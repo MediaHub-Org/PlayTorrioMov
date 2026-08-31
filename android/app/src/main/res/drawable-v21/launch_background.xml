@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The native splash shown while the process starts. It deliberately matches
+     the Flutter shell (same dark background, same logo) so startup reads as
+     one screen: previously this was ?android:colorBackground, i.e. white in
+     light mode, which flashed white before the dark UI appeared. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@mipmap/ic_launcher" />
+    </item>
+</layer-list>

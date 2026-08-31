@@ -1,0 +1,764 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  PlayTorrioMod — Multi-Platform CI/CD Release Builder
+#  Builds:
+#    - Windows: Installer (Inno Setup) & Portable ZIP (x64)
+#    - Android: Split-per-ABI APKs (arm64-v8a, armeabi-v7a, x86_64) & Universal APK
+#    - Linux: AppImage & Tar.gz (x86_64)
+#    - macOS: Apple Silicon (ARM64) & Intel (x64) DMG & ZIP
+#    - iOS: Sideloadable IPA (no-codesign)
+#  Trigger: Git tag push (v*) or Manual Workflow Dispatch
+#
+#  Manual dispatch has two modes:
+#    - release_tag empty -> build all platforms, upload artifacts only.
+#      Use this to check every platform still compiles.
+#    - release_tag set   -> additionally publish those builds under that
+#      tag (e.g. v1.1.3), so testers get download links instead of CI
+#      artifacts (which require a GitHub login and expire).
+#  Dispatched builds are marked as GitHub *prereleases* and titled
+#  "(dev)" while they are untested -- flip `dev_build` off once a build
+#  has been verified on a device. A pushed tag carrying a semver
+#  prerelease suffix (v1.2.0-beta.1) is a prerelease too; a plain
+#  v1.2.0 is a full release.
+#  Environment: Injects --dart-define-from-file=.env using ${{ secrets.ENV_FILE }}
+# ──────────────────────────────────────────────────────────────────────────────
+name: Build and Release PlayTorrioMod
+
+on:
+  push:
+    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Publish a release under this tag (e.g. v1.1.3). Leave empty to only upload build artifacts.'
+        required: false
+        default: ''
+      dev_build:
+        description: 'Untested build: title it "(dev)" and publish as a prerelease.'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: write
+
+# The pub cache steps below reference ${{ env.PUB_CACHE }}. It has to be set
+# here or it expands to an empty string, and the cache silently stores only
+# .dart_tool -- which is why `flutter pub get` re-downloaded the media_kit git
+# dependencies on every job of every run. Dart honours PUB_CACHE on all three
+# runner OSes, so one workflow-level value covers every job.
+env:
+  PUB_CACHE: ${{ github.workspace }}/.pub-cache
+
+# ═══════════════════════════════════════════════════════════════════════════════
+jobs:
+
+  # ─── Windows Build ────────────────────────────────────────────────────────
+  windows:
+    name: Windows (Installer & Portable)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows App
+        shell: bash
+        run: |
+          # flutter_inappwebview_windows uses <experimental/coroutine>, which
+          # newer MSVC (VS 2026 / STL1011) treats as a hard error. Silence the
+          # deprecation so the plugin compiles on the CI runner.
+          export CXXFLAGS="-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
+          flutter build windows --release --dart-define-from-file=.env
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          Write-Host "PATH refreshed for Inno Setup."
+
+      - name: Compile Inno Setup Installer
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Prefer the dispatched release tag, then a pushed v* tag. On a
+          # plain dispatch github.ref_name is a branch name ("main"), which
+          # is not a version -- fall back to pubspec.yaml so the installer
+          # never advertises a branch as its version.
+          $tag = "${{ github.event.inputs.release_tag }}"
+          if ([string]::IsNullOrWhiteSpace($tag)) { $tag = "${{ github.ref_name }}" }
+          $cleanVersion = $tag.TrimStart('v')
+          if ($cleanVersion -notmatch '^\d+\.\d+') {
+            $pubspec = Select-String -Path pubspec.yaml -Pattern '^version:\s*([^\s+]+)' |
+              Select-Object -First 1
+            $cleanVersion = $pubspec.Matches[0].Groups[1].Value
+          }
+          Write-Host "Installer version: $cleanVersion"
+
+          $isccCmd = (Get-Command iscc.exe -ErrorAction SilentlyContinue)?.Source
+          if (-not $isccCmd) {
+            $candidates = @(
+              "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+              "C:\Program Files\Inno Setup 6\ISCC.exe",
+              "C:\ProgramData\chocolatey\bin\iscc.exe"
+            )
+            foreach ($candidate in $candidates) {
+              if (Test-Path $candidate) {
+                $isccCmd = $candidate
+                break
+              }
+            }
+          }
+          if (-not $isccCmd) {
+            throw "ISCC compiler executable could not be found!"
+          }
+          Write-Host "Using Inno Setup Compiler at: $isccCmd"
+
+          New-Item -ItemType Directory -Force -Path "installer\windows\Output"
+
+          & $isccCmd /DMyAppVersion=$cleanVersion installer\windows\setup.iss
+          if ($LASTEXITCODE -ne 0) {
+            throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
+          }
+
+          if (Test-Path "installer\windows\Output\PlayTorrioMod-Windows-Setup.exe") {
+            Copy-Item "installer\windows\Output\PlayTorrioMod-Windows-Setup.exe" ".\PlayTorrioMod-Windows-Setup.exe" -Force
+            Write-Host "Verified and copied PlayTorrioMod-Windows-Setup.exe to root."
+          } else {
+            throw "PlayTorrioMod-Windows-Setup.exe was not found in Output directory after ISCC compile!"
+          }
+
+      - name: Package Portable ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "PlayTorrioMod-Windows-x64-Portable.zip" -Force
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-Windows
+          path: |
+            PlayTorrioMod-Windows-Setup.exe
+            PlayTorrioMod-Windows-x64-Portable.zip
+
+  # ─── Android Build (Split-per-ABI APKs) ────────────────────────────────────
+  # The universal APK is built by the `android-universal` job below rather than
+  # here: two release builds in one job ran back to back for ~13 min, and since
+  # Android is the workflow's long pole that set the whole run's wall time.
+  # Two ubuntu jobs cost the same minutes but finish in half the time.
+  android:
+    name: Android (Split-per-ABI APKs)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Cache Gradle
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Writes android/key.properties + the keystore from repository secrets so
+      # the release APK is signed with a stable key. Without the secrets (a fork
+      # PR cannot read them) the build falls back to the debug key, which is
+      # regenerated per runner -- fine for a throwaway build, but such an APK
+      # will not install over a properly signed one.
+      - name: Set up Android release signing
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set - this APK will be signed with a throwaway debug key and will not install over a release-signed build."
+            exit 0
+          fi
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is set but ANDROID_KEYSTORE_PASSWORD is not. Set both, or neither."
+            exit 1
+          fi
+          # Only the keystore and its password are required. keytool lets one
+          # password cover both the store and the key, and the alias is fixed
+          # by convention, so the other two secrets are optional overrides for
+          # a keystore that was created with different values.
+          KEY_ALIAS="${KEY_ALIAS:-playtorriomod}"
+          KEY_PASSWORD="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          # storeFile is resolved relative to the android/app module directory.
+          {
+            echo "storeFile=release.keystore"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+          echo "Release signing configured (alias: $KEY_ALIAS)."
+
+      - name: Build Split-per-ABI APKs
+        run: flutter build apk --release --split-per-abi --dart-define-from-file=.env
+
+      - name: Organize Android APK Outputs
+        run: |
+          mkdir -p android_apks
+          APK_DIR="build/app/outputs/flutter-apk"
+
+          if [ -f "$APK_DIR/app-arm64-v8a-release.apk" ]; then
+            cp "$APK_DIR/app-arm64-v8a-release.apk" "android_apks/PlayTorrioMod-Android-arm64-v8a.apk"
+          fi
+          if [ -f "$APK_DIR/app-armeabi-v7a-release.apk" ]; then
+            cp "$APK_DIR/app-armeabi-v7a-release.apk" "android_apks/PlayTorrioMod-Android-armeabi-v7a.apk"
+          fi
+          if [ -f "$APK_DIR/app-x86_64-release.apk" ]; then
+            cp "$APK_DIR/app-x86_64-release.apk" "android_apks/PlayTorrioMod-Android-x86_64.apk"
+          fi
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-Android
+          path: android_apks/*.apk
+          if-no-files-found: error
+
+  # ─── Android Universal APK ─────────────────────────────────────────────────
+  # Runs alongside the split-per-ABI job rather than after it; see that job's
+  # comment. Kept as a separate artifact so the release picks up both.
+  android-universal:
+    name: Android (Universal APK)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Cache Gradle
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Writes android/key.properties + the keystore from repository secrets so
+      # the release APK is signed with a stable key. Without the secrets (a fork
+      # PR cannot read them) the build falls back to the debug key, which is
+      # regenerated per runner -- fine for a throwaway build, but such an APK
+      # will not install over a properly signed one.
+      - name: Set up Android release signing
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set - this APK will be signed with a throwaway debug key and will not install over a release-signed build."
+            exit 0
+          fi
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is set but ANDROID_KEYSTORE_PASSWORD is not. Set both, or neither."
+            exit 1
+          fi
+          # Only the keystore and its password are required. keytool lets one
+          # password cover both the store and the key, and the alias is fixed
+          # by convention, so the other two secrets are optional overrides for
+          # a keystore that was created with different values.
+          KEY_ALIAS="${KEY_ALIAS:-playtorriomod}"
+          KEY_PASSWORD="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          # storeFile is resolved relative to the android/app module directory.
+          {
+            echo "storeFile=release.keystore"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+          echo "Release signing configured (alias: $KEY_ALIAS)."
+
+      - name: Build Universal APK
+        run: flutter build apk --release --dart-define-from-file=.env
+
+      - name: Organize Universal APK
+        run: |
+          mkdir -p android_apks
+          cp build/app/outputs/flutter-apk/app-release.apk \
+            android_apks/PlayTorrioMod-Android-Universal.apk
+
+      - name: Upload Android Universal Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-Android-Universal
+          path: android_apks/*.apk
+          if-no-files-found: error
+
+  # ─── Linux x64 Build (AppImage & Tar.gz) ──────────────────────────────────
+  linux-x64:
+    name: Linux x64 (AppImage & Tar)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            clang cmake git ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libmpv-dev xvfb \
+            libboost-all-dev libssl-dev libgcrypt20-dev \
+            libsecret-1-dev libjsoncpp-dev
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Generate Linux platform files if missing
+        run: |
+          if [ ! -d "linux" ]; then
+            flutter create --platforms=linux .
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux Release
+        run: flutter build linux --release --dart-define-from-file=.env
+
+      - name: Package as AppImage & Tar
+        run: |
+          curl -fSL "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" \
+            -o appimagetool
+          chmod +x appimagetool
+
+          APP=PlayTorrioMod.AppDir
+          mkdir -p "$APP"
+          cp -r build/linux/x64/release/bundle/* "$APP/"
+
+          if [ -f "assets/icon.png" ]; then
+            cp assets/icon.png "$APP/PlayTorrioMod.png"
+          elif [ -f "icon.png" ]; then
+            cp icon.png "$APP/PlayTorrioMod.png"
+          else
+            touch "$APP/PlayTorrioMod.png"
+          fi
+
+          cat <<EOF > "$APP/PlayTorrioMod.desktop"
+          [Desktop Entry]
+          Name=PlayTorrioMod
+          Exec=AppRun
+          Icon=PlayTorrioMod
+          Type=Application
+          Categories=AudioVideo;Audio;Video;Player;
+          EOF
+
+          printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./PlayTorrioMod "$@"\n' > "$APP/AppRun"
+          chmod +x "$APP/AppRun"
+
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run "$APP" PlayTorrioMod-Linux-x86_64.AppImage
+          tar -czvf PlayTorrioMod-Linux-x86_64.tar.gz -C build/linux/x64/release/bundle .
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-Linux-x64
+          path: |
+            PlayTorrioMod-Linux-x86_64.AppImage
+            PlayTorrioMod-Linux-x86_64.tar.gz
+
+  # ─── macOS ARM64 Build (Apple Silicon) ───────────────────────────────────
+  macos-arm64:
+    name: macOS (Apple Silicon ARM64)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Configure macOS platform files if missing
+        run: |
+          if [ ! -d "macos" ]; then
+            flutter create --platforms=macos .
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS Release
+        run: flutter build macos --release --dart-define-from-file=.env
+
+      - name: Package as DMG & ZIP
+        run: |
+          cd build/macos/Build/Products/Release
+
+          codesign --sign - --force --deep PlayTorrioMod.app
+
+          mkdir -p dmg_temp
+          cp -R PlayTorrioMod.app dmg_temp/
+          ln -s /Applications dmg_temp/Applications
+
+          sync
+          sleep 2
+
+          for i in {1..3}; do
+            hdiutil create -volname "PlayTorrioMod" -srcfolder dmg_temp -ov -format UDZO ../../../../../PlayTorrioMod-macOS-arm64.dmg && break || sleep 3
+          done
+          zip -ry ../../../../../PlayTorrioMod-macOS-arm64.zip PlayTorrioMod.app
+
+      - name: Upload macOS ARM64 Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-macOS-arm64
+          path: |
+            PlayTorrioMod-macOS-arm64.dmg
+            PlayTorrioMod-macOS-arm64.zip
+
+  # ─── macOS Intel Build (x86_64) ──────────────────────────────────────────
+  macos-intel:
+    name: macOS (Intel x86_64)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install Rosetta 2
+        run: softwareupdate --install-rosetta --agree-to-license || true
+
+      - name: Setup Flutter x64
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          architecture: x64
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-x64-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-x64-pub-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: arch -x86_64 flutter pub get
+
+      - name: Build macOS Intel Release
+        run: arch -x86_64 flutter build macos --release --dart-define-from-file=.env
+
+      - name: Package as DMG & ZIP
+        run: |
+          cd build/macos/Build/Products/Release
+
+          codesign --sign - --force --deep PlayTorrioMod.app
+
+          mkdir -p dmg_temp
+          cp -R PlayTorrioMod.app dmg_temp/
+          ln -s /Applications dmg_temp/Applications
+
+          sync
+          sleep 2
+
+          for i in {1..3}; do
+            hdiutil create -volname "PlayTorrioMod" -srcfolder dmg_temp -ov -format UDZO ../../../../../PlayTorrioMod-macOS-intel.dmg && break || sleep 3
+          done
+          zip -ry ../../../../../PlayTorrioMod-macOS-intel.zip PlayTorrioMod.app
+
+      - name: Upload macOS Intel Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-macOS-intel
+          path: |
+            PlayTorrioMod-macOS-intel.dmg
+            PlayTorrioMod-macOS-intel.zip
+
+  # ─── iOS Build (Sideloadable IPA — no-codesign) ───────────────────────────
+  ios:
+    name: iOS (IPA)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-ios-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-ios-pub-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS Release (No Codesign)
+        run: flutter build ios --release --no-codesign --dart-define-from-file=.env
+
+      - name: Package as IPA
+        run: |
+          cd build/ios/iphoneos
+          mkdir -p Payload
+          cp -R Runner.app Payload/
+          zip -ry ../../../PlayTorrioMod-iOS.ipa Payload
+
+      - name: Upload iOS Artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-iOS
+          path: PlayTorrioMod-iOS.ipa
+
+  # ─── Create / Publish GitHub Release ─────────────────────────────────────
+  release:
+    name: Publish GitHub Release
+    needs: [windows, android, android-universal, linux-x64, macos-arm64, macos-intel, ios]
+    # Publishes for a pushed v* tag, or for a manual dispatch that named a
+    # release tag. Still requires every platform to have built: a half-published
+    # release is worse than none, and each job's artifacts remain downloadable
+    # from the run either way.
+    if: |
+      success() && (
+        startsWith(github.ref, 'refs/tags/v') ||
+        github.event.inputs.release_tag != ''
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v7
+        with:
+          merge-multiple: true
+
+      - name: Generate SHA-256 checksums
+        shell: bash
+        run: |
+          # Generate a SHA256SUMS file for every release asset so users can
+          # verify download integrity. The checksum file itself is uploaded.
+          sha256sum *.exe *.zip *.apk *.AppImage *.tar.gz *.dmg *.ipa 2>/dev/null \
+            > SHA256SUMS || true
+          if [ ! -s SHA256SUMS ]; then
+            echo "No release assets found to checksum." >&2
+            exit 1
+          fi
+          echo "Generated SHA256SUMS:"
+          cat SHA256SUMS
+
+      - name: Publish Release with Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          # On a dispatch the tag comes from the input and is created at the
+          # dispatched ref; on a tag push it is the pushed tag.
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          name: "PlayTorrioMod ${{ github.event.inputs.release_tag || github.ref_name }}${{ github.event.inputs.dev_build == 'false' && ' ' || ' (dev)' }}"
+          draft: false
+          # A dev dispatch is a prerelease, as is any tag carrying a semver
+          # prerelease suffix (v1.2.0-rc.1). Plain v1.2.0 ships as full.
+          prerelease: ${{ github.event.inputs.dev_build != 'false' || contains(github.ref_name, '-') }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            *.exe
+            *.zip
+            *.apk
+            *.AppImage
+            *.tar.gz
+            *.dmg
+            *.ipa
+            SHA256SUMS

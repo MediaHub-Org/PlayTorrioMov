@@ -1,0 +1,335 @@
+import 'dart:convert';
+import 'dart:ffi' show Abi;
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class AppUpdaterService {
+  static const String githubRepo = 'MediaHub-Org/PlayTorrioMod';
+  static const String githubApiUrl =
+      'https://api.github.com/repos/$githubRepo/releases/latest';
+  static const String _keyDismissedVersion = 'dismissed_update_version';
+  static const String _keyAutoCheckEnabled = 'auto_check_updates_enabled';
+
+  /// Whether the app should check for updates on launch without being asked.
+  /// Manual checks (the Settings > Updates page's "Check for Updates"
+  /// button) always work regardless of this setting.
+  static Future<bool> isAutoCheckEnabled() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_keyAutoCheckEnabled) ?? true;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  static Future<void> setAutoCheckEnabled(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyAutoCheckEnabled, enabled);
+    } catch (_) {}
+  }
+
+  static Future<void> dismissVersion(String version) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyDismissedVersion, version);
+      debugPrint('[AppUpdaterService] Dismissed update version: $version');
+    } catch (e) {
+      debugPrint('[AppUpdaterService] Error dismissing update version: $e');
+    }
+  }
+
+  static Future<bool> isVersionDismissed(String version) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dismissed = prefs.getString(_keyDismissedVersion);
+      return dismissed == version;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<void> clearDismissedVersion() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_keyDismissedVersion);
+    } catch (_) {}
+  }
+
+  Future<UpdateInfo?> checkForUpdates({bool ignoreDismissed = false}) async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = packageInfo.version;
+
+      final response = await http.get(
+        Uri.parse(githubApiUrl),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final latestVersion = (data['tag_name'] as String).replaceFirst(
+          'v',
+          '',
+        );
+        final releaseNotes =
+            data['body'] as String? ?? 'No release notes available';
+        final publishedAt = DateTime.parse(data['published_at']);
+
+        if (_isNewerVersion(currentVersion, latestVersion)) {
+          if (!ignoreDismissed && await isVersionDismissed(latestVersion)) {
+            debugPrint('[AppUpdaterService] Update $latestVersion is newer but was dismissed by user.');
+            return null;
+          }
+
+          final assets = data['assets'] as List;
+          final downloadUrl = _findAssetForPlatform(assets);
+
+          return UpdateInfo(
+            currentVersion: currentVersion,
+            latestVersion: latestVersion,
+            downloadUrl: downloadUrl ?? data['html_url'],
+            releaseNotes: releaseNotes,
+            publishedAt: publishedAt,
+            isMacOS: kIsWeb ? false : Platform.isMacOS,
+            isIOS: kIsWeb ? false : Platform.isIOS,
+          );
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error checking for updates: $e');
+      return null;
+    }
+  }
+
+  /// Detects the current CPU architecture and finds the matching release asset.
+  String? _findAssetForPlatform(List assets) {
+    if (kIsWeb) return null;
+
+    Abi? abi;
+    try {
+      abi = Abi.current();
+      debugPrint('Detected system ABI: $abi');
+    } catch (e) {
+      debugPrint('Error detecting ABI: $e');
+    }
+
+    if (Platform.isAndroid) {
+      return _findAndroidAsset(assets, abi);
+    } else if (Platform.isWindows) {
+      return _findWindowsAsset(assets, abi);
+    } else if (Platform.isLinux) {
+      return _findLinuxAsset(assets, abi);
+    } else if (Platform.isMacOS) {
+      return _findMacOSAsset(assets, abi);
+    }
+    return null;
+  }
+
+  /// Android: match arm64-v8a, armeabi-v7a, x86_64, or fall back to universal
+  String? _findAndroidAsset(List assets, Abi? abi) {
+    final apks = assets
+        .where((a) => (a['name'] as String).toLowerCase().endsWith('.apk'))
+        .toList();
+
+    if (apks.isEmpty) return null;
+
+    // Determine architecture keywords to search for
+    List<String> archKeywords = [];
+    if (abi == Abi.androidArm64) {
+      archKeywords = ['arm64-v8a', 'arm64_v8a', 'arm64', 'v8a', 'aarch64'];
+    } else if (abi == Abi.androidArm) {
+      archKeywords = ['armeabi-v7a', 'armeabi_v7a', 'armeabi', 'v7a', 'armv7', 'arm-v7a'];
+    } else if (abi == Abi.androidX64) {
+      archKeywords = ['x86_64', 'x86-64', 'x64'];
+    } else if (abi == Abi.androidIA32) {
+      archKeywords = ['x86', 'x86_32', 'ia32'];
+    } else {
+      // Default to arm64-v8a on modern Android if ABI couldn't be determined
+      archKeywords = ['arm64-v8a', 'arm64', 'v8a'];
+    }
+
+    // 1. Try exact architecture match
+    for (final keyword in archKeywords) {
+      final match = apks
+          .where((a) => (a['name'] as String).toLowerCase().contains(keyword))
+          .firstOrNull;
+      if (match != null) {
+        debugPrint('Matched specific APK for $abi ($keyword): ${match['name']}');
+        return match['browser_download_url'];
+      }
+    }
+
+    // 2. Fall back to a "universal" APK if available
+    final universal = apks
+        .where((a) => (a['name'] as String).toLowerCase().contains('universal'))
+        .firstOrNull;
+    if (universal != null) {
+      debugPrint('Falling back to universal APK: ${universal['name']}');
+      return universal['browser_download_url'];
+    }
+
+    // 3. Fall back to standard release APK name
+    final standardRelease = apks
+        .where((a) => (a['name'] as String).toLowerCase().contains('release'))
+        .firstOrNull;
+    if (standardRelease != null) {
+      debugPrint('Using standard release APK: ${standardRelease['name']}');
+      return standardRelease['browser_download_url'];
+    }
+
+    // 4. Last resort: first available APK
+    debugPrint('Using first available APK: ${apks.first['name']}');
+    return apks.first['browser_download_url'];
+  }
+
+  /// Windows: match x64 or arm64 installer (.exe prioritized over .zip)
+  String? _findWindowsAsset(List assets, Abi? abi) {
+    final windowsAssets = assets.where((a) {
+      final name = (a['name'] as String).toLowerCase();
+      return (name.contains('windows') || name.contains('win') || name.contains('setup') || name.endsWith('.exe')) &&
+          (name.endsWith('.exe') || name.endsWith('.msix') || name.endsWith('.zip'));
+    }).toList();
+
+    if (windowsAssets.isEmpty) return null;
+
+    // 1. Look for installer .exe matching setup/installer
+    final setupExe = windowsAssets
+        .where((a) => (a['name'] as String).toLowerCase().endsWith('.exe') &&
+            ((a['name'] as String).toLowerCase().contains('setup') || (a['name'] as String).toLowerCase().contains('install')))
+        .firstOrNull;
+    if (setupExe != null) {
+      debugPrint('Selected Windows Setup installer: ${setupExe['name']}');
+      return setupExe['browser_download_url'];
+    }
+
+    // 2. Look for any .exe
+    final anyExe = windowsAssets
+        .where((a) => (a['name'] as String).toLowerCase().endsWith('.exe'))
+        .firstOrNull;
+    if (anyExe != null) {
+      debugPrint('Selected Windows exe: ${anyExe['name']}');
+      return anyExe['browser_download_url'];
+    }
+
+    // 3. Match architecture in remaining assets (.zip/.msix)
+    List<String> archKeywords;
+    if (abi == Abi.windowsArm64) {
+      archKeywords = ['arm64', 'aarch64'];
+    } else {
+      archKeywords = ['x64', 'x86_64', 'amd64', 'win64'];
+    }
+
+    for (final keyword in archKeywords) {
+      final match = windowsAssets
+          .where((a) => (a['name'] as String).toLowerCase().contains(keyword))
+          .firstOrNull;
+      if (match != null) return match['browser_download_url'];
+    }
+
+    return windowsAssets.first['browser_download_url'];
+  }
+
+  /// Linux: match x64 or arm64 AppImage/deb
+  String? _findLinuxAsset(List assets, Abi? abi) {
+    final linuxAssets = assets.where((a) {
+      final name = (a['name'] as String).toLowerCase();
+      return name.contains('linux') ||
+          name.endsWith('.appimage') ||
+          name.endsWith('.deb') ||
+          name.endsWith('.tar.gz');
+    }).toList();
+
+    if (linuxAssets.isEmpty) return null;
+
+    if (linuxAssets.length == 1) {
+      return linuxAssets.first['browser_download_url'];
+    }
+
+    List<String> archKeywords;
+    if (abi == Abi.linuxArm64) {
+      archKeywords = ['arm64', 'aarch64'];
+    } else {
+      archKeywords = ['x86_64', 'x64', 'amd64'];
+    }
+
+    for (final keyword in archKeywords) {
+      final match = linuxAssets
+          .where((a) => (a['name'] as String).toLowerCase().contains(keyword))
+          .firstOrNull;
+      if (match != null) return match['browser_download_url'];
+    }
+
+    return linuxAssets.first['browser_download_url'];
+  }
+
+  /// macOS: match dmg or zip
+  String? _findMacOSAsset(List assets, Abi? abi) {
+    final macAssets = assets.where((a) {
+      final name = (a['name'] as String).toLowerCase();
+      return name.contains('mac') || name.contains('darwin') || name.endsWith('.dmg') || name.endsWith('.pkg');
+    }).toList();
+
+    if (macAssets.isNotEmpty) {
+      return macAssets.first['browser_download_url'];
+    }
+    return null;
+  }
+
+  bool _isNewerVersion(String current, String latest) {
+    // Strip any suffix like "-test" or "-beta" for comparison
+    final currentClean = current.split('-').first;
+    final latestClean = latest.split('-').first;
+
+    final currentParts = currentClean
+        .split('.')
+        .map((p) => int.tryParse(p) ?? 0)
+        .toList();
+    final latestParts = latestClean
+        .split('.')
+        .map((p) => int.tryParse(p) ?? 0)
+        .toList();
+
+    for (int i = 0; i < 3; i++) {
+      final currentPart = i < currentParts.length ? currentParts[i] : 0;
+      final latestPart = i < latestParts.length ? latestParts[i] : 0;
+
+      if (latestPart > currentPart) return true;
+      if (latestPart < currentPart) return false;
+    }
+    return false;
+  }
+
+  Future<void> openDownloadPage(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+}
+
+class UpdateInfo {
+  final String currentVersion;
+  final String latestVersion;
+  final String downloadUrl;
+  final String releaseNotes;
+  final DateTime publishedAt;
+  final bool isMacOS;
+  final bool isIOS;
+
+  UpdateInfo({
+    required this.currentVersion,
+    required this.latestVersion,
+    required this.downloadUrl,
+    required this.releaseNotes,
+    required this.publishedAt,
+    required this.isMacOS,
+    this.isIOS = false,
+  });
+}

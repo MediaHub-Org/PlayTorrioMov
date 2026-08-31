@@ -1,0 +1,141 @@
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorrio/models/stream/stream_model.dart';
+import 'package:playtorrio/services/stream/stream_health_checker.dart';
+
+void main() {
+  group('StreamHealthChecker Tests', () {
+    late HttpServer testServer;
+    late int serverPort;
+
+    setUpAll(() async {
+      testServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      serverPort = testServer.port;
+
+      testServer.listen((request) async {
+        final path = request.uri.path;
+
+        if (path == '/alive.m3u8') {
+          // Valid HLS Manifest
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..headers.set(HttpHeaders.contentTypeHeader, 'application/vnd.apple.mpegurl')
+            ..write('#EXTM3U\n#EXT-X-VERSION:3\n#EXTINF:10.0,\nsegment1.ts\n');
+          await request.response.close();
+        } else if (path == '/alive_with_referer.m3u8') {
+          // Requires exact Referer
+          final referer = request.headers.value(HttpHeaders.refererHeader);
+          if (referer == 'https://vuflix.co/') {
+            request.response
+              ..statusCode = HttpStatus.ok
+              ..headers.set(HttpHeaders.contentTypeHeader, 'application/vnd.apple.mpegurl')
+              ..write('#EXTM3U\n#EXT-X-VERSION:3\n#EXTINF:10.0,\nsegment1.ts\n');
+          } else {
+            request.response
+              ..statusCode = HttpStatus.forbidden
+              ..write('Forbidden - Missing Referer');
+          }
+          await request.response.close();
+        } else if (path == '/alive.mp4') {
+          // Valid MP4 stream with ftyp header
+          final mp4Bytes = <int>[
+            0x00, 0x00, 0x00, 0x18, // size
+            0x66, 0x74, 0x79, 0x70, // 'ftyp'
+            0x69, 0x73, 0x6F, 0x6D, // 'isom'
+            0x00, 0x00, 0x02, 0x00,
+            0x69, 0x73, 0x6F, 0x6D,
+            0x69, 0x73, 0x6F, 0x32,
+          ];
+          request.response
+            ..statusCode = HttpStatus.partialContent
+            ..headers.set(HttpHeaders.contentTypeHeader, 'video/mp4')
+            ..headers.set(HttpHeaders.contentRangeHeader, 'bytes 0-23/24')
+            ..add(mp4Bytes);
+          await request.response.close();
+        } else if (path == '/dead_404') {
+          request.response
+            ..statusCode = HttpStatus.notFound
+            ..write('Not Found');
+          await request.response.close();
+        } else if (path == '/html_error') {
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..headers.set(HttpHeaders.contentTypeHeader, 'text/html')
+            ..write('<html><body><h1>Error: File removed</h1></body></html>');
+          await request.response.close();
+        } else {
+          request.response
+            ..statusCode = HttpStatus.badGateway
+            ..close();
+        }
+      });
+    });
+
+    tearDownAll(() async {
+      await testServer.close(force: true);
+    });
+
+    test('Valid M3U8 stream passes health check', () async {
+      final source = StreamSource(
+        name: 'Alive M3U8',
+        url: 'http://127.0.0.1:$serverPort/alive.m3u8',
+        addonName: 'PlayTorrioHTTP',
+      );
+      final isAlive = await StreamHealthChecker.isAlive(source);
+      expect(isAlive, isTrue);
+    });
+
+    test('Stream requiring Referer passes when correct headers are provided', () async {
+      final sourceWithReferer = StreamSource(
+        name: 'Alive with Referer',
+        url: 'http://127.0.0.1:$serverPort/alive_with_referer.m3u8',
+        addonName: 'PlayTorrioHTTP',
+        headers: {
+          'Referer': 'https://vuflix.co/',
+        },
+      );
+      final isAlive = await StreamHealthChecker.isAlive(sourceWithReferer);
+      expect(isAlive, isTrue);
+    });
+
+    test('Valid MP4 video container passes health check', () async {
+      final source = StreamSource(
+        name: 'Alive MP4',
+        url: 'http://127.0.0.1:$serverPort/alive.mp4',
+        addonName: 'PlayTorrioHTTP',
+      );
+      final isAlive = await StreamHealthChecker.isAlive(source);
+      expect(isAlive, isTrue);
+    });
+
+    test('Dead 404 stream fails health check', () async {
+      final source = StreamSource(
+        name: 'Dead 404',
+        url: 'http://127.0.0.1:$serverPort/dead_404',
+        addonName: 'PlayTorrioHTTP',
+      );
+      final isAlive = await StreamHealthChecker.isAlive(source);
+      expect(isAlive, isFalse);
+    });
+
+    test('HTML error response page fails health check', () async {
+      final source = StreamSource(
+        name: 'HTML Error',
+        url: 'http://127.0.0.1:$serverPort/html_error',
+        addonName: 'PlayTorrioHTTP',
+      );
+      final isAlive = await StreamHealthChecker.isAlive(source);
+      expect(isAlive, isFalse);
+    });
+
+    test('Torrent source with infoHash always passes health check', () async {
+      final source = StreamSource(
+        name: 'Torrent Source',
+        infoHash: 'abcdef1234567890abcdef1234567890abcdef12',
+        addonName: 'PlayTorrioHTTP',
+      );
+      final isAlive = await StreamHealthChecker.isAlive(source);
+      expect(isAlive, isTrue);
+    });
+  });
+}

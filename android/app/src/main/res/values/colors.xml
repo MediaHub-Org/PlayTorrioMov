@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the Flutter shell's background so the native splash and the
+         first Flutter frame are the same colour and there is no flash. -->
+    <color name="splash_background">#080A0F</color>
+</resources>

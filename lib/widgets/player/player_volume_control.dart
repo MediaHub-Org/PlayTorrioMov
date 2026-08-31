@@ -1,0 +1,218 @@
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'player_glass.dart';
+
+/// Interactive volume slider with high-gain boost support (up to 250%).
+class PlayerVolumeControl extends StatefulWidget {
+  final double volume; // 0.0 to 2.50 (250%)
+  final bool isMuted;
+  final ValueChanged<double> onVolumeChanged;
+  final VoidCallback onToggleMute;
+
+  static const double maxVolume = 2.50;
+
+  const PlayerVolumeControl({
+    super.key,
+    required this.volume,
+    required this.isMuted,
+    required this.onVolumeChanged,
+    required this.onToggleMute,
+  });
+
+  @override
+  State<PlayerVolumeControl> createState() => _PlayerVolumeControlState();
+}
+
+class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
+  bool _isHovered = false;
+  static const double _trackWidth = 96.0;
+
+  IconData _getVolumeIcon() {
+    if (widget.isMuted || widget.volume == 0) {
+      return Icons.volume_off_rounded;
+    }
+    if (widget.volume > 1.0) {
+      return Icons.volume_up_rounded;
+    }
+    if (widget.volume < 0.5) {
+      return Icons.volume_down_rounded;
+    }
+    return Icons.volume_up_rounded;
+  }
+
+  Color _getBoostColor() {
+    if (widget.volume <= 1.0) return Colors.white;
+    if (widget.volume > 1.75) return const Color(0xFFFF3D00); // Deep Flame Orange/Red
+    return const Color(0xFFFF8A00); // Amber/Orange
+  }
+
+  void _updateFromPosition(double localX) {
+    final fraction = (localX / _trackWidth).clamp(0.0, 1.0);
+    double newVol;
+    if (fraction <= 0.55) {
+      newVol = (fraction / 0.55) * 1.0;
+    } else {
+      newVol = 1.0 + ((fraction - 0.55) / 0.45) * 1.50;
+    }
+    widget.onVolumeChanged((newVol * 100).round() / 100.0);
+  }
+
+  double _getFractionFromVolume(double v) {
+    if (widget.isMuted) return 0.0;
+    if (v <= 1.0) {
+      return (v * 0.55).clamp(0.0, 0.55);
+    }
+    return (0.55 + ((v - 1.0) / 1.50) * 0.45).clamp(0.55, 1.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveVol = widget.isMuted ? 0.0 : widget.volume;
+    final fillFraction = _getFractionFromVolume(effectiveVol);
+    final isBoosting = !widget.isMuted && widget.volume > 1.001;
+    final boostColor = _getBoostColor();
+    final pct = (effectiveVol * 100).round();
+
+    return Listener(
+      onPointerSignal: (pointerSignal) {
+        if (pointerSignal is PointerScrollEvent) {
+          final delta = pointerSignal.scrollDelta.dy < 0 ? 0.05 : -0.05;
+          final next = (widget.volume + delta).clamp(0.0, PlayerVolumeControl.maxVolume);
+          widget.onVolumeChanged((next * 100).round() / 100.0);
+        }
+      },
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() => _isHovered = false),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Mute / Unmute Button
+            PlayerIconButton(
+              size: 40,
+              iconSize: 22,
+              icon: Icon(
+                _getVolumeIcon(),
+                color: isBoosting ? boostColor : (widget.isMuted ? PlayerTheme.inkSubtle : Colors.white),
+              ),
+              tooltip: widget.isMuted ? 'Unmute' : 'Mute',
+              onPressed: widget.onToggleMute,
+            ),
+
+            const SizedBox(width: 4),
+
+            // Volume Slider Track
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragUpdate: (e) => _updateFromPosition(e.localPosition.dx),
+              onTapDown: (e) => _updateFromPosition(e.localPosition.dx),
+              child: Container(
+                width: _trackWidth,
+                height: 32,
+                alignment: Alignment.center,
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    // Background track
+                    Container(
+                      height: 6,
+                      width: _trackWidth,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+
+                    // 100% Threshold Notch Line
+                    Positioned(
+                      left: _trackWidth * 0.55 - 0.75,
+                      child: Container(
+                        width: 1.5,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.40),
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                    ),
+
+                    // Filled track
+                    Container(
+                      height: 6,
+                      width: _trackWidth * fillFraction,
+                      decoration: BoxDecoration(
+                        gradient: isBoosting
+                          ? LinearGradient(
+                              colors: [
+                                Colors.white,
+                                const Color(0xFFFF8A00),
+                                if (widget.volume > 1.75) const Color(0xFFFF3D00),
+                              ],
+                            )
+                          : null,
+                        color: isBoosting ? null : Colors.white.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+
+                    // Thumb dot
+                    Positioned(
+                      left: (_trackWidth * fillFraction - 6).clamp(0.0, _trackWidth - 12),
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: isBoosting ? boostColor : Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: isBoosting ? boostColor.withValues(alpha: 0.6) : Colors.black54,
+                              blurRadius: isBoosting ? 6 : 4,
+                              spreadRadius: isBoosting ? 1 : 0,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Percentage Readout
+            if (isBoosting || _isHovered) ...[
+              const SizedBox(width: 6),
+              Container(
+                constraints: const BoxConstraints(minWidth: 38),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isBoosting)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 2),
+                        child: Icon(
+                          Icons.bolt_rounded,
+                          size: 13,
+                          color: boostColor,
+                        ),
+                      ),
+                    Text(
+                      '$pct%',
+                      style: TextStyle(
+                        color: isBoosting ? boostColor : PlayerTheme.inkMuted,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

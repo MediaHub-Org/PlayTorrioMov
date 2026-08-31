@@ -1,0 +1,4 @@
+{
+  "gradle.nestedProjects": false,
+  "gradle.projectRoots": ["android"]
+}

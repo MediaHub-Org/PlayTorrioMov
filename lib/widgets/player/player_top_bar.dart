@@ -1,0 +1,250 @@
+import 'package:flutter/material.dart';
+import 'player_glass.dart';
+
+/// Top header bar for the video player.
+class PlayerTopBar extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final String? quality;
+  final VoidCallback onBack;
+  final VoidCallback? onToggleEpisodes;
+  final bool isEpisodesActive;
+  final VoidCallback? onScreenshot;
+  final VoidCallback? onToggleAspect;
+  final VoidCallback? onCast;
+  final VoidCallback? onDownload;
+  final bool isDownloading;
+
+  const PlayerTopBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.quality,
+    required this.onBack,
+    this.onToggleEpisodes,
+    this.isEpisodesActive = false,
+    this.onScreenshot,
+    this.onToggleAspect,
+    this.onCast,
+    this.onDownload,
+    this.isDownloading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        top: MediaQuery.paddingOf(context).top + 12,
+        left: 24,
+        right: 24,
+        bottom: 24,
+      ),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.black.withValues(alpha: 0.75),
+            Colors.black.withValues(alpha: 0.35),
+            Colors.transparent,
+          ],
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Frosted Glass Circular Back Button
+          PlayerIconButton(
+            size: 44,
+            iconSize: 26,
+            icon: const Icon(Icons.chevron_left_rounded),
+            tooltip: 'Back',
+            backgroundColor: const Color(0x33080C12),
+            borderRadius: 9999,
+            onPressed: onBack,
+          ),
+
+          const SizedBox(width: 16),
+
+          // Title & Details Column
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.2,
+                          shadows: [
+                            Shadow(
+                              color: Color(0x99000000),
+                              offset: Offset(0, 2),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (quality != null && quality!.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          quality!.toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xDDFFFFFF),
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.6,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      shadows: const [
+                        Shadow(
+                          color: Color(0x99000000),
+                          offset: Offset(0, 1),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // Top-Right Action Badges
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (onToggleEpisodes != null) ...[
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onToggleEpisodes,
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isEpisodesActive
+                            ? PlayerTheme.accent.withValues(alpha: 0.30)
+                            : const Color(0x33080C12),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isEpisodesActive
+                              ? PlayerTheme.accent.withValues(alpha: 0.85)
+                              : Colors.white.withValues(alpha: 0.15),
+                          width: 1.2,
+                        ),
+                        boxShadow: isEpisodesActive
+                            ? [
+                                BoxShadow(
+                                  color: PlayerTheme.accent.withValues(alpha: 0.35),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.video_library_rounded,
+                            size: 18,
+                            color: isEpisodesActive ? const Color(0xFF9D84FF) : Colors.white,
+                          ),
+                          const SizedBox(width: 7),
+                          Text(
+                            'Episodes',
+                            style: TextStyle(
+                              color: isEpisodesActive ? Colors.white : Colors.white.withValues(alpha: 0.9),
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (onScreenshot != null) ...[
+                PlayerIconButton(
+                  size: 40,
+                  iconSize: 20,
+                  icon: const Icon(Icons.camera_alt_outlined),
+                  tooltip: 'Screenshot',
+                  backgroundColor: const Color(0x22080C12),
+                  onPressed: onScreenshot,
+                ),
+                const SizedBox(width: 8),
+              ],
+              if (onDownload != null) ...[
+                PlayerIconButton(
+                  size: 40,
+                  iconSize: 20,
+                  icon: isDownloading
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF10B981),
+                          ),
+                        )
+                      : const Icon(Icons.file_download_outlined),
+                  tooltip: isDownloading ? 'Downloading...' : 'Download Media',
+                  backgroundColor: isDownloading
+                      ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                      : const Color(0x22080C12),
+                  onPressed: onDownload,
+                ),
+                const SizedBox(width: 8),
+              ],
+              if (onCast != null)
+                PlayerIconButton(
+                  size: 40,
+                  iconSize: 20,
+                  icon: const Icon(Icons.cast_rounded),
+                  tooltip: 'Cast',
+                  backgroundColor: const Color(0x22080C12),
+                  onPressed: onCast,
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}

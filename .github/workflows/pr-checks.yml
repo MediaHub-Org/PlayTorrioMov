@@ -1,0 +1,158 @@
+# ──────────────────────────────────────────────────────────────────────────────
+#  PlayTorrioMod — Pull Request Checks
+#  Static analysis, the deterministic test suite, and an Android release build.
+#
+#  build.yml only runs on tag pushes, published releases and manual dispatch,
+#  so nothing verified a pull request. That is how the Android build was able
+#  to sit broken (a Windows-only JDK path hardcoded in gradle.properties) long
+#  enough for its release job to be deleted rather than fixed. Android is the
+#  platform built here because it is the one with no other coverage: the other
+#  five targets at least compile on every tagged release.
+# ──────────────────────────────────────────────────────────────────────────────
+name: PR Checks
+
+on:
+  pull_request:
+  # Also on merges to main, for two reasons:
+  #
+  #  1. Cache scope. A run can only restore caches created on its own branch or
+  #     on the default branch. Caches saved by a PR run belong to that PR's
+  #     branch, so no other PR can ever read them -- which made the pub/Gradle
+  #     caches effectively dead: every PR started cold. Running here saves them
+  #     against main, where every branch can restore from.
+  #  2. It verifies main itself. A PR merged before its own check finishes
+  #     currently lands unverified.
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push to the same PR makes the in-flight run redundant.
+concurrency:
+  group: pr-checks-${{ github.workflow }}-${{ github.ref }}
+  # Superseded PR runs are wasted work, but a main run is populating the shared
+  # cache -- cancelling it leaves every later PR cold again.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+# Must be set, or ${{ env.PUB_CACHE }} in the cache step below expands to an
+# empty string and only .dart_tool gets cached. See build.yml.
+env:
+  PUB_CACHE: ${{ github.workspace }}/.pub-cache
+
+jobs:
+  verify:
+    name: Analyze, Test & Android Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Cache Gradle
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          # Secrets are unavailable to pull requests from forks; an empty .env
+          # is enough for --dart-define-from-file to succeed.
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Gates on errors and warnings. Infos are not fatal: the tree carries
+      # pre-existing lint suggestions, and failing on those would make this
+      # check red on arrival and train people to ignore it.
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      # Excludes the `network` tag (see dart_test.yaml) -- those tests hit live
+      # third-party sites and fail on anything from a rate-limit to a markup
+      # change, which is not a signal a merge should ever wait on.
+      - name: Test
+        run: flutter test --exclude-tags network
+
+      # Writes android/key.properties + the keystore from repository secrets so
+      # the release APK is signed with a stable key. Without the secrets (a fork
+      # PR cannot read them) the build falls back to the debug key, which is
+      # regenerated per runner -- fine for a throwaway build, but such an APK
+      # will not install over a properly signed one.
+      - name: Set up Android release signing
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set - this APK will be signed with a throwaway debug key and will not install over a release-signed build."
+            exit 0
+          fi
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is set but ANDROID_KEYSTORE_PASSWORD is not. Set both, or neither."
+            exit 1
+          fi
+          # Only the keystore and its password are required. keytool lets one
+          # password cover both the store and the key, and the alias is fixed
+          # by convention, so the other two secrets are optional overrides for
+          # a keystore that was created with different values.
+          KEY_ALIAS="${KEY_ALIAS:-playtorriomod}"
+          KEY_PASSWORD="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          # storeFile is resolved relative to the android/app module directory.
+          {
+            echo "storeFile=release.keystore"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+          echo "Release signing configured (alias: $KEY_ALIAS)."
+
+      - name: Build Android APK
+        run: flutter build apk --release --dart-define-from-file=.env
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: PlayTorrioMod-Android-PR${{ github.event.pull_request.number || github.run_number }}
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error

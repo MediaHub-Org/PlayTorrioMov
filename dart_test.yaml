@@ -1,0 +1,9 @@
+# Tags used by this package's tests.
+#
+# network: the test talks to a live third-party site (scrapers, subtitle and
+# audiobook providers). These are useful to run by hand when changing a
+# scraper, but they fail whenever the site is down, rate-limits, changes its
+# markup, or is unreachable from the runner -- so CI excludes them with
+# `flutter test --exclude-tags network` and they must never gate a merge.
+tags:
+  network:
