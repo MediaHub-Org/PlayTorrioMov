@@ -1,4 +1,4 @@
-# Project Roadmap — PlayTorrioMod
+# Project Roadmap — PlayTorrioMov
 
 What is **outstanding**. Shipped work lives in [`CHANGELOG.md`](CHANGELOG.md);
 this file stays about what is left.

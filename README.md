@@ -1,19 +1,21 @@
 <p align="center">
-  <img src="assets/icon.png" alt="PlayTorrioMod logo" width="160"/>
+  <img src="assets/icon.png" alt="PlayTorrioMov logo" width="160"/>
 </p>
 <p align="center">
-  <h1 align="center">PlayTorrioMod</h1>
-  <h3 align="center"><em>Watch, Listen, Read — one app, every format</em></h3>
-</p>
-
-<p align="center">
-  A Flutter media hub that pulls movies, series, anime, live TV, music, radio,
-  podcasts, audiobooks, books, comics and manga into a single interface —
-  from Stremio-compatible addons, torrent swarms, and the open web.
+  <h1 align="center">PlayTorrioMov</h1>
+  <h3 align="center"><em>Movies, Series, Anime & Live TV — one app</em></h3>
 </p>
 
 <p align="center">
-  <a href="https://github.com/MediaHub-Org/PlayTorrioMod/releases"><img height="20" src="https://img.shields.io/github/v/release/MediaHub-Org/PlayTorrioMod?include_prereleases&style=flat&color=7C5CFF" alt="Latest release"/></a>
+  A Flutter media app that pulls movies, series, anime and live TV into a
+  single interface — from Stremio-compatible addons, torrent swarms, and the
+  open web. Forked from
+  <a href="https://github.com/MediaHub-Org/PlayTorrioMod">PlayTorrioMod</a>
+  with Music and Books removed — better served by dedicated apps.
+</p>
+
+<p align="center">
+  <a href="https://github.com/MediaHub-Org/PlayTorrioMov/releases"><img height="20" src="https://img.shields.io/github/v/release/MediaHub-Org/PlayTorrioMov?include_prereleases&style=flat&color=7C5CFF" alt="Latest release"/></a>
   <img height="20" src="https://img.shields.io/badge/LICENSE-GPL--3.0-4169A1?style=flat" alt="License"/>
   <img height="20" src="https://img.shields.io/badge/FLUTTER-3.44-02569B?style=flat&logo=flutter&logoColor=white" alt="Flutter"/>
   <img height="20" src="https://img.shields.io/badge/Android_iOS_Windows_macOS_Linux-000000?style=flat" alt="Platforms"/>
@@ -21,19 +23,17 @@
 
 ---
 
-## Three hubs
+## Sections
 
-Navigation is organised by what you want to do, not by file format. Every hub
-shares the same search, filters, favourites and playback surface.
-
-| Hub | Sections |
+| Section | Content |
 |:--|:--|
-| **Watch** | Movies · Series · Anime · Live TV · Library |
-| **Listen** | Music · Radio · Podcasts · Library |
-| **Read** | Audiobooks · Books · Comics · Manga · Library |
+| **Movies & Series** | TMDB-catalog movies and series, one tap apart |
+| **Anime** | Its own catalog and scraper |
+| **Live TV** | IPTV channels |
+| **Library** | Everything you've saved |
 
-On phones the section switcher collapses to a dropdown; tablets and desktops
-get the full chip bar. See [UI & Design](docs/ui-design.md).
+On phones the sections sit in the bottom tab bar; tablets and desktops get a
+chip row under the top bar. See [UI & Design](docs/ui-design.md).
 
 ## Quick start
 

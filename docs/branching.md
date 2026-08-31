@@ -1,6 +1,6 @@
 # Branching and upstream sync
 
-PlayTorrioMod is a fork of [`ayman708-UX/PlayTorrioV3`](https://github.com/ayman708-UX/PlayTorrioV3).
+PlayTorrioMov is a fork of [`ayman708-UX/PlayTorrioV3`](https://github.com/ayman708-UX/PlayTorrioV3).
 It diverges deliberately, still wants useful changes *from* upstream, and still
 wants to contribute *to* upstream. Those are three different jobs, and only two
 of them are branches.

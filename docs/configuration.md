@@ -10,8 +10,8 @@ not driven from `AppInfo`.
 
 | | Value | Set in |
 |:--|:--|:--|
-| Bundle / application id | `com.mediahub.playtorriomod` | `android/app/build.gradle.kts`, the two `project.pbxproj` files, `macos/Runner/Configs/AppInfo.xcconfig`, `linux/CMakeLists.txt` |
-| Executable / bundle name | `PlayTorrioMod` | `windows/CMakeLists.txt`, `linux/CMakeLists.txt` (`BINARY_NAME`), `macos/.../AppInfo.xcconfig` (`PRODUCT_NAME`) |
+| Bundle / application id | `com.mediahub.playtorriomov` | `android/app/build.gradle.kts`, the two `project.pbxproj` files, `macos/Runner/Configs/AppInfo.xcconfig`, `linux/CMakeLists.txt` |
+| Executable / bundle name | `PlayTorrioMov` | `windows/CMakeLists.txt`, `linux/CMakeLists.txt` (`BINARY_NAME`), `macos/.../AppInfo.xcconfig` (`PRODUCT_NAME`) |
 | Display name | `AppInfo.name` | `lib/app_info.dart`, mirrored into `AndroidManifest.xml` and `ios/Runner/Info.plist` |
 
 The Kotlin source package stays `com.example.playtorrio`. It is a namespace,
@@ -119,7 +119,7 @@ Two repository secrets are required:
 |:--|:--|:--|
 | `ANDROID_KEYSTORE_BASE64` | yes | The `.jks` keystore, base64-encoded |
 | `ANDROID_KEYSTORE_PASSWORD` | yes | Store password |
-| `ANDROID_KEY_ALIAS` | no | Defaults to `playtorriomod` |
+| `ANDROID_KEY_ALIAS` | no | Defaults to `PlayTorrioMov` |
 | `ANDROID_KEY_PASSWORD` | no | Defaults to the store password |
 
 `keytool` allows one password to cover both the store and the key, and the
@@ -127,9 +127,9 @@ alias is fixed by convention, so the last two are only needed for a keystore
 created with different values.
 
 ```bash
-keytool -genkey -v -keystore playtorriomod-release.jks \
-  -keyalg RSA -keysize 4096 -validity 10000 -alias playtorriomod
-base64 -w0 playtorriomod-release.jks > keystore.b64   # macOS: base64 -i
+keytool -genkey -v -keystore PlayTorrioMov-release.jks \
+  -keyalg RSA -keysize 4096 -validity 10000 -alias PlayTorrioMov
+base64 -w0 PlayTorrioMov-release.jks > keystore.b64   # macOS: base64 -i
 ```
 
 Add the secrets under Settings → Secrets and variables → Actions. **Keep the

@@ -1,4 +1,4 @@
-# PlayTorrioMod documentation
+# PlayTorrioMov documentation
 
 Start at the [project README](../README.md) for an overview and quick start.
 
