@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_hub.dart';
-
-/// A single section within a hub (e.g. Media -> Movies, Books -> Manga).
+/// A single section within the Media hub (Movies & Series, Anime, Live TV,
+/// Library).
 class HubSection {
   final String id;
   final String label;
@@ -15,46 +14,26 @@ class HubSection {
   });
 }
 
-/// Global controller for the top-level navigation: which hub is active and
-/// which section within that hub. The header and the hubs both read/write this
-/// so navigation stays in sync.
+/// Global controller for the top-level navigation: which section is active,
+/// and (for the Movies & Series section) which of its two sub-tabs is
+/// showing. The header and the hub both read/write this so navigation stays
+/// in sync.
 class HubController extends ChangeNotifier {
   static final HubController instance = HubController._internal();
   HubController._internal();
 
-  AppHub _currentHub = AppHub.media;
   String _mediaSection = 'watch';
-  String _booksSection = 'audiobooks';
-  String _musicTab = 'Music';
 
-  // Each hub exposes exactly four sections, so two pairs that used to be
-  // separate sections are now one section with a sub-tab: Movies/Series and
-  // Comics/Manga. These hold which side of that pair is showing.
-  String _watchType = 'movie';    // 'movie' | 'series'
-  String _readableType = 'manga'; // 'manga' | 'comics'
+  // Movies and Series share one section but stay separate catalogs, one tap
+  // apart. See SectionSubTabs for why.
+  String _watchType = 'movie'; // 'movie' | 'series'
 
-  AppHub get currentHub => _currentHub;
   String get mediaSection => _mediaSection;
-  String get booksSection => _booksSection;
-  String get musicTab => _musicTab;
   String get watchType => _watchType;
-  String get readableType => _readableType;
 
   void setWatchType(String type) {
     if (_watchType == type) return;
     _watchType = type;
-    notifyListeners();
-  }
-
-  void setReadableType(String type) {
-    if (_readableType == type) return;
-    _readableType = type;
-    notifyListeners();
-  }
-
-  void setHub(AppHub hub) {
-    if (_currentHub == hub) return;
-    _currentHub = hub;
     notifyListeners();
   }
 
@@ -64,72 +43,16 @@ class HubController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setBooksSection(String id) {
-    if (_booksSection == id) return;
-    _booksSection = id;
-    notifyListeners();
-  }
+  /// The Media hub's four sections, shown as chips on tablet/desktop
+  /// (SectionTopBar) and as the bottom tab bar on mobile (AdaptiveNavShell).
+  List<HubSection> get currentSections => const [
+        HubSection(id: 'watch', label: 'Movies & Series', icon: Icons.movie_rounded),
+        HubSection(id: 'anime', label: 'Anime', icon: Icons.animation_rounded),
+        HubSection(id: 'iptv', label: 'Live TV', icon: Icons.live_tv_rounded),
+        HubSection(id: 'collection', label: 'Library', icon: Icons.video_library_rounded),
+      ];
 
-  void setMusicTab(String tab) {
-    if (_musicTab == tab) return;
-    _musicTab = tab;
-    notifyListeners();
-  }
+  String get currentSectionId => _mediaSection;
 
-  /// The sections available for the current hub.
-  ///
-  /// Every hub has exactly four, so the mobile bottom bar and the desktop chip
-  /// row have a fixed, evenly-divisible shape. Pairs that would make a fifth
-  /// (Movies/Series, Comics/Manga) are one section with a sub-tab instead.
-  List<HubSection> get currentSections {
-    switch (_currentHub) {
-      case AppHub.media:
-        return const [
-          HubSection(id: 'watch', label: 'Movies/Series', icon: Icons.movie_rounded),
-          HubSection(id: 'anime', label: 'Anime', icon: Icons.animation_rounded),
-          HubSection(id: 'iptv', label: 'Live TV', icon: Icons.live_tv_rounded),
-          HubSection(id: 'collection', label: 'Library', icon: Icons.video_library_rounded),
-        ];
-      case AppHub.books:
-        return const [
-          HubSection(id: 'audiobooks', label: 'Audiobooks', icon: Icons.headphones_rounded),
-          HubSection(id: 'books', label: 'Books', icon: Icons.import_contacts_rounded),
-          HubSection(id: 'readables', label: 'Comics/Manga', icon: Icons.auto_stories_rounded),
-          HubSection(id: 'collection', label: 'Library', icon: Icons.collections_bookmark_rounded),
-        ];
-      case AppHub.music:
-        return const [
-          HubSection(id: 'Music', label: 'Music', icon: Icons.music_note_rounded),
-          HubSection(id: 'Podcasts', label: 'Podcasts', icon: Icons.podcasts_rounded),
-          HubSection(id: 'Radio', label: 'Radio', icon: Icons.radio_rounded),
-          HubSection(id: 'Library', label: 'Library', icon: Icons.library_music_rounded),
-        ];
-    }
-  }
-
-  /// The id of the active section within the current hub.
-  String get currentSectionId {
-    switch (_currentHub) {
-      case AppHub.media:
-        return _mediaSection;
-      case AppHub.books:
-        return _booksSection;
-      case AppHub.music:
-        return _musicTab;
-    }
-  }
-
-  void setCurrentSection(String id) {
-    switch (_currentHub) {
-      case AppHub.media:
-        setMediaSection(id);
-        break;
-      case AppHub.books:
-        setBooksSection(id);
-        break;
-      case AppHub.music:
-        setMusicTab(id);
-        break;
-    }
-  }
+  void setCurrentSection(String id) => setMediaSection(id);
 }
