@@ -52,7 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final simklAuth = await SimklService.instance.isAuthenticated();
     final pkg = await PackageInfo.fromPlatform().catchError((_) => PackageInfo(
           appName: AppInfo.name,
-          packageName: 'com.mediahub.playtorriomod',
+          packageName: 'com.mediahub.playtorriomov',
           version: AppInfo.fallbackVersion,
           buildNumber: AppInfo.fallbackBuildNumber,
         ));

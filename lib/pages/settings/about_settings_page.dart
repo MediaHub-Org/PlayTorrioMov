@@ -52,11 +52,11 @@ class AboutSettingsPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
               ],
               const _Card(
-                title: 'Movies & Series, Anime, Live TV',
+                title: 'One app for streaming media',
                 body:
-                    'One app for streaming media. The same search, library '
-                    'and playback surface serves every section.',
-                child: _HubList(),
+                    'Movies, Series, Anime and Live TV, plus your Library. '
+                    'The same search, library and playback surface serves '
+                    'every section.',
               ),
               const SizedBox(height: AppSpacing.md),
               const _SectionLabel('HOW IT WORKS'),
@@ -257,53 +257,6 @@ class _TestingNotice extends StatelessWidget {
   }
 }
 
-class _HubList extends StatelessWidget {
-  const _HubList();
-
-  static const _hubs = [
-    (Icons.play_circle_outline_rounded, 'Movies & Series',
-        'Movies · Series · Anime · Live TV · Library'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        for (final (icon, label, sections) in _hubs)
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Row(
-              children: [
-                Icon(icon, size: 18, color: _kAccent),
-                const SizedBox(width: 12),
-                SizedBox(
-                  width: 108,
-                  child: Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    sections,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.45),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _SectionLabel extends StatelessWidget {
   final String text;
   const _SectionLabel(this.text);
@@ -325,9 +278,8 @@ class _SectionLabel extends StatelessWidget {
 class _Card extends StatelessWidget {
   final String title;
   final String body;
-  final Widget? child;
 
-  const _Card({required this.title, required this.body, this.child});
+  const _Card({required this.title, required this.body});
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +310,6 @@ class _Card extends StatelessWidget {
               height: 1.45,
             ),
           ),
-          if (child != null) child!,
         ],
       ),
     );

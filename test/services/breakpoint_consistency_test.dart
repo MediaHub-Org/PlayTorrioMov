@@ -15,8 +15,10 @@ Iterable<File> _dartFiles(String dir) => Directory(dir)
     .whereType<File>()
     .where((f) => f.path.endsWith('.dart'));
 
-// No full-screen takeover pages currently exist in this app; kept as a
-// set so a future one can be added here without touching the test logic.
+// Full-screen player pages exist (player_screen.dart, iptv_player_page.dart)
+// but are not exempted here — they should still respect AppBreakpoints like
+// everything else. Kept as a set so an exception can be added later if one is
+// ever needed.
 const _fullScreenPlayers = <String>{};
 
 void main() {

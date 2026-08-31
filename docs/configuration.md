@@ -119,7 +119,7 @@ Two repository secrets are required:
 |:--|:--|:--|
 | `ANDROID_KEYSTORE_BASE64` | yes | The `.jks` keystore, base64-encoded |
 | `ANDROID_KEYSTORE_PASSWORD` | yes | Store password |
-| `ANDROID_KEY_ALIAS` | no | Defaults to `PlayTorrioMov` |
+| `ANDROID_KEY_ALIAS` | no | Defaults to `playtorriomov` |
 | `ANDROID_KEY_PASSWORD` | no | Defaults to the store password |
 
 `keytool` allows one password to cover both the store and the key, and the
@@ -127,9 +127,9 @@ alias is fixed by convention, so the last two are only needed for a keystore
 created with different values.
 
 ```bash
-keytool -genkey -v -keystore PlayTorrioMov-release.jks \
-  -keyalg RSA -keysize 4096 -validity 10000 -alias PlayTorrioMov
-base64 -w0 PlayTorrioMov-release.jks > keystore.b64   # macOS: base64 -i
+keytool -genkey -v -keystore playtorriomov-release.jks \
+  -keyalg RSA -keysize 4096 -validity 10000 -alias playtorriomov
+base64 -w0 playtorriomov-release.jks > keystore.b64   # macOS: base64 -i
 ```
 
 Add the secrets under Settings → Secrets and variables → Actions. **Keep the

@@ -16,7 +16,7 @@
 ///  * **Executable and bundle names** -- the Windows/Linux `BINARY_NAME`, the
 ///    macOS `PRODUCT_NAME` and the platform bundle identifiers are build
 ///    inputs baked into installers and packaging scripts, not display
-///    strings. They read `PlayTorrioMod` / `com.mediahub.playtorriomod` to
+///    strings. They read `PlayTorrioMov` / `com.mediahub.playtorriomov` to
 ///    match, but changing them means changing the packaging in step, so they
 ///    are not driven from here.
 abstract final class AppInfo {

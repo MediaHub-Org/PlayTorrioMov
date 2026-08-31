@@ -12,7 +12,7 @@ import '../iptv/iptv_page.dart';
 /// Watch hub: Movies/Series, Anime, Live TV, and the user's library.
 ///
 /// Sections are switched via the [SectionTopBar] — chips on tablet/desktop,
-/// a dropdown on mobile. The active section is driven by the shared
+/// a bottom tab bar on mobile. The active section is driven by the shared
 /// [HubController] so navigation stays in sync.
 class MediaHub extends StatelessWidget {
   const MediaHub({super.key});

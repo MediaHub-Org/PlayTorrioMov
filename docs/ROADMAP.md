@@ -1,6 +1,6 @@
 # Project Roadmap — PlayTorrioMov
 
-What is **outstanding**. Shipped work lives in [`CHANGELOG.md`](CHANGELOG.md);
+What is **outstanding**. Shipped work is tracked in the GitHub release notes;
 this file stays about what is left.
 
 Last reconciled against the tree: **2026-08-31** (v1.1.3+11, dev channel,

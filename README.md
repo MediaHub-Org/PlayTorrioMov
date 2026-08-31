@@ -41,8 +41,8 @@ Requires the Flutter SDK (3.44 or later) and, for mobile builds, Xcode or the
 Android SDK.
 
 ```bash
-git clone https://github.com/MediaHub-Org/PlayTorrioMod.git
-cd PlayTorrioMod
+git clone https://github.com/MediaHub-Org/PlayTorrioMov.git
+cd PlayTorrioMov
 flutter pub get
 flutter run
 ```
@@ -59,7 +59,7 @@ On first launch the app installs the default Cinemeta addon and starts the
 torrent engine. Nothing else needs configuring to start browsing.
 
 Prebuilt installers and APKs for every platform are on the
-[releases page](https://github.com/MediaHub-Org/PlayTorrioMod/releases). On
+[releases page](https://github.com/MediaHub-Org/PlayTorrioMov/releases). On
 Android, prefer `arm64-v8a` unless you know you need otherwise — it is the same
 build as the universal APK at a third of the size.
 
@@ -71,14 +71,11 @@ Everything beyond this page lives in [`docs/`](docs/).
 |:--|:--|
 | [Architecture](docs/architecture.md) | Layer diagram, project structure, the patterns the codebase leans on |
 | [Streaming](docs/streaming.md) | Discovery pipeline, VOD scrapers, torrent engine, Stremio addons, subtitles |
-| [Content sources](docs/content-sources.md) | Manga reader, audiobook aggregation, music streaming |
+| [Content sources](docs/content-sources.md) | Where catalogs and streams come from, and how sources are added |
 | [UI & design](docs/ui-design.md) | Design tokens, glassmorphism, responsive tiers |
 | [Platforms & configuration](docs/configuration.md) | Platform support matrix and runtime settings |
 | [Player](docs/player.md) | Playback engine, decoders, subtitle rendering |
-| [Changelog](docs/CHANGELOG.md) | What shipped, when |
 | [Roadmap](docs/ROADMAP.md) | What is still outstanding |
-| [Fork differences](docs/FORK_DIFFERENCES.md) | How this fork diverges from upstream |
-| [Audit](docs/AUDIT.md) | Findings log and their resolutions |
 | [Contributing](docs/CONTRIBUTING.md) | How to propose a change |
 | [Branching](docs/branching.md) | Branch model, contributing upstream, pulling upstream changes in |
 
@@ -106,14 +103,17 @@ still succeed, signed with a throwaway debug key.
 
 ## Credits
 
-PlayTorrioMod is a fork of [PlayTorrioV3](https://github.com/ayman708-UX/PlayTorrioV3)
-by [Ayman](https://github.com/ayman708-UX), who created the original
-application — the Stremio addon integration, the VOD scraper system, the
-torrent streaming engine, the audiobook aggregator, the manga reader, the music
-integration and the subtitle system, across five platforms.
+PlayTorrioMov descends from [PlayTorrioV3](https://github.com/ayman708-UX/PlayTorrioV3)
+by [Ayman](https://github.com/ayman708-UX), via
+[PlayTorrioMod](https://github.com/MediaHub-Org/PlayTorrioMod). Ayman created
+the original application — the Stremio addon integration, the VOD scraper
+system, the torrent streaming engine, the audiobook aggregator, the manga
+reader, the music integration and the subtitle system, across five platforms.
 
-This fork reorganises navigation into the three hubs above and continues from
-there; see [fork differences](docs/FORK_DIFFERENCES.md) for the specifics.
+PlayTorrioMov keeps the media half of that work and drops the rest: one hub,
+the four sections listed above, and no hub switcher. Music, podcasts,
+audiobooks, books, manga and comics live on in PlayTorrioMod for anyone who
+wants them in one app.
 
 ---
 

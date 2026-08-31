@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../app_info.dart';
 import 'cloud_backup_settings.dart';
 
 /// True if [host] is `localhost`, a loopback/private-range IPv4 literal, or
@@ -56,7 +57,7 @@ abstract final class BackupService {
       for (final key in prefs.getKeys()) key: prefs.get(key),
     };
     final envelope = {
-      'app': 'PlayTorrioMod',
+      'app': AppInfo.name,
       'version': 1,
       'exportedAt': DateTime.now().toIso8601String(),
       'data': data,

@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────────────────────────────
-#  PlayTorrioMod — Pull Request Checks
+#  PlayTorrioMov — Pull Request Checks
 #  Static analysis, the deterministic test suite, and an Android release build.
 #
 #  build.yml only runs on tag pushes, published releases and manual dispatch,
@@ -135,7 +135,7 @@ jobs:
           # password cover both the store and the key, and the alias is fixed
           # by convention, so the other two secrets are optional overrides for
           # a keystore that was created with different values.
-          KEY_ALIAS="${KEY_ALIAS:-playtorriomod}"
+          KEY_ALIAS="${KEY_ALIAS:-playtorriomov}"
           KEY_PASSWORD="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
           echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
           # storeFile is resolved relative to the android/app module directory.
@@ -153,6 +153,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v6
         with:
-          name: PlayTorrioMod-Android-PR${{ github.event.pull_request.number || github.run_number }}
+          name: PlayTorrioMov-Android-PR${{ github.event.pull_request.number || github.run_number }}
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
