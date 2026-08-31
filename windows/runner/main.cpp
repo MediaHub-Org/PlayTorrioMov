@@ -46,7 +46,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   Win32Window::Point origin(origin_x, origin_y);
   Win32Window::Size size(window_width, window_height);
-  if (!window.Create(L"PlayTorrioMod", origin, size)) {
+  if (!window.Create(L"PlayTorrioMov", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

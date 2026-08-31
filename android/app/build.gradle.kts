@@ -47,7 +47,7 @@ android {
         //
         // `namespace` above is only the generated R/BuildConfig package and is
         // intentionally left alone; it has no bearing on install identity.
-        applicationId = "com.mediahub.playtorriomod"
+        applicationId = "com.mediahub.playtorriomov"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

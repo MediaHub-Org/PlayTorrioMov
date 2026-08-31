@@ -1,18 +1,18 @@
 ; ──────────────────────────────────────────────────────────────────────────────
-;  PlayTorrioMod — Windows Installer (Inno Setup 6)
+;  PlayTorrioMov — Windows Installer (Inno Setup 6)
 ;  Built by CI from: build\windows\x64\runner\Release\
 ; ──────────────────────────────────────────────────────────────────────────────
 
-#define MyAppName      "PlayTorrioMod"
+#define MyAppName      "PlayTorrioMov"
 #ifndef MyAppVersion
 #define MyAppVersion   "1.1.0"
 #endif
 #define MyAppPublisher "MediaHub-Org"
-#define MyAppExeName   "PlayTorrioMod.exe"
-#define MyAppURL       "https://github.com/MediaHub-Org/PlayTorrioMod"
+#define MyAppExeName   "PlayTorrioMov.exe"
+#define MyAppURL       "https://github.com/MediaHub-Org/PlayTorrioMov"
 
 [Setup]
-AppId={{9B8C7D6E-5F4E-3D2C-1B0A-9F8E7D6C5B4A}
+AppId={{17554E15-6F22-497C-9B63-9D05B793B89A}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
@@ -23,7 +23,7 @@ DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 SetupIconFile=..\..\windows\runner\resources\app_icon.ico
 OutputDir=Output
-OutputBaseFilename=PlayTorrioMod-Windows-Setup
+OutputBaseFilename=PlayTorrioMov-Windows-Setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64compatible

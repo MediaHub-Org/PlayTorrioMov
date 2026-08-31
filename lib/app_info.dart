@@ -21,7 +21,7 @@
 ///    are not driven from here.
 abstract final class AppInfo {
   /// The app's display name. Shown wherever the product names itself.
-  static const String name = 'PlayTorrioMod';
+  static const String name = 'PlayTorrioMov';
 
   /// The subtitle under [name] on the splash screen.
   static const String tagline = 'Your Cinema Universe';
