@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
 /// A global coordinator that ensures only **one** playback source plays at a
-/// time across the whole app (music, video, audiobooks).
+/// time across the whole app.
 ///
 /// When a new source starts playing, it notifies the previously active source
 /// to pause/stop. This prevents multiple streams from playing simultaneously.
@@ -50,9 +50,9 @@ abstract final class PlaybackCoordinator {
   /// Registers a source as the active playback source. Any previously active
   /// source is told to stop first.
   ///
-  /// [sourceId] uniquely identifies the playback source (e.g. a track id, a
-  /// video id, an audiobook id). [kind] is a coarse category ('music',
-  /// 'video', 'audiobook') used to decide which global shortcuts apply.
+  /// [sourceId] uniquely identifies the playback source (e.g. a video id).
+  /// [kind] is a coarse category (currently just 'video') used to decide
+  /// which global shortcuts apply.
   /// [onStop] is called if this source is later superseded by another
   /// source — it should pause, not tear down, so the source can still be
   /// resumed from where it was.
@@ -67,8 +67,8 @@ abstract final class PlaybackCoordinator {
   /// video, a live channel) and the skip controls disappear from the
   /// notification rather than appearing dead.
   /// [isLiked]/[onToggleLike] let the play bar show and toggle a like
-  /// button for this source (music tracks only — leave both null for
-  /// video/audiobook/podcast sources, which have no like concept).
+  /// button for this source. No keep-module source uses this — leave both
+  /// null.
   static void activate(
     String sourceId,
     VoidCallback onStop, {

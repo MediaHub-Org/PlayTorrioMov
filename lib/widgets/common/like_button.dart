@@ -16,11 +16,11 @@ enum LikeButtonStyle {
 
 /// The one "save this" toggle, for content types where saving is a boolean.
 ///
-/// Audiobooks, Manga, Podcasts, Books and Music each had their own: two pill
-/// variants, a bare `IconButton`, and two list-row hearts, in three different
-/// reds. Worse, the two presentations had contradictory-looking colour rules —
-/// the pill filled red and turned its icon *white*, the bare icon turned
-/// *red*.
+/// PlayTorrioMod's other content types each had their own before this was
+/// unified: two pill variants, a bare `IconButton`, and two list-row hearts,
+/// in three different reds. Worse, the two presentations had
+/// contradictory-looking colour rules — the pill filled red and turned its
+/// icon *white*, the bare icon turned *red*.
 ///
 /// That contradiction is only apparent, and the rule is now written down here
 /// rather than rediscovered per page: a filled pill needs a white icon to stay

@@ -131,7 +131,7 @@ class DownloadService {
   Future<DownloadTask> startDownload({
     required String title,
     required String mediaId,
-    required String type, // 'movie', 'series', 'anime', 'audiobook'
+    required String type, // 'movie', 'series', 'anime'
     int? season,
     int? episode,
     String? episodeTitle,
@@ -181,26 +181,10 @@ class DownloadService {
     final isTorrent = (infoHash != null && infoHash.isNotEmpty) || isMagnetUrl;
     final useDebrid = isTorrent && await DebridService().isDebridActiveForStreams();
 
-    final isAudiobook = type == 'audiobook';
-
     DownloadSourceType sourceType;
-    String targetExt = isAudiobook ? '.mp3' : '.mp4';
+    String targetExt = '.mp4';
 
-    if (isAudiobook) {
-      // Audio containers only -- sniff the URL, otherwise fall back to a
-      // generic '.mp3' (audiobook sources rarely expose a clean extension
-      // on a magnet/debrid-resolved URL).
-      final lower = rawUrl?.toLowerCase() ?? '';
-      for (final ext in ['.m4b', '.m4a', '.mp3', '.opus', '.ogg', '.flac', '.wav']) {
-        if (lower.contains(ext)) {
-          targetExt = ext;
-          break;
-        }
-      }
-      sourceType = (isTorrent && !useDebrid)
-          ? DownloadSourceType.p2p
-          : (useDebrid ? DownloadSourceType.debrid : DownloadSourceType.http);
-    } else if (isTorrent && !useDebrid) {
+    if (isTorrent && !useDebrid) {
       sourceType = DownloadSourceType.p2p;
       targetExt = '.mkv'; // Standard container for torrent video
     } else if (useDebrid) {

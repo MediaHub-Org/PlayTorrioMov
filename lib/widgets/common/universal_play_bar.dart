@@ -4,11 +4,10 @@ import 'package:flutter/material.dart';
 import '../../services/playback_coordinator.dart';
 import 'like_button.dart';
 
-/// A universal bottom play bar shown across all hubs (Media, Books, Music).
+/// A universal bottom play bar shown above the hub's content.
 ///
-/// It reflects whatever is currently playing (music, video, or audiobook) via
-/// the global [PlaybackCoordinator], with a play/pause toggle and a stop
-/// button. It sits above the AppDock so it never overlaps the hub switcher.
+/// It reflects whatever is currently playing via the global
+/// [PlaybackCoordinator], with a play/pause toggle and a stop button.
 class UniversalPlayBar extends StatelessWidget {
   const UniversalPlayBar({super.key});
 
@@ -199,10 +198,7 @@ class UniversalPlayBar extends StatelessWidget {
 
   Widget _kindIcon(String? kind) {
     final icon = switch (kind) {
-      'music' => Icons.music_note_rounded,
       'video' => Icons.movie_rounded,
-      'audiobook' => Icons.headphones_rounded,
-      'podcast' => Icons.podcasts_rounded,
       _ => Icons.play_arrow_rounded,
     };
     return Container(
@@ -215,10 +211,7 @@ class UniversalPlayBar extends StatelessWidget {
 
   String _kindLabel(String? kind) {
     return switch (kind) {
-      'music' => 'MUSIC',
       'video' => 'VIDEO',
-      'audiobook' => 'AUDIOBOOK',
-      'podcast' => 'PODCAST',
       _ => 'PLAYING',
     };
   }
