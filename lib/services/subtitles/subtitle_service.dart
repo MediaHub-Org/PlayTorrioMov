@@ -1,5 +1,5 @@
 
-import 'package:playtorrio/models/subtitle/subtitle_model.dart';
+import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import './providers/subdl_provider.dart';
 import './providers/subtitlecat_provider.dart';
 import './providers/wyzie_provider.dart';

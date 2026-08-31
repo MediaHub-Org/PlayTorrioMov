@@ -1,9 +1,9 @@
 // test/widgets/browse_row_view_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/models/anime/anime_media.dart';
-import 'package:playtorrio/widgets/anime/anime_slider_section.dart';
-import 'package:playtorrio/widgets/common/browse_row_view.dart';
+import 'package:playtorriomov/models/anime/anime_media.dart';
+import 'package:playtorriomov/widgets/anime/anime_slider_section.dart';
+import 'package:playtorriomov/widgets/common/browse_row_view.dart';
 
 Widget wrap(Widget child) => MaterialApp(
       home: Scaffold(body: SingleChildScrollView(child: child)),

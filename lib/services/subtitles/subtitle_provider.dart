@@ -1,5 +1,5 @@
 
-import 'package:playtorrio/models/subtitle/subtitle_model.dart';
+import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 
 abstract class SubtitleProvider {
   String get name;

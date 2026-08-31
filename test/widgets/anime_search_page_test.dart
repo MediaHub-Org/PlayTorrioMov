@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/pages/anime/anime_search_page.dart';
+import 'package:playtorriomov/pages/anime/anime_search_page.dart';
 
 void main() {
   testWidgets('AnimeSearchPage renders custom dropdown buttons, 18+ toggle, and search input', (tester) async {

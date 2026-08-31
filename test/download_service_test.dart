@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/models/download/download_task_model.dart';
-import 'package:playtorrio/utils/platform/storage_space_helper.dart';
+import 'package:playtorriomov/models/download/download_task_model.dart';
+import 'package:playtorriomov/utils/platform/storage_space_helper.dart';
 
 void main() {
   group('Download Task System Tests', () {

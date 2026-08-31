@@ -5,10 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Settings services whose every persisted value should reach something.
 const _settingsFiles = [
-  'lib/services/music/music_settings.dart',
-  'lib/services/audiobook/audiobook_settings.dart',
   'lib/services/iptv/iptv_settings.dart',
-  'lib/services/manga/manga_settings.dart',
   'lib/services/player/player_settings.dart',
 ];
 

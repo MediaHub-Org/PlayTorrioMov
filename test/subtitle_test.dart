@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/subtitles/subtitle_parser.dart';
+import 'package:playtorriomov/services/subtitles/subtitle_parser.dart';
 import 'package:archive/archive.dart';
 
 void main() {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/models/addon/addon.dart';
+import 'package:playtorriomov/models/addon/addon.dart';
 
 void main() {
   group('AddonManifest', () {

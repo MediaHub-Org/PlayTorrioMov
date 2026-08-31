@@ -1,8 +1,8 @@
 // test/widgets/browse_scaffold_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/widgets/common/browse_scaffold.dart';
-import 'package:playtorrio/widgets/common/slider_arrow.dart';
+import 'package:playtorriomov/widgets/common/browse_scaffold.dart';
+import 'package:playtorriomov/widgets/common/slider_arrow.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 

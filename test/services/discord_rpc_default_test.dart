@@ -2,7 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/discord/discord_rpc_service.dart';
+import 'package:playtorriomov/services/discord/discord_rpc_service.dart';
 
 void main() {
   group('Discord Rich Presence', () {

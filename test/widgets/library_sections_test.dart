@@ -2,13 +2,11 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/widgets/common/library_sections.dart';
+import 'package:playtorriomov/widgets/common/library_sections.dart';
 
-/// The three Library pages, one per hub.
+/// The one Library page, for the app's single hub.
 const _libraryPages = [
   'lib/pages/collection/collection_page.dart',
-  'lib/pages/collection/books_library_page.dart',
-  'lib/pages/music/music_page.dart',
 ];
 
 void main() {

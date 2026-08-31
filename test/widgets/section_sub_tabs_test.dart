@@ -1,7 +1,7 @@
 // test/widgets/section_sub_tabs_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/widgets/common/section_sub_tabs.dart';
+import 'package:playtorriomov/widgets/common/section_sub_tabs.dart';
 
 void setSurfaceWidth(WidgetTester tester, double width, {double textScale = 1}) {
   tester.view.physicalSize = Size(width, 800);

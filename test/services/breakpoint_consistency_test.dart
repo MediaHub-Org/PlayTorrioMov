@@ -2,7 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/app_breakpoints.dart';
+import 'package:playtorriomov/services/app_breakpoints.dart';
 
 /// A width compared against 700, 750 or 800 — the values that drifted away
 /// from [AppBreakpoints]. 900 and 600 are the canonical cutoffs, so a grid
@@ -15,13 +15,9 @@ Iterable<File> _dartFiles(String dir) => Directory(dir)
     .whereType<File>()
     .where((f) => f.path.endsWith('.dart'));
 
-/// Full-screen takeovers that draw no shared chrome, so their own cutoff
-/// cannot disagree with anything on screen beside it. They also reflow a
-/// player, not a page, so the nav tiers are not the right question for them.
-const _fullScreenPlayers = {
-  'lib/pages/music/music_page.dart',
-  'lib/pages/audiobooks/audiobook_player_screen.dart',
-};
+// No full-screen takeover pages currently exist in this app; kept as a
+// set so a future one can be added here without touching the test logic.
+const _fullScreenPlayers = <String>{};
 
 void main() {
   group('AppBreakpoints', () {

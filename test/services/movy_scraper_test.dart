@@ -2,7 +2,7 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/scraper/sites/movy.dart';
+import 'package:playtorriomov/services/scraper/sites/movy.dart';
 
 void main() {
   test('MovyScraper decrypts live stream ciphertext', () async {

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:playtorrio/models/movie/movie_detail.dart';
-import 'package:playtorrio/models/stream/stream_model.dart';
-import 'package:playtorrio/services/continue_watching/continue_watching_service.dart';
+import 'package:playtorriomov/models/movie/movie_detail.dart';
+import 'package:playtorriomov/models/stream/stream_model.dart';
+import 'package:playtorriomov/services/continue_watching/continue_watching_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

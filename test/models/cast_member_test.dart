@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/models/movie/cast_member.dart';
+import 'package:playtorriomov/models/movie/cast_member.dart';
 
 void main() {
   group('CastMember & CrewMember', () {

@@ -3,7 +3,7 @@ library;
 
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/subtitles/subtitlecat_service.dart';
+import 'package:playtorriomov/services/subtitles/subtitlecat_service.dart';
 
 void main() {
   HttpOverrides.global = null;

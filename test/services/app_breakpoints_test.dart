@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/app_breakpoints.dart';
+import 'package:playtorriomov/services/app_breakpoints.dart';
 
 void main() {
   group('AppBreakpoints.tierForWidth', () {

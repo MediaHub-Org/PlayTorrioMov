@@ -2,7 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/app_info.dart';
+import 'package:playtorriomov/app_info.dart';
 
 /// Reads `version: 1.2.3+4` out of pubspec.yaml without pulling in a YAML
 /// parser -- the one line is unambiguous and this keeps the test dependency

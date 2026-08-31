@@ -3,8 +3,8 @@ library;
 
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/services/scraper/sites/vadapav.dart';
-import 'package:playtorrio/services/addon/addon_manager.dart';
+import 'package:playtorriomov/services/scraper/sites/vadapav.dart';
+import 'package:playtorriomov/services/addon/addon_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class _AllowAllHttpOverrides extends HttpOverrides {}

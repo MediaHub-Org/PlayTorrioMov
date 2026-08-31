@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorrio/widgets/common/like_button.dart';
+import 'package:playtorriomov/widgets/common/like_button.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
 
