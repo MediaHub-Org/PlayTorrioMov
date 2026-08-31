@@ -9,22 +9,13 @@ import 'package:window_manager/window_manager.dart';
 import './services/addon/addon_manager.dart';
 import './services/theme/app_theme_service.dart';
 import './services/updater/app_updater_service.dart';
-import './services/audiobook/audiobook_library_service.dart';
 import './services/backup/cloud_backup_settings.dart';
 import './services/download/download_service.dart';
-import './services/books/continue_reading_service.dart';
-import './services/books/reader_settings.dart';
 import './services/continue_watching/continue_watching_service.dart';
 import './services/theme/custom_background_service.dart';
 import './services/theme/glass_settings.dart';
-import './services/audiobook/audiobook_settings.dart';
 import './services/iptv/iptv_controller.dart';
 import './services/iptv/iptv_settings.dart';
-import './services/manga/manga_settings.dart';
-import './services/media_session/media_session_service.dart';
-import './services/music/music_download_service.dart';
-import './services/music/music_settings.dart';
-import './services/music/qobuz_music_service.dart';
 import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
 import './services/tmdb/tmdb_settings.dart';
@@ -34,7 +25,6 @@ import './services/window/window_service.dart';
 import './services/p2p/p2p_settings_service.dart';
 import './services/discord/discord_rpc_service.dart';
 import './widgets/updater/update_dialog.dart';
-import './widgets/common/global_shortcuts.dart';
 import './pages/hub/hub_page.dart';
 import 'app_info.dart';
 
@@ -52,31 +42,18 @@ void main() async {
   await PlayerSettings.initialize();
   await Future.wait([
     AddonManager.instance.initialize(),
-    AudiobookLibraryService.instance.init(),
     AppThemeService.initialize(),
-    AudiobookSettings.initialize(),
     CloudBackupSettings.initialize(),
     ContinueWatchingService.initialize(),
-    ContinueReadingService.initialize(),
-    ReaderSettings.initialize(),
     CustomBackgroundService.initialize(),
     GlassSettings.initialize(),
     IptvController.instance.init(),
     IptvSettings.initialize(),
-    MangaSettings.initialize(),
-    MusicSettings.initialize(),
-    MusicDownloadService.instance.init(),
-    QobuzMusicService.instance.initialize(),
     MyListService.initialize(),
     TmdbSettings.initialize(),
     P2pSettingsService.initialize(),
     DownloadService.instance.initialize(),
     TorrentStreamService().start(),
-    // Publishes the active source to the Android/iOS media session. Awaited
-    // with the rest so the session exists before anything can start playing,
-    // but it never throws -- a missing session costs the notification
-    // controls, not startup.
-    MediaSessionService.init(),
     DiscordRpcService.instance.initialize(),
   ]);
   runApp(const PlayTorrioApp());
@@ -156,7 +133,7 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
           scrollBehavior: const MaterialScrollBehavior().copyWith(
             overscroll: false,
           ),
-          home: const GlobalShortcuts(child: HubPage()),
+          home: const HubPage(),
         );
       },
     );
