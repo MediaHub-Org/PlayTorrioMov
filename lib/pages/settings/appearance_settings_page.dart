@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
-import '../../services/audiobook/audiobook_settings.dart';
 import '../../services/theme/custom_background_service.dart';
 import '../../services/theme/glass_settings.dart';
 import '../../services/iptv/iptv_settings.dart';
-import '../../services/manga/manga_settings.dart';
-import '../../services/music/music_settings.dart';
-import 'appearance/audiobook_player_studio_page.dart';
 import 'appearance/custom_background_settings_page.dart';
 import 'appearance/liquid_glass_settings_page.dart';
 import 'appearance/live_tv_settings_page.dart';
-import 'appearance/manga_settings_page.dart';
-import 'appearance/music_player_studio_page.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
   const AppearanceSettingsPage({super.key});
@@ -137,99 +131,6 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const LiveTvSettingsPage(),
-                            ),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 14),
-
-              // Button 4: Manga UI & Reader Atmosphere
-              ValueListenableBuilder<MangaReadingMode>(
-                valueListenable: MangaSettings.defaultReadingMode,
-                builder: (context, readingMode, _) {
-                  return ValueListenableBuilder<AppThemePalette>(
-                    valueListenable: AppThemeService.currentPalette,
-                    builder: (context, currentPalette, _) {
-                      return _buildSectionButton(
-                        icon: Icons.menu_book_rounded,
-                        iconColor: currentPalette.primaryColor,
-                        title: 'Manga UI & Reader Atmosphere',
-                        subtitle: 'Ambient moving lighting, card density, reading layout widths, webtoon/horizontal modes, and page deck preview',
-                        badgeText: readingMode == MangaReadingMode.webtoon ? 'Webtoon' : 'Horizontal',
-                        badgeColor: currentPalette.primaryColor,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MangaSettingsPage(),
-                            ),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 14),
-
-              // Button 5: Audiobook UI & Player Studio
-              ValueListenableBuilder<AudiobookPlayerPreset>(
-                valueListenable: AudiobookSettings.selectedPlayerPreset,
-                builder: (context, playerPreset, _) {
-                  return ValueListenableBuilder<AppThemePalette>(
-                    valueListenable: AppThemeService.currentPalette,
-                    builder: (context, currentPalette, _) {
-                      return _buildSectionButton(
-                        icon: Icons.headphones_rounded,
-                        iconColor: currentPalette.primaryColor,
-                        title: 'Audiobook UI & Player Studio',
-                        subtitle: 'Hero spotlight, 5 distinct player designs, drag & drop modular studio, waveform canvas scrubber, and custom controls',
-                        badgeText: playerPreset.label.split(' ').first,
-                        badgeColor: currentPalette.primaryColor,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AudiobookPlayerStudioPage(),
-                            ),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 14),
-
-              // Button 6: Music UI & Player Studio
-              ValueListenableBuilder<MusicFullscreenPreset>(
-                valueListenable: MusicSettings.selectedFullscreenPreset,
-                builder: (context, fullPreset, _) {
-                  return ValueListenableBuilder<AppThemePalette>(
-                    valueListenable: AppThemeService.currentPalette,
-                    builder: (context, currentPalette, _) {
-                      return _buildSectionButton(
-                        icon: Icons.music_note_rounded,
-                        iconColor: currentPalette.primaryColor,
-                        title: 'Music UI & Player Studio',
-                        subtitle: 'Hero spotlight, lossless badges, dual-engine customizer for both mini dock bar and fullscreen turntable/equalizer',
-                        badgeText: fullPreset.label.split(' ').first,
-                        badgeColor: currentPalette.primaryColor,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const MusicPlayerStudioPage(),
                             ),
                           );
                           setState(() {});

@@ -52,11 +52,10 @@ class AboutSettingsPage extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
               ],
               const _Card(
-                title: 'Watch, Listen, Read',
+                title: 'Movies & Series, Anime, Live TV',
                 body:
-                    'One app for every format. Navigation is organised by what '
-                    'you want to do rather than by file type, so the same '
-                    'search, library and playback surface serves all three.',
+                    'One app for streaming media. The same search, library '
+                    'and playback surface serves every section.',
                 child: _HubList(),
               ),
               const SizedBox(height: AppSpacing.md),
@@ -262,12 +261,8 @@ class _HubList extends StatelessWidget {
   const _HubList();
 
   static const _hubs = [
-    (Icons.play_circle_outline_rounded, 'Watch',
-        'Movies/Series · Anime · Live TV · Library'),
-    (Icons.headphones_rounded, 'Listen',
-        'Music · Podcasts · Radio · Library'),
-    (Icons.menu_book_rounded, 'Read',
-        'Audiobooks · Books · Comics/Manga · Library'),
+    (Icons.play_circle_outline_rounded, 'Movies & Series',
+        'Movies · Series · Anime · Live TV · Library'),
   ];
 
   @override
@@ -282,7 +277,7 @@ class _HubList extends StatelessWidget {
                 Icon(icon, size: 18, color: _kAccent),
                 const SizedBox(width: 12),
                 SizedBox(
-                  width: 58,
+                  width: 108,
                   child: Text(
                     label,
                     style: const TextStyle(
