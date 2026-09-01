@@ -16,6 +16,7 @@ import './services/theme/custom_background_service.dart';
 import './services/theme/glass_settings.dart';
 import './services/iptv/iptv_controller.dart';
 import './services/iptv/iptv_settings.dart';
+import './services/media_session/media_session_service.dart';
 import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
 import './services/tmdb/tmdb_settings.dart';
@@ -54,6 +55,11 @@ void main() async {
     P2pSettingsService.initialize(),
     DownloadService.instance.initialize(),
     TorrentStreamService().start(),
+    // Publishes the active source to the Android/iOS media session. Awaited
+    // with the rest so the session exists before anything can start playing,
+    // but it never throws -- a missing session costs the notification
+    // controls, not startup.
+    MediaSessionService.init(),
     DiscordRpcService.instance.initialize(),
   ]);
   runApp(const PlayTorrioApp());

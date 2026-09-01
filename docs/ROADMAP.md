@@ -17,15 +17,17 @@ the two repos' navigation shapes no longer match (PlayTorrioMod: three hubs
 switched by `AppHub`; this app: the single hub below, `AppHub` doesn't
 exist here), so a straight merge would not apply cleanly even if attempted.
 
-**Open decision, not yet resolved:** forking out Music/Books also deleted
-`MediaSessionService` (it turned out to be generic — it mirrors
-`PlaybackCoordinator` for *any* playback source, not Music-specific), so
-video playback here has no Android/iOS lock-screen, notification, or
-Bluetooth media controls. PlayTorrioMod is unaffected — it kept the
-service. Deciding whether to bring it back (re-adds the `audio_service`
-dependency and a background-audio permission) or document the loss and
-move on is tracked in PlayTorrioMod's own `ROADMAP.md`, since it affects
-both repos' relationship going forward.
+**Resolved 2026-09-01: `MediaSessionService` restored.** Forking out
+Music/Books had also deleted it, but it turned out to be generic — it
+mirrors `PlaybackCoordinator` for *any* playback source, not
+Music-specific — so video playback here had lost its Android/iOS
+lock-screen, notification and Bluetooth media controls for no reason tied
+to the actual fork goal (dropping Music/Books content, not video
+infrastructure). Re-added `audio_service`, the service file (identity
+strings adjusted for this app), the Android manifest's
+`FOREGROUND_SERVICE_MEDIA_PLAYBACK` permission + `AudioService`/
+`MediaButtonReceiver` entries, and iOS's `audio` background mode.
+`flutter analyze` clean, `flutter test` 196/196 passing.
 
 ## Navigation principle
 

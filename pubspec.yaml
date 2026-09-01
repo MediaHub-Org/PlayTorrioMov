@@ -67,6 +67,7 @@ dependencies:
   wakelock_plus: ^1.3.3
   window_manager: ^0.5.2
   file_picker: ^8.1.7
+  audio_service: ^0.18.19
   dart_discord_presence: ^1.2.0 # Discord Rich Presence
 
 dev_dependencies:

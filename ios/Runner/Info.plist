@@ -13,6 +13,7 @@
 	<string>PlayTorrio streams video and audio from local network services and torrent streaming engines.</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
