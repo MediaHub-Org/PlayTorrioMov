@@ -2,6 +2,7 @@ class Movie {
   final String id;
   final String name;
   final String? poster;
+  final String? background;
   final String? year;
   final String type;
   final String addonBaseUrl;
@@ -11,6 +12,7 @@ class Movie {
     required this.id,
     required this.name,
     this.poster,
+    this.background,
     this.year,
     required this.type,
     required this.addonBaseUrl,
@@ -41,6 +43,7 @@ class Movie {
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown',
       poster: json['poster']?.toString(),
+      background: json['background']?.toString(),
       year: json['releaseInfo']?.toString() ?? json['year']?.toString(),
       type: type,
       addonBaseUrl: addonBaseUrl,

@@ -10,14 +10,20 @@ import 'package:flutter/material.dart';
 class NestedNavigator extends StatefulWidget {
   final Widget child;
 
-  const NestedNavigator({super.key, required this.child});
+  /// Optional external key so a parent (e.g. [HubPage]) can pop this
+  /// navigator back to its root -- used to clear a pushed detail page when
+  /// the hub pills or bottom bar switch section out from under it.
+  final GlobalKey<NavigatorState>? navigatorKey;
+
+  const NestedNavigator({super.key, this.navigatorKey, required this.child});
 
   @override
   State<NestedNavigator> createState() => _NestedNavigatorState();
 }
 
 class _NestedNavigatorState extends State<NestedNavigator> {
-  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+  late final GlobalKey<NavigatorState> _navigatorKey =
+      widget.navigatorKey ?? GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {

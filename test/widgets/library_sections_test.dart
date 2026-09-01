@@ -11,14 +11,13 @@ const _libraryPages = [
 
 void main() {
   group('LibrarySection', () {
-    test('is exactly four tabs, in a fixed order', () {
-      // The mobile bottom bar gives every hub four sections; the Library
-      // inside each hub matches, so moving between hubs does not mean
-      // relearning where things are.
-      expect(LibrarySection.values.length, 4);
+    test('is exactly three tabs, in a fixed order', () {
+      // History was dropped 2026-09-02 -- it and Continue rendered through
+      // the same row list and looked like duplicates of each other.
+      expect(LibrarySection.values.length, 3);
       expect(
         LibrarySection.values.map((s) => s.label).toList(),
-        ['Saved', 'Continue', 'History', 'Downloads'],
+        ['Saved', 'Continue', 'Downloads'],
       );
     });
 

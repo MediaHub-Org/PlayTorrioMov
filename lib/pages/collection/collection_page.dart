@@ -161,7 +161,6 @@ class _CollectionPageState extends State<CollectionPage> {
             builder: (context) => switch (section) {
               LibrarySection.saved => _buildSavedTab(),
               LibrarySection.inProgress => _buildInProgressTab(),
-              LibrarySection.history => _buildHistoryTab(),
               LibrarySection.downloads => _buildDownloadsTab(),
             },
           ),
@@ -203,9 +202,6 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  /// Partway through and resumable. Reads `activeItems`, which the service
-  /// purges once something is finished -- unlike History below, which keeps
-  /// the full log.
   Widget _buildInProgressTab() {
     return ValueListenableBuilder<List<ContinueWatchingItem>>(
       valueListenable: ContinueWatchingService.activeItems,
@@ -217,37 +213,12 @@ class _CollectionPageState extends State<CollectionPage> {
             subtitle: 'Start a movie or episode and it will wait for you here.',
           );
         }
-        return _progressList(items, onRemove: null);
+        return _progressList(items);
       },
     );
   }
 
-  Widget _buildHistoryTab() {
-    return ValueListenableBuilder<List<ContinueWatchingItem>>(
-      valueListenable: ContinueWatchingService.historyItems,
-      builder: (context, historyItems, _) {
-        if (historyItems.isEmpty) {
-          return const LibraryEmptyState(
-            icon: Icons.history_rounded,
-            title: 'No playback history',
-            subtitle: 'Everything you watch is logged here, finished or not.',
-          );
-        }
-        return _progressList(
-          historyItems,
-          onRemove: ContinueWatchingService.removeHistoryItem,
-        );
-      },
-    );
-  }
-
-  /// The row list shared by Continue and History. They differ only in which
-  /// store they read and whether a row can be dismissed, so drawing them from
-  /// one builder is what stops the two drifting apart visually.
-  Widget _progressList(
-    List<ContinueWatchingItem> items, {
-    required void Function(ContinueWatchingItem)? onRemove,
-  }) {
+  Widget _progressList(List<ContinueWatchingItem> items) {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
       itemCount: items.length,
@@ -328,12 +299,6 @@ class _CollectionPageState extends State<CollectionPage> {
                   ],
                 ),
               ),
-              if (onRemove != null)
-                IconButton(
-                  icon: const Icon(Icons.close_rounded,
-                      color: Colors.white38, size: 20),
-                  onPressed: () => onRemove(item),
-                ),
             ],
           ),
         );

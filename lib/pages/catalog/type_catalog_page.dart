@@ -316,11 +316,16 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   }
 
   Widget _buildHeroSlide(BuildContext context, Movie movie) {
+    // Prefer the addon's landscape background over the portrait poster --
+    // the poster only fills this landscape hero slot by force-cropping.
+    final heroImage = (movie.background != null && movie.background!.isNotEmpty)
+        ? movie.background
+        : movie.poster;
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (movie.poster != null && movie.poster!.isNotEmpty)
-          Image.network(movie.poster!, fit: BoxFit.cover,
+        if (heroImage != null && heroImage.isNotEmpty)
+          Image.network(heroImage, fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFF12151F))),
         const DecoratedBox(
           decoration: BoxDecoration(

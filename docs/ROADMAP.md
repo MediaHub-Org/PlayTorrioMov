@@ -3,8 +3,24 @@
 What is **outstanding**. Shipped work is tracked in the GitHub release notes;
 this file stays about what is left.
 
-Last reconciled against the tree: **2026-08-31** (v1.1.3+11, dev channel).
-Forked from `MediaHub-Org/PlayTorrioMod` on this date; not yet re-synced.
+Last reconciled against the tree: **2026-09-02** (v1.1.3+11, dev channel).
+Forked from `MediaHub-Org/PlayTorrioMod` on 2026-08-31; first manual
+Media-domain port from there done 2026-09-02 (see below).
+
+**Ported 2026-09-02** from PlayTorrioMod's own same-day work: Details pages
+no longer block hub pill/bottom-bar navigation (a pushed detail page's
+`NestedNavigator` now pops to root when the active section changes — adapted
+here for the single-hub shape, one navigator instead of three); Library's
+Saved tab dropped the heart icon (`Icons.inventory_2_rounded`) and its
+History tab (Continue covers the same ground without the duplicate row
+list); Anime's language toggle became a flag+name `FilterDropdown`; Anime's
+hero carousel shrunk from up to 920px tall on desktop to Live TV's ~560px
+range; Movies & Series' hero now reads the addon's own `background` field
+instead of force-cropping the portrait poster. **Not ported**: the
+Watchlist/Watched split (item 8 below) — PlayTorrioMod's own version of that
+turned out to depend on an `isWatched` field and status-picker UI that
+predates this fork and was never ported either, so it needs that
+prerequisite first, not just today's chip change.
 
 ## Sibling app: PlayTorrioMod
 

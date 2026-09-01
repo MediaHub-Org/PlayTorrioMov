@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../widgets/common/nested_navigator.dart';
 import '../../widgets/common/universal_play_bar.dart';
+import '../../utils/hub_controller.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
@@ -27,8 +28,34 @@ class _HubPageState extends State<HubPage> {
   // just for the one hub that's left.
   int _rebuildKey = 0;
 
+  // Lets a pushed Details page get popped back to root when the hub pills or
+  // bottom bar switch section out from under it -- otherwise HubController's
+  // state changes correctly but the Details page stays on top, covering the
+  // switch (see NestedNavigator.navigatorKey).
+  final _navKey = GlobalKey<NavigatorState>();
+  String? _lastMediaSection;
+  String? _lastWatchType;
+
+  void _onHubControllerChanged() {
+    final section = HubController.instance.mediaSection;
+    final watchType = HubController.instance.watchType;
+    if (section == _lastMediaSection && watchType == _lastWatchType) return;
+    _lastMediaSection = section;
+    _lastWatchType = watchType;
+    _navKey.currentState?.popUntil((route) => route.isFirst);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _lastMediaSection = HubController.instance.mediaSection;
+    _lastWatchType = HubController.instance.watchType;
+    HubController.instance.addListener(_onHubControllerChanged);
+  }
+
   @override
   void dispose() {
+    HubController.instance.removeListener(_onHubControllerChanged);
     _focusNode.dispose();
     super.dispose();
   }
@@ -80,6 +107,7 @@ class _HubPageState extends State<HubPage> {
                   ),
                   child: NestedNavigator(
                     key: ValueKey(_rebuildKey),
+                    navigatorKey: _navKey,
                     child: const MediaHub(),
                   ),
                 ),
