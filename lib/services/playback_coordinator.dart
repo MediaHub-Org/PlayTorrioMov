@@ -15,6 +15,7 @@ abstract final class PlaybackCoordinator {
   static String? _activeKind;
   static VoidCallback? _onStopActive;
   static VoidCallback? _onFullStop;
+  static VoidCallback? _onShutdownDispose;
   static VoidCallback? _onTogglePlayPause;
   static VoidCallback? _onExpand;
   static VoidCallback? _onOpenArtist;
@@ -69,6 +70,18 @@ abstract final class PlaybackCoordinator {
   /// [isLiked]/[onToggleLike] let the play bar show and toggle a like
   /// button for this source. No keep-module source uses this — leave both
   /// null.
+  /// [onShutdownDispose] runs only when the app itself is closing
+  /// ([WindowService]'s shutdown path), never during normal use — a
+  /// native window destroy on Windows does not walk the widget tree
+  /// calling `State.dispose()`, so a source whose only cleanup lives
+  /// there (built for the ordinary "navigate away" path, e.g. video's
+  /// `PlayerScreen.dispose()`) would otherwise leave a live media_kit
+  /// `Player` (native decoder threads, a GPU surface) undisposed when
+  /// the process tears down. Distinct from [onFullStop]: that one also
+  /// fires on a normal in-app Stop tap, where the source's widget is
+  /// still mounted and must be left in a safe state; this one fires
+  /// only when nothing will run afterward, so an unconditional dispose
+  /// is always safe here even for a source [onFullStop] doesn't cover.
   static void activate(
     String sourceId,
     VoidCallback onStop, {
@@ -81,6 +94,7 @@ abstract final class PlaybackCoordinator {
     VoidCallback? onOpenArtist,
     ValueChanged<Duration>? onSeek,
     VoidCallback? onFullStop,
+    VoidCallback? onShutdownDispose,
     VoidCallback? onNext,
     VoidCallback? onPrevious,
     bool Function()? isLiked,
@@ -96,6 +110,7 @@ abstract final class PlaybackCoordinator {
     _coverUrl = coverUrl;
     _onStopActive = onStop;
     _onFullStop = onFullStop;
+    _onShutdownDispose = onShutdownDispose ?? onFullStop;
     _onTogglePlayPause = onTogglePlayPause;
     _onExpand = onExpand;
     _onOpenArtist = onOpenArtist;
@@ -121,6 +136,7 @@ abstract final class PlaybackCoordinator {
       _coverUrl = null;
       _onStopActive = null;
       _onFullStop = null;
+      _onShutdownDispose = null;
       _onTogglePlayPause = null;
       _onExpand = null;
       _onOpenArtist = null;
@@ -134,6 +150,36 @@ abstract final class PlaybackCoordinator {
       _isPlaying = false;
       _notify();
     }
+  }
+
+  /// Disposes whatever source is currently active for good, via
+  /// [_onShutdownDispose] (falls back to [onFullStop] if the source never
+  /// set one explicitly, and does nothing if neither was provided). Use
+  /// only from [WindowService]'s shutdown path -- see [activate]'s
+  /// [onShutdownDispose] doc for why this needs to be unconditional and
+  /// distinct from [stopActive]'s pause-safe [_onFullStop]/[_onStopActive]
+  /// fallback chain.
+  static void disposeForShutdown() {
+    _onShutdownDispose?.call();
+    _activeSourceId = null;
+    _activeKind = null;
+    _title = null;
+    _subtitle = null;
+    _coverUrl = null;
+    _onStopActive = null;
+    _onFullStop = null;
+    _onShutdownDispose = null;
+    _onTogglePlayPause = null;
+    _onExpand = null;
+    _onOpenArtist = null;
+    _onSeek = null;
+    _onNext = null;
+    _onPrevious = null;
+    _isLiked = null;
+    _onToggleLike = null;
+    _position = Duration.zero;
+    _duration = Duration.zero;
+    _isPlaying = false;
   }
 
   /// Stops the currently active source (if any) without activating a new
@@ -152,6 +198,7 @@ abstract final class PlaybackCoordinator {
     _coverUrl = null;
     _onStopActive = null;
     _onFullStop = null;
+    _onShutdownDispose = null;
     _onTogglePlayPause = null;
     _onExpand = null;
     _onOpenArtist = null;
@@ -269,4 +316,3 @@ abstract final class PlaybackCoordinator {
   /// Whether the active source is currently playing.
   static bool get isPlaying => _isPlaying;
 }
-

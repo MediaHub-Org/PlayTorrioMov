@@ -259,6 +259,11 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
           }
         },
         onSeek: (position) => _player.seek(position),
+        // See PlaybackCoordinator.activate's onShutdownDispose doc -- a
+        // native window close never runs this screen's own dispose(),
+        // which is the only place _player normally gets disposed.
+        // Believed to be ROADMAP #12's "Unknown hard error" on close.
+        onShutdownDispose: () => _player.dispose(),
       );
 
       await PlayerSettings.applyToPlayer(_player, isLive: true);

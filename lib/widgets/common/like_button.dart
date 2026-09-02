@@ -103,17 +103,23 @@ class _LikeButtonState extends State<LikeButton> {
       duration: const Duration(milliseconds: 150),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: widget.isLiked ? kLikedColor : Colors.white.withValues(alpha: 0.12),
+        color: widget.isLiked
+            ? kLikedColor
+            : Colors.white.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: widget.isLiked ? kLikedColor : Colors.white.withValues(alpha: 0.2),
+          color: widget.isLiked
+              ? kLikedColor
+              : Colors.white.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+            widget.isLiked
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
             // White, not red: the fill behind it is already red.
             color: widget.isLiked ? Colors.white : Colors.white70,
             size: widget.size,
@@ -134,7 +140,7 @@ class _LikeButtonState extends State<LikeButton> {
 
   Widget _buildIcon() {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       child: Icon(
         widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
         // Red, not white: there is no fill to sit against.

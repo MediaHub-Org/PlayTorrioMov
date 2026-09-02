@@ -16,6 +16,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
+
 // ---------------------------------------------------------------------------
 // Design tokens
 // ---------------------------------------------------------------------------
@@ -55,17 +56,25 @@ class DetailsPage extends StatefulWidget {
   /// if this is null/empty, so it's safe to leave unset for now.
   final List<Movie>? relatedItems;
 
+  /// Skips straight to playback once details finish loading -- the same
+  /// action tapping the play button would trigger, just automatic. For a
+  /// "Watch Now" entry point (e.g. a hero carousel) that shouldn't require
+  /// a second tap once the page opens.
+  final bool autoPlay;
+
   const DetailsPage({
     super.key,
     required this.movie,
     this.relatedItems,
+    this.autoPlay = false,
   });
 
   @override
   State<DetailsPage> createState() => _DetailsPageState();
 }
 
-class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStateMixin {
+class _DetailsPageState extends State<DetailsPage>
+    with SingleTickerProviderStateMixin {
   MovieDetail? _detail;
   bool _isLoading = true;
 
@@ -88,7 +97,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
 
   bool get _isSeries {
     final t = _resolvedType ?? _detail?.type ?? widget.movie.type;
-    return t == 'series' || t == 'tv' || t == 'anime' || (_detail != null && _detail!.videos.isNotEmpty);
+    return t == 'series' ||
+        t == 'tv' ||
+        t == 'anime' ||
+        (_detail != null && _detail!.videos.isNotEmpty);
   }
 
   late AnimationController _animController;
@@ -96,7 +108,7 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   late Animation<Offset> _slideAnimation;
 
   final Map<int, ScrollController> _episodeControllers = {};
-  
+
   ScrollController get _episodeScrollController {
     final key = _selectedSeason ?? -1;
     if (!_episodeControllers.containsKey(key)) {
@@ -135,11 +147,18 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 650));
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0)
-        .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 650),
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
 
     _castScrollController.addListener(_updateCastScrollButtons);
     _relatedScrollController.addListener(_updateRelatedScrollButtons);
@@ -164,7 +183,7 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
 
   Future<void> _handlePlayAction(Video? ep) async {
     if (_detail == null) return;
-    
+
     Navigator.push(
       context,
       CinematicSlideRoute(
@@ -180,8 +199,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   void _updateEpisodeScrollButtons() {
     if (!_episodeScrollController.hasClients) return;
     final canLeft = _episodeScrollController.position.pixels > 0;
-    final canRight = _episodeScrollController.position.pixels < _episodeScrollController.position.maxScrollExtent;
-    if (_canScrollEpisodesLeft != canLeft || _canScrollEpisodesRight != canRight) {
+    final canRight =
+        _episodeScrollController.position.pixels <
+        _episodeScrollController.position.maxScrollExtent;
+    if (_canScrollEpisodesLeft != canLeft ||
+        _canScrollEpisodesRight != canRight) {
       setState(() {
         _canScrollEpisodesLeft = canLeft;
         _canScrollEpisodesRight = canRight;
@@ -192,7 +214,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   void _updateCastScrollButtons() {
     if (!_castScrollController.hasClients) return;
     final canLeft = _castScrollController.position.pixels > 0;
-    final canRight = _castScrollController.position.pixels < _castScrollController.position.maxScrollExtent;
+    final canRight =
+        _castScrollController.position.pixels <
+        _castScrollController.position.maxScrollExtent;
     if (_canScrollCastLeft != canLeft || _canScrollCastRight != canRight) {
       setState(() {
         _canScrollCastLeft = canLeft;
@@ -204,8 +228,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   void _updateRelatedScrollButtons() {
     if (!_relatedScrollController.hasClients) return;
     final canLeft = _relatedScrollController.position.pixels > 0;
-    final canRight = _relatedScrollController.position.pixels < _relatedScrollController.position.maxScrollExtent;
-    if (_canScrollRelatedLeft != canLeft || _canScrollRelatedRight != canRight) {
+    final canRight =
+        _relatedScrollController.position.pixels <
+        _relatedScrollController.position.maxScrollExtent;
+    if (_canScrollRelatedLeft != canLeft ||
+        _canScrollRelatedRight != canRight) {
       setState(() {
         _canScrollRelatedLeft = canLeft;
         _canScrollRelatedRight = canRight;
@@ -216,8 +243,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   void _updateSeasonScrollButtons() {
     if (!_seasonScrollController.hasClients) return;
     final canLeft = _seasonScrollController.position.pixels > 0;
-    final canRight = _seasonScrollController.position.pixels < _seasonScrollController.position.maxScrollExtent;
-    if (_canScrollSeasonsLeft != canLeft || _canScrollSeasonsRight != canRight) {
+    final canRight =
+        _seasonScrollController.position.pixels <
+        _seasonScrollController.position.maxScrollExtent;
+    if (_canScrollSeasonsLeft != canLeft ||
+        _canScrollSeasonsRight != canRight) {
       setState(() {
         _canScrollSeasonsLeft = canLeft;
         _canScrollSeasonsRight = canRight;
@@ -228,8 +258,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   void _updateSimilarScrollButtons() {
     if (!_similarScrollController.hasClients) return;
     final canLeft = _similarScrollController.position.pixels > 0;
-    final canRight = _similarScrollController.position.pixels < _similarScrollController.position.maxScrollExtent;
-    if (_canScrollSimilarLeft != canLeft || _canScrollSimilarRight != canRight) {
+    final canRight =
+        _similarScrollController.position.pixels <
+        _similarScrollController.position.maxScrollExtent;
+    if (_canScrollSimilarLeft != canLeft ||
+        _canScrollSimilarRight != canRight) {
       setState(() {
         _canScrollSimilarLeft = canLeft;
         _canScrollSimilarRight = canRight;
@@ -241,8 +274,15 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     if (!controller.hasClients) return;
     final viewportWidth = controller.position.viewportDimension;
     final scrollAmount = viewportWidth * 0.7 * directionMultiplier;
-    final target = (controller.position.pixels + scrollAmount).clamp(0.0, controller.position.maxScrollExtent);
-    controller.animateTo(target, duration: const Duration(milliseconds: 450), curve: Curves.easeOutCubic);
+    final target = (controller.position.pixels + scrollAmount).clamp(
+      0.0,
+      controller.position.maxScrollExtent,
+    );
+    controller.animateTo(
+      target,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   Future<void> _fetchDetails() async {
@@ -250,8 +290,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     String effectiveType = widget.movie.type;
     String effectiveId = widget.movie.id;
 
-    if (effectiveId.startsWith('bestsimilar_') || effectiveBaseUrl.contains('bestsimilar')) {
-      final yearNum = widget.movie.year != null ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), '')) : null;
+    if (effectiveId.startsWith('bestsimilar_') ||
+        effectiveBaseUrl.contains('bestsimilar')) {
+      final yearNum = widget.movie.year != null
+          ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), ''))
+          : null;
       final resolved = await MetadataService.findMovieByTitle(
         title: widget.movie.name,
         type: widget.movie.type,
@@ -274,7 +317,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
 
     // If fetchMeta failed, try fallback search to resolve
     if (meta == null && !effectiveId.startsWith('tt')) {
-      final yearNum = widget.movie.year != null ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), '')) : null;
+      final yearNum = widget.movie.year != null
+          ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), ''))
+          : null;
       final resolved = await MetadataService.findMovieByTitle(
         title: widget.movie.name,
         type: widget.movie.type,
@@ -303,8 +348,14 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
         _detail = meta;
         _isLoading = false;
 
-        if (meta != null && (_isSeries || meta.videos.isNotEmpty) && meta.videos.isNotEmpty) {
-          final seasons = meta.videos.map((v) => v.season).where((s) => s != null).toSet().toList();
+        if (meta != null &&
+            (_isSeries || meta.videos.isNotEmpty) &&
+            meta.videos.isNotEmpty) {
+          final seasons = meta.videos
+              .map((v) => v.season)
+              .where((s) => s != null)
+              .toSet()
+              .toList();
           seasons.sort();
           if (seasons.isNotEmpty) {
             _selectedSeason = seasons.first;
@@ -315,7 +366,16 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
         }
       });
       _animController.forward();
-      
+
+      if (widget.autoPlay && meta != null) {
+        // Same episode/video _buildPlayButton's own onTap picks.
+        _handlePlayAction(
+          _currentSeasonEpisodes.isNotEmpty
+              ? _currentSeasonEpisodes.first
+              : (meta.videos.isNotEmpty ? meta.videos.first : null),
+        );
+      }
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           _updateSeasonScrollButtons();
@@ -337,10 +397,13 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     if (TmdbSettings.apiKey.value == null) return;
 
     // Only enrich when the addon's own cast has no photos to show already.
-    final hasPhotos = meta.castMembers.any((c) => c.profileUrl != null && c.profileUrl!.isNotEmpty);
+    final hasPhotos = meta.castMembers.any(
+      (c) => c.profileUrl != null && c.profileUrl!.isNotEmpty,
+    );
     if (hasPhotos) return;
 
-    final isTvShow = widget.movie.type == 'series' || widget.movie.type == 'anime';
+    final isTvShow =
+        widget.movie.type == 'series' || widget.movie.type == 'anime';
     final cast = await TmdbService.fetchCast(tmdbId, isTvShow: isTvShow);
     if (cast.isNotEmpty && mounted) {
       setState(() => _enrichedCast = cast);
@@ -354,7 +417,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     try {
       final title = _detail?.name ?? widget.movie.name;
       final yearStr = _detail?.year ?? widget.movie.year;
-      final year = yearStr != null ? int.tryParse(yearStr.replaceAll(RegExp(r'[^0-9]'), '')) : null;
+      final year = yearStr != null
+          ? int.tryParse(yearStr.replaceAll(RegExp(r'[^0-9]'), ''))
+          : null;
       final isTv = _isSeries;
 
       final hit = await BestSimilarScraper.findBest(
@@ -407,12 +472,17 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   void _updateEpisodesForSeason() {
     if (_detail == null || _selectedSeason == null) return;
     setState(() {
-      _currentSeasonEpisodes = _detail!.videos.where((v) => v.season == _selectedSeason).toList();
-      _currentSeasonEpisodes.sort((a, b) => (a.episode ?? 0).compareTo(b.episode ?? 0));
+      _currentSeasonEpisodes = _detail!.videos
+          .where((v) => v.season == _selectedSeason)
+          .toList();
+      _currentSeasonEpisodes.sort(
+        (a, b) => (a.episode ?? 0).compareTo(b.episode ?? 0),
+      );
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_episodeScrollController.hasClients) _episodeScrollController.jumpTo(0);
+      if (_episodeScrollController.hasClients)
+        _episodeScrollController.jumpTo(0);
       _updateEpisodeScrollButtons();
     });
   }
@@ -426,10 +496,12 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     return Scaffold(
       backgroundColor: _Palette.bg,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: _Palette.accent))
+          ? const Center(
+              child: CircularProgressIndicator(color: _Palette.accent),
+            )
           : _detail == null
-              ? _buildError()
-              : _buildContent(context),
+          ? _buildError()
+          : _buildContent(context),
     );
   }
 
@@ -438,15 +510,25 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.broken_image_rounded, size: 64, color: Colors.white24),
+          const Icon(
+            Icons.broken_image_rounded,
+            size: 64,
+            color: Colors.white24,
+          ),
           const SizedBox(height: _Space.md),
-          const Text('Details unavailable.', style: TextStyle(color: Colors.white54, fontSize: 18)),
+          const Text(
+            'Details unavailable.',
+            style: TextStyle(color: Colors.white54, fontSize: 18),
+          ),
           const SizedBox(height: _Space.lg),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.white10, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white10,
+              foregroundColor: Colors.white,
+            ),
             child: const Text('Go Back'),
-          )
+          ),
         ],
       ),
     );
@@ -464,7 +546,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     // This is now just how far down the *content* starts — the backdrop
     // itself is full-viewport and persistent (see _buildBackdrop), so this
     // no longer controls when the image "runs out".
-    final heroHeight = (screenSize.height * (isDesktop ? 0.46 : 0.4)).clamp(320.0, 520.0);
+    final heroHeight = (screenSize.height * (isDesktop ? 0.46 : 0.4)).clamp(
+      320.0,
+      520.0,
+    );
     final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
     final overlap = isDesktop ? 120.0 : 70.0;
 
@@ -492,18 +577,28 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(height: heroHeight - overlap),
-                          isDesktop ? _buildDesktopLayout(meta, posterUrl) : _buildMobileLayout(meta, posterUrl),
+                          isDesktop
+                              ? _buildDesktopLayout(meta, posterUrl)
+                              : _buildMobileLayout(meta, posterUrl),
                           const SizedBox(height: _Space.xl),
-                          if ((_enrichedCast?.isNotEmpty ?? false) || meta.castMembers.isNotEmpty || meta.cast.isNotEmpty) ...[
+                          if ((_enrichedCast?.isNotEmpty ?? false) ||
+                              meta.castMembers.isNotEmpty ||
+                              meta.cast.isNotEmpty) ...[
                             _buildCastRow(meta),
                             const SizedBox(height: _Space.xl),
                           ],
-                          if (meta.directorsList.isNotEmpty || meta.director.isNotEmpty) ...[
+                          if (meta.directorsList.isNotEmpty ||
+                              meta.director.isNotEmpty) ...[
                             _buildDirectorRow(meta),
                             const SizedBox(height: _Space.xl),
                           ],
                           if (meta.videos.isNotEmpty) ...[
-                            if (meta.videos.map((v) => v.season).where((s) => s != null).toSet().length > 1) ...[
+                            if (meta.videos
+                                    .map((v) => v.season)
+                                    .where((s) => s != null)
+                                    .toSet()
+                                    .length >
+                                1) ...[
                               _buildSeasonSelector(meta),
                               const SizedBox(height: _Space.lg),
                             ],
@@ -520,44 +615,68 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                   ],
                                 );
                               },
-                              transitionBuilder: (Widget child, Animation<double> animation) {
-                                final isIncoming = child.key == ValueKey(_selectedSeason);
-                                final int incomingSeason = _selectedSeason ?? 1;
-                                final int previousSeason = _previousSeason ?? 1;
-                                
-                                final bool slidingRight = incomingSeason > previousSeason;
-                                
-                                // Incoming starts offset, Outgoing ends offset
-                                final Offset beginOffset = isIncoming 
-                                    ? (slidingRight ? const Offset(0.12, 0.0) : const Offset(-0.12, 0.0))
-                                    : (slidingRight ? const Offset(-0.12, 0.0) : const Offset(0.12, 0.0));
-                                    
-                                final slideAnimation = Tween<Offset>(
-                                  begin: beginOffset,
-                                  end: Offset.zero,
-                                ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+                              transitionBuilder:
+                                  (Widget child, Animation<double> animation) {
+                                    final isIncoming =
+                                        child.key == ValueKey(_selectedSeason);
+                                    final int incomingSeason =
+                                        _selectedSeason ?? 1;
+                                    final int previousSeason =
+                                        _previousSeason ?? 1;
 
-                                final scaleAnimation = Tween<double>(
-                                  begin: 0.94,
-                                  end: 1.0,
-                                ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+                                    final bool slidingRight =
+                                        incomingSeason > previousSeason;
 
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: SlideTransition(
-                                    position: slideAnimation,
-                                    child: ScaleTransition(
-                                      scale: scaleAnimation,
-                                      child: child,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: _buildEpisodeSlider(key: ValueKey(_selectedSeason)),
+                                    // Incoming starts offset, Outgoing ends offset
+                                    final Offset beginOffset = isIncoming
+                                        ? (slidingRight
+                                              ? const Offset(0.12, 0.0)
+                                              : const Offset(-0.12, 0.0))
+                                        : (slidingRight
+                                              ? const Offset(-0.12, 0.0)
+                                              : const Offset(0.12, 0.0));
+
+                                    final slideAnimation =
+                                        Tween<Offset>(
+                                          begin: beginOffset,
+                                          end: Offset.zero,
+                                        ).animate(
+                                          CurvedAnimation(
+                                            parent: animation,
+                                            curve: Curves.easeOutCubic,
+                                          ),
+                                        );
+
+                                    final scaleAnimation =
+                                        Tween<double>(
+                                          begin: 0.94,
+                                          end: 1.0,
+                                        ).animate(
+                                          CurvedAnimation(
+                                            parent: animation,
+                                            curve: Curves.easeOutCubic,
+                                          ),
+                                        );
+
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: slideAnimation,
+                                        child: ScaleTransition(
+                                          scale: scaleAnimation,
+                                          child: child,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                              child: _buildEpisodeSlider(
+                                key: ValueKey(_selectedSeason),
+                              ),
                             ),
                             const SizedBox(height: _Space.xl),
                           ],
-                          if (widget.relatedItems != null && widget.relatedItems!.isNotEmpty) ...[
+                          if (widget.relatedItems != null &&
+                              widget.relatedItems!.isNotEmpty) ...[
                             _buildRelatedRow(widget.relatedItems!),
                             const SizedBox(height: _Space.xl),
                           ],
@@ -570,7 +689,8 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40),
                                 child: SizedBox(
-                                  width: 24, height: 24,
+                                  width: 24,
+                                  height: 24,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
                                     color: _Palette.accent,
@@ -597,7 +717,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 onPressed: () => Navigator.pop(context),
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.white.withOpacity(0.1),
@@ -636,7 +760,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
         child: Stack(
           fit: StackFit.expand,
           children: [
-            CachedNetworkImage(imageUrl: bgUrl, fit: BoxFit.cover, alignment: Alignment.topCenter),
+            CachedNetworkImage(
+              imageUrl: bgUrl,
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
             // horizontal wash — darkens where the title/synopsis sit, leaves
             // the rest of the image breathing room instead of blacking it all out
             const DecoratedBox(
@@ -703,8 +831,16 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                       // subtle accent-tinted glow behind the poster, on top
                       // of the usual drop shadow, so it reads as "lit" rather
                       // than just floating on black
-                      BoxShadow(color: _Palette.accent.withOpacity(0.18), blurRadius: 46, spreadRadius: -6),
-                      BoxShadow(color: Colors.black.withOpacity(0.55), blurRadius: 30, offset: const Offset(0, 14)),
+                      BoxShadow(
+                        color: _Palette.accent.withOpacity(0.18),
+                        blurRadius: 46,
+                        spreadRadius: -6,
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.55),
+                        blurRadius: 30,
+                        offset: const Offset(0, 14),
+                      ),
                     ],
                   ),
                   child: ClipRRect(
@@ -714,7 +850,8 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                       child: CachedNetworkImage(
                         imageUrl: posterUrl,
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => const ColoredBox(color: _Palette.surface),
+                        errorWidget: (_, __, ___) =>
+                            const ColoredBox(color: _Palette.surface),
                       ),
                     ),
                   ),
@@ -761,13 +898,25 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
-                    BoxShadow(color: _Palette.accent.withOpacity(0.16), blurRadius: 28, spreadRadius: -4),
-                    BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 16, offset: const Offset(0, 8)),
+                    BoxShadow(
+                      color: _Palette.accent.withOpacity(0.16),
+                      blurRadius: 28,
+                      spreadRadius: -4,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
+                    ),
                   ],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: CachedNetworkImage(imageUrl: posterUrl, width: 110, fit: BoxFit.cover),
+                  child: CachedNetworkImage(
+                    imageUrl: posterUrl,
+                    width: 110,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             const SizedBox(width: _Space.md),
@@ -802,7 +951,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   Widget _buildLogoOrTitle(MovieDetail meta, {required bool isDesktop}) {
     if (meta.logo != null && meta.logo!.isNotEmpty) {
       return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: isDesktop ? 380 : 220, maxHeight: isDesktop ? 130 : 80),
+        constraints: BoxConstraints(
+          maxWidth: isDesktop ? 380 : 220,
+          maxHeight: isDesktop ? 130 : 80,
+        ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
           alignment: Alignment.bottomLeft,
@@ -823,7 +975,13 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
         height: 1.1,
         letterSpacing: -1.0,
         color: Colors.white,
-        shadows: [Shadow(color: Colors.black.withOpacity(0.7), blurRadius: 20, offset: const Offset(0, 6))],
+        shadows: [
+          Shadow(
+            color: Colors.black.withOpacity(0.7),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
     );
   }
@@ -835,37 +993,40 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     return Wrap(
       spacing: _Space.xs,
       runSpacing: _Space.xs,
-      children: genres
-          .map(
-            (g) {
-              Offset? lastTap;
-              return GestureDetector(
-                onTapDown: (d) => lastTap = d.globalPosition,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    LiquidRevealRoute(
-                      page: DiscoverPage(query: g, isGenre: true),
-                      tapPosition: lastTap,
-                    ),
-                  );
-                },
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.06),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.white.withOpacity(0.12)),
-                    ),
-                    child: Text(g, style: const TextStyle(color: Colors.white70, fontSize: 12.5, fontWeight: FontWeight.w600)),
-                  ),
+      children: genres.map((g) {
+        Offset? lastTap;
+        return GestureDetector(
+          onTapDown: (d) => lastTap = d.globalPosition,
+          onTap: () {
+            Navigator.push(
+              context,
+              LiquidRevealRoute(
+                page: DiscoverPage(query: g, isGenre: true),
+                tapPosition: lastTap,
+              ),
+            );
+          },
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.12)),
+              ),
+              child: Text(
+                g,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
                 ),
-              );
-            },
-          )
-          .toList(),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -873,17 +1034,39 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     final List<Widget> items = [];
 
     if (meta.year != null && meta.year!.isNotEmpty) {
-      items.add(Text(meta.year!, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)));
+      items.add(
+        Text(
+          meta.year!,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
     }
 
     if (_isSeries) {
-      final seasonCount = meta.videos.map((v) => v.season).where((s) => s != null).toSet().length;
+      final seasonCount = meta.videos
+          .map((v) => v.season)
+          .where((s) => s != null)
+          .toSet()
+          .length;
       if (seasonCount > 0) {
-        items.add(Text('$seasonCount Season${seasonCount > 1 ? "s" : ""}',
-            style: const TextStyle(color: Colors.white70, fontSize: 14)));
+        items.add(
+          Text(
+            '$seasonCount Season${seasonCount > 1 ? "s" : ""}',
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+        );
       }
     } else if (meta.runtime != null && meta.runtime!.isNotEmpty) {
-      items.add(Text(meta.runtime!, style: const TextStyle(color: Colors.white70, fontSize: 14)));
+      items.add(
+        Text(
+          meta.runtime!,
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+      );
     }
 
     if (meta.imdbRating != null && meta.imdbRating!.isNotEmpty) {
@@ -900,7 +1083,14 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
             children: [
               const Icon(Icons.star_rounded, color: _Palette.gold, size: 14),
               const SizedBox(width: 4),
-              Text(meta.imdbRating!, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(
+                meta.imdbRating!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         ),
@@ -908,21 +1098,35 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     }
 
     if (meta.genres.isNotEmpty) {
-      items.add(Text(meta.genres.take(3).join(' · '), style: const TextStyle(color: Colors.white70, fontSize: 14)));
+      items.add(
+        Text(
+          meta.genres.take(3).join(' · '),
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+      );
     }
 
     final List<Widget> spaced = [];
     for (int i = 0; i < items.length; i++) {
       spaced.add(items[i]);
       if (i < items.length - 1) {
-        spaced.add(const Padding(
-          padding: EdgeInsets.symmetric(horizontal: _Space.sm),
-          child: Text('•', style: TextStyle(color: Colors.white30, fontSize: 16)),
-        ));
+        spaced.add(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: _Space.sm),
+            child: Text(
+              '•',
+              style: TextStyle(color: Colors.white30, fontSize: 16),
+            ),
+          ),
+        );
       }
     }
 
-    return Wrap(crossAxisAlignment: WrapCrossAlignment.center, runSpacing: 6, children: spaced);
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      runSpacing: 6,
+      children: spaced,
+    );
   }
 
   Widget _buildPlayButton({required bool fullWidth}) {
@@ -930,15 +1134,25 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
       onTap: () => _handlePlayAction(
         _currentSeasonEpisodes.isNotEmpty
             ? _currentSeasonEpisodes.first
-            : (_detail?.videos.isNotEmpty == true ? _detail!.videos.first : null),
+            : (_detail?.videos.isNotEmpty == true
+                  ? _detail!.videos.first
+                  : null),
       ),
       child: Container(
         width: fullWidth ? double.infinity : null,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [_Palette.accent, _Palette.accentDim]),
+          gradient: const LinearGradient(
+            colors: [_Palette.accent, _Palette.accentDim],
+          ),
           borderRadius: BorderRadius.circular(8),
-          boxShadow: [BoxShadow(color: _Palette.accent.withOpacity(0.35), blurRadius: 16, offset: const Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: _Palette.accent.withOpacity(0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
@@ -948,7 +1162,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
             const SizedBox(width: 6),
             Text(
               _isSeries ? 'Play Episodes' : 'Play Movie',
-              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w700),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),
@@ -960,7 +1178,8 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
     return ValueListenableBuilder<List<MyListItem>>(
       valueListenable: MyListService.items,
       builder: (context, items, _) {
-        final inList = _detail != null &&
+        final inList =
+            _detail != null &&
             MyListService.isInList(
               MyListItem.fromMovieDetail(
                 id: _detail!.id,
@@ -969,7 +1188,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                 year: _detail!.year,
                 type: _detail!.type,
                 imdbId: _detail!.id.startsWith('tt') ? _detail!.id : null,
-                tmdbId: _detail!.tmdbId != null ? int.tryParse(_detail!.tmdbId!) : null,
+                tmdbId: _detail!.tmdbId != null
+                    ? int.tryParse(_detail!.tmdbId!)
+                    : null,
               ),
             );
 
@@ -994,7 +1215,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  inList ? Icons.bookmark_added_rounded : Icons.bookmark_add_outlined,
+                  inList
+                      ? Icons.bookmark_added_rounded
+                      : Icons.bookmark_add_outlined,
                   color: inList ? const Color(0xFF7C5CFF) : Colors.white,
                   size: 22,
                 ),
@@ -1032,7 +1255,12 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   }
 
   Widget _buildSynopsis(String text) {
-    const style = TextStyle(color: Colors.white70, fontSize: 15, height: 1.55, letterSpacing: 0.2);
+    const style = TextStyle(
+      color: Colors.white70,
+      fontSize: 15,
+      height: 1.55,
+      letterSpacing: 0.2,
+    );
     const maxLines = 3;
 
     return LayoutBuilder(
@@ -1058,7 +1286,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                 child: Text(
                   text,
                   maxLines: _isSynopsisExpanded ? null : maxLines,
-                  overflow: _isSynopsisExpanded ? TextOverflow.visible : TextOverflow.fade,
+                  overflow: _isSynopsisExpanded
+                      ? TextOverflow.visible
+                      : TextOverflow.fade,
                   style: style,
                 ),
               ),
@@ -1066,10 +1296,15 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
             if (isOverflowing) ...[
               const SizedBox(height: _Space.xs),
               GestureDetector(
-                onTap: () => setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
+                onTap: () =>
+                    setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
                 child: Text(
                   _isSynopsisExpanded ? 'Show less' : 'Read more',
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -1082,12 +1317,21 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   Widget _buildSectionHeader(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: _Space.md),
-      child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: -0.3)),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          letterSpacing: -0.3,
+        ),
+      ),
     );
   }
 
   Widget _buildCastRow(MovieDetail meta) {
-    final List<CastMember> members = _enrichedCast ??
+    final List<CastMember> members =
+        _enrichedCast ??
         (meta.castMembers.isNotEmpty
             ? meta.castMembers
             : meta.cast.map((c) => CastMember(name: c)).toList());
@@ -1115,9 +1359,17 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                     final member = members[index];
                     final name = member.name;
                     final initials = name.isNotEmpty
-                        ? name.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join('').toUpperCase()
+                        ? name
+                              .trim()
+                              .split(' ')
+                              .map((e) => e.isNotEmpty ? e[0] : '')
+                              .take(2)
+                              .join('')
+                              .toUpperCase()
                         : '?';
-                    final pair = _Palette.avatarPairs[name.hashCode.abs() % _Palette.avatarPairs.length];
+                    final pair =
+                        _Palette.avatarPairs[name.hashCode.abs() %
+                            _Palette.avatarPairs.length];
 
                     return SizedBox(
                       width: 88,
@@ -1133,7 +1385,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                     Navigator.push(
                                       context,
                                       LiquidRevealRoute(
-                                        page: DiscoverPage(query: name, isGenre: false),
+                                        page: DiscoverPage(
+                                          query: name,
+                                          isGenre: false,
+                                        ),
                                         tapPosition: lastTap,
                                       ),
                                     );
@@ -1145,9 +1400,16 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       gradient: member.profileUrl == null
-                                          ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: pair)
+                                          ? LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
+                                              colors: pair,
+                                            )
                                           : null,
-                                      border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.1),
+                                        width: 1.5,
+                                      ),
                                     ),
                                     clipBehavior: Clip.antiAlias,
                                     alignment: Alignment.center,
@@ -1159,24 +1421,56 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                             fit: BoxFit.cover,
                                             placeholder: (_, __) => Container(
                                               decoration: BoxDecoration(
-                                                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: pair),
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topLeft,
+                                                  end: Alignment.bottomRight,
+                                                  colors: pair,
+                                                ),
                                               ),
                                               alignment: Alignment.center,
-                                              child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                                            ),
-                                            errorWidget: (_, __, ___) => Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: pair),
+                                              child: Text(
+                                                initials,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                              alignment: Alignment.center,
-                                              child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
                                             ),
+                                            errorWidget: (_, __, ___) =>
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      begin: Alignment.topLeft,
+                                                      end:
+                                                          Alignment.bottomRight,
+                                                      colors: pair,
+                                                    ),
+                                                  ),
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    initials,
+                                                    style: const TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 24,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
                                           )
-                                        : Text(initials, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                                        : Text(
+                                            initials,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                   ),
                                 ),
                               );
-                            }
+                            },
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -1184,16 +1478,26 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                             textAlign: TextAlign.center,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600, height: 1.2),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
                           ),
-                          if (member.character != null && member.character!.isNotEmpty) ...[
+                          if (member.character != null &&
+                              member.character!.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
                               member.character!,
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.white54, fontSize: 10.5, height: 1.1),
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10.5,
+                                height: 1.1,
+                              ),
                             ),
                           ],
                         ],
@@ -1204,13 +1508,25 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                 if (_isDesktop()) ...[
                   if (_canScrollCastLeft)
                     Positioned(
-                      left: 0, top: 10, bottom: 40,
-                      child: _buildScrollArrow(Icons.arrow_back_ios_new_rounded, () => _scrollList(_castScrollController, -1), _isHoveringCast),
+                      left: 0,
+                      top: 10,
+                      bottom: 40,
+                      child: _buildScrollArrow(
+                        Icons.arrow_back_ios_new_rounded,
+                        () => _scrollList(_castScrollController, -1),
+                        _isHoveringCast,
+                      ),
                     ),
                   if (_canScrollCastRight)
                     Positioned(
-                      right: 0, top: 10, bottom: 40,
-                      child: _buildScrollArrow(Icons.arrow_forward_ios_rounded, () => _scrollList(_castScrollController, 1), _isHoveringCast),
+                      right: 0,
+                      top: 10,
+                      bottom: 40,
+                      child: _buildScrollArrow(
+                        Icons.arrow_forward_ios_rounded,
+                        () => _scrollList(_castScrollController, 1),
+                        _isHoveringCast,
+                      ),
                     ),
                 ],
               ],
@@ -1224,7 +1540,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   Widget _buildDirectorRow(MovieDetail meta) {
     final List<CrewMember> directors = meta.directorsList.isNotEmpty
         ? meta.directorsList
-        : meta.director.map((d) => CrewMember(name: d, job: 'Director')).toList();
+        : meta.director
+              .map((d) => CrewMember(name: d, job: 'Director'))
+              .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1242,9 +1560,17 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
               final director = directors[index];
               final name = director.name;
               final initials = name.isNotEmpty
-                  ? name.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join('').toUpperCase()
+                  ? name
+                        .trim()
+                        .split(' ')
+                        .map((e) => e.isNotEmpty ? e[0] : '')
+                        .take(2)
+                        .join('')
+                        .toUpperCase()
                   : '?';
-              final pair = _Palette.avatarPairs[name.hashCode.abs() % _Palette.avatarPairs.length];
+              final pair =
+                  _Palette.avatarPairs[name.hashCode.abs() %
+                      _Palette.avatarPairs.length];
 
               return SizedBox(
                 width: 88,
@@ -1260,7 +1586,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                               Navigator.push(
                                 context,
                                 LiquidRevealRoute(
-                                  page: DiscoverPage(query: name, isGenre: false),
+                                  page: DiscoverPage(
+                                    query: name,
+                                    isGenre: false,
+                                  ),
                                   tapPosition: lastTap,
                                 ),
                               );
@@ -1272,9 +1601,16 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 gradient: director.profileUrl == null
-                                    ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: pair)
+                                    ? LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: pair,
+                                      )
                                     : null,
-                                border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                  width: 1.5,
+                                ),
                               ),
                               clipBehavior: Clip.antiAlias,
                               alignment: Alignment.center,
@@ -1286,24 +1622,53 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                       fit: BoxFit.cover,
                                       placeholder: (_, __) => Container(
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: pair),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: pair,
+                                          ),
                                         ),
                                         alignment: Alignment.center,
-                                        child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                                        child: Text(
+                                          initials,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                       errorWidget: (_, __, ___) => Container(
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: pair),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: pair,
+                                          ),
                                         ),
                                         alignment: Alignment.center,
-                                        child: Text(initials, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                                        child: Text(
+                                          initials,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ),
                                     )
-                                  : Text(initials, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                                  : Text(
+                                      initials,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                           ),
                         );
-                      }
+                      },
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -1311,7 +1676,12 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600, height: 1.2),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
@@ -1319,7 +1689,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.white54, fontSize: 10.5, height: 1.1),
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 10.5,
+                        height: 1.1,
+                      ),
                     ),
                   ],
                 ),
@@ -1332,7 +1706,11 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
   }
 
   Widget _buildSeasonSelector(MovieDetail meta) {
-    final seasons = meta.videos.map((v) => v.season).where((s) => s != null).toSet().toList();
+    final seasons = meta.videos
+        .map((v) => v.season)
+        .where((s) => s != null)
+        .toSet()
+        .toList();
     seasons.sort();
 
     return MouseRegion(
@@ -1369,16 +1747,24 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                     padding: const EdgeInsets.symmetric(horizontal: 22),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.white.withOpacity(0.07),
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(22),
-                      border: Border.all(color: isSelected ? Colors.white : Colors.white.withOpacity(0.1)),
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.1),
+                      ),
                     ),
                     child: Text(
                       'Season $season',
                       style: TextStyle(
                         color: isSelected ? Colors.black : Colors.white,
                         fontSize: 15,
-                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        fontWeight: isSelected
+                            ? FontWeight.w800
+                            : FontWeight.w600,
                       ),
                     ),
                   ),
@@ -1388,13 +1774,25 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
             if (_isDesktop()) ...[
               if (_canScrollSeasonsLeft)
                 Positioned(
-                  left: 0, top: 0, bottom: 0,
-                  child: _buildScrollArrow(Icons.arrow_back_ios_new_rounded, () => _scrollList(_seasonScrollController, -1), _isHoveringSeasons),
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: _buildScrollArrow(
+                    Icons.arrow_back_ios_new_rounded,
+                    () => _scrollList(_seasonScrollController, -1),
+                    _isHoveringSeasons,
+                  ),
                 ),
               if (_canScrollSeasonsRight)
                 Positioned(
-                  right: 0, top: 0, bottom: 0,
-                  child: _buildScrollArrow(Icons.arrow_forward_ios_rounded, () => _scrollList(_seasonScrollController, 1), _isHoveringSeasons),
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: _buildScrollArrow(
+                    Icons.arrow_forward_ios_rounded,
+                    () => _scrollList(_seasonScrollController, 1),
+                    _isHoveringSeasons,
+                  ),
                 ),
             ],
           ],
@@ -1419,8 +1817,12 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
           children: [
             ShaderMask(
               shaderCallback: (Rect bounds) {
-                final leftFadeStop = bounds.width > 0 ? (fadeWidth / bounds.width).clamp(0.01, 0.2) : 0.05;
-                final rightFadeStop = bounds.width > 0 ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99) : 0.95;
+                final leftFadeStop = bounds.width > 0
+                    ? (fadeWidth / bounds.width).clamp(0.01, 0.2)
+                    : 0.05;
+                final rightFadeStop = bounds.width > 0
+                    ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99)
+                    : 0.95;
 
                 return LinearGradient(
                   begin: Alignment.centerLeft,
@@ -1431,12 +1833,7 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                     Colors.black,
                     _canScrollEpisodesRight ? Colors.transparent : Colors.black,
                   ],
-                  stops: [
-                    0.0,
-                    leftFadeStop,
-                    rightFadeStop,
-                    1.0,
-                  ],
+                  stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
                 ).createShader(bounds);
               },
               blendMode: BlendMode.dstIn,
@@ -1453,7 +1850,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                     width: cardWidth,
                     child: _EpisodeCard(
                       episode: ep,
-                      fallbackImageUrl: _detail?.background ?? _detail?.poster ?? widget.movie.poster,
+                      fallbackImageUrl:
+                          _detail?.background ??
+                          _detail?.poster ??
+                          widget.movie.poster,
                       onTap: () => _handlePlayAction(ep),
                     ),
                   );
@@ -1543,24 +1943,27 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
               children: [
                 ShaderMask(
                   shaderCallback: (Rect bounds) {
-                    final leftFadeStop = bounds.width > 0 ? (fadeWidth / bounds.width).clamp(0.01, 0.2) : 0.05;
-                    final rightFadeStop = bounds.width > 0 ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99) : 0.95;
+                    final leftFadeStop = bounds.width > 0
+                        ? (fadeWidth / bounds.width).clamp(0.01, 0.2)
+                        : 0.05;
+                    final rightFadeStop = bounds.width > 0
+                        ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99)
+                        : 0.95;
 
                     return LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        _canScrollRelatedLeft ? Colors.transparent : Colors.black,
+                        _canScrollRelatedLeft
+                            ? Colors.transparent
+                            : Colors.black,
                         Colors.black,
                         Colors.black,
-                        _canScrollRelatedRight ? Colors.transparent : Colors.black,
+                        _canScrollRelatedRight
+                            ? Colors.transparent
+                            : Colors.black,
                       ],
-                      stops: [
-                        0.0,
-                        leftFadeStop,
-                        rightFadeStop,
-                        1.0,
-                      ],
+                      stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
                     ).createShader(bounds);
                   },
                   blendMode: BlendMode.dstIn,
@@ -1570,7 +1973,8 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     itemCount: related.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: _Space.md),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: _Space.md),
                     itemBuilder: (context, index) {
                       final item = related[index];
                       return SizedBox(
@@ -1579,7 +1983,9 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                           onTap: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (_) => DetailsPage(movie: item)),
+                              MaterialPageRoute(
+                                builder: (_) => DetailsPage(movie: item),
+                              ),
                             );
                           },
                           scaleAmount: 1.05,
@@ -1588,7 +1994,10 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                             child: AspectRatio(
                               aspectRatio: 2 / 3,
                               child: item.poster != null
-                                  ? CachedNetworkImage(imageUrl: item.poster!, fit: BoxFit.cover)
+                                  ? CachedNetworkImage(
+                                      imageUrl: item.poster!,
+                                      fit: BoxFit.cover,
+                                    )
                                   : const ColoredBox(color: _Palette.surface),
                             ),
                           ),
@@ -1681,24 +2090,27 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
               children: [
                 ShaderMask(
                   shaderCallback: (Rect bounds) {
-                    final leftFadeStop = bounds.width > 0 ? (fadeWidth / bounds.width).clamp(0.01, 0.2) : 0.05;
-                    final rightFadeStop = bounds.width > 0 ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99) : 0.95;
+                    final leftFadeStop = bounds.width > 0
+                        ? (fadeWidth / bounds.width).clamp(0.01, 0.2)
+                        : 0.05;
+                    final rightFadeStop = bounds.width > 0
+                        ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99)
+                        : 0.95;
 
                     return LinearGradient(
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        _canScrollSimilarLeft ? Colors.transparent : Colors.black,
+                        _canScrollSimilarLeft
+                            ? Colors.transparent
+                            : Colors.black,
                         Colors.black,
                         Colors.black,
-                        _canScrollSimilarRight ? Colors.transparent : Colors.black,
+                        _canScrollSimilarRight
+                            ? Colors.transparent
+                            : Colors.black,
                       ],
-                      stops: [
-                        0.0,
-                        leftFadeStop,
-                        rightFadeStop,
-                        1.0,
-                      ],
+                      stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
                     ).createShader(bounds);
                   },
                   blendMode: BlendMode.dstIn,
@@ -1708,7 +2120,8 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     itemCount: _similarItems.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: _Space.md),
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: _Space.md),
                     itemBuilder: (context, index) {
                       final item = _similarItems[index];
                       return SizedBox(
@@ -1730,17 +2143,26 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                           ? CachedNetworkImage(
                                               imageUrl: item.thumbUrl,
                                               fit: BoxFit.cover,
-                                              errorWidget: (_, __, ___) => Container(
-                                                color: _Palette.surface,
-                                                child: const Center(
-                                                  child: Icon(Icons.movie_rounded, color: Colors.white24, size: 36),
-                                                ),
-                                              ),
+                                              errorWidget: (_, __, ___) =>
+                                                  Container(
+                                                    color: _Palette.surface,
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.movie_rounded,
+                                                        color: Colors.white24,
+                                                        size: 36,
+                                                      ),
+                                                    ),
+                                                  ),
                                             )
                                           : Container(
                                               color: _Palette.surface,
                                               child: const Center(
-                                                child: Icon(Icons.movie_rounded, color: Colors.white24, size: 36),
+                                                child: Icon(
+                                                  Icons.movie_rounded,
+                                                  color: Colors.white24,
+                                                  size: 36,
+                                                ),
                                               ),
                                             ),
                                     ),
@@ -1751,11 +2173,20 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                       top: 6,
                                       right: 6,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.black.withOpacity(0.75),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: _Palette.accent.withOpacity(0.6)),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                          border: Border.all(
+                                            color: _Palette.accent.withOpacity(
+                                              0.6,
+                                            ),
+                                          ),
                                         ),
                                         child: Text(
                                           '${item.similarityPercent}%',
@@ -1773,15 +2204,24 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                                       bottom: 6,
                                       left: 6,
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
                                           color: Colors.black.withOpacity(0.75),
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Icon(Icons.star_rounded, color: _Palette.gold, size: 13),
+                                            const Icon(
+                                              Icons.star_rounded,
+                                              color: _Palette.gold,
+                                              size: 13,
+                                            ),
                                             const SizedBox(width: 3),
                                             Text(
                                               item.rating!.toStringAsFixed(1),
@@ -1814,7 +2254,8 @@ class _DetailsPageState extends State<DetailsPage> with SingleTickerProviderStat
                               Text(
                                 [
                                   if (item.year != null) '${item.year}',
-                                  if (item.genre != null) item.genre!.split(',').first.trim(),
+                                  if (item.genre != null)
+                                    item.genre!.split(',').first.trim(),
                                 ].join(' · '),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1931,7 +2372,11 @@ class _EpisodeCard extends StatefulWidget {
   final String? fallbackImageUrl;
   final VoidCallback? onTap;
 
-  const _EpisodeCard({required this.episode, this.fallbackImageUrl, this.onTap});
+  const _EpisodeCard({
+    required this.episode,
+    this.fallbackImageUrl,
+    this.onTap,
+  });
 
   @override
   State<_EpisodeCard> createState() => _EpisodeCardState();
@@ -1959,9 +2404,19 @@ class _EpisodeCardState extends State<_EpisodeCard> {
             decoration: BoxDecoration(
               color: _Palette.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: _hovered ? Colors.white.withOpacity(0.22) : Colors.white.withOpacity(0.04)),
+              border: Border.all(
+                color: _hovered
+                    ? Colors.white.withOpacity(0.22)
+                    : Colors.white.withOpacity(0.04),
+              ),
               boxShadow: _hovered
-                  ? [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 18, offset: const Offset(0, 8))]
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.4),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ]
                   : [],
             ),
             child: ClipRRect(
@@ -1978,7 +2433,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           CachedNetworkImage(
                             imageUrl: imgUrl,
                             fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => const ColoredBox(color: Color(0xFF1B1E27)),
+                            errorWidget: (context, url, error) =>
+                                const ColoredBox(color: Color(0xFF1B1E27)),
                           )
                         else
                           const ColoredBox(color: Color(0xFF1B1E27)),
@@ -1987,7 +2443,10 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             gradient: LinearGradient(
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, Colors.black.withOpacity(0.75)],
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.75),
+                              ],
                               stops: const [0.5, 1.0],
                             ),
                           ),
@@ -2001,9 +2460,18 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.5), blurRadius: 10)],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.5),
+                                    blurRadius: 10,
+                                  ),
+                                ],
                               ),
-                              child: const Icon(Icons.play_arrow_rounded, color: Colors.black, size: 24),
+                              child: const Icon(
+                                Icons.play_arrow_rounded,
+                                color: Colors.black,
+                                size: 24,
+                              ),
                             ),
                           ),
                         ),
@@ -2018,10 +2486,24 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                       children: [
                         Row(
                           children: [
-                            Text('EP ${ep.episode ?? "?"}', style: const TextStyle(color: _Palette.accent, fontWeight: FontWeight.bold, fontSize: 12)),
+                            Text(
+                              'EP ${ep.episode ?? "?"}',
+                              style: const TextStyle(
+                                color: _Palette.accent,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
                             const Spacer(),
-                            if (ep.released != null && ep.released!.length >= 10)
-                              Text(ep.released!.substring(0, 10), style: const TextStyle(color: Colors.white38, fontSize: 11)),
+                            if (ep.released != null &&
+                                ep.released!.length >= 10)
+                              Text(
+                                ep.released!.substring(0, 10),
+                                style: const TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 11,
+                                ),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -2029,7 +2511,11 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           ep.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13.5),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13.5,
+                          ),
                         ),
                         if (ep.overview != null) ...[
                           const SizedBox(height: 3),
@@ -2037,7 +2523,11 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             ep.overview!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Colors.white54, fontSize: 11.5, height: 1.3),
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 11.5,
+                              height: 1.3,
+                            ),
                           ),
                         ],
                       ],
@@ -2058,7 +2548,11 @@ class _HoverButton extends StatefulWidget {
   final VoidCallback onTap;
   final double scaleAmount;
 
-  const _HoverButton({required this.child, required this.onTap, this.scaleAmount = 1.04});
+  const _HoverButton({
+    required this.child,
+    required this.onTap,
+    this.scaleAmount = 1.04,
+  });
 
   @override
   State<_HoverButton> createState() => _HoverButtonState();
@@ -2073,7 +2567,10 @@ class _HoverButtonState extends State<_HoverButton> {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() { _isHovered = false; _isPressed = false; }),
+      onExit: (_) => setState(() {
+        _isHovered = false;
+        _isPressed = false;
+      }),
       child: GestureDetector(
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) => setState(() => _isPressed = false),

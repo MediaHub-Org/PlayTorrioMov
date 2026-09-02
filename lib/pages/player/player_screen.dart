@@ -287,6 +287,13 @@ class _PlayerScreenState extends State<PlayerScreen>
         }
       },
       onSeek: (position) => _player.seek(position),
+      // See PlaybackCoordinator.activate's onShutdownDispose doc -- this
+      // screen's own dispose() (which does the real, safe cleanup for the
+      // ordinary close-this-screen path) never runs on a native window
+      // close, so without this the media_kit Player's native decoder
+      // threads and GPU surface stayed alive into process teardown.
+      // Believed to be ROADMAP #12's "Unknown hard error" on close.
+      onShutdownDispose: () => _player.dispose(),
     );
 
     print('[PlayerScreen] Initializing playback:');

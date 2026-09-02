@@ -15,7 +15,8 @@ import '../../services/continue_watching/continue_watching_service.dart';
 import '../common/slider_arrow.dart';
 
 class ContinueWatchingSlider extends StatefulWidget {
-  final String? typeFilter; // 'main', 'anime', or null for all
+  final String?
+  typeFilter; // 'main', 'anime', 'movie', 'series', or null for all
   final String title;
 
   const ContinueWatchingSlider({
@@ -56,7 +57,8 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
     if (!_scrollController.hasClients) return;
     final canLeft = _scrollController.position.pixels > 10;
     final canRight =
-        _scrollController.position.pixels < _scrollController.position.maxScrollExtent - 10;
+        _scrollController.position.pixels <
+        _scrollController.position.maxScrollExtent - 10;
 
     if (canLeft != _canScrollLeft || canRight != _canScrollRight) {
       setState(() {
@@ -70,8 +72,10 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
     if (!_scrollController.hasClients) return;
     final viewportWidth = _scrollController.position.viewportDimension;
     final scrollAmount = viewportWidth * 0.8 * directionMultiplier;
-    final target = (_scrollController.position.pixels + scrollAmount)
-        .clamp(0.0, _scrollController.position.maxScrollExtent);
+    final target = (_scrollController.position.pixels + scrollAmount).clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
 
     _scrollController.animateTo(
       target,
@@ -97,15 +101,25 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
       builder: (context, allItems, _) {
         final items = allItems.where((i) {
           if (widget.typeFilter == 'main') {
-            return i.type != 'anime' && !i.id.startsWith('anilist:') && !i.id.startsWith('arabic_anime:');
+            return i.type != 'anime' &&
+                !i.id.startsWith('anilist:') &&
+                !i.id.startsWith('arabic_anime:');
           } else if (widget.typeFilter == 'anime') {
-            return i.type == 'anime' || i.id.startsWith('anilist:') || i.id.startsWith('arabic_anime:') || i.addonName == 'ArabicAnime';
+            return i.type == 'anime' ||
+                i.id.startsWith('anilist:') ||
+                i.id.startsWith('arabic_anime:') ||
+                i.addonName == 'ArabicAnime';
           } else if (widget.typeFilter == 'arabic_anime') {
-            return i.id.startsWith('arabic_anime:') || i.addonName == 'ArabicAnime';
+            return i.id.startsWith('arabic_anime:') ||
+                i.addonName == 'ArabicAnime';
           } else if (widget.typeFilter == 'general_anime') {
             return (i.type == 'anime' || i.id.startsWith('anilist:')) &&
                 !i.id.startsWith('arabic_anime:') &&
                 i.addonName != 'ArabicAnime';
+          } else if (widget.typeFilter == 'movie') {
+            return i.type == 'movie';
+          } else if (widget.typeFilter == 'series') {
+            return i.type == 'series';
           }
           return true;
         }).toList();
@@ -116,8 +130,8 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
         final cardWidth = screenWidth > 900
             ? 280.0
             : screenWidth > 600
-                ? 240.0
-                : 200.0;
+            ? 240.0
+            : 200.0;
         final cardHeight = cardWidth * 0.62 + 60.0;
 
         return Padding(
@@ -156,7 +170,10 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: palette.primaryColor.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
@@ -203,8 +220,12 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                             item: item,
                             width: cardWidth,
                             palette: palette,
-                            onTap: () => ContinueWatchingService.resumePlayback(context, item),
-                            onRemove: () => ContinueWatchingService.removeItem(item),
+                            onTap: () => ContinueWatchingService.resumePlayback(
+                              context,
+                              item,
+                            ),
+                            onRemove: () =>
+                                ContinueWatchingService.removeItem(item),
                           );
                         },
                       ),
@@ -227,7 +248,9 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         AnimatedPositioned(
                           duration: const Duration(milliseconds: 250),
                           curve: Curves.easeOutCubic,
-                          right: _canScrollRight && _isHoveringSlider ? 10 : -60,
+                          right: _canScrollRight && _isHoveringSlider
+                              ? 10
+                              : -60,
                           top: 0,
                           bottom: 0,
                           child: Center(
@@ -274,7 +297,8 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
 
   void _openDetails(BuildContext context) {
     final item = widget.item;
-    if (item.id.startsWith('arabic_anime:') || item.addonName == 'ArabicAnime') {
+    if (item.id.startsWith('arabic_anime:') ||
+        item.addonName == 'ArabicAnime') {
       final slug = item.id.replaceAll('arabic_anime:', '');
       final card = ArabicAnimeCard(
         slug: slug,
@@ -356,7 +380,9 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: widget.width,
-          transform: _isHovered ? Matrix4.diagonal3Values(1.02, 1.02, 1.0) : Matrix4.identity(),
+          transform: _isHovered
+              ? Matrix4.diagonal3Values(1.02, 1.02, 1.0)
+              : Matrix4.identity(),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
             color: const Color(0xFF13151F).withValues(alpha: 0.75),
@@ -370,7 +396,9 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
             boxShadow: _isHovered
                 ? [
                     BoxShadow(
-                      color: widget.palette.primaryColor.withValues(alpha: 0.18),
+                      color: widget.palette.primaryColor.withValues(
+                        alpha: 0.18,
+                      ),
                       blurRadius: 18,
                       offset: const Offset(0, 4),
                     ),
@@ -431,7 +459,8 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                                 color: widget.palette.primaryColor,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: widget.palette.primaryColor.withValues(alpha: 0.5),
+                                    color: widget.palette.primaryColor
+                                        .withValues(alpha: 0.5),
                                     blurRadius: 14,
                                   ),
                                 ],
@@ -448,7 +477,10 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                     ),
 
                     // Action Buttons (Top-Right: always on mobile, hover-only on desktop)
-                    if (_isHovered || !(defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.linux))
+                    if (_isHovered ||
+                        !(defaultTargetPlatform == TargetPlatform.windows ||
+                            defaultTargetPlatform == TargetPlatform.macOS ||
+                            defaultTargetPlatform == TargetPlatform.linux))
                       Positioned(
                         top: 6,
                         right: 6,
@@ -466,7 +498,9 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
                                     border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.25),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.25,
+                                      ),
                                       width: 0.8,
                                     ),
                                   ),
@@ -490,7 +524,9 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
                                     border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.25),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.25,
+                                      ),
                                       width: 0.8,
                                     ),
                                   ),
@@ -511,7 +547,10 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                       top: 6,
                       left: 6,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(6),
@@ -524,13 +563,18 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              item.isTorrent ? Icons.cloud_download_rounded : Icons.link_rounded,
+                              item.isTorrent
+                                  ? Icons.cloud_download_rounded
+                                  : Icons.link_rounded,
                               size: 10,
-                              color: item.isTorrent ? const Color(0xFF00E5FF) : const Color(0xFF10B981),
+                              color: item.isTorrent
+                                  ? const Color(0xFF00E5FF)
+                                  : const Color(0xFF10B981),
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              item.addonName ?? (item.isTorrent ? 'Torrent' : 'Stream'),
+                              item.addonName ??
+                                  (item.isTorrent ? 'Torrent' : 'Stream'),
                               style: const TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
@@ -547,7 +591,10 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                       bottom: 6,
                       right: 6,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.75),
                           borderRadius: BorderRadius.circular(5),
@@ -581,7 +628,9 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                               color: widget.palette.primaryColor,
                               boxShadow: [
                                 BoxShadow(
-                                  color: widget.palette.primaryColor.withValues(alpha: 0.6),
+                                  color: widget.palette.primaryColor.withValues(
+                                    alpha: 0.6,
+                                  ),
                                   blurRadius: 4,
                                 ),
                               ],
@@ -612,9 +661,13 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        item.type == 'series' && item.season != null && item.episode != null
+                        item.type == 'series' &&
+                                item.season != null &&
+                                item.episode != null
                             ? 'S${item.season!.toString().padLeft(2, '0')}:E${item.episode!.toString().padLeft(2, '0')}${item.episodeTitle != null ? ' • ${item.episodeTitle}' : ''}'
-                            : (item.year != null ? '${item.year} • Movie' : 'Movie'),
+                            : (item.year != null
+                                  ? '${item.year} • Movie'
+                                  : 'Movie'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(

@@ -671,7 +671,9 @@ class _CollectionPageState extends State<CollectionPage> {
         ? 4
         : width < 1200
         ? 5
-        : 6;
+        : width < 1600
+        ? 6
+        : 7;
     return GridView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
