@@ -55,9 +55,40 @@ env:
 # ═══════════════════════════════════════════════════════════════════════════════
 jobs:
 
+  # ─── Resolve version once ──────────────────────────────────────────────────
+  # Every platform job stamps its own artifact filenames with this so two
+  # different releases downloaded into the same folder (e.g. Downloads) don't
+  # silently overwrite each other under an identical name.
+  version:
+    name: Resolve Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Resolve version string
+        id: resolve
+        shell: bash
+        run: |
+          # Prefer the dispatched release tag, then a pushed v* tag. On a
+          # plain dispatch github.ref_name is a branch name ("master"), which
+          # is not a version -- fall back to pubspec.yaml so artifacts never
+          # advertise a branch as their version.
+          tag="${{ github.event.inputs.release_tag }}"
+          if [ -z "$tag" ]; then tag="${{ github.ref_name }}"; fi
+          clean="${tag#v}"
+          if ! [[ "$clean" =~ ^[0-9]+\.[0-9]+ ]]; then
+            clean=$(grep -m1 '^version:' pubspec.yaml | sed -E 's/version:[[:space:]]*([^+[:space:]]+).*/\1/')
+          fi
+          echo "Resolved version: $clean"
+          echo "version=$clean" >> "$GITHUB_OUTPUT"
+
   # ─── Windows Build ────────────────────────────────────────────────────────
   windows:
     name: Windows (Installer & Portable)
+    needs: [version]
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -112,20 +143,11 @@ jobs:
 
       - name: Compile Inno Setup Installer
         shell: pwsh
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           $ErrorActionPreference = 'Stop'
-          # Prefer the dispatched release tag, then a pushed v* tag. On a
-          # plain dispatch github.ref_name is a branch name ("main"), which
-          # is not a version -- fall back to pubspec.yaml so the installer
-          # never advertises a branch as its version.
-          $tag = "${{ github.event.inputs.release_tag }}"
-          if ([string]::IsNullOrWhiteSpace($tag)) { $tag = "${{ github.ref_name }}" }
-          $cleanVersion = $tag.TrimStart('v')
-          if ($cleanVersion -notmatch '^\d+\.\d+') {
-            $pubspec = Select-String -Path pubspec.yaml -Pattern '^version:\s*([^\s+]+)' |
-              Select-Object -First 1
-            $cleanVersion = $pubspec.Matches[0].Groups[1].Value
-          }
+          $cleanVersion = $env:APP_VERSION
           Write-Host "Installer version: $cleanVersion"
 
           $isccCmd = (Get-Command iscc.exe -ErrorAction SilentlyContinue)?.Source
@@ -154,25 +176,28 @@ jobs:
             throw "Inno Setup compilation failed with exit code $LASTEXITCODE"
           }
 
+          $outExe = "PlayTorrioMov-$cleanVersion-Windows-Setup.exe"
           if (Test-Path "installer\windows\Output\PlayTorrioMov-Windows-Setup.exe") {
-            Copy-Item "installer\windows\Output\PlayTorrioMov-Windows-Setup.exe" ".\PlayTorrioMov-Windows-Setup.exe" -Force
-            Write-Host "Verified and copied PlayTorrioMov-Windows-Setup.exe to root."
+            Copy-Item "installer\windows\Output\PlayTorrioMov-Windows-Setup.exe" ".\$outExe" -Force
+            Write-Host "Verified and copied $outExe to root."
           } else {
             throw "PlayTorrioMov-Windows-Setup.exe was not found in Output directory after ISCC compile!"
           }
 
       - name: Package Portable ZIP
         shell: pwsh
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
-          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "PlayTorrioMov-Windows-x64-Portable.zip" -Force
+          Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "PlayTorrioMov-$($env:APP_VERSION)-Windows-x64-Portable.zip" -Force
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: PlayTorrioMov-Windows
           path: |
-            PlayTorrioMov-Windows-Setup.exe
-            PlayTorrioMov-Windows-x64-Portable.zip
+            PlayTorrioMov-*-Windows-Setup.exe
+            PlayTorrioMov-*-Windows-x64-Portable.zip
 
   # ─── Android Build (Split-per-ABI APKs) ────────────────────────────────────
   # The universal APK is built by the `android-universal` job below rather than
@@ -181,6 +206,7 @@ jobs:
   # Two ubuntu jobs cost the same minutes but finish in half the time.
   android:
     name: Android (Split-per-ABI APKs)
+    needs: [version]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -274,18 +300,20 @@ jobs:
         run: flutter build apk --release --split-per-abi --dart-define-from-file=.env
 
       - name: Organize Android APK Outputs
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           mkdir -p android_apks
           APK_DIR="build/app/outputs/flutter-apk"
 
           if [ -f "$APK_DIR/app-arm64-v8a-release.apk" ]; then
-            cp "$APK_DIR/app-arm64-v8a-release.apk" "android_apks/PlayTorrioMov-Android-arm64-v8a.apk"
+            cp "$APK_DIR/app-arm64-v8a-release.apk" "android_apks/PlayTorrioMov-$APP_VERSION-Android-arm64-v8a.apk"
           fi
           if [ -f "$APK_DIR/app-armeabi-v7a-release.apk" ]; then
-            cp "$APK_DIR/app-armeabi-v7a-release.apk" "android_apks/PlayTorrioMov-Android-armeabi-v7a.apk"
+            cp "$APK_DIR/app-armeabi-v7a-release.apk" "android_apks/PlayTorrioMov-$APP_VERSION-Android-armeabi-v7a.apk"
           fi
           if [ -f "$APK_DIR/app-x86_64-release.apk" ]; then
-            cp "$APK_DIR/app-x86_64-release.apk" "android_apks/PlayTorrioMov-Android-x86_64.apk"
+            cp "$APK_DIR/app-x86_64-release.apk" "android_apks/PlayTorrioMov-$APP_VERSION-Android-x86_64.apk"
           fi
 
       - name: Upload Android Artifacts
@@ -300,6 +328,7 @@ jobs:
   # comment. Kept as a separate artifact so the release picks up both.
   android-universal:
     name: Android (Universal APK)
+    needs: [version]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -393,10 +422,12 @@ jobs:
         run: flutter build apk --release --dart-define-from-file=.env
 
       - name: Organize Universal APK
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           mkdir -p android_apks
           cp build/app/outputs/flutter-apk/app-release.apk \
-            android_apks/PlayTorrioMov-Android-Universal.apk
+            "android_apks/PlayTorrioMov-$APP_VERSION-Android-Universal.apk"
 
       - name: Upload Android Universal Artifact
         uses: actions/upload-artifact@v6
@@ -408,6 +439,7 @@ jobs:
   # ─── Linux x64 Build (AppImage & Tar.gz) ──────────────────────────────────
   linux-x64:
     name: Linux x64 (AppImage & Tar)
+    needs: [version]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -464,6 +496,8 @@ jobs:
         run: flutter build linux --release --dart-define-from-file=.env
 
       - name: Package as AppImage & Tar
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           curl -fSL "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" \
             -o appimagetool
@@ -493,20 +527,21 @@ jobs:
           printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./PlayTorrioMov "$@"\n' > "$APP/AppRun"
           chmod +x "$APP/AppRun"
 
-          ARCH=x86_64 ./appimagetool --appimage-extract-and-run "$APP" PlayTorrioMov-Linux-x86_64.AppImage
-          tar -czvf PlayTorrioMov-Linux-x86_64.tar.gz -C build/linux/x64/release/bundle .
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run "$APP" "PlayTorrioMov-$APP_VERSION-Linux-x86_64.AppImage"
+          tar -czvf "PlayTorrioMov-$APP_VERSION-Linux-x86_64.tar.gz" -C build/linux/x64/release/bundle .
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: PlayTorrioMov-Linux-x64
           path: |
-            PlayTorrioMov-Linux-x86_64.AppImage
-            PlayTorrioMov-Linux-x86_64.tar.gz
+            PlayTorrioMov-*-Linux-x86_64.AppImage
+            PlayTorrioMov-*-Linux-x86_64.tar.gz
 
   # ─── macOS ARM64 Build (Apple Silicon) ───────────────────────────────────
   macos-arm64:
     name: macOS (Apple Silicon ARM64)
+    needs: [version]
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -553,6 +588,8 @@ jobs:
         run: flutter build macos --release --dart-define-from-file=.env
 
       - name: Package as DMG & ZIP
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           cd build/macos/Build/Products/Release
 
@@ -566,21 +603,22 @@ jobs:
           sleep 2
 
           for i in {1..3}; do
-            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO ../../../../../PlayTorrioMov-macOS-arm64.dmg && break || sleep 3
+            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO "../../../../../PlayTorrioMov-$APP_VERSION-macOS-arm64.dmg" && break || sleep 3
           done
-          zip -ry ../../../../../PlayTorrioMov-macOS-arm64.zip PlayTorrioMov.app
+          zip -ry "../../../../../PlayTorrioMov-$APP_VERSION-macOS-arm64.zip" PlayTorrioMov.app
 
       - name: Upload macOS ARM64 Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: PlayTorrioMov-macOS-arm64
           path: |
-            PlayTorrioMov-macOS-arm64.dmg
-            PlayTorrioMov-macOS-arm64.zip
+            PlayTorrioMov-*-macOS-arm64.dmg
+            PlayTorrioMov-*-macOS-arm64.zip
 
   # ─── macOS Intel Build (x86_64) ──────────────────────────────────────────
   macos-intel:
     name: macOS (Intel x86_64)
+    needs: [version]
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -625,6 +663,8 @@ jobs:
         run: arch -x86_64 flutter build macos --release --dart-define-from-file=.env
 
       - name: Package as DMG & ZIP
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           cd build/macos/Build/Products/Release
 
@@ -638,21 +678,22 @@ jobs:
           sleep 2
 
           for i in {1..3}; do
-            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO ../../../../../PlayTorrioMov-macOS-intel.dmg && break || sleep 3
+            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO "../../../../../PlayTorrioMov-$APP_VERSION-macOS-intel.dmg" && break || sleep 3
           done
-          zip -ry ../../../../../PlayTorrioMov-macOS-intel.zip PlayTorrioMov.app
+          zip -ry "../../../../../PlayTorrioMov-$APP_VERSION-macOS-intel.zip" PlayTorrioMov.app
 
       - name: Upload macOS Intel Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: PlayTorrioMov-macOS-intel
           path: |
-            PlayTorrioMov-macOS-intel.dmg
-            PlayTorrioMov-macOS-intel.zip
+            PlayTorrioMov-*-macOS-intel.dmg
+            PlayTorrioMov-*-macOS-intel.zip
 
   # ─── iOS Build (Sideloadable IPA — no-codesign) ───────────────────────────
   ios:
     name: iOS (IPA)
+    needs: [version]
     runs-on: macos-latest
     steps:
       - name: Checkout repository
@@ -693,17 +734,19 @@ jobs:
         run: flutter build ios --release --no-codesign --dart-define-from-file=.env
 
       - name: Package as IPA
+        env:
+          APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
           cd build/ios/iphoneos
           mkdir -p Payload
           cp -R Runner.app Payload/
-          zip -ry ../../../PlayTorrioMov-iOS.ipa Payload
+          zip -ry "../../../PlayTorrioMov-$APP_VERSION-iOS.ipa" Payload
 
       - name: Upload iOS Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: PlayTorrioMov-iOS
-          path: PlayTorrioMov-iOS.ipa
+          path: PlayTorrioMov-*-iOS.ipa
 
   # ─── Create / Publish GitHub Release ─────────────────────────────────────
   release:
