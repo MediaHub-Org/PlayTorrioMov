@@ -23,6 +23,12 @@
 
 ---
 
+> **This is a partial mirror fork of [PlayTorrioMod](https://github.com/MediaHub-Org/PlayTorrioMod)** —
+> watching content only (Movies, Series, Anime, Live TV), nothing else.
+> PlayTorrioMod is the primary development repo: the roadmap, architecture
+> notes, and all other documentation live there. This repo is a fraction
+> mirror copy of it, source code only.
+
 ## Sections
 
 | Section | Content |
@@ -33,7 +39,7 @@
 | **Library** | Everything you've saved |
 
 On phones the sections sit in the bottom tab bar; tablets and desktops get a
-chip row under the top bar. See [UI & Design](docs/ui-design.md).
+chip row under the top bar.
 
 ## Quick start
 
@@ -65,19 +71,10 @@ build as the universal APK at a third of the size.
 
 ## Documentation
 
-Everything beyond this page lives in [`docs/`](docs/).
-
-| Document | What's in it |
-|:--|:--|
-| [Architecture](docs/architecture.md) | Layer diagram, project structure, the patterns the codebase leans on |
-| [Streaming](docs/streaming.md) | Discovery pipeline, VOD scrapers, torrent engine, Stremio addons, subtitles |
-| [Content sources](docs/content-sources.md) | Where catalogs and streams come from, and how sources are added |
-| [UI & design](docs/ui-design.md) | Design tokens, glassmorphism, responsive tiers |
-| [Platforms & configuration](docs/configuration.md) | Platform support matrix and runtime settings |
-| [Player](docs/player.md) | Playback engine, decoders, subtitle rendering |
-| [Roadmap](docs/ROADMAP.md) | What is still outstanding |
-| [Contributing](docs/CONTRIBUTING.md) | How to propose a change |
-| [Branching](docs/branching.md) | Branch model, contributing upstream, pulling upstream changes in |
+Architecture, streaming pipeline, content sources, UI design tokens, player
+internals, roadmap, and contributing guidelines all live in
+[PlayTorrioMod's own docs](https://github.com/MediaHub-Org/PlayTorrioMod/tree/main/docs) —
+this fork doesn't carry a separate copy.
 
 ## Building and releases
 
@@ -97,9 +94,8 @@ version. Untick it once a build has been verified on a device. Tags matching
 (`v1.2.0-rc.1`) publishes as a prerelease.
 
 Android release signing needs two repository secrets, and is what lets the
-in-app updater replace an existing install — see
-[release signing](docs/configuration.md#release-signing). Without them builds
-still succeed, signed with a throwaway debug key.
+in-app updater replace an existing install. Without them builds still
+succeed, signed with a throwaway debug key.
 
 ## Credits
 

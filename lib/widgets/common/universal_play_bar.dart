@@ -16,7 +16,14 @@ class UniversalPlayBar extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: PlaybackCoordinator.revision,
       builder: (context, _, __) {
-        if (!PlaybackCoordinator.hasActive) return const SizedBox.shrink();
+        // Video (movies/series/anime/IPTV) always opens its own dedicated
+        // full-screen player with its own transport controls -- this bar
+        // would just duplicate them. It's only meant as a music mini-player
+        // for background playback while browsing elsewhere.
+        if (!PlaybackCoordinator.hasActive ||
+            PlaybackCoordinator.activeKind == 'video') {
+          return const SizedBox.shrink();
+        }
 
         final title = PlaybackCoordinator.title ?? 'Now Playing';
         final subtitle = PlaybackCoordinator.subtitle ?? '';
