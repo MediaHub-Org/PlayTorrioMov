@@ -12,6 +12,13 @@ class MyListItem {
   final DateTime addedAt;
   final MyListSource source;
   final bool isWatchlist;
+  final bool isWatched;
+
+  /// Favourited, independent of watch progress -- unlike Watchlist/Watched,
+  /// which are mutually exclusive, something can be both Watched and Liked
+  /// at once. Local-only: neither Trakt nor Simkl has a "liked" concept to
+  /// sync against.
+  final bool isLiked;
 
   const MyListItem({
     this.traktId,
@@ -25,6 +32,8 @@ class MyListItem {
     required this.addedAt,
     this.source = MyListSource.local,
     this.isWatchlist = false,
+    this.isWatched = false,
+    this.isLiked = false,
   });
 
   /// Identity key used for de-duplication and for [==]/[hashCode].
@@ -46,7 +55,10 @@ class MyListItem {
   }
 
   bool matches(MyListItem other) {
-    if (imdbId != null && other.imdbId != null && imdbId!.isNotEmpty && other.imdbId!.isNotEmpty) {
+    if (imdbId != null &&
+        other.imdbId != null &&
+        imdbId!.isNotEmpty &&
+        other.imdbId!.isNotEmpty) {
       return imdbId == other.imdbId;
     }
     if (tmdbId != null && other.tmdbId != null) {
@@ -60,16 +72,29 @@ class MyListItem {
     }
 
     // Don't fallback to title if there are conflicting IDs of the same authority
-    final hasConflictingIds = (imdbId != null && other.imdbId != null && imdbId != other.imdbId) ||
+    final hasConflictingIds =
+        (imdbId != null && other.imdbId != null && imdbId != other.imdbId) ||
         (tmdbId != null && other.tmdbId != null && tmdbId != other.tmdbId) ||
-        (traktId != null && other.traktId != null && traktId != other.traktId) ||
+        (traktId != null &&
+            other.traktId != null &&
+            traktId != other.traktId) ||
         (simklId != null && other.simklId != null && simklId != other.simklId);
 
     if (hasConflictingIds) return false;
 
-    final cleanA = title.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').trim();
-    final cleanB = other.title.toLowerCase().replaceAll(RegExp(r'[^\w\s]'), '').trim();
-    if (cleanA.isNotEmpty && cleanA == cleanB && (year == null || other.year == null || (year! - other.year!).abs() <= 1)) {
+    final cleanA = title
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), '')
+        .trim();
+    final cleanB = other.title
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\w\s]'), '')
+        .trim();
+    if (cleanA.isNotEmpty &&
+        cleanA == cleanB &&
+        (year == null ||
+            other.year == null ||
+            (year! - other.year!).abs() <= 1)) {
       return type == other.type;
     }
     return false;
@@ -79,10 +104,17 @@ class MyListItem {
     return copyWith(
       traktId: other.traktId ?? traktId,
       simklId: other.simklId ?? simklId,
-      imdbId: (other.imdbId != null && other.imdbId!.isNotEmpty) ? other.imdbId : imdbId,
+      imdbId: (other.imdbId != null && other.imdbId!.isNotEmpty)
+          ? other.imdbId
+          : imdbId,
       tmdbId: other.tmdbId ?? tmdbId,
       poster: poster ?? other.poster,
       source: other.source != MyListSource.local ? other.source : source,
+      // OR, not overwrite: a re-sync merging in a fresh watchlist entry
+      // shouldn't be able to silently clear a status the other side set.
+      isWatchlist: isWatchlist || other.isWatchlist,
+      isWatched: isWatched || other.isWatched,
+      isLiked: isLiked || other.isLiked,
     );
   }
 
@@ -99,12 +131,18 @@ class MyListItem {
   }) {
     return MyListItem(
       imdbId: id.startsWith('tt') ? id : imdbId,
-      tmdbId: tmdbId ?? (int.tryParse(id) != null && !id.startsWith('tt') ? int.tryParse(id) : null),
+      tmdbId:
+          tmdbId ??
+          (int.tryParse(id) != null && !id.startsWith('tt')
+              ? int.tryParse(id)
+              : null),
       traktId: traktId,
       simklId: simklId,
       title: name,
       poster: poster,
-      year: year != null ? int.tryParse(year.replaceAll(RegExp(r'[^0-9]'), '')) : null,
+      year: year != null
+          ? int.tryParse(year.replaceAll(RegExp(r'[^0-9]'), ''))
+          : null,
       type: type == 'series' || type == 'anime' ? 'series' : 'movie',
       addedAt: DateTime.now(),
       source: MyListSource.local,
@@ -124,18 +162,29 @@ class MyListItem {
   }) {
     return MyListItem(
       imdbId: id.startsWith('tt') ? id : imdbId,
-      tmdbId: tmdbId ?? (int.tryParse(id) != null && !id.startsWith('tt') ? int.tryParse(id) : null),
+      tmdbId:
+          tmdbId ??
+          (int.tryParse(id) != null && !id.startsWith('tt')
+              ? int.tryParse(id)
+              : null),
       traktId: traktId,
       simklId: simklId,
       title: name,
       poster: poster,
-      year: year != null ? int.tryParse(year.replaceAll(RegExp(r'[^0-9]'), '')) : null,
+      year: year != null
+          ? int.tryParse(year.replaceAll(RegExp(r'[^0-9]'), ''))
+          : null,
       type: type == 'series' || type == 'anime' ? 'series' : 'movie',
       addedAt: DateTime.now(),
       source: MyListSource.local,
     );
   }
 
+  /// Only ever called with items from Trakt's own `watchlist` list
+  /// (`MyListService.syncWithTrakt`), so [isWatchlist] is always true here --
+  /// previously left false, meaning a synced item never actually showed as
+  /// "Watchlist" in the Saved tab's own Watchlist filter or the detail
+  /// page's status picker despite genuinely being one.
   factory MyListItem.fromTraktJson(Map<String, dynamic> json) {
     final movie = json['movie'] as Map<String, dynamic>?;
     final show = json['show'] as Map<String, dynamic>?;
@@ -148,25 +197,47 @@ class MyListItem {
       tmdbId: ids['tmdb'] as int?,
       title: media['title']?.toString() ?? 'Unknown',
       year: media['year'] as int?,
-      type: (media['type']?.toString() == 'show' || show != null) ? 'series' : 'movie',
-      poster: imdbId != null ? 'https://images.metahub.space/poster/medium/$imdbId/img' : null,
+      type: (media['type']?.toString() == 'show' || show != null)
+          ? 'series'
+          : 'movie',
+      poster: imdbId != null
+          ? 'https://images.metahub.space/poster/medium/$imdbId/img'
+          : null,
       addedAt: json['listed_at'] != null
           ? DateTime.tryParse(json['listed_at'].toString()) ?? DateTime.now()
           : DateTime.now(),
       source: MyListSource.trakt,
+      isWatchlist: true,
     );
   }
 
-  factory MyListItem.fromSimklJson(Map<String, dynamic> json) {
+  /// [bucketType] is which of Simkl's own movies/shows/anime buckets this
+  /// item was fetched from (see `MyListService.syncWithSimkl`) -- ground
+  /// truth for the anime split, unlike guessing from the item's own shape
+  /// (anime is wrapped exactly like a show, `{"show": {...}}` or
+  /// `{"anime": {...}}` depending on endpoint, so shape alone can't tell
+  /// a TV show from an anime series).
+  factory MyListItem.fromSimklJson(
+    Map<String, dynamic> json, {
+    String? bucketType,
+  }) {
     final movie = json['movie'] as Map<String, dynamic>?;
-    final show = json['show'] as Map<String, dynamic>? ?? json['anime'] as Map<String, dynamic>?;
+    final show =
+        json['show'] as Map<String, dynamic>? ??
+        json['anime'] as Map<String, dynamic>?;
     final media = movie ?? show ?? json;
     final ids = media['ids'] as Map<String, dynamic>? ?? {};
     final imdbId = ids['imdb']?.toString();
     final posterPath = media['poster'] as String?;
     final posterUrl = posterPath != null
         ? 'https://simkl.in/posters/${posterPath}_m.jpg'
-        : (imdbId != null ? 'https://images.metahub.space/poster/medium/$imdbId/img' : null);
+        : (imdbId != null
+              ? 'https://images.metahub.space/poster/medium/$imdbId/img'
+              : null);
+
+    final type = bucketType == 'anime'
+        ? 'anime'
+        : (movie != null ? 'movie' : 'series');
 
     return MyListItem(
       simklId: ids['simkl'] as int?,
@@ -174,12 +245,17 @@ class MyListItem {
       tmdbId: ids['tmdb'] as int?,
       title: media['title']?.toString() ?? 'Unknown',
       year: media['year'] as int?,
-      type: (movie != null) ? 'movie' : 'series',
+      type: type,
       poster: posterUrl,
       addedAt: json['last_watched_at'] != null
-          ? DateTime.tryParse(json['last_watched_at'].toString()) ?? DateTime.now()
+          ? DateTime.tryParse(json['last_watched_at'].toString()) ??
+                DateTime.now()
           : DateTime.now(),
       source: MyListSource.simkl,
+      // Only ever called for plantowatch/watching Simkl items
+      // (MyListService.syncWithSimkl) -- previously left false, same gap as
+      // fromTraktJson above.
+      isWatchlist: true,
     );
   }
 
@@ -196,6 +272,8 @@ class MyListItem {
       'addedAt': addedAt.toIso8601String(),
       'source': source.name,
       'isWatchlist': isWatchlist,
+      'isWatched': isWatched,
+      'isLiked': isLiked,
     };
   }
 
@@ -220,6 +298,8 @@ class MyListItem {
           : DateTime.now(),
       source: src,
       isWatchlist: json['isWatchlist'] as bool? ?? false,
+      isWatched: json['isWatched'] as bool? ?? false,
+      isLiked: json['isLiked'] as bool? ?? false,
     );
   }
 
@@ -234,6 +314,9 @@ class MyListItem {
     String? poster,
     DateTime? addedAt,
     MyListSource? source,
+    bool? isWatchlist,
+    bool? isWatched,
+    bool? isLiked,
   }) {
     return MyListItem(
       traktId: traktId ?? this.traktId,
@@ -246,12 +329,16 @@ class MyListItem {
       poster: poster ?? this.poster,
       addedAt: addedAt ?? this.addedAt,
       source: source ?? this.source,
+      isWatchlist: isWatchlist ?? this.isWatchlist,
+      isWatched: isWatched ?? this.isWatched,
+      isLiked: isLiked ?? this.isLiked,
     );
   }
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is MyListItem && uniqueKey == other.uniqueKey;
+      identical(this, other) ||
+      other is MyListItem && uniqueKey == other.uniqueKey;
 
   @override
   int get hashCode => uniqueKey.hashCode;

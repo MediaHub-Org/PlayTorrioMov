@@ -13,6 +13,7 @@ import '../../services/my_list/my_list_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/like_button.dart';
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
@@ -859,7 +860,7 @@ class _DetailsPageState extends State<DetailsPage>
               const SizedBox(height: _Space.lg),
               _buildPlayButton(fullWidth: true),
               const SizedBox(height: _Space.sm),
-              _buildLibraryButton(fullWidth: true),
+              _buildLibraryButton(),
             ],
           ),
         ),
@@ -930,7 +931,7 @@ class _DetailsPageState extends State<DetailsPage>
           children: [
             Expanded(child: _buildPlayButton(fullWidth: true)),
             const SizedBox(width: _Space.sm),
-            _buildLibraryButton(fullWidth: false),
+            _buildLibraryButton(),
           ],
         ),
         if (meta.description != null && meta.description!.isNotEmpty) ...[
@@ -1174,74 +1175,17 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  Widget _buildLibraryButton({required bool fullWidth}) {
-    return ValueListenableBuilder<List<MyListItem>>(
-      valueListenable: MyListService.items,
-      builder: (context, items, _) {
-        final inList =
-            _detail != null &&
-            MyListService.isInList(
-              MyListItem.fromMovieDetail(
-                id: _detail!.id,
-                name: _detail!.name,
-                poster: _detail!.poster,
-                year: _detail!.year,
-                type: _detail!.type,
-                imdbId: _detail!.id.startsWith('tt') ? _detail!.id : null,
-                tmdbId: _detail!.tmdbId != null
-                    ? int.tryParse(_detail!.tmdbId!)
-                    : null,
-              ),
-            );
-
-        return _HoverButton(
-          onTap: () => _toggleMyList(),
-          child: Container(
-            width: fullWidth ? double.infinity : null,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: BoxDecoration(
-              color: inList
-                  ? const Color(0xFF7C5CFF).withOpacity(0.18)
-                  : Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: inList
-                    ? const Color(0xFF7C5CFF).withOpacity(0.35)
-                    : Colors.white.withOpacity(0.14),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  inList
-                      ? Icons.bookmark_added_rounded
-                      : Icons.bookmark_add_outlined,
-                  color: inList ? const Color(0xFF7C5CFF) : Colors.white,
-                  size: 22,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  inList ? 'In Library' : 'Add to Library',
-                  style: TextStyle(
-                    color: inList ? const Color(0xFF7C5CFF) : Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  MyListItem? _myListEntry(List<MyListItem> items) {
+    if (_detail == null) return null;
+    final probe = _buildMyListItem();
+    for (final i in items) {
+      if (i.uniqueKey == probe.uniqueKey || i.matches(probe)) return i;
+    }
+    return null;
   }
 
-  void _toggleMyList() {
-    if (_detail == null) return;
-
-    final item = MyListItem.fromMovieDetail(
+  MyListItem _buildMyListItem() {
+    return MyListItem.fromMovieDetail(
       id: _detail!.id,
       name: _detail!.name,
       poster: _detail!.poster,
@@ -1250,8 +1194,93 @@ class _DetailsPageState extends State<DetailsPage>
       imdbId: _detail!.id.startsWith('tt') ? _detail!.id : null,
       tmdbId: _detail!.tmdbId != null ? int.tryParse(_detail!.tmdbId!) : null,
     );
+  }
 
-    MyListService.toggle(item);
+  /// Three independent buttons -- Watchlist and Watched are mutually
+  /// exclusive (tapping one clears the other), Liked is its own toggle and
+  /// can be on regardless of the other two. Replaces the old single "Add to
+  /// Library" toggle, which had no room for watched-tracking or liking
+  /// without cramming it into the same slot.
+  ///
+  /// Icon-only with a hover [Tooltip] for the label, mirroring
+  /// PlayTorrioMod: a labelled pill here didn't have room for "Watchlist"/
+  /// "Watched" once three buttons shared the row, and an icon can't overflow
+  /// the way that text did.
+  Widget _buildLibraryButton() {
+    return ValueListenableBuilder<List<MyListItem>>(
+      valueListenable: MyListService.items,
+      builder: (context, items, _) {
+        final entry = _myListEntry(items);
+        final isWatched = entry?.isWatched ?? false;
+        final isWatchlist = entry?.isWatchlist ?? false;
+        final isLiked = entry?.isLiked ?? false;
+
+        final watchlistBtn = _libraryStatusButton(
+          icon: isWatchlist
+              ? Icons.bookmark_added_rounded
+              : Icons.bookmark_add_outlined,
+          label: isWatchlist ? 'Remove from watchlist' : 'Add to watchlist',
+          active: isWatchlist,
+          color: const Color(0xFF7C5CFF),
+          onTap: () => MyListService.setWatchlist(_buildMyListItem()),
+        );
+        final watchedBtn = _libraryStatusButton(
+          icon: isWatched
+              ? Icons.check_circle_rounded
+              : Icons.check_circle_outline_rounded,
+          label: isWatched ? 'Mark as unwatched' : 'Mark as watched',
+          active: isWatched,
+          color: const Color(0xFF00D294),
+          onTap: () => MyListService.setWatched(_buildMyListItem()),
+        );
+        final likedBtn = LikeButton(
+          isLiked: isLiked,
+          onTap: () => MyListService.toggleLiked(_buildMyListItem()),
+          style: LikeButtonStyle.icon,
+        );
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            watchlistBtn,
+            const SizedBox(width: 10),
+            watchedBtn,
+            const SizedBox(width: 10),
+            likedBtn,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _libraryStatusButton({
+    required IconData icon,
+    required String label,
+    required bool active,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: label,
+      child: _HoverButton(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: active
+                ? color.withOpacity(0.18)
+                : Colors.white.withOpacity(0.08),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: active
+                  ? color.withOpacity(0.35)
+                  : Colors.white.withOpacity(0.14),
+            ),
+          ),
+          child: Icon(icon, color: active ? color : Colors.white, size: 22),
+        ),
+      ),
+    );
   }
 
   Widget _buildSynopsis(String text) {
