@@ -22,6 +22,27 @@ turned out to depend on an `isWatched` field and status-picker UI that
 predates this fork and was never ported either, so it needs that
 prerequisite first, not just today's chip change.
 
+**Ported again 2026-09-02** (a second, larger batch from the same day):
+Movies & Series' browse page reaches parity with Anime's own hero — the
+type-switch pill moved inline beside the genre/decade/sort filters
+(`PillTabRow` extracted out of `SectionSubTabs`), `BrowseScaffold` gained a
+Continue Watching slot, a Latest Releases row, a Series-only Calendar row
+(new `UpcomingCalendarRow`), and an opt-in `overlayHeader` (hero fills to
+the page top, header floats, a desktop scroll track) that this page now
+uses; the hero gained rating/genre chips and Watch Now/Details buttons; the
+hero image source was corrected a second time — it had regressed to reading
+the addon's own flat catalog-list `background` field (unreliable, one addon
+put a wrong portrait image there), fixed to read the same per-item enriched
+metadata fetch's `background` upstream's own `home_page.dart` uses. Grid
+covers no longer grow unbounded on wide desktop windows (a 7-column tier
+past 1600px, both here and in Library's Saved grid). `LibraryTabs` swapped
+its underline tab bar for `PillTabRow`. `TorrentStreamService` now kills an
+orphaned `torrserver.exe` before starting. Item 7 below (the Windows close
+crash) got a candidate fix — see its own row. **Not ported**: the Listen/
+Read hub restructure and search-UX work (this app has no Music/Books hubs
+to apply it to) and, again, the Watchlist/Watched/Liked redesign (same
+prerequisite gap as before).
+
 ## Sibling app: PlayTorrioMod
 
 This app is a Media-only fork of `MediaHub-Org/PlayTorrioMod` (Movies &
@@ -94,7 +115,7 @@ Once a build has actually been through this, clear `AppInfo.channel` and the
 
 | # | Bug | Notes |
 |---|-----|-------|
-| 7 | **"Unknown hard error" on Windows after closing the app** | Reported against PlayTorrioMod 2026-08-31 (see its own `ROADMAP.md`). Unconfirmed here specifically, but this app shares the same Windows runner code, so worth checking once PlayTorrioMod's is root-caused. |
+| 7 | **"Unknown hard error" on Windows after closing the app** | Reported against PlayTorrioMod 2026-08-31. PlayTorrioMod root-caused and candidate-fixed it 2026-09-02: a native window close never runs the widget tree's own `dispose()`, so `PlayerScreen`/`IptvPlayerPage`'s media_kit `Player` stayed alive into process teardown (no `onFullStop` registered, only pause-only `onStop`). Ported the same fix here (`PlaybackCoordinator.disposeForShutdown()` + `onShutdownDispose`, `WindowService` calls it on close). **Not yet empirically verified in either app** — no way to drive the UI to start real playback and then close over it in this environment; confirmed only that a real `WM_CLOSE` with no active player exits clean. Needs a hands-on close-while-playing-video check. |
 
 ## Requested UI work
 
