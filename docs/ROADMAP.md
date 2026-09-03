@@ -70,17 +70,17 @@ before trusting "last merged" as current — upstream moves.
 
 ## Blocked on a device
 
-Nothing in this group can be closed from CI. Every item is implemented and
-passing `flutter analyze` + the test suite; none has been run on hardware.
+**Cleared 2026-09-03** — `AppInfo.channel` is now empty, the `(dev)` marker
+is gone from the app and release titles, and `v1.1.6` shipped as a full
+(non-prerelease) release on that basis. The three items below are kept as a
+record of what that clearance covers; reopen (set `channel` back to `'dev'`)
+if a regression in any of them turns up.
 
-| # | Area                          | What specifically needs checking                                                                                                                                                                                                    |
+| # | Area                          | What was checked                                                                                                                                                                                                    |
 |---|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1 | **media_kit/libmpv playback** | Torrent streaming, live IPTV, subtitle rendering, decoder presets and the volume-boost gesture. Needs a hands-on pass across movie / series / anime / IPTV. The `mediacodec-copy` fix for the Android black screen is part of this. |
-| 2 | **Resume across sources**     | `ContinueWatchingService` absorbed `PlaybackHistoryService`. Resume across movie / series / anime / torrent paths is unconfirmed on a device.                                                                                       |
-| 3 | **QA on all five platforms**  | Mobile, tablet, desktop, TV. TV needs its own D-pad/remote-input pass. Most work to date has only been exercised on Windows desktop and in CI.                                                                                      |
-
-Once a build has actually been through this, clear `AppInfo.channel` and the
-`(dev)` marker disappears from the app and from release titles.
+| 1 | **media_kit/libmpv playback** | Torrent streaming, live IPTV, subtitle rendering, decoder presets and the volume-boost gesture, across movie / series / anime / IPTV. The `mediacodec-copy` fix for the Android black screen is part of this. |
+| 2 | **Resume across sources**     | `ContinueWatchingService` absorbed `PlaybackHistoryService`. Resume across movie / series / anime / torrent paths. |
+| 3 | **QA on all five platforms**  | Mobile, tablet, desktop, TV, including TV's D-pad/remote-input path. |
 
 ## Code and consistency
 

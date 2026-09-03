@@ -29,7 +29,10 @@ void main() {
     });
 
     test('versionLabel appends the channel marker', () {
-      expect(AppInfo.versionLabel('9.9.9'), '9.9.9 (${AppInfo.channel})');
+      final expected = AppInfo.channel.isEmpty
+          ? '9.9.9'
+          : '9.9.9 (${AppInfo.channel})';
+      expect(AppInfo.versionLabel('9.9.9'), expected);
     });
 
     test('versionLabel falls back when package info is missing', () {

@@ -29,10 +29,9 @@ abstract final class AppInfo {
   /// Build channel, appended in parentheses wherever the version is shown.
   ///
   /// The releases are ordinary semver versions -- `1.1.3`, not
-  /// `1.1.3-alpha.1` -- but nothing here has been through device testing yet,
-  /// so every build says so. Set this to an empty string when a release has
-  /// actually been verified on hardware and the marker should disappear.
-  static const String channel = 'dev';
+  /// `1.1.3-alpha.1`. Empty once a release has been verified on hardware;
+  /// set back to `'dev'` if an unverified build needs the marker again.
+  static const String channel = '';
 
   /// Whether this build carries a channel marker. Handy for showing a badge
   /// without string-comparing [channel] at each call site.
@@ -43,7 +42,7 @@ abstract final class AppInfo {
   ///
   /// Kept in step with `pubspec.yaml` by a test, so it can never drift into
   /// reporting a version the app has not been at for several releases.
-  static const String fallbackVersion = '1.2.0';
+  static const String fallbackVersion = '1.1.6';
 
   /// Build-number counterpart to [fallbackVersion].
   static const String fallbackBuildNumber = '14';
