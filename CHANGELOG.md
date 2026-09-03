@@ -3,6 +3,27 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- 30 new torrent/stream scraper sites and 7 new anime extractors, ported
+  from upstream `ayman708-UX/PlayTorrioV3` (commit `b0aecf5`) side by side
+  with Mov's own existing, non-overlapping set — see
+  [ROADMAP.md](docs/ROADMAP.md#upstream-tracking) for the full list and
+  what was deliberately left out
+- `stream_model.dart` getters (`quality`, `isHDR`, `codec`, `fileSize`,
+  `sizeBytes`, `qualityRank`) now memoized instead of recomputing regexes
+  on every access; new `seeders` getter
+- Android "Direct Surface" player rendering toggle (`player_settings.dart`,
+  `video_player_settings_page.dart`)
+
+### Fixed
+- AniList catalog 403s — request now sends a browser-like User-Agent/
+  Origin/Referer and a 15s timeout instead of the old custom UA (ported
+  from upstream `cc07994`)
+- IPTV player now actually applies `PlayerSettings`' video controller
+  configuration instead of bare defaults
+
 ## [1.1.5+13] - 2026-09-02
 
 ### Added

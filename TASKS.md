@@ -8,6 +8,9 @@
 - [ ] Consistent header spacing (margin/padding) across all pages
 - [ ] Fix Android back button
 - [ ] Fix tags on pages — only icon shows, doesn't fit screen
-- [ ] Pull latest commits from original repo (PlayTorrioMod) and log them
-- [ ] Re-add roadmap, releases, changelog, and README (own docs, no longer
+- [x] Pull latest commits from original repo (PlayTorrioMod) and log them —
+      done: PlayTorrioMod sits 3 commits behind its own upstream
+      (`ayman708-UX/PlayTorrioV3`), see ROADMAP.md § Upstream tracking for
+      what was ported into this repo and what got skipped and why.
+- [x] Re-add roadmap, releases, changelog, and README (own docs, no longer
       pointing to PlayTorrioMod as source of truth)
