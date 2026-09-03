@@ -51,16 +51,22 @@ Everything below is a deliberate, file-by-file port, checked each time
 against how far Mov's own scraper/player/continue-watching code has already
 diverged from both PlayTorrioMod and its own upstream, `ayman708-UX/PlayTorrioV3`.
 
-As of 2026-09-03, PlayTorrioMod's `main` sat 3 commits behind `v3/main`:
+As of 2026-09-03, PlayTorrioMod's `main` sat 3 commits behind `v3/main`.
+All 3 have since been reconciled (merged for real in PlayTorrioMod, ported
+file-by-file here in Mov — see [PlayTorrioMod](https://github.com/MediaHub-Org/PlayTorrioMod)
+for its own log). **Last commit actually merged into Mov: `b0aecf5`** —
+`9d34d4c` carried no portable content (V3's own README).
 
 | Commit    | Summary                                              | Status                                                                                                                     |
 |-----------|-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| `cc07994` | Fix anime catalog AniList 403 issue, bump 1.1.1        | Ported — `anilist_service.dart` now sends a browser User-Agent/Origin/Referer and a 15s timeout. The paired `anime_page.dart` empty-results error message already existed independently in Mov. |
-| `b0aecf5` | New scraper sources, fix mapple scraper, bump 1.1.2    | Ported (side by side) — 30 new scraper sites and 7 new anime extractors added alongside Mov's existing, non-overlapping set; new `video_settings_page.dart`; anime/continue-watching/player diffs reviewed file-by-file rather than patch-applied, since those files had already diverged. Mov's own `StreamHealthChecker` dead-stream filtering was kept — V3 had dropped its equivalent, not carried over. |
-| `9d34d4c` | Update README                                         | Skipped — V3's own README, not relevant here.                                                                              |
+| `cc07994` | Fix anime catalog AniList 403 issue, bump 1.1.1        | **Merged.** `anilist_service.dart` now sends a browser User-Agent/Origin/Referer and a 15s timeout. The paired `anime_page.dart` empty-results error message already existed independently in Mov. |
+| `b0aecf5` | New scraper sources, fix mapple scraper, bump 1.1.2    | **Merged (side by side).** 30 new scraper sites and 7 new anime extractors added alongside Mov's existing, non-overlapping set; new `video_settings_page.dart`; anime/continue-watching/player diffs reviewed file-by-file rather than patch-applied, since those files had already diverged. Mov's own `StreamHealthChecker` dead-stream filtering was kept — V3 had dropped its equivalent, not carried over. |
+| `9d34d4c` | Update README                                         | **Not merged, by design.** V3's own README, not relevant here.                                                             |
+| `ad0e40d` | Bump 1.1.3: audio dub & language filtering, backend scraper extractions, responsive UI | **Not yet merged — new since this pass.** Landed 2026-09-04 on `v3/main`, discovered on a routine re-fetch. 22 files, +1555/−148: a ~1080-line rewrite of `watch_screen.dart` (audio-track/dub language picker, responsive layout), a further `stream_model.dart` extension, and touch-ups to several scraper sites — including `movy.dart`/`vuflix.dart`/`xdownloader.dart`, which are *not* from the b0aecf5 port; Mov already carries its own independently-evolved copies of those three from before the fork, so this one will need the same careful diff-first treatment, not a blind apply. Left for a deliberate follow-up pass. |
 
 This table gets re-checked whenever PlayTorrioMod's upstream gap is
-revisited; it is a snapshot, not a live sync status.
+revisited; it is a snapshot, not a live sync status. Re-fetch `v3/main`
+before trusting "last merged" as current — upstream moves.
 
 ## Blocked on a device
 
