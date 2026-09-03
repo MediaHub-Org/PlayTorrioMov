@@ -951,6 +951,35 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             activeColor: palette.primaryColor,
             onChanged: (val) => PlayerSettings.setLowLatency(val),
           ),
+
+          if (Platform.isAndroid) ...[
+            const SizedBox(height: 8),
+            Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+            const SizedBox(height: 8),
+
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              secondary: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: palette.primaryColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.layers_rounded, color: palette.primaryColor, size: 20),
+              ),
+              title: const Text(
+                'Direct Surface (SurfaceView)',
+                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              ),
+              subtitle: Text(
+                'Renders frames directly to the hardware surface without texture blitting. Boosts 4K/60fps playback and reduces battery usage. Keep disabled if your device shows display glitches.',
+                style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              ),
+              value: PlayerSettings.enableSurfaceProducer.value,
+              activeColor: palette.primaryColor,
+              onChanged: (val) => PlayerSettings.setEnableSurfaceProducer(val),
+            ),
+          ],
         ],
       ),
     );

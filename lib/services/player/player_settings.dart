@@ -93,6 +93,7 @@ abstract final class PlayerSettings {
   static const _keyHardwareAudioClock = 'player_hardware_audio_clock';
   static const _keyAudioDelayDefault = 'player_audio_delay_default';
   static const _keyAutoNextEnabled = 'player_auto_next_enabled';
+  static const _keyEnableSurfaceProducer = 'player_enable_surface_producer';
 
   // Subtitle Customization Keys
   static const _keySubStylePreset = 'player_sub_style_preset';
@@ -137,6 +138,9 @@ abstract final class PlayerSettings {
   static final ValueNotifier<bool> hardwareAudioClock = ValueNotifier<bool>(true);
   static final ValueNotifier<double> audioDelayDefault = ValueNotifier<double>(0.0);
   static final ValueNotifier<bool> autoNextEnabled = ValueNotifier<bool>(true);
+  /// Android Direct Surface (SurfaceProducer / SurfaceView) toggle. Default: false (off).
+  /// Ported from upstream PlayTorrioV3 b0aecf5.
+  static final ValueNotifier<bool> enableSurfaceProducer = ValueNotifier<bool>(false);
 
   // Subtitle Customization ValueNotifiers
   static final ValueNotifier<SubtitleStylePreset> subStylePreset =
@@ -280,6 +284,7 @@ abstract final class PlayerSettings {
     hardwareAudioClock.value = prefs.getBool(_keyHardwareAudioClock) ?? true;
     audioDelayDefault.value = prefs.getDouble(_keyAudioDelayDefault) ?? 0.0;
     autoNextEnabled.value = prefs.getBool(_keyAutoNextEnabled) ?? true;
+    enableSurfaceProducer.value = prefs.getBool(_keyEnableSurfaceProducer) ?? false;
 
     // Load Subtitle Customization Preferences
     final subPresetStr = prefs.getString(_keySubStylePreset);
@@ -466,14 +471,14 @@ abstract final class PlayerSettings {
       hwdec: hwdec,
       enableHardwareAcceleration: hwdec != 'no',
       androidAttachSurfaceAfterVideoParameters: true,
-      enableAndroidSurfaceProducer: false,
+      enableAndroidSurfaceProducer: enableSurfaceProducer.value,
     );
   }
 
   /// Returns a configured [VideoControllerConfiguration] for media_kit_video.
   static VideoControllerConfiguration getMediaKitVideoControllerConfiguration() {
-    return const VideoControllerConfiguration(
-      enableAndroidSurfaceProducer: false,
+    return VideoControllerConfiguration(
+      enableAndroidSurfaceProducer: enableSurfaceProducer.value,
     );
   }
 
@@ -1218,6 +1223,13 @@ abstract final class PlayerSettings {
     _notify();
   }
 
+  static Future<void> setEnableSurfaceProducer(bool val) async {
+    enableSurfaceProducer.value = val;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyEnableSurfaceProducer, val);
+    _notify();
+  }
+
   static Future<void> resetToDefaults() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyDecoderPreset);
@@ -1237,6 +1249,7 @@ abstract final class PlayerSettings {
     await prefs.remove(_keyHardwareAudioClock);
     await prefs.remove(_keyAudioDelayDefault);
     await prefs.remove(_keyAutoNextEnabled);
+    await prefs.remove(_keyEnableSurfaceProducer);
 
     decoderPreset.value = DecoderPreset.hardwareAuto;
     forceSoftwareDecoding.value = false;
@@ -1256,6 +1269,7 @@ abstract final class PlayerSettings {
     hardwareAudioClock.value = true;
     audioDelayDefault.value = 0.0;
     autoNextEnabled.value = true;
+    enableSurfaceProducer.value = false;
     customDecoders.value = _getDefaultDecodersForPreset(DecoderPreset.hardwareAuto);
 
     await resetSubtitleDefaults();
