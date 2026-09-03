@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../../scraper/user_agent.dart';
 
 class AniNekoAnimeResult {
   final String url;
@@ -28,7 +29,7 @@ class AniNekoExtractor {
 
   static const _baseUrl = 'https://anineko.to';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   String _cleanTitle(String t) => t.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 

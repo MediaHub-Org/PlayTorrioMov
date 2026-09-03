@@ -17,6 +17,7 @@ import 'trakt_settings_page.dart';
 import 'simkl_settings_page.dart';
 import 'updates_settings_page.dart';
 import 'about_settings_page.dart';
+import 'video_player_settings_page.dart';
 import '../../services/p2p/p2p_settings_service.dart';
 import '../../widgets/p2p/p2p_warning_dialog.dart';
 import '../../services/discord/discord_rpc_service.dart';
@@ -314,6 +315,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 title: 'General & Data',
                 subtitle: 'Backup & restore, TMDB cast photos, keyboard shortcuts',
                 onTap: () => _navigateTo(const GeneralSettingsPage()),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Video Playback (decoder, subtitles, rendering)
+              _SettingsCategoryTile(
+                icon: Icons.play_circle_outline_rounded,
+                iconColor: const Color(0xFF8B5CF6),
+                title: 'Video Playback',
+                subtitle: 'Decoder, subtitles, and rendering options',
+                onTap: () => _navigateTo(const VideoPlayerSettingsPage()),
               ),
 
               const SizedBox(height: 12),

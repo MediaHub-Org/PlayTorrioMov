@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../models/stream/stream_model.dart';
 import '../player/player_settings.dart';
+import '../scraper/user_agent.dart';
 
 /// Production-grade HTTP/HLS/MP4 Stream Health & Liveness Checker for PlayTorrioHTTP.
 ///
@@ -42,7 +43,7 @@ class StreamHealthChecker {
       final req = http.Request('GET', Uri.parse(url))
         ..followRedirects = false
         ..headers['User-Agent'] = headers['User-Agent'] ??
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+            kDefaultUA
         ..headers['Accept'] = '*/*'
         ..headers['Connection'] = 'keep-alive'
         ..headers['Range'] = 'bytes=0-${_maxBytes - 1}';

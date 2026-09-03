@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart MegaSource Stream Scraper for PlayTorrioHTTP.
 ///
@@ -18,7 +19,7 @@ class MegaSourceScraper extends StreamScraper {
       'W3siaWQiOiJkZWZhdWx0IiwibmFtZSI6Ik1lZ2FTb3VyY2UgZGVmYXVsdCIsInVybCI6Imh0dHBzOi8vZ2l0aHViLmNvbS96b3JldS9tZWdhc291cmNlX3NjcmFwZXJzL3Jhdy9yZWZzL2hlYWRzL21haW4vZGVmYXVsdF9zY3JhcGVyLnB5IiwiZGVzY3JpcHRpb24iOiJEZWZhdWx0IHNjcmFwZXIgaG9zdGVkIG9uIEdpdEh1Yi4ifV0';
   static const _baseUrl = 'https://megasource.wasmer.app/$_config';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   @override
   Stream<StreamSource> scrapeStream({

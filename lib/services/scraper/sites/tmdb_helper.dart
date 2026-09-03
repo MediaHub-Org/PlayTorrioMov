@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../user_agent.dart';
 
 class TmdbHelper {
   static const _apiKey = 'b3556f3b206e16f82df4d1f6fd4545e6';
@@ -8,7 +9,7 @@ class TmdbHelper {
 
   static const _headers = {
     'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        kDefaultUA,
     'Accept': 'application/json',
   };
 

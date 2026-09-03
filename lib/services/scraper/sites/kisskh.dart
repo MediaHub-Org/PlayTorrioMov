@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart KissKH Stream Scraper for PlayTorrioHTTP.
 ///
@@ -16,7 +17,7 @@ class KissKhScraper extends StreamScraper {
   static const _encApi = 'https://enc-dec.app/api';
   static const _base = 'https://kisskh.do';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _headers = {
     'User-Agent': _ua,

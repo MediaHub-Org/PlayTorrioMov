@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../../scraper/user_agent.dart';
 
 class VidNestAnimeResult {
   final String url;
@@ -28,7 +29,7 @@ class VidNestExtractor {
   static const _baseUrl = 'https://vidnest.fun';
   static const _apiBaseUrl = 'https://new.vidnest.fun';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _alphabet = 'RB0fpH8ZEyVLkv7c2i6MAJ5u3IKFDxlS1NTsnGaqmXYdUrtzjwObCgQP94hoeW+/=';
   static final Uint8List _revMap = () {

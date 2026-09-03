@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart CineSu Stream Scraper for PlayTorrioHTTP.
 ///
@@ -16,7 +17,7 @@ class CineSuScraper extends StreamScraper {
   static const _baseDomain = 'https://glendale-plumbing.com';
   static const _referer = 'https://cine.su/';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _nD = '4860ac8bfddb';
   static const _aD = '224eff10e662e9635c9f671cf46351dcd69af42b1edd56f5e5fa21751f44b9c8';

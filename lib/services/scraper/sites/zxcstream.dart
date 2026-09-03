@@ -7,6 +7,7 @@ import 'package:pointycastle/export.dart';
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart ZxcStream Stream Scraper for PlayTorrioHTTP.
 ///
@@ -20,7 +21,7 @@ class ZxcStreamScraper extends StreamScraper {
   static const _aesKey = '7f4c9e2a81d63b05c4f7a9e8126d3b50e1a8c7f23d9465ab0c6e9f1d4a7b832c';
   static const _servers = ['berkas', 'orion', 'aquarius', 'resshin'];
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _headers = {
     'User-Agent': _ua,

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart LookMovie Stream Scraper for PlayTorrioHTTP.
 ///
@@ -20,7 +21,7 @@ class LookMovieScraper extends StreamScraper {
   ];
 
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _headersBase = {
     'User-Agent': _ua,

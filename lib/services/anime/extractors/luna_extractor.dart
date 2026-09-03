@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import '../../scraper/user_agent.dart';
 
 class LunaAnimeResult {
   final String url;
@@ -30,7 +31,7 @@ class LunaExtractor {
   static const _actionFetchSources = 'afb0491c5516f9fff5fcb464d627638df76062f8';
   static const _watchUrl = 'https://luna-stream.me/anime/watch/21/gogoanime/1';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _providers = [
     {'id': 'megaplay', 'name': 'Helios'},

@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../models/profiles/profile_policy.dart';
 import '../continue_watching/episode_tracker_snapshot_revision.dart';
-import '../profiles/profile_async_authorization.dart';
-import '../profiles/profile_runtime.dart';
+import '../../models/profiles/profile_async_authorization.dart';
 import '../storage/storage_service.dart';
 import 'trakt_calendar_service.dart';
 import 'trakt_constants.dart';
@@ -451,9 +450,7 @@ class TraktService {
   Future<String?> pollDeviceToken(String deviceCode) async {
     try {
       final attempt = _deviceAuthorizations[deviceCode];
-      if (ProfileRuntime.isInitialized &&
-          ProfileRuntime.isProfileCommitted &&
-          (attempt == null || attempt.expiresAt.isBefore(DateTime.now()))) {
+      if (attempt == null || attempt.expiresAt.isBefore(DateTime.now())) {
         _deviceAuthorizations.remove(deviceCode);
         return 'access_denied';
       }
@@ -479,11 +476,7 @@ class TraktService {
         }
 
         try {
-          if (attempt == null) {
-            await commit();
-          } else {
-            await attempt.authorization.run(commit);
-          }
+          await attempt.authorization.run(commit);
         } on StateError {
           return 'access_denied';
         }

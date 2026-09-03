@@ -5,8 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../models/profiles/profile_policy.dart';
 import '../continue_watching/episode_tracker_snapshot_revision.dart';
-import '../profiles/profile_async_authorization.dart';
-import '../profiles/profile_runtime.dart';
+import '../../models/profiles/profile_async_authorization.dart';
 import '../storage/storage_service.dart';
 import 'simkl_calendar_service.dart';
 import 'simkl_constants.dart';
@@ -322,9 +321,7 @@ class SimklService {
   Future<String?> pollPin(String userCode) async {
     try {
       final attempt = _pinAuthorizations[userCode];
-      if (ProfileRuntime.isInitialized &&
-          ProfileRuntime.isProfileCommitted &&
-          (attempt == null || attempt.expiresAt.isBefore(DateTime.now()))) {
+      if (attempt == null || attempt.expiresAt.isBefore(DateTime.now())) {
         _pinAuthorizations.remove(userCode);
         return 'access_denied';
       }
@@ -348,11 +345,7 @@ class SimklService {
           }
 
           try {
-            if (attempt == null) {
-              await commit();
-            } else {
-              await attempt.authorization.run(commit);
-            }
+            await attempt.authorization.run(commit);
           } on StateError {
             return 'access_denied';
           }

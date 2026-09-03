@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart CineSrc Stream Scraper for PlayTorrioHTTP.
 ///
@@ -14,7 +15,7 @@ class CineSrcScraper extends StreamScraper {
   String get name => 'PlayTorrioHTTP';
 
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _vParam = '_v=34403446';
   static const _nD = '4860ac8bfddb';

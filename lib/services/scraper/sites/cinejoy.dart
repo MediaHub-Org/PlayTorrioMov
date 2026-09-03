@@ -7,6 +7,7 @@ import 'package:pointycastle/export.dart';
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart Cinejoy Stream Scraper for PlayTorrioHTTP.
 ///
@@ -23,7 +24,7 @@ class CinejoyScraper extends StreamScraper {
   static const _origin = 'https://cinejoy.to';
   static const _referer = 'https://cinejoy.to/';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static const _defaultHeaders = {
     'User-Agent': _ua,

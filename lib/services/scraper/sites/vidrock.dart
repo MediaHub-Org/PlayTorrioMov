@@ -6,6 +6,7 @@ import 'package:pointycastle/export.dart';
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../user_agent.dart';
 
 /// Pure-Dart VidRock Stream Scraper for PlayTorrioHTTP.
 ///
@@ -18,7 +19,7 @@ class VidRockScraper extends StreamScraper {
   static const _gcmHexKey = '7f3e9c2a8b5d1f4e6a9c3b7d2e5f8a1c4b6d9e2f5a8c1b4d7e9f2a5c8b1d4e7f';
   static const _baseUrl = 'https://vidrock.ru/';
   static const _ua =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+      kDefaultUA;
 
   static Uint8List _hexToBytes(String hex) {
     final bytes = Uint8List(hex.length ~/ 2);
