@@ -40,7 +40,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   late final Player _player = Player(
     configuration: PlayerSettings.getMediaKitPlayerConfiguration(),
   );
-  late final VideoController _videoController = VideoController(_player);
+  late final VideoController _videoController = VideoController(
+    _player,
+    configuration: PlayerSettings.getVideoControllerConfiguration(),
+  );
   final List<StreamSubscription> _subscriptions = [];
 
   late int _activeHitIndex;
