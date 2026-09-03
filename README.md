@@ -23,20 +23,21 @@
 
 ---
 
-> **This is a partial mirror fork of [PlayTorrioMod](https://github.com/MediaHub-Org/PlayTorrioMod)** —
-> watching content only (Movies, Series, Anime, Live TV), nothing else.
-> PlayTorrioMod is the primary development repo: the roadmap, architecture
-> notes, and all other documentation live there. This repo is a fraction
-> mirror copy of it, source code only.
+PlayTorrioMov is the primary app in the `MediaHub-Org` family — a
+watch-only fork of [PlayTorrioMod](https://github.com/MediaHub-Org/PlayTorrioMod)
+(Movies, Series, Anime, Live TV, nothing else). The smaller codebase is
+easier to keep consistent and has been working well, so this repo now
+carries its own roadmap, changelog and docs instead of pointing back to
+PlayTorrioMod for them.
 
 ## Sections
 
-| Section | Content |
-|:--|:--|
+| Section             | Content                                       |
+|:--------------------|:----------------------------------------------|
 | **Movies & Series** | TMDB-catalog movies and series, one tap apart |
-| **Anime** | Its own catalog and scraper |
-| **Live TV** | IPTV channels |
-| **Library** | Everything you've saved |
+| **Anime**           | Its own catalog and scraper                   |
+| **Live TV**         | IPTV channels                                 |
+| **Library**         | Everything you've saved                       |
 
 On phones the sections sit in the bottom tab bar; tablets and desktops get a
 chip row under the top bar.
@@ -53,13 +54,13 @@ flutter pub get
 flutter run
 ```
 
-| Target | Command |
-|:--|:--|
+| Target  | Command                  |
+|:--------|:-------------------------|
 | Android | `flutter run -d android` |
-| iOS | `flutter run -d ios` |
+| iOS     | `flutter run -d ios`     |
 | Windows | `flutter run -d windows` |
-| macOS | `flutter run -d macos` |
-| Linux | `flutter run -d linux` |
+| macOS   | `flutter run -d macos`   |
+| Linux   | `flutter run -d linux`   |
 
 On first launch the app installs the default Cinemeta addon and starts the
 torrent engine. Nothing else needs configuring to start browsing.
@@ -71,31 +72,19 @@ build as the universal APK at a third of the size.
 
 ## Documentation
 
-Architecture, streaming pipeline, content sources, UI design tokens, player
-internals, roadmap, and contributing guidelines all live in
-[PlayTorrioMod's own docs](https://github.com/MediaHub-Org/PlayTorrioMod/tree/main/docs) —
-this fork doesn't carry a separate copy.
+| Document                     | What's in it                                                            |
+|:-----------------------------|:------------------------------------------------------------------------|
+| [Roadmap](docs/ROADMAP.md)   | What is still outstanding, and this app's relationship to PlayTorrioMod |
+| [Tasks](TASKS.md)            | Near-term checklist                                                     |
+| [Changelog](CHANGELOG.md)    | Notable changes by version                                              |
+| [Releases](docs/RELEASES.md) | Build/release process, Android signing                                  |
 
 ## Building and releases
 
 CI builds every platform. Pull requests run analysis, the test suite and an
 Android APK; merges to `main` run the same checks and refresh the shared build
-cache.
-
-To cut a downloadable build without tagging a release, dispatch the
-**Build and Release** workflow with a `release_tag` such as `v1.2.0` — it
-publishes all six platforms. Leave `release_tag` empty to build every platform
-and upload artifacts only.
-
-Dispatched builds default to `dev_build`, which titles the release `(dev)` and
-publishes it as a GitHub prerelease; the app shows the same marker next to its
-version. Untick it once a build has been verified on a device. Tags matching
-`v*` publish a full release; a tag carrying a semver prerelease suffix
-(`v1.2.0-rc.1`) publishes as a prerelease.
-
-Android release signing needs two repository secrets, and is what lets the
-in-app updater replace an existing install. Without them builds still
-succeed, signed with a throwaway debug key.
+cache. Full release-workflow and signing details are in
+[docs/RELEASES.md](docs/RELEASES.md).
 
 ## Credits
 
