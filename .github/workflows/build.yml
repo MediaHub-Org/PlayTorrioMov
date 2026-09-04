@@ -507,10 +507,10 @@ jobs:
           mkdir -p "$APP"
           cp -r build/linux/x64/release/bundle/* "$APP/"
 
-          if [ -f "assets/icon.png" ]; then
-            cp assets/icon.png "$APP/PlayTorrioMov.png"
-          elif [ -f "icon.png" ]; then
-            cp icon.png "$APP/PlayTorrioMov.png"
+          if [ -f "assets/icon-playtorriomov.png" ]; then
+            cp assets/icon-playtorriomov.png "$APP/PlayTorrioMov.png"
+          elif [ -f "icon-playtorriomov.png" ]; then
+            cp icon-playtorriomov.png "$APP/PlayTorrioMov.png"
           else
             touch "$APP/PlayTorrioMov.png"
           fi

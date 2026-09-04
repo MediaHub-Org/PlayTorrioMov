@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" alt="PlayTorrioMov logo" width="160"/>
+  <img src="assets/icon-playtorriomov.png" alt="PlayTorrioMov logo" width="160"/>
 </p>
 <p align="center">
   <h1 align="center">PlayTorrioMov</h1>

@@ -122,14 +122,14 @@ flutter_launcher_icons:
   remove_alpha_ios: true
   windows:
     generate: true
-    image_path: "assets/icon.png"
+    image_path: "assets/icon-playtorriomov.png"
   macos:
     generate: true
-    image_path: "assets/icon.png"
+    image_path: "assets/icon-playtorriomov.png"
   linux:
     generate: true
-    image_path: "assets/icon.png"
-  image_path: "assets/icon.png"
+    image_path: "assets/icon-playtorriomov.png"
+  image_path: "assets/icon-playtorriomov.png"
   min_sdk_android: 21
 
 # For information on the generic Dart part of this file, see the
@@ -146,7 +146,7 @@ flutter:
     enable-swift-package-manager: false
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/icon.png
+    - assets/icon-playtorriomov.png
     - assets/fonts/
 
   # An image asset can refer to one or more resolution-specific "variants", see
