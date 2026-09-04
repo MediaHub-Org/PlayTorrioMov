@@ -18,7 +18,7 @@ class SidebarLogo extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          'assets/icon-playtorriomov.png',
+          'assets/icon.png',
           width: iconSize,
           height: iconSize,
           fit: BoxFit.contain,
