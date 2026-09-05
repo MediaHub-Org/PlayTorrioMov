@@ -34,6 +34,37 @@ Two repository secrets are required:
 | `ANDROID_KEY_ALIAS` | no | Defaults to `playtorriomov` |
 | `ANDROID_KEY_PASSWORD` | no | Defaults to the store password |
 
+## All repository secrets
+
+Every secret `build.yml` reads, across all platforms:
+
+| Secret | Used for |
+|:--|:--|
+| `ANDROID_KEYSTORE_BASE64` | Release signing, see above |
+| `ANDROID_KEYSTORE_PASSWORD` | Release signing, see above |
+| `ANDROID_KEY_ALIAS` | Release signing, see above |
+| `ANDROID_KEY_PASSWORD` | Release signing, see above |
+| `ENV_FILE` | Contents written to `.env` before every build (`--dart-define-from-file=.env`); checked first |
+| `DOTENV` | Same as `ENV_FILE`, used only if `ENV_FILE` is unset |
+
+List secret **names** (GitHub never returns a secret's value once set, by
+design — there is no `gh` command or API call that reveals it, only who set
+it and when):
+
+```sh
+gh secret list -R MediaHub-Org/PlayTorrioMov
+```
+
+To set or rotate one (overwrites silently, no confirmation prompt):
+
+```sh
+gh secret set ANDROID_KEYSTORE_BASE64 -R MediaHub-Org/PlayTorrioMov < keystore.b64
+```
+
+If you don't have the original value (a keystore password, a generated
+`.env`), it must come from wherever it was first created — there's no way
+to recover it from GitHub.
+
 `keytool` allows one password to cover both the store and the key, and the
 alias is fixed by convention, so the last two are only needed for a
 keystore created with different values.
