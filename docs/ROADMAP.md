@@ -6,6 +6,14 @@ task tracking lives in [TASKS.md](../TASKS.md); this file is the longer arc.
 
 Last reconciled against the tree: **2026-09-05** (v1.1.6+14).
 
+**In progress, paused mid-session:** porting upstream's `ad0e40d`/`6c4d0cf`/
+`f1f1310` gap into Mov (see § Upstream tracking below for what each
+contains) is running in a background agent, isolated in its own git
+worktree/branch — not yet reviewed or merged into `master`. PlayTorrioMod's
+side of the same 3-commit gap is already done and pushed (`main` @
+`08978f0`). Next session: check on that agent's result, review its diff,
+merge if clean.
+
 ## Relationship to PlayTorrioMod
 
 PlayTorrioMov forked from
