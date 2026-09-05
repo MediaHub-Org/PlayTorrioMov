@@ -6,7 +6,9 @@
 - [ ] Logo: add extra element — black & white film-strip/clapperboard line
       accent (🎬🎞️ movie-action motif)
 - [ ] Consistent header spacing (margin/padding) across all pages
-- [ ] Fix Android back button
+- [x] Fix Android back button — root cause was `NestedNavigator` not
+      participating in the system back-gesture dispatch; see ROADMAP.md §
+      Resolved.
 - [ ] Fix tags on pages — only icon shows, doesn't fit screen
 - [x] Pull latest commits from original repo (PlayTorrioMod) and log them —
       done: PlayTorrioMod sits 3 commits behind its own upstream

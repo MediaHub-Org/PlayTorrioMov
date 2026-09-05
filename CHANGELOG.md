@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Android back button not popping pages pushed in the hub content area —
+  `NestedNavigator` now handles the system back gesture via
+  `NavigatorPopHandler`
+
+### Changed
+- New app icon, `assets/icon.png`, regenerated across all platforms
+
+## [1.1.6+14] - 2026-09-04
+
 ### Added
 - 30 new torrent/stream scraper sites and 7 new anime extractors, ported
   from upstream `ayman708-UX/PlayTorrioV3` (commit `b0aecf5`) side by side
@@ -15,7 +25,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `sizeBytes`, `qualityRank`) now memoized instead of recomputing regexes
   on every access; new `seeders` getter
 - Android "Direct Surface" player rendering toggle (`player_settings.dart`,
-  `video_player_settings_page.dart`)
+  `video_player_settings_page.dart`), now reachable from Settings
 
 ### Fixed
 - AniList catalog 403s — request now sends a browser-like User-Agent/
@@ -23,6 +33,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   from upstream `cc07994`)
 - IPTV player now actually applies `PlayerSettings`' video controller
   configuration instead of bare defaults
+- `app_info.dart` fallback version had drifted from `pubspec.yaml`
+
+### Removed
+- Dead code: `AnimeDetailsModal`, `MyListPage`, `ProfileRuntime` (a
+  hardcoded-always-true guard) and its `profile_async_authorization.dart`
+  re-export shim, the unused `flutter_inappwebview` dependency
+- Duplicated desktop-Chrome User-Agent literal across 51 scraper/extractor
+  files, collapsed into one shared constant
+
+### Cleared
+- `AppInfo.channel`'s `(dev)` marker — this release is the first to ship
+  as a full, non-prerelease build; see ROADMAP.md § Blocked on a device
 
 ## [1.1.5+13] - 2026-09-02
 
