@@ -27,11 +27,19 @@ class _NestedNavigatorState extends State<NestedNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: _navigatorKey,
-      onGenerateInitialRoutes: (navigator, initialRoute) {
-        return [MaterialPageRoute(builder: (_) => widget.child)];
-      },
+    // A plain Navigator never sees the Android system back button -- that
+    // goes to the app's root Navigator, which has nothing to pop while a
+    // page pushed in here is on top, so back would exit the app instead of
+    // popping the pushed page. NavigatorPopHandler is Flutter's own fix for
+    // this exact nested-Navigator case.
+    return NavigatorPopHandler<void>(
+      onPopWithResult: (_) => _navigatorKey.currentState?.maybePop(),
+      child: Navigator(
+        key: _navigatorKey,
+        onGenerateInitialRoutes: (navigator, initialRoute) {
+          return [MaterialPageRoute(builder: (_) => widget.child)];
+        },
+      ),
     );
   }
 }
