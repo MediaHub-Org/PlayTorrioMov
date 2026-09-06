@@ -19,6 +19,13 @@ class Movie {
     this.imdbRating,
   });
 
+  /// Whether this movie represents a collection or franchise item.
+  bool get isCollection =>
+      type == 'collections' ||
+      type == 'collection' ||
+      id.startsWith('ctmdb.') ||
+      name.toLowerCase().endsWith('collection');
+
   factory Movie.fromJson(
     Map<String, dynamic> json,
     String addonBaseUrl, {

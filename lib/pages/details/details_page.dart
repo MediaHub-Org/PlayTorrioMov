@@ -96,12 +96,17 @@ class _DetailsPageState extends State<DetailsPage>
   String? _resolvedType;
   String? _resolvedBaseUrl;
 
+  bool get _isCollection {
+    final t = _resolvedType ?? _detail?.type ?? widget.movie.type;
+    return t == 'collections' ||
+        t == 'collection' ||
+        widget.movie.isCollection ||
+        (_detail != null && _detail!.isCollection);
+  }
+
   bool get _isSeries {
     final t = _resolvedType ?? _detail?.type ?? widget.movie.type;
-    return t == 'series' ||
-        t == 'tv' ||
-        t == 'anime' ||
-        (_detail != null && _detail!.videos.isNotEmpty);
+    return (t == 'series' || t == 'tv' || t == 'anime' || (_detail != null && _detail!.videos.isNotEmpty)) && !_isCollection;
   }
 
   late AnimationController _animController;
@@ -192,6 +197,7 @@ class _DetailsPageState extends State<DetailsPage>
           detail: _detail!,
           type: _resolvedType ?? _detail!.type,
           selectedEpisode: ep,
+          isCollection: _isCollection,
         ),
       ),
     );
@@ -602,6 +608,8 @@ class _DetailsPageState extends State<DetailsPage>
                                 1) ...[
                               _buildSeasonSelector(meta),
                               const SizedBox(height: _Space.lg),
+                            ] else ...[
+                              _buildSectionHeader(_isCollection ? 'Movies in Collection' : 'Episodes'),
                             ],
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 550),
@@ -1162,7 +1170,9 @@ class _DetailsPageState extends State<DetailsPage>
             const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
             const SizedBox(width: 6),
             Text(
-              _isSeries ? 'Play Episodes' : 'Play Movie',
+              _isCollection
+                  ? 'Play First Movie'
+                  : (_isSeries ? 'Play Episodes' : 'Play Movie'),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 15,
@@ -1884,6 +1894,7 @@ class _DetailsPageState extends State<DetailsPage>
                           _detail?.poster ??
                           widget.movie.poster,
                       onTap: () => _handlePlayAction(ep),
+                      isCollection: _isCollection,
                     ),
                   );
                 },
@@ -2400,11 +2411,13 @@ class _EpisodeCard extends StatefulWidget {
   final Video episode;
   final String? fallbackImageUrl;
   final VoidCallback? onTap;
+  final bool isCollection;
 
   const _EpisodeCard({
     required this.episode,
     this.fallbackImageUrl,
     this.onTap,
+    this.isCollection = false,
   });
 
   @override
@@ -2516,7 +2529,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                         Row(
                           children: [
                             Text(
-                              'EP ${ep.episode ?? "?"}',
+                              widget.isCollection ? 'PART ${ep.episode ?? "?"}' : 'EP ${ep.episode ?? "?"}',
                               style: const TextStyle(
                                 color: _Palette.accent,
                                 fontWeight: FontWeight.bold,
@@ -2524,10 +2537,11 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                               ),
                             ),
                             const Spacer(),
-                            if (ep.released != null &&
-                                ep.released!.length >= 10)
+                            if (ep.released != null && ep.released!.length >= 4)
                               Text(
-                                ep.released!.substring(0, 10),
+                                widget.isCollection
+                                    ? ep.released!.substring(0, 4)
+                                    : (ep.released!.length >= 10 ? ep.released!.substring(0, 10) : ep.released!),
                                 style: const TextStyle(
                                   color: Colors.white38,
                                   fontSize: 11,

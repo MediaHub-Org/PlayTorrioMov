@@ -186,7 +186,8 @@ class AddonManager {
 
     // 1. Kick off all network requests concurrently
     for (final addon in active) {
-      final catalogsToFetch = addon.manifest.catalogs;
+      // Only auto-load catalogs where NO extra has isRequired: true
+      final catalogsToFetch = addon.manifest.catalogs.where((c) => c.canAutoLoadOnHome).toList();
 
       for (final catalog in catalogsToFetch) {
         sectionFutures.add(() async {
@@ -224,8 +225,8 @@ class AddonManager {
   Future<List<MovieSection>> _fetchAddonSections(
     InstalledAddon addon,
   ) async {
-    // Fetch all catalogs that the addon provides
-    final catalogsToFetch = addon.manifest.catalogs;
+    // Only auto-load catalogs where NO extra has isRequired: true
+    final catalogsToFetch = addon.manifest.catalogs.where((c) => c.canAutoLoadOnHome).toList();
 
     final futures = catalogsToFetch.map((catalog) async {
       try {
@@ -317,6 +318,24 @@ class AddonManager {
         .where((s) => s != null && s.movies.isNotEmpty)
         .cast<MovieSection>()
         .toList();
+  }
+
+  /// Returns all available catalogs from active catalog addons.
+  /// Includes selector-only catalogs (e.g. Tag, Performer) for Discover.
+  List<({InstalledAddon addon, AddonCatalog catalog})> getAvailableDiscoverCatalogs({
+    String? type,
+  }) {
+    final active = activeCatalogAddons;
+    final list = <({InstalledAddon addon, AddonCatalog catalog})>[];
+    for (final addon in active) {
+      for (final catalog in addon.manifest.catalogs) {
+        if (type != null && type.isNotEmpty && catalog.type != type) {
+          continue;
+        }
+        list.add((addon: addon, catalog: catalog));
+      }
+    }
+    return list;
   }
 
   /// Search across all active addons that support search.
@@ -433,7 +452,9 @@ class AddonManager {
   }
 
   /// Generate a human-readable name for a catalog.
-  String _catalogDisplayName(AddonCatalog catalog) {
+  String _catalogDisplayName(AddonCatalog catalog) => catalogDisplayName(catalog);
+
+  String catalogDisplayName(AddonCatalog catalog) {
     if (catalog.name != null && catalog.name!.isNotEmpty) {
       return catalog.name!;
     }
@@ -442,7 +463,9 @@ class AddonManager {
         ? 'Series'
         : (catalog.type == 'anime'
             ? 'Anime'
-            : (catalog.type == 'movie' ? 'Movies' : catalog.type));
+            : (catalog.type == 'collections' || catalog.type == 'collection'
+                ? 'Collections'
+                : (catalog.type == 'movie' ? 'Movies' : catalog.type)));
 
     switch (catalog.id) {
       case 'top':

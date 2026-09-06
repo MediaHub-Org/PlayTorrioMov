@@ -29,6 +29,20 @@ class AddonManifest {
   bool get supportsSubtitles => resources.contains('subtitles');
 
   factory AddonManifest.fromJson(Map<String, dynamic> json) {
+    final prefixes = _parseStringList(json['idPrefixes']);
+    if (json['resources'] is List) {
+      for (final r in json['resources']) {
+        if (r is Map && r['idPrefixes'] != null) {
+          final resPrefixes = _parseStringList(r['idPrefixes']);
+          for (final p in resPrefixes) {
+            if (!prefixes.contains(p)) {
+              prefixes.add(p);
+            }
+          }
+        }
+      }
+    }
+
     return AddonManifest(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'Unknown Addon',
@@ -37,7 +51,7 @@ class AddonManifest {
       logo: json['logo']?.toString(),
       resources: _parseResourceList(json['resources']),
       types: _parseStringList(json['types']),
-      idPrefixes: _parseStringList(json['idPrefixes']),
+      idPrefixes: prefixes,
       catalogs: (json['catalogs'] as List<dynamic>?)
               ?.map((e) => AddonCatalog.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -58,66 +72,202 @@ class AddonManifest {
       };
 }
 
+/// Represents a single extra parameter definition in a Stremio catalog manifest.
+class CatalogExtra {
+  final String name;
+  final bool isRequired;
+  final List<String> options;
+  final int? optionsLimit;
+
+  const CatalogExtra({
+    required this.name,
+    this.isRequired = false,
+    this.options = const [],
+    this.optionsLimit,
+  });
+
+  factory CatalogExtra.fromJson(dynamic json) {
+    if (json is String) {
+      return CatalogExtra(name: json);
+    }
+    if (json is Map) {
+      return CatalogExtra(
+        name: json['name']?.toString() ?? '',
+        isRequired: json['isRequired'] == true,
+        options: _parseStringList(json['options']),
+        optionsLimit: json['optionsLimit'] is int
+            ? json['optionsLimit'] as int
+            : int.tryParse(json['optionsLimit']?.toString() ?? ''),
+      );
+    }
+    return CatalogExtra(name: json?.toString() ?? '');
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'isRequired': isRequired,
+        'options': options,
+        if (optionsLimit != null) 'optionsLimit': optionsLimit,
+      };
+}
+
 class AddonCatalog {
   final String type;
   final String id;
   final String? name;
-  final List<String> genres;
-  final bool supportsSearch;
-  final bool supportsSkip;
+  final int? pageSize;
+  final List<CatalogExtra> extra;
 
   AddonCatalog({
     required this.type,
     required this.id,
     this.name,
-    required this.genres,
-    required this.supportsSearch,
-    required this.supportsSkip,
-  });
+    this.pageSize,
+    List<CatalogExtra>? extra,
+    List<String>? genres,
+    bool? supportsSearch,
+    bool? supportsSkip,
+  }) : extra = extra ?? [
+          if (genres != null && genres.isNotEmpty)
+            CatalogExtra(name: 'genre', options: genres),
+          if (supportsSearch == true)
+            const CatalogExtra(name: 'search'),
+          if (supportsSkip == true)
+            const CatalogExtra(name: 'skip'),
+        ];
+
+  /// Backward-compatible list of genres defined on this catalog.
+  List<String> get genres =>
+      extra.firstWhere((e) => e.name == 'genre', orElse: () => const CatalogExtra(name: 'genre')).options;
+
+  /// Whether this catalog represents a collection of movies/franchise sagas.
+  bool get isCollection => type == 'collections' || type == 'collection';
+
+  /// Whether this catalog supports freeform search query.
+  bool get supportsSearch => extra.any((e) => e.name == 'search');
+
+  /// Whether this catalog supports pagination via skip.
+  bool get supportsSkip => extra.any((e) => e.name == 'skip');
+
+  /// Whether this catalog has any extra marked isRequired: true.
+  bool get hasRequiredExtra => extra.any((e) => e.isRequired);
+
+  /// Whether this catalog requires search to be provided.
+  bool get isSearchRequired => extra.any((e) => e.name == 'search' && e.isRequired);
+
+  /// Catalogs that can be safely loaded as a row on the Home page.
+  /// Strictly requires that NO extra is marked with isRequired: true.
+  bool get canAutoLoadOnHome => !hasRequiredExtra;
+
+  /// All required extras for this catalog.
+  List<CatalogExtra> get requiredExtras => extra.where((e) => e.isRequired).toList();
+
+  /// All selectable extras (extras that have options, excluding skip and search).
+  List<CatalogExtra> get selectableExtras =>
+      extra.where((e) => e.name != 'skip' && e.name != 'search' && e.options.isNotEmpty).toList();
+
+  /// Look up an extra by name.
+  CatalogExtra? getExtra(String name) {
+    try {
+      return extra.firstWhere((e) => e.name == name);
+    } catch (_) {
+      return null;
+    }
+  }
 
   factory AddonCatalog.fromJson(Map<String, dynamic> json) {
-    final extras = <Map<String, dynamic>>[];
+    final parsedExtras = <CatalogExtra>[];
+    final seenExtraNames = <String>{};
 
-    // Parse both 'extra' and 'extraSupported' arrays
+    void addExtra(CatalogExtra e) {
+      if (e.name.isEmpty) return;
+      final existingIndex = parsedExtras.indexWhere((x) => x.name == e.name);
+      if (existingIndex >= 0) {
+        final existing = parsedExtras[existingIndex];
+        parsedExtras[existingIndex] = CatalogExtra(
+          name: existing.name,
+          isRequired: existing.isRequired || e.isRequired,
+          options: existing.options.isNotEmpty ? existing.options : e.options,
+          optionsLimit: existing.optionsLimit ?? e.optionsLimit,
+        );
+      } else {
+        parsedExtras.add(e);
+        seenExtraNames.add(e.name);
+      }
+    }
+
+    // 1. Parse both 'extra' and legacy 'extraSupported'
     for (final key in ['extra', 'extraSupported']) {
       if (json[key] is List) {
-        for (final e in json[key] as List) {
-          if (e is Map<String, dynamic>) {
-            extras.add(e);
-          } else if (e is String) {
-            extras.add({'name': e});
+        for (final item in json[key] as List) {
+          addExtra(CatalogExtra.fromJson(item));
+        }
+      }
+    }
+
+    // 2. Backward compatibility: legacy 'genres' field fallback
+    if (json['genres'] is List) {
+      final legacyGenres = _parseStringList(json['genres']);
+      if (legacyGenres.isNotEmpty) {
+        final idx = parsedExtras.indexWhere((x) => x.name.toLowerCase() == 'genre');
+        if (idx >= 0) {
+          final existing = parsedExtras[idx];
+          if (existing.options.isEmpty) {
+            parsedExtras[idx] = CatalogExtra(
+              name: existing.name,
+              isRequired: existing.isRequired,
+              options: legacyGenres,
+              optionsLimit: existing.optionsLimit,
+            );
+          }
+        } else {
+          addExtra(CatalogExtra(
+            name: 'genre',
+            options: legacyGenres,
+          ));
+        }
+      }
+    }
+
+    // 3. Backward compatibility: legacy 'extraRequired' list of strings
+    if (json['extraRequired'] is List) {
+      for (final item in json['extraRequired'] as List) {
+        final name = item.toString().trim().toLowerCase();
+        if (name.isNotEmpty) {
+          final idx = parsedExtras.indexWhere((x) => x.name.toLowerCase() == name);
+          if (idx >= 0) {
+            final existing = parsedExtras[idx];
+            parsedExtras[idx] = CatalogExtra(
+              name: existing.name,
+              isRequired: true,
+              options: existing.options,
+              optionsLimit: existing.optionsLimit,
+            );
+          } else {
+            addExtra(CatalogExtra(name: name, isRequired: true));
           }
         }
       }
     }
 
-    List<String> genres = [];
-    bool supportsSearch = json['supportsSearch'] as bool? ?? false;
-    bool supportsSkip = json['supportsSkip'] as bool? ?? false;
-
-    for (final extra in extras) {
-      final name = extra['name']?.toString();
-      if (name == 'genre') {
-        genres = _parseStringList(extra['options']);
-      } else if (name == 'search') {
-        supportsSearch = true;
-      } else if (name == 'skip') {
-        supportsSkip = true;
-      }
+    // 4. Backward compatibility: legacy 'supportsSearch' boolean
+    if (!seenExtraNames.contains('search') && json['supportsSearch'] == true) {
+      addExtra(const CatalogExtra(name: 'search'));
     }
 
-    // Legacy 'genres' field fallback
-    if (genres.isEmpty && json['genres'] is List) {
-      genres = _parseStringList(json['genres']);
+    // 5. Backward compatibility: legacy 'supportsSkip' boolean
+    if (!seenExtraNames.contains('skip') && json['supportsSkip'] == true) {
+      addExtra(const CatalogExtra(name: 'skip'));
     }
 
     return AddonCatalog(
       type: json['type']?.toString() ?? '',
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString(),
-      genres: genres,
-      supportsSearch: supportsSearch,
-      supportsSkip: supportsSkip,
+      pageSize: json['pageSize'] is int
+          ? json['pageSize'] as int
+          : int.tryParse(json['pageSize']?.toString() ?? ''),
+      extra: parsedExtras,
     );
   }
 
@@ -125,6 +275,9 @@ class AddonCatalog {
         'type': type,
         'id': id,
         if (name != null) 'name': name,
+        if (pageSize != null) 'pageSize': pageSize,
+        'extra': extra.map((e) => e.toJson()).toList(),
+        // Keep legacy fields for backward compatibility
         'genres': genres,
         'supportsSearch': supportsSearch,
         'supportsSkip': supportsSkip,

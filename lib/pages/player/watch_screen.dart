@@ -57,12 +57,15 @@ class WatchScreen extends StatefulWidget {
   final String type;
   final Duration? initialPosition;
 
+  final bool isCollection;
+
   const WatchScreen({
     super.key,
     required this.detail,
     this.selectedEpisode,
     required this.type,
     this.initialPosition,
+    this.isCollection = false,
   });
 
   @override
@@ -71,6 +74,17 @@ class WatchScreen extends StatefulWidget {
 
 class _WatchScreenState extends State<WatchScreen>
     with SingleTickerProviderStateMixin {
+  bool get _isCollection =>
+      widget.isCollection ||
+      widget.type == 'collections' ||
+      widget.type == 'collection' ||
+      widget.detail.isCollection ||
+      (widget.selectedEpisode != null &&
+          widget.selectedEpisode!.id.startsWith('tt') &&
+          (widget.detail.type == 'collections' ||
+              widget.detail.type == 'collection' ||
+              widget.detail.isCollection));
+
   // Stream sources
   final List<StreamSource> _sources = [];
   final List<StreamSource> _pendingSources = [];
@@ -122,14 +136,26 @@ class _WatchScreenState extends State<WatchScreen>
       _flushPendingSources();
     }
 
+    final isColl = _isCollection;
+    final effectiveType = isColl ? 'movie' : widget.type;
+    final effectiveTitle = (isColl && widget.selectedEpisode != null)
+        ? widget.selectedEpisode!.title
+        : widget.detail.name;
+    final epReleased = widget.selectedEpisode?.released;
+    final effectiveYear = (isColl && epReleased != null && epReleased.length >= 4)
+        ? int.tryParse(epReleased.substring(0, 4))
+        : int.tryParse(widget.detail.year ?? '');
+    final effectiveSeason = isColl ? null : widget.selectedEpisode?.season;
+    final effectiveEpisode = isColl ? null : widget.selectedEpisode?.episode;
+
     try {
       await for (final source in StreamService.fetchStreams(
-        type: widget.type,
+        type: effectiveType,
         id: streamId,
-        title: widget.detail.name,
-        year: int.tryParse(widget.detail.year ?? ''),
-        season: widget.selectedEpisode?.season,
-        episode: widget.selectedEpisode?.episode,
+        title: effectiveTitle,
+        year: effectiveYear,
+        season: effectiveSeason,
+        episode: effectiveEpisode,
       )) {
         if (!mounted) return;
         _pendingSources.add(source);
@@ -581,7 +607,9 @@ class _WatchScreenState extends State<WatchScreen>
               border: Border.all(color: _C.accent.withValues(alpha: 0.3)),
             ),
             child: Text(
-              'S${ep.season ?? '?'}E${ep.episode ?? '?'}',
+              _isCollection
+                  ? 'PART ${ep.episode ?? 1}'
+                  : 'S${ep.season ?? '?' }E${ep.episode ?? '?' }',
               style: const TextStyle(
                 color: _C.accent,
                 fontSize: 13,
@@ -1903,11 +1931,16 @@ class _SourceCardState extends State<_SourceCard> {
                 }
               }
 
+              final isColl = widget.detail.isCollection;
+              final effectiveTitle = (isColl && widget.episode != null && widget.episode!.title.isNotEmpty)
+                  ? widget.episode!.title
+                  : s.displayTitle;
+
               pushFullscreen(
                 CinematicSlideRoute(
                   page: PlayerScreen(
                     source: s,
-                    title: s.displayTitle,
+                    title: effectiveTitle,
                     backdropUrl: widget.backdropUrl,
                     logoUrl: widget.logoUrl,
                     detail: widget.detail,

@@ -4,7 +4,7 @@ import 'package:playtorriomov/services/player/player_settings.dart';
 void main() {
   group('PlayerSettings.isNonFatalError', () {
     test('ignores ffurl_read returned 0xffffff99 error', () {
-      final error = 'tcp: ffurl_read returned 0xffffff99';
+      const error = 'tcp: ffurl_read returned 0xffffff99';
       expect(PlayerSettings.isNonFatalError(error), isTrue);
     });
 

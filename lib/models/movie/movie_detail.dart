@@ -43,6 +43,13 @@ class MovieDetail {
     this.tmdbId,
   });
 
+  /// Whether this detail represents a collection or franchise item.
+  bool get isCollection =>
+      type == 'collections' ||
+      type == 'collection' ||
+      id.startsWith('ctmdb.') ||
+      name.toLowerCase().endsWith('collection');
+
   factory MovieDetail.fromJson(Map<String, dynamic> json) {
     final rawCast = json['cast'];
     final castStrings = _parseStringList(rawCast);

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../models/addon/addon.dart';
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_section.dart';
 import '../../services/metadata/metadata_service.dart';
@@ -26,7 +27,7 @@ class _CatalogPageState extends State<CatalogPage> {
   bool _hasMore = true;
   String? _error;
 
-  String? _selectedGenre;
+  final Map<String, String> _selectedExtras = {};
   String _searchQuery = '';
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
@@ -97,14 +98,26 @@ class _CatalogPageState extends State<CatalogPage> {
 
     if (!_hasMore) return;
 
+    // Check if all required extras are selected
+    if (widget.section.catalog.hasRequiredExtra) {
+      for (final req in widget.section.catalog.requiredExtras) {
+        final val = _selectedExtras[req.name];
+        if (val == null || val.trim().isEmpty) {
+          setState(() {
+            _isLoading = false;
+            _hasMore = false;
+          });
+          return;
+        }
+      }
+    }
+
     setState(() => _isLoading = true);
 
     try {
       List<Movie> newItems = [];
 
       if (_isSearching && _searchQuery.isNotEmpty) {
-        // Search usually doesn't support pagination in Stremio natively in the same way,
-        // but we'll try to fetch it.
         if (refresh) {
           newItems = await MetadataService.search(
             baseUrl: widget.section.addonBaseUrl,
@@ -112,14 +125,14 @@ class _CatalogPageState extends State<CatalogPage> {
             catalogId: widget.section.catalog.id,
             query: _searchQuery,
           );
-          _hasMore = false; // Usually search returns all relevant results or doesn't support skip
+          _hasMore = false;
         }
       } else {
         newItems = await MetadataService.fetchCatalog(
           baseUrl: widget.section.addonBaseUrl,
           type: widget.section.contentType,
           catalogId: widget.section.catalog.id,
-          genre: _selectedGenre,
+          extraParams: _selectedExtras.isNotEmpty ? _selectedExtras : null,
           skip: _items.length,
         );
       }
@@ -155,10 +168,14 @@ class _CatalogPageState extends State<CatalogPage> {
     }
   }
 
-  void _onGenreSelected(String? genre) {
-    if (_selectedGenre == genre) return;
+  void _onExtraSelected(String extraName, String? value) {
+    if (_selectedExtras[extraName] == value) return;
     setState(() {
-      _selectedGenre = genre;
+      if (value == null || value.isEmpty) {
+        _selectedExtras.remove(extraName);
+      } else {
+        _selectedExtras[extraName] = value;
+      }
       _isSearching = false;
       _searchQuery = '';
       _searchController.clear();
@@ -179,7 +196,7 @@ class _CatalogPageState extends State<CatalogPage> {
     setState(() {
       _isSearching = true;
       _searchQuery = query.trim();
-      _selectedGenre = null; // Clear genre when searching
+      _selectedExtras.clear();
     });
     _loadItems(refresh: true);
   }
@@ -199,9 +216,10 @@ class _CatalogPageState extends State<CatalogPage> {
     final sizing = MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width);
     final isDesktop = AppBreakpoints.of(context) == ScreenTier.desktop;
     
-    // Calculate safe top padding for grid based on if genres are available
-    final hasGenres = widget.section.catalog.genres.isNotEmpty && !_isSearching;
-    final gridTopPadding = topPadding + kToolbarHeight + (hasGenres ? 60 : 20) + 20;
+    // Calculate safe top padding for grid based on if filters are available
+    final selectableExtras = widget.section.catalog.selectableExtras;
+    final hasFilters = selectableExtras.isNotEmpty && !_isSearching;
+    final gridTopPadding = topPadding + kToolbarHeight + (hasFilters ? 60 : 20) + 20;
 
     return Scaffold(
       backgroundColor: const Color(0xFF080A0F),
@@ -236,7 +254,7 @@ class _CatalogPageState extends State<CatalogPage> {
               physics: const BouncingScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: ((MediaQuery.sizeOf(context).width - sizing.sidePadding * 2 + sizing.spacing) / (sizing.cardWidth + sizing.spacing)).floor().clamp(2, 10),
-                childAspectRatio: 1 / 1.48,
+                childAspectRatio: sizing.cardWidth / sizing.totalHeight,
                 crossAxisSpacing: sizing.spacing,
                 mainAxisSpacing: sizing.spacing,
               ),
@@ -342,66 +360,9 @@ class _CatalogPageState extends State<CatalogPage> {
                         ),
                       ),
                       
-                      // Genres Row
-                      if (hasGenres)
-                        MouseRegion(
-                          onEnter: (_) => setState(() => _isHoveringGenres = true),
-                          onExit: (_) => setState(() => _isHoveringGenres = false),
-                          child: Stack(
-                            children: [
-                              SizedBox(
-                                height: 50,
-                                child: ListView.separated(
-                                  controller: _genreScrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  physics: const BouncingScrollPhysics(),
-                                  itemCount: widget.section.catalog.genres.length + 1,
-                                  separatorBuilder: (context, index) => const SizedBox(width: 8),
-                                  itemBuilder: (context, index) {
-                                    if (index == 0) {
-                                      return _GenreChip(
-                                        label: 'All',
-                                        isSelected: _selectedGenre == null,
-                                        onTap: () => _onGenreSelected(null),
-                                      );
-                                    }
-                                    final genre = widget.section.catalog.genres[index - 1];
-                                    return _GenreChip(
-                                      label: genre,
-                                      isSelected: _selectedGenre == genre,
-                                      onTap: () => _onGenreSelected(genre),
-                                    );
-                                  },
-                                ),
-                              ),
-                              if (isDesktop) ...[
-                                if (_canScrollGenresLeft)
-                                  Positioned(
-                                    left: 0,
-                                    top: 0,
-                                    bottom: 0,
-                                    child: _buildScrollArrow(
-                                      Icons.arrow_back_ios_new_rounded,
-                                      () => _scrollGenres(-1),
-                                      _isHoveringGenres,
-                                    ),
-                                  ),
-                                if (_canScrollGenresRight)
-                                  Positioned(
-                                    right: 0,
-                                    top: 0,
-                                    bottom: 0,
-                                    child: _buildScrollArrow(
-                                      Icons.arrow_forward_ios_rounded,
-                                      () => _scrollGenres(1),
-                                      _isHoveringGenres,
-                                    ),
-                                  ),
-                              ],
-                            ],
-                          ),
-                        ),
+                      // Selectable Extras Row (Genre, Tag, Sort, etc.)
+                      if (hasFilters)
+                        _buildFilterRow(selectableExtras, isDesktop),
                     ],
                   ),
                 ),
@@ -409,6 +370,152 @@ class _CatalogPageState extends State<CatalogPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFilterRow(List<CatalogExtra> selectableExtras, bool isDesktop) {
+    if (selectableExtras.length == 1) {
+      final singleExtra = selectableExtras.first;
+      final options = singleExtra.options;
+      return MouseRegion(
+        onEnter: (_) => setState(() => _isHoveringGenres = true),
+        onExit: (_) => setState(() => _isHoveringGenres = false),
+        child: Stack(
+          children: [
+            SizedBox(
+              height: 50,
+              child: ListView.separated(
+                controller: _genreScrollController,
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                physics: const BouncingScrollPhysics(),
+                itemCount: options.length + (singleExtra.isRequired ? 0 : 1),
+                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  if (!singleExtra.isRequired) {
+                    if (index == 0) {
+                      return _GenreChip(
+                        label: 'All',
+                        isSelected: _selectedExtras[singleExtra.name] == null,
+                        onTap: () => _onExtraSelected(singleExtra.name, null),
+                      );
+                    }
+                    final opt = options[index - 1];
+                    return _GenreChip(
+                      label: opt,
+                      isSelected: _selectedExtras[singleExtra.name] == opt,
+                      onTap: () => _onExtraSelected(singleExtra.name, opt),
+                    );
+                  }
+                  final opt = options[index];
+                  return _GenreChip(
+                    label: opt,
+                    isSelected: _selectedExtras[singleExtra.name] == opt,
+                    onTap: () => _onExtraSelected(singleExtra.name, opt),
+                  );
+                },
+              ),
+            ),
+            if (isDesktop) ...[
+              if (_canScrollGenresLeft)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: _buildScrollArrow(
+                    Icons.arrow_back_ios_new_rounded,
+                    () => _scrollGenres(-1),
+                    _isHoveringGenres,
+                  ),
+                ),
+              if (_canScrollGenresRight)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: _buildScrollArrow(
+                    Icons.arrow_forward_ios_rounded,
+                    () => _scrollGenres(1),
+                    _isHoveringGenres,
+                  ),
+                ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 50,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        physics: const BouncingScrollPhysics(),
+        itemCount: selectableExtras.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final extra = selectableExtras[index];
+          final currentVal = _selectedExtras[extra.name];
+          final label = currentVal ?? (extra.isRequired ? 'Select ${extra.name}' : 'All ${extra.name}');
+          return PopupMenuButton<String?>(
+            tooltip: extra.name,
+            color: const Color(0xFF15171F),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            onSelected: (val) => _onExtraSelected(extra.name, val),
+            itemBuilder: (context) => [
+              if (!extra.isRequired)
+                const PopupMenuItem<String?>(
+                  value: null,
+                  child: Text('All', style: TextStyle(color: Colors.white)),
+                ),
+              ...extra.options.map(
+                (opt) => PopupMenuItem<String?>(
+                  value: opt,
+                  child: Text(
+                    opt,
+                    style: TextStyle(
+                      color: opt == currentVal ? const Color(0xFF7C5CFF) : Colors.white,
+                      fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: currentVal != null ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: currentVal != null ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.12),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${extra.name.toUpperCase()}: $label',
+                    style: TextStyle(
+                      color: currentVal != null ? Colors.white : Colors.white.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    size: 18,
+                    color: currentVal != null ? Colors.white : Colors.white70,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

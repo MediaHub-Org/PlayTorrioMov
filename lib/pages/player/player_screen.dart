@@ -502,12 +502,13 @@ class _PlayerScreenState extends State<PlayerScreen>
 
         final detail = widget.detail;
         if (detail != null) {
-          final targetId = detail.id.startsWith('tt')
-              ? detail.id
-              : (detail.tmdbId ?? detail.id);
+          final isColl = detail.isCollection;
+          final targetId = (_currentEpisode != null && _currentEpisode!.id.startsWith('tt'))
+              ? _currentEpisode!.id
+              : (detail.id.startsWith('tt') ? detail.id : (detail.tmdbId ?? detail.id));
           if (targetId.isNotEmpty) {
-            final s = _currentEpisode?.season;
-            final e = _currentEpisode?.episode;
+            final s = isColl ? null : _currentEpisode?.season;
+            final e = isColl ? null : _currentEpisode?.episode;
             final initPos = widget.initialPosition?.inSeconds ?? 0;
             final dur = _player.state.duration.inSeconds;
             final progress = (dur > 0 ? (initPos / dur) * 100.0 : 0.0).clamp(
@@ -805,17 +806,28 @@ class _PlayerScreenState extends State<PlayerScreen>
         final yMatch = RegExp(r'\b(19\d\d|20\d\d)\b').firstMatch(rawName);
         if (yMatch != null) searchYear = int.tryParse(yMatch.group(1)!);
       }
-      final showName = cleanMediaTitle(rawName);
-      print(
-        '[PlayerScreen] Scraping initial subtitles for "$showName" (year: $searchYear, imdb: ${widget.detail?.id})...',
-      );
+      final isColl = widget.detail?.isCollection == true;
+      final targetImdbId = (_currentEpisode != null && _currentEpisode!.id.startsWith('tt'))
+          ? _currentEpisode!.id
+          : widget.detail?.id;
+      final targetName = (isColl && _currentEpisode != null && _currentEpisode!.title.isNotEmpty)
+          ? _currentEpisode!.title
+          : rawName;
+      final targetYear = (isColl && _currentEpisode?.released != null && _currentEpisode!.released!.length >= 4)
+          ? int.tryParse(_currentEpisode!.released!.substring(0, 4))
+          : searchYear;
+      final targetSeason = isColl ? null : _currentEpisode?.season;
+      final targetEpisode = isColl ? null : _currentEpisode?.episode;
+      final showName = cleanMediaTitle(targetName);
+
+      print('[PlayerScreen] Scraping initial subtitles for "$showName" (year: $targetYear, imdb: $targetImdbId)...');
 
       final groups = await SubtitleService().fetchAllSubtitles(
         showName,
-        imdbId: widget.detail?.id,
-        season: _currentEpisode?.season,
-        episode: _currentEpisode?.episode,
-        year: searchYear,
+        imdbId: targetImdbId,
+        season: targetSeason,
+        episode: targetEpisode,
+        year: targetYear,
       );
       print(
         '[PlayerScreen] Scraped ${groups.length} subtitle language groups with ${groups.fold(0, (s, g) => s + g.variants.length)} total variants',
@@ -1952,9 +1964,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   Widget _buildControlsOverlay() {
     final buffered = _buffered;
 
+    final isColl = widget.detail?.isCollection == true;
     final episodeTitle = _currentEpisode?.title;
     final episodeSubtitle = _currentEpisode != null
-        ? 'S${_currentEpisode!.season ?? 1}:E${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
+        ? (isColl
+            ? 'Part ${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
+            : 'S${_currentEpisode!.season ?? 1}:E${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}')
         : widget.detail?.year;
 
     final isOfflineFile = _currentSource.name == 'Downloaded';

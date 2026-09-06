@@ -44,6 +44,26 @@ Verification: `flutter analyze` on all touched files — 0 errors (1 pre-existin
 
 ## f1f1310 — Stremio catalog-extra & collection addons
 
-Branch: `port/f1f1310-stremio-catalog-extras` (planned, off branch 2)
+Branch: `port/f1f1310-stremio-catalog-extras` (off branch 2)
 
-⬜ Not started yet.
+| File | Status | Note |
+|---|---|---|
+| `lib/models/addon/addon.dart` | ✅ | Clean cherry-pick — `AddonCatalogExtra` model (required/optional extras, options, limits). |
+| `lib/models/movie/movie_detail.dart` | ✅ | Clean cherry-pick. |
+| `lib/pages/catalog/catalog_page.dart` | ✅ | Clean cherry-pick. |
+| `lib/services/metadata/metadata_service.dart` | ✅ | Clean cherry-pick. |
+| `lib/pages/discover/discover_page.dart` | ✍️ | Cherry-pick applied clean at the diff level, but the result referenced `dock_settings.dart`/`app_liquid_dock.dart` (V3's three-hub dock, which this repo doesn't have) for a "Liquid Dock Navbar" `Positioned` overlay + 2 imports — removed both; `DiscoverPage` is pushed as a standalone page from search/genre/tag browsing here (see ROADMAP § Navigation principle), it was never dock-bearing on this tree. Everything else (the catalog-extra UI, collection support) is intact. |
+| `lib/models/movie/movie.dart` | ✍️ | Trivial: added the `isCollection` getter; conflict was purely because Mov's `fromJson` already has an extra `fallbackType` param upstream doesn't have. |
+| `lib/pages/details/details_page.dart` | ✍️ | 4 small hunks: `_isCollection`-aware `_isSeries`, "Play First Movie" button label, `_EpisodeCard.isCollection` param + PART/year labels for collection parts. One self-inflicted syntax slip while hand-merging (missing a closing paren after moving a `Text(...)` block) — caught by `flutter analyze` and fixed before commit. |
+| `lib/pages/player/watch_screen.dart` | ✍️ | 1 hunk: collection-aware `effectiveTitle` (uses the episode/part title over the raw stream title) feeding into Mov's existing `pushFullscreen(CinematicSlideRoute(...))` navigation (kept Mov's transition wrapper, upstream used a plain `MaterialPageRoute`). |
+| `lib/pages/player/player_screen.dart` | ✍️ | 2 hunks: normalize to the collection part's own IMDb id (via `_currentEpisode`) for continue-watching progress tracking and for initial-subtitle search (title/year/season/episode all resolve to the part, not the parent collection). |
+| `lib/services/addon/addon_manager.dart` | ✍️ | Not a real conflict — two independent methods (Mov's own pre-existing `fetchByType` and upstream's new `getAvailableDiscoverCatalogs`) landed at the same spot; kept both. |
+| `test/models/catalog_extra_test.dart`, `test/models/collection_addon_test.dart` | ✅ | Clean cherry-pick; fixed `package:playtorrio/…` → `package:playtorriomov/…` imports. 17/17 pass. |
+| `test/test_player_error_filter.dart` | ✅ | Trivial `final` → `const` lint hunk from this commit, layered on top of branch 2's version of the file. |
+| `lib/pages/home/home_page.dart`, `lib/services/theme/dock_settings.dart`, `lib/widgets/common/app_liquid_dock.dart` | ⏭️ | V3's three-hub dock nav — declined architecture for this app (ROADMAP § Navigation principle / Declined). |
+
+Verification: `flutter analyze` on all touched files — 0 errors (1 pre-existing, unrelated info-level lint in `details_page.dart:492`, present before this port too). `flutter test` on the 3 new/touched test files — 22/22 pass. Full `flutter test` — same 1 pre-existing PeeStream network flake as branches 1–2, no new failures.
+
+## Status
+
+All 3 commits ported (`port/ad0e40d-dub-lang-filtering` → `port/6c4d0cf-stream-error-filtering` → `port/f1f1310-stremio-catalog-extras`, stacked in that order). Left as 3 separate branches for review rather than merged to `master` — see ROADMAP.md's Upstream tracking table for the merge decision once reviewed.
