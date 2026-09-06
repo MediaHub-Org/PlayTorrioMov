@@ -84,8 +84,11 @@ class _HubPageState extends State<HubPage> {
             Positioned.fill(
               child: AdaptiveNavShell(
                 onSettingsTap: () async {
-                  await Navigator.push(
-                    context,
+                  // Pushed through the nested navigator (the same one Details
+                  // and Search use), not the root one -- so it renders inside
+                  // the content box below TopBar/SectionTopBar instead of
+                  // covering the whole screen and hiding the 5 sections.
+                  await _navKey.currentState!.push(
                     LiquidRevealRoute(
                       page: const SettingsPage(),
                       tapPosition: null,
