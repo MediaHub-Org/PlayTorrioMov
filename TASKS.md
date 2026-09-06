@@ -33,6 +33,10 @@
       add a Watched chip to Library; add a favorite-channel heart on IPTV
       channel cards with a new Live TV chip in Library to show them — see
       ROADMAP.md § Resolved #18
+- [x] Remove Custom Background/Wallpaper and Liquid Glass setup (both
+      leftover from PlayTorrioMod, the latter themed a dock that no
+      longer exists here); fix Settings hiding the 5-section bar the same
+      way Details/Search did — see ROADMAP.md § Resolved #20
 - [x] Fix IPTV channel favoriting discoverability, the 5-section bar being
       hidden behind Details/Search pages on desktop, the Settings icon's
       remaining position drift (a `Flexible`/`Spacer` flex-space bug), and

@@ -120,6 +120,30 @@ See Resolved below for #13 (nav split), #14 (Settings position), and #16
 
 ## Resolved
 
+- ~~**#20 Remove Custom Background/Wallpaper and Liquid Glass, fix Settings hiding the 5-section bar**~~ —
+  a follow-up batch after #19:
+  - Custom Background & Wallpaper (a settings page letting a user replace
+    the ambient theme background with a photo/preset image) and Liquid
+    Glass Setup (hover/wobble/refraction physics tuning for a real
+    liquid-glass rendering path) were both leftover from PlayTorrioMod,
+    the app this repo forked from. Liquid Glass's own scope note named
+    the bottom dock as one of the things it themed, but the dock
+    (`AppLiquidDock`, PlayTorrioMod's hub-switcher) doesn't exist in this
+    single-hub app — that note was half describing UI that was already
+    gone. Both removed: `CustomBackgroundService`,
+    `AnimatedAmbientBackground`'s wallpaper-blending branch,
+    `GlassSettings`, and every gated `LiquidGlassView`/`LiquidGlassLens`
+    branch across the player, Anime, and Live TV pages (which were
+    permanently dead code anyway — the toggle defaulted off and nothing
+    could turn it on without the now-removed settings page). Dropped the
+    `liquid_glass_easy` dependency.
+  - Settings had the same "hides the 5 sections" bug #19 fixed for
+    Details/Search: it was pushed on the root Navigator instead of the
+    hub's nested one, covering `AdaptiveNavShell` entirely. Routed
+    through the same `_navKey` `HubPage` already uses to pop
+    Details/Search when the section switches underneath them, so
+    Settings now renders inside the content box with the 5 sections
+    still visible and tappable behind it.
 - ~~**#19 IPTV favorite discoverability, back button design, 5-section bar hidden on desktop, Settings drift (final root cause)**~~ —
   four items reported together from live testing after #18 shipped:
   - *"Not possible to like IPTV channel"* — the heart from #18 actually
