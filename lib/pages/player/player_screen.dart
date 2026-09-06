@@ -503,7 +503,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         final detail = widget.detail;
         if (detail != null) {
           final isColl = detail.isCollection;
-          final targetId = (_currentEpisode != null && _currentEpisode!.id.startsWith('tt'))
+          final targetId = (isColl && _currentEpisode != null && _currentEpisode!.id.startsWith('tt'))
               ? _currentEpisode!.id
               : (detail.id.startsWith('tt') ? detail.id : (detail.tmdbId ?? detail.id));
           if (targetId.isNotEmpty) {
@@ -807,7 +807,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         if (yMatch != null) searchYear = int.tryParse(yMatch.group(1)!);
       }
       final isColl = widget.detail?.isCollection == true;
-      final targetImdbId = (_currentEpisode != null && _currentEpisode!.id.startsWith('tt'))
+      final targetImdbId = (isColl && _currentEpisode != null && _currentEpisode!.id.startsWith('tt'))
           ? _currentEpisode!.id
           : widget.detail?.id;
       final targetName = (isColl && _currentEpisode != null && _currentEpisode!.title.isNotEmpty)

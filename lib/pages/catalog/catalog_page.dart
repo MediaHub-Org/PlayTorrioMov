@@ -188,6 +188,7 @@ class _CatalogPageState extends State<CatalogPage> {
       setState(() {
         _isSearching = false;
         _searchQuery = '';
+        _selectedExtras.remove('search');
       });
       _loadItems(refresh: true);
       return;
@@ -197,6 +198,7 @@ class _CatalogPageState extends State<CatalogPage> {
       _isSearching = true;
       _searchQuery = query.trim();
       _selectedExtras.clear();
+      _selectedExtras['search'] = query.trim();
     });
     _loadItems(refresh: true);
   }

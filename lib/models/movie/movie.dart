@@ -23,8 +23,7 @@ class Movie {
   bool get isCollection =>
       type == 'collections' ||
       type == 'collection' ||
-      id.startsWith('ctmdb.') ||
-      name.toLowerCase().endsWith('collection');
+      id.startsWith('ctmdb.');
 
   factory Movie.fromJson(
     Map<String, dynamic> json,

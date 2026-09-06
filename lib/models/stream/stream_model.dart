@@ -123,7 +123,7 @@ class StreamSource {
   );
 
   static final RegExp _frenchRegex = RegExp(
-    r'\b(french|francais|français|paris|truefrench|vff|vfi|fre)\b(?![- ]?(?:sub|subbed|subs|subtitles))|\bvf\b',
+    r'\b(french|francais|français|paris|truefrench|vff|vfi|fre|vf)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
     caseSensitive: false,
   );
 
@@ -148,20 +148,35 @@ class StreamSource {
   );
 
   static final RegExp _englishRegex = RegExp(
-    r'\b(eng|english|original audio|miami|seattle|denver|chicago|dallas|atlanta|houston|boston)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    r'\b(eng|english|original audio)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
     caseSensitive: false,
   );
+
+  /// Movy's server-name labels (e.g. "[Movy - Miami]") double as an
+  /// original-audio marker, but only when scoped to Movy's own streams —
+  /// these city names appear too often in unrelated titles/descriptions to
+  /// be treated as a general English signal.
+  static final RegExp _movyCityRegex = RegExp(
+    r'\b(miami|seattle|denver|chicago|dallas|atlanta|houston|boston)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  /// Concatenated title/name/description text with [mediaTitle] stripped out,
+  /// so the media's own name can't be mistaken for an audio-language tag.
+  String _textWithoutMediaTitle({String? mediaTitle}) {
+    var fullText = '${title ?? ''} ${name ?? ''} ${description ?? ''}';
+    if (mediaTitle != null && mediaTitle.trim().isNotEmpty) {
+      final sanitized = RegExp.escape(mediaTitle.trim());
+      fullText = fullText.replaceAll(RegExp(sanitized, caseSensitive: false), ' ');
+    }
+    return fullText;
+  }
 
   /// Returns detected audio languages for this stream.
   /// Standard keys: 'multi', 'english', 'hindi', 'german', 'french', 'spanish', 'russian', 'japanese', 'italian'.
   Set<String> getAudioLanguages({String? mediaTitle}) {
     final tags = <String>{};
-    var fullText = '${title ?? ''} ${name ?? ''} ${description ?? ''}';
-
-    if (mediaTitle != null && mediaTitle.trim().isNotEmpty) {
-      final sanitized = RegExp.escape(mediaTitle.trim());
-      fullText = fullText.replaceAll(RegExp(sanitized, caseSensitive: false), ' ');
-    }
+    var fullText = _textWithoutMediaTitle(mediaTitle: mediaTitle);
 
     // Strip explicit subtitle listings so they don't trigger audio tags
     fullText = fullText.replaceAll(
@@ -179,7 +194,10 @@ class StreamSource {
     if (_italianRegex.hasMatch(fullText)) tags.add('italian');
 
     final hasRegional = tags.any((t) => t != 'multi');
-    if (_englishRegex.hasMatch(fullText) || !hasRegional) {
+    final isMovySource = fullText.toLowerCase().contains('movy');
+    if (_englishRegex.hasMatch(fullText) ||
+        (isMovySource && _movyCityRegex.hasMatch(fullText)) ||
+        !hasRegional) {
       tags.add('english');
     }
 
@@ -198,7 +216,7 @@ class StreamSource {
     final langs = getAudioLanguages(mediaTitle: mediaTitle);
     if (langs.contains('multi')) return '🌐 MULTI';
     if (langs.contains('hindi')) {
-      final text = '${title ?? ''} ${name ?? ''} ${description ?? ''}'.toLowerCase();
+      final text = _textWithoutMediaTitle(mediaTitle: mediaTitle).toLowerCase();
       if (text.contains('telugu')) return '🇮🇳 TELUGU';
       if (text.contains('tamil')) return '🇮🇳 TAMIL';
       if (text.contains('malayalam')) return '🇮🇳 MALAYALAM';
@@ -213,7 +231,7 @@ class StreamSource {
     if (langs.contains('japanese')) return '🇯🇵 JPN';
     if (langs.contains('italian')) return '🇮🇹 ITA';
 
-    final text = '${title ?? ''} ${name ?? ''} ${description ?? ''}';
+    final text = _textWithoutMediaTitle(mediaTitle: mediaTitle);
     if (RegExp(r'\b(eng|english)\b', caseSensitive: false).hasMatch(text)) {
       return '🇺🇸 ENG';
     }

@@ -316,7 +316,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
           _hasMore = false;
         } else {
           _items.addAll(newItems);
-          if (newItems.length < 10) {
+          final declaredPageSize = entry.catalog.pageSize;
+          if (declaredPageSize != null && newItems.length < declaredPageSize) {
             _hasMore = false;
           }
         }
@@ -346,6 +347,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       setState(() {
         _isSearching = false;
         _searchQuery = '';
+        _selectedExtras.remove('search');
       });
       _checkAndLoadCatalog();
       return;
@@ -354,6 +356,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     setState(() {
       _isSearching = true;
       _searchQuery = query.trim();
+      _selectedExtras['search'] = query.trim();
     });
     _checkAndLoadCatalog();
   }
@@ -669,7 +672,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     final controller = TextEditingController(text: _selectedExtras[extraName] ?? '');
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF15171F),
@@ -722,7 +725,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           ),
         ],
       ),
-    );
+    ).then((_) => controller.dispose());
   }
 
   Widget _buildHeader(

@@ -124,7 +124,7 @@ class PurstreamScraper extends StreamScraper {
             name: 'PlayTorrioHTTP',
             addonName: 'PlayTorrioHTTP',
             title: streamTitle,
-            description: 'Purstream Multi-Audio HLS Stream',
+            description: 'Purstream HLS Stream',
             url: sUrl,
             headers: reqHeaders,
             behaviorHints: {

@@ -47,8 +47,7 @@ class MovieDetail {
   bool get isCollection =>
       type == 'collections' ||
       type == 'collection' ||
-      id.startsWith('ctmdb.') ||
-      name.toLowerCase().endsWith('collection');
+      id.startsWith('ctmdb.');
 
   factory MovieDetail.fromJson(Map<String, dynamic> json) {
     final rawCast = json['cast'];

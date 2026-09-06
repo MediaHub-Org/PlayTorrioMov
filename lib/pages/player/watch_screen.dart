@@ -78,12 +78,7 @@ class _WatchScreenState extends State<WatchScreen>
       widget.isCollection ||
       widget.type == 'collections' ||
       widget.type == 'collection' ||
-      widget.detail.isCollection ||
-      (widget.selectedEpisode != null &&
-          widget.selectedEpisode!.id.startsWith('tt') &&
-          (widget.detail.type == 'collections' ||
-              widget.detail.type == 'collection' ||
-              widget.detail.isCollection));
+      widget.detail.isCollection;
 
   // Stream sources
   final List<StreamSource> _sources = [];

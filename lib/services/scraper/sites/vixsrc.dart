@@ -111,7 +111,7 @@ class VixSrcScraper extends StreamScraper {
           'hi': 'Hindi',
         };
         final langName = langMap[lang.toLowerCase()] ?? lang.toUpperCase();
-        final title = isForeign
+        final displayTitle = isForeign
             ? 'VixSrc · Master HLS · $langName · 1080p'
             : 'VixSrc · Master HLS · 1080p';
         final desc = isForeign
@@ -126,7 +126,7 @@ class VixSrcScraper extends StreamScraper {
         yield StreamSource(
           name: 'PlayTorrioHTTP',
           addonName: 'PlayTorrioHTTP',
-          title: title,
+          title: displayTitle,
           description: desc,
           url: rawMasterUrl,
           headers: reqHeaders,
