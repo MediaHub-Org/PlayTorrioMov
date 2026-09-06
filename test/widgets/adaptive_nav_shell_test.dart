@@ -15,11 +15,11 @@ void setSurfaceWidth(WidgetTester tester, double width) {
 
 void main() {
   setUp(() {
-    HubController.instance.setMediaSection('watch');
+    HubController.instance.setMediaSection('movies');
   });
 
   group('AdaptiveNavShell', () {
-    testWidgets('mobile bottom bar carries the four sections', (tester) async {
+    testWidgets('mobile bottom bar carries the five sections', (tester) async {
       setSurfaceWidth(tester, 400);
       await tester.pumpWidget(wrap(const AdaptiveNavShell(child: SizedBox.shrink())));
       await tester.pumpAndSettle();
@@ -27,7 +27,8 @@ void main() {
       expect(find.byKey(const Key('adaptiveNavMobileBar')), findsOneWidget);
       expect(find.byType(TopBar), findsNothing);
 
-      expect(find.text('Movies & Series'), findsOneWidget);
+      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('Series'), findsOneWidget);
       expect(find.text('Anime'), findsOneWidget);
       expect(find.text('Live TV'), findsOneWidget);
       expect(find.text('Library'), findsOneWidget);

@@ -12,7 +12,7 @@ import '../settings/settings_page.dart';
 import 'media_hub.dart';
 
 /// HubPage: the top-level container hosting the app's single Media hub
-/// (Movies & Series, Anime, Live TV, Library).
+/// (Movies, Series, Anime, Live TV, Library).
 class HubPage extends StatefulWidget {
   const HubPage({super.key});
 
@@ -34,14 +34,11 @@ class _HubPageState extends State<HubPage> {
   // switch (see NestedNavigator.navigatorKey).
   final _navKey = GlobalKey<NavigatorState>();
   String? _lastMediaSection;
-  String? _lastWatchType;
 
   void _onHubControllerChanged() {
     final section = HubController.instance.mediaSection;
-    final watchType = HubController.instance.watchType;
-    if (section == _lastMediaSection && watchType == _lastWatchType) return;
+    if (section == _lastMediaSection) return;
     _lastMediaSection = section;
-    _lastWatchType = watchType;
     _navKey.currentState?.popUntil((route) => route.isFirst);
   }
 
@@ -49,7 +46,6 @@ class _HubPageState extends State<HubPage> {
   void initState() {
     super.initState();
     _lastMediaSection = HubController.instance.mediaSection;
-    _lastWatchType = HubController.instance.watchType;
     HubController.instance.addListener(_onHubControllerChanged);
   }
 

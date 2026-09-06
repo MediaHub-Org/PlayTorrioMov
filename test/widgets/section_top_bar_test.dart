@@ -15,7 +15,7 @@ void setSurfaceWidth(WidgetTester tester, double width) {
 void main() {
   setUp(() {
     // HubController is a singleton, so reset the active section between tests.
-    HubController.instance.setMediaSection('watch');
+    HubController.instance.setMediaSection('movies');
   });
 
   group('SectionTopBar', () {
@@ -25,7 +25,7 @@ void main() {
       await tester.pumpWidget(wrap(const SectionTopBar()));
       await tester.pumpAndSettle();
 
-      expect(find.text('Movies & Series'), findsNothing);
+      expect(find.text('Movies'), findsNothing);
       expect(find.text('Anime'), findsNothing);
       expect(find.text('Library'), findsNothing);
     });
@@ -35,7 +35,8 @@ void main() {
       await tester.pumpWidget(wrap(const SectionTopBar()));
       await tester.pumpAndSettle();
 
-      expect(find.text('Movies & Series'), findsOneWidget);
+      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('Series'), findsOneWidget);
       expect(find.text('Anime'), findsOneWidget);
       expect(find.text('Live TV'), findsOneWidget);
       expect(find.text('Library'), findsOneWidget);
@@ -54,12 +55,11 @@ void main() {
   });
 
   group('HubController sections', () {
-    test('Media hub exposes exactly four sections', () {
+    test('Media hub exposes exactly five sections', () {
       expect(
         HubController.instance.currentSections.length,
-        4,
-        reason: 'the Media hub must have four sections so the mobile '
-            'bottom bar divides evenly',
+        5,
+        reason: 'Movies, Series, Anime, Live TV, Library',
       );
     });
 
@@ -67,10 +67,11 @@ void main() {
       expect(HubController.instance.currentSections.last.label, 'Library');
     });
 
-    test('merged sections keep their two sides selectable', () {
-      expect(HubController.instance.watchType, 'movie');
-      HubController.instance.setWatchType('series');
-      expect(HubController.instance.watchType, 'series');
+    test('Movies and Series are both selectable top-level sections', () {
+      HubController.instance.setMediaSection('movies');
+      expect(HubController.instance.mediaSection, 'movies');
+      HubController.instance.setMediaSection('series');
+      expect(HubController.instance.mediaSection, 'series');
     });
   });
 }

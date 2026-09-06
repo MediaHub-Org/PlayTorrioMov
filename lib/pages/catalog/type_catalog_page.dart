@@ -12,7 +12,6 @@ import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/error_view.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/page_search_button.dart';
-import '../../widgets/common/pill_tab_row.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
@@ -24,17 +23,15 @@ enum _CatalogSort { yearNewest, yearOldest }
 /// A simple catalog page that shows all content of a given type
 /// (e.g. "movie" or "series") aggregated from the installed addons.
 ///
-/// Used by the Media hub's "Movies" and "Series" sidebar sections.
+/// Used by the Media hub's "Movies" and "Series" sections.
 class TypeCatalogPage extends StatefulWidget {
   final String type; // 'movie' | 'series'
   final String title;
-  final ValueChanged<String> onTypeChanged;
 
   const TypeCatalogPage({
     super.key,
     required this.type,
     required this.title,
-    required this.onTypeChanged,
   });
 
   @override
@@ -43,11 +40,6 @@ class TypeCatalogPage extends StatefulWidget {
 
 class _TypeCatalogPageState extends State<TypeCatalogPage> {
   final _manager = AddonManager.instance;
-
-  static const _watchTabs = [
-    SubTab(id: 'movie', label: 'Movies', icon: Icons.movie_rounded),
-    SubTab(id: 'series', label: 'Series', icon: Icons.live_tv_rounded),
-  ];
 
   /// The addon catalogs as fetched, each becoming one browse row. The flat
   /// [_items] list below is derived from these and is only used by the
@@ -279,23 +271,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
       child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
+        alignment: WrapAlignment.end,
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 10,
         runSpacing: 10,
         children: [
-          PillTabRow(
-            tabs: _watchTabs,
-            activeId: widget.type,
-            onSelected: widget.onTypeChanged,
-          ),
-          Wrap(
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              if (_availableGenres.isNotEmpty) ...[
+          if (_availableGenres.isNotEmpty) ...[
                 FilterDropdown<String?>(
                   label: _genreFilter ?? 'All genres',
                   icon: Icons.category_rounded,
@@ -351,8 +332,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                 onSelected: (v) => setState(() => _sort = v!),
               ),
               const PageSearchButton(),
-            ],
-          ),
         ],
       ),
     );

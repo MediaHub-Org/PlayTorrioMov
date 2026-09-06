@@ -7,12 +7,10 @@ import 'pill_tab_row.dart';
 export 'pill_tab_row.dart' show SubTab;
 
 /// A segmented control that splits a single hub section into two related
-/// views — Movies/Series, Comics/Manga.
-///
-/// Each hub exposes exactly four sections so the mobile bottom bar has a fixed
-/// shape. Pairs that would have made a fifth live here instead: they stay
-/// distinct catalogs, one tap apart, rather than being merged into one
-/// undifferentiated list.
+/// views. Not currently used by any hub section — Movies/Series (the
+/// original motivating case) became two full top-level sections instead of
+/// sharing one with this toggle — but kept for a future pair that would
+/// rather stay one section with two views than grow the section count.
 class SectionSubTabs extends StatelessWidget {
   final List<SubTab> tabs;
   final String activeId;
