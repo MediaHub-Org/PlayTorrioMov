@@ -7,6 +7,8 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/custom_scroll_track.dart';
+import '../../widgets/common/header_pill_style.dart';
+import '../../widgets/common/page_search_button.dart';
 import '../../widgets/iptv/iptv_hero_carousel.dart';
 import '../../widgets/iptv/iptv_slider_section.dart';
 import 'iptv_channel_sheet.dart';
@@ -153,7 +155,6 @@ class _IptvPageState extends State<IptvPage> {
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
     final palette = AppThemeService.currentPalette.value;
     final spotlightEnabled = IptvSettings.enableSpotlight.value;
     final visibleCategories = IptvSettings.visibleCategories.value;
@@ -205,6 +206,16 @@ class _IptvPageState extends State<IptvPage> {
       ),
     };
 
+    final pillHeader = _IptvGlassAppBar(
+      onSearchTap: _navigateToSearch,
+      onSourcesTap: () => IptvPortalsModal.show(context),
+      onMultiViewTap: _navigateToMultiView,
+    );
+    // Nested inside the hero's own Stack (see IptvHeroCarousel) so it
+    // scrolls away with the hero instead of staying pinned to the viewport;
+    // with no hero to nest into, it renders inline instead.
+    final heroWillRender = spotlightEnabled && _featured.isNotEmpty;
+
     final listContent = RefreshIndicator(
       color: palette.primaryColor,
       backgroundColor: palette.cardBackgroundColor,
@@ -220,20 +231,22 @@ class _IptvPageState extends State<IptvPage> {
         ),
         children: [
           // 1. Full Bleed Spotlight Hero Carousel
-          if (spotlightEnabled)
+          if (heroWillRender)
             IptvHeroCarousel(
               channels: _featured,
               onWatchNow: _watchChannelNow,
               onSourcesTap: _openChannel,
+              header: pillHeader,
             )
           else
-            SizedBox(height: topPadding + 76),
+            pillHeader,
 
           const SizedBox(height: 20),
 
           // 2. Curated Slider Sections (driven by user-customized category visibility and order)
           for (final catName in visibleCategories)
-            if (categoryMap.containsKey(catName) && categoryMap[catName]!.$2.isNotEmpty)
+            if (categoryMap.containsKey(catName) &&
+                categoryMap[catName]!.$2.isNotEmpty)
               IptvSliderSection(
                 title: catName,
                 subtitle: categoryMap[catName]!.$1,
@@ -252,19 +265,6 @@ class _IptvPageState extends State<IptvPage> {
     );
 
     final overlayChildren = <Widget>[
-      // Floating Glass App Bar (Home & Anime Page Style)
-      Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        child: _IptvGlassAppBar(
-          topPadding: topPadding,
-          onSearchTap: _navigateToSearch,
-          onSourcesTap: () => IptvPortalsModal.show(context),
-          onMultiViewTap: _navigateToMultiView,
-        ),
-      ),
-
       // Custom Scroll Track (Matching Home & Anime Page)
       if (AppBreakpoints.of(context) == ScreenTier.desktop)
         Positioned(
@@ -289,14 +289,17 @@ class _IptvPageState extends State<IptvPage> {
   }
 }
 
+/// Live TV's own header pill row -- title, channel count, and the Sources/
+/// Multi-view/Search actions all share [headerPillDecoration] with the
+/// genre/decade/sort pills and [PageSearchButton] used everywhere else, so
+/// this reads as the same design language instead of the bespoke gradient
+/// "glass" look it used to have.
 class _IptvGlassAppBar extends StatelessWidget {
-  final double topPadding;
   final Function(Offset? tapPosition) onSearchTap;
   final VoidCallback onSourcesTap;
   final VoidCallback onMultiViewTap;
 
   const _IptvGlassAppBar({
-    required this.topPadding,
     required this.onSearchTap,
     required this.onSourcesTap,
     required this.onMultiViewTap,
@@ -304,174 +307,67 @@ class _IptvGlassAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(28, topPadding + 14, 28, 14),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xCC080A0F),
-            Color(0x77080A0F),
-            Colors.transparent,
-          ],
-          stops: [0.0, 0.6, 1.0],
-        ),
-      ),
-      child: Row(
-        children: [
-          // Logo & Title
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
-                  ),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF7C5CFF).withValues(alpha: 0.4),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.live_tv_rounded, color: Colors.white, size: 18),
-                    SizedBox(width: 6),
-                    Text(
-                      'LIVE TV',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Text(
-                  '60+ CHANNELS',
-                  style: TextStyle(
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: headerPillDecoration,
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.live_tv_rounded,
                     color: Colors.white70,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+                    size: headerPillIconSize,
                   ),
+                  SizedBox(width: 6),
+                  Text(
+                    'LIVE TV',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: headerPillDecoration,
+              child: const Text(
+                '60+ CHANNELS',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.4,
                 ),
               ),
-            ],
-          ),
-
-          const Spacer(),
-
-          // Sources / Xtream Panels button
-          _GlassActionButton(
-            icon: Icons.settings_input_antenna_rounded,
-            tooltip: 'Manage Portals & Playlists',
-            onTap: onSourcesTap,
-          ),
-
-          const SizedBox(width: 10),
-
-          // Multi-view button
-          _GlassActionButton(
-            icon: Icons.grid_view_rounded,
-            tooltip: 'Multi-View (watch several channels at once)',
-            onTap: onMultiViewTap,
-          ),
-
-          const SizedBox(width: 10),
-
-          // Search button
-          _GlassActionButton(
-            icon: Icons.search_rounded,
-            tooltip: 'Search Channels',
-            onTapWithPosition: onSearchTap,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _GlassActionButton extends StatefulWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onTap;
-  final Function(Offset? position)? onTapWithPosition;
-
-  const _GlassActionButton({
-    required this.icon,
-    required this.tooltip,
-    this.onTap,
-    this.onTapWithPosition,
-  });
-
-  @override
-  State<_GlassActionButton> createState() => _GlassActionButtonState();
-}
-
-class _GlassActionButtonState extends State<_GlassActionButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Tooltip(
-        message: widget.tooltip,
-        child: GestureDetector(
-          onTapDown: (details) {
-            if (widget.onTapWithPosition != null) {
-              widget.onTapWithPosition!(details.globalPosition);
-            } else if (widget.onTap != null) {
-              widget.onTap!();
-            }
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 160),
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: _hovered
-                  ? Colors.white.withValues(alpha: 0.16)
-                  : Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: _hovered
-                    ? const Color(0xFF7C5CFF).withValues(alpha: 0.6)
-                    : Colors.white.withValues(alpha: 0.12),
-              ),
-              boxShadow: _hovered
-                  ? [
-                      BoxShadow(
-                        color: const Color(0xFF7C5CFF).withValues(alpha: 0.25),
-                        blurRadius: 10,
-                      )
-                    ]
-                  : null,
             ),
-            child: Icon(
-              widget.icon,
-              color: _hovered ? Colors.white : Colors.white70,
-              size: 20,
+
+            const Spacer(),
+
+            HeaderPillIconButton(
+              icon: Icons.settings_input_antenna_rounded,
+              tooltip: 'Manage Portals & Playlists',
+              onTap: onSourcesTap,
             ),
-          ),
+            const SizedBox(width: 8),
+            HeaderPillIconButton(
+              icon: Icons.grid_view_rounded,
+              tooltip: 'Multi-View (watch several channels at once)',
+              onTap: onMultiViewTap,
+            ),
+            const SizedBox(width: 8),
+            PageSearchButton(onTap: onSearchTap),
+          ],
         ),
       ),
     );

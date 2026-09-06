@@ -12,11 +12,17 @@ class IptvHeroCarousel extends StatefulWidget {
   final Function(HardcodedChannel) onWatchNow;
   final Function(HardcodedChannel) onSourcesTap;
 
+  /// Nested inside this widget's own Stack (see build()) instead of being a
+  /// page-level floating overlay, so it scrolls away together with the hero
+  /// rather than staying pinned to the viewport.
+  final Widget? header;
+
   const IptvHeroCarousel({
     super.key,
     required this.channels,
     required this.onWatchNow,
     required this.onSourcesTap,
+    this.header,
   });
 
   @override
@@ -113,7 +119,9 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
               ),
 
               // Desktop Previous / Next Hover Arrows
-              if (isDesktop && isHoveringCarousel && widget.channels.length > 1) ...[
+              if (isDesktop &&
+                  isHoveringCarousel &&
+                  widget.channels.length > 1) ...[
                 Positioned(
                   left: 20,
                   top: 0,
@@ -122,7 +130,8 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
                     child: _HeroArrowButton(
                       icon: Icons.chevron_left_rounded,
                       onTap: () {
-                        final prev = (currentHeroIndex - 1 + widget.channels.length) %
+                        final prev =
+                            (currentHeroIndex - 1 + widget.channels.length) %
                             widget.channels.length;
                         goToHeroPage(prev);
                       },
@@ -137,7 +146,8 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
                     child: _HeroArrowButton(
                       icon: Icons.chevron_right_rounded,
                       onTap: () {
-                        final next = (currentHeroIndex + 1) % widget.channels.length;
+                        final next =
+                            (currentHeroIndex + 1) % widget.channels.length;
                         goToHeroPage(next);
                       },
                     ),
@@ -171,10 +181,12 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
                               boxShadow: currentHeroIndex == index
                                   ? [
                                       BoxShadow(
-                                        color: primaryColor.withValues(alpha: 0.6),
+                                        color: primaryColor.withValues(
+                                          alpha: 0.6,
+                                        ),
                                         blurRadius: 8,
                                         spreadRadius: 1,
-                                      )
+                                      ),
                                     ]
                                   : null,
                             ),
@@ -183,6 +195,14 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
                       ),
                     ),
                   ),
+                ),
+
+              if (widget.header != null)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(bottom: false, child: widget.header!),
                 ),
             ],
           ),
@@ -206,10 +226,12 @@ class _IptvHeroSlide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppThemeService.currentPalette.value;
-    final primaryColor =
-        channel.gradient.isNotEmpty ? channel.gradient.first : palette.primaryColor;
-    final secondaryColor =
-        channel.gradient.length > 1 ? channel.gradient.last : palette.accentColor;
+    final primaryColor = channel.gradient.isNotEmpty
+        ? channel.gradient.first
+        : palette.primaryColor;
+    final secondaryColor = channel.gradient.length > 1
+        ? channel.gradient.last
+        : palette.accentColor;
 
     return Stack(
       fit: StackFit.expand,
@@ -292,7 +314,10 @@ class _IptvHeroSlide extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFF3B30).withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(8),
@@ -307,7 +332,11 @@ class _IptvHeroSlide extends StatelessWidget {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.sensors_rounded, color: Colors.white, size: 14),
+                        Icon(
+                          Icons.sensors_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
                         SizedBox(width: 5),
                         Text(
                           'LIVE BROADCAST',
@@ -323,11 +352,16 @@ class _IptvHeroSlide extends StatelessWidget {
                   ),
                   const SizedBox(width: 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
                     ),
                     child: Text(
                       channel.category,
@@ -405,7 +439,10 @@ class _IptvHeroSlide extends StatelessWidget {
                     child: GestureDetector(
                       onTap: onWatchNow,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(14),
                           gradient: LinearGradient(
@@ -413,7 +450,9 @@ class _IptvHeroSlide extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: palette.primaryColor.withValues(alpha: 0.5),
+                              color: palette.primaryColor.withValues(
+                                alpha: 0.5,
+                              ),
                               blurRadius: 16,
                               offset: const Offset(0, 4),
                             ),
@@ -422,7 +461,11 @@ class _IptvHeroSlide extends StatelessWidget {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.play_arrow_rounded, color: Colors.white, size: 22),
+                            Icon(
+                              Icons.play_arrow_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
                             SizedBox(width: 8),
                             Text(
                               'Watch Live',
@@ -447,16 +490,25 @@ class _IptvHeroSlide extends StatelessWidget {
                     child: GestureDetector(
                       onTap: onSourcesTap,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                          ),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.tune_rounded, color: Colors.white70, size: 18),
+                            Icon(
+                              Icons.tune_rounded,
+                              color: Colors.white70,
+                              size: 18,
+                            ),
                             SizedBox(width: 8),
                             Text(
                               'Stream Feeds',
@@ -485,10 +537,7 @@ class _HeroArrowButton extends StatefulWidget {
   final IconData icon;
   final VoidCallback onTap;
 
-  const _HeroArrowButton({
-    required this.icon,
-    required this.onTap,
-  });
+  const _HeroArrowButton({required this.icon, required this.onTap});
 
   @override
   State<_HeroArrowButton> createState() => _HeroArrowButtonState();
@@ -530,11 +579,7 @@ class _HeroArrowButtonState extends State<_HeroArrowButton> {
               ),
             ],
           ),
-          child: Icon(
-            widget.icon,
-            color: Colors.white,
-            size: 26,
-          ),
+          child: Icon(widget.icon, color: Colors.white, size: 26),
         ),
       ),
     );

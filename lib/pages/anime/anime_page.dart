@@ -15,6 +15,7 @@ import '../../widgets/common/custom_scroll_track.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/hero_carousel_auto_rotate.dart';
+import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
@@ -25,9 +26,19 @@ import '../anime_arabic/anime_arabic_stream_sheet.dart';
 import '../../services/app_breakpoints.dart';
 
 const _kAnimeGenres = [
-  'Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror',
-  'Mystery', 'Romance', 'Sci-Fi', 'Slice of Life', 'Sports',
-  'Supernatural', 'Thriller',
+  'Action',
+  'Adventure',
+  'Comedy',
+  'Drama',
+  'Fantasy',
+  'Horror',
+  'Mystery',
+  'Romance',
+  'Sci-Fi',
+  'Slice of Life',
+  'Sports',
+  'Supernatural',
+  'Thriller',
 ];
 
 class AnimePage extends StatefulWidget {
@@ -99,6 +110,7 @@ class _AnimePageState extends State<AnimePage> {
             _arabicCards[c.slug.hashCode.abs()] = c;
           }
         }
+
         registerCards(feed.spotlight);
         registerCards(feed.recentEpisodes);
         registerCards(feed.trending);
@@ -118,7 +130,8 @@ class _AnimePageState extends State<AnimePage> {
         debugPrint('Error loading Arabic Anime data: $e');
         if (mounted) {
           setState(() {
-            _error = 'Failed to load Arabic Anime catalog. Check your internet connection.';
+            _error =
+                'Failed to load Arabic Anime catalog. Check your internet connection.';
             _loading = false;
           });
         }
@@ -128,7 +141,10 @@ class _AnimePageState extends State<AnimePage> {
 
     // Each section fetches independently: one bad/rate-limited/timed-out
     // AniList call shouldn't blank the whole page when the other 7 succeed.
-    Future<List<AnimeMedia>> section(String label, Future<List<AnimeMedia>> future) {
+    Future<List<AnimeMedia>> section(
+      String label,
+      Future<List<AnimeMedia>> future,
+    ) {
       return future.catchError((e) {
         debugPrint('Error loading Anime section "$label": $e');
         return <AnimeMedia>[];
@@ -157,7 +173,9 @@ class _AnimePageState extends State<AnimePage> {
       _romanceAnime = results[5];
       _fantasyAnime = results[6];
       _sciFiAnime = results[7];
-      _error = allEmpty ? 'Failed to load Anime catalog. Check your internet connection.' : null;
+      _error = allEmpty
+          ? 'Failed to load Anime catalog. Check your internet connection.'
+          : null;
       _loading = false;
     });
   }
@@ -198,7 +216,8 @@ class _AnimePageState extends State<AnimePage> {
 
   void _playEpisode(AnimeMedia anime, int episodeNumber) {
     if (_isArabicMode || _arabicCards.containsKey(anime.id)) {
-      final card = _arabicCards[anime.id] ??
+      final card =
+          _arabicCards[anime.id] ??
           ArabicAnimeCard(
             slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
             title: anime.displayTitle,
@@ -243,6 +262,69 @@ class _AnimePageState extends State<AnimePage> {
     );
   }
 
+  /// The genre/language/search pill row. Built once per [build] and either
+  /// nested inside the hero carousel (see its call sites) or placed inline
+  /// above other content via [_withHeader] -- never a page-level floating
+  /// overlay, so it always scrolls away with whatever it sits above.
+  Widget _buildPillHeader() {
+    return PillFilterHeaderBar(
+      pills: [
+        FilterDropdown<String?>(
+          label: _genreFilter ?? 'All Genres',
+          icon: Icons.filter_list_rounded,
+          items: [
+            const PopupMenuItem(value: null, child: Text('All Genres')),
+            for (final g in _kAnimeGenres)
+              PopupMenuItem(value: g, child: Text(g)),
+          ],
+          onSelected: _selectGenre,
+        ),
+        FilterDropdown<bool>(
+          label: _isArabicMode ? '🇸🇦 Arabic' : '🇬🇧 English',
+          icon: Icons.language_rounded,
+          items: const [
+            PopupMenuItem(
+              value: false,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🇬🇧', style: TextStyle(fontSize: 16)),
+                  SizedBox(width: 10),
+                  Text('English'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: true,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('🇸🇦', style: TextStyle(fontSize: 16)),
+                  SizedBox(width: 10),
+                  Text('Arabic'),
+                ],
+              ),
+            ),
+          ],
+          onSelected: (arabic) => _onModeChanged(arabic ?? false),
+        ),
+        PageSearchButton(onTap: _navigateToSearch),
+      ],
+    );
+  }
+
+  /// Places [header] above [child] as normal top content, not a floating
+  /// overlay -- used by every branch that has no hero to nest the header
+  /// into instead (see the hero carousel call sites in [build]).
+  Widget _withHeader(Widget header, Widget child) {
+    return Column(
+      children: [
+        SafeArea(bottom: false, child: header),
+        Expanded(child: child),
+      ],
+    );
+  }
+
   Widget _buildGenreGrid() {
     if (_genreResults.isEmpty) {
       return Center(
@@ -256,12 +338,14 @@ class _AnimePageState extends State<AnimePage> {
     final crossAxisCount = width < 600
         ? 3
         : width < 900
-            ? 4
-            : width < 1200
-                ? 5
-                : 6;
+        ? 4
+        : width < 1200
+        ? 5
+        : 6;
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 80, AppSpacing.lg, 120),
+      // No floating header to clear anymore -- _withHeader (see build())
+      // already reserves real space for the pill row above this grid.
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 16, AppSpacing.lg, 120),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 20,
@@ -278,13 +362,16 @@ class _AnimePageState extends State<AnimePage> {
 
   void _openDetails(AnimeMedia anime, [int? preferredEpisode]) {
     if (_isArabicMode || _arabicCards.containsKey(anime.id)) {
-      final card = _arabicCards[anime.id] ??
+      final card =
+          _arabicCards[anime.id] ??
           ArabicAnimeCard(
             slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
             title: anime.displayTitle,
             cover: anime.coverUrl,
           );
-      final epNum = preferredEpisode ?? (anime.totalEpisodes > 0 ? anime.totalEpisodes : null);
+      final epNum =
+          preferredEpisode ??
+          (anime.totalEpisodes > 0 ? anime.totalEpisodes : null);
       Navigator.push(
         context,
         CinematicSlideRoute(
@@ -299,9 +386,7 @@ class _AnimePageState extends State<AnimePage> {
 
     Navigator.push(
       context,
-      CinematicSlideRoute(
-        page: AnimeDetailsPage(anime: anime),
-      ),
+      CinematicSlideRoute(page: AnimeDetailsPage(anime: anime)),
     );
   }
 
@@ -317,6 +402,13 @@ class _AnimePageState extends State<AnimePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Built once and either nested inside the hero carousel's own Stack (so
+    // it scrolls away with the hero instead of staying pinned to the
+    // viewport) or, when there is no hero to nest it into -- the genre grid,
+    // loading, and error states -- placed inline above that content instead,
+    // via _withHeader below. Never a page-level floating overlay.
+    final pillHeader = _buildPillHeader();
+
     final backgroundContent = Stack(
       children: [
         // Ambient background glows matching Home
@@ -347,43 +439,54 @@ class _AnimePageState extends State<AnimePage> {
 
         // Main scrollable content
         if (_genreFilter != null)
-          _genreLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
-                )
-              : _buildGenreGrid()
-        else if (_loading && (_isArabicMode ? _arabicFeed == null : _trending.isEmpty))
-          const Center(
-            child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+          _withHeader(
+            pillHeader,
+            _genreLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+                  )
+                : _buildGenreGrid(),
           )
-        else if (_error != null && (_isArabicMode ? _arabicFeed == null : _trending.isEmpty))
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.error_outline_rounded,
-                  color: Colors.redAccent,
-                  size: 48,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+        else if (_loading &&
+            (_isArabicMode ? _arabicFeed == null : _trending.isEmpty))
+          _withHeader(
+            pillHeader,
+            const Center(
+              child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+            ),
+          )
+        else if (_error != null &&
+            (_isArabicMode ? _arabicFeed == null : _trending.isEmpty))
+          _withHeader(
+            pillHeader,
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    color: Colors.redAccent,
+                    size: 48,
                   ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C5CFF),
+                  const SizedBox(height: 16),
+                  Text(
+                    _error!,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  onPressed: _loadAnimeData,
-                  child: const Text('Retry'),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7C5CFF),
+                    ),
+                    onPressed: _loadAnimeData,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
             ),
           )
         else
@@ -402,17 +505,22 @@ class _AnimePageState extends State<AnimePage> {
                 if (_isArabicMode) ...[
                   // 1. Arabic Hero Carousel (Matching Home Page)
                   if (_arabicFeed != null &&
-                      (_arabicFeed!.spotlight.isNotEmpty || _arabicFeed!.trending.isNotEmpty))
+                      (_arabicFeed!.spotlight.isNotEmpty ||
+                          _arabicFeed!.trending.isNotEmpty))
                     _AnimeHeroCarousel(
-                      animeList: (_arabicFeed!.spotlight.isNotEmpty
-                              ? _arabicFeed!.spotlight
-                              : _arabicFeed!.trending)
-                          .take(6)
-                          .map((c) => c.toAnimeMedia())
-                          .toList(),
+                      animeList:
+                          (_arabicFeed!.spotlight.isNotEmpty
+                                  ? _arabicFeed!.spotlight
+                                  : _arabicFeed!.trending)
+                              .take(6)
+                              .map((c) => c.toAnimeMedia())
+                              .toList(),
                       onWatchNow: (anime) => _playEpisode(anime, 1),
                       onDetailsTap: _openDetails,
-                    ),
+                      header: pillHeader,
+                    )
+                  else
+                    pillHeader,
 
                   const SizedBox(height: 16),
 
@@ -430,49 +538,66 @@ class _AnimePageState extends State<AnimePage> {
                       AnimeSliderSection(
                         title: '⚡ آخر الحلقات المعروضة',
                         subtitle: 'أحدث الحلقات المضافة المترجمة للعربية',
-                        animeList: _arabicFeed!.recentEpisodes.map((c) => c.toAnimeMedia()).toList(),
-                        onAnimeTap: (anime) => _openDetails(anime, anime.totalEpisodes > 0 ? anime.totalEpisodes : null),
+                        animeList: _arabicFeed!.recentEpisodes
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
+                        onAnimeTap: (anime) => _openDetails(
+                          anime,
+                          anime.totalEpisodes > 0 ? anime.totalEpisodes : null,
+                        ),
                       ),
                     if (_arabicFeed!.trending.isNotEmpty)
                       AnimeSliderSection(
                         title: '🔥 الأكثر شهرة وتداولاً',
                         subtitle: 'الأنميات الأكثر مشاهدة حالياً',
-                        animeList: _arabicFeed!.trending.map((c) => c.toAnimeMedia()).toList(),
+                        animeList: _arabicFeed!.trending
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
                         onAnimeTap: _openDetails,
                       ),
                     if (_arabicFeed!.popularMovies.isNotEmpty)
                       AnimeSliderSection(
                         title: '🎬 الأفلام الأكثر شعبية',
                         subtitle: 'أفلام الأنمي المميزة',
-                        animeList: _arabicFeed!.popularMovies.map((c) => c.toAnimeMedia()).toList(),
+                        animeList: _arabicFeed!.popularMovies
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
                         onAnimeTap: _openDetails,
                       ),
                     if (_arabicFeed!.topSeasonal.isNotEmpty)
                       AnimeSliderSection(
                         title: '👑 أفضل الأنميات',
                         subtitle: 'أنميات ذات تقييمات استثنائية',
-                        animeList: _arabicFeed!.topSeasonal.map((c) => c.toAnimeMedia()).toList(),
+                        animeList: _arabicFeed!.topSeasonal
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
                         onAnimeTap: _openDetails,
                       ),
                     if (_arabicFeed!.seasonal.isNotEmpty)
                       AnimeSliderSection(
                         title: '🌟 أنميات موسمية',
                         subtitle: 'عروض الموسم الحالي',
-                        animeList: _arabicFeed!.seasonal.map((c) => c.toAnimeMedia()).toList(),
+                        animeList: _arabicFeed!.seasonal
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
                         onAnimeTap: _openDetails,
                       ),
                     if (_arabicFeed!.legendary.isNotEmpty)
                       AnimeSliderSection(
                         title: '⚔️ أنميات أسطورية',
                         subtitle: 'أعمال خالدة يجب ألا تفوتك',
-                        animeList: _arabicFeed!.legendary.map((c) => c.toAnimeMedia()).toList(),
+                        animeList: _arabicFeed!.legendary
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
                         onAnimeTap: _openDetails,
                       ),
                     if (_arabicFeed!.upcoming.isNotEmpty)
                       AnimeSliderSection(
                         title: '🚀 المنتظرة قريباً',
                         subtitle: 'أنميات قادمة قريباً',
-                        animeList: _arabicFeed!.upcoming.map((c) => c.toAnimeMedia()).toList(),
+                        animeList: _arabicFeed!.upcoming
+                            .map((c) => c.toAnimeMedia())
+                            .toList(),
                         onAnimeTap: _openDetails,
                       ),
                   ],
@@ -483,7 +608,10 @@ class _AnimePageState extends State<AnimePage> {
                       animeList: _trending.take(6).toList(),
                       onWatchNow: (anime) => _playEpisode(anime, 1),
                       onDetailsTap: _openDetails,
-                    ),
+                      header: pillHeader,
+                    )
+                  else
+                    pillHeader,
 
                   const SizedBox(height: 16),
 
@@ -503,7 +631,8 @@ class _AnimePageState extends State<AnimePage> {
                     onAnimeTap: _openDetails,
                   ),
                   AnimeSliderSection(
-                    title: '🌟 Popular This Season (${AnilistService.currentSeason()})',
+                    title:
+                        '🌟 Popular This Season (${AnilistService.currentSeason()})',
                     subtitle: 'Currently airing hits',
                     animeList: _popularSeason,
                     onAnimeTap: _openDetails,
@@ -561,60 +690,6 @@ class _AnimePageState extends State<AnimePage> {
           bottom: 40,
           child: CustomScrollTrack(controller: _scrollController),
         ),
-      Positioned(
-        top: 0,
-        left: 0,
-        right: 0,
-        child: PillFilterHeaderBar(
-          pills: [
-            FilterDropdown<String?>(
-              label: _genreFilter ?? 'All Genres',
-              icon: Icons.filter_list_rounded,
-              items: [
-                const PopupMenuItem(value: null, child: Text('All Genres')),
-                for (final g in _kAnimeGenres)
-                  PopupMenuItem(value: g, child: Text(g)),
-              ],
-              onSelected: _selectGenre,
-            ),
-            FilterDropdown<bool>(
-              label: _isArabicMode ? '🇸🇦 Arabic' : '🇬🇧 English',
-              icon: Icons.language_rounded,
-              items: const [
-                PopupMenuItem(
-                  value: false,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('🇬🇧', style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 10),
-                      Text('English'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: true,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('🇸🇦', style: TextStyle(fontSize: 16)),
-                      SizedBox(width: 10),
-                      Text('Arabic'),
-                    ],
-                  ),
-                ),
-              ],
-              onSelected: (arabic) => _onModeChanged(arabic ?? false),
-            ),
-            IconButton(
-              tooltip: 'Search',
-              icon: const Icon(Icons.search_rounded),
-              color: Colors.white.withValues(alpha: 0.75),
-              onPressed: () => _navigateToSearch(null),
-            ),
-          ],
-        ),
-      ),
     ];
 
     return Scaffold(
@@ -641,10 +716,16 @@ class _AnimeHeroCarousel extends StatefulWidget {
   final Function(AnimeMedia) onWatchNow;
   final Function(AnimeMedia) onDetailsTap;
 
+  /// Nested inside this widget's own Stack (see build()) instead of being a
+  /// page-level floating overlay, so it scrolls away together with the hero
+  /// rather than staying pinned to the viewport.
+  final Widget? header;
+
   const _AnimeHeroCarousel({
     required this.animeList,
     required this.onWatchNow,
     required this.onDetailsTap,
+    this.header,
   });
 
   @override
@@ -740,12 +821,18 @@ class _AnimeHeroCarouselState extends State<_AnimeHeroCarousel>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4),
                           color: active
-                              ? AppThemeService.currentPalette.value.primaryColor
+                              ? AppThemeService
+                                    .currentPalette
+                                    .value
+                                    .primaryColor
                               : Colors.white.withValues(alpha: 0.30),
                           boxShadow: active
                               ? [
                                   BoxShadow(
-                                    color: AppThemeService.currentPalette.value.primaryColor
+                                    color: AppThemeService
+                                        .currentPalette
+                                        .value
+                                        .primaryColor
                                         .withValues(alpha: 0.55),
                                     blurRadius: 8,
                                   ),
@@ -787,6 +874,14 @@ class _AnimeHeroCarouselState extends State<_AnimeHeroCarousel>
                   ),
                 ),
             ],
+
+            if (widget.header != null)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(bottom: false, child: widget.header!),
+              ),
           ],
         ),
       ),
@@ -821,7 +916,8 @@ class _AnimeHeroSlide extends StatelessWidget {
           alignment: const Alignment(0, -0.15),
           filterQuality: FilterQuality.medium,
           placeholder: (_, __) => const ColoredBox(color: Color(0xFF151822)),
-          errorWidget: (_, __, ___) => const ColoredBox(color: Color(0xFF151822)),
+          errorWidget: (_, __, ___) =>
+              const ColoredBox(color: Color(0xFF151822)),
         ),
 
         // Left horizontal wash for cinematic readability
@@ -901,10 +997,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFD700).withValues(alpha: 0.14),
+                            color: const Color(
+                              0xFFFFD700,
+                            ).withValues(alpha: 0.14),
                             borderRadius: BorderRadius.circular(9),
                             border: Border.all(
-                              color: const Color(0xFFFFD700).withValues(alpha: 0.28),
+                              color: const Color(
+                                0xFFFFD700,
+                              ).withValues(alpha: 0.28),
                             ),
                           ),
                           child: Row(
@@ -1034,7 +1134,8 @@ class _AnimeHeroSlide extends StatelessWidget {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppThemeService.currentPalette.value.primaryColor,
+                          backgroundColor:
+                              AppThemeService.currentPalette.value.primaryColor,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(
                             horizontal: isCompact ? 18 : 28,
@@ -1044,7 +1145,11 @@ class _AnimeHeroSlide extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           elevation: 12,
-                          shadowColor: AppThemeService.currentPalette.value.primaryColor.withValues(alpha: 0.45),
+                          shadowColor: AppThemeService
+                              .currentPalette
+                              .value
+                              .primaryColor
+                              .withValues(alpha: 0.45),
                         ),
                       ),
                       SizedBox(width: isCompact ? 8 : 12),

@@ -272,5 +272,38 @@ void main() {
         expect(find.byType(CustomScrollTrack), findsNothing);
       },
     );
+
+    testWidgets(
+      'overlayHeader header scrolls away with the hero instead of staying pinned',
+      (tester) async {
+        // Regression test: the header used to be a page-level Positioned
+        // sitting outside the CustomScrollView, so it stayed fixed on
+        // screen no matter how far the page scrolled. Nested inside the
+        // hero's own Stack instead, it must scroll away along with it.
+        setSurfaceWidth(tester, 1400);
+        await tester.pumpWidget(
+          wrap(
+            build(
+              hero: ['a'],
+              header: const Text('filters'),
+              overlayHeader: true,
+              rows: [BrowseRow(title: 'Trending', items: items(10))],
+              // Guarantees enough scroll extent regardless of row/card
+              // sizing -- without it, the fixed 900px test viewport can fit
+              // the whole page and there is nothing to scroll.
+              afterRows: const SizedBox(height: 3000),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('filters'), findsOneWidget);
+
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
+        await tester.pumpAndSettle();
+
+        expect(find.text('filters'), findsNothing);
+      },
+    );
   });
 }

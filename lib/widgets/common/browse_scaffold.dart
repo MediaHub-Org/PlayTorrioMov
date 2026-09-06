@@ -60,11 +60,13 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// Shown above the hero — a search button, filters, a sub-tab bar.
   final Widget? header;
 
-  /// When true, [header] floats over the content instead of pushing the
-  /// hero down: the hero fills all the way to the top of the page (like
-  /// Anime's and Live TV's own bespoke hero pages), the header stays fixed
-  /// on screen while rows scroll underneath it, and a desktop-only
-  /// [CustomScrollTrack] appears bottom-right (Anime's own scroll
+  /// When true, [header] floats over the hero instead of pushing it down:
+  /// the hero fills all the way to the top of the page (like Anime's and
+  /// Live TV's own bespoke hero pages). The header still scrolls away with
+  /// the rest of the page -- it is nested inside the hero's own `Stack`
+  /// (see [_buildHero]), not pinned to the viewport, so it never covers
+  /// content scrolled up underneath it. A desktop-only [CustomScrollTrack]
+  /// also appears bottom-right, pinned regardless (Anime's own scroll
   /// indicator, otherwise absent here). Off by default so an existing
   /// consumer's solid-header layout is unaffected.
   final bool overlayHeader;
@@ -164,9 +166,10 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final sizing = MovieCardSizing.fromWidth(width);
-    // Overlaid, the header floats above every branch below instead of each
-    // one rendering it inline -- see the wrap at the end of this method.
-    final showInlineHeader = widget.header != null && !widget.overlayHeader;
+    // The loading skeleton, error, and empty states never have a hero to
+    // nest the header into (see _buildHero), so it always renders inline
+    // there, overlaid or not -- only the real hero-carousel path nests it.
+    final showInlineHeader = widget.header != null;
 
     Widget body;
     if (widget.error != null) {
@@ -194,52 +197,57 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
           ],
         );
       } else {
-        body = _buildScrollable(sizing, width, showInlineHeader);
+        body = _buildScrollable(sizing, width);
       }
     }
 
-    if (!widget.overlayHeader || widget.header == null) return body;
+    if (!widget.overlayHeader || AppBreakpoints.of(context) != ScreenTier.desktop) {
+      return body;
+    }
 
+    // The scroll-position indicator is the only thing that stays pinned to
+    // the viewport -- unlike the header (see _buildHero), it isn't part of
+    // the page's own content, so pinning it isn't the "sticky" behavior
+    // that was the problem.
     return Stack(
       children: [
         body,
         Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: SafeArea(bottom: false, child: widget.header!),
+          right: 24,
+          bottom: 40,
+          child: CustomScrollTrack(controller: _scrollController),
         ),
-        if (AppBreakpoints.of(context) == ScreenTier.desktop)
-          Positioned(
-            right: 24,
-            bottom: 40,
-            child: CustomScrollTrack(controller: _scrollController),
-          ),
       ],
     );
   }
 
-  Widget _buildScrollable(
-    MovieCardSizing sizing,
-    double width,
-    bool showInlineHeader,
-  ) {
+  Widget _buildScrollable(MovieCardSizing sizing, double width) {
+    final hasHeader = widget.header != null;
+    // Nested inside the hero's own Stack instead of rendered inline here,
+    // so it scrolls away together with the hero rather than staying pinned
+    // to the viewport while the rest of the page scrolls underneath it.
+    // Only possible once a hero actually exists to nest it into.
+    final headerGoesInHero =
+        hasHeader &&
+        widget.overlayHeader &&
+        !widget.isLoading &&
+        widget.heroItems.isNotEmpty;
+    final showInlineHeaderHere = hasHeader && !headerGoesInHero;
+
     final content = CustomScrollView(
       controller: _scrollController,
       slivers: [
-        if (showInlineHeader) SliverToBoxAdapter(child: widget.header!),
+        if (showInlineHeaderHere) SliverToBoxAdapter(child: widget.header!),
         if (widget.isLoading)
           SliverToBoxAdapter(child: _buildLoading(sizing, width))
         else ...[
           if (widget.heroItems.isNotEmpty) ...[
-            SliverToBoxAdapter(child: _buildHero(width)),
+            SliverToBoxAdapter(
+              child: _buildHero(width, headerGoesInHero ? widget.header : null),
+            ),
             if (widget.belowHero != null)
               SliverToBoxAdapter(child: widget.belowHero!),
-          ] else if (widget.overlayHeader)
-            // No hero to clear the floating header -- the rows below need
-            // their own headroom instead, or the first row's title would
-            // render right under it.
-            const SliverToBoxAdapter(child: SizedBox(height: 72)),
+          ],
           for (final row in widget.rows)
             if (row.items.isNotEmpty)
               SliverToBoxAdapter(
@@ -262,7 +270,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     return RefreshIndicator(onRefresh: widget.onRefresh!, child: content);
   }
 
-  Widget _buildHero(double width) {
+  Widget _buildHero(double width, Widget? overlaidHeader) {
     final height = _heroHeight(width, MediaQuery.sizeOf(context).height);
     return MouseRegion(
       onEnter: (_) => setState(() => isHoveringCarousel = true),
@@ -340,6 +348,13 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                       ),
                   ],
                 ),
+              ),
+            if (overlaidHeader != null)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(bottom: false, child: overlaidHeader),
               ),
           ],
         ),
