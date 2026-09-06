@@ -4,15 +4,20 @@ What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.
 and the GitHub release notes; this file stays about what is left. Day-to-day
 task tracking lives in [TASKS.md](../TASKS.md); this file is the longer arc.
 
-Last reconciled against the tree: **2026-09-05** (v1.1.6+14).
+Last reconciled against the tree: **2026-09-06** (v1.1.6+14).
 
-**In progress, paused mid-session:** porting upstream's `ad0e40d`/`6c4d0cf`/
-`f1f1310` gap into Mov (see § Upstream tracking below for what each
-contains) is running in a background agent, isolated in its own git
-worktree/branch — not yet reviewed or merged into `master`. PlayTorrioMod's
-side of the same 3-commit gap is already done and pushed (`main` @
-`08978f0`). Next session: check on that agent's result, review its diff,
-merge if clean.
+**Redone from scratch, awaiting review:** the prior background agent's
+worktree/branch for the `ad0e40d`/`6c4d0cf`/`f1f1310` port (see § Upstream
+tracking below) turned out to exist only in that session's now-gone
+environment — never pushed to `origin`, no other local checkout on the
+machine. Redone as 3 stacked branches, each file-by-file (not
+patch-applied) and each with `flutter analyze`/`flutter test` run clean:
+`port/ad0e40d-dub-lang-filtering` → `port/6c4d0cf-stream-error-filtering` →
+`port/f1f1310-stremio-catalog-extras`. Per-file breakdown of what was
+clean, hand-merged, or skipped (and why) is in
+[docs/UPSTREAM_MERGE.md](UPSTREAM_MERGE.md). PlayTorrioMod's side of the
+same 3-commit gap is already done and pushed (`main` @ `08978f0`). Next
+session: review the 3 branches, fast-forward `master` if clean.
 
 ## Relationship to PlayTorrioMod
 
@@ -70,9 +75,9 @@ for its own log). **Last commit actually merged into Mov: `b0aecf5`** —
 | `cc07994` | Fix anime catalog AniList 403 issue, bump 1.1.1        | **Merged.** `anilist_service.dart` now sends a browser User-Agent/Origin/Referer and a 15s timeout. The paired `anime_page.dart` empty-results error message already existed independently in Mov. |
 | `b0aecf5` | New scraper sources, fix mapple scraper, bump 1.1.2    | **Merged (side by side).** 30 new scraper sites and 7 new anime extractors added alongside Mov's existing, non-overlapping set; new `video_settings_page.dart`; anime/continue-watching/player diffs reviewed file-by-file rather than patch-applied, since those files had already diverged. Mov's own `StreamHealthChecker` dead-stream filtering was kept — V3 had dropped its equivalent, not carried over. |
 | `9d34d4c` | Update README                                         | **Not merged, by design.** V3's own README, not relevant here.                                                             |
-| `ad0e40d` | Bump 1.1.3: audio dub & language filtering, backend scraper extractions, responsive UI | **In progress.** 22 files, +1555/−148: a ~1080-line rewrite of `watch_screen.dart` (audio-track/dub language picker, responsive layout), a further `stream_model.dart` extension, and touch-ups to several scraper sites — including `movy.dart`/`vuflix.dart`/`xdownloader.dart`, which are *not* from the b0aecf5 port; Mov already carries its own independently-evolved copies of those three from before the fork. |
-| `6c4d0cf` | fix(player): streamline stream error filtering and health verification | **Mostly a non-issue here.** Re-adds a dead-stream health check V3 itself had dropped in `b0aecf5` and then found it needed back — Mov never dropped it, so that hunk is already equivalent. Real content for Mov: `PlayerSettings.isNonFatalError` refinement, `PlayerScreen._onControllerError` fix, Dulo referer/domain-priority fix, VidRock JSON-playlist parsing fix, new CDN referer resolver rules. Skips the `audiobook_player_screen.dart`/`music_player_controller.dart` hunks — Mov has neither. |
-| `f1f1310` | Add full Stremio catalog-extra handling and collection addons support | **In progress — large.** 14 files, ~2000 lines: a real `AddonCatalogExtra` model (required/optional extras, options, limits), a much bigger `discover_page.dart` (Mov's is 182 lines pre-merge vs. this diff's +1145), Stremio collection-addon support (e.g. TMDB Collections, "Movies in Collection" UI), `metadata_service.dart`/`addon.dart`/`catalog_page.dart` extensions. Skips the `dock_settings.dart`/`app_liquid_dock.dart`/`home_page.dart` hunks outright — those are V3's three-hub dock nav, which this app doesn't have (see § Navigation principle); the Discover-nav wiring needs to land in Mov's own nav shell instead. |
+| `ad0e40d` | Bump 1.1.3: audio dub & language filtering, backend scraper extractions, responsive UI | **Ported**, on `port/ad0e40d-dub-lang-filtering`, awaiting review/merge. Audio-language/dub detection on `StreamSource` plus a matching filter dropdown and source-card badge in `watch_screen.dart`, 10 scraper-site touch-ups, a smarter open-above dropdown positioning fix. Deliberately skips the type-filter chip bar, seeder filter, mobile bottom-sheet variant, and the desktop flex-ratio tweak — see [docs/UPSTREAM_MERGE.md](UPSTREAM_MERGE.md) for why. |
+| `6c4d0cf` | fix(player): streamline stream error filtering and health verification | **Ported**, on `port/6c4d0cf-stream-error-filtering`, awaiting review/merge. `PlayerSettings.isNonFatalError` refinement, Dulo referer/domain-priority fix, VidRock JSON-playlist parsing fix, new CDN referer resolver rules. The `stream_scraper.dart` health-check hunk was confirmed a non-issue — Mov already had the equivalent gate under different variable names. Skips the `audiobook_player_screen.dart`/`music_player_controller.dart` hunks — Mov has neither. |
+| `f1f1310` | Add full Stremio catalog-extra handling and collection addons support | **Ported**, on `port/f1f1310-stremio-catalog-extras`, awaiting review/merge. `AddonCatalogExtra` model, the bigger `discover_page.dart` with catalog-extra selectors, Stremio collection-addon support (Movie/MovieDetail `isCollection`, part-level IMDb-id normalization through watch/player/details). Dropped the "Liquid Dock Navbar" this commit added to `discover_page.dart` along with the `dock_settings.dart`/`app_liquid_dock.dart`/`home_page.dart` hunks outright — V3's three-hub dock nav, which this app doesn't have (see § Navigation principle); `DiscoverPage` here is a standalone pushed page, not dock-bearing. |
 
 This table gets re-checked whenever PlayTorrioMod's upstream gap is
 revisited; it is a snapshot, not a live sync status. Re-fetch `v3/main`
