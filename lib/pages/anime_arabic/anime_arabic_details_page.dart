@@ -7,6 +7,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/genre_tag_row.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_arabic_stream_sheet.dart';
 import '../../services/app_breakpoints.dart';
@@ -360,14 +361,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                   ),
                   child: Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                      const GlassBackButton(),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(

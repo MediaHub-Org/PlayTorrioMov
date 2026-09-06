@@ -6,6 +6,7 @@ import '../../models/movie/movie.dart';
 import '../../models/movie/movie_section.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../widgets/common/error_view.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 
@@ -305,11 +306,7 @@ class _CatalogPageState extends State<CatalogPage> {
                         child: Row(
                           children: [
                             const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
-                              color: Colors.white,
-                              onPressed: () => Navigator.pop(context),
-                            ),
+                            const GlassBackButton(),
                             if (!_isSearching)
                               Expanded(
                                 child: Text(

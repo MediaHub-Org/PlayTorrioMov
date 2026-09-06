@@ -7,6 +7,7 @@ import '../../models/stream/stream_model.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../utils/search_scope.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/movie/movie_slider_section.dart';
 import '../../widgets/search/magnet_files_view.dart';
 import '../player/player_screen.dart';
@@ -199,11 +200,7 @@ class _SearchPageState extends State<SearchPage> {
               child: Row(
                 children: [
                   const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
-                    color: Colors.white,
-                    onPressed: () => Navigator.pop(context),
-                  ),
+                  const GlassBackButton(),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 16),

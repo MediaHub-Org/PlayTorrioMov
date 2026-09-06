@@ -14,6 +14,7 @@ import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/genre_tag_row.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/like_button.dart';
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
@@ -723,24 +724,7 @@ class _DetailsPageState extends State<DetailsPage>
         Positioned(
           top: isDesktop ? _Space.lg : (topInset + 10),
           left: isDesktop ? _Space.xxl : _Space.md,
-          child: ClipOval(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                onPressed: () => Navigator.pop(context),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.1),
-                  padding: const EdgeInsets.all(12),
-                  side: BorderSide(color: Colors.white.withOpacity(0.12)),
-                ),
-              ),
-            ),
-          ),
+          child: const GlassBackButton(),
         ),
       ],
     );

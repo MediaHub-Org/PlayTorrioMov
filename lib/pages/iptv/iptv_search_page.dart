@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/iptv/hardcoded_channels.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
 import 'iptv_channel_sheet.dart';
 
@@ -67,10 +68,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white70),
-          onPressed: () => Navigator.pop(context),
-        ),
+        leading: const Center(child: GlassBackButton()),
         title: Container(
           height: 44,
           decoration: BoxDecoration(

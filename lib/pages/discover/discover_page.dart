@@ -7,6 +7,7 @@ import '../../models/movie/movie_section.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../widgets/common/error_view.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 
@@ -767,10 +768,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 child: Row(
                   children: [
                     const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_rounded, size: 19, color: Colors.white),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
+                    const GlassBackButton(),
                     const SizedBox(width: 2),
                     if (!_isSearching) ...[
                       const Icon(Icons.explore_rounded, color: Color(0xFF7C5CFF), size: 21),
@@ -1166,10 +1164,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   ),
                   child: Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
+                      const GlassBackButton(),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(

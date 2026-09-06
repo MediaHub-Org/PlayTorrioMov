@@ -8,6 +8,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/common/animated_ambient_background.dart';
+import '../../widgets/common/glass_back_button.dart';
 import 'anime_details_page.dart';
 
 import '../../services/anime_arabic/anime_arabic_service.dart';
@@ -524,11 +525,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
-                          color: Colors.white,
-                          onPressed: () => Navigator.pop(context),
-                        ),
+                        const GlassBackButton(),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8),
