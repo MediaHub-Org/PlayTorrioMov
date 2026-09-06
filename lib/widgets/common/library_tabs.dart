@@ -68,51 +68,66 @@ class _LibraryTabsState extends State<LibraryTabs>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
-        surfaceTintColor: Colors.transparent,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(widget.titleIcon, color: const Color(0xFF7C5CFF), size: 22),
-            const SizedBox(width: 10),
-            Text(
-              widget.title,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
-            ),
+    // LibraryTabs only ever renders inside the hub's own content area,
+    // already below AdaptiveNavShell's persistent TopBar -- which has
+    // already cleared the device's status-bar inset with a real SizedBox.
+    // Without this, AppBar (which reserves MediaQuery.padding.top for
+    // itself unconditionally, assuming it sits directly under the status
+    // bar) would reserve that same inset a second time, showing up as a
+    // block of empty space above the title on mobile, where there is
+    // nothing else above this page to justify it.
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF080A0F),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF0D1017),
+          surfaceTintColor: Colors.transparent,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(widget.titleIcon, color: const Color(0xFF7C5CFF), size: 22),
+              const SizedBox(width: 10),
+              Text(
+                widget.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            if (widget.trailing != null) widget.trailing!,
+            const SizedBox(width: 8),
           ],
-        ),
-        actions: [
-          if (widget.trailing != null) widget.trailing!,
-          const SizedBox(width: 8),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(52),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: PillTabRow(
-                tabs: [
-                  for (var i = 0; i < widget.tabs.length; i++)
-                    SubTab(
-                      id: _idOf(i),
-                      label: widget.tabs[i].label,
-                      icon: widget.tabs[i].icon,
-                    ),
-                ],
-                activeId: _activeId,
-                onSelected: _selectPill,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(52),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: PillTabRow(
+                  tabs: [
+                    for (var i = 0; i < widget.tabs.length; i++)
+                      SubTab(
+                        id: _idOf(i),
+                        label: widget.tabs[i].label,
+                        icon: widget.tabs[i].icon,
+                      ),
+                  ],
+                  activeId: _activeId,
+                  onSelected: _selectPill,
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: widget.tabs.map((t) => t.builder(context)).toList(),
+        body: TabBarView(
+          controller: _tabController,
+          children: widget.tabs.map((t) => t.builder(context)).toList(),
+        ),
       ),
     );
   }
