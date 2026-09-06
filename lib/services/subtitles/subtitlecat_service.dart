@@ -262,6 +262,10 @@ class SubtitleCatService {
       folder = m.group(3)!;
       final norm = _normalizeLang(code);
       if (directCodes.contains(norm)) continue;
+      // The site can on-the-fly translate to any of ~110 languages, but most
+      // have no real demand as a subtitle language — only offer translation
+      // into commonly-requested languages instead of flooding the picker.
+      if (!_commonTranslatableLangs.contains(norm)) continue;
       translatables.add(_LangEntry(
         code: norm,
         label: _languageLabel(code),
@@ -501,6 +505,18 @@ class SubtitleCatService {
     final c = code.toLowerCase();
     return map[c] ?? code.toUpperCase();
   }
+
+  /// Languages worth offering as an on-the-fly Google Translate target when
+  /// no real subtitle file exists. Deliberately a small, high-demand subset
+  /// of the ~110 languages the site's translate widget could theoretically
+  /// produce — most of those never get picked and just bloat the language
+  /// picker.
+  static const Set<String> _commonTranslatableLangs = {
+    'en', 'es', 'es-419', 'fr', 'de', 'it', 'pt', 'pt-br', 'pt-pt', 'ru',
+    'ja', 'ko', 'zh-cn', 'zh-tw', 'ar', 'hi', 'tr', 'nl', 'pl', 'sv', 'id',
+    'vi', 'th', 'el', 'he', 'uk', 'cs', 'ro', 'hu', 'fa', 'sr', 'bg', 'fi',
+    'da', 'no',
+  };
 }
 
 class _SearchHit {
