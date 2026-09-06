@@ -17,6 +17,7 @@ import '../../widgets/common/custom_scroll_track.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/hero_carousel_auto_rotate.dart';
+import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
 import 'anime_stream_sheet.dart';
@@ -563,10 +564,11 @@ class _AnimePageState extends State<AnimePage> {
           child: CustomScrollTrack(controller: _scrollController),
         ),
       Positioned(
-        top: 16,
-        right: 16,
-        child: Row(
-          children: [
+        top: 0,
+        left: 0,
+        right: 0,
+        child: PillFilterHeaderBar(
+          pills: [
             FilterDropdown<String?>(
               label: _genreFilter ?? 'All Genres',
               icon: Icons.filter_list_rounded,
@@ -577,7 +579,6 @@ class _AnimePageState extends State<AnimePage> {
               ],
               onSelected: _selectGenre,
             ),
-            const SizedBox(width: 10),
             FilterDropdown<bool>(
               label: _isArabicMode ? '🇸🇦 Arabic' : '🇬🇧 English',
               icon: Icons.language_rounded,
@@ -607,18 +608,11 @@ class _AnimePageState extends State<AnimePage> {
               ],
               onSelected: (arabic) => _onModeChanged(arabic ?? false),
             ),
-            const SizedBox(width: 10),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.35),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                tooltip: 'Search',
-                icon: const Icon(Icons.search_rounded),
-                color: Colors.white.withValues(alpha: 0.75),
-                onPressed: () => _navigateToSearch(null),
-              ),
+            IconButton(
+              tooltip: 'Search',
+              icon: const Icon(Icons.search_rounded),
+              color: Colors.white.withValues(alpha: 0.75),
+              onPressed: () => _navigateToSearch(null),
             ),
           ],
         ),

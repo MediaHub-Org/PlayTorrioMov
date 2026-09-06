@@ -19,12 +19,19 @@ class WindowService with WindowListener {
   bool get isDesktop =>
       !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
 
+  /// Below this, the desktop chrome (nav, filter pills, source dropdowns)
+  /// has to start hiding labels and cramming controls -- the same layout
+  /// rules that make sense on an actual narrow phone look broken on a
+  /// desktop window someone can just as easily make wider instead.
+  static const Size minimumWindowSize = Size(760, 600);
+
   Future<void> initialize() async {
     if (!isDesktop) return;
     try {
       windowManager.addListener(this);
       final isFs = await windowManager.isFullScreen();
       isFullscreenNotifier.value = isFs;
+      await windowManager.setMinimumSize(minimumWindowSize);
       // Defers the actual close until we call destroy() below, instead of
       // the OS killing the process mid-teardown while LocalStreamProxy's
       // server (and other background services) are still live.

@@ -25,11 +25,8 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-  final TextEditingController _searchController = TextEditingController();
-
   String _filterType = 'all'; // 'all', 'movie', 'series', 'anime'
   String _sortBy = 'recent'; // 'recent', 'title', 'year'
-  String _searchQuery = '';
 
   /// Narrows Saved to items flagged as "watch later". This used to be its own
   /// tab, but a watchlist item is just a My List item with `isWatchlist` set,
@@ -37,21 +34,19 @@ class _CollectionPageState extends State<CollectionPage> {
   /// grid, its filter bar and its empty state one tab over.
   bool _watchlistOnly = false;
 
+  /// Narrows Saved to items already marked watched (`MyListItem.isWatched`).
+  bool _watchedOnly = false;
+
   @override
   void initState() {
     super.initState();
     AnimeLibraryService.instance.init();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   List<MyListItem> _getFilteredAndSortedItems(List<MyListItem> allItems) {
     var filtered = allItems.where((item) {
       if (_watchlistOnly && !item.isWatchlist) return false;
+      if (_watchedOnly && !item.isWatched) return false;
       if (_filterType == 'movie' && item.type != 'movie') return false;
       if (_filterType == 'series' &&
           item.type != 'series' &&
@@ -59,11 +54,6 @@ class _CollectionPageState extends State<CollectionPage> {
         return false;
       if (_filterType == 'anime' && item.type != 'anime') return false;
 
-      if (_searchQuery.trim().isNotEmpty) {
-        final query = _searchQuery.toLowerCase().trim();
-        final title = item.title.toLowerCase();
-        if (!title.contains(query)) return false;
-      }
       return true;
     }).toList();
 
@@ -186,23 +176,29 @@ class _CollectionPageState extends State<CollectionPage> {
 
         return Column(
           children: [
-            _buildFilterAndSearchBar(allItems.length),
+            _buildFilterBar(allItems.length),
             Expanded(
               child: items.isEmpty
                   ? LibraryEmptyState(
                       icon: _watchlistOnly
                           ? Icons.bookmark_border_rounded
-                          : Icons.video_library_rounded,
+                          : _watchedOnly
+                              ? Icons.check_circle_outline_rounded
+                              : Icons.video_library_rounded,
                       title: allItems.isEmpty
                           ? 'Nothing saved yet'
                           : (_watchlistOnly
                                 ? 'Nothing on your watchlist'
-                                : 'No matching items'),
+                                : _watchedOnly
+                                    ? 'Nothing marked watched yet'
+                                    : 'No matching items'),
                       subtitle: allItems.isEmpty
                           ? 'Add movies, series or anime to access them quickly.'
                           : (_watchlistOnly
                                 ? 'Bookmark something to watch later and it lands here.'
-                                : 'Try adjusting your search or filters.'),
+                                : _watchedOnly
+                                    ? 'Mark something watched and it lands here.'
+                                    : 'Try adjusting your filters.'),
                     )
                   : _buildGrid(items),
             ),
@@ -497,71 +493,11 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  Widget _buildFilterAndSearchBar(int totalCount) {
+  Widget _buildFilterBar(int totalCount) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF141824),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.search_rounded,
-                        size: 18,
-                        color: Colors.white54,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: (val) =>
-                              setState(() => _searchQuery = val),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'Search library...',
-                            hintStyle: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 13,
-                            ),
-                            border: InputBorder.none,
-                            isDense: true,
-                          ),
-                        ),
-                      ),
-                      if (_searchQuery.isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                          child: const Icon(
-                            Icons.close_rounded,
-                            size: 16,
-                            color: Colors.white54,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
           Row(
             children: [
               _buildChoiceChip('All', 'all'),
@@ -572,9 +508,20 @@ class _CollectionPageState extends State<CollectionPage> {
               const SizedBox(width: 6),
               _buildChoiceChip('Anime', 'anime'),
               const SizedBox(width: 12),
-              _WatchlistChip(
+              _ToggleChip(
+                label: 'Watchlist',
+                icon: Icons.bookmark_border_rounded,
+                selectedIcon: Icons.bookmark_rounded,
                 selected: _watchlistOnly,
                 onTap: () => setState(() => _watchlistOnly = !_watchlistOnly),
+              ),
+              const SizedBox(width: 6),
+              _ToggleChip(
+                label: 'Watched',
+                icon: Icons.check_circle_outline_rounded,
+                selectedIcon: Icons.check_circle_rounded,
+                selected: _watchedOnly,
+                onTap: () => setState(() => _watchedOnly = !_watchedOnly),
               ),
               const Spacer(),
               PopupMenuButton<String>(
@@ -702,16 +649,28 @@ class _CollectionPageState extends State<CollectionPage> {
 /// Distinct from the type chips because it composes with them -- "Series I
 /// bookmarked" is a real filter, and it would not be expressible if watchlist
 /// were just a fifth mutually-exclusive chip.
-class _WatchlistChip extends StatelessWidget {
+/// A toggle chip for a boolean filter on the Saved tab (Watchlist, Watched)
+/// -- same shape as the type chips but its own on/off state instead of a
+/// mutually-exclusive selection.
+class _ToggleChip extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
+  final String label;
+  final IconData icon;
+  final IconData selectedIcon;
 
-  const _WatchlistChip({required this.selected, required this.onTap});
+  const _ToggleChip({
+    required this.selected,
+    required this.onTap,
+    required this.label,
+    required this.icon,
+    required this.selectedIcon,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: selected ? 'Showing watchlist only' : 'Watchlist only',
+      message: selected ? 'Showing $label only' : '$label only',
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -729,15 +688,13 @@ class _WatchlistChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                selected
-                    ? Icons.bookmark_rounded
-                    : Icons.bookmark_border_rounded,
+                selected ? selectedIcon : icon,
                 size: 14,
                 color: selected ? Colors.white : Colors.white60,
               ),
               const SizedBox(width: 4),
               Text(
-                'Watchlist',
+                label,
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,

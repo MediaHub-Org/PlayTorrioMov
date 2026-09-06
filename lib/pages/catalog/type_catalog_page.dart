@@ -13,6 +13,7 @@ import '../../widgets/common/error_view.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/page_search_button.dart';
+import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
@@ -269,72 +270,54 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     final decades = _items.map(_decadeOf).whereType<int>().toSet().toList()
       ..sort((a, b) => b.compareTo(a));
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-      child: Wrap(
-        alignment: WrapAlignment.end,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 10,
-        runSpacing: 10,
-        children: [
-          if (_availableGenres.isNotEmpty) ...[
-                FilterDropdown<String?>(
-                  label: _genreFilter ?? 'All genres',
-                  icon: Icons.category_rounded,
-                  items: [
-                    const PopupMenuItem(value: null, child: Text('All genres')),
-                    for (final g in _availableGenres)
-                      PopupMenuItem(value: g, child: Text(g)),
-                  ],
-                  onSelected: _selectGenreFilter,
-                ),
-                if (_loadingGenre)
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Color(0xFF7C5CFF),
-                    ),
-                  ),
-              ],
-              if (decades.isNotEmpty)
-                FilterDropdown<int?>(
-                  label: _decadeFilter == null
-                      ? 'All decades'
-                      : '${_decadeFilter}s',
-                  icon: Icons.calendar_today_rounded,
-                  items: [
-                    const PopupMenuItem(
-                      value: null,
-                      child: Text('All decades'),
-                    ),
-                    for (final d in decades)
-                      PopupMenuItem(value: d, child: Text('${d}s')),
-                  ],
-                  onSelected: (v) => setState(() => _decadeFilter = v),
-                ),
-              FilterDropdown<_CatalogSort>(
-                label: switch (_sort) {
-                  _CatalogSort.yearNewest => 'Newest',
-                  _CatalogSort.yearOldest => 'Oldest',
-                },
-                icon: Icons.sort_rounded,
-                items: const [
-                  PopupMenuItem(
-                    value: _CatalogSort.yearNewest,
-                    child: Text('Newest'),
-                  ),
-                  PopupMenuItem(
-                    value: _CatalogSort.yearOldest,
-                    child: Text('Oldest'),
-                  ),
-                ],
-                onSelected: (v) => setState(() => _sort = v!),
+    return PillFilterHeaderBar(
+      pills: [
+        if (_availableGenres.isNotEmpty) ...[
+          FilterDropdown<String?>(
+            label: _genreFilter ?? 'All genres',
+            icon: Icons.category_rounded,
+            items: [
+              const PopupMenuItem(value: null, child: Text('All genres')),
+              for (final g in _availableGenres)
+                PopupMenuItem(value: g, child: Text(g)),
+            ],
+            onSelected: _selectGenreFilter,
+          ),
+          if (_loadingGenre)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF7C5CFF),
               ),
-              const PageSearchButton(),
+            ),
         ],
-      ),
+        if (decades.isNotEmpty)
+          FilterDropdown<int?>(
+            label: _decadeFilter == null ? 'All decades' : '${_decadeFilter}s',
+            icon: Icons.calendar_today_rounded,
+            items: [
+              const PopupMenuItem(value: null, child: Text('All decades')),
+              for (final d in decades)
+                PopupMenuItem(value: d, child: Text('${d}s')),
+            ],
+            onSelected: (v) => setState(() => _decadeFilter = v),
+          ),
+        FilterDropdown<_CatalogSort>(
+          label: switch (_sort) {
+            _CatalogSort.yearNewest => 'Newest',
+            _CatalogSort.yearOldest => 'Oldest',
+          },
+          icon: Icons.sort_rounded,
+          items: const [
+            PopupMenuItem(value: _CatalogSort.yearNewest, child: Text('Newest')),
+            PopupMenuItem(value: _CatalogSort.yearOldest, child: Text('Oldest')),
+          ],
+          onSelected: (v) => setState(() => _sort = v!),
+        ),
+        const PageSearchButton(),
+      ],
     );
   }
 

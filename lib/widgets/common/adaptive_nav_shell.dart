@@ -71,7 +71,7 @@ class _MobileTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
+      height: TopBar.sharedHeight,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: const BoxDecoration(
         color: Color(0xFF0B0D15),
@@ -81,14 +81,7 @@ class _MobileTopBar extends StatelessWidget {
         children: [
           const Flexible(child: SidebarLogo()),
           const Spacer(),
-          if (onSettingsTap != null)
-            IconButton(
-              onPressed: onSettingsTap,
-              tooltip: 'Settings',
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-              icon: const Icon(Icons.settings_rounded, color: Colors.white70, size: 20),
-            ),
+          if (onSettingsTap != null) SettingsIconButton(onTap: onSettingsTap!),
         ],
       ),
     );

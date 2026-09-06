@@ -16,7 +16,13 @@ class TopBar extends StatelessWidget {
   /// Invoked when the settings (gear) button is tapped.
   final VoidCallback? onSettingsTap;
 
-  const TopBar({super.key, this.height = 60, this.onSettingsTap});
+  /// Shared with [AdaptiveNavShell]'s mobile top bar so the header itself is
+  /// the same height on every tier -- the Settings button previously sat at
+  /// a slightly different vertical position on mobile vs. desktop purely
+  /// because the two bars picked different heights independently.
+  static const double sharedHeight = 56;
+
+  const TopBar({super.key, this.height = sharedHeight, this.onSettingsTap});
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +49,29 @@ class TopBar extends StatelessWidget {
           if (onSettingsTap != null)
             Align(
               alignment: Alignment.centerRight,
-              child: _settingsButton(onTap: onSettingsTap!),
+              child: SettingsIconButton(onTap: onSettingsTap!),
             ),
         ],
       ),
     );
   }
+}
 
-  Widget _settingsButton({required VoidCallback onTap}) {
+/// The Settings (gear) button, identical wherever it appears -- currently
+/// [TopBar] (tablet/desktop) and [AdaptiveNavShell]'s mobile top bar -- so
+/// its exact size and icon inset never drift between them.
+class SettingsIconButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const SettingsIconButton({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     return IconButton(
       onPressed: onTap,
       tooltip: 'Settings',
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       style: IconButton.styleFrom(
         backgroundColor: Colors.white.withValues(alpha: 0.04),
         foregroundColor: Colors.white70,
