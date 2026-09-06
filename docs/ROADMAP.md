@@ -122,15 +122,46 @@ Requested 2026-09-06, after using the #19/#20 build:
 | #  | Task                                                        | Details                                                                                                                                                                                                                                                            |
 |----|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 22 | **`GlassBackButton` sits flush against the search bar**       | On Search/Catalog/Discover's header rows, the back button (`lib/widgets/common/glass_back_button.dart`) has no gap before the search field/pill row starts right next to it — reads as one cramped control instead of two. Needs a deliberate gap (`SizedBox`) between them, everywhere `GlassBackButton` shares a row with a search field. |
-| 23 | **`PageSearchButton` doesn't match the pill row it sits in**  | `PageSearchButton` (`lib/widgets/common/page_search_button.dart`) is a bare `IconButton` with no background/border, placed via `PillFilterHeaderBar` right next to `FilterDropdown` pills that *do* have both (`Colors.white` @ 6% fill, 10% border, `BorderRadius.circular(10)` — see `filter_dropdown.dart`). Give it the same pill decoration so it reads as part of the row instead of a stray icon. Apply the same treatment to Live TV's own header, which never adopted `PillFilterHeaderBar` (per #18, it "has no equivalent filter row to unify" — but it should still get a matching search pill even without the genre/decade/sort pills). |
-| 24 | **Define a minimum width for the pill/header controls**      | The 760×600 floor from #18 covers the whole window; the pills themselves (`FilterDropdown`, `PageSearchButton`, once #23 lands) have no minimum tap-target/width of their own, so review whether they need one — distinct question from the window floor. |
+| 24 | **Define a minimum width for the pill/header controls**      | The 760×600 floor from #18 covers the whole window; the pills themselves (`FilterDropdown`, `PageSearchButton`, `HeaderPillIconButton`) have no minimum tap-target/width of their own, so review whether they need one — distinct question from the window floor. |
 | 25 | **Separate row titles ("Popular", "New", ...) from the card list below them** | `SectionHeader` (`lib/widgets/common/section_header.dart`) pads `fromLTRB(20, 8, 16, 0)` — zero bottom inset, so the title sits flush against the first row of poster cards with no breathing room. Needs a real gap between the title/subtitle and the list beneath it. |
 
-See Resolved below for #13 (nav split), #14 (Settings position), and #16
-(subtitle list).
+See Resolved below for #13 (nav split), #14 (Settings position), #16
+(subtitle list), and #23 (search icon pill styling).
 
 ## Resolved
 
+- ~~**#26 Sticky header pills, #23 search icon consistency, Library's extra mobile top gap**~~ —
+  - *"Pills that are sticky"* — real bug: the genre/decade/sort/search
+    header on Movies/Series, Anime, and Live TV floated as a page-level
+    `Positioned` outside the scrollable content, so it stayed pinned to
+    the viewport for the whole page instead of scrolling away. Fixed by
+    nesting it inside the hero carousel's own `Stack` instead
+    (`BrowseScaffold._buildHero`, `_AnimeHeroCarousel`,
+    `IptvHeroCarousel`) — it still visually floats over the hero, but
+    now scrolls away with it once the page scrolls, since it's part of
+    the hero's own sliver item rather than a sibling outside the scroll
+    view. Renders inline (never floating) wherever there's no hero to
+    nest into — loading/error/empty/genre-grid states, or Live TV with
+    its hero spotlight disabled. Covered by a regression test that
+    scrolls a page and asserts the header is no longer found.
+  - *(#23)* Search icon now shares one `headerPillDecoration` (new
+    `lib/widgets/common/header_pill_style.dart`) with `FilterDropdown`'s
+    pills, applied consistently across Movies, Series, Anime, and Live
+    TV. Live TV's bespoke gradient "glass" title/count badges and action
+    buttons (`_IptvGlassAppBar`, `_GlassActionButton`) are gone in favor
+    of the same pill look everywhere else (new `HeaderPillIconButton`
+    for its plain Sources/Multi-view actions), and no longer double-add
+    the device's status-bar inset now that it renders like every other
+    hub section's header instead of a from-scratch full-screen app bar.
+  - *"Extra space on top of Library's header on mobile"* — root cause:
+    `LibraryTabs`'s own `AppBar` reserves `MediaQuery.padding.top` for
+    itself unconditionally, on top of the same inset `AdaptiveNavShell`
+    already cleared with a real `SizedBox` above it — a block of dead
+    space with nothing above it to justify it, most visible on mobile
+    where there's no second header row (unlike desktop's
+    `SectionTopBar`) to make the double-reservation less obvious. Fixed
+    with `MediaQuery.removePadding(removeTop: true)` around the whole
+    `Scaffold`.
 - ~~**#20 Remove Custom Background/Wallpaper and Liquid Glass, fix Settings hiding the 5-section bar**~~ —
   a follow-up batch after #19:
   - Custom Background & Wallpaper (a settings page letting a user replace
