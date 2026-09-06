@@ -118,6 +118,53 @@ class VidRockScraper extends StreamScraper {
           }
 
           if (streamUrl != null && streamUrl.isNotEmpty) {
+            if (streamUrl.contains('/playlist/')) {
+              try {
+                final pRes = await client.get(
+                  Uri.parse(streamUrl),
+                  headers: {
+                    'User-Agent': _ua,
+                    'Referer': _baseUrl,
+                  },
+                ).timeout(const Duration(seconds: 6));
+
+                if (pRes.statusCode == 200 && pRes.body.trim().startsWith('[')) {
+                  final pList = jsonDecode(pRes.body);
+                  if (pList is List && pList.isNotEmpty) {
+                    for (final item in pList) {
+                      if (item is Map) {
+                        final rawItemUrl = item['url']?.toString();
+                        if (rawItemUrl != null && rawItemUrl.startsWith('http')) {
+                          final resVal = item['resolution']?.toString() ?? '1080';
+                          final isHls = rawItemUrl.contains('.m3u8');
+                          final reqHeaders = {
+                            'User-Agent': _ua,
+                            'Referer': _baseUrl,
+                          };
+
+                          yield StreamSource(
+                            name: 'PlayTorrioHTTP',
+                            addonName: 'PlayTorrioHTTP',
+                            title: 'VidRock · $provider · ${resVal}p',
+                            description: 'VidRock Stream · ${isHls ? 'HLS' : 'MP4'}',
+                            url: rawItemUrl,
+                            headers: reqHeaders,
+                            behaviorHints: {
+                              'notWebReady': false,
+                              'proxyHeaders': {
+                                'request': reqHeaders,
+                              },
+                            },
+                          );
+                        }
+                      }
+                    }
+                    continue;
+                  }
+                }
+              } catch (_) {}
+            }
+
             final isHls = streamUrl.contains('.m3u8');
             final reqHeaders = {
               'User-Agent': _ua,

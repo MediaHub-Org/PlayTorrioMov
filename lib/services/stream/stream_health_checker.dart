@@ -109,8 +109,8 @@ class StreamHealthChecker {
       // Binary video / stream container signature checks
       if (_hasVideoSignature(buf)) return true;
 
-      // If we received >= 16KB of binary content without dead content type, it's alive
-      if (buf.length >= 16 * 1024 && !_isDeadContentType(ct)) {
+      // If we received >= _minBytes of binary content without dead content type, it's alive
+      if (buf.length >= _minBytes && !_isDeadContentType(ct)) {
         return true;
       }
 

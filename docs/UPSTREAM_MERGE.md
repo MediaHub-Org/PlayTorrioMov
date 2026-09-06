@@ -27,9 +27,20 @@ Verification: `flutter analyze` on all touched files — 0 issues. `flutter test
 
 ## 6c4d0cf — player error filtering & stream health
 
-Branch: `port/6c4d0cf-stream-error-filtering` (planned, off branch 1)
+Branch: `port/6c4d0cf-stream-error-filtering` (off branch 1)
 
-⬜ Not started yet.
+| File | Status | Note |
+|---|---|---|
+| `lib/pages/player/player_screen.dart` | ✅ | Clean cherry-pick. |
+| `lib/services/player/player_settings.dart` | ✅ | Clean cherry-pick — `isNonFatalError` refinement, CDN referer resolver rules for Dulo/VidFast. |
+| `lib/services/scraper/sites/dulo_client.dart` | ✅ | Clean cherry-pick — referer/domain-priority fix. |
+| `lib/services/scraper/sites/vidrock.dart` | ✅ | Clean cherry-pick — parses playlist JSON instead of yielding raw JSON. |
+| `lib/services/stream/stream_health_checker.dart` | ✅ | Clean cherry-pick — named `_minBytes` constant instead of a magic number. |
+| `lib/services/scraper/stream_scraper.dart` | ✍️ | Conflict was a false alarm: Mov already had the exact same `StreamHealthChecker.isAlive` gate in `ScraperManager`'s scrape loop (own naming: `inFlightChecks` vs upstream's `pendingHealthChecks`) — never dropped it, so nothing to port. Kept Mov's existing code as-is; net diff on this file is zero. |
+| `test/services/cinejoy_scraper_test.dart`, `test/test_player_error_filter.dart` | ✅ | Clean cherry-pick; fixed `package:playtorrio/…` → `package:playtorriomov/…` imports. 6/6 pass. |
+| `lib/pages/audiobooks/audiobook_player_screen.dart`, `lib/services/music/music_player_controller.dart` | ⏭️ | Mov has neither audiobooks nor music. |
+
+Verification: `flutter analyze` on all touched files — 0 errors (1 pre-existing, unrelated lint warning in `stream_health_checker.dart` confirmed present before this port too). `flutter test` on the 2 new test files — 6/6 pass. Full `flutter test` — same 1 pre-existing PeeStream network flake as branch 1, no new failures.
 
 ## f1f1310 — Stremio catalog-extra & collection addons
 

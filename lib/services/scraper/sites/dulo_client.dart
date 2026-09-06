@@ -35,8 +35,8 @@ class DuloClient {
   DuloClient._internal();
 
   static const List<String> _domains = [
-    'https://dulo.cx',
     'https://dulo.gd',
+    'https://dulo.cx',
   ];
 
   static const String _ua =
@@ -50,8 +50,8 @@ class DuloClient {
 
   Map<String, String> get playbackHeaders => {
         'User-Agent': _ua,
-        'Referer': '$_activeDomain/',
-        'Origin': _activeDomain,
+        'Referer': 'https://d.dulo.gd/',
+        'Origin': 'https://d.dulo.gd',
       };
 
   /// Obtains or reuses an active `__Host-amri_session` cookie from Dulo.

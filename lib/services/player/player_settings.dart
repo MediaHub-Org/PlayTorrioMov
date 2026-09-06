@@ -634,6 +634,86 @@ abstract final class PlayerSettings {
     }
   }
 
+  /// Checks if an error emitted by media_kit / MPV / FFmpeg is a non-fatal,
+  /// routine protocol warning or demuxer hiccup that should be ignored during playback.
+  static bool isNonFatalError(dynamic err) {
+    if (err == null) return false;
+    final errorMsg = err.toString().trim();
+    if (errorMsg.isEmpty) return false;
+    final lower = errorMsg.toLowerCase();
+
+    // 0. Subtitles loading or parsing errors are always non-fatal
+    if (lower.contains('can not open external file') ||
+        lower.contains('subtitle') ||
+        lower.contains('sub-add') ||
+        lower.contains('.srt') ||
+        lower.contains('.vtt') ||
+        lower.contains('.ass')) {
+      return true;
+    }
+
+    // 1. FATAL error indicators: These MUST NEVER be ignored, as they indicate dead streams or broken formats.
+    if (lower.contains('failed to open') ||
+        lower.contains('cannot open') ||
+        lower.contains('can not open') ||
+        lower.contains('could not open') ||
+        lower.contains('unable to open') ||
+        lower.contains('failed to recognize file format') ||
+        lower.contains('unsupported file format') ||
+        lower.contains('format not supported') ||
+        lower.contains('no such file or directory') ||
+        lower.contains('server returned 4') ||
+        lower.contains('server returned 5') ||
+        lower.contains('failed to resolve hostname') ||
+        lower.contains('failed host lookup') ||
+        lower.contains('no such host is known') ||
+        lower.contains('name or service not known') ||
+        lower.contains('connection refused') ||
+        lower.contains('host unreachable') ||
+        lower.contains('network is unreachable') ||
+        lower.contains('error opening')) {
+      return false;
+    }
+
+    // 2. FFmpeg URL protocol & socket read/write return codes (e.g. "tcp: ffurl_read returned 0xffffff99")
+    if (lower.contains('ffurl_read') ||
+        lower.contains('ffurl_write') ||
+        lower.contains('ffurl_') ||
+        lower.contains('av_read_frame') ||
+        lower.contains('0xffffff') ||
+        lower.contains('returned -') ||
+        lower.contains('returned 0x')) {
+      return true;
+    }
+
+    // 3. Transient socket/stream level warnings during active playback where demuxer reconnects or handles EOF
+    if (lower.contains('averror_eof') ||
+        lower.contains('end of file') ||
+        lower.contains('connection reset') ||
+        lower.contains('connection closed') ||
+        lower.contains('connection timed out') ||
+        lower.contains('broken pipe') ||
+        lower.contains('resource temporarily unavailable')) {
+      return true;
+    }
+
+    // 4. Codec, demuxer packet or hardware acceleration fallbacks that don't prevent playback
+    if (lower.contains('invalid nal unit') ||
+        lower.contains('corrupt input packet') ||
+        lower.contains('missing picture') ||
+        lower.contains('packet corrupt') ||
+        lower.contains('error while decoding') ||
+        lower.contains('hardware decoder') ||
+        lower.contains('hwdec') ||
+        lower.contains('auto-safe') ||
+        lower.contains('swscaler') ||
+        lower.contains('scaletempo')) {
+      return true;
+    }
+
+    return false;
+  }
+
   /// Automatically resolves all required Referer, Origin, and User-Agent headers for known streaming CDNs.
   static Map<String, String> resolveStreamHeaders(String url, [Map<String, String>? initialHeaders]) {
     final h = <String, String>{
@@ -649,6 +729,9 @@ abstract final class PlayerSettings {
     final lower = url.toLowerCase();
     if (lower.contains('hakunaymatata.com')) {
       h['User-Agent'] = 'Lavf/60.16.100';
+    } else if (lower.contains('sabrina-stream-proxy') || lower.contains('dulo.') || lower.contains('dulo.gd')) {
+      h['Referer'] = 'https://d.dulo.gd/';
+      h['Origin'] = 'https://d.dulo.gd';
     } else if (lower.contains('movieboxnoob.cc') ||
         lower.contains('moviebox.ph') ||
         lower.contains('cinejoy.to') ||
@@ -661,8 +744,14 @@ abstract final class PlayerSettings {
         lower.contains('vidzy.cc') ||
         lower.contains('vimeos.zip') ||
         lower.contains('wecollege.net')) {
-      h['Referer'] = 'https://www.movy.bz/';
-      h['Origin'] = 'https://www.movy.bz';
+      final customRef = initialHeaders?['Referer'] ?? initialHeaders?['referer'];
+      if (customRef != null && customRef.isNotEmpty) {
+        h['Referer'] = customRef;
+        h['Origin'] = customRef.replaceAll(RegExp(r'/+$'), '');
+      } else {
+        h['Referer'] = 'https://www.movy.bz/';
+        h['Origin'] = 'https://www.movy.bz';
+      }
     } else if (lower.contains('chillflix.lol')) {
       h['Referer'] = 'https://www.chillflix.lol/';
       h['Origin'] = 'https://www.chillflix.lol';
