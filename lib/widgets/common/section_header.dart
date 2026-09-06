@@ -19,7 +19,11 @@ class SectionHeader extends StatelessWidget {
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 16, 0),
+      // Bottom matches the loading skeleton's own title placeholder
+      // (BrowseScaffold._buildLoading) so the real header doesn't shift the
+      // row down once content replaces the skeleton. Used to be 0, leaving
+      // the title flush against the card row with no breathing room.
+      padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -201,6 +201,7 @@ class _SearchPageState extends State<SearchPage> {
                 children: [
                   const SizedBox(width: 8),
                   const GlassBackButton(),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(right: 16),

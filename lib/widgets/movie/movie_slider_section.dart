@@ -51,7 +51,6 @@ class _MovieSliderSectionState extends State<MovieSliderSection>
               },
             ),
           ),
-          const SizedBox(height: 12),
           MouseRegion(
             onEnter: (_) => setState(() => _isHoveringSlider = true),
             onExit: (_) => setState(() => _isHoveringSlider = false),

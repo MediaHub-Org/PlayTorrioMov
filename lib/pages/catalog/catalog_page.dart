@@ -307,6 +307,7 @@ class _CatalogPageState extends State<CatalogPage> {
                           children: [
                             const SizedBox(width: 8),
                             const GlassBackButton(),
+                            const SizedBox(width: 10),
                             if (!_isSearching)
                               Expanded(
                                 child: Text(

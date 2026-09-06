@@ -526,6 +526,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     child: Row(
                       children: [
                         const GlassBackButton(),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8),
