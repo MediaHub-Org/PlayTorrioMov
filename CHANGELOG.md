@@ -5,13 +5,51 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.0+15] - 2026-09-06
+
+### Added
+- Audio dub/language detection and filtering for stream sources, player
+  error filtering, and stream health checks — ported from upstream
+  `ayman708-UX/PlayTorrioV3` (`ad0e40d`, `6c4d0cf`)
+- Stremio catalog-extra and collection addon support — ported from
+  upstream `f1f1310`
+- Movies and Series split into two full top-level navigation sections
+  (previously shared one section behind an internal pill toggle)
+- Live TV channels can be favorited (heart on the channel card and in
+  the channel detail sheet); favorited channels surface in Library
+  under a new Live TV chip
+- A Watched toggle chip in Library, alongside Watchlist
+- One shared genre-tag pill row (`GenreTagRow`), filter/search pill row
+  (`PillFilterHeaderBar`), and back button (`GlassBackButton`) — each
+  replacing several hand-rolled, slightly-inconsistent implementations
+  across Movies/Series/Anime/Anime-Arabic/Search/Catalog/Discover/IPTV
+- A 760×600 minimum desktop window size, so the window can't be shrunk
+  into the cramped mobile breakpoint
+
 ### Fixed
+- The 5-section navigation bar no longer gets hidden behind Details,
+  Search, Catalog, Discover, or Settings on tablet/desktop
+- The Settings gear icon no longer drifts position between mobile,
+  tablet, and desktop, or as the window is resized within a tier
+- A catalog fetch failure (e.g. a transient network error) no longer
+  silently looks like "no content" — it now surfaces a retryable error
+- Subtitle translation language list trimmed from ~110 languages to a
+  curated ~34 commonly-used set
 - Android back button not popping pages pushed in the hub content area —
   `NestedNavigator` now handles the system back gesture via
   `NavigatorPopHandler`
 
 ### Changed
 - New app icon, `assets/icon.png`, regenerated across all platforms
+
+### Removed
+- Custom Background & Wallpaper and Liquid Glass Setup — both leftover
+  from PlayTorrioMod (the app this repo forked from); Liquid Glass
+  themed a bottom dock that doesn't exist in this single-hub app, and
+  its toggle defaulted off with no way to enable it, so every gated
+  code path was already dead
+- Library's own local search bar, superseded by the same per-page
+  search icon every other page already uses
 
 ## [1.1.6+14] - 2026-09-04
 
