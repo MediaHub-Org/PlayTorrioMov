@@ -121,15 +121,36 @@ Requested 2026-09-06, after using the #19/#20 build:
 
 | #  | Task                                                        | Details                                                                                                                                                                                                                                                            |
 |----|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 22 | **`GlassBackButton` sits flush against the search bar**       | On Search/Catalog/Discover's header rows, the back button (`lib/widgets/common/glass_back_button.dart`) has no gap before the search field/pill row starts right next to it — reads as one cramped control instead of two. Needs a deliberate gap (`SizedBox`) between them, everywhere `GlassBackButton` shares a row with a search field. |
 | 24 | **Define a minimum width for the pill/header controls**      | The 760×600 floor from #18 covers the whole window; the pills themselves (`FilterDropdown`, `PageSearchButton`, `HeaderPillIconButton`) have no minimum tap-target/width of their own, so review whether they need one — distinct question from the window floor. |
-| 25 | **Separate row titles ("Popular", "New", ...) from the card list below them** | `SectionHeader` (`lib/widgets/common/section_header.dart`) pads `fromLTRB(20, 8, 16, 0)` — zero bottom inset, so the title sits flush against the first row of poster cards with no breathing room. Needs a real gap between the title/subtitle and the list beneath it. |
 
 See Resolved below for #13 (nav split), #14 (Settings position), #16
-(subtitle list), and #23 (search icon pill styling).
+(subtitle list), #22 (back button gap), #23 (search icon pill styling),
+and #25 (row title spacing).
 
 ## Resolved
 
+- ~~**#27 Tap-to-play/pause on the video removed; #22/#25 header spacing**~~ —
+  - *Tap-to-play/pause* — reconsidered and removed. In the movies/series/
+    anime player it was hand-disambiguated from double-tap-to-fullscreen
+    by timestamp, so every double-tap also fired an unwanted play/pause
+    blip from its own first tap (a lone tap can't be told apart from the
+    first half of a double-tap until the second one does or doesn't
+    arrive). In the Live TV player, `onTap` and `onDoubleTap` on the same
+    `GestureDetector` meant Flutter's gesture arena had to wait to see
+    whether a second tap was coming before firing either — a real,
+    noticeable delay on something as immediate as pausing a live
+    channel. Both problems, plus an accidental tap (repositioning the
+    device, wiping the screen) silently pausing playback, outweighed the
+    convenience given a dedicated play/pause button already exists. A
+    single tap on the video now only reveals/hides the controls overlay,
+    same as before this was added.
+  - *(#22)* `GlassBackButton` sat flush against the search field/title
+    text on Search, Catalog, and Anime Search's header rows; added a
+    10px gap after it in all three, matching Discover's own header.
+  - *(#25)* `SectionHeader` padded `fromLTRB(20, 8, 16, 0)`, so a row's
+    title sat flush against the first card underneath it. Bottom now
+    matches the loading skeleton's own title placeholder
+    (`BrowseScaffold._buildLoading`).
 - ~~**#26 Sticky header pills, #23 search icon consistency, Library's extra mobile top gap**~~ —
   - *"Pills that are sticky"* — real bug: the genre/decade/sort/search
     header on Movies/Series, Anime, and Live TV floated as a page-level
