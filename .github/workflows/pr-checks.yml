@@ -13,25 +13,25 @@ name: PR Checks
 
 on:
   pull_request:
-  # Also on merges to main, for two reasons:
+  # Also on merges to master (this repo's default branch), for two reasons:
   #
   #  1. Cache scope. A run can only restore caches created on its own branch or
   #     on the default branch. Caches saved by a PR run belong to that PR's
   #     branch, so no other PR can ever read them -- which made the pub/Gradle
   #     caches effectively dead: every PR started cold. Running here saves them
-  #     against main, where every branch can restore from.
-  #  2. It verifies main itself. A PR merged before its own check finishes
+  #     against master, where every branch can restore from.
+  #  2. It verifies master itself. A PR merged before its own check finishes
   #     currently lands unverified.
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 # A new push to the same PR makes the in-flight run redundant.
 concurrency:
   group: pr-checks-${{ github.workflow }}-${{ github.ref }}
-  # Superseded PR runs are wasted work, but a main run is populating the shared
-  # cache -- cancelling it leaves every later PR cold again.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Superseded PR runs are wasted work, but a master run is populating the
+  # shared cache -- cancelling it leaves every later PR cold again.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 permissions:
   contents: read

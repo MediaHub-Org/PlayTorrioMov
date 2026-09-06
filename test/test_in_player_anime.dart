@@ -1,3 +1,6 @@
+@Tags(['network'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
 import 'package:playtorriomov/services/anime/anime_scraper_service.dart';
