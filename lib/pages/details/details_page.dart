@@ -13,6 +13,7 @@ import '../../services/my_list/my_list_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/like_button.dart';
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
@@ -999,43 +1000,12 @@ class _DetailsPageState extends State<DetailsPage>
   // the old boxed "Quick Facts" panel — same information, but styled as a
   // lightweight row instead of a card that left dead space under the poster.
   Widget _buildGenreChips(List<String> genres) {
-    return Wrap(
-      spacing: _Space.xs,
-      runSpacing: _Space.xs,
-      children: genres.map((g) {
-        Offset? lastTap;
-        return GestureDetector(
-          onTapDown: (d) => lastTap = d.globalPosition,
-          onTap: () {
-            Navigator.push(
-              context,
-              LiquidRevealRoute(
-                page: DiscoverPage(query: g, isGenre: true),
-                tapPosition: lastTap,
-              ),
-            );
-          },
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.06),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
-              ),
-              child: Text(
-                g,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
+    return GenreTagRow(
+      genres: genres,
+      onTap: (g) => Navigator.push(
+        context,
+        LiquidRevealRoute(page: DiscoverPage(query: g, isGenre: true)),
+      ),
     );
   }
 

@@ -6,6 +6,7 @@ import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
+import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_arabic_stream_sheet.dart';
 import '../../services/app_breakpoints.dart';
@@ -512,29 +513,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
         const SizedBox(height: 14),
 
         // Genres
-        if (genres.isNotEmpty)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: genres.map((g) {
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-                child: Text(
-                  g,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+        if (genres.isNotEmpty) GenreTagRow(genres: genres),
 
         const SizedBox(height: 18),
 

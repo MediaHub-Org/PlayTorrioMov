@@ -7,6 +7,7 @@ import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
+import '../../services/app_spacing.dart';
 import '../../services/theme/glass_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
@@ -260,7 +261,7 @@ class _AnimePageState extends State<AnimePage> {
                 ? 5
                 : 6;
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(24, 80, 24, 120),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 80, AppSpacing.lg, 120),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 20,

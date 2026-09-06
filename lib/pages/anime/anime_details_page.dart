@@ -11,11 +11,11 @@ import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
+import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
 
 class _Space {
-  static const xs = 8.0;
   static const sm = 12.0;
   static const md = 16.0;
   static const lg = 24.0;
@@ -857,30 +857,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   }
 
   Widget _buildGenreChips(List<String> genres) {
-    return Wrap(
-      spacing: _Space.xs,
-      runSpacing: _Space.xs,
-      children: genres
-          .map(
-            (g) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-              ),
-              child: Text(
-                g,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          )
-          .toList(),
-    );
+    return GenreTagRow(genres: genres);
   }
 
   // ─── Characters & Voice Cast Row ───────────────────────────────
