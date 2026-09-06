@@ -3,11 +3,23 @@ import 'package:flutter/material.dart';
 import '../../services/app_spacing.dart';
 import 'sidebar_logo.dart';
 
-/// The slim global top bar shown above the hub's content.
+/// The slim global top bar shown above the hub's content, on every tier --
+/// mobile included, as of the fix described below. Holds the PlayTorrio
+/// logo and a Settings button. The section switcher for the hub's sections
+/// renders below it, in [AdaptiveNavShell] — see [SectionTopBar].
 ///
-/// Holds the PlayTorrio logo and a Settings button. The section switcher for
-/// the hub's four sections renders below it, in the content area — see
-/// [SectionTopBar].
+/// Mobile and tablet/desktop used to be two separate widgets with
+/// independently-picked heights, padding, and button sizing, which drifted
+/// the Settings icon a few px between tiers despite looking almost the
+/// same. Rather than keep two copies in sync by hand, there is now exactly
+/// one definition, built mobile-first (a `Row` with the logo in a
+/// `Flexible` so it can actually shrink/ellipsize under a real phone
+/// width, `Spacer()`, then the button) and reused unchanged on every tier
+/// — not just visually matched, but the same widget, so it cannot drift
+/// again. The previous tablet/desktop version used `Stack` + `Align`
+/// instead, which doesn't bound the logo's width at all; that happened to
+/// be safe as long as desktop always had room to spare, but was never a
+/// definition mobile could have reused.
 class TopBar extends StatelessWidget {
   /// The height available to the bar. Callers should inset their content by
   /// this amount so nothing sits beneath the bar.
@@ -16,10 +28,6 @@ class TopBar extends StatelessWidget {
   /// Invoked when the settings (gear) button is tapped.
   final VoidCallback? onSettingsTap;
 
-  /// Shared with [AdaptiveNavShell]'s mobile top bar so the header itself is
-  /// the same height on every tier -- the Settings button previously sat at
-  /// a slightly different vertical position on mobile vs. desktop purely
-  /// because the two bars picked different heights independently.
   static const double sharedHeight = 56;
 
   const TopBar({super.key, this.height = sharedHeight, this.onSettingsTap});
@@ -42,15 +50,21 @@ class TopBar extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      child: Stack(
-        alignment: Alignment.center,
+      // spaceBetween, not a Spacer() alongside Flexible: both default to
+      // flex 1, so a Spacer sibling splits the remaining width evenly with
+      // the logo's Flexible allocation instead of yielding it all -- since
+      // Flexible only shrinks to content (FlexFit.loose) and Flutter's Flex
+      // layout doesn't reclaim an undersized flex child's unused
+      // allocation for its sibling, that leftover became a growing gap
+      // between the logo and the button as the bar got wider. spaceBetween
+      // has no such competition: the Flexible logo (alone, no competing
+      // flex sibling) shrinks to its own content, and spaceBetween pushes
+      // whatever's actually left to the far right.
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Align(alignment: Alignment.centerLeft, child: SidebarLogo()),
-          if (onSettingsTap != null)
-            Align(
-              alignment: Alignment.centerRight,
-              child: SettingsIconButton(onTap: onSettingsTap!),
-            ),
+          const Flexible(child: SidebarLogo()),
+          if (onSettingsTap != null) SettingsIconButton(onTap: onSettingsTap!),
         ],
       ),
     );

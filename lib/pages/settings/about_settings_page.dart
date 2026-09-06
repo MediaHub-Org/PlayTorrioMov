@@ -10,7 +10,7 @@ const Color _kSurface = Color(0xFF12151E);
 const Color _kAccent = Color(0xFF7C5CFF);
 const Color _kAccentAlt = Color(0xFF00E5FF);
 
-const String _kRepoUrl = 'https://github.com/MediaHub-Org/PlayTorrioMod';
+const String _kRepoUrl = 'https://github.com/MediaHub-Org/PlayTorrioMov';
 const String _kUpstreamUrl = 'https://github.com/ayman708-UX/PlayTorrioV3';
 
 /// The About screen.
@@ -94,7 +94,7 @@ class AboutSettingsPage extends StatelessWidget {
               const _LinkTile(
                 icon: Icons.code_rounded,
                 title: 'Source code',
-                subtitle: 'MediaHub-Org/PlayTorrioMod — GPL-3.0',
+                subtitle: 'MediaHub-Org/PlayTorrioMov — GPL-3.0',
                 url: _kRepoUrl,
               ),
               const SizedBox(height: 10),
