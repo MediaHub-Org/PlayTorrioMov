@@ -22,8 +22,8 @@
       UI work #15
 - [x] Trim the subtitle language list to commonly-used / actually-available
       languages — see ROADMAP.md § Resolved #16
-- [ ] A catalog fetch failure silently looks like "no content" instead of a
-      retryable error — see ROADMAP.md § Known bugs #17
+- [x] A catalog fetch failure silently looks like "no content" instead of a
+      retryable error — see ROADMAP.md § Resolved #17
 - [x] Pull latest commits from original repo (PlayTorrioMod) and log them —
       done: PlayTorrioMod sits 3 commits behind its own upstream
       (`ayman708-UX/PlayTorrioV3`), see ROADMAP.md § Upstream tracking for

@@ -105,9 +105,7 @@ if a regression in any of them turns up.
 
 ## Known bugs
 
-| #  | Bug                                                       | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-|----|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 17 | **A catalog fetch failure silently looks like "no content"** | `AddonManager.fetchByType`/`fetchAllHomeSections` swallow each catalog's fetch exception per-addon (`catch (_) { return null; }`) so a transient network failure (DNS hiccup, timeout) for one type/catalog just drops that row instead of surfacing an error with retry. Found 2026-09-06 chasing a "Series doesn't load content" report — reproduced no code-level asymmetry between Movies/Series, but the same session's log showed live DNS failures (`Failed host lookup: graphql.anilist.co`) at the same time, and Cinemeta's manifest was independently confirmed (live) to declare a real `type: series` catalog. Likely explanation: the swallowed exception, not a Movies/Series bug — but the swallowing itself is worth fixing so a network blip shows a retryable error instead of an indistinguishable empty state. |
+Nothing open here right now — see Resolved below for #17.
 
 ## Requested UI work
 
@@ -123,6 +121,15 @@ See Resolved below for #13 (nav split) and #16 (subtitle list).
 
 ## Resolved
 
+- ~~**#17 A catalog fetch failure silently looked like "no content"**~~ —
+  fixed: `AddonManager.fetchByType` now rethrows the last error when every
+  catalog for that type failed outright (as opposed to succeeding with
+  zero results), instead of always swallowing to `null`. A transient
+  network failure now surfaces `TypeCatalogPage`'s existing `ErrorView` +
+  retry instead of the misleading "no content" empty state. Found chasing
+  a "Series doesn't load content" report — the report itself traced to a
+  live DNS failure during that session, not a Movies/Series code
+  asymmetry, but the swallowing was real and is what made it confusing.
 - ~~**#7 "Unknown hard error" on Windows after closing the app**~~ —
   confirmed fixed 2026-09-06: no longer reproduces. Root cause was a
   native window close never running the widget tree's own `dispose()`,

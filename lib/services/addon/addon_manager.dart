@@ -263,9 +263,17 @@ class AddonManager {
   /// This is stricter than [fetchAllHomeSections] + client-side filtering:
   /// it only requests catalogs whose manifest declares the requested type, so
   /// a Series section never receives movie-typed catalogs.
+  ///
+  /// If every catalog request for [type] fails (as opposed to succeeding
+  /// with zero results), rethrows the last error instead of returning an
+  /// empty list — otherwise a transient network failure is indistinguishable
+  /// from "this type genuinely has no content", and the caller can't offer
+  /// a retry for something that was never really empty.
   Future<List<MovieSection>> fetchByType(String type) async {
     final active = activeAddons;
     final futures = <Future<MovieSection?>>[];
+    Object? lastError;
+    var attempted = 0;
 
     for (final addon in active) {
       final typeCatalogs = addon.manifest.catalogs
@@ -273,6 +281,7 @@ class AddonManager {
           .toList();
 
       for (final catalog in typeCatalogs) {
+        attempted++;
         futures.add(() async {
           try {
             final movies = await MetadataService.fetchCatalog(
@@ -306,18 +315,24 @@ class AddonManager {
               catalog: catalog,
               movies: typedMovies,
             );
-          } catch (_) {
-            return null; // Gracefully handle failure
+          } catch (e) {
+            lastError = e;
+            return null; // Gracefully handle failure -- see if-check below
           }
         }());
       }
     }
 
     final results = await Future.wait(futures);
-    return results
+    final sections = results
         .where((s) => s != null && s.movies.isNotEmpty)
         .cast<MovieSection>()
         .toList();
+
+    if (sections.isEmpty && attempted > 0 && lastError != null) {
+      throw lastError!;
+    }
+    return sections;
   }
 
   /// Returns all available catalogs from active catalog addons.
