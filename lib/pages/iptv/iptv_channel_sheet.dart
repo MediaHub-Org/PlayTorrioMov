@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../models/iptv/iptv_models.dart';
+import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_controller.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/like_button.dart';
 import 'iptv_player_page.dart';
 
 class IptvChannelSheet extends StatefulWidget {
@@ -231,6 +233,19 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                           ),
                         ],
                       ),
+                    ),
+
+                    // Favorite (save to Library) toggle
+                    ValueListenableBuilder<List<FavoriteChannel>>(
+                      valueListenable: FavoriteChannelsService.items,
+                      builder: (context, _, _) {
+                        final isFav = FavoriteChannelsService.isFavorite(ch.id);
+                        return LikeButton(
+                          isLiked: isFav,
+                          onTap: () => FavoriteChannelsService.toggle(ch.id),
+                          style: LikeButtonStyle.icon,
+                        );
+                      },
                     ),
 
                     // Pen / Edit Button
