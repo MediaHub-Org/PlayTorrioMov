@@ -5,6 +5,25 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.2.1+16] - 2026-09-06
+
+### Fixed
+- The genre/decade/sort/search header on Movies, Series, Anime, and Live
+  TV no longer stays pinned to the screen while the page scrolls
+  underneath it
+- The search icon, and Live TV's whole header, now match the same pill
+  design used everywhere else instead of a bare icon and a bespoke
+  gradient "glass" look
+- Extra empty space above Library's header on mobile
+- Tapping the video no longer toggles play/pause — it only shows/hides
+  the controls now, same as before that was added; it conflicted with
+  double-tap-to-fullscreen and added input latency for no real benefit
+  over the dedicated play/pause button
+- Gap between the back button and the search field on Search, Catalog,
+  and Anime Search
+- Row titles ("Popular", "New", ...) no longer sit flush against the
+  card row underneath them
+
 ## [1.2.0+15] - 2026-09-06
 
 ### Added
