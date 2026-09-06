@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart' as mk;
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/models/movie/movie_detail.dart';
@@ -20,7 +19,6 @@ import '../../services/playback_coordinator.dart';
 import '../../services/stream/torrent_stream_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/debrid/debrid_service.dart';
-import '../../services/theme/glass_settings.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
 import '../../services/player/player_settings.dart';
@@ -2633,29 +2631,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   Widget _buildPlayerBody() {
-    return ValueListenableBuilder<bool>(
-      valueListenable: GlassSettings.enabled,
-      builder: (context, enabled, _) {
-        if (enabled) {
-          return LiquidGlassView(
-            realTimeCapture: _showControls && !_isLoading,
-            useSync: true,
-            pixelRatio: 0.85,
-            refreshRate: LiquidGlassRefreshRate.deviceRefreshRate,
-            regionCapture: true,
-            backgroundWidget: _buildBackgroundStack(),
-            child: _buildControlsOverlay(),
-          );
-        }
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            RepaintBoundary(child: _buildBackgroundStack()),
-            RepaintBoundary(child: _buildControlsOverlay()),
-          ],
-        );
-      },
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        RepaintBoundary(child: _buildBackgroundStack()),
+        RepaintBoundary(child: _buildControlsOverlay()),
+      ],
     );
   }
 }

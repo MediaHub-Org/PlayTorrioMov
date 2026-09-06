@@ -5,7 +5,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/debrid/debrid_service.dart';
-import '../../services/theme/glass_settings.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
 
@@ -180,22 +179,17 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 12),
 
               // 1. Appearance & Interface
-              ValueListenableBuilder<bool>(
-                valueListenable: GlassSettings.enabled,
-                builder: (context, glassEnabled, _) {
-                  return ValueListenableBuilder<AppThemePalette>(
-                    valueListenable: AppThemeService.currentPalette,
-                    builder: (context, currentPalette, _) {
-                      return _SettingsCategoryTile(
-                        icon: Icons.palette_rounded,
-                        iconColor: currentPalette.primaryColor,
-                        title: 'Appearance & Interface',
-                        subtitle: 'Liquid Glass setup, color themes, and Home Page UI',
-                        badgeText: glassEnabled ? '${currentPalette.name} · Glass ON' : currentPalette.name,
-                        badgeColor: currentPalette.primaryColor,
-                        onTap: () => _navigateTo(const AppearanceSettingsPage()),
-                      );
-                    },
+              ValueListenableBuilder<AppThemePalette>(
+                valueListenable: AppThemeService.currentPalette,
+                builder: (context, currentPalette, _) {
+                  return _SettingsCategoryTile(
+                    icon: Icons.palette_rounded,
+                    iconColor: currentPalette.primaryColor,
+                    title: 'Appearance & Interface',
+                    subtitle: 'Color themes and Home Page UI',
+                    badgeText: currentPalette.name,
+                    badgeColor: currentPalette.primaryColor,
+                    onTap: () => _navigateTo(const AppearanceSettingsPage()),
                   );
                 },
               ),

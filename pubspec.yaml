@@ -57,7 +57,6 @@ dependencies:
   video_player: ^2.11.1
   archive: ^4.0.9
   path_provider: ^2.1.6
-  liquid_glass_easy: ^4.1.1
   ota_update: ^7.1.0
   package_info_plus: ^8.3.1
   path: ^1.9.0

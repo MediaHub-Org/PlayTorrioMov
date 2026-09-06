@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import '../../models/player/skip_segment_model.dart';
-import '../../services/theme/glass_settings.dart';
 import 'player_glass.dart';
 import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
@@ -322,94 +320,45 @@ class _PlayerPlayPauseButtonState extends State<_PlayerPlayPauseButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: GlassSettings.enabled,
-      builder: (context, glassEnabled, _) {
-        return ValueListenableBuilder<int>(
-          valueListenable: GlassSettings.styleRevision,
-          builder: (context, _, __) {
-            final hoverScaleVal = glassEnabled ? GlassSettings.hoverScale.value : 1.0;
-            final effectiveScale = _hovered ? hoverScaleVal : 1.0;
+    final iconWidget = Icon(
+      widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+      color: Colors.white,
+      size: widget.iconSize,
+    );
 
-            final iconWidget = Icon(
-              widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              color: Colors.white,
-              size: widget.iconSize,
-            );
+    final body = AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      width: widget.size,
+      height: widget.size,
+      decoration: BoxDecoration(
+        color: _hovered
+            ? Colors.white.withValues(alpha: 0.28)
+            : Colors.white.withValues(alpha: 0.18),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 1.2,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            offset: Offset(0, 4),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: iconWidget,
+    );
 
-            Widget body;
-            if (glassEnabled) {
-              final style = GlassSettings.createButtonGlassStyle(
-                cornerRadius: widget.size / 2,
-                customColor: _hovered ? const Color(0x45FFFFFF) : const Color(0x28FFFFFF),
-              );
-
-              body = RepaintBoundary(
-                child: LiquidGlassLens(
-                  style: style,
-                  useImpellerBackdrop: true,
-                  child: Container(
-                    width: widget.size,
-                    height: widget.size,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x66000000),
-                          offset: Offset(0, 4),
-                          blurRadius: 16,
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: iconWidget,
-                  ),
-                ),
-              );
-            } else {
-              body = AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: widget.size,
-                height: widget.size,
-                decoration: BoxDecoration(
-                  color: _hovered
-                      ? Colors.white.withValues(alpha: 0.28)
-                      : Colors.white.withValues(alpha: 0.18),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.25),
-                    width: 1.2,
-                  ),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Color(0x66000000),
-                      offset: Offset(0, 4),
-                      blurRadius: 16,
-                    ),
-                  ],
-                ),
-                alignment: Alignment.center,
-                child: iconWidget,
-              );
-            }
-
-            return MouseRegion(
-              cursor: SystemMouseCursors.click,
-              onEnter: (_) => setState(() => _hovered = true),
-              onExit: (_) => setState(() => _hovered = false),
-              child: GestureDetector(
-                onTap: widget.onTap,
-                child: AnimatedScale(
-                  scale: effectiveScale,
-                  duration: const Duration(milliseconds: 140),
-                  curve: Curves.easeOutCubic,
-                  child: body,
-                ),
-              ),
-            );
-          },
-        );
-      },
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: body,
+      ),
     );
   }
 }

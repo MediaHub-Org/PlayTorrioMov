@@ -1,7 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
-import '../../services/theme/glass_settings.dart';
 
 /// Design tokens and glass styling for the modern video player UI.
 class PlayerTheme {
@@ -143,126 +141,86 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: GlassSettings.enabled,
-      builder: (context, glassEnabled, _) {
-        return ValueListenableBuilder<int>(
-          valueListenable: GlassSettings.styleRevision,
-          builder: (context, _, __) {
-            final hoverScaleVal = glassEnabled ? GlassSettings.hoverScale.value : 1.0;
-            final effectiveScale = _hovered ? hoverScaleVal : 1.0;
+    final bg = widget.active
+        ? (widget.activeColor ?? Colors.white.withValues(alpha: 0.22))
+        : (_hovered
+            ? (widget.backgroundColor ?? Colors.white.withValues(alpha: 0.12))
+            : (widget.backgroundColor ?? Colors.transparent));
 
-            final bg = widget.active
-                ? (widget.activeColor ?? Colors.white.withValues(alpha: 0.22))
-                : (_hovered
-                    ? (widget.backgroundColor ?? Colors.white.withValues(alpha: 0.12))
-                    : (widget.backgroundColor ?? Colors.transparent));
-
-            final iconContent = Stack(
-              alignment: Alignment.center,
-              children: [
-                IconTheme(
-                  data: IconThemeData(
-                    color: widget.active ? Colors.white : (_hovered ? Colors.white : PlayerTheme.inkMuted),
-                    size: widget.iconSize,
+    final iconContent = Stack(
+      alignment: Alignment.center,
+      children: [
+        IconTheme(
+          data: IconThemeData(
+            color: widget.active ? Colors.white : (_hovered ? Colors.white : PlayerTheme.inkMuted),
+            size: widget.iconSize,
+          ),
+          child: widget.icon,
+        ),
+        if (widget.showActiveBadge)
+          Positioned(
+            top: widget.size * 0.2,
+            right: widget.size * 0.2,
+            child: Container(
+              width: 6,
+              height: 6,
+              decoration: BoxDecoration(
+                color: widget.badgeColor ?? PlayerTheme.accent,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: (widget.badgeColor ?? PlayerTheme.accent).withValues(alpha: 0.8),
+                    blurRadius: 4,
+                    spreadRadius: 1,
                   ),
-                  child: widget.icon,
-                ),
-                if (widget.showActiveBadge)
-                  Positioned(
-                    top: widget.size * 0.2,
-                    right: widget.size * 0.2,
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: widget.badgeColor ?? PlayerTheme.accent,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: (widget.badgeColor ?? PlayerTheme.accent).withValues(alpha: 0.8),
-                            blurRadius: 4,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            );
-
-            Widget buttonBody;
-            if (glassEnabled) {
-              final buttonStyle = GlassSettings.createButtonGlassStyle(
-                cornerRadius: widget.borderRadius.clamp(0, widget.size / 2),
-                customColor: widget.active
-                    ? (widget.activeColor?.withValues(alpha: 0.35) ?? const Color(0x557C5CFF))
-                    : (_hovered ? const Color(0x38FFFFFF) : const Color(0x18FFFFFF)),
-              );
-
-              buttonBody = RepaintBoundary(
-                child: LiquidGlassLens(
-                  style: buttonStyle,
-                  useImpellerBackdrop: true,
-                  child: SizedBox(
-                    width: widget.size,
-                    height: widget.size,
-                    child: iconContent,
-                  ),
-                ),
-              );
-            } else {
-              buttonBody = AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: widget.size,
-                height: widget.size,
-                decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(widget.borderRadius),
-                ),
-                child: iconContent,
-              );
-            }
-
-            Widget button = MouseRegion(
-              cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
-              onEnter: (_) => setState(() => _hovered = true),
-              onExit: (_) => setState(() => _hovered = false),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: widget.onPressed,
-                child: AnimatedScale(
-                  scale: effectiveScale,
-                  duration: const Duration(milliseconds: 140),
-                  curve: Curves.easeOutCubic,
-                  child: buttonBody,
-                ),
+                ],
               ),
-            );
-
-            if (widget.tooltip != null) {
-              return Tooltip(
-                message: widget.tooltip!,
-                waitDuration: const Duration(milliseconds: 400),
-                decoration: BoxDecoration(
-                  color: const Color(0xE6080C12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: PlayerTheme.edgeSoft),
-                ),
-                textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-                child: button,
-              );
-            }
-
-            return button;
-          },
-        );
-      },
+            ),
+          ),
+      ],
     );
+
+    final buttonBody = AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      width: widget.size,
+      height: widget.size,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+      ),
+      child: iconContent,
+    );
+
+    Widget button = MouseRegion(
+      cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onPressed,
+        child: buttonBody,
+      ),
+    );
+
+    if (widget.tooltip != null) {
+      return Tooltip(
+        message: widget.tooltip!,
+        waitDuration: const Duration(milliseconds: 400),
+        decoration: BoxDecoration(
+          color: const Color(0xE6080C12),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: PlayerTheme.edgeSoft),
+        ),
+        textStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+        child: button,
+      );
+    }
+
+    return button;
   }
 }
 

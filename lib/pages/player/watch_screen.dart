@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,7 +18,6 @@ import '../../models/download/download_task_model.dart';
 import './player_screen.dart';
 import '../../services/stream/stream_service.dart';
 import '../../services/download/download_service.dart';
-import '../../services/theme/glass_settings.dart';
 import '../../utils/download/download_path_helper.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/performance_liquid_lens.dart';
@@ -327,23 +325,7 @@ class _WatchScreenState extends State<WatchScreen>
 
     return Scaffold(
       backgroundColor: _C.bg,
-      body: ValueListenableBuilder<bool>(
-        valueListenable: GlassSettings.enabled,
-        builder: (context, enabled, _) {
-          if (enabled) {
-            return LiquidGlassView(
-              realTimeCapture: true,
-              useSync: true,
-              pixelRatio: 0.85,
-              refreshRate: LiquidGlassRefreshRate.deviceRefreshRate,
-              regionCapture: true,
-              backgroundWidget: background,
-              child: content,
-            );
-          }
-          return Stack(children: [background, content]);
-        },
-      ),
+      body: Stack(children: [background, content]),
     );
   }
 
@@ -1138,7 +1120,6 @@ class _WatchScreenState extends State<WatchScreen>
               ],
             ),
             child: PerformanceLiquidLens(
-              style: PerformanceGlassStyles.menuButton,
               child: Container(
                 height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1240,7 +1221,6 @@ class _WatchScreenState extends State<WatchScreen>
                       ],
                     ),
                     child: PerformanceLiquidLens(
-                      style: PerformanceGlassStyles.menu,
                       child: Container(
                         width: dialogWidth,
                         constraints: BoxConstraints(maxHeight: maxMenuHeight),
@@ -1350,7 +1330,6 @@ class _WatchScreenState extends State<WatchScreen>
               ],
             ),
             child: PerformanceLiquidLens(
-              style: PerformanceGlassStyles.menuButton,
               child: Container(
                 height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1450,7 +1429,6 @@ class _WatchScreenState extends State<WatchScreen>
                       ],
                     ),
                     child: PerformanceLiquidLens(
-                      style: PerformanceGlassStyles.menu,
                       child: Container(
                         width: dialogWidth,
                         constraints: BoxConstraints(maxHeight: maxMenuHeight),
@@ -1558,7 +1536,6 @@ class _WatchScreenState extends State<WatchScreen>
               ],
             ),
             child: PerformanceLiquidLens(
-              style: PerformanceGlassStyles.menuButton,
               child: Container(
                 height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1660,7 +1637,6 @@ class _WatchScreenState extends State<WatchScreen>
                       ],
                     ),
                     child: PerformanceLiquidLens(
-                      style: PerformanceGlassStyles.menu,
                       child: Container(
                         width: dialogWidth,
                         constraints: BoxConstraints(maxHeight: maxMenuHeight),

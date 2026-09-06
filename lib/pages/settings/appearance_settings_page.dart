@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
-import '../../services/theme/custom_background_service.dart';
-import '../../services/theme/glass_settings.dart';
 import '../../services/iptv/iptv_settings.dart';
-import 'appearance/custom_background_settings_page.dart';
-import 'appearance/liquid_glass_settings_page.dart';
 import 'appearance/live_tv_settings_page.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
@@ -41,7 +37,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 20),
                 child: Text(
-                  'Fine-tune the visual atmosphere, custom wallpaper background, color palettes, and interface layouts.',
+                  'Fine-tune the visual atmosphere, color palettes, and interface layouts.',
                   style: TextStyle(
                     fontSize: 13.5,
                     color: Colors.white.withValues(alpha: 0.5),
@@ -50,69 +46,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                 ),
               ),
 
-              // Button 0: Custom Wallpaper & Atmosphere Background
-              ValueListenableBuilder<CustomBackgroundData>(
-                valueListenable: CustomBackgroundService.notifier,
-                builder: (context, customBg, _) {
-                  return ValueListenableBuilder<AppThemePalette>(
-                    valueListenable: AppThemeService.currentPalette,
-                    builder: (context, currentPalette, _) {
-                      return _buildSectionButton(
-                        icon: Icons.wallpaper_rounded,
-                        iconColor: currentPalette.primaryColor,
-                        title: 'Custom Background & Wallpaper',
-                        subtitle: 'Upload custom photos, choose curated dark wallpapers, and blend theme ambient lighting',
-                        badgeText: customBg.hasCustomBackground ? 'Custom Active' : 'Default Theme',
-                        badgeColor: customBg.hasCustomBackground ? currentPalette.primaryColor : Colors.white38,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CustomBackgroundSettingsPage(),
-                            ),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 14),
-
-              // Button 1: Liquid Glass Setup
-              ValueListenableBuilder<bool>(
-                valueListenable: GlassSettings.enabled,
-                builder: (context, glassEnabled, _) {
-                  return ValueListenableBuilder<GlassPreset>(
-                    valueListenable: GlassSettings.preset,
-                    builder: (context, preset, _) {
-                      return _buildSectionButton(
-                        icon: Icons.blur_on_rounded,
-                        iconColor: const Color(0xFF7C5CFF),
-                        title: 'Liquid Glass Setup',
-                        subtitle: 'Adjust hover impact, wobble spring physics, lens refraction, and chromatic aberration',
-                        badgeText: glassEnabled ? preset.label : 'Disabled',
-                        badgeColor: glassEnabled ? const Color(0xFF7C5CFF) : Colors.white38,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LiquidGlassSettingsPage(),
-                            ),
-                          );
-                          setState(() {});
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 14),
-
-              // Button 2: Live TV & Sports UI
+              // Button: Live TV & Sports UI
               ValueListenableBuilder<bool>(
                 valueListenable: IptvSettings.enableSpotlight,
                 builder: (context, spotlightEnabled, _) {
@@ -139,38 +73,6 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                     },
                   );
                 },
-              ),
-
-              const SizedBox(height: 28),
-
-              // Visual Overview Notes
-              Text(
-                'LIVE CUSTOMIZATION SCOPE',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              _buildScopeTile(
-                icon: Icons.dock_rounded,
-                title: 'Bottom Liquid Dock',
-                description: 'Dock items react dynamically with your custom hover magnification, proximity ripples, and wobble springs.',
-              ),
-              const SizedBox(height: 10),
-              _buildScopeTile(
-                icon: Icons.play_circle_outline_rounded,
-                title: 'Video Player & Watch Screens',
-                description: 'Overlays, glass sheets, and media controls render with your custom optical blur, refraction index, and border shimmer.',
-              ),
-              const SizedBox(height: 10),
-              _buildScopeTile(
-                icon: Icons.home_rounded,
-                title: 'Home Page & Discovery',
-                description: 'Adapts to your chosen theme accent colors, smart BestSimilar recommendation slider, and chosen poster density.',
               ),
             ],
           ),
@@ -274,60 +176,4 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
     );
   }
 
-  Widget _buildScopeTile({
-    required IconData icon,
-    required String title,
-    required String description,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.05),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 2),
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: Colors.white70, size: 18),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.4),
-                    height: 1.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

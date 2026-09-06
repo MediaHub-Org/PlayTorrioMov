@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import '../../services/theme/app_theme_service.dart';
-import '../../services/theme/glass_settings.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_controller.dart';
 import '../../services/iptv/iptv_settings.dart';
@@ -278,32 +276,14 @@ class _IptvPageState extends State<IptvPage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF080A0F),
-      body: ValueListenableBuilder<bool>(
-        valueListenable: GlassSettings.enabled,
-        builder: (context, enabled, _) {
-          final overlays = Stack(children: overlayChildren);
-          if (enabled) {
-            return LiquidGlassView(
-              realTimeCapture: true,
-              useSync: true,
-              pixelRatio: 0.85,
-              refreshRate: LiquidGlassRefreshRate.deviceRefreshRate,
-              regionCapture: true,
-              backgroundWidget: backgroundContent,
-              child: overlays,
-            );
-          }
-
-          return Container(
-            color: const Color(0xFF080A0F),
-            child: Stack(
-              children: [
-                RepaintBoundary(child: backgroundContent),
-                ...overlayChildren,
-              ],
-            ),
-          );
-        },
+      body: Container(
+        color: const Color(0xFF080A0F),
+        child: Stack(
+          children: [
+            RepaintBoundary(child: backgroundContent),
+            ...overlayChildren,
+          ],
+        ),
       ),
     );
   }

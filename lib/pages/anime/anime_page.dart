@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/app_spacing.dart';
-import '../../services/theme/glass_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -621,32 +619,14 @@ class _AnimePageState extends State<AnimePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF080A0F),
-      body: ValueListenableBuilder<bool>(
-        valueListenable: GlassSettings.enabled,
-        builder: (context, enabled, _) {
-          final overlays = Stack(children: overlayChildren);
-          if (enabled) {
-            return LiquidGlassView(
-              realTimeCapture: true,
-              useSync: true,
-              pixelRatio: 0.85,
-              refreshRate: LiquidGlassRefreshRate.deviceRefreshRate,
-              regionCapture: true,
-              backgroundWidget: backgroundContent,
-              child: overlays,
-            );
-          }
-
-          return Container(
-            color: const Color(0xFF080A0F),
-            child: Stack(
-              children: [
-                RepaintBoundary(child: backgroundContent),
-                ...overlayChildren,
-              ],
-            ),
-          );
-        },
+      body: Container(
+        color: const Color(0xFF080A0F),
+        child: Stack(
+          children: [
+            RepaintBoundary(child: backgroundContent),
+            ...overlayChildren,
+          ],
+        ),
       ),
     );
   }
