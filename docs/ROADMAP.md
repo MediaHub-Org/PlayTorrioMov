@@ -36,19 +36,28 @@ navigation shapes don't match (PlayTorrioMod: three hubs switched by
 
 ## Navigation principle
 
-One hub, four sections, the fourth always Library:
+One hub, five sections, the last always Library:
 
-| Section             | Content                                       |
-|:--------------------|:----------------------------------------------|
-| **Movies & Series** | TMDB-catalog movies and series, one tap apart |
-| **Anime**           | Its own catalog and scraper                   |
-| **Live TV**         | IPTV channels                                 |
-| **Library**         | Everything you've saved                       |
+| Section      | Content                                    |
+|:-------------|:--------------------------------------------|
+| **Movies**   | TMDB-catalog movies                         |
+| **Series**   | TMDB-catalog series                         |
+| **Anime**    | Its own catalog and scraper                 |
+| **Live TV**  | IPTV channels                               |
+| **Library**  | Everything you've saved                     |
 
 Phones show sections in the bottom tab bar; tablet and desktop show them as
 a chip row under the top bar. Search stays an icon, not a section — it's an
 action reachable from anywhere, not a place to browse, and doesn't compete
-for the same scarce nav real estate the four sections above use.
+for the same scarce nav real estate the five sections above use.
+
+**2026-09-06:** Movies and Series used to share one section with an
+internal pill toggle, specifically to keep the mobile bottom bar at a
+fixed four items (`SectionSubTabs`'s own doc comment explained why). User
+asked to split them into two full top-level sections regardless — done
+(`HubController.currentSections`, `MediaHub`, `TypeCatalogPage`'s internal
+toggle removed). `SectionSubTabs` itself is kept for a future pair that
+would rather stay merged than grow the section count again.
 
 There used to be three hubs here (Watch/Listen/Read, à la PlayTorrioMod) —
 the hub-switching machinery (`AppHub` enum, hub-pill nav) was deleted
@@ -116,28 +125,45 @@ if a regression in any of them turns up.
 | #  | Bug                                                       | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 |----|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 7  | **"Unknown hard error" on Windows after closing the app** | Root-caused: a native window close never runs the widget tree's own `dispose()`, so `PlayerScreen`/`IptvPlayerPage`'s media_kit `Player` stayed alive into process teardown. Candidate fix shipped (`PlaybackCoordinator.disposeForShutdown()` + `onShutdownDispose`, `WindowService` calls it on close) — see [CHANGELOG.md](../CHANGELOG.md). **Not yet empirically verified** — no way to drive the UI to start real playback and then close over it in this environment; confirmed only that a real `WM_CLOSE` with no active player exits clean. Needs a hands-on close-while-playing-video check. |
-| 12 | **Tags on content pages only show their icon**            | The label doesn't fit the available width; tracked in [TASKS.md](../TASKS.md). Still unlocated — no widget matching "icon-only, label overflows" turned up on a source read; needs a screenshot or on-device repro rather than a guess. **2026-09-06:** user's proposed direction, rather than restoring the label — go all-in on icon-only tags, sized so every tag fits in a single row, applied the same way across Movies, Series, Anime, and Live TV (right now the row may only exist/overflow on some of the four). |
+| 17 | **A catalog fetch failure silently looks like "no content"** | `AddonManager.fetchByType`/`fetchAllHomeSections` swallow each catalog's fetch exception per-addon (`catch (_) { return null; }`) so a transient network failure (DNS hiccup, timeout) for one type/catalog just drops that row instead of surfacing an error with retry. Found 2026-09-06 chasing a "Series doesn't load content" report — reproduced no code-level asymmetry between Movies/Series, but the same session's log showed live DNS failures (`Failed host lookup: graphql.anilist.co`) at the same time, and Cinemeta's manifest was independently confirmed (live) to declare a real `type: series` catalog. Likely explanation: the swallowed exception, not a Movies/Series bug — but the swallowing itself is worth fixing so a network blip shows a retryable error instead of an indistinguishable empty state. |
 
 ## Requested UI work
 
 Requested 2026-09-06, after seeing the merged upstream-port build running
-live for the first time this session. Not started — recorded here for the
-next pass.
+live for the first time this session.
 
 | #  | Task                                                        | Details                                                                                                                                                                                                                                                            |
 |----|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 13 | **Split "Movies & Series" into two separate sections**        | Currently one combined section/tab (see § Navigation principle). Break it into a Movies section and a Series section, each with its own nav entry, instead of a single merged catalog with a Movies/Series toggle inside it. This changes the four-section nav table in § Navigation principle to five — revisit that section's wording once this lands. |
-| 14 | **Settings entry point: fixed position, same on every screen** | On mobile, Settings should be the first action, top-right — and that same position (not just "top-right" but the same slot in the layout) should be used consistently across every screen, not vary page to page. |
-| 15 | **Design mobile first, as a standing policy**                  | General direction going forward, not a single fix: design new/reworked screens for mobile first, then scale up to tablet/desktop — not the other way around. Applies to #10 and #12 below, and to any future layout work. |
-| 16 | **Subtitle language list is unmanageably long**               | The subtitle picker lists every language a backend could theoretically offer (dozens), most with no real content. Cut it down to commonly-used languages and/or only the ones that actually have tracks available for the given stream, instead of the full world-language list. |
+| 14 | **Settings entry point: fixed position, same on every screen** | **Confirmed already true 2026-09-06**, not a fix: `TopBar`/`AdaptiveNavShell._MobileTopBar` are the *only* Settings entry points in the app (top-right on both), shared by all 5 hub sections via one `onSettingsTap` callback threaded from `HubPage` — nothing duplicates it per page. The one real gap is pages pushed *outside* the hub (`DiscoverPage`, detail pages) showing no Settings icon at all — that looks intentional (they're nested, not top-level destinations), so left alone pending confirmation it should change. |
+| 15 | **Design mobile first, as a standing policy**                  | General direction going forward, not a single fix: design new/reworked screens for mobile first, then scale up to tablet/desktop — not the other way around. Applied so far to #12 and the `FilterDropdown` mobile fix below; still open for #10. |
 
-Two more requests land on top of **existing** open items rather than as
-new rows — see their updated notes below: header/margin spacing (#10, now
-explicitly "mobile first") and content tags (#12, now with a concrete
-proposed fix instead of just a bug report).
+See Resolved below for #13 (nav split) and #16 (subtitle list).
 
 ## Resolved
 
+- ~~**#13 Split "Movies & Series" into two separate sections**~~ — done: 5
+  top-level sections now (`HubController.currentSections`), the internal
+  Movies/Series pill toggle removed from `TypeCatalogPage`. See §
+  Navigation principle for the shape and the trade-off it overrides.
+- ~~**#12 Tags on content pages only show their icon**~~ — done, but not
+  the bug originally suspected: no "icon-only, overflowing label" widget
+  ever existed (confirmed by source read) — genre chips on
+  Movies/Series/Anime/Anime-Arabic detail pages were text-only `Wrap`s,
+  three separate near-identical implementations, and Live TV had no genre
+  tag at all (only a category badge). Unified into one shared
+  `GenreTagRow` (`lib/widgets/common/genre_tag_row.dart`): icon-only pills
+  (with a genre→icon map and a hover/long-press `Tooltip` for the name),
+  laid out in a horizontally-scrolling single row so it can never wrap to
+  a second line regardless of genre count. Also made `FilterDropdown` (the
+  genre/decade/sort pill buttons on catalog pages) icon-only on mobile
+  after a follow-up report that they ran too wide there — label comes
+  back on tablet/desktop where there's room.
+- ~~**#16 Subtitle language list is unmanageably long**~~ — done:
+  `SubtitleCatService`'s on-the-fly-translation branch (the ~110-language
+  flood; direct/real subtitle files were never the problem and are
+  untouched) now filters through a curated ~34-language
+  `_commonTranslatableLangs` set instead of offering every language the
+  site's translate widget could theoretically target.
 - ~~**Icon-button consistency, plus a Watchlist/Watched pair**~~ — shipped:
   Watchlist / Watched / Like three-state buttons for Movies & Series (see
   [CHANGELOG.md](../CHANGELOG.md)).
