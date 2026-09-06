@@ -6,19 +6,6 @@ task tracking lives in [TASKS.md](../TASKS.md); this file is the longer arc.
 
 Last reconciled against the tree: **2026-09-06** (v1.1.6+14).
 
-**Redone from scratch, awaiting review:** the prior background agent's
-worktree/branch for the `ad0e40d`/`6c4d0cf`/`f1f1310` port (see § Upstream
-tracking below) turned out to exist only in that session's now-gone
-environment — never pushed to `origin`, no other local checkout on the
-machine. Redone as 3 stacked branches, each file-by-file (not
-patch-applied) and each with `flutter analyze`/`flutter test` run clean:
-`port/ad0e40d-dub-lang-filtering` → `port/6c4d0cf-stream-error-filtering` →
-`port/f1f1310-stremio-catalog-extras`. Per-file breakdown of what was
-clean, hand-merged, or skipped (and why) is in
-[docs/UPSTREAM_MERGE.md](UPSTREAM_MERGE.md). PlayTorrioMod's side of the
-same 3-commit gap is already done and pushed (`main` @ `08978f0`). Next
-session: review the 3 branches, fast-forward `master` if clean.
-
 ## Relationship to PlayTorrioMod
 
 PlayTorrioMov forked from
@@ -76,26 +63,22 @@ diverged from both PlayTorrioMod and its own upstream, `ayman708-UX/PlayTorrioV3
 As of 2026-09-03, PlayTorrioMod's `main` sat 3 commits behind `v3/main`.
 All 3 have since been reconciled (merged for real in PlayTorrioMod, ported
 file-by-file here in Mov — see [PlayTorrioMod](https://github.com/MediaHub-Org/PlayTorrioMod)
-for its own log). **Last commit actually merged into Mov: `b0aecf5`** —
-`9d34d4c` carried no portable content (V3's own README).
+for its own log). **Last commit merged into Mov: `f1f1310`** — Mov is
+fully caught up with `v3/main` as of 2026-09-06; `9d34d4c` carried no
+portable content (V3's own README).
 
 | Commit    | Summary                                              | Status                                                                                                                     |
 |-----------|-------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
 | `cc07994` | Fix anime catalog AniList 403 issue, bump 1.1.1        | **Merged.** `anilist_service.dart` now sends a browser User-Agent/Origin/Referer and a 15s timeout. The paired `anime_page.dart` empty-results error message already existed independently in Mov. |
 | `b0aecf5` | New scraper sources, fix mapple scraper, bump 1.1.2    | **Merged (side by side).** 30 new scraper sites and 7 new anime extractors added alongside Mov's existing, non-overlapping set; new `video_settings_page.dart`; anime/continue-watching/player diffs reviewed file-by-file rather than patch-applied, since those files had already diverged. Mov's own `StreamHealthChecker` dead-stream filtering was kept — V3 had dropped its equivalent, not carried over. |
 | `9d34d4c` | Update README                                         | **Not merged, by design.** V3's own README, not relevant here.                                                             |
-| `ad0e40d` | Bump 1.1.3: audio dub & language filtering, backend scraper extractions, responsive UI | **Ported**, on `port/ad0e40d-dub-lang-filtering`, awaiting review/merge. Audio-language/dub detection on `StreamSource` plus a matching filter dropdown and source-card badge in `watch_screen.dart`, 10 scraper-site touch-ups, a smarter open-above dropdown positioning fix. Deliberately skips the type-filter chip bar, seeder filter, mobile bottom-sheet variant, and the desktop flex-ratio tweak — see [docs/UPSTREAM_MERGE.md](UPSTREAM_MERGE.md) for why. |
-| `6c4d0cf` | fix(player): streamline stream error filtering and health verification | **Ported**, on `port/6c4d0cf-stream-error-filtering`, awaiting review/merge. `PlayerSettings.isNonFatalError` refinement, Dulo referer/domain-priority fix, VidRock JSON-playlist parsing fix, new CDN referer resolver rules. The `stream_scraper.dart` health-check hunk was confirmed a non-issue — Mov already had the equivalent gate under different variable names. Skips the `audiobook_player_screen.dart`/`music_player_controller.dart` hunks — Mov has neither. |
-| `f1f1310` | Add full Stremio catalog-extra handling and collection addons support | **Ported**, on `port/f1f1310-stremio-catalog-extras`, awaiting review/merge. `AddonCatalogExtra` model, the bigger `discover_page.dart` with catalog-extra selectors, Stremio collection-addon support (Movie/MovieDetail `isCollection`, part-level IMDb-id normalization through watch/player/details). Dropped the "Liquid Dock Navbar" this commit added to `discover_page.dart` along with the `dock_settings.dart`/`app_liquid_dock.dart`/`home_page.dart` hunks outright — V3's three-hub dock nav, which this app doesn't have (see § Navigation principle); `DiscoverPage` here is a standalone pushed page, not dock-bearing. |
+| `ad0e40d` | Bump 1.1.3: audio dub & language filtering, backend scraper extractions, responsive UI | **Merged.** Audio-language/dub detection on `StreamSource` plus a matching filter dropdown and source-card badge in `watch_screen.dart`, 10 scraper-site touch-ups, a smarter open-above dropdown positioning fix. Deliberately skips the type-filter chip bar, seeder filter, mobile bottom-sheet variant, and the desktop flex-ratio tweak — Mov never had the first two, and the last one risked an unreviewed layout regression. |
+| `6c4d0cf` | fix(player): streamline stream error filtering and health verification | **Merged.** `PlayerSettings.isNonFatalError` refinement, Dulo referer/domain-priority fix, VidRock JSON-playlist parsing fix, new CDN referer resolver rules. The `stream_scraper.dart` health-check hunk was a non-issue — Mov already had the equivalent gate under different variable names. Skips the `audiobook_player_screen.dart`/`music_player_controller.dart` hunks — Mov has neither. |
+| `f1f1310` | Add full Stremio catalog-extra handling and collection addons support | **Merged.** `AddonCatalogExtra` model, the bigger `discover_page.dart` with catalog-extra selectors, Stremio collection-addon support (Movie/MovieDetail `isCollection`, part-level IMDb-id normalization through watch/player/details). Dropped the "Liquid Dock Navbar" this commit added to `discover_page.dart` along with the `dock_settings.dart`/`app_liquid_dock.dart`/`home_page.dart` hunks outright — V3's three-hub dock nav, which this app doesn't have (see § Navigation principle); `DiscoverPage` here is a standalone pushed page, not dock-bearing. A follow-up cloud review caught a real regression in the port (a collection-part IMDb-id override that was firing for every series episode, not just collection parts) — fixed same day, see git log for the fix commit. |
 
 This table gets re-checked whenever PlayTorrioMod's upstream gap is
 revisited; it is a snapshot, not a live sync status. Re-fetch `v3/main`
 before trusting "last merged" as current — upstream moves.
-
-Per-file merge status for the in-progress `ad0e40d`/`6c4d0cf`/`f1f1310`
-port (what applied cleanly, what was hand-merged and why, what was
-deliberately skipped) is tracked in
-[docs/UPSTREAM_MERGE.md](UPSTREAM_MERGE.md) while that work is in flight.
 
 ## Blocked on a device
 
@@ -124,7 +107,6 @@ if a regression in any of them turns up.
 
 | #  | Bug                                                       | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 |----|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 7  | **"Unknown hard error" on Windows after closing the app** | Root-caused: a native window close never runs the widget tree's own `dispose()`, so `PlayerScreen`/`IptvPlayerPage`'s media_kit `Player` stayed alive into process teardown. Candidate fix shipped (`PlaybackCoordinator.disposeForShutdown()` + `onShutdownDispose`, `WindowService` calls it on close) — see [CHANGELOG.md](../CHANGELOG.md). **Not yet empirically verified** — no way to drive the UI to start real playback and then close over it in this environment; confirmed only that a real `WM_CLOSE` with no active player exits clean. Needs a hands-on close-while-playing-video check. |
 | 17 | **A catalog fetch failure silently looks like "no content"** | `AddonManager.fetchByType`/`fetchAllHomeSections` swallow each catalog's fetch exception per-addon (`catch (_) { return null; }`) so a transient network failure (DNS hiccup, timeout) for one type/catalog just drops that row instead of surfacing an error with retry. Found 2026-09-06 chasing a "Series doesn't load content" report — reproduced no code-level asymmetry between Movies/Series, but the same session's log showed live DNS failures (`Failed host lookup: graphql.anilist.co`) at the same time, and Cinemeta's manifest was independently confirmed (live) to declare a real `type: series` catalog. Likely explanation: the swallowed exception, not a Movies/Series bug — but the swallowing itself is worth fixing so a network blip shows a retryable error instead of an indistinguishable empty state. |
 
 ## Requested UI work
@@ -141,6 +123,13 @@ See Resolved below for #13 (nav split) and #16 (subtitle list).
 
 ## Resolved
 
+- ~~**#7 "Unknown hard error" on Windows after closing the app**~~ —
+  confirmed fixed 2026-09-06: no longer reproduces. Root cause was a
+  native window close never running the widget tree's own `dispose()`,
+  leaving `PlayerScreen`/`IptvPlayerPage`'s media_kit `Player` alive into
+  process teardown; fixed by `PlaybackCoordinator.disposeForShutdown()` +
+  `onShutdownDispose`, called from `WindowService` on close (see
+  [CHANGELOG.md](../CHANGELOG.md)).
 - ~~**#13 Split "Movies & Series" into two separate sections**~~ — done: 5
   top-level sections now (`HubController.currentSections`), the internal
   Movies/Series pill toggle removed from `TypeCatalogPage`. See §
