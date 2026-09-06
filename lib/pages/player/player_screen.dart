@@ -1644,11 +1644,16 @@ class _PlayerScreenState extends State<PlayerScreen>
       WindowService.instance.toggleFullscreen();
     } else {
       _lastScreenTapTime = now;
-      // Tapping the video itself toggles play/pause, same as the dedicated
-      // icon -- it used to only reveal/hide the controls, leaving the icon
-      // as the only way to actually play or pause.
-      _togglePlayPause();
-      if (!_showControls) setState(() => _showControls = true);
+      // A single tap only reveals/hides the controls overlay. It used to
+      // also toggle play/pause, but this handler can't tell a lone tap from
+      // the first half of a double-tap until the second one does or
+      // doesn't arrive -- so every double-tap-to-fullscreen also fired an
+      // unwanted play/pause blip from its first tap, and an accidental tap
+      // (repositioning the device, wiping the screen) silently paused
+      // playback. The dedicated play/pause button is the one deliberate way
+      // to do that now.
+      setState(() => _showControls = !_showControls);
+      if (_showControls) _startHideControlsTimer();
     }
   }
 

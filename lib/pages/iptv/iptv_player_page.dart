@@ -553,12 +553,15 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
           },
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            onTap: () {
-              // Tapping the video toggles play/pause, same as the dedicated
-              // icon -- it used to only reveal/hide the controls.
-              _togglePlayPause();
-              if (!_showControls) _toggleControls();
-            },
+            // A single tap only reveals/hides the controls overlay. It used
+            // to also toggle play/pause, but requiring onDoubleTap on the
+            // same detector means Flutter must wait to see whether a second
+            // tap follows before either callback fires -- so a lone tap
+            // toggling playback landed with a real, noticeable delay, and
+            // an accidental tap (repositioning the device, wiping the
+            // screen) silently paused a live channel. The dedicated
+            // play/pause button is the one deliberate way to do that now.
+            onTap: _toggleControls,
             onDoubleTap: () {
               if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
                 WindowService.instance.toggleFullscreen();
