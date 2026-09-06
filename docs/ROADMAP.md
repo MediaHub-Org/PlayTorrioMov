@@ -1,8 +1,9 @@
 # Project Roadmap — PlayTorrioMov
 
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
-and the GitHub release notes; this file stays about what is left. Day-to-day
-task tracking lives in [TASKS.md](../TASKS.md); this file is the longer arc.
+and the GitHub release notes; this file stays about what is left. This used to
+be split with a separate day-to-day TASKS.md checklist; merged back into this
+one file since the split just meant keeping two lists in sync.
 
 Last reconciled against the tree: **2026-09-06** (v1.1.6+14).
 
@@ -114,6 +115,7 @@ live for the first time this session.
 | #  | Task                                                        | Details                                                                                                                                                                                                                                                            |
 |----|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 15 | **Design mobile first, as a standing policy**                  | General direction going forward, not a single fix: design new/reworked screens for mobile first, then scale up to tablet/desktop — not the other way around. Applied so far to #12 and the `FilterDropdown` mobile fix below; still open for #10. |
+| 21 | **Logo: add an extra element**                                 | A black & white film-strip/clapperboard line accent (🎬🎞️ movie-action motif), on top of the current wordmark/`SidebarLogo`. |
 
 See Resolved below for #13 (nav split), #14 (Settings position), and #16
 (subtitle list).

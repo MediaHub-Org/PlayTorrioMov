@@ -75,7 +75,6 @@ build as the universal APK at a third of the size.
 | Document                     | What's in it                                                            |
 |:-----------------------------|:------------------------------------------------------------------------|
 | [Roadmap](docs/ROADMAP.md)   | What is still outstanding, and this app's relationship to PlayTorrioMod |
-| [Tasks](TASKS.md)            | Near-term checklist                                                     |
 | [Changelog](CHANGELOG.md)    | Notable changes by version                                              |
 | [Releases](docs/RELEASES.md) | Build/release process, Android signing                                  |
 
