@@ -15,15 +15,24 @@
       Movies/Series/Anime/Anime-Arabic — see ROADMAP.md § Resolved #12
 - [x] Split Movies & Series into two separate sections — see ROADMAP.md §
       Navigation principle and § Resolved #13
-- [x] Settings entry point: same fixed position (top-right on mobile) on
-      every screen — confirmed already true, see ROADMAP.md § Requested UI
-      work #14
+- [x] Settings entry point: same fixed position on every screen — a later
+      pass found the mobile/desktop bars actually differed in height (52 vs
+      60) and button size, drifting the icon a few px between tiers; fixed
+      with a shared `SettingsIconButton` + `TopBar.sharedHeight`. See
+      ROADMAP.md § Resolved #14.
 - [ ] Design mobile first, as a standing policy — ROADMAP.md § Requested
       UI work #15
 - [x] Trim the subtitle language list to commonly-used / actually-available
       languages — see ROADMAP.md § Resolved #16
 - [x] A catalog fetch failure silently looks like "no content" instead of a
       retryable error — see ROADMAP.md § Resolved #17
+- [x] Unify the genre/decade/sort/search pill row's design and position
+      across Movies, Series, and Anime (`PillFilterHeaderBar`); enforce a
+      760x600 minimum desktop window size so the app can't be shrunk into
+      the cramped mobile breakpoint; remove Library's own local search bar;
+      add a Watched chip to Library; add a favorite-channel heart on IPTV
+      channel cards with a new Live TV chip in Library to show them — see
+      ROADMAP.md § Resolved #18
 - [x] Pull latest commits from original repo (PlayTorrioMod) and log them —
       done: PlayTorrioMod sits 3 commits behind its own upstream
       (`ayman708-UX/PlayTorrioV3`), see ROADMAP.md § Upstream tracking for

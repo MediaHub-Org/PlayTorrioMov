@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../common/interactive_card_shell.dart';
+import '../common/like_button.dart';
 
 class IptvChannelCard extends StatelessWidget {
   final HardcodedChannel channel;
@@ -179,6 +181,30 @@ class IptvChannelCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
+
+                            // Favorite toggle, bottom-right
+                            Positioned(
+                              bottom: 4,
+                              right: 4,
+                              child: ValueListenableBuilder<List<FavoriteChannel>>(
+                                valueListenable: FavoriteChannelsService.items,
+                                builder: (context, _, _) {
+                                  final isFav = FavoriteChannelsService.isFavorite(ch.id);
+                                  return DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(alpha: 0.5),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: LikeButton(
+                                      isLiked: isFav,
+                                      onTap: () => FavoriteChannelsService.toggle(ch.id),
+                                      style: LikeButtonStyle.icon,
+                                      size: 15,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
 
                             // Gloss overlay on hover
                             if (hovered)

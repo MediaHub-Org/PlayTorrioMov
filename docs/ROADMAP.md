@@ -121,13 +121,48 @@ See Resolved below for #13 (nav split), #14 (Settings position), and #16
 ## Resolved
 
 - ~~**#14 Settings entry point: fixed position, same on every screen**~~ —
-  confirmed already true, not a fix: `TopBar`/`AdaptiveNavShell._MobileTopBar`
-  are the *only* Settings entry points in the app (top-right on both),
-  shared by all 5 hub sections via one `onSettingsTap` callback threaded
-  from `HubPage` — nothing duplicates it per page. The one gap (pages
-  pushed *outside* the hub, like `DiscoverPage` or detail pages, show no
-  Settings icon) looks intentional — they're nested, not top-level
-  destinations — so left as-is.
+  `TopBar`/`AdaptiveNavShell._MobileTopBar` were already the *only* two
+  Settings entry points (top-right on both, one `onSettingsTap` callback
+  from `HubPage`, nothing duplicated per page) — first pass called that
+  "already true." A closer look found the two bars actually picked
+  different heights (60 vs 52) and differently-sized/padded `IconButton`s
+  independently, drifting the gear icon's exact position a few px between
+  tiers while resizing. Fixed for real with a shared `SettingsIconButton`
+  and `TopBar.sharedHeight` both bars now use. The one remaining gap
+  (pages pushed *outside* the hub, like `DiscoverPage` or detail pages,
+  show no Settings icon) still looks intentional — nested, not top-level
+  destinations — left as-is.
+- ~~**#18 Header pills, Settings drift, window min size, Library search/chips, Live TV favorites**~~ —
+  a batch from live testing on the desktop build:
+  - New `PillFilterHeaderBar` (`lib/widgets/common/pill_filter_header_bar.dart`):
+    the genre/decade/sort/search pill row floated over a page's hero is one
+    widget with one canonical inset now, instead of Movies/Series and Anime
+    each hand-rolling their own (24/24/24/16 padding vs. a hand-tuned
+    `Positioned(top:16,right:16)` box) — they render pixel-identically.
+    Live TV has no equivalent filter row to unify (its header is a
+    distinct branded bar with a channel count), left as-is.
+  - `window_service.dart` now calls `windowManager.setMinimumSize(760, 600)`
+    on desktop — there was no floor before, so the window could be shrunk
+    into the mobile breakpoint tier, which is what made pills look cramped
+    in the first place. 760 stays above `AppBreakpoints.tablet` (600).
+  - Library's own local search box (a second, separate search implementation
+    from the rest of the app's per-page `PageSearchButton` pattern) removed.
+  - Library gets a Watched toggle chip (next to Watchlist, filtering on
+    the already-existing `MyListItem.isWatched`) and a Live TV chip.
+  - Live TV channels can now be favorited (heart on `IptvChannelCard`,
+    reusing `LikeButton` — a first attempt hand-rolled the same
+    `favorite_rounded`/`favorite_border_rounded` toggle
+    `test/widgets/like_button_test.dart` exists specifically to catch, and
+    it did) and show up under Library's new Live TV chip. Kept fully
+    separate from `MyListItem`/`MyListService` (new `FavoriteChannelsService`,
+    mirroring `IptvStore`'s own favorites pattern) since that model syncs to
+    Trakt/Simkl, which have no concept of a live channel.
+  - Audited whether any hub-section page can cover the shared
+    `SectionTopBar`/bottom tab bar: none use `Overlay.insert`,
+    `OverlayEntry`, or `extendBody` — each section's own `Stack`/`Positioned`
+    overlays are bounded to its own `Expanded` slot in
+    `SectionedHubScaffold`'s `Column`, not the full screen. Confirmed by
+    source read, no fix needed.
 - ~~**#17 A catalog fetch failure silently looked like "no content"**~~ —
   fixed: `AddonManager.fetchByType` now rethrows the last error when every
   catalog for that type failed outright (as opposed to succeeding with

@@ -8,12 +8,16 @@ import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/download/download_service.dart';
+import '../../services/iptv/favorite_channels_service.dart';
+import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/my_list/my_list_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
+import '../../widgets/iptv/iptv_channel_card.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../details/details_page.dart';
+import '../iptv/iptv_channel_sheet.dart';
 
 class CollectionPage extends StatefulWidget {
   final int initialTabIndex;
@@ -169,6 +173,30 @@ class _CollectionPageState extends State<CollectionPage> {
   }
 
   Widget _buildSavedTab() {
+    if (_filterType == 'livetv') {
+      return ValueListenableBuilder<List<FavoriteChannel>>(
+        valueListenable: FavoriteChannelsService.items,
+        builder: (context, favorites, _) {
+          final channels = _sortedFavoriteChannels(favorites);
+          return Column(
+            children: [
+              _buildFilterBar(favorites.length),
+              Expanded(
+                child: channels.isEmpty
+                    ? const LibraryEmptyState(
+                        icon: Icons.live_tv_rounded,
+                        title: 'No favorite channels yet',
+                        subtitle:
+                            'Tap the heart on a channel in Live TV to save it here.',
+                      )
+                    : _buildChannelsGrid(channels),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
     return ValueListenableBuilder<List<MyListItem>>(
       valueListenable: MyListService.items,
       builder: (context, allItems, _) {
@@ -500,30 +528,46 @@ class _CollectionPageState extends State<CollectionPage> {
         children: [
           Row(
             children: [
-              _buildChoiceChip('All', 'all'),
-              const SizedBox(width: 6),
-              _buildChoiceChip('Movies', 'movie'),
-              const SizedBox(width: 6),
-              _buildChoiceChip('Series', 'series'),
-              const SizedBox(width: 6),
-              _buildChoiceChip('Anime', 'anime'),
-              const SizedBox(width: 12),
-              _ToggleChip(
-                label: 'Watchlist',
-                icon: Icons.bookmark_border_rounded,
-                selectedIcon: Icons.bookmark_rounded,
-                selected: _watchlistOnly,
-                onTap: () => setState(() => _watchlistOnly = !_watchlistOnly),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _buildChoiceChip('All', 'all'),
+                      const SizedBox(width: 6),
+                      _buildChoiceChip('Movies', 'movie'),
+                      const SizedBox(width: 6),
+                      _buildChoiceChip('Series', 'series'),
+                      const SizedBox(width: 6),
+                      _buildChoiceChip('Anime', 'anime'),
+                      const SizedBox(width: 6),
+                      _buildChoiceChip('Live TV', 'livetv'),
+                      if (_filterType != 'livetv') ...[
+                        const SizedBox(width: 12),
+                        _ToggleChip(
+                          label: 'Watchlist',
+                          icon: Icons.bookmark_border_rounded,
+                          selectedIcon: Icons.bookmark_rounded,
+                          selected: _watchlistOnly,
+                          onTap: () =>
+                              setState(() => _watchlistOnly = !_watchlistOnly),
+                        ),
+                        const SizedBox(width: 6),
+                        _ToggleChip(
+                          label: 'Watched',
+                          icon: Icons.check_circle_outline_rounded,
+                          selectedIcon: Icons.check_circle_rounded,
+                          selected: _watchedOnly,
+                          onTap: () =>
+                              setState(() => _watchedOnly = !_watchedOnly),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(width: 6),
-              _ToggleChip(
-                label: 'Watched',
-                icon: Icons.check_circle_outline_rounded,
-                selectedIcon: Icons.check_circle_rounded,
-                selected: _watchedOnly,
-                onTap: () => setState(() => _watchedOnly = !_watchedOnly),
-              ),
-              const Spacer(),
+              const SizedBox(width: 8),
               PopupMenuButton<String>(
                 initialValue: _sortBy,
                 tooltip: 'Sort by',
@@ -642,13 +686,61 @@ class _CollectionPageState extends State<CollectionPage> {
       },
     );
   }
+
+  /// Favorited channels newest-first ("recent") or alphabetically ("title");
+  /// "year" doesn't apply to a channel, so it falls back to recent.
+  List<HardcodedChannel> _sortedFavoriteChannels(List<FavoriteChannel> favorites) {
+    final sorted = List<FavoriteChannel>.from(favorites);
+    if (_sortBy == 'title') {
+      final byId = {for (final f in sorted) f.channelId: f};
+      final resolved = byId.values
+          .map((f) => HardcodedChannels.byId(f.channelId))
+          .whereType<HardcodedChannel>()
+          .toList()
+        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      return resolved;
+    }
+    sorted.sort((a, b) => b.addedAt.compareTo(a.addedAt));
+    return sorted
+        .map((f) => HardcodedChannels.byId(f.channelId))
+        .whereType<HardcodedChannel>()
+        .toList();
+  }
+
+  Widget _buildChannelsGrid(List<HardcodedChannel> channels) {
+    final width = MediaQuery.sizeOf(context).width;
+    final crossAxisCount = width < 600
+        ? 2
+        : width < 900
+        ? 3
+        : width < 1200
+        ? 4
+        : width < 1600
+        ? 5
+        : 6;
+    return GridView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
+        // favorited channel looks the same size and shape here as it does
+        // in Live TV's own rows.
+        childAspectRatio: 0.58,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 20,
+      ),
+      itemCount: channels.length,
+      itemBuilder: (context, index) {
+        final channel = channels[index];
+        return IptvChannelCard(
+          channel: channel,
+          onTap: () => IptvChannelSheet.show(context, channel),
+        );
+      },
+    );
+  }
 }
 
-/// The "watch later" toggle beside the type chips.
-///
-/// Distinct from the type chips because it composes with them -- "Series I
-/// bookmarked" is a real filter, and it would not be expressible if watchlist
-/// were just a fifth mutually-exclusive chip.
 /// A toggle chip for a boolean filter on the Saved tab (Watchlist, Watched)
 /// -- same shape as the type chips but its own on/off state instead of a
 /// mutually-exclusive selection.

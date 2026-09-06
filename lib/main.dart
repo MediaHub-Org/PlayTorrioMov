@@ -14,6 +14,7 @@ import './services/download/download_service.dart';
 import './services/continue_watching/continue_watching_service.dart';
 import './services/theme/custom_background_service.dart';
 import './services/theme/glass_settings.dart';
+import './services/iptv/favorite_channels_service.dart';
 import './services/iptv/iptv_controller.dart';
 import './services/iptv/iptv_settings.dart';
 import './services/media_session/media_session_service.dart';
@@ -47,6 +48,7 @@ void main() async {
     CloudBackupSettings.initialize(),
     ContinueWatchingService.initialize(),
     CustomBackgroundService.initialize(),
+    FavoriteChannelsService.initialize(),
     GlassSettings.initialize(),
     IptvController.instance.init(),
     IptvSettings.initialize(),
