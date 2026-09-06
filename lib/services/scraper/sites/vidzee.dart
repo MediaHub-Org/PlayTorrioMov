@@ -71,9 +71,11 @@ class VidZeeScraper extends StreamScraper {
               if (data is Map && data['url'] != null) {
                 final streamUrl = data['url'].toString();
                 if (streamUrl.isNotEmpty) {
+                  final rawLang = data['language']?.toString().trim() ?? '';
                   return {
                     'url': streamUrl,
                     'service': service,
+                    'language': rawLang,
                     'isHls': streamUrl.contains('.m3u8'),
                   };
                 }
@@ -88,7 +90,16 @@ class VidZeeScraper extends StreamScraper {
           if (r == null) continue;
           final streamUrl = r['url'] as String;
           final service = r['service'] as String;
+          final language = (r['language'] as String?) ?? '';
           final isHls = r['isHls'] as bool;
+
+          final hasValidLang = language.isNotEmpty && language.toLowerCase() != 'auto';
+          final titleParts = [
+            'VidZee',
+            service,
+            if (hasValidLang) language,
+            '1080p',
+          ];
 
           final reqHeaders = {
             'User-Agent': _ua,
@@ -99,8 +110,10 @@ class VidZeeScraper extends StreamScraper {
           yield StreamSource(
             name: 'PlayTorrioHTTP',
             addonName: 'PlayTorrioHTTP',
-            title: 'VidZee · $service · 1080p',
-            description: 'VidZee Stream · ${isHls ? 'HLS' : 'MP4'}',
+            title: titleParts.join(' · '),
+            description: hasValidLang
+                ? 'VidZee Stream · $language · ${isHls ? 'HLS' : 'MP4'}'
+                : 'VidZee Stream · ${isHls ? 'HLS' : 'MP4'}',
             url: streamUrl,
             headers: reqHeaders,
             behaviorHints: {

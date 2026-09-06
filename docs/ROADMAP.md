@@ -78,6 +78,11 @@ This table gets re-checked whenever PlayTorrioMod's upstream gap is
 revisited; it is a snapshot, not a live sync status. Re-fetch `v3/main`
 before trusting "last merged" as current — upstream moves.
 
+Per-file merge status for the in-progress `ad0e40d`/`6c4d0cf`/`f1f1310`
+port (what applied cleanly, what was hand-merged and why, what was
+deliberately skipped) is tracked in
+[docs/UPSTREAM_MERGE.md](UPSTREAM_MERGE.md) while that work is in flight.
+
 ## Blocked on a device
 
 **Cleared 2026-09-03** — `AppInfo.channel` is now empty, the `(dev)` marker

@@ -101,6 +101,125 @@ class StreamSource {
     return _cachedQuality = null;
   }
 
+  static final RegExp _multiAudioRegex = RegExp(
+    r'(?:'
+    r'\|\s*MULTI\b|'
+    r'\bmulti[- ]?audio\b|'
+    r'\bdual[- ]?audio\b|'
+    r'\bdual\b(?=[\s.·|\[\]\(\)-]|$)|'
+    r'\bmulti\b(?=[\s.·|\[\]\(\)-]|$)(?!-?cdn|-?server|-?embed|-?vid|-?sub)'
+    r')',
+    caseSensitive: false,
+  );
+
+  static final RegExp _hindiIndianRegex = RegExp(
+    r'\b(hindi|hindiv3|hindicast|tamil|telugu|malayalam|kannada|punjabi|marathi|bengali|bollywood)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _germanRegex = RegExp(
+    r'\b(german|deutsch|munich|berlin|ger)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _frenchRegex = RegExp(
+    r'\b(french|francais|français|paris|truefrench|vff|vfi|fre)\b(?![- ]?(?:sub|subbed|subs|subtitles))|\bvf\b',
+    caseSensitive: false,
+  );
+
+  static final RegExp _spanishRegex = RegExp(
+    r'\b(spanish|espanol|español|cancun|latino|castellano|spa|esp)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _russianRegex = RegExp(
+    r'\b(russian|rus|ukr|ukrainian)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _japaneseRegex = RegExp(
+    r'\b(japanese|jpn)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _italianRegex = RegExp(
+    r'\b(italian|ita)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _englishRegex = RegExp(
+    r'\b(eng|english|original audio|miami|seattle|denver|chicago|dallas|atlanta|houston|boston)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  /// Returns detected audio languages for this stream.
+  /// Standard keys: 'multi', 'english', 'hindi', 'german', 'french', 'spanish', 'russian', 'japanese', 'italian'.
+  Set<String> getAudioLanguages({String? mediaTitle}) {
+    final tags = <String>{};
+    var fullText = '${title ?? ''} ${name ?? ''} ${description ?? ''}';
+
+    if (mediaTitle != null && mediaTitle.trim().isNotEmpty) {
+      final sanitized = RegExp.escape(mediaTitle.trim());
+      fullText = fullText.replaceAll(RegExp(sanitized, caseSensitive: false), ' ');
+    }
+
+    // Strip explicit subtitle listings so they don't trigger audio tags
+    fullText = fullText.replaceAll(
+      RegExp(r'\b(?:subs?|subtitles?)\s*[:=]\s*.*$', multiLine: true, caseSensitive: false),
+      ' ',
+    );
+
+    if (_multiAudioRegex.hasMatch(fullText)) tags.add('multi');
+    if (_hindiIndianRegex.hasMatch(fullText)) tags.add('hindi');
+    if (_germanRegex.hasMatch(fullText)) tags.add('german');
+    if (_frenchRegex.hasMatch(fullText)) tags.add('french');
+    if (_spanishRegex.hasMatch(fullText)) tags.add('spanish');
+    if (_russianRegex.hasMatch(fullText)) tags.add('russian');
+    if (_japaneseRegex.hasMatch(fullText)) tags.add('japanese');
+    if (_italianRegex.hasMatch(fullText)) tags.add('italian');
+
+    final hasRegional = tags.any((t) => t != 'multi');
+    if (_englishRegex.hasMatch(fullText) || !hasRegional) {
+      tags.add('english');
+    }
+
+    return tags;
+  }
+
+  /// Whether this stream source matches the selected audio filter key.
+  bool hasAudioLanguage(String filterKey, {String? mediaTitle}) {
+    if (filterKey == 'all') return true;
+    final langs = getAudioLanguages(mediaTitle: mediaTitle);
+    return langs.contains(filterKey);
+  }
+
+  /// Returns a clean UI badge label if a special or regional dub is detected.
+  String? getAudioBadge({String? mediaTitle}) {
+    final langs = getAudioLanguages(mediaTitle: mediaTitle);
+    if (langs.contains('multi')) return '🌐 MULTI';
+    if (langs.contains('hindi')) {
+      final text = '${title ?? ''} ${name ?? ''} ${description ?? ''}'.toLowerCase();
+      if (text.contains('telugu')) return '🇮🇳 TELUGU';
+      if (text.contains('tamil')) return '🇮🇳 TAMIL';
+      if (text.contains('malayalam')) return '🇮🇳 MALAYALAM';
+      if (text.contains('kannada')) return '🇮🇳 KANNADA';
+      if (text.contains('punjabi')) return '🇮🇳 PUNJABI';
+      return '🇮🇳 HINDI';
+    }
+    if (langs.contains('german')) return '🇩🇪 GER';
+    if (langs.contains('french')) return '🇫🇷 FRE';
+    if (langs.contains('spanish')) return '🇪🇸 SPA';
+    if (langs.contains('russian')) return '🇷🇺 RUS';
+    if (langs.contains('japanese')) return '🇯🇵 JPN';
+    if (langs.contains('italian')) return '🇮🇹 ITA';
+
+    final text = '${title ?? ''} ${name ?? ''} ${description ?? ''}';
+    if (RegExp(r'\b(eng|english)\b', caseSensitive: false).hasMatch(text)) {
+      return '🇺🇸 ENG';
+    }
+    return null;
+  }
+
   bool? _cachedHDR;
   /// Extract HDR badge.
   bool get isHDR {

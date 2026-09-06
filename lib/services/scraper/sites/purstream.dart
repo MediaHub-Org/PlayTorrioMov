@@ -104,8 +104,16 @@ class PurstreamScraper extends StreamScraper {
           final sUrl = src['stream_url']?.toString();
           if (sUrl == null || sUrl.isEmpty) continue;
 
-          final sName = src['source_name']?.toString() ?? 'Purstream';
+          final rawName = src['source_name']?.toString() ?? 'Purstream';
+          final cleanName = rawName
+              .replaceAll(RegExp(r'^\s*\|\s*'), '')
+              .replaceAll(RegExp(r'\s*\|\s*'), ' · ')
+              .trim();
           final sQuality = src['quality']?.toString() ?? 'Auto';
+          final titleQuality = (sQuality != 'Auto' && !cleanName.contains(sQuality))
+              ? ' · $sQuality'
+              : '';
+          final streamTitle = 'Purstream · $cleanName$titleQuality';
 
           final reqHeaders = {
             'User-Agent': _ua,
@@ -115,8 +123,8 @@ class PurstreamScraper extends StreamScraper {
           yield StreamSource(
             name: 'PlayTorrioHTTP',
             addonName: 'PlayTorrioHTTP',
-            title: 'Purstream · $sName · $sQuality',
-            description: 'Purstream HLS Stream',
+            title: streamTitle,
+            description: 'Purstream Multi-Audio HLS Stream',
             url: sUrl,
             headers: reqHeaders,
             behaviorHints: {

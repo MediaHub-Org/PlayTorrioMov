@@ -85,6 +85,13 @@ class XDownloaderScraper extends StreamScraper {
       final data = detailsJson['data'];
       if (data == null) return sources;
 
+      final spoken = (data['spokenLanguages'] as List?)
+              ?.map((e) => e.toString().trim())
+              .where((e) => e.isNotEmpty)
+              .toList() ??
+          [];
+      final langSuffix = spoken.isNotEmpty ? ' · ${spoken.join(', ')}' : '';
+
       if (targetType == 'movie') {
         final downloadUrl = data['downloadUrl']?.toString();
         final videoUrl = data['videoUrl']?.toString();
@@ -96,8 +103,8 @@ class XDownloaderScraper extends StreamScraper {
           sources.add(StreamSource(
             name: 'PlayTorrioHTTP',
             addonName: 'PlayTorrioHTTP',
-            title: 'X-Downloader',
-            description: 'X-Downloader Direct MP4 Stream',
+            title: 'X-Downloader$langSuffix',
+            description: 'X-Downloader Direct MP4 Stream$langSuffix',
             url: safeUrl,
           ));
         }
@@ -131,8 +138,8 @@ class XDownloaderScraper extends StreamScraper {
                   sources.add(StreamSource(
                     name: 'PlayTorrioHTTP',
                     addonName: 'PlayTorrioHTTP',
-                    title: 'X-Downloader',
-                    description: 'X-Downloader Direct MP4 Stream (S${season}E$episode)',
+                    title: 'X-Downloader$langSuffix',
+                    description: 'X-Downloader Direct MP4 Stream (S${season}E$episode)$langSuffix',
                     url: safeUrl,
                   ));
                 }

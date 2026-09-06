@@ -100,6 +100,24 @@ class VixSrcScraper extends StreamScraper {
         final delim = playlist.contains('?') ? '&' : '?';
         final rawMasterUrl = '$playlist${delim}token=$token&expires=$expires&h=1&lang=$lang';
 
+        final isForeign = lang.isNotEmpty && lang.toLowerCase() != 'en';
+        const langMap = {
+          'es': 'Spanish',
+          'fr': 'French',
+          'de': 'German',
+          'it': 'Italian',
+          'ru': 'Russian',
+          'ja': 'Japanese',
+          'hi': 'Hindi',
+        };
+        final langName = langMap[lang.toLowerCase()] ?? lang.toUpperCase();
+        final title = isForeign
+            ? 'VixSrc · Master HLS · $langName · 1080p'
+            : 'VixSrc · Master HLS · 1080p';
+        final desc = isForeign
+            ? 'VixSrc Master Stream · $langName'
+            : 'VixSrc Master Stream';
+
         final reqHeaders = {
           ..._headers,
           'Referer': embedUrl,
@@ -108,8 +126,8 @@ class VixSrcScraper extends StreamScraper {
         yield StreamSource(
           name: 'PlayTorrioHTTP',
           addonName: 'PlayTorrioHTTP',
-          title: 'VixSrc · Master HLS · 1080p',
-          description: 'VixSrc Master Stream',
+          title: title,
+          description: desc,
           url: rawMasterUrl,
           headers: reqHeaders,
           behaviorHints: {

@@ -127,13 +127,26 @@ class FshareTvScraper extends StreamScraper {
             final srcUrl = rawSrc.startsWith('http') ? rawSrc : '$_baseUrl$rawSrc';
             if (seen.add(srcUrl)) {
               final quality = item['quality']?.toString() ?? '1080';
+              final label = item['label']?.toString().trim() ?? '';
               final isHls = srcUrl.contains('.m3u8');
+
+              final titleParts = [
+                'FshareTV',
+                if (label.isNotEmpty) label,
+                '${quality}p',
+              ];
+
+              final descParts = [
+                'FshareTV Stream',
+                if (label.isNotEmpty) label,
+                isHls ? 'HLS' : 'MP4',
+              ];
 
               yield StreamSource(
                 name: 'PlayTorrioHTTP',
                 addonName: 'PlayTorrioHTTP',
-                title: 'FshareTV · ${quality}p',
-                description: 'FshareTV Stream · ${isHls ? 'HLS' : 'MP4'}',
+                title: titleParts.join(' · '),
+                description: descParts.join(' · '),
                 url: srcUrl,
                 headers: _headers,
                 behaviorHints: {

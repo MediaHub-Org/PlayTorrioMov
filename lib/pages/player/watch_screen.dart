@@ -194,6 +194,7 @@ class _WatchScreenState extends State<WatchScreen>
 
   String? _selectedAddonFilter;
   String? _selectedSizeFilter;
+  String _selectedAudioFilter = 'all'; // 'all', 'multi', 'english', 'hindi', 'german', 'french', 'spanish', 'russian', 'japanese', 'italian'
 
   List<StreamSource> get _filteredSources {
     var list = List<StreamSource>.from(_sources);
@@ -233,6 +234,14 @@ class _WatchScreenState extends State<WatchScreen>
           }).toList();
           break;
       }
+    }
+
+    // Filter by audio language / dub
+    if (_selectedAudioFilter != 'all') {
+      list = list
+          .where((s) => s.hasAudioLanguage(_selectedAudioFilter,
+              mediaTitle: widget.detail.name))
+          .toList();
     }
 
     if (_selectedSizeFilter == 'largest') {
@@ -484,6 +493,8 @@ class _WatchScreenState extends State<WatchScreen>
                             _buildSizeFilterDropdown(),
                             const SizedBox(width: 8),
                             _buildAddonFilterDropdown(),
+                            const SizedBox(width: 8),
+                            _buildAudioFilterDropdown(),
                           ],
                         ),
                       ),
@@ -1017,12 +1028,14 @@ class _WatchScreenState extends State<WatchScreen>
               ],
             ),
             if (_sources.isNotEmpty)
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   _buildSizeFilterDropdown(),
-                  const SizedBox(width: 8),
                   _buildAddonFilterDropdown(),
+                  _buildAudioFilterDropdown(),
                 ],
               ),
           ],
@@ -1151,10 +1164,18 @@ class _WatchScreenState extends State<WatchScreen>
       Offset.zero,
       ancestor: overlay,
     );
-    const double dialogWidth = 200.0;
-    final topOffset = (buttonOffset.dy + button.size.height + 8).clamp(8.0, (overlay.size.height - 350.0).clamp(8.0, overlay.size.height));
-    final rawRightOffset = overlay.size.width - buttonOffset.dx - button.size.width;
-    final rightOffset = rawRightOffset.clamp(8.0, (overlay.size.width - dialogWidth - 8.0).clamp(8.0, overlay.size.width));
+    const double dialogWidth = 230.0;
+    final double spaceBelow = overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
+    final double spaceAbove = buttonOffset.dy - 16;
+    final bool openAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
+
+    final double maxMenuHeight = (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
+    final double? topOffset = openAbove ? null : (buttonOffset.dy + button.size.height + 8);
+    final double? bottomOffset = openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
+
+    final double rawLeft = buttonOffset.dx;
+    final double maxLeft = overlay.size.width - dialogWidth - 12.0;
+    final double leftOffset = rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
 
     showGeneralDialog(
       context: context,
@@ -1167,7 +1188,8 @@ class _WatchScreenState extends State<WatchScreen>
           children: [
             Positioned(
               top: topOffset,
-              right: rightOffset,
+              bottom: bottomOffset,
+              left: leftOffset,
               child: Material(
                 color: Colors.transparent,
                 child: TweenAnimationBuilder<double>(
@@ -1176,7 +1198,7 @@ class _WatchScreenState extends State<WatchScreen>
                   curve: Curves.easeOut,
                   builder: (context, value, child) {
                     return Transform.translate(
-                      offset: Offset(0, -10 * (1 - value)),
+                      offset: Offset(0, (openAbove ? 10 : -10) * (1 - value)),
                       child: Opacity(
                         opacity: value.clamp(0.0, 1.0),
                         child: child,
@@ -1197,8 +1219,8 @@ class _WatchScreenState extends State<WatchScreen>
                     child: PerformanceLiquidLens(
                       style: PerformanceGlassStyles.menu,
                       child: Container(
-                        width: 200,
-                        constraints: const BoxConstraints(maxHeight: 380),
+                        width: dialogWidth,
+                        constraints: BoxConstraints(maxHeight: maxMenuHeight),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
@@ -1349,25 +1371,32 @@ class _WatchScreenState extends State<WatchScreen>
       ancestor: overlay,
     );
 
-    // We want the dropdown to align with the right edge of the button, and appear just below it.
-    const double dialogWidth = 200.0;
-    final topOffset = (buttonOffset.dy + button.size.height + 8).clamp(8.0, (overlay.size.height - 350.0).clamp(8.0, overlay.size.height));
-    final rawRightOffset = overlay.size.width - buttonOffset.dx - button.size.width;
-    final rightOffset = rawRightOffset.clamp(8.0, (overlay.size.width - dialogWidth - 8.0).clamp(8.0, overlay.size.width));
+    const double dialogWidth = 230.0;
+    final double spaceBelow = overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
+    final double spaceAbove = buttonOffset.dy - 16;
+    final bool openAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
+
+    final double maxMenuHeight = (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
+    final double? topOffset = openAbove ? null : (buttonOffset.dy + button.size.height + 8);
+    final double? bottomOffset = openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
+
+    final double rawLeft = buttonOffset.dx;
+    final double maxLeft = overlay.size.width - dialogWidth - 12.0;
+    final double leftOffset = rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
 
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Dismiss',
-      barrierColor: Colors
-          .transparent, // True dropdowns do not dim the background heavily
+      barrierColor: Colors.transparent,
       transitionDuration: const Duration(milliseconds: 250),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Stack(
           children: [
             Positioned(
               top: topOffset,
-              right: rightOffset,
+              bottom: bottomOffset,
+              left: leftOffset,
               child: Material(
                 color: Colors.transparent,
                 child: TweenAnimationBuilder<double>(
@@ -1378,8 +1407,8 @@ class _WatchScreenState extends State<WatchScreen>
                     return Transform.translate(
                       offset: Offset(
                         0,
-                        -10 * (1 - value),
-                      ), // Slide down slightly
+                        (openAbove ? 10 : -10) * (1 - value),
+                      ),
                       child: Opacity(
                         opacity: value.clamp(0.0, 1.0),
                         child: child,
@@ -1400,8 +1429,8 @@ class _WatchScreenState extends State<WatchScreen>
                     child: PerformanceLiquidLens(
                       style: PerformanceGlassStyles.menu,
                       child: Container(
-                        width: 200,
-                        constraints: const BoxConstraints(maxHeight: 300),
+                        width: dialogWidth,
+                        constraints: BoxConstraints(maxHeight: maxMenuHeight),
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
@@ -1469,6 +1498,224 @@ class _WatchScreenState extends State<WatchScreen>
             ),
             if (isSelected)
               const Icon(Icons.check_circle, color: Colors.white, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAudioFilterDropdown() {
+    const labels = {
+      'all': 'All Audio',
+      'multi': '🌐 Multi-Audio',
+      'english': '🇺🇸 English / Orig',
+      'hindi': '🇮🇳 Hindi / Indian',
+      'german': '🇩🇪 German',
+      'french': '🇫🇷 French',
+      'spanish': '🇪🇸 Spanish',
+      'russian': '🇷🇺 Russian',
+      'japanese': '🇯🇵 Japanese',
+      'italian': '🇮🇹 Italian',
+    };
+    final currentText = labels[_selectedAudioFilter] ?? 'All Audio';
+
+    return Builder(
+      builder: (buttonContext) {
+        return GestureDetector(
+          onTap: () => _showAudioGlassDropdown(buttonContext),
+          child: DecoratedBox(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(18)),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x40000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: PerformanceLiquidLens(
+              style: PerformanceGlassStyles.menuButton,
+              child: Container(
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: const Color(0x26FFFFFF)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.language_rounded,
+                      color: Colors.white70,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      currentText,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.white70,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAudioGlassDropdown(BuildContext buttonContext) {
+    final RenderBox button = buttonContext.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+    final Offset buttonOffset = button.localToGlobal(
+      Offset.zero,
+      ancestor: overlay,
+    );
+    const double dialogWidth = 230.0;
+    final double spaceBelow = overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
+    final double spaceAbove = buttonOffset.dy - 16;
+    final bool openAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
+
+    final double maxMenuHeight = (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
+    final double? topOffset = openAbove ? null : (buttonOffset.dy + button.size.height + 8);
+    final double? bottomOffset = openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
+
+    final double rawLeft = buttonOffset.dx;
+    final double maxLeft = overlay.size.width - dialogWidth - 12.0;
+    final double leftOffset = rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.transparent,
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Stack(
+          children: [
+            Positioned(
+              top: topOffset,
+              bottom: bottomOffset,
+              left: leftOffset,
+              child: Material(
+                color: Colors.transparent,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, (openAbove ? 10 : -10) * (1 - value)),
+                      child: Opacity(
+                        opacity: value.clamp(0.0, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: DecoratedBox(
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x99000000),
+                          blurRadius: 18,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: PerformanceLiquidLens(
+                      style: PerformanceGlassStyles.menu,
+                      child: Container(
+                        width: dialogWidth,
+                        constraints: BoxConstraints(maxHeight: maxMenuHeight),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0x26FFFFFF)),
+                        ),
+                        child: SingleChildScrollView(
+                          physics: const BouncingScrollPhysics(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildAudioDropdownItem('All Audio', 'all'),
+                              const SizedBox(height: 4),
+                              Container(
+                                height: 1,
+                                color: Colors.white.withValues(alpha: 0.1),
+                              ),
+                              const SizedBox(height: 4),
+                              _buildAudioDropdownItem('🌐 Multi-Audio', 'multi'),
+                              _buildAudioDropdownItem('🇺🇸 English / Orig', 'english'),
+                              _buildAudioDropdownItem('🇮🇳 Hindi / Indian', 'hindi'),
+                              _buildAudioDropdownItem('🇩🇪 German', 'german'),
+                              _buildAudioDropdownItem('🇫🇷 French', 'french'),
+                              _buildAudioDropdownItem('🇪🇸 Spanish', 'spanish'),
+                              _buildAudioDropdownItem('🇷🇺 Russian', 'russian'),
+                              _buildAudioDropdownItem('🇯🇵 Japanese', 'japanese'),
+                              _buildAudioDropdownItem('🇮🇹 Italian', 'italian'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildAudioDropdownItem(String title, String value) {
+    final isSelected = _selectedAudioFilter == value;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedAudioFilter = value;
+        });
+        Navigator.pop(context);
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: isSelected
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.white70,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: Colors.white, size: 18),
           ],
         ),
       ),
@@ -1576,6 +1823,37 @@ class _SourceCardState extends State<_SourceCard> {
     if (s.isHDR) badges.add(_badge('HDR', const Color(0xFFFFD43B)));
     if (s.codec != null) badges.add(_badge(s.codec!, _C.textTertiary));
     if (s.fileSize != null) badges.add(_badge(s.fileSize!, _C.textTertiary));
+
+    // Audio Language / Dub badge
+    final audioBadge = s.getAudioBadge(mediaTitle: widget.detail.name);
+    if (audioBadge != null) {
+      Color audioBadgeColor;
+      if (audioBadge.contains('MULTI')) {
+        audioBadgeColor = const Color(0xFFB197FC);
+      } else if (audioBadge.contains('HINDI') ||
+          audioBadge.contains('TELUGU') ||
+          audioBadge.contains('TAMIL') ||
+          audioBadge.contains('MALAYALAM') ||
+          audioBadge.contains('KANNADA') ||
+          audioBadge.contains('PUNJABI')) {
+        audioBadgeColor = const Color(0xFFFF922B);
+      } else if (audioBadge.contains('GER')) {
+        audioBadgeColor = const Color(0xFFFFD43B);
+      } else if (audioBadge.contains('FRE')) {
+        audioBadgeColor = const Color(0xFF4DABF7);
+      } else if (audioBadge.contains('SPA')) {
+        audioBadgeColor = const Color(0xFFFAB005);
+      } else if (audioBadge.contains('RUS')) {
+        audioBadgeColor = const Color(0xFF22B8CF);
+      } else if (audioBadge.contains('JPN')) {
+        audioBadgeColor = const Color(0xFFFF8787);
+      } else if (audioBadge.contains('ITA')) {
+        audioBadgeColor = const Color(0xFF69DB7C);
+      } else {
+        audioBadgeColor = _C.textTertiary;
+      }
+      badges.add(_badge(audioBadge, audioBadgeColor));
+    }
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,

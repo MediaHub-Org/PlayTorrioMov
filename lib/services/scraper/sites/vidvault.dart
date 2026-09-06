@@ -95,6 +95,10 @@ class VidVaultScraper extends StreamScraper {
 
         final mp4 = data['mp4Data'];
         if (mp4 is Map) {
+          final lanName = mp4['lanName']?.toString().trim() ?? '';
+          final country = mp4['country']?.toString().trim() ?? '';
+          final detailPath = mp4['detailPath']?.toString().trim() ?? '';
+
           final downloads = mp4['downloadInfo']?['data']?['downloads'];
           if (downloads is List) {
             for (final d in downloads) {
@@ -103,12 +107,26 @@ class VidVaultScraper extends StreamScraper {
               if (dUrl == null || dUrl.isEmpty) continue;
 
               final resLabel = d['resolution']?.toString() ?? '1080';
+              final titleParts = [
+                'VidVault',
+                'MP4',
+                if (lanName.isNotEmpty) lanName,
+                if (country.isNotEmpty && country != lanName) country,
+                '${resLabel}p',
+              ];
+
+              final descParts = [
+                'VidVault Direct MP4',
+                if (lanName.isNotEmpty) lanName,
+                if (country.isNotEmpty) country,
+                if (detailPath.isNotEmpty) detailPath,
+              ];
 
               yield StreamSource(
                 name: 'PlayTorrioHTTP',
                 addonName: 'PlayTorrioHTTP',
-                title: 'VidVault · MP4 · ${resLabel}p',
-                description: 'VidVault Direct MP4',
+                title: titleParts.join(' · '),
+                description: descParts.join(' · '),
                 url: dUrl,
                 headers: _headers,
                 behaviorHints: {
@@ -146,6 +164,44 @@ class VidVaultScraper extends StreamScraper {
                 },
               },
             );
+          }
+        }
+
+        // Additional mkvV2Data and mkvV3Data sources with explicit backend language tags
+        for (final key in ['mkvV2Data', 'mkvV3Data']) {
+          final mkvExtra = data[key];
+          if (mkvExtra is Map) {
+            final eUrl = mkvExtra['url']?.toString();
+            if (eUrl != null && eUrl.isNotEmpty) {
+              final eQuality = mkvExtra['quality']?.toString().trim() ?? '';
+              final eLang = mkvExtra['language']?.toString().trim() ?? '';
+              final eCountry = mkvExtra['country']?.toString().trim() ?? '';
+              final eSize = mkvExtra['size']?.toString().trim() ?? '';
+
+              final parts = [
+                'VidVault',
+                'MKV',
+                if (eLang.isNotEmpty) eLang,
+                if (eCountry.isNotEmpty && eCountry != eLang) eCountry,
+                if (eQuality.isNotEmpty) eQuality,
+                if (eSize.isNotEmpty) eSize,
+              ];
+
+              yield StreamSource(
+                name: 'PlayTorrioHTTP',
+                addonName: 'PlayTorrioHTTP',
+                title: parts.join(' · '),
+                description: 'VidVault Direct MKV · $eLang $eCountry $eSize'.trim(),
+                url: eUrl,
+                headers: _headers,
+                behaviorHints: {
+                  'notWebReady': false,
+                  'proxyHeaders': {
+                    'request': _headers,
+                  },
+                },
+              );
+            }
           }
         }
       } finally {

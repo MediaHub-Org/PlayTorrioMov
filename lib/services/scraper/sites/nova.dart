@@ -85,7 +85,7 @@ class NovaScraper extends StreamScraper {
           final stName = (st['name']?.toString() ?? 'Nova').replaceAll('Nova ', '');
           final rawTitle = st['title']?.toString();
           final stTitle = rawTitle != null && rawTitle.contains(' | ')
-              ? rawTitle.split(' | ').first
+              ? rawTitle.replaceAll(' | ', ' · ')
               : (rawTitle ?? '');
           final titleLabel = stTitle.isNotEmpty ? '$stName · $stTitle' : stName;
 

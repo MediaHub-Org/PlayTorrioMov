@@ -159,7 +159,12 @@ class MovyScraper extends StreamScraper {
 
                       final rawQuality = src['quality']?.toString() ?? 'Auto';
                       final cleanQuality = _formatQuality(rawQuality);
-                      final streamTitle = '[Movy - $serverName] $cleanQuality';
+                      final isSpecificAudio = note.toLowerCase().contains('audio') &&
+                          !note.toLowerCase().contains('original');
+                      final langLabel = isSpecificAudio ? note.split(' ').first : '';
+                      final streamTitle = isSpecificAudio
+                          ? '[Movy - $serverName · $langLabel] $cleanQuality'
+                          : '[Movy - $serverName] $cleanQuality';
                       final desc = '$note • HLS';
 
                       final source = StreamSource(

@@ -320,11 +320,14 @@ class VuflixScraper extends StreamScraper {
                   }
                   seenUrls.add(unwrapped.url);
 
-                  final aLabel = (a['label'] ??
+                  final rawLabel = (a['label'] ??
                           a['name'] ??
                           a['language'] ??
                           'Audio')
-                      .toString();
+                      .toString()
+                      .trim();
+                  final cleanLabel = rawLabel.replaceAll(RegExp(r'\s*audio\s*$', caseSensitive: false), '').trim();
+                  final aLabel = cleanLabel.isNotEmpty ? cleanLabel : 'Audio';
                   final streamTitle = '[Vuflix - $providerName] $aLabel Audio';
                   final desc =
                       '$providerName • $aLabel Audio • ${itemType.toUpperCase()}';

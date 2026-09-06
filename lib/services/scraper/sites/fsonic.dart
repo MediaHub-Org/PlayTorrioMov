@@ -112,7 +112,20 @@ class FSonicScraper extends StreamScraper {
 
             if (seen.add(srcUrl)) {
               final quality = item['quality']?.toString() ?? '1080';
+              final label = item['label']?.toString().trim() ?? '';
               final isHls = srcUrl.contains('.m3u8');
+
+              final titleParts = [
+                'FSonic',
+                if (label.isNotEmpty) label,
+                '${quality}p',
+              ];
+
+              final descParts = [
+                'FSonic Stream',
+                if (label.isNotEmpty) label,
+                isHls ? 'HLS' : 'MP4',
+              ];
 
               final reqHeaders = {
                 ..._headers,
@@ -122,8 +135,8 @@ class FSonicScraper extends StreamScraper {
               yield StreamSource(
                 name: 'PlayTorrioHTTP',
                 addonName: 'PlayTorrioHTTP',
-                title: 'FSonic · ${quality}p',
-                description: 'FSonic Stream · ${isHls ? 'HLS' : 'MP4'}',
+                title: titleParts.join(' · '),
+                description: descParts.join(' · '),
                 url: srcUrl,
                 headers: reqHeaders,
                 behaviorHints: {
