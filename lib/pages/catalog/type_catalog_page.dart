@@ -11,6 +11,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/error_view.dart';
 import '../../widgets/common/filter_dropdown.dart';
+import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
@@ -495,33 +496,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                 ],
                 if (detail != null && detail.genres.isNotEmpty) ...[
                   const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: detail.genres.take(4).map((genre) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 13,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.12),
-                          ),
-                        ),
-                        child: Text(
-                          genre,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.70),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                  GenreTagRow(genres: detail.genres.take(4).toList()),
                 ],
                 SizedBox(height: isCompact ? 18 : 22),
                 Row(

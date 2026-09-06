@@ -100,7 +100,6 @@ if a regression in any of them turns up.
 |----|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 4  | **Anime and Movies/Series now share one row; the pages still differ**                               | The row is done: `BrowseRowView` is the single implementation, `BrowseScaffold` builds its rows from it and `AnimeSliderSection` wraps it, so card size, spacing, header and arrows cannot drift. Migrating the anime *page* itself onto `BrowseScaffold` was **dropped as not worth it**: `AnimeSliderSection` is also used by `anime_search_page`, so converting only the anime page would leave two row implementations on adjacent screens — worse than before. Converting both is two large pages of churn for a layout that now already matches. What the anime page still has of its own is a hero carousel and a `ContinueWatchingSlider` slot; revisit only if a third page wants that arrangement. |
 | 5  | **Some files do ad-hoc `MediaQuery.sizeOf(context).width`** instead of `AppBreakpoints.of(context)` | Inherited from PlayTorrioMod's own count of call sites — no shared risk, no user-visible bug. Migrate opportunistically when a file is touched for another reason, not as a batch pass.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| 6  | **Kotlin Gradle Plugin will break future Flutter builds**                                           | Every Android build warns: the app and six plugins (`package_info_plus`, `shared_preferences_android`, `torrserver_flutter`, `url_launcher_android`, `video_player_android`, `wakelock_plus`) apply KGP, and *"future versions of Flutter will fail to build if your app uses plugins that apply KGP"*. The app's own `build.gradle.kts` can migrate to Built-in Kotlin; the plugins cannot be fixed here — each needs a version that supports it, or an upstream issue. Not urgent, but it is a dated fuse rather than a style nit.                                                                                                                                                                         |
 | 10 | **Header space consistency between all sections, mobile first** | Confirmed and quantified: Movies & Series (`BrowseScaffold`) uses a shared, responsive `sizing.sidePadding`; Anime hardcodes `EdgeInsets.fromLTRB(24, 80, 24, 120)`; Live TV hardcodes `EdgeInsets.fromLTRB(28, topPadding + 14, 28, 14)`; Library hardcodes `EdgeInsets.fromLTRB(16, 16, 16, 100)`. Three different fixed side-padding values (24/28/16) where one page already has a responsive constant to converge on. **2026-09-06:** user asked specifically for the top-of-page margin/padding to be tightened on mobile, and for the fix to be designed mobile-first rather than adapted down from desktop. Still not fixed — this environment can now actually run and screenshot the desktop build (see this session's launch), but has no phone/tablet device or emulator to check the mobile result against, so a mobile-first pass still needs a hands-on check on a real device before landing. |
 
 ## Known bugs
@@ -114,13 +113,21 @@ live for the first time this session.
 
 | #  | Task                                                        | Details                                                                                                                                                                                                                                                            |
 |----|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 14 | **Settings entry point: fixed position, same on every screen** | **Confirmed already true 2026-09-06**, not a fix: `TopBar`/`AdaptiveNavShell._MobileTopBar` are the *only* Settings entry points in the app (top-right on both), shared by all 5 hub sections via one `onSettingsTap` callback threaded from `HubPage` — nothing duplicates it per page. The one real gap is pages pushed *outside* the hub (`DiscoverPage`, detail pages) showing no Settings icon at all — that looks intentional (they're nested, not top-level destinations), so left alone pending confirmation it should change. |
 | 15 | **Design mobile first, as a standing policy**                  | General direction going forward, not a single fix: design new/reworked screens for mobile first, then scale up to tablet/desktop — not the other way around. Applied so far to #12 and the `FilterDropdown` mobile fix below; still open for #10. |
 
-See Resolved below for #13 (nav split) and #16 (subtitle list).
+See Resolved below for #13 (nav split), #14 (Settings position), and #16
+(subtitle list).
 
 ## Resolved
 
+- ~~**#14 Settings entry point: fixed position, same on every screen**~~ —
+  confirmed already true, not a fix: `TopBar`/`AdaptiveNavShell._MobileTopBar`
+  are the *only* Settings entry points in the app (top-right on both),
+  shared by all 5 hub sections via one `onSettingsTap` callback threaded
+  from `HubPage` — nothing duplicates it per page. The one gap (pages
+  pushed *outside* the hub, like `DiscoverPage` or detail pages, show no
+  Settings icon) looks intentional — they're nested, not top-level
+  destinations — so left as-is.
 - ~~**#17 A catalog fetch failure silently looked like "no content"**~~ —
   fixed: `AddonManager.fetchByType` now rethrows the last error when every
   catalog for that type failed outright (as opposed to succeeding with
@@ -143,14 +150,16 @@ See Resolved below for #13 (nav split) and #16 (subtitle list).
   Navigation principle for the shape and the trade-off it overrides.
 - ~~**#12 Tags on content pages only show their icon**~~ — done, but not
   the bug originally suspected: no "icon-only, overflowing label" widget
-  ever existed (confirmed by source read) — genre chips on
-  Movies/Series/Anime/Anime-Arabic detail pages were text-only `Wrap`s,
-  three separate near-identical implementations, and Live TV had no genre
-  tag at all (only a category badge). Unified into one shared
-  `GenreTagRow` (`lib/widgets/common/genre_tag_row.dart`): icon-only pills
-  (with a genre→icon map and a hover/long-press `Tooltip` for the name),
-  laid out in a horizontally-scrolling single row so it can never wrap to
-  a second line regardless of genre count. Also made `FilterDropdown` (the
+  ever existed (confirmed by source read) — genre chips were text-only
+  `Wrap`s implemented **five separate times** (Movies/Series and Anime's
+  hero carousels, plus the Movies/Series, Anime, and Anime-Arabic detail
+  pages — the hero-carousel pair only turned up in a later visual pass,
+  after the first fix already landed), and Live TV had no genre tag at
+  all (only a category badge). Unified into one shared `GenreTagRow`
+  (`lib/widgets/common/genre_tag_row.dart`): icon-only pills (with a
+  genre→icon map and a hover/long-press `Tooltip` for the name), laid out
+  in a horizontally-scrolling single row so it can never wrap to a second
+  line regardless of genre count. Also made `FilterDropdown` (the
   genre/decade/sort pill buttons on catalog pages) icon-only on mobile
   after a follow-up report that they ran too wide there — label comes
   back on tablet/desktop where there's room.

@@ -15,6 +15,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/common/custom_scroll_track.dart';
 import '../../widgets/common/filter_dropdown.dart';
+import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/hero_carousel_auto_rotate.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
@@ -1041,33 +1042,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                   // Genre chips
                   if (anime.genres.isNotEmpty) ...[
                     const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: anime.genres.take(4).map((genre) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 13,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.12),
-                            ),
-                          ),
-                          child: Text(
-                            genre,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white.withValues(alpha: 0.70),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                    GenreTagRow(genres: anime.genres.take(4).toList()),
                   ],
 
                   // Action buttons (Matching Home Page)
