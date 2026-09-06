@@ -117,6 +117,15 @@ live for the first time this session.
 | 15 | **Design mobile first, as a standing policy**                  | General direction going forward, not a single fix: design new/reworked screens for mobile first, then scale up to tablet/desktop — not the other way around. Applied so far to #12 and the `FilterDropdown` mobile fix below; still open for #10. |
 | 21 | **Logo: add an extra element**                                 | A black & white film-strip/clapperboard line accent (🎬🎞️ movie-action motif), on top of the current wordmark/`SidebarLogo`. |
 
+Requested 2026-09-06, after using the #19/#20 build:
+
+| #  | Task                                                        | Details                                                                                                                                                                                                                                                            |
+|----|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 22 | **`GlassBackButton` sits flush against the search bar**       | On Search/Catalog/Discover's header rows, the back button (`lib/widgets/common/glass_back_button.dart`) has no gap before the search field/pill row starts right next to it — reads as one cramped control instead of two. Needs a deliberate gap (`SizedBox`) between them, everywhere `GlassBackButton` shares a row with a search field. |
+| 23 | **`PageSearchButton` doesn't match the pill row it sits in**  | `PageSearchButton` (`lib/widgets/common/page_search_button.dart`) is a bare `IconButton` with no background/border, placed via `PillFilterHeaderBar` right next to `FilterDropdown` pills that *do* have both (`Colors.white` @ 6% fill, 10% border, `BorderRadius.circular(10)` — see `filter_dropdown.dart`). Give it the same pill decoration so it reads as part of the row instead of a stray icon. Apply the same treatment to Live TV's own header, which never adopted `PillFilterHeaderBar` (per #18, it "has no equivalent filter row to unify" — but it should still get a matching search pill even without the genre/decade/sort pills). |
+| 24 | **Define a minimum width for the pill/header controls**      | The 760×600 floor from #18 covers the whole window; the pills themselves (`FilterDropdown`, `PageSearchButton`, once #23 lands) have no minimum tap-target/width of their own, so review whether they need one — distinct question from the window floor. |
+| 25 | **Separate row titles ("Popular", "New", ...) from the card list below them** | `SectionHeader` (`lib/widgets/common/section_header.dart`) pads `fromLTRB(20, 8, 16, 0)` — zero bottom inset, so the title sits flush against the first row of poster cards with no breathing room. Needs a real gap between the title/subtitle and the list beneath it. |
+
 See Resolved below for #13 (nav split), #14 (Settings position), and #16
 (subtitle list).
 
