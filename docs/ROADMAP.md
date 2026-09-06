@@ -120,6 +120,48 @@ See Resolved below for #13 (nav split), #14 (Settings position), and #16
 
 ## Resolved
 
+- ~~**#19 IPTV favorite discoverability, back button design, 5-section bar hidden on desktop, Settings drift (final root cause)**~~ —
+  four items reported together from live testing after #18 shipped:
+  - *"Not possible to like IPTV channel"* — the heart from #18 actually
+    worked; a widget test (`test/widgets/iptv_channel_card_test.dart`)
+    pumping a real `IptvChannelCard` and tapping it proved the tap
+    mechanics were never broken. Added a second, more visible entry point
+    in the channel detail sheet's header anyway, since it was easy to miss
+    on the card alone.
+  - *"5 categories hidden by search/detail pages on desktop"* — a real bug:
+    `SectionTopBar` lived inside `SectionedHubScaffold`, itself inside
+    `NestedNavigator` (see #11's fix), so pushing Details/Search through
+    that navigator replaced the section bar along with everything else it
+    wraps. Moved `SectionTopBar` into `AdaptiveNavShell`, as a sibling
+    above `Expanded(child: child)` rather than inside it — mirroring how
+    the mobile bottom tab bar already sat outside the nested navigator's
+    scope and was never affected. Covered by a regression test that pushes
+    a route through the nested navigator and asserts the bar survives.
+  - *"Settings icon still differs in position, and drifts as width
+    changes"* — #14's fix (shared height/button) wasn't the whole story.
+    The merged `TopBar` used `Flexible(logo)` + `Spacer()` + button in a
+    `Row`; `Flexible` (loose fit) and `Spacer`'s `Expanded` both default to
+    `flex: 1` and split remaining space evenly, but the logo (loose fit)
+    never actually claims its full half — and Flutter's `Flex` layout
+    doesn't reclaim an undersized flex child's unused space for its
+    sibling, so the wasted half became a gap that grew with window width
+    (measured at 30px/70.5px/320.5px at 400/700/1200px). Fixed by
+    `Row(mainAxisAlignment: spaceBetween)` instead of `Spacer()` — the
+    `Flexible` logo alone has no competing flex sibling, so it shrinks to
+    its own content and `spaceBetween` pushes whatever's left to the far
+    right. A widget test comparing the icon's offset from the bar's
+    right edge at 400/700/1200px now asserts they're identical.
+  - *"Details/Search pages don't share the same back button design"* —
+    confirmed: 8 pages (Details, Search, Catalog, Discover, plus the
+    anime/anime-Arabic/IPTV equivalents) each hand-rolled their own back
+    button, split between a frosted floating circle and a bare icon in a
+    header bar, and between `arrow_back_ios_rounded` and
+    `arrow_back_ios_new_rounded` with no reason for the split. Unified
+    into one shared `GlassBackButton` widget, with a
+    `like_button_test.dart`-style regression test scanning `lib/pages`
+    for the hand-rolled pattern (a back-arrow icon near a `Navigator.pop`
+    call) outside the settings/player families, which are their own
+    already-consistent contexts and intentionally out of scope.
 - ~~**#14 Settings entry point: fixed position, same on every screen**~~ —
   `TopBar`/`AdaptiveNavShell._MobileTopBar` were already the *only* two
   Settings entry points (top-right on both, one `onSettingsTap` callback

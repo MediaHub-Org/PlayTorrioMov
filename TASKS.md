@@ -33,6 +33,11 @@
       add a Watched chip to Library; add a favorite-channel heart on IPTV
       channel cards with a new Live TV chip in Library to show them — see
       ROADMAP.md § Resolved #18
+- [x] Fix IPTV channel favoriting discoverability, the 5-section bar being
+      hidden behind Details/Search pages on desktop, the Settings icon's
+      remaining position drift (a `Flexible`/`Spacer` flex-space bug), and
+      unify the back button design across all 8 details/search pages
+      (new `GlassBackButton`) — see ROADMAP.md § Resolved #19
 - [x] Pull latest commits from original repo (PlayTorrioMod) and log them —
       done: PlayTorrioMod sits 3 commits behind its own upstream
       (`ayman708-UX/PlayTorrioV3`), see ROADMAP.md § Upstream tracking for
