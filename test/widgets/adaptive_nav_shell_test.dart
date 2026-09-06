@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/utils/hub_controller.dart';
 import 'package:playtorriomov/widgets/common/adaptive_nav_shell.dart';
+import 'package:playtorriomov/widgets/common/nested_navigator.dart';
 import 'package:playtorriomov/widgets/common/top_bar.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -25,7 +26,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('adaptiveNavMobileBar')), findsOneWidget);
-      expect(find.byType(TopBar), findsNothing);
+      // Mobile uses the exact same TopBar as tablet/desktop now -- one
+      // definition, not a second copy that could drift the Settings icon's
+      // position out of sync (see the dedicated position test below).
+      expect(find.byType(TopBar), findsOneWidget);
 
       expect(find.text('Movies'), findsOneWidget);
       expect(find.text('Series'), findsOneWidget);
@@ -86,12 +90,80 @@ void main() {
       expect(tapped, true);
     });
 
+    testWidgets(
+        'Settings icon sits at the same distance from the top-right corner on every tier',
+        (tester) async {
+      // Regression test for the icon drifting between tiers: same window
+      // width for the "top" measurement is irrelevant since both tiers
+      // right-align, so this checks the icon's offset from its own bar's
+      // top-right corner, which must be identical everywhere since TopBar
+      // is now one shared definition.
+      Future<Offset> settingsOffsetFromTopRight(double width) async {
+        setSurfaceWidth(tester, width);
+        await tester.pumpWidget(wrap(AdaptiveNavShell(
+          onSettingsTap: () {},
+          child: const SizedBox.shrink(),
+        )));
+        await tester.pumpAndSettle();
+
+        final iconTopLeft = tester.getTopLeft(find.byIcon(Icons.settings_rounded));
+        final iconSize = tester.getSize(find.byIcon(Icons.settings_rounded));
+        final barTopRight = tester.getTopRight(find.byType(TopBar));
+        return Offset(
+          barTopRight.dx - (iconTopLeft.dx + iconSize.width),
+          iconTopLeft.dy,
+        );
+      }
+
+      final mobileOffset = await settingsOffsetFromTopRight(400);
+      final tabletOffset = await settingsOffsetFromTopRight(700);
+      final desktopOffset = await settingsOffsetFromTopRight(1200);
+
+      expect(mobileOffset, tabletOffset);
+      expect(mobileOffset, desktopOffset);
+    });
+
     testWidgets('renders the provided child', (tester) async {
       setSurfaceWidth(tester, 1200);
       await tester.pumpWidget(wrap(const AdaptiveNavShell(child: Text('hub content'))));
       await tester.pumpAndSettle();
 
       expect(find.text('hub content'), findsOneWidget);
+    });
+
+    testWidgets(
+        'the 5-section bar survives a page pushed through the nested navigator on desktop',
+        (tester) async {
+      // Regression test: SectionTopBar used to live inside the hub content
+      // that NestedNavigator wraps, so pushing a page there (Details,
+      // Search, ...) covered the whole content area including the bar.
+      // It now lives in AdaptiveNavShell, outside NestedNavigator's scope.
+      setSurfaceWidth(tester, 1200);
+      late BuildContext hubContentContext;
+      await tester.pumpWidget(wrap(AdaptiveNavShell(
+        child: NestedNavigator(
+          child: Builder(
+            builder: (context) {
+              hubContentContext = context;
+              return const Text('hub content');
+            },
+          ),
+        ),
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('hub content'), findsOneWidget);
+
+      Navigator.of(hubContentContext).push(MaterialPageRoute<void>(
+        builder: (_) => const Text('pushed details page'),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text('pushed details page'), findsOneWidget);
+      expect(find.text('hub content'), findsNothing);
+      expect(find.text('Movies'), findsOneWidget,
+          reason: 'the 5-section bar must stay visible above pushed pages');
     });
   });
 }

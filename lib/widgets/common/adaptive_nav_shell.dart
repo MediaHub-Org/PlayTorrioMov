@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
-import 'sidebar_logo.dart';
+import 'section_top_bar.dart';
 import 'top_bar.dart';
 
 /// Tier-aware nav chrome wrapping the Media hub's content area.
@@ -46,7 +46,7 @@ class AdaptiveNavShell extends StatelessWidget {
       return Column(
         children: [
           SizedBox(height: topPadding),
-          _MobileTopBar(onSettingsTap: onSettingsTap),
+          TopBar(onSettingsTap: onSettingsTap),
           Expanded(child: child),
           const SafeArea(top: false, child: _MobileSectionTabBar()),
         ],
@@ -57,33 +57,16 @@ class AdaptiveNavShell extends StatelessWidget {
       children: [
         SizedBox(height: topPadding),
         TopBar(onSettingsTap: onSettingsTap),
+        // Outside `child` (NestedNavigator) on purpose: a page pushed within
+        // the hub's own nested Navigator (Details, Search, ...) replaces
+        // everything inside that navigator, which used to include this bar
+        // when it lived inside MediaHub -- hiding the 5 sections behind
+        // every detail/search page. Sitting here, as a sibling above the
+        // navigated content, mirrors how the mobile bottom tab bar already
+        // sits outside `child` and so never gets covered either.
+        const SectionTopBar(),
         Expanded(child: child),
       ],
-    );
-  }
-}
-
-class _MobileTopBar extends StatelessWidget {
-  final VoidCallback? onSettingsTap;
-
-  const _MobileTopBar({this.onSettingsTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: TopBar.sharedHeight,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0B0D15),
-        border: Border(bottom: BorderSide(color: Colors.white12)),
-      ),
-      child: Row(
-        children: [
-          const Flexible(child: SidebarLogo()),
-          const Spacer(),
-          if (onSettingsTap != null) SettingsIconButton(onTap: onSettingsTap!),
-        ],
-      ),
     );
   }
 }
