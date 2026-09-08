@@ -20,8 +20,13 @@ abstract final class AppSpacing {
   /// control. Each of those used to carry its own (8, 16, 20, 24, 28, 48),
   /// so the same control sat in a different place depending on which page
   /// you reached it from.
-  static double pageInset(BuildContext context) {
-    switch (AppBreakpoints.of(context)) {
+  static double pageInset(BuildContext context) =>
+      pageInsetForWidth(MediaQuery.sizeOf(context).width);
+
+  /// [pageInset] from a raw width, for the sizing values computed off a
+  /// measured width rather than a context (see `MovieCardSizing`).
+  static double pageInsetForWidth(double width) {
+    switch (AppBreakpoints.tierForWidth(width)) {
       case ScreenTier.mobile:
         return 16;
       case ScreenTier.tablet:

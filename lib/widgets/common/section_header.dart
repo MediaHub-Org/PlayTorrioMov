@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/app_spacing.dart';
 import '../../services/theme/app_theme_service.dart';
 
 /// Clean section header — title on left, optional "See All" on right.
@@ -23,7 +24,12 @@ class SectionHeader extends StatelessWidget {
       // (BrowseScaffold._buildLoading) so the real header doesn't shift the
       // row down once content replaces the skeleton. Used to be 0, leaving
       // the title flush against the card row with no breathing room.
-      padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.pageInset(context),
+        8,
+        AppSpacing.pageInset(context),
+        12,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

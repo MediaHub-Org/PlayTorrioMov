@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../models/movie/movie.dart';
 import '../../pages/details/details_page.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -59,7 +60,10 @@ class MovieCardSizing {
       posterHeight: posterHeight,
       totalHeight: totalHeight,
       spacing: 16,
-      sidePadding: 18,
+      // The page gutter, not a number of its own: a row's first card has
+      // to line up with the section title above it and the filter bar
+      // above that.
+      sidePadding: AppSpacing.pageInsetForWidth(screenWidth),
     );
   }
 }

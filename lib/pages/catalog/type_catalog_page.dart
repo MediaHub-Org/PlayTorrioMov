@@ -382,7 +382,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 34),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.pageInset(context),
+              0,
+              AppSpacing.pageInset(context),
+              34,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -586,7 +591,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.pageInset(context),
+                    0,
+                    AppSpacing.pageInset(context),
+                    120,
+                  ),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
