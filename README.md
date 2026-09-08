@@ -32,12 +32,13 @@ PlayTorrioMod for them.
 
 ## Sections
 
-| Section             | Content                                       |
-|:--------------------|:----------------------------------------------|
-| **Movies & Series** | TMDB-catalog movies and series, one tap apart |
-| **Anime**           | Its own catalog and scraper                   |
-| **Live TV**         | IPTV channels                                 |
-| **Library**         | Everything you've saved                       |
+| Section      | Content                       |
+|:-------------|:--------------------------------|
+| **Movies**   | TMDB-catalog movies             |
+| **Series**   | TMDB-catalog series              |
+| **Anime**    | Its own catalog and scraper      |
+| **Live TV**  | IPTV channels                    |
+| **Library**  | Everything you've saved          |
 
 On phones the sections sit in the bottom tab bar; tablets and desktops get a
 chip row under the top bar.
@@ -81,8 +82,8 @@ build as the universal APK at a third of the size.
 ## Building and releases
 
 CI builds every platform. Pull requests run analysis, the test suite and an
-Android APK; merges to `main` run the same checks and refresh the shared build
-cache. Full release-workflow and signing details are in
+Android APK; merges to `master` run the same checks and refresh the shared
+build cache. Full release-workflow and signing details are in
 [docs/RELEASES.md](docs/RELEASES.md).
 
 ## Credits
@@ -95,7 +96,7 @@ system, the torrent streaming engine, the audiobook aggregator, the manga
 reader, the music integration and the subtitle system, across five platforms.
 
 PlayTorrioMov keeps the media half of that work and drops the rest: one hub,
-the four sections listed above, and no hub switcher. Music, podcasts,
+the five sections listed above, and no hub switcher. Music, podcasts,
 audiobooks, books, manga and comics live on in PlayTorrioMod for anyone who
 wants them in one app.
 
