@@ -27,9 +27,12 @@ is now **archived**, so Mov is the only active app in the family and the
 direct downstream of upstream `ayman708-UX/PlayTorrioV3` — no more relaying
 through PlayTorrioMod.
 
-**Last synced: `f1f1310`, 2026-09-06.** Next step: check `v3/main` for
-commits past that point and port anything applicable, file-by-file (git
-history was squashed at the fork point, so nothing arrives via `git merge`).
+**Last synced: `e560d4a`, 2026-09-08.** Ported the HindMoviez scraper,
+Castilian/Latino Spanish audio detection, and Arabic anime catalog fixes.
+Deliberately not ported: the "Builtin Providers" settings feature (see #29
+below). Next step: check `v3/main` for commits past `e560d4a` and port
+anything applicable, file-by-file (git history was squashed at the fork
+point, so nothing arrives via `git merge`).
 
 ## Code and consistency
 
@@ -46,6 +49,8 @@ history was squashed at the fork point, so nothing arrives via `git merge`).
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. Still open for #10. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. |
 | 24 | Define a minimum width for the pill/header controls | `FilterDropdown`/`PageSearchButton`/`HeaderPillIconButton` have no minimum tap-target/width of their own — separate question from the 760×600 window floor. |
+| 28 | Google Cast: verify on real Android/iOS hardware | Wired up (`lib/services/cast/cast_service.dart`, `flutter_chrome_cast`), but this environment has no Android SDK, no Xcode, and no Cast-capable device — the native manifest/plist config and the actual cast-a-stream flow are both unverified. |
+| 29 | Port upstream's "Builtin Providers" settings feature | A settings page + service (821 + 285 lines in `ayman708-UX/PlayTorrioV3`, commit `e560d4a`) letting users toggle and reorder individual built-in scrapers. Upstream hardcodes its own 46-provider list, which doesn't match Mov's actual registered scraper set (ported separately, at different times) — needs to generate the list from `ScraperManager`'s real scrapers instead of copying V3's, which is real design work, not a quick port. |
 
 ## Signing and releases
 
