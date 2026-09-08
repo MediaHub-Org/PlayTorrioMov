@@ -376,32 +376,21 @@ class _AnimePageState extends State<AnimePage> {
       final epNum =
           preferredEpisode ??
           (anime.totalEpisodes > 0 ? anime.totalEpisodes : null);
-      Navigator.push(
+      pushPage(
         context,
-        CinematicSlideRoute(
-          page: AnimeArabicDetailsPage(
-            anime: card,
-            initialEpisodeNumber: epNum,
-          ),
+        AnimeArabicDetailsPage(
+          anime: card,
+          initialEpisodeNumber: epNum,
         ),
       );
       return;
     }
 
-    Navigator.push(
-      context,
-      CinematicSlideRoute(page: AnimeDetailsPage(anime: anime)),
-    );
+    pushPage(context, AnimeDetailsPage(anime: anime));
   }
 
-  void _navigateToSearch(Offset? tapPosition) {
-    Navigator.push(
-      context,
-      LiquidRevealRoute(
-        page: AnimeSearchPage(initialArabicMode: _isArabicMode),
-        tapPosition: tapPosition,
-      ),
-    );
+  void _navigateToSearch() {
+    pushPage(context, AnimeSearchPage(initialArabicMode: _isArabicMode));
   }
 
   @override

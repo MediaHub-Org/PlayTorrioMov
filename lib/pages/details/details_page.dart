@@ -192,15 +192,13 @@ class _DetailsPageState extends State<DetailsPage>
   Future<void> _handlePlayAction(Video? ep) async {
     if (_detail == null) return;
 
-    Navigator.push(
+    pushPage(
       context,
-      CinematicSlideRoute(
-        page: WatchScreen(
-          detail: _detail!,
-          type: _resolvedType ?? _detail!.type,
-          selectedEpisode: ep,
-          isCollection: _isCollection,
-        ),
+      WatchScreen(
+        detail: _detail!,
+        type: _resolvedType ?? _detail!.type,
+        selectedEpisode: ep,
+        isCollection: _isCollection,
       ),
     );
   }
@@ -471,10 +469,7 @@ class _DetailsPageState extends State<DetailsPage>
     );
 
     if (resolved != null && mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => DetailsPage(movie: resolved)),
-      );
+      pushReplacementPage(context, DetailsPage(movie: resolved));
     }
   }
 
@@ -986,10 +981,7 @@ class _DetailsPageState extends State<DetailsPage>
   Widget _buildGenreChips(List<String> genres) {
     return GenreTagRow(
       genres: genres,
-      onTap: (g) => Navigator.push(
-        context,
-        LiquidRevealRoute(page: DiscoverPage(query: g, isGenre: true)),
-      ),
+      onTap: (g) => pushPage(context, DiscoverPage(query: g, isGenre: true)),
     );
   }
 
@@ -1370,97 +1362,90 @@ class _DetailsPageState extends State<DetailsPage>
                         children: [
                           Builder(
                             builder: (context) {
-                              Offset? lastTap;
-                              return GestureDetector(
-                                onTapDown: (d) => lastTap = d.globalPosition,
-                                child: _HoverButton(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      LiquidRevealRoute(
-                                        page: DiscoverPage(
-                                          query: name,
-                                          isGenre: false,
-                                        ),
-                                        tapPosition: lastTap,
-                                      ),
-                                    );
-                                  },
-                                  scaleAmount: 1.05,
-                                  child: Container(
-                                    width: 76,
-                                    height: 76,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: member.profileUrl == null
-                                          ? LinearGradient(
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
-                                              colors: pair,
-                                            )
-                                          : null,
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.1),
-                                        width: 1.5,
-                                      ),
+                              return _HoverButton(
+                                onTap: () {
+                                  pushPage(
+                                    context,
+                                    DiscoverPage(
+                                      query: name,
+                                      isGenre: false,
                                     ),
-                                    clipBehavior: Clip.antiAlias,
-                                    alignment: Alignment.center,
-                                    child: member.profileUrl != null
-                                        ? CachedNetworkImage(
-                                            imageUrl: member.profileUrl!,
-                                            width: 76,
-                                            height: 76,
-                                            fit: BoxFit.cover,
-                                            placeholder: (_, __) => Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  begin: Alignment.topLeft,
-                                                  end: Alignment.bottomRight,
-                                                  colors: pair,
-                                                ),
-                                              ),
-                                              alignment: Alignment.center,
-                                              child: Text(
-                                                initials,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                  );
+                                },
+                                scaleAmount: 1.05,
+                                child: Container(
+                                  width: 76,
+                                  height: 76,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: member.profileUrl == null
+                                        ? LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: pair,
+                                          )
+                                        : null,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.1),
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
+                                  alignment: Alignment.center,
+                                  child: member.profileUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: member.profileUrl!,
+                                          width: 76,
+                                          height: 76,
+                                          fit: BoxFit.cover,
+                                          placeholder: (_, __) => Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: pair,
                                               ),
                                             ),
-                                            errorWidget: (_, __, ___) =>
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    gradient: LinearGradient(
-                                                      begin: Alignment.topLeft,
-                                                      end:
-                                                          Alignment.bottomRight,
-                                                      colors: pair,
-                                                    ),
-                                                  ),
-                                                  alignment: Alignment.center,
-                                                  child: Text(
-                                                    initials,
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 24,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
-                                          )
-                                        : Text(
-                                            initials,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              initials,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
-                                  ),
+                                          errorWidget: (_, __, ___) =>
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    begin: Alignment.topLeft,
+                                                    end:
+                                                        Alignment.bottomRight,
+                                                    colors: pair,
+                                                  ),
+                                                ),
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  initials,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 24,
+                                                    fontWeight:
+                                                        FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                        )
+                                      : Text(
+                                          initials,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                 ),
                               );
                             },
@@ -1571,94 +1556,87 @@ class _DetailsPageState extends State<DetailsPage>
                   children: [
                     Builder(
                       builder: (context) {
-                        Offset? lastTap;
-                        return GestureDetector(
-                          onTapDown: (d) => lastTap = d.globalPosition,
-                          child: _HoverButton(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                LiquidRevealRoute(
-                                  page: DiscoverPage(
-                                    query: name,
-                                    isGenre: false,
-                                  ),
-                                  tapPosition: lastTap,
-                                ),
-                              );
-                            },
-                            scaleAmount: 1.05,
-                            child: Container(
-                              width: 76,
-                              height: 76,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: director.profileUrl == null
-                                    ? LinearGradient(
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                        colors: pair,
-                                      )
-                                    : null,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.1),
-                                  width: 1.5,
-                                ),
+                        return _HoverButton(
+                          onTap: () {
+                            pushPage(
+                              context,
+                              DiscoverPage(
+                                query: name,
+                                isGenre: false,
                               ),
-                              clipBehavior: Clip.antiAlias,
-                              alignment: Alignment.center,
-                              child: director.profileUrl != null
-                                  ? CachedNetworkImage(
-                                      imageUrl: director.profileUrl!,
-                                      width: 76,
-                                      height: 76,
-                                      fit: BoxFit.cover,
-                                      placeholder: (_, __) => Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: pair,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          initials,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      errorWidget: (_, __, ___) => Container(
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: pair,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          initials,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
+                            );
+                          },
+                          scaleAmount: 1.05,
+                          child: Container(
+                            width: 76,
+                            height: 76,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: director.profileUrl == null
+                                  ? LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: pair,
                                     )
-                                  : Text(
-                                      initials,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
+                                  : null,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.1),
+                                width: 1.5,
+                              ),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            alignment: Alignment.center,
+                            child: director.profileUrl != null
+                                ? CachedNetworkImage(
+                                    imageUrl: director.profileUrl!,
+                                    width: 76,
+                                    height: 76,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: pair,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        initials,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
-                            ),
+                                    errorWidget: (_, __, ___) => Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: pair,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        initials,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    initials,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
                         );
                       },
@@ -1975,11 +1953,9 @@ class _DetailsPageState extends State<DetailsPage>
                         width: cardWidth,
                         child: _HoverButton(
                           onTap: () {
-                            Navigator.pushReplacement(
+                            pushReplacementPage(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => DetailsPage(movie: item),
-                              ),
+                              DetailsPage(movie: item),
                             );
                           },
                           scaleAmount: 1.05,

@@ -67,18 +67,15 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
   void _openDetails(TraktCalendarEntry entry) {
     final imdbId = entry.showImdbId;
     if (imdbId == null || imdbId.isEmpty) return;
-    Navigator.push(
+    pushPage(
       context,
-      LiquidRevealRoute(
-        page: DetailsPage(
-          movie: Movie(
-            id: imdbId,
-            name: entry.showTitle,
-            type: 'series',
-            addonBaseUrl: '',
-          ),
+      DetailsPage(
+        movie: Movie(
+          id: imdbId,
+          name: entry.showTitle,
+          type: 'series',
+          addonBaseUrl: '',
         ),
-        tapPosition: null,
       ),
     );
   }

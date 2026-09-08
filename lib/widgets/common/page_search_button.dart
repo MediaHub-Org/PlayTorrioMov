@@ -15,9 +15,7 @@ import 'header_pill_style.dart';
 class PageSearchButton extends StatelessWidget {
   /// Overrides the default navigation to the app-wide [SearchPage] --
   /// Anime and Live TV route to their own scoped search page instead.
-  /// Receives the tap position so the destination's reveal animation can
-  /// originate from it, same as the default.
-  final void Function(Offset? tapPosition)? onTap;
+  final VoidCallback? onTap;
 
   const PageSearchButton({super.key, this.onTap});
 
@@ -29,21 +27,7 @@ class PageSearchButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
-          onTap: () {
-            final box = context.findRenderObject() as RenderBox?;
-            final offset = box?.localToGlobal(box.size.center(Offset.zero));
-            if (onTap != null) {
-              onTap!(offset);
-            } else {
-              Navigator.push(
-                context,
-                LiquidRevealRoute(
-                  page: const SearchPage(),
-                  tapPosition: offset,
-                ),
-              );
-            }
-          },
+          onTap: onTap ?? () => pushPage(context, const SearchPage()),
           child: Container(
             constraints: const BoxConstraints(
               minWidth: headerPillMinSize,

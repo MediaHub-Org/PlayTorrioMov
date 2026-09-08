@@ -125,15 +125,12 @@ class _IptvPageState extends State<IptvPage> {
     // If we have saved hits, launch immediately, otherwise open sheet to scan
     final results = _ctrl.channelResults;
     if (_ctrl.activeHardcoded?.id == channel.id && results.isNotEmpty) {
-      Navigator.push(
+      pushPage(
         context,
-        LiquidRevealRoute(
-          page: IptvPlayerPage(
-            channel: channel,
-            hits: results,
-            initialHitIndex: 0,
-          ),
-          tapPosition: null,
+        IptvPlayerPage(
+          channel: channel,
+          hits: results,
+          initialHitIndex: 0,
         ),
       );
     } else {
@@ -141,18 +138,12 @@ class _IptvPageState extends State<IptvPage> {
     }
   }
 
-  void _navigateToSearch(Offset? tapPosition) {
-    Navigator.push(
-      context,
-      LiquidRevealRoute(page: const IptvSearchPage(), tapPosition: tapPosition),
-    );
+  void _navigateToSearch() {
+    pushPage(context, const IptvSearchPage());
   }
 
   void _navigateToMultiView() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const IptvMultiViewPage()),
-    );
+    pushPage(context, const IptvMultiViewPage());
   }
 
   @override
@@ -305,7 +296,7 @@ class _IptvPageState extends State<IptvPage> {
 /// The title and channel-count pills are the bar's [leading] run; the
 /// three actions are its trailing pills.
 class _IptvGlassAppBar extends StatelessWidget {
-  final Function(Offset? tapPosition) onSearchTap;
+  final VoidCallback onSearchTap;
   final VoidCallback onSourcesTap;
   final VoidCallback onMultiViewTap;
 

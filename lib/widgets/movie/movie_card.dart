@@ -84,13 +84,7 @@ class MovieCard extends StatelessWidget {
       pressedScale: 0.97,
       onTap: onTap ??
           () {
-            Navigator.push(
-              context,
-              LiquidRevealRoute(
-                page: DetailsPage(movie: movie),
-                tapPosition: null, // Let it center if tapPosition not easily available
-              ),
-            );
+            pushPage(context, DetailsPage(movie: movie));
           },
       builder: (context, hovered, pressed) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,

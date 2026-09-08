@@ -1890,10 +1890,7 @@ class _SourceCardState extends State<_SourceCard> {
                       name: s.name ?? 'Unknown',
                       addonBaseUrl: 'https://v3-cinemeta.strem.io',
                     );
-                    Navigator.push(
-                      context,
-                      CinematicSlideRoute(page: DetailsPage(movie: movie)),
-                    );
+                    pushPage(context, DetailsPage(movie: movie));
                     return;
                   }
                   return;
@@ -1912,18 +1909,16 @@ class _SourceCardState extends State<_SourceCard> {
                   ? widget.episode!.title
                   : s.displayTitle;
 
-              pushFullscreen(
-                CinematicSlideRoute(
-                  page: PlayerScreen(
-                    source: s,
-                    title: effectiveTitle,
-                    backdropUrl: widget.backdropUrl,
-                    logoUrl: widget.logoUrl,
-                    detail: widget.detail,
-                    episode: widget.episode,
-                    onNextEpisode: widget.onNextEpisode,
-                    initialPosition: widget.initialPosition,
-                  ),
+              pushFullscreenPage(
+                PlayerScreen(
+                  source: s,
+                  title: effectiveTitle,
+                  backdropUrl: widget.backdropUrl,
+                  logoUrl: widget.logoUrl,
+                  detail: widget.detail,
+                  episode: widget.episode,
+                  onNextEpisode: widget.onNextEpisode,
+                  initialPosition: widget.initialPosition,
                 ),
               );
             },
@@ -2444,10 +2439,7 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
               onTap: () {
-                Navigator.push(
-                  context,
-                  LiquidRevealRoute(page: const SettingsPage(), tapPosition: null),
-                );
+                pushPage(context, const SettingsPage());
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),

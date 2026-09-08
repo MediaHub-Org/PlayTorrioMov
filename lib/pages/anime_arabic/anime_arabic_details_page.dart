@@ -882,11 +882,9 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                       final item = related[index];
                       return InkWell(
                         onTap: () {
-                          Navigator.push(
+                          pushPage(
                             context,
-                            CinematicSlideRoute(
-                              page: AnimeArabicDetailsPage(anime: item),
-                            ),
+                            AnimeArabicDetailsPage(anime: item),
                           );
                         },
                         borderRadius: BorderRadius.circular(14),

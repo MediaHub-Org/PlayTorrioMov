@@ -251,12 +251,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   }
 
   void _navigateToAnime(AnimeMedia target) {
-    Navigator.push(
-      context,
-      CinematicSlideRoute(
-        page: AnimeDetailsPage(anime: target),
-      ),
-    );
+    pushPage(context, AnimeDetailsPage(anime: target));
   }
 
   bool _isDesktop() {

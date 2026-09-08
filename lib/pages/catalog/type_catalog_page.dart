@@ -356,13 +356,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     // addon's higher-quality response and is what upstream trusts.
     final heroImage = detail?.background ?? movie.poster;
     final isCompact = MediaQuery.sizeOf(context).width < 600;
-    void openDetails({bool autoPlay = false}) => Navigator.push(
-      context,
-      LiquidRevealRoute(
-        page: DetailsPage(movie: movie, autoPlay: autoPlay),
-        tapPosition: null,
-      ),
-    );
+    void openDetails({bool autoPlay = false}) => pushPage(context, DetailsPage(movie: movie, autoPlay: autoPlay));
     return Stack(
       fit: StackFit.expand,
       children: [

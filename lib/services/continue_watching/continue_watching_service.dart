@@ -707,13 +707,11 @@ class ContinueWatchingService {
         title: item.title,
         cover: item.posterUrl ?? item.backdropUrl,
       );
-      Navigator.push(
+      pushPage(
         context,
-        CinematicSlideRoute(
-          page: AnimeArabicDetailsPage(
-            anime: card,
-            initialEpisodeNumber: episodeNum,
-          ),
+        AnimeArabicDetailsPage(
+          anime: card,
+          initialEpisodeNumber: episodeNum,
         ),
       );
       return;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/iptv_settings.dart';
 import 'appearance/live_tv_settings_page.dart';
+import '../../utils/navigation/route_transitions.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
   const AppearanceSettingsPage({super.key});
@@ -61,12 +62,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                         badgeText: spotlightEnabled ? 'Spotlight ON' : 'Compact',
                         badgeColor: currentPalette.primaryColor,
                         onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LiveTvSettingsPage(),
-                            ),
-                          );
+                          await pushPage(context, const LiveTvSettingsPage());
                           setState(() {});
                         },
                       );

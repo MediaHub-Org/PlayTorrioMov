@@ -453,21 +453,11 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
             title: anime.displayTitle,
             cover: anime.coverUrl,
           );
-      Navigator.push(
-        context,
-        CinematicSlideRoute(
-          page: AnimeArabicDetailsPage(anime: card),
-        ),
-      );
+      pushPage(context, AnimeArabicDetailsPage(anime: card));
       return;
     }
 
-    Navigator.push(
-      context,
-      CinematicSlideRoute(
-        page: AnimeDetailsPage(anime: anime),
-      ),
-    );
+    pushPage(context, AnimeDetailsPage(anime: anime));
   }
 
   @override

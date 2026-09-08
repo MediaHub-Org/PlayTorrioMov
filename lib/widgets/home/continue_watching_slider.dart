@@ -306,13 +306,11 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
         cover: item.posterUrl ?? item.backdropUrl,
       );
 
-      Navigator.push(
+      pushPage(
         context,
-        CinematicSlideRoute(
-          page: AnimeArabicDetailsPage(
-            anime: card,
-            initialEpisodeNumber: item.episode,
-          ),
+        AnimeArabicDetailsPage(
+          anime: card,
+          initialEpisodeNumber: item.episode,
         ),
       );
       return;
@@ -338,10 +336,7 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
         totalEpisodes: 0,
       );
 
-      Navigator.push(
-        context,
-        CinematicSlideRoute(page: AnimeDetailsPage(anime: anime)),
-      );
+      pushPage(context, AnimeDetailsPage(anime: anime));
     } else {
       final movie = Movie(
         id: item.id,
@@ -355,13 +350,7 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
       final box = context.findRenderObject() as RenderBox?;
       final offset = box?.localToGlobal(box.size.center(Offset.zero));
 
-      Navigator.push(
-        context,
-        LiquidRevealRoute(
-          page: DetailsPage(movie: movie),
-          tapPosition: offset,
-        ),
-      );
+      pushPage(context, DetailsPage(movie: movie));
     }
   }
 
