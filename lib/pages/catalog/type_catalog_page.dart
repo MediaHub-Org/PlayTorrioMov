@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/movie/movie_section.dart';
+import '../../services/app_spacing.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -229,7 +230,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     if (!_isFiltered) {
       return BrowseScaffold<Movie>(
         header: _buildHeader(context),
-        overlayHeader: true,
         belowHero: ContinueWatchingSlider(typeFilter: widget.type),
         afterRows: widget.type == 'series' ? const UpcomingCalendarRow() : null,
         isLoading: _loading,
@@ -356,13 +356,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     // addon's higher-quality response and is what upstream trusts.
     final heroImage = detail?.background ?? movie.poster;
     final isCompact = MediaQuery.sizeOf(context).width < 600;
-    void openDetails({bool autoPlay = false}) => Navigator.push(
-      context,
-      LiquidRevealRoute(
-        page: DetailsPage(movie: movie, autoPlay: autoPlay),
-        tapPosition: null,
-      ),
-    );
+    void openDetails({bool autoPlay = false}) => pushPage(context, DetailsPage(movie: movie, autoPlay: autoPlay));
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -388,7 +382,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         Align(
           alignment: Alignment.bottomLeft,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 34),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.pageInset(context),
+              0,
+              AppSpacing.pageInset(context),
+              34,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -566,39 +565,54 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         : 7;
     final visible = _visibleItems;
 
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(child: _buildHeader(context)),
-        if (visible.isEmpty && !_loadingGenre)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Center(
-              child: Text(
-                _items.isEmpty
-                    ? 'No content found. Install more addons in Settings.'
-                    : _genreFilter != null
-                    ? 'No titles found for $_genreFilter.'
-                    : 'No titles in the ${_decadeFilter}s.',
-                style: const TextStyle(color: Colors.white54, fontSize: 16),
-              ),
-            ),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.62,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => MovieCard(movie: visible[index]),
-                childCount: visible.length,
-              ),
-            ),
+    // Header above the viewport, not the first sliver in it, so it stays
+    // put here exactly as it does on the unfiltered rows view -- switching
+    // between the two must not make the controls move or scroll away.
+    return Column(
+      children: [
+        _buildHeader(context),
+        const SizedBox(height: AppSpacing.sm),
+        Expanded(
+          child: CustomScrollView(
+            slivers: [
+              if (visible.isEmpty && !_loadingGenre)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text(
+                      _items.isEmpty
+                          ? 'No content found. Install more addons in Settings.'
+                          : _genreFilter != null
+                          ? 'No titles found for $_genreFilter.'
+                          : 'No titles in the ${_decadeFilter}s.',
+                      style: const TextStyle(color: Colors.white54, fontSize: 16),
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.pageInset(context),
+                    0,
+                    AppSpacing.pageInset(context),
+                    120,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: 20,
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.62,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => MovieCard(movie: visible[index]),
+                      childCount: visible.length,
+                    ),
+                  ),
+                ),
+            ],
           ),
+        ),
       ],
     );
   }

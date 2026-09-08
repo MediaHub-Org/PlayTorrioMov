@@ -95,13 +95,7 @@ class _CollectionPageState extends State<CollectionPage> {
   }
 
   void _navigateToDetail(MyListItem item) {
-    Navigator.push(
-      context,
-      LiquidRevealRoute(
-        page: DetailsPage(movie: _toMovie(item)),
-        tapPosition: null,
-      ),
-    );
+    pushPage(context, DetailsPage(movie: _toMovie(item)));
   }
 
   Future<void> _confirmRemove(MyListItem item) async {
@@ -264,20 +258,17 @@ class _CollectionPageState extends State<CollectionPage> {
         return InkWell(
           borderRadius: BorderRadius.circular(14),
           // Rows had no tap handler at all -- clicking one did nothing.
-          onTap: () => Navigator.push(
+          onTap: () => pushPage(
             context,
-            LiquidRevealRoute(
-              page: DetailsPage(
-                movie: Movie(
-                  id: item.id,
-                  name: item.title,
-                  poster: item.posterUrl,
-                  year: item.year,
-                  type: item.type,
-                  addonBaseUrl: 'https://v3-cinemeta.strem.io',
-                ),
+            DetailsPage(
+              movie: Movie(
+                id: item.id,
+                name: item.title,
+                poster: item.posterUrl,
+                year: item.year,
+                type: item.type,
+                addonBaseUrl: 'https://v3-cinemeta.strem.io',
               ),
-              tapPosition: null,
             ),
           ),
           child: Container(
@@ -402,20 +393,17 @@ class _CollectionPageState extends State<CollectionPage> {
             return InkWell(
               borderRadius: BorderRadius.circular(14),
               // Rows had no tap handler at all -- clicking one did nothing.
-              onTap: () => Navigator.push(
+              onTap: () => pushPage(
                 context,
-                LiquidRevealRoute(
-                  page: DetailsPage(
-                    movie: Movie(
-                      id: item.mediaId,
-                      name: item.title,
-                      poster: item.posterUrl,
-                      year: item.year,
-                      type: item.type,
-                      addonBaseUrl: 'https://v3-cinemeta.strem.io',
-                    ),
+                DetailsPage(
+                  movie: Movie(
+                    id: item.mediaId,
+                    name: item.title,
+                    poster: item.posterUrl,
+                    year: item.year,
+                    type: item.type,
+                    addonBaseUrl: 'https://v3-cinemeta.strem.io',
                   ),
-                  tapPosition: null,
                 ),
               ),
               child: Container(

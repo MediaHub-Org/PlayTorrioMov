@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
+
 /// The single back-navigation button design used across every page that
 /// pushes content on top of the hub (Details, Search, and so on). Used to
 /// diverge per page -- a frosted floating circle here, a plain icon in a
@@ -34,6 +36,29 @@ class GlassBackButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// [GlassBackButton], positioned, for a page that floats one over a
+/// full-bleed hero instead of putting it in a header row.
+///
+/// One widget owns the offsets so the button lands in the same place on
+/// every such page. They each used to carry their own `Positioned`: Details
+/// at `topInset + 10` / 16px (48px on desktop), Anime Details at a flat
+/// `top: 24` that ignored the status-bar inset entirely, so on a phone with
+/// a notch its button sat under the system clock.
+class FloatingBackButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+
+  const FloatingBackButton({super.key, this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: AppSpacing.floatingTopInset(context),
+      left: AppSpacing.pageInset(context),
+      child: GlassBackButton(onPressed: onPressed),
     );
   }
 }

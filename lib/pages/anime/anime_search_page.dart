@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -453,21 +454,11 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
             title: anime.displayTitle,
             cover: anime.coverUrl,
           );
-      Navigator.push(
-        context,
-        CinematicSlideRoute(
-          page: AnimeArabicDetailsPage(anime: card),
-        ),
-      );
+      pushPage(context, AnimeArabicDetailsPage(anime: card));
       return;
     }
 
-    Navigator.push(
-      context,
-      CinematicSlideRoute(
-        page: AnimeDetailsPage(anime: anime),
-      ),
-    );
+    pushPage(context, AnimeDetailsPage(anime: anime));
   }
 
   @override
@@ -522,7 +513,9 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 children: [
                   // Row 1: Back Button + Search Bar + 18+ Toggle
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.pageInset(context),
+                    ),
                     child: Row(
                       children: [
                         const GlassBackButton(),

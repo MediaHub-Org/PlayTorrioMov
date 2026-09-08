@@ -89,10 +89,7 @@ class _HubPageState extends State<HubPage> {
                   // the content box below TopBar/SectionTopBar instead of
                   // covering the whole screen and hiding the 5 sections.
                   await _navKey.currentState!.push(
-                    LiquidRevealRoute(
-                      page: const SettingsPage(),
-                      tapPosition: null,
-                    ),
+                    CinematicSlideRoute(page: const SettingsPage()),
                   );
                   // Addons may have changed in Settings — remount the hub so
                   // it rebuilds and refetches on next show.

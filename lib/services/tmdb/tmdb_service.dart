@@ -8,21 +8,23 @@ import 'tmdb_settings.dart';
 
 /// Fetches cast (photos, character names) from TMDB to fill in what most
 /// Stremio addons don't provide -- they typically send `cast` as plain name
-/// strings, no photos. No-ops when the user hasn't configured their own
-/// TMDB API key (Settings > TMDB): everything that calls this degrades
-/// gracefully to the addon's own name-only cast list.
+/// strings, no photos. No-ops when no key is available at all (see
+/// [TmdbSettings]): everything that calls this degrades gracefully to the
+/// addon's own name-only cast list.
 abstract final class TmdbService {
   static const _baseUrl = 'https://api.themoviedb.org/3';
 
   /// Fetches the cast for a movie or TV show by its TMDB id. Returns an
-  /// empty list if no API key is configured, the id is invalid, or the
+  /// empty list if no API key is available, the id is invalid, or the
   /// request fails -- callers should keep whatever cast data they already
   /// have in that case.
   static Future<List<CastMember>> fetchCast(
     String tmdbId, {
     required bool isTvShow,
   }) async {
-    final key = TmdbSettings.apiKey.value;
+    // The user's key when they set one, otherwise the key this build
+    // ships with.
+    final key = TmdbSettings.effectiveApiKey;
     if (key == null || tmdbId.isEmpty) return const [];
 
     final kind = isTvShow ? 'tv' : 'movie';

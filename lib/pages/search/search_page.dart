@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../models/movie/movie_section.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/addon/addon_manager.dart';
-import '../../utils/navigation/route_transitions.dart';
+import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/movie/movie_slider_section.dart';
@@ -59,18 +60,15 @@ class _SearchPageState extends State<SearchPage> {
       }
     }
 
-    Navigator.push(
-      context,
-      CinematicSlideRoute(
-        page: PlayerScreen(
-          source: StreamSource(
-            name: 'Direct Stream',
-            title: title,
-            url: trimmed,
-            addonName: 'Direct Stream',
-          ),
+    pushFullscreenPage(
+      PlayerScreen(
+        source: StreamSource(
+          name: 'Direct Stream',
           title: title,
+          url: trimmed,
+          addonName: 'Direct Stream',
         ),
+        title: title,
       ),
     );
   }
@@ -199,7 +197,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
               child: Row(
                 children: [
-                  const SizedBox(width: 8),
+                  SizedBox(width: AppSpacing.pageInset(context)),
                   const GlassBackButton(),
                   const SizedBox(width: 10),
                   Expanded(

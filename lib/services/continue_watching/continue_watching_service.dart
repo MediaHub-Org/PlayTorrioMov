@@ -16,6 +16,7 @@ import '../../services/anime/anime_scraper_service.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/anime_arabic/anime_arabic_extractor.dart';
 import '../../services/stream/stream_service.dart';
+import '../../utils/fullscreen_navigator.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../trakt/trakt_service.dart';
 import '../trakt/trakt_continue_watching_service.dart';
@@ -531,6 +532,67 @@ class ContinueWatchingService {
   /// - For Torrents: launches directly using saved magnet and fileIdx (no rescraping).
   /// - For PlayTorrioHTTP & Addons: rescrapes and selects the best matching healthy stream.
   /// - Fallback: opens WatchScreen or AnimeStreamSheet if source died.
+  /// Shows the blocking "Resuming ..." spinner and returns a closer that
+  /// dismisses exactly that dialog.
+  ///
+  /// `showDialog` puts the dialog on the **root** navigator, while
+  /// `Navigator.pop(context)` from a hub context resolves to the nearest
+  /// one -- the hub's `NestedNavigator`. So the old close call left the
+  /// spinner up and popped whatever page happened to be under the
+  /// Continue Watching row instead. Holding the dialog's own context pops
+  /// the dialog and nothing else, and the closer is a no-op once it has
+  /// run, so the success and error paths can both call it.
+  static VoidCallback _showResumeLoader(BuildContext context, String message) {
+    BuildContext? dialogContext;
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        dialogContext = ctx;
+        return Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+            decoration: BoxDecoration(
+              color: const Color(0xFF12151E),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Color(0xFF7C5CFF),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    return () {
+      final ctx = dialogContext;
+      dialogContext = null;
+      if (ctx != null && ctx.mounted) Navigator.of(ctx).pop();
+    };
+  }
+
   static Future<void> resumePlayback(
     BuildContext context,
     ContinueWatchingItem item,
@@ -563,15 +625,12 @@ class ContinueWatchingService {
         (item.rawUrl == null || item.rawUrl!.isEmpty);
 
     if (isFirstLaunchCloudItem) {
-      Navigator.push(
-        context,
-        CinematicSlideRoute(
-          page: WatchScreen(
-            detail: movieDetail,
-            selectedEpisode: video,
-            type: item.type,
-            initialPosition: Duration(seconds: item.positionSeconds),
-          ),
+      pushFullscreenPage(
+        WatchScreen(
+          detail: movieDetail,
+          selectedEpisode: video,
+          type: item.type,
+          initialPosition: Duration(seconds: item.positionSeconds),
         ),
       );
       return;
@@ -582,42 +641,9 @@ class ContinueWatchingService {
       final slug = item.id.replaceAll('arabic_anime:', '');
       final episodeNum = item.episode ?? 1;
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-            decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Color(0xFF7C5CFF),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  'استئناف ${item.title} الحلقة $episodeNum...',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      final closeLoader = _showResumeLoader(
+        context,
+        'استئناف ${item.title} الحلقة $episodeNum...',
       );
 
       try {
@@ -636,9 +662,7 @@ class ContinueWatchingService {
 
         final rawStreams = await AnimeArabicExtractor.instance.resolveEpisode(ep);
 
-        if (context.mounted && Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
+        closeLoader();
 
         if (rawStreams.isNotEmpty) {
           final sources = AnimeArabicExtractor.toSources(
@@ -660,26 +684,21 @@ class ContinueWatchingService {
           );
 
           if (!context.mounted) return;
-          Navigator.push(
-            context,
-            CinematicSlideRoute(
-              page: PlayerScreen(
-                source: targetSource,
-                title: '${details.title} - الحلقة $episodeNum',
-                backdropUrl: details.displayBanner,
-                detail: movieDetail,
-                episode: video,
-                initialPosition: Duration(seconds: item.positionSeconds),
-              ),
+          pushFullscreenPage(
+            PlayerScreen(
+              source: targetSource,
+              title: '${details.title} - الحلقة $episodeNum',
+              backdropUrl: details.displayBanner,
+              detail: movieDetail,
+              episode: video,
+              initialPosition: Duration(seconds: item.positionSeconds),
             ),
           );
           return;
         }
       } catch (e) {
         debugPrint('[ContinueWatching] Arabic resume error: $e');
-        if (context.mounted && Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
+        closeLoader();
       }
 
       if (!context.mounted) return;
@@ -688,13 +707,11 @@ class ContinueWatchingService {
         title: item.title,
         cover: item.posterUrl ?? item.backdropUrl,
       );
-      Navigator.push(
+      pushPage(
         context,
-        CinematicSlideRoute(
-          page: AnimeArabicDetailsPage(
-            anime: card,
-            initialEpisodeNumber: episodeNum,
-          ),
+        AnimeArabicDetailsPage(
+          anime: card,
+          initialEpisodeNumber: episodeNum,
         ),
       );
       return;
@@ -724,42 +741,9 @@ class ContinueWatchingService {
       final episodeNum = item.episode ?? 1;
 
       // Show rescrape loader for Anime HTTP streams
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-            decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: Color(0xFF7C5CFF),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  'Resuming ${item.title} Ep $episodeNum...',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      final closeLoader = _showResumeLoader(
+        context,
+        'Resuming ${item.title} Ep $episodeNum...',
       );
 
       final animeSources = <StreamSource>[];
@@ -791,9 +775,7 @@ class ContinueWatchingService {
         sub?.cancel();
       }
 
-      if (context.mounted && Navigator.canPop(context)) {
-        Navigator.pop(context);
-      }
+      closeLoader();
 
       if (!context.mounted) return;
 
@@ -810,17 +792,14 @@ class ContinueWatchingService {
         final video = AnimeScraperService.toVideo(anime, episodeNum);
 
         final finalSource = selectedSource;
-        Navigator.push(
-          context,
-          CinematicSlideRoute(
-            page: PlayerScreen(
-              source: finalSource,
-              title: finalSource.displayTitle,
-              backdropUrl: item.backdropUrl,
-              detail: detail,
-              episode: video,
-              initialPosition: Duration(seconds: item.positionSeconds),
-            ),
+        pushFullscreenPage(
+          PlayerScreen(
+            source: finalSource,
+            title: finalSource.displayTitle,
+            backdropUrl: item.backdropUrl,
+            detail: detail,
+            episode: video,
+            initialPosition: Duration(seconds: item.positionSeconds),
           ),
         );
       } else {
@@ -845,59 +824,23 @@ class ContinueWatchingService {
          (item.infoHash != null && item.infoHash!.isNotEmpty))) {
       final source = item.toStreamSource();
 
-      Navigator.push(
-        context,
-        CinematicSlideRoute(
-          page: PlayerScreen(
-            source: source,
-            title: item.streamTitle ?? item.title,
-            backdropUrl: item.backdropUrl,
-            detail: movieDetail,
-            episode: video,
-            initialPosition: Duration(seconds: item.positionSeconds),
-          ),
+      pushFullscreenPage(
+        PlayerScreen(
+          source: source,
+          title: item.streamTitle ?? item.title,
+          backdropUrl: item.backdropUrl,
+          detail: movieDetail,
+          episode: video,
+          initialPosition: Duration(seconds: item.positionSeconds),
         ),
       );
       return;
     }
 
     // 3. HTTP / Dynamic Stream Rescrape Path
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-          decoration: BoxDecoration(
-            color: const Color(0xFF12151E),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Color(0xFF7C5CFF),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Resuming ${item.title}...',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  decoration: TextDecoration.none,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    final closeLoader = _showResumeLoader(
+      context,
+      'Resuming ${item.title}...',
     );
 
     final streamId = item.episodeId ?? (item.type == 'series' && item.season != null && item.episode != null
@@ -939,9 +882,7 @@ class ContinueWatchingService {
     }
 
     // Close loading dialog
-    if (context.mounted && Navigator.canPop(context)) {
-      Navigator.pop(context);
-    }
+    closeLoader();
 
     if (!context.mounted) return;
 
@@ -969,30 +910,24 @@ class ContinueWatchingService {
 
     if (selectedSource != null) {
       final finalSource = selectedSource;
-      Navigator.push(
-        context,
-        CinematicSlideRoute(
-          page: PlayerScreen(
-            source: finalSource,
-            title: finalSource.displayTitle,
-            backdropUrl: item.backdropUrl,
-            detail: movieDetail,
-            episode: video,
-            initialPosition: Duration(seconds: item.positionSeconds),
-          ),
+      pushFullscreenPage(
+        PlayerScreen(
+          source: finalSource,
+          title: finalSource.displayTitle,
+          backdropUrl: item.backdropUrl,
+          detail: movieDetail,
+          episode: video,
+          initialPosition: Duration(seconds: item.positionSeconds),
         ),
       );
     } else {
       // Fallback to WatchScreen so the user can choose from all available sources
-      Navigator.push(
-        context,
-        CinematicSlideRoute(
-          page: WatchScreen(
-            detail: movieDetail,
-            selectedEpisode: video,
-            type: item.type,
-            initialPosition: Duration(seconds: item.positionSeconds),
-          ),
+      pushFullscreenPage(
+        WatchScreen(
+          detail: movieDetail,
+          selectedEpisode: video,
+          type: item.type,
+          initialPosition: Duration(seconds: item.positionSeconds),
         ),
       );
     }

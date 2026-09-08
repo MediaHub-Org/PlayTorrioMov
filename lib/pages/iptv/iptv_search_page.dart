@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/app_spacing.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
@@ -68,7 +69,13 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const Center(child: GlassBackButton()),
+        // Same leading inset as every other page's back button; AppBar's
+        // own 56px leading slot would centre it somewhere else again.
+        leadingWidth: AppSpacing.pageInset(context) + 44,
+        leading: Padding(
+          padding: EdgeInsets.only(left: AppSpacing.pageInset(context)),
+          child: const Center(child: GlassBackButton()),
+        ),
         title: Container(
           height: 44,
           decoration: BoxDecoration(

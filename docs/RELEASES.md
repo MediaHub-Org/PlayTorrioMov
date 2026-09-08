@@ -47,6 +47,25 @@ Every secret `build.yml` reads, across all platforms:
 | `ENV_FILE` | Contents written to `.env` before every build (`--dart-define-from-file=.env`); checked first |
 | `DOTENV` | Same as `ENV_FILE`, used only if `ENV_FILE` is unset |
 
+### Keys inside `ENV_FILE`
+
+`.env` is a plain `KEY=value` file, read at build time via
+`--dart-define-from-file` and at runtime by `EnvService`. The keys the app
+looks for:
+
+| Key | Used for |
+|:--|:--|
+| `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` | Trakt sign-in |
+| `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET` | Simkl sign-in |
+| `DISCORD_APP_ID` | Discord Rich Presence |
+| `TMDB_API_KEY` | Cast photos and character names, so a fresh install has them with no setup |
+
+All are optional: each feature no-ops when its key is missing. A TMDB key
+is free and takes a minute to get — register at
+[themoviedb.org](https://www.themoviedb.org/settings/api), no billing
+details. A user can always paste their own key under Settings → General,
+which takes precedence over whatever the build ships with.
+
 List secret **names** (GitHub never returns a secret's value once set, by
 design — there is no `gh` command or API call that reveals it, only who set
 it and when):

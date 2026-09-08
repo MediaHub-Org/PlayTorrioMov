@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/services/app_spacing.dart';
 import 'package:playtorriomov/widgets/common/glass_back_button.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
@@ -50,6 +51,48 @@ void main() {
     testWidgets('renders the shared icon', (tester) async {
       await tester.pumpWidget(wrap(const GlassBackButton()));
       expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
+    });
+  });
+
+  group('FloatingBackButton', () {
+    testWidgets('clears the status bar on a device with a notch', (
+      tester,
+    ) async {
+      // Regression test: Anime Details pinned its button at a flat top: 24,
+      // which on a notched phone put it under the system clock.
+      const inset = EdgeInsets.only(top: 59);
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(padding: inset),
+            child: Scaffold(
+              body: Stack(children: [FloatingBackButton()]),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(GlassBackButton)).dy,
+        greaterThanOrEqualTo(inset.top),
+      );
+    });
+
+    testWidgets('sits at the shared page inset', (tester) async {
+      tester.view.physicalSize = const Size(400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(body: Stack(children: [FloatingBackButton()])),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.byType(GlassBackButton)).dx,
+        AppSpacing.pageInset(tester.element(find.byType(GlassBackButton))),
+      );
     });
   });
 

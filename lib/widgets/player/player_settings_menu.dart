@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'player_glass.dart';
 
 /// Settings entry point -- one gear icon opens this instead of separate
-/// playback-speed and aspect-ratio buttons cluttering the transport bar.
-/// Picking a row opens that row's own existing popover (PlayerSpeedMenu /
-/// PlayerAspectMenu); this widget only lists them, YouTube-gear-menu style.
+/// playback-speed, aspect-ratio and audio-track buttons cluttering the
+/// transport bar. Picking a row opens that row's own existing popover
+/// (PlayerSpeedMenu / PlayerAspectMenu / PlayerAudioMenu); this widget only
+/// lists them, YouTube-gear-menu style.
 class PlayerSettingsMenu extends StatelessWidget {
   final double currentRate;
   final String aspectLabel;
+
+  /// The playing track's name, or null while the media has not reported
+  /// its tracks yet (or has only one, where there is nothing to choose).
+  final String? audioLabel;
+
   final VoidCallback onTapSpeed;
   final VoidCallback onTapAspect;
+
+  /// Null hides the audio row entirely -- a single-track file has no
+  /// choice to offer, and a row that opens an empty menu is worse than
+  /// no row.
+  final VoidCallback? onTapAudio;
+
   final VoidCallback onClose;
 
   const PlayerSettingsMenu({
@@ -19,6 +31,8 @@ class PlayerSettingsMenu extends StatelessWidget {
     required this.onTapSpeed,
     required this.onTapAspect,
     required this.onClose,
+    this.audioLabel,
+    this.onTapAudio,
   });
 
   @override
@@ -71,6 +85,13 @@ class PlayerSettingsMenu extends StatelessWidget {
             value: aspectLabel,
             onTap: onTapAspect,
           ),
+          if (onTapAudio != null)
+            _SettingsRow(
+              icon: Icons.audiotrack_rounded,
+              label: 'Audio track',
+              value: audioLabel ?? 'Default',
+              onTap: onTapAudio!,
+            ),
         ],
       ),
     );

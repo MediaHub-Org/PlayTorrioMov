@@ -22,7 +22,6 @@ class MovieSliderSection extends StatefulWidget {
 
 class _MovieSliderSectionState extends State<MovieSliderSection>
     with HorizontalSliderScroll<MovieSliderSection> {
-  Offset? _tapPosition;
   bool _isHoveringSlider = false;
 
   @override
@@ -35,21 +34,12 @@ class _MovieSliderSectionState extends State<MovieSliderSection>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Listener(
-            onPointerDown: (event) => _tapPosition = event.position,
-            child: SectionHeader(
-              title: widget.section.title,
-              subtitle: widget.section.subtitle,
-              onSeeAll: () {
-                Navigator.push(
-                  context,
-                  LiquidRevealRoute(
-                    page: CatalogPage(section: widget.section),
-                    tapPosition: _tapPosition,
-                  ),
-                );
-              },
-            ),
+          SectionHeader(
+            title: widget.section.title,
+            subtitle: widget.section.subtitle,
+            onSeeAll: () {
+              pushPage(context, CatalogPage(section: widget.section));
+            },
           ),
           MouseRegion(
             onEnter: (_) => setState(() => _isHoveringSlider = true),

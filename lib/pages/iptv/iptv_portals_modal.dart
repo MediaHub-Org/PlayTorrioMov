@@ -45,7 +45,6 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
   bool _isM3uEditMode = false;
   final Set<String> _selectedM3uIds = {};
 
-  Offset? _tapPosition;
 
   @override
   void initState() {
@@ -819,7 +818,6 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       return MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
-                          onTapDown: (details) => _tapPosition = details.globalPosition,
                           onTap: () {
                             if (_isPortalsEditMode) {
                               setState(() {
@@ -830,14 +828,10 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 }
                               });
                             } else {
-                              final tapPos = _tapPosition;
                               Navigator.pop(context);
-                              Navigator.push(
+                              pushPage(
                                 context,
-                                LiquidRevealRoute(
-                                  page: IptvPortalBrowserPage(portal: p),
-                                  tapPosition: tapPos,
-                                ),
+                                IptvPortalBrowserPage(portal: p),
                               );
                             }
                           },
@@ -1206,7 +1200,6 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       return MouseRegion(
                         cursor: SystemMouseCursors.click,
                         child: GestureDetector(
-                          onTapDown: (details) => _tapPosition = details.globalPosition,
                           onTap: () {
                             if (_isM3uEditMode) {
                               setState(() {
@@ -1217,14 +1210,10 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 }
                               });
                             } else {
-                              final tapPos = _tapPosition;
                               Navigator.pop(context);
-                              Navigator.push(
+                              pushPage(
                                 context,
-                                LiquidRevealRoute(
-                                  page: IptvPortalBrowserPage(m3uPlaylist: pl),
-                                  tapPosition: tapPos,
-                                ),
+                                IptvPortalBrowserPage(m3uPlaylist: pl),
                               );
                             }
                           },

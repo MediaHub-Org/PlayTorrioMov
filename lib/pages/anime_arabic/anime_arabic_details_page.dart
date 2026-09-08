@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
@@ -348,8 +349,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                   padding: EdgeInsets.only(
                     top: MediaQuery.paddingOf(context).top + 8,
                     bottom: 12,
-                    left: 20,
-                    right: 20,
+                    left: AppSpacing.pageInset(context),
+                    right: AppSpacing.pageInset(context),
                   ),
                   decoration: BoxDecoration(
                     color: _Palette.bg.withValues(alpha: 0.65),
@@ -882,11 +883,9 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                       final item = related[index];
                       return InkWell(
                         onTap: () {
-                          Navigator.push(
+                          pushPage(
                             context,
-                            CinematicSlideRoute(
-                              page: AnimeArabicDetailsPage(anime: item),
-                            ),
+                            AnimeArabicDetailsPage(anime: item),
                           );
                         },
                         borderRadius: BorderRadius.circular(14),

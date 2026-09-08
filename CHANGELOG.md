@@ -5,6 +5,45 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Seed count and a P2P/HTTP indicator on every stream-source picker
+  (Movies, Series, Anime, Arabic Anime, and the in-player panel) — the
+  seed count was already being parsed out of source titles and then
+  never shown
+- Support for a TMDB API key baked into the build, so cast photos and
+  character names work on a fresh install instead of only after the
+  user registers and pastes their own key (which still takes
+  precedence). See `TMDB_API_KEY` in docs/RELEASES.md
+
+### Changed
+- Audio track selection moved behind the video player's settings gear,
+  alongside playback speed and aspect ratio, instead of its own button
+  in the transport bar. The row is hidden for media with only one audio
+  track
+- The genre/decade/sort/search filters now stay on one line and stay
+  put while the page scrolls, with the hero carousel starting just
+  below them. They previously wrapped onto a second row on phones and
+  scrolled away with the hero
+- Live TV's header moved onto the same shared pill bar as every other
+  section, instead of its own SafeArea and padding
+- One page transition everywhere. The 750ms circular reveal is gone —
+  it revealed from a tap position most call sites never had, including
+  the poster tap it was designed for
+- One page gutter, `AppSpacing.pageInset` (16/20/24, mobile first),
+  replacing the 8/16/18/20/24/28/48 spread across filter bars, back
+  buttons, header rows, section titles, card rows and grids
+
+### Fixed
+- Resuming from Continue Watching now opens straight into the player.
+  It was pushed inside the hub's navigator, so the section top bar and
+  sidebar stayed drawn around a fullscreen video screen
+- The "Resuming..." spinner not closing, and popping the page under
+  the Continue Watching row instead of itself
+- Anime Details' back button sitting under the status bar on phones
+  with a notch
+- The torrent icon in the player's sources panel disagreeing with its
+  own P2P badge for a magnet link carrying no separate infoHash
+
 ## [1.3.0+17] - 2026-09-08
 
 ### Added

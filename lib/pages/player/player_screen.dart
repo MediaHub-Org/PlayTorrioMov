@@ -112,8 +112,10 @@ class _PlayerScreenState extends State<PlayerScreen>
   late AnimationController _logoAnimController;
 
   // Active Menu / Popover
-  String?
-  _activeMenu; // 'subtitle' | 'audio' | 'speed' | 'aspect' | 'style' | null
+  // 'settings' is the gear; 'audio', 'speed' and 'aspect' are the popovers
+  // its rows open. 'subtitle' and 'style' are reached from the transport
+  // bar directly.
+  String? _activeMenu;
   bool _showSubSyncBar = false;
   bool _showTextSyncOverlay = false;
 
@@ -967,6 +969,16 @@ class _PlayerScreenState extends State<PlayerScreen>
     _gestureIndicatorTimer = Timer(const Duration(milliseconds: 900), () {
       if (mounted) setState(() => _showGestureIndicator = false);
     });
+  }
+
+  /// Name of the audio track currently playing, for the settings menu's
+  /// audio row. Null before the media reports its tracks.
+  String? get _selectedAudioTrackLabel {
+    if (_audioTracks.isEmpty) return null;
+    final match = _audioTracks
+        .where((t) => t.index == _selectedAudioTrackIndex)
+        .firstOrNull;
+    return (match ?? _audioTracks.first).title;
   }
 
   void _toggleMenu(String menuName) {
@@ -2082,11 +2094,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                     playbackRate: _playbackRate,
                     isSubtitlesActive:
                         _isSubtitleEnabled && _currentSubtitleVariant != null,
-                    isAudioActive: _selectedAudioTrackIndex > 0,
                     onSeek: (pos) => _player.seek(pos),
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
-                    onToggleAudioMenu: () => _toggleMenu('audio'),
                     onToggleSubtitleMenu: () => _toggleMenu('subtitle'),
                     onToggleSettingsMenu: () => _toggleMenu('settings'),
                   ),
@@ -2229,6 +2239,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                 BoxFit.fill => 'Stretch',
                 _ => 'Fit',
               },
+              audioLabel: _selectedAudioTrackLabel,
+              // A single-track file has nothing to choose between, so the
+              // row is not offered at all rather than opening an empty menu.
+              onTapAudio: _audioTracks.length > 1
+                  ? () => setState(() => _activeMenu = 'audio')
+                  : null,
               onTapSpeed: () => setState(() => _activeMenu = 'speed'),
               onTapAspect: () => setState(() => _activeMenu = 'aspect'),
               onClose: () => setState(() => _activeMenu = null),

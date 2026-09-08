@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_storage.dart';
 import '../../services/playback_coordinator.dart';
+import '../../utils/navigation/route_transitions.dart';
 
 /// Watch up to 4 live channels at once in a grid.
 ///
@@ -64,12 +65,7 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
     // app's single-active-source model -- stop whatever else is playing
     // instead of layering audio on top of it.
     PlaybackCoordinator.stopActive();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => _IptvMultiViewGrid(channels: List.of(_selected)),
-      ),
-    );
+    pushPage(context, _IptvMultiViewGrid(channels: List.of(_selected)));
   }
 
   @override

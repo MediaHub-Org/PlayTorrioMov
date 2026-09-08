@@ -23,6 +23,7 @@ import '../../services/discord/discord_rpc_service.dart';
 
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../app_info.dart';
+import '../../utils/navigation/route_transitions.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -69,10 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _navigateTo(Widget page) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
+    await pushPage(context, page);
     // Refresh badges when returning
     _loadOverviewState();
   }

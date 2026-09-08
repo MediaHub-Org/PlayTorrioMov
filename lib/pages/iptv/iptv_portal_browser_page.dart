@@ -561,24 +561,22 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         gradient: const [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
       );
 
-      Navigator.push(
+      pushPage(
         context,
-        LiquidRevealRoute(
-          page: IptvPlayerPage(
-            channel: ch,
-            hits: hits.isNotEmpty
-                ? hits
-                : [
-                    ChannelHit(
-                      portal: p,
-                      stream: stream,
-                      streamUrl: IptvClient.streamUrl(p.portal, stream),
-                    ),
-                  ],
-            initialHitIndex: initialIndex,
-            isLive: isLive,
-            categoryTitle: currentCat.name,
-          ),
+        IptvPlayerPage(
+          channel: ch,
+          hits: hits.isNotEmpty
+              ? hits
+              : [
+                  ChannelHit(
+                    portal: p,
+                    stream: stream,
+                    streamUrl: IptvClient.streamUrl(p.portal, stream),
+                  ),
+                ],
+          initialHitIndex: initialIndex,
+          isLive: isLive,
+          categoryTitle: currentCat.name,
         ),
       );
     } else if (widget.m3uPlaylist != null) {
@@ -603,30 +601,28 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         gradient: const [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
       );
 
-      Navigator.push(
+      pushPage(
         context,
-        LiquidRevealRoute(
-          page: IptvPlayerPage(
-            channel: ch,
-            hits: hits.isNotEmpty
-                ? hits
-                : [
-                    ChannelHit(
-                      portal: VerifiedPortal(
-                        portal: IptvPortal(url: stream.streamId, username: '', password: '', source: 'M3U'),
-                        name: widget.m3uPlaylist!.name,
-                        expiry: '',
-                        maxConnections: '1',
-                        activeConnections: '0',
-                      ),
-                      stream: stream,
-                      streamUrl: stream.streamId,
+        IptvPlayerPage(
+          channel: ch,
+          hits: hits.isNotEmpty
+              ? hits
+              : [
+                  ChannelHit(
+                    portal: VerifiedPortal(
+                      portal: IptvPortal(url: stream.streamId, username: '', password: '', source: 'M3U'),
+                      name: widget.m3uPlaylist!.name,
+                      expiry: '',
+                      maxConnections: '1',
+                      activeConnections: '0',
                     ),
-                  ],
-            initialHitIndex: initialIndex,
-            isLive: isLive,
-            categoryTitle: currentCat.name,
-          ),
+                    stream: stream,
+                    streamUrl: stream.streamId,
+                  ),
+                ],
+          initialHitIndex: initialIndex,
+          isLive: isLive,
+          categoryTitle: currentCat.name,
         ),
       );
     }
@@ -2422,24 +2418,22 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
     );
 
     Navigator.pop(context);
-    Navigator.push(
+    pushPage(
       context,
-      LiquidRevealRoute(
-        page: IptvPlayerPage(
-          channel: ch,
-          hits: hits.isNotEmpty
-              ? hits
-              : [
-                  ChannelHit(
-                    portal: widget.portal,
-                    stream: currentStream,
-                    streamUrl: IptvClient.streamUrl(widget.portal.portal, currentStream),
-                  ),
-                ],
-          initialHitIndex: initialIndex,
-          isLive: false,
-          categoryTitle: '${widget.series.name} Episodes',
-        ),
+      IptvPlayerPage(
+        channel: ch,
+        hits: hits.isNotEmpty
+            ? hits
+            : [
+                ChannelHit(
+                  portal: widget.portal,
+                  stream: currentStream,
+                  streamUrl: IptvClient.streamUrl(widget.portal.portal, currentStream),
+                ),
+              ],
+        initialHitIndex: initialIndex,
+        isLive: false,
+        categoryTitle: '${widget.series.name} Episodes',
       ),
     );
   }

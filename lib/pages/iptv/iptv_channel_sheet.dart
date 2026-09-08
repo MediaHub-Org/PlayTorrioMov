@@ -50,16 +50,13 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
     if (results.isEmpty) return;
     final index = results.indexOf(hit);
     Navigator.pop(context);
-    Navigator.push(
+    pushPage(
       context,
-      LiquidRevealRoute(
-        page: IptvPlayerPage(
-          channel: widget.channel,
-          hits: results,
-          initialHitIndex: index >= 0 ? index : 0,
-          isLive: true,
-        ),
-        tapPosition: tapPos,
+      IptvPlayerPage(
+        channel: widget.channel,
+        hits: results,
+        initialHitIndex: index >= 0 ? index : 0,
+        isLive: true,
       ),
     );
   }
