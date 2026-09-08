@@ -54,3 +54,5 @@ app.*.map.json
 .env
 **/secrets.dart
 keystore_password.txt
+
+.claude/settings.local.json

@@ -27,6 +27,8 @@ import '../../services/discord/discord_rpc_service.dart';
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_top_bar.dart';
 import '../../widgets/player/player_transport.dart';
+import '../../widgets/player/player_center_controls.dart';
+import '../../widgets/player/player_settings_menu.dart';
 import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
@@ -41,9 +43,8 @@ import '../../widgets/player/player_sources_panel.dart';
 import '../../widgets/player/player_volume_control.dart';
 import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
-import '../../models/download/download_task_model.dart';
-import '../../services/download/download_service.dart';
-import '../../utils/download/download_path_helper.dart';
+import '../../widgets/player/player_cast_sheet.dart';
+import '../../services/cast/cast_service.dart';
 
 class PlayerScreen extends StatefulWidget {
   final StreamSource source;
@@ -154,6 +155,16 @@ class _PlayerScreenState extends State<PlayerScreen>
   Video? _currentEpisode;
   late String _currentTitle;
   bool _showEpisodesPanel = false;
+
+  // The URL actually opened by the local player, and whether it's a genuine
+  // remote HTTP(S) URL a Cast receiver could fetch too. Torrent sources
+  // resolve to this device's own local server (127.0.0.1), which a
+  // Chromecast on the network cannot reach -- there is no fix for that
+  // short of rearchitecting the torrent server to bind LAN-wide, so those
+  // are excluded from casting rather than offering a button that always
+  // fails for them.
+  String? _resolvedStreamUrl;
+  bool _isCastableSource = false;
   bool _showSourcesPanel = false;
   Video? _sourcesEpisode;
   String? _sourcesErrorMessage;
@@ -454,6 +465,9 @@ class _PlayerScreenState extends State<PlayerScreen>
 
       // Volume before open, for the same reason as the offline path above.
       _applyVolume(_isMuted ? 0.0 : _volume);
+
+      _resolvedStreamUrl = cleanUri.toString();
+      _isCastableSource = !isTorrentStream;
 
       await _player.open(
         Media(
@@ -1634,13 +1648,28 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   DateTime? _lastScreenTapTime;
 
-  void _handleScreenTap() {
+  void _handleScreenTap(TapDownDetails details) {
     if (_showTextSyncOverlay || _activeMenu != null) return;
     final now = DateTime.now();
     if (_lastScreenTapTime != null &&
         now.difference(_lastScreenTapTime!) <
             const Duration(milliseconds: 280)) {
       _lastScreenTapTime = null;
+      // Left/right thirds seek ±10s (YouTube-style), touch only -- mouse
+      // users already have the center ±10s buttons and don't need a
+      // double-click gesture for the same thing. The middle third keeps the
+      // existing double-tap-to-fullscreen behavior on every platform.
+      if (!WindowService.instance.isDesktop) {
+        final width = MediaQuery.sizeOf(context).width;
+        final dx = details.localPosition.dx;
+        if (dx < width / 3) {
+          _seekRelative(const Duration(seconds: -10));
+          return;
+        } else if (dx > width * 2 / 3) {
+          _seekRelative(const Duration(seconds: 10));
+          return;
+        }
+      }
       WindowService.instance.toggleFullscreen();
     } else {
       _lastScreenTapTime = now;
@@ -1746,10 +1775,22 @@ class _PlayerScreenState extends State<PlayerScreen>
               onHover: (_) => _handlePointerActivity(),
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: _handleScreenTap,
-                onVerticalDragStart: _onVerticalDragStart,
-                onVerticalDragUpdate: _onVerticalDragUpdate,
-                onVerticalDragEnd: _onVerticalDragEnd,
+                onTapDown: _handleScreenTap,
+                // Swipe-to-adjust volume/brightness is desktop only now --
+                // on mobile, hardware volume buttons and the OS's own
+                // brightness control already do this reliably, and an
+                // accidental swipe (repositioning the device, adjusting
+                // grip) silently changing volume or brightness mid-watch
+                // was worse than not having the gesture.
+                onVerticalDragStart: WindowService.instance.isDesktop
+                    ? _onVerticalDragStart
+                    : null,
+                onVerticalDragUpdate: WindowService.instance.isDesktop
+                    ? _onVerticalDragUpdate
+                    : null,
+                onVerticalDragEnd: WindowService.instance.isDesktop
+                    ? _onVerticalDragEnd
+                    : null,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -1891,77 +1932,15 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  Future<void> _handleDownloadMedia() async {
-    final mediaId = widget.detail?.id ?? _currentTitle;
-    final season = _currentEpisode?.season;
-    final episode = _currentEpisode?.episode;
-
-    final existing = DownloadService.instance.tasksNotifier.value.where((t) {
-      if (t.mediaId == mediaId && t.season == season && t.episode == episode) {
-        return true;
-      }
-      return false;
-    }).firstOrNull;
-
-    if (existing != null) {
-      if (existing.status == DownloadStatus.downloading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Download already in progress in background.'),
-          ),
-        );
-        return;
-      } else if (existing.status == DownloadStatus.completed) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This media is already downloaded.')),
-        );
-        return;
-      }
-    }
-
-    try {
-      String? customDir;
-      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-        customDir = await DownloadPathHelper.pickDownloadsDirectory();
-        if (customDir == null) {
-          // User canceled folder selection
-          return;
-        }
-      }
-
-      await DownloadService.instance.startDownload(
-        title: widget.detail?.name ?? _currentTitle,
-        mediaId: mediaId,
-        type:
-            widget.detail?.type ??
-            (widget.detail?.videos.isNotEmpty == true ? 'series' : 'movie'),
-        season: season,
-        episode: episode,
-        episodeTitle: _currentEpisode?.title,
-        posterUrl: widget.detail?.poster,
-        backdropUrl: widget.detail?.background,
-        year: widget.detail?.year,
-        source: _currentSource,
-        customDownloadDir: customDir,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Download started in background. Track progress in Downloads tab.',
-            ),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Download failed to start: $e')));
-      }
-    }
+  void _handleCast() {
+    final url = _resolvedStreamUrl;
+    if (url == null) return;
+    PlayerCastSheet.show(
+      context,
+      title: widget.detail?.name ?? _currentTitle,
+      streamUrl: url,
+      posterUrl: widget.detail?.poster,
+    );
   }
 
   Widget _buildControlsOverlay() {
@@ -1974,8 +1953,6 @@ class _PlayerScreenState extends State<PlayerScreen>
             ? 'Part ${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
             : 'S${_currentEpisode!.season ?? 1}:E${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}')
         : widget.detail?.year;
-
-    final isOfflineFile = _currentSource.name == 'Downloaded';
 
     return Stack(
       children: [
@@ -2016,45 +1993,56 @@ class _PlayerScreenState extends State<PlayerScreen>
                   _isHoveringUI = false;
                   _startHideControlsTimer();
                 },
-                child: ValueListenableBuilder<List<DownloadTask>>(
-                  valueListenable: DownloadService.instance.tasksNotifier,
-                  builder: (context, tasks, _) {
-                    final mediaId = widget.detail?.id ?? _currentTitle;
-                    final season = _currentEpisode?.season;
-                    final episode = _currentEpisode?.episode;
-                    final isDownloading = tasks.any(
-                      (t) =>
-                          t.mediaId == mediaId &&
-                          t.season == season &&
-                          t.episode == episode &&
-                          t.status == DownloadStatus.downloading,
-                    );
-
-                    return PlayerTopBar(
-                      title: widget.detail?.name ?? _currentTitle,
-                      subtitle: episodeSubtitle,
-                      quality: _currentSource.name,
-                      onDownload: (_isLoading || isOfflineFile)
-                          ? null
-                          : _handleDownloadMedia,
-                      isDownloading: isDownloading,
-                      onToggleEpisodes:
-                          (!_isLoading &&
-                              widget.detail?.videos.isNotEmpty == true)
-                          ? _toggleEpisodesPanel
-                          : null,
-                      isEpisodesActive: _showEpisodesPanel || _showSourcesPanel,
-                      onBack: () {
-                        WindowService.instance.exitFullscreen();
-                        Navigator.pop(context);
-                      },
-                    );
+                child: PlayerTopBar(
+                  title: widget.detail?.name ?? _currentTitle,
+                  subtitle: episodeSubtitle,
+                  quality: _currentSource.name,
+                  // No Cast SDK on desktop; a downloaded file or a torrent
+                  // source (resolved to this device's own 127.0.0.1 server)
+                  // has no URL a Cast receiver on the network could fetch.
+                  onCast:
+                      (_isLoading ||
+                          !_isCastableSource ||
+                          !CastService.isSupported)
+                      ? null
+                      : _handleCast,
+                  onToggleEpisodes:
+                      (!_isLoading &&
+                          widget.detail?.videos.isNotEmpty == true)
+                      ? _toggleEpisodesPanel
+                      : null,
+                  isEpisodesActive: _showEpisodesPanel || _showSourcesPanel,
+                  onBack: () {
+                    WindowService.instance.exitFullscreen();
+                    Navigator.pop(context);
                   },
                 ),
               ),
             ),
           ),
         ),
+
+        // Centered Play/Pause + ±10s (YouTube/Netflix style)
+        if (!_isLoading)
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: !_showControls || _showTextSyncOverlay,
+              child: AnimatedOpacity(
+                opacity: (_showControls && !_showTextSyncOverlay) ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: Center(
+                  child: PlayerCenterControls(
+                    isPlaying: _isPlaying,
+                    onPlayPause: _togglePlayPause,
+                    onSeekBack10: () =>
+                        _seekRelative(const Duration(seconds: -10)),
+                    onSeekForward10: () =>
+                        _seekRelative(const Duration(seconds: 10)),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         // Bottom Transport Bar
         if (!_isLoading)
@@ -2082,52 +2070,25 @@ class _PlayerScreenState extends State<PlayerScreen>
                     _isHoveringUI = false;
                     _startHideControlsTimer();
                   },
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable:
-                        WindowService.instance.isFullscreenNotifier,
-                    builder: (context, isFs, _) {
-                      return PlayerTransport(
-                        isPlaying: _isPlaying,
-                        position: _position,
-                        duration: _duration,
-                        buffered: buffered,
-                        positionListenable: _positionNotifier,
-                        bufferedListenable: _bufferNotifier,
-                        skipSegments: _skipSegments,
-                        volume: _volume,
-                        isMuted: _isMuted || _volume == 0,
-                        playbackRate: _playbackRate,
-                        isSubtitlesActive:
-                            _isSubtitleEnabled &&
-                            _currentSubtitleVariant != null,
-                        isAudioActive: _selectedAudioTrackIndex > 0,
-                        isEpisodesActive:
-                            _showEpisodesPanel || _showSourcesPanel,
-                        isFullscreen: isFs,
-                        onToggleEpisodes:
-                            (widget.detail?.videos.isNotEmpty == true)
-                            ? _toggleEpisodesPanel
-                            : null,
-                        onPlayPause: () {
-                          _togglePlayPause();
-                        },
-                        onSeek: (pos) => _player.seek(pos),
-                        onSeekBack10: () {
-                          _seekRelative(const Duration(seconds: -10));
-                        },
-                        onSeekForward10: () {
-                          _seekRelative(const Duration(seconds: 10));
-                        },
-                        onVolumeChanged: (vol) => _applyVolume(vol),
-                        onToggleMute: () => _toggleMute(),
-                        onToggleAspectMenu: () => _toggleMenu('aspect'),
-                        onToggleSpeedMenu: () => _toggleMenu('speed'),
-                        onToggleAudioMenu: () => _toggleMenu('audio'),
-                        onToggleSubtitleMenu: () => _toggleMenu('subtitle'),
-                        onToggleFullscreen: () =>
-                            WindowService.instance.toggleFullscreen(),
-                      );
-                    },
+                  child: PlayerTransport(
+                    position: _position,
+                    duration: _duration,
+                    buffered: buffered,
+                    positionListenable: _positionNotifier,
+                    bufferedListenable: _bufferNotifier,
+                    skipSegments: _skipSegments,
+                    volume: _volume,
+                    isMuted: _isMuted || _volume == 0,
+                    playbackRate: _playbackRate,
+                    isSubtitlesActive:
+                        _isSubtitleEnabled && _currentSubtitleVariant != null,
+                    isAudioActive: _selectedAudioTrackIndex > 0,
+                    onSeek: (pos) => _player.seek(pos),
+                    onVolumeChanged: (vol) => _applyVolume(vol),
+                    onToggleMute: () => _toggleMute(),
+                    onToggleAudioMenu: () => _toggleMenu('audio'),
+                    onToggleSubtitleMenu: () => _toggleMenu('subtitle'),
+                    onToggleSettingsMenu: () => _toggleMenu('settings'),
                   ),
                 ),
               ),
@@ -2250,6 +2211,26 @@ class _PlayerScreenState extends State<PlayerScreen>
                   'AUDIO SYNC: ${sec > 0 ? "+" : ""}${sec.toStringAsFixed(2)}s',
                 );
               },
+              onClose: () => setState(() => _activeMenu = null),
+            ),
+          ),
+
+        // Floating Settings Menu Popover (playback speed + aspect ratio index)
+        if (_activeMenu == 'settings' && !_isLoading)
+          Positioned(
+            bottom: MediaQuery.sizeOf(context).height < 500
+                ? 46
+                : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
+            right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
+            child: PlayerSettingsMenu(
+              currentRate: _playbackRate,
+              aspectLabel: switch (_videoFit) {
+                BoxFit.cover => 'Fill',
+                BoxFit.fill => 'Stretch',
+                _ => 'Fit',
+              },
+              onTapSpeed: () => setState(() => _activeMenu = 'speed'),
+              onTapAspect: () => setState(() => _activeMenu = 'aspect'),
               onClose: () => setState(() => _activeMenu = null),
             ),
           ),

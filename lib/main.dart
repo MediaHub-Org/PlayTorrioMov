@@ -7,6 +7,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:window_manager/window_manager.dart';
 
 import './services/addon/addon_manager.dart';
+import './services/cast/cast_service.dart';
 import './services/theme/app_theme_service.dart';
 import './services/updater/app_updater_service.dart';
 import './services/backup/cloud_backup_settings.dart';
@@ -43,6 +44,7 @@ void main() async {
   await Future.wait([
     AddonManager.instance.initialize(),
     AppThemeService.initialize(),
+    CastService.initialize(),
     CloudBackupSettings.initialize(),
     ContinueWatchingService.initialize(),
     FavoriteChannelsService.initialize(),

@@ -10,7 +10,12 @@
 		<true/>
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>PlayTorrio streams video and audio from local network services and torrent streaming engines.</string>
+	<string>PlayTorrio streams video and audio from local network services and torrent streaming engines, and discovers Cast-enabled devices on your WiFi network.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_CC1AD845._googlecast._tcp</string>
+		<string>_googlecast._tcp</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

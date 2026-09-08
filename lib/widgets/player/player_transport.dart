@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../models/player/skip_segment_model.dart';
@@ -6,9 +5,12 @@ import 'player_glass.dart';
 import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
 
-/// Full bottom transport bar containing timeline scrubber, play controls, and menu triggers.
+/// Bottom transport bar: timeline scrubber, volume, and the audio/subtitle/
+/// settings menu triggers. Play/pause and the ±10s seek buttons live in the
+/// centered overlay instead (see PlayerCenterControls) -- YouTube/Netflix
+/// style, not duplicated here. Episode switching lives in PlayerTopBar's own
+/// "Episodes" badge, not duplicated here either.
 class PlayerTransport extends StatelessWidget {
-  final bool isPlaying;
   final Duration position;
   final Duration duration;
   final Duration? buffered;
@@ -20,31 +22,18 @@ class PlayerTransport extends StatelessWidget {
   final double playbackRate;
   final bool isSubtitlesActive;
   final bool isAudioActive;
-  final bool isEpisodesActive;
-  final bool isFullscreen;
-  final bool hasPrevEpisode;
-  final bool hasNextEpisode;
 
   // Actions
-  final VoidCallback onPlayPause;
   final ValueChanged<Duration> onSeek;
-  final VoidCallback onSeekBack10;
-  final VoidCallback onSeekForward10;
   final ValueChanged<double> onVolumeChanged;
   final VoidCallback onToggleMute;
-  final VoidCallback? onToggleEpisodes;
-  final VoidCallback onToggleAspectMenu;
-  final VoidCallback onToggleSpeedMenu;
   final VoidCallback onToggleAudioMenu;
   final VoidCallback onToggleSubtitleMenu;
-  final VoidCallback onToggleFullscreen;
-  final VoidCallback? onPrevEpisode;
-  final VoidCallback? onNextEpisode;
+  final VoidCallback onToggleSettingsMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
   const PlayerTransport({
     super.key,
-    required this.isPlaying,
     required this.position,
     required this.duration,
     this.buffered,
@@ -56,24 +45,12 @@ class PlayerTransport extends StatelessWidget {
     required this.playbackRate,
     required this.isSubtitlesActive,
     required this.isAudioActive,
-    this.isEpisodesActive = false,
-    required this.isFullscreen,
-    this.hasPrevEpisode = false,
-    this.hasNextEpisode = false,
-    required this.onPlayPause,
     required this.onSeek,
-    required this.onSeekBack10,
-    required this.onSeekForward10,
     required this.onVolumeChanged,
     required this.onToggleMute,
-    this.onToggleEpisodes,
-    required this.onToggleAspectMenu,
-    required this.onToggleSpeedMenu,
     required this.onToggleAudioMenu,
     required this.onToggleSubtitleMenu,
-    required this.onToggleFullscreen,
-    this.onPrevEpisode,
-    this.onNextEpisode,
+    required this.onToggleSettingsMenu,
     this.onScrubbingChanged,
   });
 
@@ -81,10 +58,8 @@ class PlayerTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    final isDesktop = !kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux);
     final btnSize = isCompact ? 36.0 : 42.0;
     final btnIconSize = isCompact ? 20.0 : 22.0;
-    final playBtnSize = isCompact ? 46.0 : 54.0;
     final gap = isCompact ? 2.0 : 4.0;
 
     return Container(
@@ -126,122 +101,31 @@ class PlayerTransport extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Left Group: Play/Pause, Rewind 10, FastForward 10, Volume Control
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Frosted/Liquid Glass Play/Pause Button
-                  _PlayerPlayPauseButton(
-                    isPlaying: isPlaying,
-                    size: playBtnSize,
-                    iconSize: isCompact ? 28 : 34,
-                    onTap: onPlayPause,
+              // Volume Control (Full slider on wide screens, Mute button on compact)
+              if (!isCompact)
+                PlayerVolumeControl(
+                  volume: volume,
+                  isMuted: isMuted,
+                  onVolumeChanged: onVolumeChanged,
+                  onToggleMute: onToggleMute,
+                )
+              else
+                PlayerIconButton(
+                  size: btnSize,
+                  iconSize: btnIconSize,
+                  icon: Icon(
+                    isMuted || volume == 0
+                        ? Icons.volume_off_rounded
+                        : (volume > 1.0 ? Icons.volume_up_rounded : Icons.volume_down_rounded),
                   ),
-
-                  SizedBox(width: isCompact ? 8 : 14),
-
-                  // Seek Back 10s
-                  PlayerIconButton(
-                    size: btnSize,
-                    iconSize: btnIconSize + 2,
-                    icon: const Icon(Icons.replay_10_rounded),
-                    tooltip: 'Seek -10s',
-                    onPressed: onSeekBack10,
-                  ),
-
-                  SizedBox(width: gap),
-
-                  // Seek Forward 10s
-                  PlayerIconButton(
-                    size: btnSize,
-                    iconSize: btnIconSize + 2,
-                    icon: const Icon(Icons.forward_10_rounded),
-                    tooltip: 'Seek +10s',
-                    onPressed: onSeekForward10,
-                  ),
-
-                  // Volume Control (Full slider on wide screens, Mute button on compact)
-                  if (!isCompact) ...[
-                    const SizedBox(width: 10),
-                    PlayerVolumeControl(
-                      volume: volume,
-                      isMuted: isMuted,
-                      onVolumeChanged: onVolumeChanged,
-                      onToggleMute: onToggleMute,
-                    ),
-                  ] else ...[
-                    SizedBox(width: gap),
-                    PlayerIconButton(
-                      size: btnSize,
-                      iconSize: btnIconSize,
-                      icon: Icon(
-                        isMuted || volume == 0
-                            ? Icons.volume_off_rounded
-                            : (volume > 1.0 ? Icons.volume_up_rounded : Icons.volume_down_rounded),
-                      ),
-                      tooltip: isMuted ? 'Unmute' : 'Mute',
-                      onPressed: onToggleMute,
-                    ),
-                  ],
-                ],
-              ),
-
-              // Center Group: Episode Navigation (if available and enough width)
-              if (!isCompact && (hasPrevEpisode || hasNextEpisode))
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (hasPrevEpisode && onPrevEpisode != null)
-                      PlayerIconButton(
-                        size: 40,
-                        iconSize: 22,
-                        icon: const Icon(Icons.skip_previous_rounded),
-                        tooltip: 'Previous Episode',
-                        onPressed: onPrevEpisode,
-                      ),
-                    if (hasNextEpisode && onNextEpisode != null) ...[
-                      const SizedBox(width: 6),
-                      PlayerIconButton(
-                        size: 40,
-                        iconSize: 22,
-                        icon: const Icon(Icons.skip_next_rounded),
-                        tooltip: 'Next Episode',
-                        onPressed: onNextEpisode,
-                      ),
-                    ],
-                  ],
+                  tooltip: isMuted ? 'Unmute' : 'Mute',
+                  onPressed: onToggleMute,
                 ),
 
-              // Right Group: Aspect, Speed, Audio, Subtitles, SubSync, Fullscreen
+              // Right Group: Audio, Subtitles, Settings (speed + aspect ratio)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Episodes Menu Trigger (for TV Shows)
-                  if (onToggleEpisodes != null) ...[
-                    PlayerIconButton(
-                      size: btnSize,
-                      iconSize: btnIconSize,
-                      icon: const Icon(Icons.video_library_rounded),
-                      tooltip: 'Episodes',
-                      active: isEpisodesActive,
-                      activeColor: PlayerTheme.accent,
-                      onPressed: onToggleEpisodes,
-                    ),
-                    SizedBox(width: gap),
-                  ],
-
-                  // Playback Speed Menu Trigger
-                  PlayerIconButton(
-                    size: btnSize,
-                    iconSize: btnIconSize,
-                    icon: const Icon(Icons.speed_rounded),
-                    tooltip: 'Playback Speed',
-                    showActiveBadge: playbackRate != 1.0,
-                    onPressed: onToggleSpeedMenu,
-                  ),
-
-                  SizedBox(width: gap),
-
                   // Audio Menu Trigger
                   PlayerIconButton(
                     size: btnSize,
@@ -266,98 +150,20 @@ class PlayerTransport extends StatelessWidget {
 
                   SizedBox(width: gap),
 
-                  // Aspect Ratio Menu Trigger
+                  // Settings Menu Trigger (playback speed + aspect ratio)
                   PlayerIconButton(
                     size: btnSize,
                     iconSize: btnIconSize,
-                    icon: const Icon(Icons.aspect_ratio_rounded),
-                    tooltip: 'Aspect Ratio',
-                    onPressed: onToggleAspectMenu,
+                    icon: const Icon(Icons.settings_rounded),
+                    tooltip: 'Settings',
+                    showActiveBadge: playbackRate != 1.0,
+                    onPressed: onToggleSettingsMenu,
                   ),
-
-                  // Fullscreen Button (Desktop only)
-                  if (isDesktop) ...[
-                    SizedBox(width: gap),
-                    PlayerIconButton(
-                      size: btnSize,
-                      iconSize: btnIconSize,
-                      icon: Icon(
-                        isFullscreen ? Icons.fullscreen_exit_rounded : Icons.fullscreen_rounded,
-                      ),
-                      tooltip: isFullscreen ? 'Exit Fullscreen' : 'Fullscreen',
-                      onPressed: onToggleFullscreen,
-                    ),
-                  ],
                 ],
               ),
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _PlayerPlayPauseButton extends StatefulWidget {
-  final bool isPlaying;
-  final double size;
-  final double iconSize;
-  final VoidCallback onTap;
-
-  const _PlayerPlayPauseButton({
-    required this.isPlaying,
-    required this.size,
-    required this.iconSize,
-    required this.onTap,
-  });
-
-  @override
-  State<_PlayerPlayPauseButton> createState() => _PlayerPlayPauseButtonState();
-}
-
-class _PlayerPlayPauseButtonState extends State<_PlayerPlayPauseButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final iconWidget = Icon(
-      widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-      color: Colors.white,
-      size: widget.iconSize,
-    );
-
-    final body = AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      width: widget.size,
-      height: widget.size,
-      decoration: BoxDecoration(
-        color: _hovered
-            ? Colors.white.withValues(alpha: 0.28)
-            : Colors.white.withValues(alpha: 0.18),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.25),
-          width: 1.2,
-        ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x66000000),
-            offset: Offset(0, 4),
-            blurRadius: 16,
-          ),
-        ],
-      ),
-      alignment: Alignment.center,
-      child: iconWidget,
-    );
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: body,
       ),
     );
   }
