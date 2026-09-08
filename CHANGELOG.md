@@ -5,6 +5,29 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Google Cast support in the video player (Android/iOS) — needs
+  real-device verification before it can be considered done
+- New HindMoviez scraper site
+- Castilian (Spain) vs. Latino (Latin America) Spanish audio-dub
+  detection, with their own badges
+
+### Changed
+- Video player UI simplified: play/pause and ±10s seek moved to a
+  centered overlay; playback speed and aspect ratio consolidated
+  behind one Settings button; fullscreen and duplicate Episodes
+  buttons removed (both already reachable another way); download
+  button removed (still available before playback starts)
+- Double-tap now seeks ±10s on the left/right thirds of the video on
+  touch platforms, keeping double-tap-to-fullscreen on the middle
+  third and on desktop
+- Swipe-to-adjust volume/brightness removed on mobile (hardware
+  buttons and the OS already do this) — unchanged on desktop
+
+### Fixed
+- Arabic anime catalog and search scraping, following the source
+  site's changed HTML structure
+
 ## [1.2.1+16] - 2026-09-06
 
 ### Fixed
