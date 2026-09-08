@@ -97,6 +97,18 @@ class EnvService {
     return get('SIMKL_CLIENT_SECRET');
   }
 
+  // TMDB API key (checks compile-time dart-define first, then runtime .env).
+  //
+  // A release build carries this via the ENV_FILE repository secret, the
+  // same way Trakt's and Simkl's credentials get in, so cast photos work
+  // out of the box instead of every user having to register their own key
+  // first. A key the user pastes into Settings still wins over it.
+  static String get tmdbApiKey {
+    const compileVal = String.fromEnvironment('TMDB_API_KEY');
+    if (compileVal.isNotEmpty) return compileVal;
+    return get('TMDB_API_KEY');
+  }
+
   // Discord Rich Presence App ID (checks compile-time dart-define first, then runtime .env)
   static String get discordAppId {
     const compileVal = String.fromEnvironment('DISCORD_APP_ID');

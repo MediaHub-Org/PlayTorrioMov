@@ -455,7 +455,10 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       ),
-                      child: const Text('Connect', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      child: Text(
+                    bundled ? 'Use my key' : 'Connect',
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  ),
                     ),
                 ],
               ),
@@ -504,7 +507,11 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
     return ValueListenableBuilder<String?>(
       valueListenable: TmdbSettings.apiKey,
       builder: (context, apiKey, _) {
-        final connected = apiKey != null;
+        // Three states, not two: no key at all, running on the key this
+        // build ships with, or running on the user's own.
+        final ownKey = apiKey != null;
+        final bundled = TmdbSettings.bundledApiKey != null;
+        final connected = ownKey || bundled;
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -536,15 +543,19 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      connected
-                          ? 'Connected — cast photos and character names load when available.'
+                      ownKey
+                          ? 'Connected with your own key — cast photos and character names load when available.'
+                          : bundled
+                          ? 'Using this build\'s included key — cast photos and character names load when available. Add your own if you would rather not share it.'
                           : 'Add your own free TMDB API key to fill in cast photos and character names most addons don\'t provide.',
                       style: const TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
                     ),
                   ],
                 ),
               ),
-              if (connected)
+              // Only the user's own key is theirs to disconnect; the
+              // built-in one is part of the build.
+              if (ownKey)
                 TextButton(
                   onPressed: () => TmdbSettings.setApiKey(null),
                   child: Text(
