@@ -195,8 +195,8 @@ class _WatchScreenState extends State<WatchScreen>
     );
 
     // WatchScreen lives on the hub's nested navigator, but the player that's
-    // actually visible right now was pushed fullscreen onto the root
-    // navigator (see pushFullscreen in player_screen.dart). A plain
+    // actually visible right now was pushed fullscreen onto the root one
+    // (see pushFullscreen in utils/fullscreen_navigator.dart). A plain
     // Navigator.pushReplacement(context, ...) would replace the buried
     // nested-navigator route instead of the visible fullscreen one, so
     // "Play Next" would silently do nothing. Replace on the root instead.

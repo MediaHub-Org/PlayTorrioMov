@@ -3,6 +3,8 @@ import '../../models/stream/stream_model.dart';
 import '../../services/anime_arabic/anime_arabic_extractor.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../utils/fullscreen_navigator.dart';
+import '../../utils/navigation/route_transitions.dart';
 import '../player/player_screen.dart';
 
 class AnimeArabicStreamSheet extends StatefulWidget {
@@ -105,10 +107,12 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
       orElse: () => movieDetail.videos.first,
     );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PlayerScreen(
+    // Replace on the root navigator, not this sheet's: the sheet sits over
+    // the hub's nested navigator, so a plain pushReplacement would leave the
+    // player boxed inside the hub with its top bar still drawn around it.
+    pushFullscreenReplacement(
+      CinematicSlideRoute(
+        page: PlayerScreen(
           source: source,
           title: '${widget.details.title} - Episode ${widget.episode.number}',
           backdropUrl: widget.details.displayBanner,

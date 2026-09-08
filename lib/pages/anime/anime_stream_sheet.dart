@@ -4,6 +4,7 @@ import '../../models/anime/anime_media.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../utils/fullscreen_navigator.dart';
+import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../player/player_screen.dart';
 
@@ -123,8 +124,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
         AnimeScraperService.toVideo(widget.anime, widget.episodeNumber);
 
     pushFullscreenReplacement(
-      MaterialPageRoute(
-        builder: (_) => PlayerScreen(
+      CinematicSlideRoute(
+        page: PlayerScreen(
           source: source,
           title: '${widget.anime.displayTitle} - Episode ${widget.episodeNumber}',
           backdropUrl: widget.anime.backdropUrl,

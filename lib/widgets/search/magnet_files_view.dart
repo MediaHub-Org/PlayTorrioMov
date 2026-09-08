@@ -4,7 +4,7 @@ import '../../pages/player/player_screen.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../services/stream/torrent_stream_service.dart';
-import '../../utils/navigation/route_transitions.dart';
+import '../../utils/fullscreen_navigator.dart';
 
 class MagnetFileItem {
   final int id;
@@ -240,13 +240,10 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
       );
     }
 
-    Navigator.push(
-      context,
-      CinematicSlideRoute(
-        page: PlayerScreen(
-          source: source,
-          title: streamTitle,
-        ),
+    pushFullscreenPage(
+      PlayerScreen(
+        source: source,
+        title: streamTitle,
       ),
     );
   }
