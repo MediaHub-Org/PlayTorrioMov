@@ -127,8 +127,24 @@ class StreamSource {
     caseSensitive: false,
   );
 
+  /// Castellano (Spain) Spanish specifically -- distinct badge from Latino.
+  static final RegExp _castilianRegex = RegExp(
+    r'\b(castellano|castellana|castilian|es[-_]es|spa[- ]?castellano|esp[- ]?castellano|audio[- ]?castellano|spanish\s*\(\s*spain\s*\)|español\s*de\s*españa|espanol\s*de\s*espana)\b(?![- ]?(?:sub|subbed|subs|subtitles))|\[cast\]|\(cast\)',
+    caseSensitive: false,
+  );
+
+  /// Latino (Latin America) Spanish specifically -- distinct badge from
+  /// Castilian. The bare `lat` alternative is deliberately unanchored to
+  /// word-boundary punctuation on both sides (not `\b`) so it still matches
+  /// a release tag like `[LAT]` or `.LAT.` bracketed/dotted the way scene
+  /// releases commonly format them.
+  static final RegExp _latinoRegex = RegExp(
+    r'\b(latino|latina|latam|latin[- ]?audio|audio[- ]?latino|es[-_](?:la|419|mx|ar|co|cl)|spanish\s*\(\s*latin(?:\s*america)?\s*\)|español\s*latino|espanol\s*latino)\b(?![- ]?(?:sub|subbed|subs|subtitles))|(?<=[^a-z0-9]|^)lat(?=[^a-z0-9]|$)(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
   static final RegExp _spanishRegex = RegExp(
-    r'\b(spanish|espanol|español|cancun|latino|castellano|spa|esp)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    r'\b(spanish|espanol|español|cancun|latino|latina|latam|castellano|castellana|castilian|spa|esp|es[-_](?:es|la|419|mx|ar|co|cl))\b(?![- ]?(?:sub|subbed|subs|subtitles))|(?<=[^a-z0-9]|^)lat(?=[^a-z0-9]|$)(?![- ]?(?:sub|subbed|subs|subtitles))|\[cast\]|\(cast\)',
     caseSensitive: false,
   );
 
@@ -173,7 +189,9 @@ class StreamSource {
   }
 
   /// Returns detected audio languages for this stream.
-  /// Standard keys: 'multi', 'english', 'hindi', 'german', 'french', 'spanish', 'russian', 'japanese', 'italian'.
+  /// Standard keys: 'multi', 'english', 'hindi', 'german', 'french',
+  /// 'spanish' (either Spanish variant, or neither detected specifically),
+  /// 'spanish_castilian', 'spanish_latino', 'russian', 'japanese', 'italian'.
   Set<String> getAudioLanguages({String? mediaTitle}) {
     final tags = <String>{};
     var fullText = _textWithoutMediaTitle(mediaTitle: mediaTitle);
@@ -188,7 +206,14 @@ class StreamSource {
     if (_hindiIndianRegex.hasMatch(fullText)) tags.add('hindi');
     if (_germanRegex.hasMatch(fullText)) tags.add('german');
     if (_frenchRegex.hasMatch(fullText)) tags.add('french');
-    if (_spanishRegex.hasMatch(fullText)) tags.add('spanish');
+
+    final isCastilian = _castilianRegex.hasMatch(fullText);
+    final isLatino = _latinoRegex.hasMatch(fullText);
+    final isSpanish = isCastilian || isLatino || _spanishRegex.hasMatch(fullText);
+    if (isCastilian) tags.add('spanish_castilian');
+    if (isLatino) tags.add('spanish_latino');
+    if (isSpanish) tags.add('spanish');
+
     if (_russianRegex.hasMatch(fullText)) tags.add('russian');
     if (_japaneseRegex.hasMatch(fullText)) tags.add('japanese');
     if (_italianRegex.hasMatch(fullText)) tags.add('italian');
@@ -214,7 +239,15 @@ class StreamSource {
   /// Returns a clean UI badge label if a special or regional dub is detected.
   String? getAudioBadge({String? mediaTitle}) {
     final langs = getAudioLanguages(mediaTitle: mediaTitle);
+
+    // Both Spanish dubs present is more specific than a generic MULTI badge,
+    // so it wins even over the existing MULTI-takes-priority rule below.
+    if (langs.contains('spanish_castilian') && langs.contains('spanish_latino')) {
+      return '🇪🇸 CAST / 🇲🇽 LAT';
+    }
     if (langs.contains('multi')) return '🌐 MULTI';
+    if (langs.contains('spanish_castilian')) return '🇪🇸 CAST';
+    if (langs.contains('spanish_latino')) return '🇲🇽 LAT';
     if (langs.contains('hindi')) {
       final text = _textWithoutMediaTitle(mediaTitle: mediaTitle).toLowerCase();
       if (text.contains('telugu')) return '🇮🇳 TELUGU';

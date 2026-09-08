@@ -75,7 +75,7 @@ class AnimeArabicExtractor {
   static const Duration _flareTtl = Duration(minutes: 10);
 
   Future<List<ArabicResolvedStream>> resolveEpisode(
-    ArabicEpisode episode, {
+    dynamic episodeOrWatchPath, {
     Duration discoverTimeout = const Duration(seconds: 25),
     Duration sniffTimeout = const Duration(seconds: 25),
     Duration graceWindow = const Duration(seconds: 4),
@@ -84,7 +84,7 @@ class AnimeArabicExtractor {
     onProgress?.call('discover', 'Cracking Arabic server map…');
 
     final servers = await discoverServers(
-      episode,
+      episodeOrWatchPath,
       timeout: discoverTimeout,
       onProgress: onProgress,
     );
@@ -102,7 +102,7 @@ class AnimeArabicExtractor {
   }
 
   Future<List<ArabicResolvedServer>> discoverServers(
-    ArabicEpisode episode, {
+    dynamic episodeOrWatchPath, {
     Duration timeout = const Duration(seconds: 25),
     void Function(String phase, String detail)? onProgress,
   }) async {
@@ -111,7 +111,10 @@ class AnimeArabicExtractor {
       ..connectionTimeout = const Duration(seconds: 15);
 
     try {
-      final watchPath = episode.watchPath;
+      final String watchPath = episodeOrWatchPath is ArabicEpisode
+          ? episodeOrWatchPath.watchPath
+          : (episodeOrWatchPath is String ? episodeOrWatchPath : '');
+      if (watchPath.isEmpty) return const [];
       final hashIdx = watchPath.indexOf('#');
       final path = hashIdx >= 0 ? watchPath.substring(0, hashIdx) : watchPath;
       final frag = hashIdx >= 0 ? watchPath.substring(hashIdx + 1) : '';
@@ -334,10 +337,13 @@ class AnimeArabicExtractor {
     ArabicResolvedServer server,
     String html,
   ) {
-    final iframeOrigin = Uri.tryParse(server.iframeUrl)?.origin ?? '';
+    final uri = Uri.tryParse(server.iframeUrl);
+    final iframeOrigin = (uri != null && uri.hasScheme && uri.host.isNotEmpty)
+        ? '${uri.scheme}://${uri.host}${uri.hasPort && uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}'
+        : '';
     final headers = <String, String>{
       'User-Agent': _userAgent,
-      'Referer': '$iframeOrigin/',
+      'Referer': iframeOrigin.isNotEmpty ? '$iframeOrigin/' : '',
       if (iframeOrigin.isNotEmpty) 'Origin': iframeOrigin,
     };
 
@@ -478,8 +484,8 @@ class AnimeArabicExtractor {
 
     final sorted = List<ArabicResolvedStream>.from(hits)
       ..sort((a, b) {
-        final ra = rank(a.server.name);
-        final rb = rank(b.server.name);
+        final ra = rank(a.server.name.toLowerCase());
+        final rb = rank(b.server.name.toLowerCase());
         if (ra != rb) return ra.compareTo(rb);
         return _qualityRank(b.quality).compareTo(_qualityRank(a.quality));
       });

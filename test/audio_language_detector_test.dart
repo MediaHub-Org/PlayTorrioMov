@@ -300,4 +300,128 @@ void main() {
       expect(s.getAudioBadge(), '🇮🇳 HINDI');
     });
   });
+
+  // Ported from upstream ayman708-UX/PlayTorrioV3 (e560d4a) -- splits the
+  // generic 'spanish' tag into Castilian (Spain) vs Latino (Latin America)
+  // variants with their own badges, on top of the existing 'spanish' tag
+  // (kept for anything that only wants "some Spanish dub, don't care which").
+  group('Spanish Castilian & Latin American audio detection', () {
+    test('detects Castilian Spanish from Castellano tag', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Gladiator.2000.1080p.BluRay.x264.Castellano.AC3',
+        url: 'https://example.com',
+      );
+      final langs = source.getAudioLanguages();
+      expect(langs.contains('spanish_castilian'), isTrue);
+      expect(langs.contains('spanish'), isTrue);
+      expect(langs.contains('spanish_latino'), isFalse);
+      expect(source.hasAudioLanguage('spanish_castilian'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.hasAudioLanguage('spanish_latino'), isFalse);
+      expect(source.getAudioBadge(), '🇪🇸 CAST');
+    });
+
+    test('detects Castilian Spanish from [CAST] tag', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Gladiator.2000.1080p.[CAST].mkv',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish_castilian'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.getAudioBadge(), '🇪🇸 CAST');
+    });
+
+    test('detects Castilian Spanish from ES-ES tag', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Movie.2024.1080p.WEB-DL.ES-ES.mkv',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish_castilian'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.getAudioBadge(), '🇪🇸 CAST');
+    });
+
+    test('detects Latin American Spanish from Latino tag', () {
+      // Deliberately no "Dual Audio" here, unlike upstream's own version of
+      // this test -- Mov's existing MULTI-takes-priority convention (see
+      // "DownloadEverything Dual Audio Hindi release" above) means a real
+      // "Dual Audio ... English" phrase legitimately earns the generic
+      // MULTI badge over a specific-language one, same as it does for
+      // Hindi. This test is about the Latino tag alone, not that priority
+      // rule, so it isolates just that.
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Avengers.Endgame.2019.1080p.Latino-English.mkv',
+        url: 'https://example.com',
+      );
+      final langs = source.getAudioLanguages();
+      expect(langs.contains('spanish_latino'), isTrue);
+      expect(langs.contains('spanish'), isTrue);
+      expect(langs.contains('spanish_castilian'), isFalse);
+      expect(source.hasAudioLanguage('spanish_latino'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.hasAudioLanguage('spanish_castilian'), isFalse);
+      expect(source.getAudioBadge(), '🇲🇽 LAT');
+    });
+
+    test('detects Latin American Spanish from [LAT] tag', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Dune.Part.Two.2024.1080p.[LAT].mkv',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish_latino'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.getAudioBadge(), '🇲🇽 LAT');
+    });
+
+    test('detects Latin American Spanish from ES-419 tag', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Movie.2024.1080p.WEB-DL.ES-419.AAC.mkv',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish_latino'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.getAudioBadge(), '🇲🇽 LAT');
+    });
+
+    test('detects both Castilian and Latin American when both present', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Interstellar.2014.1080p.BluRay.Castellano.Latino.Eng.mkv',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish_castilian'), isTrue);
+      expect(source.hasAudioLanguage('spanish_latino'), isTrue);
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.getAudioBadge(), '🇪🇸 CAST / 🇲🇽 LAT');
+    });
+
+    test('detects generic Spanish and badges as SPA', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Movie.2024.1080p.Spanish.AAC5.1.mkv',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish'), isTrue);
+      expect(source.hasAudioLanguage('spanish_castilian'), isFalse);
+      expect(source.hasAudioLanguage('spanish_latino'), isFalse);
+      expect(source.getAudioBadge(), '🇪🇸 SPA');
+    });
+
+    test('does not match subtitles listing as audio language', () {
+      final source = StreamSource(
+        addonName: 'Torrentio',
+        title: 'Movie.2024.1080p.BluRay.x264\nSubs: Spanish, English, French',
+        url: 'https://example.com',
+      );
+      expect(source.hasAudioLanguage('spanish'), isFalse);
+      expect(source.hasAudioLanguage('spanish_castilian'), isFalse);
+      expect(source.hasAudioLanguage('spanish_latino'), isFalse);
+    });
+  });
 }
