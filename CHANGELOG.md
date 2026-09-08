@@ -16,6 +16,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   precedence). See `TMDB_API_KEY` in docs/RELEASES.md
 
 ### Changed
+- Audio track selection moved behind the video player's settings gear,
+  alongside playback speed and aspect ratio, instead of its own button
+  in the transport bar. The row is hidden for media with only one audio
+  track
 - The genre/decade/sort/search filters now stay on one line and stay
   put while the page scrolls, with the hero carousel starting just
   below them. They previously wrapped onto a second row on phones and

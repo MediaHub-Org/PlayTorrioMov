@@ -21,13 +21,11 @@ class PlayerTransport extends StatelessWidget {
   final bool isMuted;
   final double playbackRate;
   final bool isSubtitlesActive;
-  final bool isAudioActive;
 
   // Actions
   final ValueChanged<Duration> onSeek;
   final ValueChanged<double> onVolumeChanged;
   final VoidCallback onToggleMute;
-  final VoidCallback onToggleAudioMenu;
   final VoidCallback onToggleSubtitleMenu;
   final VoidCallback onToggleSettingsMenu;
   final ValueChanged<bool>? onScrubbingChanged;
@@ -44,11 +42,9 @@ class PlayerTransport extends StatelessWidget {
     required this.isMuted,
     required this.playbackRate,
     required this.isSubtitlesActive,
-    required this.isAudioActive,
     required this.onSeek,
     required this.onVolumeChanged,
     required this.onToggleMute,
-    required this.onToggleAudioMenu,
     required this.onToggleSubtitleMenu,
     required this.onToggleSettingsMenu,
     this.onScrubbingChanged,
@@ -122,21 +118,12 @@ class PlayerTransport extends StatelessWidget {
                   onPressed: onToggleMute,
                 ),
 
-              // Right Group: Audio, Subtitles, Settings (speed + aspect ratio)
+              // Right Group: Subtitles, Settings (speed, aspect, audio track).
+              // Audio moved behind the gear -- picking a dub is a set-once
+              // choice, unlike subtitles, which get toggled mid-scene.
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Audio Menu Trigger
-                  PlayerIconButton(
-                    size: btnSize,
-                    iconSize: btnIconSize,
-                    icon: const Icon(Icons.audiotrack_rounded),
-                    tooltip: 'Audio Tracks',
-                    onPressed: onToggleAudioMenu,
-                  ),
-
-                  SizedBox(width: gap),
-
                   // Subtitles Menu Trigger
                   PlayerIconButton(
                     size: btnSize,
