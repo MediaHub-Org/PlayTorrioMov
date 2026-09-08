@@ -27,6 +27,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 - Arabic anime catalog and search scraping, following the source
   site's changed HTML structure
+- Header pill controls (genre/decade/sort filters, search, Live TV's
+  icon buttons) now keep a minimum 40×40 tap target even when
+  icon-only, instead of shrinking to ~31px
 
 ## [1.2.1+16] - 2026-09-06
 

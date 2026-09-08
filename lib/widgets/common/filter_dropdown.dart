@@ -32,11 +32,16 @@ class FilterDropdown<T> extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       tooltip: isMobile ? label : '',
       child: Container(
+        constraints: const BoxConstraints(
+          minWidth: headerPillMinSize,
+          minHeight: headerPillMinSize,
+        ),
         padding: EdgeInsets.symmetric(
           horizontal: isMobile ? 8 : 12,
           vertical: 8,
         ),
         decoration: headerPillDecoration,
+        alignment: Alignment.center,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

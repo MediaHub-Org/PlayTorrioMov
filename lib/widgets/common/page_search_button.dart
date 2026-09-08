@@ -45,8 +45,13 @@ class PageSearchButton extends StatelessWidget {
             }
           },
           child: Container(
+            constraints: const BoxConstraints(
+              minWidth: headerPillMinSize,
+              minHeight: headerPillMinSize,
+            ),
             padding: const EdgeInsets.all(8),
             decoration: headerPillDecoration,
+            alignment: Alignment.center,
             child: const Icon(
               Icons.search_rounded,
               size: headerPillIconSize,
