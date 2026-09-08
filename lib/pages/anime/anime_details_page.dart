@@ -342,12 +342,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             ),
           ),
 
-          // Floating Frosted Back Button (Top Left)
-          Positioned(
-            top: _Space.lg,
-            left: isDesktop ? _Space.xxl : _Space.md,
-            child: const GlassBackButton(),
-          ),
+          const FloatingBackButton(),
         ],
       ),
     ),

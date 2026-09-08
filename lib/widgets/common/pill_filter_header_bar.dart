@@ -1,21 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../services/app_breakpoints.dart';
+import '../../services/app_spacing.dart';
 import 'header_pill_style.dart';
-
-/// Horizontal page inset for the filter bar, mobile first: the phone value
-/// is the base and wider tiers step up from it, rather than a desktop
-/// number being squeezed down.
-double pillFilterHeaderInset(BuildContext context) {
-  switch (AppBreakpoints.of(context)) {
-    case ScreenTier.mobile:
-      return 16;
-    case ScreenTier.tablet:
-      return 20;
-    case ScreenTier.desktop:
-      return 24;
-  }
-}
 
 /// Vertical breathing room above and below the pill row.
 const double _kBarVerticalPadding = 12;
@@ -66,7 +52,7 @@ class PillFilterHeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final inset = pillFilterHeaderInset(context);
+    final inset = AppSpacing.pageInset(context);
 
     final bar = SafeArea(
       bottom: false,

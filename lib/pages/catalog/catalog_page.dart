@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../models/addon/addon.dart';
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_section.dart';
@@ -305,7 +306,7 @@ class _CatalogPageState extends State<CatalogPage> {
                         height: kToolbarHeight,
                         child: Row(
                           children: [
-                            const SizedBox(width: 8),
+                            SizedBox(width: AppSpacing.pageInset(context)),
                             const GlassBackButton(),
                             const SizedBox(width: 10),
                             if (!_isSearching)

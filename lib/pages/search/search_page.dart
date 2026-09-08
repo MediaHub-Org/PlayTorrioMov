@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../models/movie/movie_section.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/addon/addon_manager.dart';
@@ -196,7 +197,7 @@ class _SearchPageState extends State<SearchPage> {
               ),
               child: Row(
                 children: [
-                  const SizedBox(width: 8),
+                  SizedBox(width: AppSpacing.pageInset(context)),
                   const GlassBackButton(),
                   const SizedBox(width: 10),
                   Expanded(

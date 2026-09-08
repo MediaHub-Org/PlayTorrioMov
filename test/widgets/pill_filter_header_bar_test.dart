@@ -1,6 +1,7 @@
 // test/widgets/pill_filter_header_bar_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/services/app_spacing.dart';
 import 'package:playtorriomov/widgets/common/pill_filter_header_bar.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -115,7 +116,7 @@ void main() {
       setSurfaceWidth(tester, 1000);
       await tester.pumpWidget(wrap(PillFilterHeaderBar(pills: [pill('a')])));
 
-      final expectedInset = pillFilterHeaderInset(
+      final expectedInset = AppSpacing.pageInset(
         tester.element(find.byType(PillFilterHeaderBar)),
       );
       expect(

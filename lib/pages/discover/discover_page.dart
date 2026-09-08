@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+import '../../services/app_spacing.dart';
 import '../../models/addon/addon.dart';
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_section.dart';
@@ -767,7 +768,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 height: toolbarH,
                 child: Row(
                   children: [
-                    const SizedBox(width: 8),
+                    SizedBox(width: AppSpacing.pageInset(context)),
                     const GlassBackButton(),
                     const SizedBox(width: 2),
                     if (!_isSearching) ...[
@@ -1155,7 +1156,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Container(
                   height: kToolbarHeight + topPadding,
-                  padding: EdgeInsets.only(top: topPadding, left: 16, right: 16),
+                  padding: EdgeInsets.only(
+                    top: topPadding,
+                    left: AppSpacing.pageInset(context),
+                    right: AppSpacing.pageInset(context),
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0A0C16).withValues(alpha: 0.6),
                     border: Border(

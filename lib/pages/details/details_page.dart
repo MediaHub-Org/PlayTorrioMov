@@ -544,7 +544,6 @@ class _DetailsPageState extends State<DetailsPage>
     final posterUrl = meta.poster ?? widget.movie.poster;
     final isDesktop = _isDesktop(context);
     final screenSize = MediaQuery.sizeOf(context);
-    final topInset = MediaQuery.paddingOf(context).top;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     // This is now just how far down the *content* starts — the backdrop
@@ -716,11 +715,7 @@ class _DetailsPageState extends State<DetailsPage>
             ),
           ),
         ),
-        Positioned(
-          top: isDesktop ? _Space.lg : (topInset + 10),
-          left: isDesktop ? _Space.xxl : _Space.md,
-          child: const GlassBackButton(),
-        ),
+        const FloatingBackButton(),
       ],
     );
   }
