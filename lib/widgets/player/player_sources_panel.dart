@@ -9,6 +9,7 @@ import '../../services/stream/stream_service.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/anime_arabic/anime_arabic_extractor.dart';
+import '../common/source_badges.dart';
 import 'player_glass.dart';
 
 /// Glassmorphic Sources Side Panel for selecting episode stream sources,
@@ -535,7 +536,10 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     bool isCompact,
   ) {
     final title = source.title ?? source.name ?? 'Stream Source';
-    final isTorrent = source.infoHash != null && source.infoHash!.isNotEmpty;
+    // StreamSource.isMagnet, not a bare infoHash check: a magnet: URL
+    // with no separate infoHash field is still a torrent, and the icon
+    // has to agree with the P2P/HTTP badge next to it.
+    final isTorrent = source.isMagnet;
     final resolution = _extractResolution(title);
 
     return MouseRegion(
@@ -616,22 +620,14 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                             ),
                           ],
 
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                            margin: const EdgeInsets.only(right: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(4),
+                          // Shared with every out-of-player source picker,
+                          // so a source's delivery and seed health read the
+                          // same wherever it is listed.
+                          for (final badge in sourceDeliveryBadges(source))
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: badge,
                             ),
-                            child: Text(
-                              isTorrent ? 'P2P' : 'HTTP',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.70),
-                                fontSize: 9.5,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
 
                           if (source.name != null && source.name!.isNotEmpty) ...[
                             Flexible(

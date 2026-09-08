@@ -21,6 +21,7 @@ import '../../services/download/download_service.dart';
 import '../../utils/download/download_path_helper.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/performance_liquid_lens.dart';
+import '../../widgets/common/source_badges.dart';
 import '../settings/settings_page.dart';
 import '../details/details_page.dart';
 import '../../utils/navigation/route_transitions.dart';
@@ -1819,6 +1820,10 @@ class _SourceCardState extends State<_SourceCard> {
       badges.add(_badge(s.quality!, badgeColor));
     }
 
+    // How it's delivered, and for a torrent its seed count -- the health
+    // signal that decides between two otherwise identical 1080p sources.
+    badges.addAll(sourceDeliveryBadges(s));
+
     if (s.isHDR) badges.add(_badge('HDR', const Color(0xFFFFD43B)));
     if (s.codec != null) badges.add(_badge(s.codec!, _C.textTertiary));
     if (s.fileSize != null) badges.add(_badge(s.fileSize!, _C.textTertiary));
@@ -2124,25 +2129,7 @@ class _SourceCardState extends State<_SourceCard> {
     }
   }
 
-  Widget _badge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-        ),
-      ),
-    );
-  }
+  Widget _badge(String text, Color color) => SourceBadge(text, color);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

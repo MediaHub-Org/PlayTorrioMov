@@ -4,6 +4,7 @@ import '../../models/anime/anime_media.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../utils/fullscreen_navigator.dart';
+import '../../widgets/common/source_badges.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../player/player_screen.dart';
@@ -363,6 +364,17 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                                   color: Colors.white54,
                                                   fontSize: 11,
                                                 ),
+                                              ),
+                                              // Same delivery/seed badges
+                                              // the movie and series picker
+                                              // shows, so a torrent source
+                                              // reads the same here.
+                                              const SizedBox(height: 6),
+                                              Wrap(
+                                                spacing: 6,
+                                                runSpacing: 4,
+                                                children:
+                                                    sourceDeliveryBadges(s),
                                               ),
                                             ],
                                           ),
