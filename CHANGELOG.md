@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.3.0+17] - 2026-09-08
+
 ### Added
 - Google Cast support in the video player (Android/iOS) — needs
   real-device verification before it can be considered done
