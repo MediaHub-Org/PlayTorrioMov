@@ -12,17 +12,11 @@ class IptvHeroCarousel extends StatefulWidget {
   final Function(HardcodedChannel) onWatchNow;
   final Function(HardcodedChannel) onSourcesTap;
 
-  /// Nested inside this widget's own Stack (see build()) instead of being a
-  /// page-level floating overlay, so it scrolls away together with the hero
-  /// rather than staying pinned to the viewport.
-  final Widget? header;
-
   const IptvHeroCarousel({
     super.key,
     required this.channels,
     required this.onWatchNow,
     required this.onSourcesTap,
-    this.header,
   });
 
   @override
@@ -195,14 +189,6 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
                       ),
                     ),
                   ),
-                ),
-
-              if (widget.header != null)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: SafeArea(bottom: false, child: widget.header!),
                 ),
             ],
           ),

@@ -7,8 +7,10 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/custom_scroll_track.dart';
+import '../../services/app_spacing.dart';
 import '../../widgets/common/header_pill_style.dart';
 import '../../widgets/common/page_search_button.dart';
+import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/iptv/iptv_hero_carousel.dart';
 import '../../widgets/iptv/iptv_slider_section.dart';
 import 'iptv_channel_sheet.dart';
@@ -211,9 +213,6 @@ class _IptvPageState extends State<IptvPage> {
       onSourcesTap: () => IptvPortalsModal.show(context),
       onMultiViewTap: _navigateToMultiView,
     );
-    // Nested inside the hero's own Stack (see IptvHeroCarousel) so it
-    // scrolls away with the hero instead of staying pinned to the viewport;
-    // with no hero to nest into, it renders inline instead.
     final heroWillRender = spotlightEnabled && _featured.isNotEmpty;
 
     final listContent = RefreshIndicator(
@@ -236,10 +235,7 @@ class _IptvPageState extends State<IptvPage> {
               channels: _featured,
               onWatchNow: _watchChannelNow,
               onSourcesTap: _openChannel,
-              header: pillHeader,
-            )
-          else
-            pillHeader,
+            ),
 
           const SizedBox(height: 20),
 
@@ -259,9 +255,19 @@ class _IptvPageState extends State<IptvPage> {
       ),
     );
 
+    // The header band sits above the scroll viewport, not pinned over it,
+    // so it stays put whether or not the spotlight hero is showing and
+    // nothing scrolls underneath it. It used to be nested inside the
+    // hero's own Stack, which moved it whenever the hero came or went.
     final backgroundContent = Container(
       color: palette.scaffoldBackgroundColor,
-      child: listContent,
+      child: Column(
+        children: [
+          pillHeader,
+          const SizedBox(height: AppSpacing.sm),
+          Expanded(child: listContent),
+        ],
+      ),
     );
 
     final overlayChildren = <Widget>[
@@ -289,11 +295,15 @@ class _IptvPageState extends State<IptvPage> {
   }
 }
 
-/// Live TV's own header pill row -- title, channel count, and the Sources/
-/// Multi-view/Search actions all share [headerPillDecoration] with the
-/// genre/decade/sort pills and [PageSearchButton] used everywhere else, so
-/// this reads as the same design language instead of the bespoke gradient
-/// "glass" look it used to have.
+/// Live TV's header row. Sits on the shared [PillFilterHeaderBar] like
+/// every other section's header, so the inset, the bar height, the
+/// one-line scrolling behaviour and the divider all come from one place
+/// instead of this page re-deriving them -- it used to hand-roll its own
+/// SafeArea and `fromLTRB(24, 24, 24, 16)` padding, which is why its
+/// controls sat a few pixels off from Movies', Series' and Anime's.
+///
+/// The title and channel-count pills are the bar's [leading] run; the
+/// three actions are its trailing pills.
 class _IptvGlassAppBar extends StatelessWidget {
   final Function(Offset? tapPosition) onSearchTap;
   final VoidCallback onSourcesTap;
@@ -307,69 +317,63 @@ class _IptvGlassAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: headerPillDecoration,
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.live_tv_rounded,
-                    color: Colors.white70,
-                    size: headerPillIconSize,
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    'LIVE TV',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: headerPillDecoration,
-              child: const Text(
-                '60+ CHANNELS',
-                style: TextStyle(
+    return PillFilterHeaderBar(
+      leading: const [
+        DecoratedBox(
+          decoration: headerPillDecoration,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.live_tv_rounded,
                   color: Colors.white70,
-                  fontSize: 10.5,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.4,
+                  size: headerPillIconSize,
                 ),
+                SizedBox(width: 6),
+                Text(
+                  'LIVE TV',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        DecoratedBox(
+          decoration: headerPillDecoration,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Text(
+              '60+ CHANNELS',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
               ),
             ),
-
-            const Spacer(),
-
-            HeaderPillIconButton(
-              icon: Icons.settings_input_antenna_rounded,
-              tooltip: 'Manage Portals & Playlists',
-              onTap: onSourcesTap,
-            ),
-            const SizedBox(width: 8),
-            HeaderPillIconButton(
-              icon: Icons.grid_view_rounded,
-              tooltip: 'Multi-View (watch several channels at once)',
-              onTap: onMultiViewTap,
-            ),
-            const SizedBox(width: 8),
-            PageSearchButton(onTap: onSearchTap),
-          ],
+          ),
         ),
-      ),
+      ],
+      pills: [
+        HeaderPillIconButton(
+          icon: Icons.settings_input_antenna_rounded,
+          tooltip: 'Manage Portals & Playlists',
+          onTap: onSourcesTap,
+        ),
+        HeaderPillIconButton(
+          icon: Icons.grid_view_rounded,
+          tooltip: 'Multi-View (watch several channels at once)',
+          onTap: onMultiViewTap,
+        ),
+        PageSearchButton(onTap: onSearchTap),
+      ],
     );
   }
 }

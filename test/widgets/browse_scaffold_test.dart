@@ -22,7 +22,6 @@ BrowseScaffold<String> build({
   Widget? belowHero,
   Widget? afterRows,
   Widget? header,
-  bool overlayHeader = false,
 }) {
   return BrowseScaffold<String>(
     heroItems: hero,
@@ -33,7 +32,6 @@ BrowseScaffold<String> build({
     belowHero: belowHero,
     afterRows: afterRows,
     header: header,
-    overlayHeader: overlayHeader,
     // Auto-rotation would leave a pending timer at the end of every test.
     heroInterval: null,
     heroBuilder: (_, item) => ColoredBox(
@@ -228,65 +226,40 @@ void main() {
     });
 
     testWidgets(
-      'overlayHeader floats the header over the hero instead of pushing it down',
+      'the header sits above the hero rather than over it',
       (tester) async {
         setSurfaceWidth(tester, 1400); // desktop tier
-        await tester.pumpWidget(
-          wrap(
-            build(
-              hero: ['a'],
-              header: const Text('filters'),
-              overlayHeader: true,
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('filters'), findsOneWidget);
-        expect(find.text('hero:a'), findsOneWidget);
-        // The hero fills to the very top of the page -- the header floats
-        // over it instead of reserving its own flow space above it (which
-        // the inline case, tested below, does).
-        expect(tester.getTopLeft(find.byKey(const Key('hero-box'))).dy, 0.0);
-        // Desktop-only scroll track appears alongside it.
-        expect(find.byType(CustomScrollTrack), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'overlayHeader is off by default -- header pushes the hero down, no scroll track',
-      (tester) async {
-        setSurfaceWidth(tester, 1400);
         await tester.pumpWidget(
           wrap(build(hero: ['a'], header: const Text('filters'))),
         );
         await tester.pumpAndSettle();
 
         expect(find.text('filters'), findsOneWidget);
-        // Inline: the header's own flow space pushes the hero down from the
-        // top edge, unlike the overlay case above.
-        expect(
-          tester.getTopLeft(find.byKey(const Key('hero-box'))).dy,
-          greaterThan(0.0),
-        );
-        expect(find.byType(CustomScrollTrack), findsNothing);
+        expect(find.text('hero:a'), findsOneWidget);
+
+        // The header owns a band at the top of the page and the hero starts
+        // below it. It used to be nested in the hero's own Stack, drawn over
+        // a hero that ran to y = 0.
+        final headerBottom = tester.getBottomLeft(find.text('filters')).dy;
+        final heroTop = tester.getTopLeft(find.byKey(const Key('hero-box'))).dy;
+        expect(heroTop, greaterThan(0.0));
+        expect(heroTop, greaterThanOrEqualTo(headerBottom));
       },
     );
 
     testWidgets(
-      'overlayHeader header scrolls away with the hero instead of staying pinned',
+      'the header stays put while the page scrolls under it',
       (tester) async {
-        // Regression test: the header used to be a page-level Positioned
-        // sitting outside the CustomScrollView, so it stayed fixed on
-        // screen no matter how far the page scrolled. Nested inside the
-        // hero's own Stack instead, it must scroll away along with it.
+        // Regression test for the reverse of the old behaviour: the header
+        // used to be nested inside the hero, so it scrolled away with it.
+        // It now lives outside the scroll viewport, which is what makes it
+        // stay fixed without content sliding visibly underneath it.
         setSurfaceWidth(tester, 1400);
         await tester.pumpWidget(
           wrap(
             build(
               hero: ['a'],
               header: const Text('filters'),
-              overlayHeader: true,
               rows: [BrowseRow(title: 'Trending', items: items(10))],
               // Guarantees enough scroll extent regardless of row/card
               // sizing -- without it, the fixed 900px test viewport can fit
@@ -297,13 +270,33 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('filters'), findsOneWidget);
+        final headerY = tester.getTopLeft(find.text('filters')).dy;
 
         await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
         await tester.pumpAndSettle();
 
-        expect(find.text('filters'), findsNothing);
+        expect(find.text('filters'), findsOneWidget);
+        expect(tester.getTopLeft(find.text('filters')).dy, headerY);
+        // The hero really did scroll -- otherwise the assertion above is
+        // only saying that nothing moved at all.
+        expect(find.byKey(const Key('hero-box')), findsNothing);
       },
     );
+
+    testWidgets('the scroll track is desktop-only', (tester) async {
+      setSurfaceWidth(tester, 1400);
+      await tester.pumpWidget(
+        wrap(build(hero: ['a'], header: const Text('filters'))),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(CustomScrollTrack), findsOneWidget);
+
+      setSurfaceWidth(tester, 420);
+      await tester.pumpWidget(
+        wrap(build(hero: ['a'], header: const Text('filters'))),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(CustomScrollTrack), findsNothing);
+    });
   });
 }
