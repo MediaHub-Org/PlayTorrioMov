@@ -236,8 +236,9 @@ abstract final class MyListService {
       ),
     ];
     newList.sort((a, b) => b.addedAt.compareTo(a.addedAt));
-    if (newList.length > maxItems)
+    if (newList.length > maxItems) {
       newList.removeRange(maxItems, newList.length);
+    }
     items.value = newList;
     _persist();
   }

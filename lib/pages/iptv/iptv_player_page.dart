@@ -114,8 +114,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
   bool get _isCategoryList {
     if (widget.hits.length <= 1) return false;
-    if (widget.categoryTitle != null && widget.categoryTitle!.isNotEmpty)
+    if (widget.categoryTitle != null && widget.categoryTitle!.isNotEmpty) {
       return true;
+    }
     return widget.hits.first.stream.streamId !=
         widget.hits.last.stream.streamId;
   }
@@ -137,8 +138,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
     _subscriptions.addAll([
       _player.stream.playing.listen((playing) {
-        if (mounted && _isPlaying != playing)
+        if (mounted && _isPlaying != playing) {
           setState(() => _isPlaying = playing);
+        }
       }),
       _player.stream.position.listen((pos) {
         _position = pos;
@@ -1071,11 +1073,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                     milliseconds: 1600,
                                                   ),
                                                   () {
-                                                    if (mounted)
+                                                    if (mounted) {
                                                       setState(
                                                         () => _showVolumeHud =
                                                             false,
                                                       );
+                                                    }
                                                   },
                                                 );
                                                 _hideControlsTimer?.cancel();

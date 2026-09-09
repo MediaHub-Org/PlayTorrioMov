@@ -16,6 +16,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/stream/stream_model.dart';
 import '../../models/download/download_task_model.dart';
 import './player_screen.dart';
+import '../../services/app_breakpoints.dart';
 import '../../services/stream/stream_service.dart';
 import '../../services/download/download_service.dart';
 import '../../utils/download/download_path_helper.dart';
@@ -295,7 +296,8 @@ class _WatchScreenState extends State<WatchScreen>
     }
   }
 
-  bool _isDesktop() => MediaQuery.sizeOf(context).width >= 900;
+  bool _isDesktop() =>
+      AppBreakpoints.of(context) == ScreenTier.desktop;
 
   @override
   Widget build(BuildContext context) {

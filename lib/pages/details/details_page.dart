@@ -485,8 +485,9 @@ class _DetailsPageState extends State<DetailsPage>
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_episodeScrollController.hasClients)
+      if (_episodeScrollController.hasClients) {
         _episodeScrollController.jumpTo(0);
+      }
       _updateEpisodeScrollButtons();
     });
   }

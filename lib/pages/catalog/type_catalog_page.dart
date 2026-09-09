@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/movie/movie_section.dart';
+import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../services/addon/addon_manager.dart';
@@ -355,7 +356,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     // instead of a real backdrop); the full per-title meta fetch is the
     // addon's higher-quality response and is what upstream trusts.
     final heroImage = detail?.background ?? movie.poster;
-    final isCompact = MediaQuery.sizeOf(context).width < 600;
+    final isCompact = AppBreakpoints.of(context) == ScreenTier.mobile;
     void openDetails({bool autoPlay = false}) => pushPage(context, DetailsPage(movie: movie, autoPlay: autoPlay));
     return Stack(
       fit: StackFit.expand,
