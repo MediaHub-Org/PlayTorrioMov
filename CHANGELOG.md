@@ -34,6 +34,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   buttons, header rows, section titles, card rows and grids
 
 ### Fixed
+- Anime Details now picks its layout from the window width like every
+  other page, instead of from the platform — a desktop window dragged
+  narrow kept desktop metrics (38px titles, a 1440px content cap) while
+  Movie Details beside it switched to mobile ones
 - Backing out of the video player no longer exits the app when playback
   was started from an anime episode's source sheet
 - The TMDB key shipped with a build is now actually used — cast

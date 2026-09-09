@@ -1,5 +1,4 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/content_display_enums.dart';
@@ -57,12 +56,6 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
     super.dispose();
   }
 
-  bool _isDesktop() {
-    if (kIsWeb) return true;
-    return defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.linux;
-  }
 
   double _heroHeight(double screenWidth, double screenHeight) {
     final style = IptvSettings.heroStyle.value;
@@ -82,7 +75,6 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final heroHeight = _heroHeight(screenWidth, screenHeight);
-    final isDesktop = _isDesktop();
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
 
     return MouseRegion(
@@ -112,10 +104,14 @@ class _IptvHeroCarouselState extends State<IptvHeroCarousel>
                 },
               ),
 
-              // Desktop Previous / Next Hover Arrows
-              if (isDesktop &&
-                  isHoveringCarousel &&
-                  widget.channels.length > 1) ...[
+              // Hover alone gates these, the same way BrowseScaffold's
+              // arrows do: a touch device never fires onEnter, so it never
+              // sees an arrow, and a device with a pointer does -- which is
+              // the actual question. The platform check that used to sit
+              // here was both redundant with isHoveringCarousel and wrong
+              // in name, since every other _isDesktop() in the app asks
+              // about width.
+              if (isHoveringCarousel && widget.channels.length > 1) ...[
                 Positioned(
                   left: 20,
                   top: 0,
