@@ -54,47 +54,49 @@ class PillFilterHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final inset = AppSpacing.pageInset(context);
 
-    final bar = SafeArea(
-      bottom: false,
-      child: SizedBox(
-        height: pillFilterHeaderContentHeight,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // minWidth keeps the row right-aligned while the pills fit,
-            // and lets it grow past the viewport (so the SingleChildScroll
-            // View actually scrolls) once they do not.
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(
-                horizontal: inset,
-                vertical: _kBarVerticalPadding,
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: (constraints.maxWidth - inset * 2).clamp(
-                    0.0,
-                    double.infinity,
-                  ),
-                ),
-                // No Spacer/Expanded in here: the row is laid out with an
-                // unbounded max width so it can scroll, and a flex child
-                // would throw. spaceBetween does the same job off the
-                // minWidth above, and collapses to packed once the pills
-                // are wide enough to scroll.
-                child: Row(
-                  mainAxisAlignment: leading.isEmpty
-                      ? MainAxisAlignment.end
-                      : MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    if (leading.isNotEmpty) _group(leading),
-                    _group(pills),
-                  ],
+    // No SafeArea here: every page that uses this bar renders inside the
+    // hub's content area, and AdaptiveNavShell has already inset past the
+    // status bar (SizedBox(topPadding) + TopBar) before the content starts.
+    // Wrapping again double-counted the notch, and made this bar taller
+    // than pillFilterHeaderContentHeight claims.
+    final bar = SizedBox(
+      height: pillFilterHeaderContentHeight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // minWidth keeps the row right-aligned while the pills fit,
+          // and lets it grow past the viewport (so the SingleChildScroll
+          // View actually scrolls) once they do not.
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.symmetric(
+              horizontal: inset,
+              vertical: _kBarVerticalPadding,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minWidth: (constraints.maxWidth - inset * 2).clamp(
+                  0.0,
+                  double.infinity,
                 ),
               ),
-            );
-          },
-        ),
+              // No Spacer/Expanded in here: the row is laid out with an
+              // unbounded max width so it can scroll, and a flex child
+              // would throw. spaceBetween does the same job off the
+              // minWidth above, and collapses to packed once the pills
+              // are wide enough to scroll.
+              child: Row(
+                mainAxisAlignment: leading.isEmpty
+                    ? MainAxisAlignment.end
+                    : MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (leading.isNotEmpty) _group(leading),
+                  _group(pills),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
 

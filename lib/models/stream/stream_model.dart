@@ -78,13 +78,31 @@ class StreamSource {
     caseSensitive: false,
   );
 
+  // Tried in order, first match wins. These used to be looser; the seed
+  // count was parsed and never shown, so a false positive cost nothing.
+  // It is rendered now (as a colour-coded health badge), so two
+  // alternatives had to be tightened:
+  //
+  //  * the bare `s` prefix needed a word boundary -- without it "Files: 3"
+  //    and any other word ending in s before a colon parsed as 3 seeders;
+  //  * the `N/M` form needed its seeds/peers suffix to be mandatory --
+  //    optional, it claimed "12/12" episode counts and "16/9" as seeds.
+  //
+  // Order matters, and the `N/M` form has moved up for the same reason: it
+  // captures the *first* number, per the usual seeds/leechers convention,
+  // and while it sat last the patterns above it grabbed the second -- so
+  // "25/3 peers" reported 3 seeders, the leecher count, under a green
+  // health badge.
   static final List<RegExp> _seederPatterns = [
     RegExp(r'[👤👥🌱⚡]\s*(\d+)', caseSensitive: false),
-    RegExp(r'(?:seeds?|seeders?|peers?|s)\s*[:=]\s*(\d+)', caseSensitive: false),
-    RegExp(r'(\d+)\s*(?:seeds?|seeders?)', caseSensitive: false),
-    RegExp(r'\[\s*(\d+)\s*(?:s|seeds?)', caseSensitive: false),
-    RegExp(r'/\s*(\d+)\s*peers?', caseSensitive: false),
-    RegExp(r'(\d+)\s*/\s*\d+\s*(?:peers?|seeds?)?', caseSensitive: false),
+    RegExp(r'(\d+)\s*/\s*\d+\s*(?:peers?|seeds?)\b', caseSensitive: false),
+    RegExp(
+      r'(?:\bseeds?|\bseeders?|\bpeers?|\bs)\s*[:=]\s*(\d+)',
+      caseSensitive: false,
+    ),
+    RegExp(r'(\d+)\s*(?:seeds?|seeders?)\b', caseSensitive: false),
+    RegExp(r'\[\s*(\d+)\s*(?:s\b|seeds?\b)', caseSensitive: false),
+    RegExp(r'/\s*(\d+)\s*peers?\b', caseSensitive: false),
   ];
 
   String? _cachedQuality;

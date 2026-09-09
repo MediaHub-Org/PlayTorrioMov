@@ -5,7 +5,6 @@ import '../../models/stream/stream_model.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/source_badges.dart';
-import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../player/player_screen.dart';
 
@@ -124,15 +123,17 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     final video =
         AnimeScraperService.toVideo(widget.anime, widget.episodeNumber);
 
-    pushFullscreenReplacement(
-      CinematicSlideRoute(
-        page: PlayerScreen(
-          source: source,
-          title: '${widget.anime.displayTitle} - Episode ${widget.episodeNumber}',
-          backdropUrl: widget.anime.backdropUrl,
-          detail: detail,
-          episode: video,
-        ),
+    // Close the sheet, then push onto the ROOT navigator -- see the same
+    // note in anime_arabic_stream_sheet: replacing the root's top route
+    // tore down the hub underneath and made Back exit the app.
+    Navigator.pop(context);
+    pushFullscreenPage(
+      PlayerScreen(
+        source: source,
+        title: '${widget.anime.displayTitle} - Episode ${widget.episodeNumber}',
+        backdropUrl: widget.anime.backdropUrl,
+        detail: detail,
+        episode: video,
       ),
     );
   }

@@ -2239,11 +2239,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                 _ => 'Fit',
               },
               audioLabel: _selectedAudioTrackLabel,
-              // A single-track file has nothing to choose between, so the
-              // row is not offered at all rather than opening an empty menu.
-              onTapAudio: _audioTracks.length > 1
-                  ? () => setState(() => _activeMenu = 'audio')
-                  : null,
+              // Always offered: the menu is not just a track list, it also
+              // holds the Audio Sync Offset control, and with the transport
+              // bar's audio button gone this row is its only way in. Gating
+              // it on a track count stranded sync on single-track media,
+              // which is most media.
+              onTapAudio: () => setState(() => _activeMenu = 'audio'),
               onTapSpeed: () => setState(() => _activeMenu = 'speed'),
               onTapAspect: () => setState(() => _activeMenu = 'aspect'),
               onClose: () => setState(() => _activeMenu = null),

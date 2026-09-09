@@ -401,7 +401,9 @@ class _DetailsPageState extends State<DetailsPage>
     final meta = _detail;
     final tmdbId = meta?.tmdbId;
     if (meta == null || tmdbId == null || tmdbId.isEmpty) return;
-    if (TmdbSettings.apiKey.value == null) return;
+    // isConfigured, not apiKey: a key can also come from the build
+    // (--dart-define / .env), which is the whole point of #34.
+    if (!TmdbSettings.isConfigured) return;
 
     // Only enrich when the addon's own cast has no photos to show already.
     final hasPhotos = meta.castMembers.any(
