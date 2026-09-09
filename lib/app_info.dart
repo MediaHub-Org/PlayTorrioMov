@@ -29,9 +29,18 @@ abstract final class AppInfo {
   /// Build channel, appended in parentheses wherever the version is shown.
   ///
   /// The releases are ordinary semver versions -- `1.1.3`, not
-  /// `1.1.3-alpha.1`. Empty once a release has been verified on hardware;
-  /// set back to `'dev'` if an unverified build needs the marker again.
-  static const String channel = '';
+  /// `1.1.3-alpha.1`. `dev` on an unverified build, empty on a verified
+  /// one.
+  ///
+  /// Supplied by the build (`--dart-define=APP_CHANNEL=dev`), from the same
+  /// condition `build.yml` uses to decide the GitHub release's `prerelease`
+  /// flag -- so the marker inside the app cannot disagree with the label
+  /// outside it. This used to be a hardcoded constant that a human was
+  /// expected to flip by hand each release, which meant a `dev_build`
+  /// dispatch shipped binaries reporting themselves as verified.
+  ///
+  /// Empty by default, so a local `flutter run` is unmarked.
+  static const String channel = String.fromEnvironment('APP_CHANNEL');
 
   /// Whether this build carries a channel marker. Handy for showing a badge
   /// without string-comparing [channel] at each call site.

@@ -43,5 +43,35 @@ void main() {
     test('isPrerelease tracks the channel', () {
       expect(AppInfo.isPrerelease, AppInfo.channel.isNotEmpty);
     });
+
+    test('the channel comes from the build, not a hand-edited constant', () {
+      // These three assertions are all self-consistent -- they hold whatever
+      // channel says -- so none of them would notice the channel being
+      // hardcoded, which is exactly how dev_build dispatches came to publish
+      // binaries reporting themselves as verified releases. This pins the
+      // wiring instead: unset (a plain `flutter test`) must be empty, and
+      // build.yml must pass APP_CHANNEL to every platform build.
+      expect(
+        AppInfo.channel,
+        '',
+        reason: 'no --dart-define=APP_CHANNEL was given, so it must be empty',
+      );
+
+      final workflow = File('.github/workflows/build.yml').readAsStringSync();
+      final buildCommands = RegExp(
+        r'flutter build \w+ --release',
+      ).allMatches(workflow).length;
+      final channelDefines = RegExp(
+        r'--dart-define=APP_CHANNEL=',
+      ).allMatches(workflow).length;
+
+      expect(
+        channelDefines,
+        greaterThanOrEqualTo(buildCommands),
+        reason:
+            'every `flutter build` in build.yml must pass APP_CHANNEL, or '
+            'that platform ships without the dev marker',
+      );
+    });
   });
 }
