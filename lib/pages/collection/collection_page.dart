@@ -54,8 +54,9 @@ class _CollectionPageState extends State<CollectionPage> {
       if (_filterType == 'movie' && item.type != 'movie') return false;
       if (_filterType == 'series' &&
           item.type != 'series' &&
-          item.type != 'anime')
+          item.type != 'anime') {
         return false;
+      }
       if (_filterType == 'anime' && item.type != 'anime') return false;
 
       return true;

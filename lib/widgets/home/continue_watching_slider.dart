@@ -347,9 +347,6 @@ class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
         addonBaseUrl: '',
       );
 
-      final box = context.findRenderObject() as RenderBox?;
-      final offset = box?.localToGlobal(box.size.center(Offset.zero));
-
       pushPage(context, DetailsPage(movie: movie));
     }
   }
