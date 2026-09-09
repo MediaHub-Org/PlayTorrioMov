@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
 import 'package:playtorriomov/pages/anime/anime_details_page.dart';
+import 'package:playtorriomov/widgets/common/glass_back_button.dart';
 
 void main() {
   testWidgets('AnimeDetailsPage renders full page layout, 50-chunk selector, jump to ep, and relations', (tester) async {
@@ -56,8 +57,16 @@ void main() {
     expect(find.text('Episodes'), findsOneWidget);
     expect(find.textContaining('1120 total'), findsOneWidget);
 
-    // Verify Back Button (top-left)
-    expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
+    // Verify Back Button (top-left).
+    //
+    // By widget, not by icon: at the 1200px width this test declares, the
+    // page now genuinely renders its desktop layout, whose cast, relations
+    // and recommendation carousels each carry a SliderArrow drawn with the
+    // same arrow_back_ios_new_rounded glyph. Counting the icon found four.
+    // It only ever found one because _isDesktop() used to ask the platform,
+    // which is android under flutter_test -- so this test set a desktop
+    // width and then asserted against the mobile layout.
+    expect(find.byType(GlassBackButton), findsOneWidget);
 
     // Verify Jump Input
     expect(find.byType(TextField), findsOneWidget);

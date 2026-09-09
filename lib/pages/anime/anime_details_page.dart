@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/app_breakpoints.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
@@ -254,12 +254,16 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     pushPage(context, AnimeDetailsPage(anime: target));
   }
 
-  bool _isDesktop() {
-    if (kIsWeb) return true;
-    return defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.linux;
-  }
+  /// Width, not platform.
+  ///
+  /// Everything this gates is a layout measurement -- hero height, a 1440
+  /// content cap, padding, 38px vs 26px titles, 165px vs 135px cards --
+  /// and DetailsPage, the sibling page making those same calls, has always
+  /// asked AppBreakpoints. Asking defaultTargetPlatform instead meant a
+  /// macOS window dragged narrow (or any web viewport) kept desktop
+  /// metrics while Movie Details next to it switched to mobile ones.
+  bool _isDesktop() =>
+      AppBreakpoints.of(context) == ScreenTier.desktop;
 
   @override
   Widget build(BuildContext context) {
