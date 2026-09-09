@@ -544,12 +544,22 @@ class ContinueWatchingService {
   /// run, so the success and error paths can both call it.
   static VoidCallback _showResumeLoader(BuildContext context, String message) {
     BuildContext? dialogContext;
+    // showDialog builds on the next frame, so a resume that finishes in
+    // microtasks (a cached lookup) can call the closer before there is any
+    // context to pop. Without this flag that close was a silent no-op and
+    // the spinner -- barrierDismissible: false -- stayed up for good.
+    var closeRequested = false;
 
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
         dialogContext = ctx;
+        if (closeRequested) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (ctx.mounted) Navigator.of(ctx).pop();
+          });
+        }
         return Center(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
@@ -587,6 +597,7 @@ class ContinueWatchingService {
     );
 
     return () {
+      closeRequested = true;
       final ctx = dialogContext;
       dialogContext = null;
       if (ctx != null && ctx.mounted) Navigator.of(ctx).pop();

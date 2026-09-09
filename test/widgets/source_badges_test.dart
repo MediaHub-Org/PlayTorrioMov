@@ -70,6 +70,50 @@ void main() {
       expect(find.byType(SourceBadge), findsOneWidget);
     });
 
+    testWidgets('does not invent a seed count from unrelated numbers', (
+      tester,
+    ) async {
+      // These parsed as seed counts before the count was ever displayed,
+      // which cost nothing then and paints a wrong colour-coded health
+      // badge now: "Files: 3" hit the bare `s:` alternative, and "12/12"
+      // hit the N/M one whose seeds/peers suffix was optional.
+      for (final title in [
+        'Show S01E05 1080p [12/12] x265',
+        'Movie 2019 1080p Files: 3',
+        'Movie 1080p 16/9 HDR',
+      ]) {
+        await tester.pumpWidget(wrap(sourceDeliveryBadges(torrent(title: title))));
+        expect(
+          find.byType(SourceBadge),
+          findsOneWidget,
+          reason: 'only the P2P badge should show for: $title',
+        );
+        expect(find.text('P2P'), findsOneWidget);
+      }
+    });
+
+    testWidgets('still reads the counts scrapers really do emit', (
+      tester,
+    ) async {
+      for (final entry in {
+        'Movie 1080p 👤 137': '137',
+        'Movie 1080p Seeds: 42': '42',
+        'Movie 1080p 8 seeders': '8',
+        'Movie 1080p 25/3 peers': '25',
+        'Movie 1080p 25/3 seeds': '25',
+        'Movie 1080p [45 seeds]': '45',
+      }.entries) {
+        await tester.pumpWidget(
+          wrap(sourceDeliveryBadges(torrent(title: entry.key))),
+        );
+        expect(
+          find.text(entry.value),
+          findsOneWidget,
+          reason: 'should read ${entry.value} from: ${entry.key}',
+        );
+      }
+    });
+
     testWidgets('a magnet URL with no infoHash still reads as P2P', (
       tester,
     ) async {

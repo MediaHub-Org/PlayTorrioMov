@@ -66,6 +66,31 @@ void main() {
       expect(withOne, pillFilterHeaderContentHeight);
     });
 
+    testWidgets('does not re-inset a status bar the shell already cleared', (
+      tester,
+    ) async {
+      // Regression test. The bar used to wrap itself in a SafeArea, but
+      // AdaptiveNavShell already offsets past the status bar before the hub
+      // content starts and does not removePadding -- so on a notched phone
+      // the inset was counted twice and the bar was ~50px taller than
+      // pillFilterHeaderContentHeight claims. Harmless while it floated
+      // over the hero; it eats the scroll viewport now that it owns a band.
+      setSurfaceWidth(tester, 400);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: 59)),
+            child: Scaffold(body: PillFilterHeaderBar(pills: [pill('a')])),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getSize(find.byType(PillFilterHeaderBar)).height,
+        pillFilterHeaderContentHeight,
+      );
+    });
+
     testWidgets('overflowing pills scroll horizontally', (tester) async {
       setSurfaceWidth(tester, 400);
       await tester.pumpWidget(

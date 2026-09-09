@@ -71,7 +71,9 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
         elevation: 0,
         // Same leading inset as every other page's back button; AppBar's
         // own 56px leading slot would centre it somewhere else again.
-        leadingWidth: AppSpacing.pageInset(context) + 44,
+        // + kMinInteractiveDimension: GlassBackButton is a 48x48
+        // IconButton, and a narrower slot clamps it into an ellipse.
+        leadingWidth: AppSpacing.pageInset(context) + 48,
         leading: Padding(
           padding: EdgeInsets.only(left: AppSpacing.pageInset(context)),
           child: const Center(child: GlassBackButton()),

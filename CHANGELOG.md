@@ -3,7 +3,7 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.4.0+18] - 2026-09-09
 
 ### Added
 - Seed count and a P2P/HTTP indicator on every stream-source picker
@@ -34,6 +34,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   buttons, header rows, section titles, card rows and grids
 
 ### Fixed
+- Backing out of the video player no longer exits the app when playback
+  was started from an anime episode's source sheet
+- The TMDB key shipped with a build is now actually used — cast
+  enrichment still checked only for a user-entered key, so the built-in
+  one never took effect
+- Audio Sync Offset is reachable again for media with a single audio
+  track; it lives in the audio menu, which was being hidden in exactly
+  that case
+- Wrong seed counts on source badges: titles like `[12/12]` or
+  `Files: 3` were read as seed counts, and the `25/3 peers` form
+  reported the leecher count instead of the seeds
+- The filter bar no longer counts the status bar twice on notched
+  phones, which cost ~50px of every browse page
+- Row titles no longer shift sideways when real content replaces the
+  loading skeleton
 - Resuming from Continue Watching now opens straight into the player.
   It was pushed inside the hub's navigator, so the section top bar and
   sidebar stayed drawn around a fullscreen video screen

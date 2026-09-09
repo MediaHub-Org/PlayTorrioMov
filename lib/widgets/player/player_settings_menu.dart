@@ -11,15 +11,15 @@ class PlayerSettingsMenu extends StatelessWidget {
   final String aspectLabel;
 
   /// The playing track's name, or null while the media has not reported
-  /// its tracks yet (or has only one, where there is nothing to choose).
+  /// its tracks yet.
   final String? audioLabel;
 
   final VoidCallback onTapSpeed;
   final VoidCallback onTapAspect;
 
-  /// Null hides the audio row entirely -- a single-track file has no
-  /// choice to offer, and a row that opens an empty menu is worse than
-  /// no row.
+  /// Null hides the audio row. Callers should normally supply it even for
+  /// single-track media: the menu it opens also carries the Audio Sync
+  /// Offset control, and this row is its only entry point.
   final VoidCallback? onTapAudio;
 
   final VoidCallback onClose;

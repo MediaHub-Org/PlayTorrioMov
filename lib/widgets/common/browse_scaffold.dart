@@ -342,7 +342,12 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
         ),
         for (var r = 0; r < 2; r++) ...[
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 16, 12),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.pageInset(context),
+              8,
+              AppSpacing.pageInset(context),
+              12,
+            ),
             child: Container(
               width: 140,
               height: 20,

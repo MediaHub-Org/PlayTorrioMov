@@ -4,7 +4,6 @@ import '../../services/anime_arabic/anime_arabic_extractor.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/fullscreen_navigator.dart';
-import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/source_badges.dart';
 import '../player/player_screen.dart';
 
@@ -108,18 +107,20 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
       orElse: () => movieDetail.videos.first,
     );
 
-    // Replace on the root navigator, not this sheet's: the sheet sits over
-    // the hub's nested navigator, so a plain pushReplacement would leave the
-    // player boxed inside the hub with its top bar still drawn around it.
-    pushFullscreenReplacement(
-      CinematicSlideRoute(
-        page: PlayerScreen(
-          source: source,
-          title: '${widget.details.title} - Episode ${widget.episode.number}',
-          backdropUrl: widget.details.displayBanner,
-          detail: movieDetail,
-          episode: video,
-        ),
+    // Close the sheet, then push the player onto the ROOT navigator.
+    //
+    // Not pushFullscreenReplacement: the sheet lives on the hub's nested
+    // navigator, so the root stack is just [HubPage] -- replacing its top
+    // route tore the hub down, and backing out of the player then popped
+    // an empty root and exited the app.
+    Navigator.pop(context);
+    pushFullscreenPage(
+      PlayerScreen(
+        source: source,
+        title: '${widget.details.title} - Episode ${widget.episode.number}',
+        backdropUrl: widget.details.displayBanner,
+        detail: movieDetail,
+        episode: video,
       ),
     );
   }
