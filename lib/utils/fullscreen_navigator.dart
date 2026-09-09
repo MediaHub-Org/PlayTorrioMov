@@ -25,5 +25,5 @@ Future<T?> pushFullscreenReplacement<T>(Route<T> route) {
 /// drawn around the player. This is the same escape hatch as
 /// [pushFullscreen], minus each caller restating the route class.
 Future<T?> pushFullscreenPage<T>(Widget page) {
-  return pushFullscreen<T>(CinematicSlideRoute(page: page));
+  return pushFullscreen<T>(CinematicSlideRoute<T>(page: page));
 }

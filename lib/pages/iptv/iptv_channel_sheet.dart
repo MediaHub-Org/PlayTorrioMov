@@ -45,7 +45,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
     super.dispose();
   }
 
-  void _playHit(ChannelHit hit, [Offset? tapPos]) {
+  void _playHit(ChannelHit hit) {
     final results = _ctrl.channelResults;
     if (results.isEmpty) return;
     final index = results.indexOf(hit);

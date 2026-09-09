@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 ///
 /// Prefer [pushPage] / [pushReplacementPage] over naming this directly --
 /// they are what keeps every navigation on the same transition.
-class CinematicSlideRoute extends PageRouteBuilder {
+class CinematicSlideRoute<T> extends PageRouteBuilder<T> {
   final Widget page;
 
   CinematicSlideRoute({
@@ -66,7 +66,7 @@ class CinematicSlideRoute extends PageRouteBuilder {
 /// content area. Fullscreen playback deliberately escapes that; see
 /// `pushFullscreenPage` in utils/fullscreen_navigator.dart.
 Future<T?> pushPage<T>(BuildContext context, Widget page) {
-  return Navigator.of(context).push<T>(CinematicSlideRoute(page: page));
+  return Navigator.of(context).push<T>(CinematicSlideRoute<T>(page: page));
 }
 
 /// Replaces the current route with [page], same transition as [pushPage].
@@ -77,5 +77,5 @@ Future<T?> pushPage<T>(BuildContext context, Widget page) {
 Future<T?> pushReplacementPage<T>(BuildContext context, Widget page) {
   return Navigator.of(
     context,
-  ).pushReplacement<T, dynamic>(CinematicSlideRoute(page: page));
+  ).pushReplacement<T, dynamic>(CinematicSlideRoute<T>(page: page));
 }

@@ -455,10 +455,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       ),
-                      child: Text(
-                    bundled ? 'Use my key' : 'Connect',
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
-                  ),
+                      child: const Text('Connect', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                     ),
                 ],
               ),
@@ -571,7 +568,13 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
-                  child: const Text('Connect', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                  child: Text(
+                    bundled ? 'Use my key' : 'Connect',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
             ],
           ),
