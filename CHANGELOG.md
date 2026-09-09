@@ -3,6 +3,16 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- An unverified build now actually says so. `dev_build` only ever set the
+  GitHub release's title and prerelease flag; the binary carried a
+  hardcoded empty channel, so Settings, Updates and About reported a dev
+  prerelease as a verified release and hid the prerelease badge. The
+  marker is now baked in by the build from the same condition that sets
+  the release flag, so the two cannot disagree
+
 ## [1.4.0+18] - 2026-09-09
 
 ### Added

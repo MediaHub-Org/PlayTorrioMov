@@ -20,7 +20,9 @@
 #  has been verified on a device. A pushed tag carrying a semver
 #  prerelease suffix (v1.2.0-beta.1) is a prerelease too; a plain
 #  v1.2.0 is a full release.
-#  Environment: Injects --dart-define-from-file=.env using ${{ secrets.ENV_FILE }}
+#  Environment: Injects --dart-define-from-file=.env using ${{ secrets.ENV_FILE }},
+#  plus --dart-define=APP_CHANNEL so the binary carries the same dev/stable
+#  marker as the release it ships in.
 # ──────────────────────────────────────────────────────────────────────────────
 name: Build and Release PlayTorrioMov
 
@@ -51,6 +53,15 @@ permissions:
 # runner OSes, so one workflow-level value covers every job.
 env:
   PUB_CACHE: ${{ github.workspace }}/.pub-cache
+  # Build channel baked into the binary via AppInfo.channel, so an
+  # unverified build says "1.4.0 (dev)" in Settings/About and shows the
+  # prerelease badge. Deliberately the same condition line 797 uses for the
+  # GitHub release's `prerelease` flag: computed once here, the marker
+  # inside the app cannot disagree with the label outside it. It used to be
+  # a hardcoded constant in app_info.dart that a human was expected to flip
+  # by hand each release, which meant a dev_build dispatch published
+  # binaries claiming to be verified.
+  APP_CHANNEL: ${{ (github.event.inputs.dev_build != 'false' || contains(github.ref_name, '-')) && 'dev' || '' }}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 jobs:
@@ -132,7 +143,7 @@ jobs:
           # newer MSVC (VS 2026 / STL1011) treats as a hard error. Silence the
           # deprecation so the plugin compiles on the CI runner.
           export CXXFLAGS="-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
-          flutter build windows --release --dart-define-from-file=.env
+          flutter build windows --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Install Inno Setup
         shell: pwsh
@@ -297,7 +308,7 @@ jobs:
           echo "Release signing configured (alias: $KEY_ALIAS)."
 
       - name: Build Split-per-ABI APKs
-        run: flutter build apk --release --split-per-abi --dart-define-from-file=.env
+        run: flutter build apk --release --split-per-abi --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Organize Android APK Outputs
         env:
@@ -419,7 +430,7 @@ jobs:
           echo "Release signing configured (alias: $KEY_ALIAS)."
 
       - name: Build Universal APK
-        run: flutter build apk --release --dart-define-from-file=.env
+        run: flutter build apk --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Organize Universal APK
         env:
@@ -493,7 +504,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Linux Release
-        run: flutter build linux --release --dart-define-from-file=.env
+        run: flutter build linux --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Package as AppImage & Tar
         env:
@@ -585,7 +596,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS Release
-        run: flutter build macos --release --dart-define-from-file=.env
+        run: flutter build macos --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Package as DMG & ZIP
         env:
@@ -660,7 +671,7 @@ jobs:
         run: arch -x86_64 flutter pub get
 
       - name: Build macOS Intel Release
-        run: arch -x86_64 flutter build macos --release --dart-define-from-file=.env
+        run: arch -x86_64 flutter build macos --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Package as DMG & ZIP
         env:
@@ -731,7 +742,7 @@ jobs:
         run: flutter pub get
 
       - name: Build iOS Release (No Codesign)
-        run: flutter build ios --release --no-codesign --dart-define-from-file=.env
+        run: flutter build ios --release --no-codesign --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
       - name: Package as IPA
         env:
