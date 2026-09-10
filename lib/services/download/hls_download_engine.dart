@@ -101,7 +101,11 @@ class HlsDownloadEngine {
         }
 
         final segment = segments[i];
-        Uint8List chunkBytes = await _fetchBytes(segment.uri, headers);
+        Uint8List chunkBytes = await _fetchBytesWithRetry(
+          segment.uri,
+          headers,
+          isPausedOrCanceled: isPausedOrCanceled,
+        );
 
         // Decrypt if AES-128 encrypted
         if (segment.encryptionKey != null) {
@@ -145,27 +149,50 @@ class HlsDownloadEngine {
           totalBytes: estimatedTotalBytes,
           speedBytesPerSec: speed,
           etaSeconds: eta,
+          error: null,
         ));
       }
 
       await sink.flush();
       await sink.close();
 
-      // Rename .part to targetFilePath
+      // Pause briefly on Windows to ensure file handle release
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // Rename .part to targetFilePath with fallback copy
       final finalFile = File(task.targetFilePath);
-      if (await finalFile.exists()) await finalFile.delete();
-      await partFile.rename(task.targetFilePath);
+      if (await finalFile.exists()) {
+        try {
+          await finalFile.delete();
+        } catch (_) {}
+      }
+      try {
+        await partFile.rename(task.targetFilePath);
+      } catch (e) {
+        debugPrint('[HlsDownloadEngine] Rename failed, using fallback copy: $e');
+        await partFile.copy(task.targetFilePath);
+        try {
+          await partFile.delete();
+        } catch (_) {}
+      }
 
       // Clean up metadata
-      if (await metaFile.exists()) await metaFile.delete();
+      if (await metaFile.exists()) {
+        try {
+          await metaFile.delete();
+        } catch (_) {}
+      }
+
+      final completedBytes = await File(task.targetFilePath).length();
 
       onProgress(task.copyWith(
         status: DownloadStatus.completed,
-        receivedBytes: totalBytesWritten,
-        totalBytes: totalBytesWritten,
+        receivedBytes: completedBytes,
+        totalBytes: completedBytes,
         speedBytesPerSec: 0.0,
         etaSeconds: 0,
         completedAt: DateTime.now(),
+        error: null,
       ));
     } catch (e) {
       try {
@@ -304,6 +331,25 @@ class HlsDownloadEngine {
     } finally {
       client.close();
     }
+  }
+
+  static Future<Uint8List> _fetchBytesWithRetry(
+    Uri uri,
+    Map<String, String> headers, {
+    int maxRetries = 4,
+    required bool Function() isPausedOrCanceled,
+  }) async {
+    for (int attempt = 1; attempt <= maxRetries; attempt++) {
+      if (isPausedOrCanceled()) throw Exception('Download paused or canceled');
+      try {
+        return await _fetchBytes(uri, headers);
+      } catch (e) {
+        if (attempt == maxRetries || isPausedOrCanceled()) rethrow;
+        debugPrint('[HlsDownloadEngine] Chunk fetch failed ($e), retrying attempt $attempt of $maxRetries in ${(600 * attempt)}ms...');
+        await Future.delayed(Duration(milliseconds: 600 * attempt));
+      }
+    }
+    throw Exception('Failed to fetch segment after $maxRetries attempts');
   }
 
   static Future<Uint8List> _fetchBytes(Uri uri, Map<String, String> headers) async {

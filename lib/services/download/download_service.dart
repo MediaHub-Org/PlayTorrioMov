@@ -366,7 +366,7 @@ class DownloadService {
 
   // ── Engine 4: Dart HTTP Client with Range-based Resumption ─────────────────
 
-  Future<void> _executeHttpDownload(DownloadTask task) async {
+  Future<void> _executeHttpDownload(DownloadTask task, {int attempt = 1}) async {
     final urlStr = task.rawUrl;
     if (urlStr == null || urlStr.isEmpty) {
       _updateTask(task.copyWith(status: DownloadStatus.failed, error: 'Empty download URL'));
@@ -384,10 +384,16 @@ class DownloadService {
       existingBytes = await partFile.length();
     }
 
+    // Check if task was already fully downloaded but not yet finalized
+    if (task.totalBytes > 0 && existingBytes >= task.totalBytes) {
+      await _finalizeDownloadedFile(task, partFile);
+      return;
+    }
+
     try {
       final uri = Uri.parse(urlStr);
       final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 20);
+      client.connectionTimeout = const Duration(seconds: 25);
 
       final request = await client.getUrl(uri);
       _httpRequests[task.id] = request;
@@ -413,6 +419,11 @@ class DownloadService {
       final isOk = response.statusCode == HttpStatus.ok;
 
       if (!isPartial && !isOk) {
+        // If range was unsatisfiable (416), file is probably already fully downloaded
+        if (response.statusCode == HttpStatus.requestedRangeNotSatisfiable && existingBytes > 0) {
+          await _finalizeDownloadedFile(task, partFile);
+          return;
+        }
         throw Exception('Server returned HTTP ${response.statusCode}: ${response.reasonPhrase}');
       }
 
@@ -463,47 +474,86 @@ class DownloadService {
             }
 
             _updateTask(task.copyWith(
+              status: DownloadStatus.downloading,
               receivedBytes: receivedSoFar,
               totalBytes: totalBytes > 0 ? totalBytes : receivedSoFar,
               speedBytesPerSec: speed,
               etaSeconds: eta,
+              error: null,
             ));
           }
         },
         onDone: () async {
-          await sink.flush();
-          await sink.close();
+          try {
+            await sink.flush();
+            await sink.close();
+          } catch (_) {}
           _httpFileSinks.remove(task.id);
           _httpSubscriptions.remove(task.id);
           _httpRequests.remove(task.id);
 
-          // Rename .part to targetFilePath
-          final finalFile = File(task.targetFilePath);
-          if (await finalFile.exists()) await finalFile.delete();
-          await partFile.rename(task.targetFilePath);
+          if (_canceledOrPausedTaskIds.contains(task.id)) return;
 
-          _updateTask(task.copyWith(
-            status: DownloadStatus.completed,
-            receivedBytes: receivedSoFar,
-            totalBytes: totalBytes > 0 ? totalBytes : receivedSoFar,
-            speedBytesPerSec: 0.0,
-            etaSeconds: 0,
-            completedAt: DateTime.now(),
-          ));
+          // Check if stream closed prematurely before reaching total bytes (common 99% hiccup)
+          if (totalBytes > 0 && receivedSoFar < (totalBytes - 2048) && attempt < 5) {
+            debugPrint('[DownloadService] Stream closed prematurely ($receivedSoFar / $totalBytes bytes). Auto-reconnecting attempt ${attempt + 1}...');
+            _updateTask(task.copyWith(
+              status: DownloadStatus.downloading,
+              error: 'Reconnecting remaining data (attempt $attempt)...',
+              speedBytesPerSec: 0.0,
+            ));
+            await Future.delayed(Duration(seconds: attempt));
+            if (!_canceledOrPausedTaskIds.contains(task.id)) {
+              await _executeHttpDownload(
+                task.copyWith(receivedBytes: receivedSoFar, totalBytes: totalBytes),
+                attempt: attempt + 1,
+              );
+            }
+            return;
+          }
+
+          await _finalizeDownloadedFile(
+            task.copyWith(
+              receivedBytes: receivedSoFar,
+              totalBytes: totalBytes > 0 ? totalBytes : receivedSoFar,
+            ),
+            partFile,
+          );
         },
         onError: (err) async {
-          await sink.flush();
-          await sink.close();
+          try {
+            await sink.flush();
+            await sink.close();
+          } catch (_) {}
           _httpFileSinks.remove(task.id);
           _httpSubscriptions.remove(task.id);
           _httpRequests.remove(task.id);
 
-          if (!_canceledOrPausedTaskIds.contains(task.id)) {
+          if (_canceledOrPausedTaskIds.contains(task.id)) return;
+
+          // Auto-reconnect up to 4 attempts on network error
+          if (attempt < 5) {
+            debugPrint('[DownloadService] Download network error: $err. Auto-reconnecting attempt ${attempt + 1}...');
             _updateTask(task.copyWith(
-              status: DownloadStatus.failed,
-              error: err.toString(),
+              status: DownloadStatus.downloading,
+              error: 'Reconnecting (attempt $attempt)...',
+              speedBytesPerSec: 0.0,
             ));
+            await Future.delayed(Duration(seconds: attempt * 2));
+            if (!_canceledOrPausedTaskIds.contains(task.id)) {
+              await _executeHttpDownload(
+                task.copyWith(receivedBytes: receivedSoFar, totalBytes: totalBytes),
+                attempt: attempt + 1,
+              );
+            }
+            return;
           }
+
+          _updateTask(task.copyWith(
+            status: DownloadStatus.failed,
+            error: err.toString(),
+            speedBytesPerSec: 0.0,
+          ));
         },
         cancelOnError: true,
       );
@@ -512,11 +562,68 @@ class DownloadService {
     } catch (e) {
       _cleanupHttpTask(task.id);
       if (!_canceledOrPausedTaskIds.contains(task.id)) {
+        if (attempt < 5) {
+          debugPrint('[DownloadService] Exception in HTTP download: $e. Auto-reconnecting attempt ${attempt + 1}...');
+          _updateTask(task.copyWith(
+            status: DownloadStatus.downloading,
+            error: 'Reconnecting (attempt $attempt)...',
+            speedBytesPerSec: 0.0,
+          ));
+          await Future.delayed(Duration(seconds: attempt * 2));
+          if (!_canceledOrPausedTaskIds.contains(task.id)) {
+            await _executeHttpDownload(task, attempt: attempt + 1);
+            return;
+          }
+        }
         _updateTask(task.copyWith(
           status: DownloadStatus.failed,
           error: e.toString(),
+          speedBytesPerSec: 0.0,
         ));
       }
+    }
+  }
+
+  Future<void> _finalizeDownloadedFile(DownloadTask task, File partFile) async {
+    try {
+      // Small delay on Windows to ensure OS releases any file handles
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      final finalFile = File(task.targetFilePath);
+      if (await finalFile.exists()) {
+        try {
+          await finalFile.delete();
+        } catch (_) {}
+      }
+
+      // Try atomic rename first, fallback to copy + delete if locked or cross-device
+      try {
+        await partFile.rename(task.targetFilePath);
+      } catch (e) {
+        debugPrint('[DownloadService] Rename failed, using fallback copy: $e');
+        await partFile.copy(task.targetFilePath);
+        try {
+          await partFile.delete();
+        } catch (_) {}
+      }
+
+      final completedBytes = await File(task.targetFilePath).length();
+
+      _updateTask(task.copyWith(
+        status: DownloadStatus.completed,
+        receivedBytes: completedBytes,
+        totalBytes: completedBytes,
+        speedBytesPerSec: 0.0,
+        etaSeconds: 0,
+        completedAt: DateTime.now(),
+        error: null,
+      ));
+    } catch (e) {
+      debugPrint('[DownloadService] Error finalizing downloaded file: $e');
+      _updateTask(task.copyWith(
+        status: DownloadStatus.failed,
+        error: 'Failed to save final file: $e',
+      ));
     }
   }
 
@@ -548,11 +655,16 @@ class DownloadService {
     ));
   }
 
-  /// Resumes a paused download.
+  /// Resumes or retries a paused/failed download.
   Future<void> resumeDownload(String taskId) async {
+    _canceledOrPausedTaskIds.remove(taskId);
     final task = tasksNotifier.value.where((t) => t.id == taskId).firstOrNull;
     if (task == null) return;
 
+    _updateTask(task.copyWith(
+      status: DownloadStatus.queued,
+      error: null,
+    ));
     _executeDownload(task);
   }
 

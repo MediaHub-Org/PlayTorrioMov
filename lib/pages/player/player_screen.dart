@@ -166,6 +166,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   // fails for them.
   String? _resolvedStreamUrl;
   bool _isCastableSource = false;
+
+  // Whether the app was already fullscreen (e.g. kiosk mode) before this
+  // screen opened -- so leaving the player doesn't forcibly drop the user
+  // out of a fullscreen they set up themselves, only the fullscreen the
+  // player may have entered on its own.
+  bool _wasFullscreenBeforeEntering = false;
   bool _showSourcesPanel = false;
   Video? _sourcesEpisode;
   String? _sourcesErrorMessage;
@@ -194,6 +200,7 @@ class _PlayerScreenState extends State<PlayerScreen>
   @override
   void initState() {
     super.initState();
+    _wasFullscreenBeforeEntering = WindowService.instance.isFullscreen;
     _currentSource = widget.source;
     _currentEpisode = widget.episode;
     _currentTitle = widget.title;
@@ -1648,7 +1655,9 @@ class _PlayerScreenState extends State<PlayerScreen>
     _player.dispose();
     _logoAnimController.dispose();
     TorrentStreamService().cleanup();
-    WindowService.instance.exitFullscreen();
+    if (!_wasFullscreenBeforeEntering && WindowService.instance.isFullscreen) {
+      WindowService.instance.exitFullscreen();
+    }
     DiscordRpcService.instance.clearToIdle();
     super.dispose();
   }
@@ -1702,7 +1711,9 @@ class _PlayerScreenState extends State<PlayerScreen>
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, _) {
-        WindowService.instance.exitFullscreen();
+        if (!_wasFullscreenBeforeEntering && WindowService.instance.isFullscreen) {
+          WindowService.instance.exitFullscreen();
+        }
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -1752,7 +1763,8 @@ class _PlayerScreenState extends State<PlayerScreen>
                   event.logicalKey == LogicalKeyboardKey.keyL) {
                 _seekRelative(const Duration(seconds: 10));
                 return KeyEventResult.handled;
-              } else if (event.logicalKey == LogicalKeyboardKey.keyF) {
+              } else if (event.logicalKey == LogicalKeyboardKey.keyF ||
+                  event.logicalKey == LogicalKeyboardKey.f11) {
                 WindowService.instance.toggleFullscreen();
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.escape) {
@@ -1954,6 +1966,15 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
+  void _handleCopyStreamUrl() {
+    final url = _resolvedStreamUrl;
+    if (url == null) return;
+    Clipboard.setData(ClipboardData(text: url));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Stream URL copied to clipboard')),
+    );
+  }
+
   Widget _buildControlsOverlay() {
     final buffered = _buffered;
 
@@ -2017,6 +2038,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                           !CastService.isSupported)
                       ? null
                       : _handleCast,
+                  onCopyStreamUrl: (_isLoading || _resolvedStreamUrl == null)
+                      ? null
+                      : _handleCopyStreamUrl,
                   onToggleEpisodes:
                       (!_isLoading &&
                           widget.detail?.videos.isNotEmpty == true)
@@ -2024,7 +2048,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                       : null,
                   isEpisodesActive: _showEpisodesPanel || _showSourcesPanel,
                   onBack: () {
-                    WindowService.instance.exitFullscreen();
+                    if (!_wasFullscreenBeforeEntering &&
+                        WindowService.instance.isFullscreen) {
+                      WindowService.instance.exitFullscreen();
+                    }
                     Navigator.pop(context);
                   },
                 ),
