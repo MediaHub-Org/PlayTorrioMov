@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../main.dart';
+
 /// The app's one page transition.
 ///
 /// The outgoing page's content slides to the left and fades out, while the
@@ -52,21 +54,27 @@ class CinematicSlideRoute<T> extends PageRouteBuilder<T> {
         );
 }
 
-/// Pushes [page] onto the nearest navigator with the app's one page
-/// transition.
+/// Pushes [page] onto the **root** navigator with the app's one page
+/// transition, so it renders fullscreen -- covering the hub's top bar and
+/// section chips, not just the content box below them.
 ///
-/// Every forward navigation goes through here, so a page arrives the same
-/// way no matter what opened it. It used to depend on the call site: a
-/// poster tap, a "see all", a settings row and a search button each picked
-/// their own route class, so the same Details page slid in from one place
-/// and circle-revealed from another.
+/// Every forward navigation with a back button goes through here, so a page
+/// arrives the same way no matter what opened it. It used to depend on the
+/// call site: a poster tap, a "see all", a settings row and a search button
+/// each picked their own route class, so the same Details page slid in from
+/// one place and circle-revealed from another.
 ///
-/// Uses the nearest navigator on purpose -- inside a hub that is the hub's
-/// own `NestedNavigator`, which is what keeps a details page inside the
-/// content area. Fullscreen playback deliberately escapes that; see
-/// `pushFullscreenPage` in utils/fullscreen_navigator.dart.
+/// Used to push onto the *nearest* navigator instead -- inside a hub that is
+/// the hub's own `NestedNavigator`, which kept a details page inside the
+/// content area, with the top bar and section chips still drawn around it.
+/// That left every "back button" page showing two back affordances at once
+/// (the page's own, and implicitly the hub chrome still visible above it),
+/// so every one of them now escapes to the root navigator instead -- the
+/// same escape hatch fullscreen playback already used; see
+/// `pushFullscreenPage` in utils/fullscreen_navigator.dart. [context] is
+/// kept in the signature only so call sites don't need to change.
 Future<T?> pushPage<T>(BuildContext context, Widget page) {
-  return Navigator.of(context).push<T>(CinematicSlideRoute<T>(page: page));
+  return navigatorKey.currentState!.push<T>(CinematicSlideRoute<T>(page: page));
 }
 
 /// Replaces the current route with [page], same transition as [pushPage].
@@ -75,7 +83,6 @@ Future<T?> pushPage<T>(BuildContext context, Widget page) {
 /// (a related title, a resolved redirect), where backing out of the second
 /// should return to where the first was opened from, not to the first.
 Future<T?> pushReplacementPage<T>(BuildContext context, Widget page) {
-  return Navigator.of(
-    context,
-  ).pushReplacement<T, dynamic>(CinematicSlideRoute<T>(page: page));
+  return navigatorKey.currentState!
+      .pushReplacement<T, dynamic>(CinematicSlideRoute<T>(page: page));
 }

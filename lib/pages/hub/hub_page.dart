@@ -35,6 +35,12 @@ class _HubPageState extends State<HubPage> {
   final _navKey = GlobalKey<NavigatorState>();
   String? _lastMediaSection;
 
+  // A fast double-click on the gear (easy to do with a mouse) fired this
+  // handler twice before the first push's transition finished, stacking
+  // two SettingsPage instances -- back had to be pressed twice to actually
+  // leave. Guards against a second push while one is already in flight.
+  bool _openingSettings = false;
+
   void _onHubControllerChanged() {
     final section = HubController.instance.mediaSection;
     if (section == _lastMediaSection) return;
@@ -84,13 +90,13 @@ class _HubPageState extends State<HubPage> {
             Positioned.fill(
               child: AdaptiveNavShell(
                 onSettingsTap: () async {
-                  // Pushed through the nested navigator (the same one Details
-                  // and Search use), not the root one -- so it renders inside
-                  // the content box below TopBar/SectionTopBar instead of
-                  // covering the whole screen and hiding the 5 sections.
-                  await _navKey.currentState!.push(
-                    CinematicSlideRoute(page: const SettingsPage()),
-                  );
+                  if (_openingSettings) return;
+                  _openingSettings = true;
+                  // Same root-navigator escape every back-button page uses
+                  // (see pushPage) -- covers the top bar and section chips
+                  // instead of leaving them drawn around Settings.
+                  await pushPage(context, const SettingsPage());
+                  _openingSettings = false;
                   // Addons may have changed in Settings — remount the hub so
                   // it rebuilds and refetches on next show.
                   if (mounted) {
