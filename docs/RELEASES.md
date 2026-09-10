@@ -66,6 +66,14 @@ is free and takes a minute to get — register at
 details. A user can always paste their own key under Settings → General,
 which takes precedence over whatever the build ships with.
 
+> **Neither secret is set on this repository today.** The v1.4.0 build
+> logs show the `.env` step falling through to `touch .env`, so every
+> published artifact so far ships with an empty `.env`: Trakt and Simkl
+> sign-in, Discord Rich Presence and TMDB cast photos are all inert in
+> the released binaries. Nothing fails and nothing is logged as an error,
+> which is why it went unnoticed — the build now emits a CI **warning**
+> when it happens. Setting `ENV_FILE` is what turns those features on.
+
 List secret **names** (GitHub never returns a secret's value once set, by
 design — there is no `gh` command or API call that reveals it, only who set
 it and when):
