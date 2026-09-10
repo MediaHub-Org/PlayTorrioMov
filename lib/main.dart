@@ -24,6 +24,7 @@ import './services/stream/torrent_stream_service.dart';
 import './services/config/env_service.dart';
 import './services/window/window_service.dart';
 import './services/p2p/p2p_settings_service.dart';
+import './services/scraper/builtin_providers_service.dart';
 import './services/discord/discord_rpc_service.dart';
 import './widgets/updater/update_dialog.dart';
 import './pages/hub/hub_page.dart';
@@ -53,6 +54,9 @@ void main() async {
     MyListService.initialize(),
     TmdbSettings.initialize(),
     P2pSettingsService.initialize(),
+    // Loads which built-in scrapers the user switched off. Must land before
+    // the first scrapeAll, which reads the result synchronously.
+    BuiltinProvidersService.initialize(),
     DownloadService.instance.initialize(),
     TorrentStreamService().start(),
     // Publishes the active source to the Android/iOS media session. Awaited

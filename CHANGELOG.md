@@ -5,6 +5,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Built-in Providers** settings page: each built-in scraper now has its
+  own switch, so you can cut the source list down to the handful that work
+  for you instead of waiting on all 48. Torrent providers are marked, and
+  say when the P2P master switch has silenced them. The roster is generated
+  from the scrapers the app actually registers, not a written-down list, so
+  porting or dropping a scraper adds or removes its row with nothing else
+  to update
+
 ### Changed
 - Release builds now warn in CI when no `ENV_FILE`/`DOTENV` secret is
   set, instead of silently producing artifacts with an empty `.env` —
@@ -16,6 +25,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   showing only `MSB3073` with no reason
 
 ### Fixed
+- A pushed `v1.2.0` tag now publishes as a full release. Both the release's
+  `prerelease` flag and its "(dev)" title came from
+  `github.event.inputs.dev_build != 'false'`, and that input is an empty
+  string on a tag push — so every tagged release would have been labelled
+  an untested dev prerelease. The title, the badge and the channel compiled
+  into the binaries are now all read from one resolved value
 - An unverified build now actually says so. `dev_build` only ever set the
   GitHub release's title and prerelease flag; the binary carried a
   hardcoded empty channel, so Settings, Updates and About reported a dev

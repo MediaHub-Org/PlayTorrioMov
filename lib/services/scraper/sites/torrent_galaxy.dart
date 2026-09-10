@@ -10,6 +10,9 @@ class TorrentGalaxyScraper extends StreamScraper {
   String get name => 'PlayTorrio';
 
   @override
+  bool get isTorrent => true;
+
+  @override
   Future<List<StreamSource>> scrape({
     required String type,
     required String title,

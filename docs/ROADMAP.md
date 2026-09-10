@@ -3,8 +3,8 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
-Last reconciled against the tree: **2026-09-08** (v1.3.0+17), after the
-#30-#35 batch landed.
+Last reconciled against the tree: **2026-09-10** (v1.4.0+18), after the
+#30-#35 batch and the Built-in Providers work landed.
 
 ## Navigation
 
@@ -30,10 +30,12 @@ through PlayTorrioMod.
 
 **Last synced: `e560d4a`, 2026-09-08.** Ported the HindMoviez scraper,
 Castilian/Latino Spanish audio detection, and Arabic anime catalog fixes.
-Deliberately not ported: the "Builtin Providers" settings feature (see #29
-below). Next step: check `v3/main` for commits past `e560d4a` and port
-anything applicable, file-by-file (git history was squashed at the fork
-point, so nothing arrives via `git merge`).
+"Builtin Providers" was reimplemented rather than ported — upstream's
+hardcoded 46-name roster does not match Mov's registered scraper set, so
+Settings enumerates `ScraperManager.instance.scrapers` and stores only the
+user's exceptions. Next step: check `v3/main` for commits past `e560d4a`
+and port anything applicable, file-by-file (git history was squashed at the
+fork point, so nothing arrives via `git merge`).
 
 ## Code and consistency
 
@@ -49,7 +51,6 @@ point, so nothing arrives via `git merge`).
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is now the mobile-first gutter to build against; still open for #10 and #36. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify on real Android/iOS hardware | Wired up (`lib/services/cast/cast_service.dart`, `flutter_chrome_cast`), but this environment has no Android SDK, no Xcode, and no Cast-capable device — the native manifest/plist config and the actual cast-a-stream flow are both unverified. |
-| 29 | Port upstream's "Builtin Providers" settings feature | A settings page + service (821 + 285 lines in `ayman708-UX/PlayTorrioV3`, commit `e560d4a`) letting users toggle and reorder individual built-in scrapers. Upstream hardcodes its own 46-provider list, which doesn't match Mov's actual registered scraper set (ported separately, at different times) — needs to generate the list from `ScraperManager`'s real scrapers instead of copying V3's, which is real design work, not a quick port. |
 | 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset` (filter bar, back button, header rows, section titles, card rows, grids), and `BrowseScaffold` has one arrangement for all of its states. Still open is the structural half — Anime and Live TV each still hand-roll a hero + `ListView` page rather than using `BrowseScaffold` (see #4), so "the same kind of page" is still three implementations. |
 
 ## Signing and releases
