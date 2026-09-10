@@ -82,7 +82,7 @@ build as the universal APK at a third of the size.
 ## Building and releases
 
 CI builds every platform. Pull requests run analysis, the test suite and an
-Android APK; merges to `master` run the same checks and refresh the shared
+Android APK; merges to `main` run the same checks and refresh the shared
 build cache. Full release-workflow and signing details are in
 [docs/RELEASES.md](docs/RELEASES.md).
 

@@ -96,7 +96,7 @@ jobs:
         shell: bash
         run: |
           # Prefer the dispatched release tag, then a pushed v* tag. On a
-          # plain dispatch github.ref_name is a branch name ("master"), which
+          # plain dispatch github.ref_name is a branch name ("main"), which
           # is not a version -- fall back to pubspec.yaml so artifacts never
           # advertise a branch as their version.
           tag="${{ github.event.inputs.release_tag }}"

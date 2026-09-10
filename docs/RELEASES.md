@@ -1,7 +1,7 @@
 # Building and releases
 
 CI builds every platform. Pull requests run analysis, the test suite and an
-Android APK; merges to `master` run the same checks and refresh the shared
+Android APK; merges to `main` run the same checks and refresh the shared
 build cache.
 
 To cut a downloadable build without tagging a release, dispatch the
