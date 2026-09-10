@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_info.dart';
 import '../../services/app_spacing.dart';
+import '../../services/updater/app_updater_service.dart';
+import '../../widgets/updater/update_dialog.dart';
 
 const Color _kBackground = Color(0xFF080A0F);
 const Color _kSurface = Color(0xFF12151E);
@@ -20,8 +22,60 @@ const String _kUpstreamUrl = 'https://github.com/ayman708-UX/PlayTorrioV3';
 /// app actually does today (three hubs, not a feature list of things that only
 /// half exist), where the code lives, and — because this is a fork — who wrote
 /// the original.
-class AboutSettingsPage extends StatelessWidget {
+class AboutSettingsPage extends StatefulWidget {
   const AboutSettingsPage({super.key});
+
+  @override
+  State<AboutSettingsPage> createState() => _AboutSettingsPageState();
+}
+
+class _AboutSettingsPageState extends State<AboutSettingsPage> {
+  bool _isCheckingForUpdates = false;
+  bool _autoCheckEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    AppUpdaterService.isAutoCheckEnabled().then((enabled) {
+      if (mounted) setState(() => _autoCheckEnabled = enabled);
+    });
+  }
+
+  Future<void> _checkForUpdates() async {
+    setState(() => _isCheckingForUpdates = true);
+    try {
+      final updateInfo = await AppUpdaterService().checkForUpdates(
+        ignoreDismissed: true,
+      );
+      if (!mounted) return;
+      if (updateInfo != null) {
+        showDialog(
+          context: context,
+          builder: (context) => UpdateDialog(updateInfo: updateInfo),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('${AppInfo.name} is up to date!'),
+            backgroundColor: _kAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error checking updates: $e'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isCheckingForUpdates = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +100,16 @@ class AboutSettingsPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             children: [
               const _BrandHeader(),
+              const SizedBox(height: AppSpacing.md),
+              _UpdatesRow(
+                isChecking: _isCheckingForUpdates,
+                autoCheckEnabled: _autoCheckEnabled,
+                onCheckNow: _checkForUpdates,
+                onAutoCheckChanged: (value) {
+                  setState(() => _autoCheckEnabled = value);
+                  AppUpdaterService.setAutoCheckEnabled(value);
+                },
+              ),
               const SizedBox(height: AppSpacing.lg),
               if (AppInfo.isPrerelease) ...[
                 const _TestingNotice(),
@@ -192,6 +256,76 @@ class _BrandHeader extends StatelessWidget {
                 ),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One button, one switch -- what used to be its own "App Updates & System"
+/// page (a description paragraph, a version card, an auto-check toggle with
+/// its own explanation, and two marketing tiles about the release channel)
+/// is just the two controls that actually do something.
+class _UpdatesRow extends StatelessWidget {
+  final bool isChecking;
+  final bool autoCheckEnabled;
+  final VoidCallback onCheckNow;
+  final ValueChanged<bool> onAutoCheckChanged;
+
+  const _UpdatesRow({
+    required this.isChecking,
+    required this.autoCheckEnabled,
+    required this.onCheckNow,
+    required this.onAutoCheckChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextButton.icon(
+              onPressed: isChecking ? null : onCheckNow,
+              style: TextButton.styleFrom(
+                foregroundColor: _kAccent,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+              icon: isChecking
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: _kAccent,
+                      ),
+                    )
+                  : const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(
+                isChecking ? 'Checking...' : 'Check for Updates',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'Auto-check',
+            style: TextStyle(fontSize: 12.5, color: Colors.white54),
+          ),
+          Switch(
+            value: autoCheckEnabled,
+            activeThumbColor: _kAccent,
+            onChanged: onAutoCheckChanged,
           ),
         ],
       ),

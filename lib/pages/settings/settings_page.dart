@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../services/addon/addon_manager.dart';
+import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../services/trakt/trakt_service.dart';
@@ -13,17 +13,12 @@ import 'debrid_settings_page.dart';
 import 'addons_settings_page.dart';
 import 'builtin_providers_settings_page.dart';
 import 'general_settings_page.dart';
-import 'trakt_settings_page.dart';
-import 'simkl_settings_page.dart';
-import 'updates_settings_page.dart';
+import 'sync_settings_page.dart';
 import 'about_settings_page.dart';
 import 'video_player_settings_page.dart';
-import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/scraper/builtin_providers_service.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/stream/stream_service.dart';
-import '../../widgets/p2p/p2p_warning_dialog.dart';
-import '../../services/discord/discord_rpc_service.dart';
 
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../app_info.dart';
@@ -83,6 +78,61 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final addonCount = AddonManager.instance.addons.length;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final tier = AppBreakpoints.of(context);
+    final syncedCount = (_traktConnected ? 1 : 0) + (_simklConnected ? 1 : 0);
+
+    // Sorted A-Z by title, except About -- which stays last, the way a
+    // settings screen's "about this app" entry conventionally does.
+    final tiles = <Widget>[
+      _SettingsCategoryTile(
+        icon: Icons.extension_rounded,
+        iconColor: const Color(0xFF10B981),
+        title: 'Addons',
+        badgeText: '$addonCount',
+        badgeColor: const Color(0xFF10B981),
+        onTap: () => _navigateTo(const AddonsSettingsPage()),
+      ),
+      _SettingsCategoryTile(
+        icon: Icons.palette_rounded,
+        iconColor: AppThemeService.currentPalette.value.primaryColor,
+        title: 'Appearance & Interface',
+        badgeText: AppThemeService.currentPalette.value.name,
+        badgeColor: AppThemeService.currentPalette.value.primaryColor,
+        onTap: () => _navigateTo(const AppearanceSettingsPage()),
+      ),
+      _builtinProvidersTile(),
+      _SettingsCategoryTile(
+        icon: Icons.cloud_download_rounded,
+        iconColor: const Color(0xFF00E5FF),
+        title: 'Debrid & Cloud Streaming',
+        badgeText: _useDebrid
+            ? (_debridProvider != 'None' ? _debridProvider : 'Active')
+            : 'Disabled',
+        badgeColor: _useDebrid ? const Color(0xFF00E5FF) : Colors.white38,
+        onTap: () => _navigateTo(const DebridSettingsPage()),
+      ),
+      _SettingsCategoryTile(
+        icon: Icons.tune_rounded,
+        iconColor: Colors.white70,
+        title: 'General & Data',
+        onTap: () => _navigateTo(const GeneralSettingsPage()),
+      ),
+      _SettingsCategoryTile(
+        icon: Icons.sync_rounded,
+        iconColor: const Color(0xFFED1C24),
+        title: 'Sync',
+        badgeText: syncedCount == 0 ? 'Offline' : '$syncedCount/2 Connected',
+        badgeColor:
+            syncedCount == 0 ? Colors.white38 : const Color(0xFF10B981),
+        onTap: () => _navigateTo(const SyncSettingsPage()),
+      ),
+      _SettingsCategoryTile(
+        icon: Icons.play_circle_outline_rounded,
+        iconColor: const Color(0xFF8B5CF6),
+        title: 'Video Playback',
+        onTap: () => _navigateTo(const VideoPlayerSettingsPage()),
+      ),
+    ];
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -100,290 +150,69 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: AnimatedAmbientBackground(
         child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(16, 20, 16, 32 + bottomInset),
-            children: [
-              // Header Intro Card
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF7C5CFF).withValues(alpha: 0.12),
-                      const Color(0xFF00E5FF).withValues(alpha: 0.04),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: const Color(0xFF7C5CFF).withValues(alpha: 20 / 100),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7C5CFF).withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(
-                        Icons.tune_rounded,
-                        color: Color(0xFF7C5CFF),
-                        size: 26,
-                      ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: tier == ScreenTier.desktop ? 1100 : 800,
+            ),
+            child: tier == ScreenTier.mobile
+                ? ListView.separated(
+                    padding: EdgeInsets.fromLTRB(16, 20, 16, 32 + bottomInset),
+                    itemCount: tiles.length + 1,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, i) => i < tiles.length
+                        ? tiles[i]
+                        : _aboutTile(),
+                  )
+                : GridView.builder(
+                    padding: EdgeInsets.fromLTRB(20, 24, 20, 32 + bottomInset),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: tier == ScreenTier.desktop ? 3 : 2,
+                      mainAxisExtent: 76,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Preferences & Configuration',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Manage streaming providers, addons, UI effects, and account sync.',
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: Colors.white.withValues(alpha: 0.5),
-                              height: 1.35,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Section Label
-              Text(
-                'CATEGORIES',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // 1. Appearance & Interface
-              ValueListenableBuilder<AppThemePalette>(
-                valueListenable: AppThemeService.currentPalette,
-                builder: (context, currentPalette, _) {
-                  return _SettingsCategoryTile(
-                    icon: Icons.palette_rounded,
-                    iconColor: currentPalette.primaryColor,
-                    title: 'Appearance & Interface',
-                    subtitle: 'Color themes and Home Page UI',
-                    badgeText: currentPalette.name,
-                    badgeColor: currentPalette.primaryColor,
-                    onTap: () => _navigateTo(const AppearanceSettingsPage()),
-                  );
-                },
-              ),
-
-
-              // 2. Debrid & Cloud Streaming
-              _SettingsCategoryTile(
-                icon: Icons.cloud_download_rounded,
-                iconColor: const Color(0xFF00E5FF),
-                title: 'Debrid & Cloud Streaming',
-                subtitle: 'Real-Debrid, TorBox, AllDebrid, Premiumize & Debrid-Link',
-                badgeText: _useDebrid
-                    ? (_debridProvider != 'None' ? _debridProvider : 'Active')
-                    : 'Disabled',
-                badgeColor: _useDebrid ? const Color(0xFF00E5FF) : Colors.white38,
-                onTap: () => _navigateTo(const DebridSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 3. Metadata & Catalogs (Addons)
-              _SettingsCategoryTile(
-                icon: Icons.extension_rounded,
-                iconColor: const Color(0xFF10B981),
-                title: 'Addons',
-                subtitle: 'Stremio catalogs and content providers',
-                badgeText: '$addonCount Installed',
-                badgeColor: const Color(0xFF10B981),
-                onTap: () => _navigateTo(const AddonsSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 4. Built-in scrapers, one row each
-              ValueListenableBuilder<int>(
-                valueListenable: BuiltinProvidersService.revision,
-                builder: (context, _, __) {
-                  // Registration is idempotent and cheap; doing it here means
-                  // the count is right even on a launch that never opened a
-                  // stream, which is when scrapers used to first register.
-                  StreamService.registerBuiltInScrapers();
-                  final providers = ScraperManager.instance.scrapers;
-                  final off = BuiltinProvidersService.disabledCountAmong(
-                    providers.map((p) => p.id),
-                  );
-                  final on = providers.length - off;
-
-                  return _SettingsCategoryTile(
-                    icon: Icons.travel_explore_rounded,
-                    iconColor: const Color(0xFF38BDF8),
-                    title: 'Built-in Providers',
-                    subtitle:
-                        'Choose which built-in scrapers are searched for sources',
-                    badgeText: '$on of ${providers.length} on',
-                    badgeColor: off == 0
-                        ? const Color(0xFF38BDF8)
-                        : const Color(0xFFF59E0B),
-                    onTap: () =>
-                        _navigateTo(const BuiltinProvidersSettingsPage()),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // 5. Built-in P2P Torrent Source Toggle (PlayTorrio)
-              ValueListenableBuilder<bool>(
-                valueListenable: P2pSettingsService.isP2pEnabled,
-                builder: (context, isP2p, _) {
-                  return _SettingsSwitchTile(
-                    icon: Icons.hub_rounded,
-                    iconColor: isP2p ? const Color(0xFFF59E0B) : Colors.white54,
-                    title: 'Built-in P2P Torrent Source',
-                    subtitle: isP2p
-                        ? 'PlayTorrio torrent swarms (Knaben, TorrentGalaxy) active'
-                        : 'P2P disabled. Using only direct HTTP streaming (PlayTorrioHTTP)',
-                    badgeText: isP2p ? 'P2P Active' : 'HTTP Only',
-                    badgeColor: isP2p ? const Color(0xFFF59E0B) : const Color(0xFF10B981),
-                    value: isP2p,
-                    onChanged: (val) async {
-                      await P2pSettingsService.setP2pEnabled(val);
-                    },
-                    onInfoTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => const P2pWarningDialog(),
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              // 6. Discord Rich Presence (Desktop Only)
-              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ...[
-                ValueListenableBuilder<bool>(
-                  valueListenable: DiscordRpcService.instance.isEnabled,
-                  builder: (context, isDiscordEnabled, _) {
-                    return _SettingsSwitchTile(
-                      icon: Icons.sports_esports_rounded,
-                      iconColor: isDiscordEnabled ? const Color(0xFF5865F2) : Colors.white54,
-                      title: 'Discord Rich Presence',
-                      subtitle: isDiscordEnabled
-                          ? 'Broadcasting movies, shows, music & live activity to Discord'
-                          : 'Disabled. Activity is hidden from Discord',
-                      badgeText: isDiscordEnabled ? 'Active' : 'Disabled',
-                      badgeColor: isDiscordEnabled ? const Color(0xFF5865F2) : Colors.white38,
-                      value: isDiscordEnabled,
-                      onChanged: (val) async {
-                        await DiscordRpcService.instance.setEnabled(val);
-                      },
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-              ],
-
-              // 7. Trakt Sync
-              _SettingsCategoryTile(
-                icon: Icons.movie_filter_rounded,
-                iconColor: const Color(0xFFED1C24),
-                title: 'Trakt.tv Sync',
-                subtitle: 'Cross-device watchlist, history & playback synchronization',
-                badgeText: _traktConnected ? 'Connected' : 'Offline',
-                badgeColor: _traktConnected ? const Color(0xFFED1C24) : Colors.white38,
-                onTap: () => _navigateTo(const TraktSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 8. Simkl Sync
-              _SettingsCategoryTile(
-                icon: Icons.tv_rounded,
-                iconColor: const Color(0xFF00ADFF),
-                title: 'Simkl Sync',
-                subtitle: 'Cross-device Movies, TV & Anime synchronization',
-                badgeText: _simklConnected ? 'Connected' : 'Offline',
-                badgeColor: _simklConnected ? const Color(0xFF00ADFF) : Colors.white38,
-                onTap: () => _navigateTo(const SimklSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // General & Data (Backup/Restore, TMDB cast photos, shortcuts)
-              _SettingsCategoryTile(
-                icon: Icons.tune_rounded,
-                iconColor: Colors.white70,
-                title: 'General & Data',
-                subtitle: 'Backup & restore, TMDB cast photos, keyboard shortcuts',
-                onTap: () => _navigateTo(const GeneralSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Video Playback (decoder, subtitles, rendering)
-              _SettingsCategoryTile(
-                icon: Icons.play_circle_outline_rounded,
-                iconColor: const Color(0xFF8B5CF6),
-                title: 'Video Playback',
-                subtitle: 'Decoder, subtitles, and rendering options',
-                onTap: () => _navigateTo(const VideoPlayerSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 9. App Updates & System
-              _SettingsCategoryTile(
-                icon: Icons.system_update_rounded,
-                iconColor: const Color(0xFFF59E0B),
-                title: 'App Updates',
-                subtitle: 'Check for latest software versions and patches',
-                badgeText: _appVersion != null ? 'v$_appVersion' : 'Check',
-                badgeColor: const Color(0xFFF59E0B),
-                onTap: () => _navigateTo(const UpdatesSettingsPage()),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 10. About the app
-              _SettingsCategoryTile(
-                icon: Icons.info_outline_rounded,
-                iconColor: Colors.white70,
-                title: 'About ${AppInfo.name}',
-                subtitle: 'Architecture, video engine, and credits',
-                onTap: () => _navigateTo(const AboutSettingsPage()),
-              ),
-            ],
+                    itemCount: tiles.length + 1,
+                    itemBuilder: (context, i) =>
+                        i < tiles.length ? tiles[i] : _aboutTile(),
+                  ),
           ),
         ),
       ),
-      ),
+    );
+  }
+
+  Widget _builtinProvidersTile() {
+    return ValueListenableBuilder<int>(
+      valueListenable: BuiltinProvidersService.revision,
+      builder: (context, _, __) {
+        StreamService.registerBuiltInScrapers();
+        final providers = ScraperManager.instance.scrapers;
+        final off = BuiltinProvidersService.disabledCountAmong(
+          providers.map((p) => p.id),
+        );
+        final on = providers.length - off;
+
+        return _SettingsCategoryTile(
+          icon: Icons.travel_explore_rounded,
+          iconColor: const Color(0xFF38BDF8),
+          title: 'Built-in Providers',
+          badgeText: '$on/${providers.length}',
+          badgeColor:
+              off == 0 ? const Color(0xFF38BDF8) : const Color(0xFFF59E0B),
+          onTap: () => _navigateTo(const BuiltinProvidersSettingsPage()),
+        );
+      },
+    );
+  }
+
+  Widget _aboutTile() {
+    return _SettingsCategoryTile(
+      icon: Icons.info_outline_rounded,
+      iconColor: Colors.white70,
+      title: 'About ${AppInfo.name}',
+      badgeText: _appVersion,
+      badgeColor: Colors.white38,
+      onTap: () => _navigateTo(const AboutSettingsPage()),
     );
   }
 }
@@ -392,11 +221,17 @@ class _SettingsPageState extends State<SettingsPage> {
 // Settings Category Tile
 // ─────────────────────────────────────────────────────────────────────────────
 
+/// One entry in the Settings grid/list -- icon, title, an optional short
+/// status badge, and a chevron. Every category uses this same shape and
+/// size now; there used to also be a subtitle sentence under the title and
+/// a visually distinct switch-tile variant for the two toggles that lived
+/// here (P2P, Discord) -- both toggles moved to the page whose behavior
+/// they actually control (Built-in Providers, General & Data), so every
+/// remaining entry is just "go to this category", uniformly.
 class _SettingsCategoryTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
-  final String subtitle;
   final String? badgeText;
   final Color? badgeColor;
   final VoidCallback onTap;
@@ -405,7 +240,6 @@ class _SettingsCategoryTile extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     required this.title,
-    required this.subtitle,
     this.badgeText,
     this.badgeColor,
     required this.onTap,
@@ -419,7 +253,8 @@ class _SettingsCategoryTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          height: 76,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: const Color(0xFF12151E),
             borderRadius: BorderRadius.circular(16),
@@ -429,7 +264,6 @@ class _SettingsCategoryTile extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Icon Container with subtle tinted background
               Container(
                 width: 44,
                 height: 44,
@@ -437,213 +271,49 @@ class _SettingsCategoryTile extends StatelessWidget {
                   color: iconColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 22,
-                ),
+                child: Icon(icon, color: iconColor, size: 22),
               ),
               const SizedBox(width: 14),
-
-              // Title and Subtitle
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 15.5,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (badgeText != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-                            decoration: BoxDecoration(
-                              color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              badgeText!,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                color: badgeColor ?? iconColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.45),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-
-              const SizedBox(width: 10),
-
-              // Chevron right
+              if (badgeText != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badgeText!,
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: badgeColor ?? iconColor,
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(width: 8),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 15,
+                size: 14,
                 color: Colors.white.withValues(alpha: 0.25),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Settings Switch Tile
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _SettingsSwitchTile extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String subtitle;
-  final String? badgeText;
-  final Color? badgeColor;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final VoidCallback? onInfoTap;
-
-  const _SettingsSwitchTile({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-    this.badgeText,
-    this.badgeColor,
-    required this.value,
-    required this.onChanged,
-    this.onInfoTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: value
-              ? iconColor.withValues(alpha: 0.20)
-              : Colors.white.withValues(alpha: 0.08),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Icon Container
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 14),
-
-          // Title and Subtitle
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (onInfoTap != null) ...[
-                      const SizedBox(width: 4),
-                      IconButton(
-                        icon: const Icon(Icons.info_outline_rounded, size: 16, color: Colors.white54),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        tooltip: 'P2P Advisory Details',
-                        onPressed: onInfoTap,
-                      ),
-                    ],
-                    if (badgeText != null) ...[
-                      const SizedBox(width: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          badgeText!,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: badgeColor ?? iconColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: Colors.white.withValues(alpha: 0.45),
-                    height: 1.25,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 10),
-
-          // Switch
-          Switch.adaptive(
-            value: value,
-            activeColor: const Color(0xFFF59E0B),
-            activeTrackColor: const Color(0xFFF59E0B).withValues(alpha: 0.35),
-            inactiveThumbColor: Colors.white60,
-            inactiveTrackColor: Colors.white10,
-            onChanged: onChanged,
-          ),
-        ],
       ),
     );
   }

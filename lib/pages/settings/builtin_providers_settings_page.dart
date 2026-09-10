@@ -5,6 +5,7 @@ import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/scraper/builtin_providers_service.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/stream/stream_service.dart';
+import '../../widgets/p2p/p2p_warning_dialog.dart';
 
 /// Per-provider control over the app's built-in scrapers.
 ///
@@ -121,6 +122,69 @@ class _BuiltinProvidersSettingsPageState
           ),
         ),
         const SizedBox(height: 14),
+        // The master switch every torrent row below answers to -- used to
+        // be its own top-level Settings row, disconnected from the list
+        // whose rows it silences.
+        ValueListenableBuilder<bool>(
+          valueListenable: P2pSettingsService.isP2pEnabled,
+          builder: (context, isP2p, _) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF12151E),
+                borderRadius: BorderRadius.circular(AppRadii.md),
+                border: Border.all(
+                  color: isP2p
+                      ? const Color(0xFFF59E0B).withValues(alpha: 0.25)
+                      : Colors.white.withValues(alpha: 0.06),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.hub_rounded,
+                    size: 20,
+                    color: isP2p
+                        ? const Color(0xFFF59E0B)
+                        : Colors.white.withValues(alpha: 0.35),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Built-in P2P torrent source',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      size: 16,
+                      color: Colors.white54,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: 'P2P Advisory Details',
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) => const P2pWarningDialog(),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Switch.adaptive(
+                    value: isP2p,
+                    activeColor: const Color(0xFFF59E0B),
+                    onChanged: (val) => P2pSettingsService.setP2pEnabled(val),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
         Row(
           children: [
             Text(

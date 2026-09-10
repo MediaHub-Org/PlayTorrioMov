@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../services/backup/backup_service.dart';
 import '../../services/backup/cloud_backup_settings.dart';
+import '../../services/discord/discord_rpc_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 
 /// Backup/restore, TMDB cast enrichment, and keyboard shortcuts reference --
@@ -645,6 +647,57 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
     );
   }
 
+  static bool get _isDesktop =>
+      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+
+  Widget _buildDiscordSection() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: DiscordRpcService.instance.isEnabled,
+      builder: (context, isEnabled, _) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF12151E),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isEnabled
+                  ? const Color(0xFF5865F2).withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF5865F2).withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.sports_esports_rounded,
+                  color: Color(0xFF5865F2),
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Text(
+                  'Discord Rich Presence',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+              ),
+              Switch.adaptive(
+                value: isEnabled,
+                activeColor: const Color(0xFF5865F2),
+                onChanged: (val) => DiscordRpcService.instance.setEnabled(val),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -666,6 +719,10 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
             children: [
               _buildTmdbSection(),
               const SizedBox(height: 12),
+              if (_isDesktop) ...[
+                _buildDiscordSection(),
+                const SizedBox(height: 12),
+              ],
               _buildBackupSection(),
               const SizedBox(height: 12),
               _buildCloudBackupSection(),
