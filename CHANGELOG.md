@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.0+19] - 2026-09-10
+
 ### Added
 - **Built-in Providers** settings page: each built-in scraper now has its
   own switch, so you can cut the source list down to the handful that work
@@ -13,6 +15,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   from the scrapers the app actually registers, not a written-down list, so
   porting or dropping a scraper adds or removes its row with nothing else
   to update
+- A Flatpak build and packaging manifest for Linux, alongside the existing
+  AppImage and tar.gz
 
 ### Changed
 - Anime's page now uses `BrowseScaffold`, the same hero + row + loading/error
@@ -25,6 +29,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the scroll arrows, hover state and section header. Channel cards keep
   their own logo/banner shape — `BrowseRowView` can now take a row-specific
   card sizing instead of always using the poster one
+- Every page with its own back button (Details, Search, Settings, and
+  everything else routed through `pushPage`) now renders fullscreen,
+  covering the hub's top bar and section chips, instead of showing both at
+  once
+- Settings redesigned: every category tile is now the same shape and size
+  (icon, title, a short badge, chevron) — no subtitle sentence, no header
+  intro card. Trakt.tv and Simkl merged into one "Sync" category; App
+  Updates folded into About; the P2P master switch moved into Built-in
+  Providers, next to the rows it silences; Discord Rich Presence moved into
+  General & Data. Remaining categories sort A-Z, About last. Tablet/desktop
+  shows them as a centered grid instead of a single narrow column
+- The repository's default branch is now `main`, not `master`
 - Release builds now warn in CI when no `ENV_FILE`/`DOTENV` secret is
   set, instead of silently producing artifacts with an empty `.env` —
   which is what every release so far has shipped, leaving Trakt, Simkl,
@@ -35,6 +51,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   showing only `MSB3073` with no reason
 
 ### Fixed
+- Settings could open twice from a fast double-click on the gear icon
+  (easy to do with a mouse), stacking two instances — back had to be
+  pressed twice to actually leave
 - A pushed `v1.2.0` tag now publishes as a full release. Both the release's
   `prerelease` flag and its "(dev)" title came from
   `github.event.inputs.dev_build != 'false'`, and that input is an empty

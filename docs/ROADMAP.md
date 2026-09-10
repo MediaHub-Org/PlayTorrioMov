@@ -3,9 +3,8 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
-Last reconciled against the tree: **2026-09-10** (v1.4.0+18), after Anime's
-page moved onto `BrowseScaffold` and Live TV's row converged onto
-`BrowseRowView`.
+Last reconciled against the tree: **2026-09-10**, after every back-button
+page moved onto the root navigator and Settings was redesigned.
 
 ## Navigation
 
