@@ -1,0 +1,43 @@
+{
+  "app-id": "io.github.MediaHubOrg.PlayTorrioMov",
+  "runtime": "org.freedesktop.Platform",
+  "runtime-version": "24.08",
+  "sdk": "org.freedesktop.Sdk",
+  "command": "PlayTorrioMov",
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--filesystem=xdg-videos",
+    "--filesystem=xdg-download"
+  ],
+  "add-extensions": {
+    "org.freedesktop.Platform.ffmpeg-full": {
+      "directory": "lib/ffmpeg",
+      "version": "24.08",
+      "add-ld-path": "."
+    }
+  },
+  "modules": [
+    {
+      "name": "playtorriomov",
+      "buildsystem": "simple",
+      "build-commands": [
+        "install -Dm755 bundle/PlayTorrioMov /app/bin/PlayTorrioMov",
+        "mkdir -p /app/lib /app/data",
+        "cp -r bundle/lib/. /app/lib/",
+        "cp -r bundle/data/. /app/data/",
+        "install -Dm644 assets/icon.png /app/share/icons/hicolor/256x256/apps/io.github.MediaHubOrg.PlayTorrioMov.png",
+        "install -Dm644 flatpak/io.github.MediaHubOrg.PlayTorrioMov.desktop /app/share/applications/io.github.MediaHubOrg.PlayTorrioMov.desktop",
+        "install -Dm644 flatpak/io.github.MediaHubOrg.PlayTorrioMov.metainfo.xml /app/share/metainfo/io.github.MediaHubOrg.PlayTorrioMov.metainfo.xml"
+      ],
+      "sources": [
+        { "type": "dir", "path": "bundle", "dest": "bundle" },
+        { "type": "dir", "path": "assets", "dest": "assets" },
+        { "type": "dir", "path": "flatpak", "dest": "flatpak" }
+      ]
+    }
+  ]
+}

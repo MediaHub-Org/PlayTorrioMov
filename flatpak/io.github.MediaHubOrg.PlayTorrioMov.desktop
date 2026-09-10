@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=PlayTorrioMov
+Comment=Movies, Series, Anime & Live TV — one app
+Exec=PlayTorrioMov
+Icon=io.github.MediaHubOrg.PlayTorrioMov
+Categories=AudioVideo;Audio;Video;Player;
+Terminal=false
+StartupNotify=true

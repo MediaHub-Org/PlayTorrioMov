@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.MediaHubOrg.PlayTorrioMov</id>
+  <name>PlayTorrioMov</name>
+  <summary>Movies, Series, Anime &amp; Live TV — one app</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>
+      PlayTorrioMov pulls movies, series, anime and live TV into a single
+      interface — from Stremio-compatible addons, torrent swarms, and the
+      open web.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.MediaHubOrg.PlayTorrioMov.desktop</launchable>
+  <url type="homepage">https://github.com/MediaHub-Org/PlayTorrioMov</url>
+  <url type="bugtracker">https://github.com/MediaHub-Org/PlayTorrioMov/issues</url>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="1.3.0" date="2026-09-08" />
+  </releases>
+</component>
