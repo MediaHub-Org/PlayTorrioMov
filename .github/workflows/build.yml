@@ -161,6 +161,16 @@ jobs:
           # deprecation so the plugin compiles on the CI runner.
           export CXXFLAGS="-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
 
+          # The generated cmake_install.cmake unconditionally installs
+          # build/native_assets/windows, even though this app has no native
+          # (FFI) assets to populate it -- Dart's native-assets build step
+          # never creates the directory when there is nothing for it to
+          # build. CMake's `file(INSTALL ...)` then fails with "cannot find
+          # ...: No error", which is what the verbose re-run below was added
+          # to surface in the first place. Pre-create it so the directory
+          # exists (empty) either way.
+          mkdir -p build/native_assets/windows
+
           if flutter build windows --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}; then
             exit 0
           fi
