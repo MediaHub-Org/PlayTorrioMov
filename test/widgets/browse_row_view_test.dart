@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
+import 'package:playtorriomov/services/iptv/hardcoded_channels.dart';
 import 'package:playtorriomov/widgets/anime/anime_slider_section.dart';
 import 'package:playtorriomov/widgets/common/browse_row_view.dart';
+import 'package:playtorriomov/widgets/iptv/iptv_slider_section.dart';
 
 Widget wrap(Widget child) => MaterialApp(
       home: Scaffold(body: SingleChildScrollView(child: child)),
@@ -45,6 +47,30 @@ void main() {
       expect(find.text('Top popular series'), findsOneWidget);
       expect(find.text('one'), findsOneWidget);
     });
+
+    testWidgets('sizingOf overrides the default poster width', (tester) async {
+      // Live TV's channel cards are a logo/banner shape, not a poster
+      // shape -- this is what lets IptvSliderSection reuse the row without
+      // forcing every card through MovieCardSizing's aspect ratio.
+      setSurfaceWidth(tester, 1200);
+      await tester.pumpWidget(wrap(BrowseRowView<String>(
+        title: 'Channels',
+        items: const ['one'],
+        sizingOf: (_) => const RowCardSizing(
+          cardWidth: 77,
+          totalHeight: 140,
+          spacing: 16,
+          sidePadding: 18,
+        ),
+        itemBuilder: (_, item) => Text(item),
+      )));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byWidgetPredicate((w) => w is SizedBox && w.width == 77),
+        findsOneWidget,
+      );
+    });
   });
 
   group('AnimeSliderSection', () {
@@ -81,6 +107,56 @@ void main() {
       expect(find.text('Trending Anime'), findsNothing);
     });
   });
+
+  group('IptvSliderSection', () {
+    // Also a thin wrapper over BrowseRowView -- but with its own sizing
+    // (IptvCardSizing, a logo/banner shape) instead of the row's default
+    // poster shape, via BrowseRowView.sizingOf.
+    testWidgets('delegates to the shared row with channel-card sizing', (
+      tester,
+    ) async {
+      setSurfaceWidth(tester, 1200);
+      await tester.pumpWidget(wrap(IptvSliderSection(
+        title: 'Sports',
+        subtitle: 'Live sports channels',
+        channels: const [_channel],
+        onChannelTap: (_) {},
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BrowseRowView<HardcodedChannel>), findsOneWidget);
+      expect(find.text('Sports'), findsOneWidget);
+      expect(find.text('Live sports channels'), findsOneWidget);
+      final expectedWidth = IptvCardSizing.fromWidth(1200).cardWidth;
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is SizedBox && w.width == expectedWidth,
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('an empty channel list renders nothing', (tester) async {
+      setSurfaceWidth(tester, 1200);
+      await tester.pumpWidget(wrap(IptvSliderSection(
+        title: 'Sports',
+        channels: const [],
+        onChannelTap: (_) {},
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sports'), findsNothing);
+    });
+  });
 }
+
+const _channel = HardcodedChannel(
+  id: 'test',
+  name: 'Test Channel',
+  short: 'TC',
+  category: 'News',
+  keywords: ['test'],
+  gradient: [Colors.blue, Colors.purple],
+);
 
 void _noop(AnimeMedia _) {}
