@@ -10,11 +10,9 @@ import '../../services/app_spacing.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
 import '../../services/theme/app_theme_service.dart';
-import '../../widgets/anime/anime_slider_section.dart';
-import '../../widgets/common/custom_scroll_track.dart';
+import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
-import '../../widgets/common/hero_carousel_auto_rotate.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
@@ -23,7 +21,6 @@ import 'anime_stream_sheet.dart';
 import 'anime_search_page.dart';
 import '../anime_arabic/anime_arabic_details_page.dart';
 import '../anime_arabic/anime_arabic_stream_sheet.dart';
-import '../../services/app_breakpoints.dart';
 
 const _kAnimeGenres = [
   'Action',
@@ -52,7 +49,6 @@ class _AnimePageState extends State<AnimePage> {
   final AnilistService _anilistService = AnilistService.instance;
   final AnimeLibraryService _libraryService = AnimeLibraryService.instance;
   final AnimeArabicService _arabicService = AnimeArabicService.instance;
-  final ScrollController _scrollController = ScrollController();
 
   bool _isArabicMode = false;
   bool _loading = true;
@@ -87,7 +83,6 @@ class _AnimePageState extends State<AnimePage> {
   @override
   void dispose() {
     _libraryService.removeListener(_onLibraryChanged);
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -393,6 +388,111 @@ class _AnimePageState extends State<AnimePage> {
     pushPage(context, AnimeSearchPage(initialArabicMode: _isArabicMode));
   }
 
+  /// The hero carousel's items -- the same "newest first" slides both modes
+  /// showed before this migrated onto [BrowseScaffold], which now owns the
+  /// carousel chrome (arrows, dots, auto-rotation) that used to live in
+  /// `_AnimeHeroCarousel`.
+  List<AnimeMedia> get _heroItems {
+    if (_isArabicMode) {
+      final feed = _arabicFeed;
+      if (feed == null) return const [];
+      final source = feed.spotlight.isNotEmpty ? feed.spotlight : feed.trending;
+      return source.take(6).map((c) => c.toAnimeMedia()).toList();
+    }
+    return _trending.take(6).toList();
+  }
+
+  /// The curated rows below the hero, in the same order the page always
+  /// showed them. [BrowseScaffold] already skips any row whose items are
+  /// empty, so these don't need to be individually guarded the way the
+  /// Arabic rows used to be.
+  List<BrowseRow<AnimeMedia>> get _rows {
+    if (_isArabicMode) {
+      final feed = _arabicFeed;
+      if (feed == null) return const [];
+      AnimeMedia toMedia(ArabicAnimeCard c) => c.toAnimeMedia();
+      return [
+        BrowseRow(
+          title: '⚡ آخر الحلقات المعروضة',
+          subtitle: 'أحدث الحلقات المضافة المترجمة للعربية',
+          items: feed.recentEpisodes.map(toMedia).toList(),
+        ),
+        BrowseRow(
+          title: '🔥 الأكثر شهرة وتداولاً',
+          subtitle: 'الأنميات الأكثر مشاهدة حالياً',
+          items: feed.trending.map(toMedia).toList(),
+        ),
+        BrowseRow(
+          title: '🎬 الأفلام الأكثر شعبية',
+          subtitle: 'أفلام الأنمي المميزة',
+          items: feed.popularMovies.map(toMedia).toList(),
+        ),
+        BrowseRow(
+          title: '👑 أفضل الأنميات',
+          subtitle: 'أنميات ذات تقييمات استثنائية',
+          items: feed.topSeasonal.map(toMedia).toList(),
+        ),
+        BrowseRow(
+          title: '🌟 أنميات موسمية',
+          subtitle: 'عروض الموسم الحالي',
+          items: feed.seasonal.map(toMedia).toList(),
+        ),
+        BrowseRow(
+          title: '⚔️ أنميات أسطورية',
+          subtitle: 'أعمال خالدة يجب ألا تفوتك',
+          items: feed.legendary.map(toMedia).toList(),
+        ),
+        BrowseRow(
+          title: '🚀 المنتظرة قريباً',
+          subtitle: 'أنميات قادمة قريباً',
+          items: feed.upcoming.map(toMedia).toList(),
+        ),
+      ];
+    }
+    return [
+      BrowseRow(
+        title: '🔥 Trending Anime',
+        subtitle: 'Top popular and trending series',
+        items: _trending,
+      ),
+      BrowseRow(
+        title: '🌟 Popular This Season (${AnilistService.currentSeason()})',
+        subtitle: 'Currently airing hits',
+        items: _popularSeason,
+      ),
+      BrowseRow(
+        title: '⭐ All-Time Masterpieces',
+        subtitle: 'Critically acclaimed top rated anime',
+        items: _topRated,
+      ),
+      BrowseRow(
+        title: '🚀 Anticipated Next Season',
+        subtitle: 'Upcoming anime you cannot miss',
+        items: _upcoming,
+      ),
+      BrowseRow(
+        title: '⚔️ Action & Adventure',
+        subtitle: 'High octane battles and epic journeys',
+        items: _actionAnime,
+      ),
+      BrowseRow(
+        title: '💖 Romance & Drama',
+        subtitle: 'Heartfelt emotional stories',
+        items: _romanceAnime,
+      ),
+      BrowseRow(
+        title: '🔮 Fantasy & Isekai',
+        subtitle: 'Magical realms and alternate worlds',
+        items: _fantasyAnime,
+      ),
+      BrowseRow(
+        title: '🤖 Sci-Fi & Cyberpunk',
+        subtitle: 'Futuristic technologies and dystopian worlds',
+        items: _sciFiAnime,
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     // Built once and placed above the content by _withHeader in every
@@ -401,37 +501,12 @@ class _AnimePageState extends State<AnimePage> {
     // depending on whether the page happened to have a hero yet.
     final pillHeader = _buildPillHeader();
 
-    final backgroundContent = Stack(
-      children: [
-        // Ambient background glows matching Home
-        Positioned(
-          top: -120,
-          right: -120,
-          child: Container(
-            width: 500,
-            height: 500,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF7C5CFF).withValues(alpha: 0.08),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 100,
-          left: -100,
-          child: Container(
-            width: 450,
-            height: 450,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFF00D2EF).withValues(alpha: 0.05),
-            ),
-          ),
-        ),
-
-        // Main scrollable content
-        if (_genreFilter != null)
-          _withHeader(
+    // A genre choice cannot be answered by rows of curated catalogs, so
+    // picking one switches the page to a single filtered grid -- same split
+    // TypeCatalogPage (Movies/Series) uses between BrowseScaffold and its own
+    // filtered grid.
+    final content = _genreFilter != null
+        ? _withHeader(
             pillHeader,
             _genreLoading
                 ? const Center(
@@ -439,247 +514,33 @@ class _AnimePageState extends State<AnimePage> {
                   )
                 : _buildGenreGrid(),
           )
-        else if (_loading &&
-            (_isArabicMode ? _arabicFeed == null : _trending.isEmpty))
-          _withHeader(
-            pillHeader,
-            const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+        : BrowseScaffold<AnimeMedia>(
+            header: pillHeader,
+            belowHero: ContinueWatchingSlider(
+              typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',
+              title: _isArabicMode ? 'متابعة المشاهدة' : 'Continue Watching',
             ),
-          )
-        else if (_error != null &&
-            (_isArabicMode ? _arabicFeed == null : _trending.isEmpty))
-          _withHeader(
-            pillHeader,
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.error_outline_rounded,
-                    color: Colors.redAccent,
-                    size: 48,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    _error!,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C5CFF),
-                    ),
-                    onPressed: _loadAnimeData,
-                    child: const Text('Retry'),
-                  ),
-                ],
+            isLoading: _loading,
+            error: _error,
+            onRetry: _loadAnimeData,
+            heroItems: _heroItems,
+            rows: _rows,
+            heroBuilder: (context, anime) => _AnimeHeroSlide(
+              anime: anime,
+              screenWidth: MediaQuery.sizeOf(context).width,
+              onWatchNow: () => _playEpisode(anime, 1),
+              onDetailsTap: () => _openDetails(anime),
+            ),
+            itemBuilder: (context, anime) =>
+                AnimeCard(anime: anime, onTap: () => _openDetails(anime)),
+            onRefresh: _loadAnimeData,
+            emptyState: const Center(
+              child: Text(
+                'Failed to load the Anime catalog.',
+                style: TextStyle(color: Colors.white54, fontSize: 16),
               ),
             ),
-          )
-        else
-          _withHeader(
-            pillHeader,
-            RefreshIndicator(
-              color: const Color(0xFF7C5CFF),
-              backgroundColor: const Color(0xFF151822),
-              onRefresh: _loadAnimeData,
-              child: ListView(
-                controller: _scrollController,
-                clipBehavior: Clip.none,
-                padding: EdgeInsets.zero,
-                physics: const BouncingScrollPhysics(
-                  parent: AlwaysScrollableScrollPhysics(),
-                ),
-                children: [
-                  if (_isArabicMode) ...[
-                    // 1. Arabic Hero Carousel (Matching Home Page)
-                    if (_arabicFeed != null &&
-                        (_arabicFeed!.spotlight.isNotEmpty ||
-                            _arabicFeed!.trending.isNotEmpty))
-                      _AnimeHeroCarousel(
-                        animeList:
-                            (_arabicFeed!.spotlight.isNotEmpty
-                                    ? _arabicFeed!.spotlight
-                                    : _arabicFeed!.trending)
-                                .take(6)
-                                .map((c) => c.toAnimeMedia())
-                                .toList(),
-                        onWatchNow: (anime) => _playEpisode(anime, 1),
-                        onDetailsTap: _openDetails,
-                      ),
-
-                    const SizedBox(height: 16),
-
-                    // 2. Anime Continue Watching Slider
-                    const ContinueWatchingSlider(
-                      typeFilter: 'arabic_anime',
-                      title: 'متابعة المشاهدة',
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // 3. Arabic Sliders with Desktop Scroll Arrows
-                    if (_arabicFeed != null) ...[
-                      if (_arabicFeed!.recentEpisodes.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '⚡ آخر الحلقات المعروضة',
-                          subtitle: 'أحدث الحلقات المضافة المترجمة للعربية',
-                          animeList: _arabicFeed!.recentEpisodes
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: (anime) => _openDetails(
-                            anime,
-                            anime.totalEpisodes > 0 ? anime.totalEpisodes : null,
-                          ),
-                        ),
-                      if (_arabicFeed!.trending.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '🔥 الأكثر شهرة وتداولاً',
-                          subtitle: 'الأنميات الأكثر مشاهدة حالياً',
-                          animeList: _arabicFeed!.trending
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: _openDetails,
-                        ),
-                      if (_arabicFeed!.popularMovies.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '🎬 الأفلام الأكثر شعبية',
-                          subtitle: 'أفلام الأنمي المميزة',
-                          animeList: _arabicFeed!.popularMovies
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: _openDetails,
-                        ),
-                      if (_arabicFeed!.topSeasonal.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '👑 أفضل الأنميات',
-                          subtitle: 'أنميات ذات تقييمات استثنائية',
-                          animeList: _arabicFeed!.topSeasonal
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: _openDetails,
-                        ),
-                      if (_arabicFeed!.seasonal.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '🌟 أنميات موسمية',
-                          subtitle: 'عروض الموسم الحالي',
-                          animeList: _arabicFeed!.seasonal
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: _openDetails,
-                        ),
-                      if (_arabicFeed!.legendary.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '⚔️ أنميات أسطورية',
-                          subtitle: 'أعمال خالدة يجب ألا تفوتك',
-                          animeList: _arabicFeed!.legendary
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: _openDetails,
-                        ),
-                      if (_arabicFeed!.upcoming.isNotEmpty)
-                        AnimeSliderSection(
-                          title: '🚀 المنتظرة قريباً',
-                          subtitle: 'أنميات قادمة قريباً',
-                          animeList: _arabicFeed!.upcoming
-                              .map((c) => c.toAnimeMedia())
-                              .toList(),
-                          onAnimeTap: _openDetails,
-                        ),
-                    ],
-                  ] else ...[
-                    // 1. Full Bleed Hero Carousel (Matching Home Page)
-                    if (_trending.isNotEmpty)
-                      _AnimeHeroCarousel(
-                        animeList: _trending.take(6).toList(),
-                        onWatchNow: (anime) => _playEpisode(anime, 1),
-                        onDetailsTap: _openDetails,
-                      ),
-
-                    const SizedBox(height: 16),
-
-                    // 2. Anime Continue Watching Slider
-                    const ContinueWatchingSlider(
-                      typeFilter: 'general_anime',
-                      title: 'Continue Watching',
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    // 3. Sliders with Desktop Scroll Arrows
-                    AnimeSliderSection(
-                      title: '🔥 Trending Anime',
-                      subtitle: 'Top popular and trending series',
-                      animeList: _trending,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title:
-                          '🌟 Popular This Season (${AnilistService.currentSeason()})',
-                      subtitle: 'Currently airing hits',
-                      animeList: _popularSeason,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title: '⭐ All-Time Masterpieces',
-                      subtitle: 'Critically acclaimed top rated anime',
-                      animeList: _topRated,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title: '🚀 Anticipated Next Season',
-                      subtitle: 'Upcoming anime you cannot miss',
-                      animeList: _upcoming,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title: '⚔️ Action & Adventure',
-                      subtitle: 'High octane battles and epic journeys',
-                      animeList: _actionAnime,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title: '💖 Romance & Drama',
-                      subtitle: 'Heartfelt emotional stories',
-                      animeList: _romanceAnime,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title: '🔮 Fantasy & Isekai',
-                      subtitle: 'Magical realms and alternate worlds',
-                      animeList: _fantasyAnime,
-                      onAnimeTap: _openDetails,
-                    ),
-                    AnimeSliderSection(
-                      title: '🤖 Sci-Fi & Cyberpunk',
-                      subtitle: 'Futuristic technologies and dystopian worlds',
-                      animeList: _sciFiAnime,
-                      onAnimeTap: _openDetails,
-                    ),
-                  ],
-
-                  SizedBox(height: 110.0 + MediaQuery.paddingOf(context).bottom),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-
-    final overlayChildren = <Widget>[
-      // Custom Scroll Track (Matching Home Page)
-      if (AppBreakpoints.of(context) == ScreenTier.desktop)
-        Positioned(
-          right: 24,
-          bottom: 40,
-          child: CustomScrollTrack(controller: _scrollController),
-        ),
-    ];
+          );
 
     return Scaffold(
       backgroundColor: const Color(0xFF080A0F),
@@ -687,176 +548,38 @@ class _AnimePageState extends State<AnimePage> {
         color: const Color(0xFF080A0F),
         child: Stack(
           children: [
-            RepaintBoundary(child: backgroundContent),
-            ...overlayChildren,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Full-Bleed Anime Hero Carousel (Matching Home Page _HeroCarousel)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _AnimeHeroCarousel extends StatefulWidget {
-  final List<AnimeMedia> animeList;
-  final Function(AnimeMedia) onWatchNow;
-  final Function(AnimeMedia) onDetailsTap;
-
-  const _AnimeHeroCarousel({
-    required this.animeList,
-    required this.onWatchNow,
-    required this.onDetailsTap,
-  });
-
-  @override
-  State<_AnimeHeroCarousel> createState() => _AnimeHeroCarouselState();
-}
-
-class _AnimeHeroCarouselState extends State<_AnimeHeroCarousel>
-    with HeroCarouselAutoRotate<_AnimeHeroCarousel> {
-  static const _rotateEvery = Duration(seconds: 8);
-
-  @override
-  void initState() {
-    super.initState();
-    startHeroAutoRotate(
-      itemCount: widget.animeList.length,
-      interval: _rotateEvery,
-      transitionDuration: const Duration(milliseconds: 700),
-      transitionCurve: Curves.easeInOutCubic,
-    );
-  }
-
-  void _goTo(int index) {
-    goToHeroPage(
-      index,
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOutCubic,
-    );
-  }
-
-  double _heroHeight(double screenWidth, double screenHeight) {
-    // Sized to match Live TV's hero carousel (iptv_hero_carousel.dart's
-    // Immersive style) -- previously ran up to 920px on desktop, nearly
-    // double any other hero in the app.
-    if (screenWidth < 600) {
-      return (screenHeight * 0.42).clamp(340.0, 420.0);
-    } else if (screenWidth < 1100) {
-      return (screenHeight * 0.48).clamp(360.0, 480.0);
-    } else {
-      return (screenHeight * 0.52).clamp(380.0, 560.0);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final heroHeight = _heroHeight(screenWidth, screenHeight);
-
-    if (widget.animeList.isEmpty) return SizedBox(height: heroHeight);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => isHoveringCarousel = true),
-      onExit: (_) => setState(() => isHoveringCarousel = false),
-      child: SizedBox(
-        height: heroHeight,
-        width: double.infinity,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            PageView.builder(
-              controller: heroPageController,
-              itemCount: widget.animeList.length,
-              onPageChanged: (i) => setState(() => currentHeroIndex = i),
-              itemBuilder: (context, i) {
-                final anime = widget.animeList[i];
-                return _AnimeHeroSlide(
-                  anime: anime,
-                  screenWidth: screenWidth,
-                  onWatchNow: () => widget.onWatchNow(anime),
-                  onDetailsTap: () => widget.onDetailsTap(anime),
-                );
-              },
-            ),
-
-            // Dot indicators
-            if (widget.animeList.length > 1)
-              Positioned(
-                bottom: 16,
-                left: 0,
-                right: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(widget.animeList.length, (i) {
-                    final active = i == currentHeroIndex;
-                    return GestureDetector(
-                      onTap: () => _goTo(i),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeOutCubic,
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: active ? 22 : 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
-                          color: active
-                              ? AppThemeService
-                                    .currentPalette
-                                    .value
-                                    .primaryColor
-                              : Colors.white.withValues(alpha: 0.30),
-                          boxShadow: active
-                              ? [
-                                  BoxShadow(
-                                    color: AppThemeService
-                                        .currentPalette
-                                        .value
-                                        .primaryColor
-                                        .withValues(alpha: 0.55),
-                                    blurRadius: 8,
-                                  ),
-                                ]
-                              : null,
-                        ),
+            RepaintBoundary(
+              child: Stack(
+                children: [
+                  // Ambient background glows matching Home
+                  Positioned(
+                    top: -120,
+                    right: -120,
+                    child: Container(
+                      width: 500,
+                      height: 500,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF7C5CFF).withValues(alpha: 0.08),
                       ),
-                    );
-                  }),
-                ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 100,
+                    left: -100,
+                    child: Container(
+                      width: 450,
+                      height: 450,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF00D2EF).withValues(alpha: 0.05),
+                      ),
+                    ),
+                  ),
+                  content,
+                ],
               ),
-
-            // Desktop Hover Arrows
-            if (widget.animeList.length > 1 &&
-                isHoveringCarousel &&
-                screenWidth > 600) ...[
-              if (currentHeroIndex > 0)
-                Positioned(
-                  left: 24,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: _CarouselArrow(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: () => _goTo(currentHeroIndex - 1),
-                    ),
-                  ),
-                ),
-              if (currentHeroIndex < widget.animeList.length - 1)
-                Positioned(
-                  right: 24,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: _CarouselArrow(
-                      icon: Icons.arrow_forward_ios_rounded,
-                      onTap: () => _goTo(currentHeroIndex + 1),
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ],
         ),
       ),
@@ -1165,53 +888,6 @@ class _AnimeHeroSlide extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _CarouselArrow extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _CarouselArrow({required this.icon, required this.onTap});
-
-  @override
-  State<_CarouselArrow> createState() => _CarouselArrowState();
-}
-
-class _CarouselArrowState extends State<_CarouselArrow> {
-  bool _isHoveringArrow = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHoveringArrow = true),
-      onExit: (_) => setState(() => _isHoveringArrow = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 52,
-          height: 52,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _isHoveringArrow
-                ? Colors.black.withValues(alpha: 0.6)
-                : Colors.black.withValues(alpha: 0.3),
-            border: Border.all(
-              color: _isHoveringArrow
-                  ? Colors.white.withValues(alpha: 0.6)
-                  : Colors.white.withValues(alpha: 0.2),
-              width: 1.5,
-            ),
-          ),
-          child: Icon(
-            widget.icon,
-            color: _isHoveringArrow ? Colors.white : Colors.white70,
-            size: 24,
-          ),
-        ),
-      ),
     );
   }
 }
