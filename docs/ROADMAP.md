@@ -28,14 +28,21 @@ is now **archived**, so Mov is the only active app in the family and the
 direct downstream of upstream `ayman708-UX/PlayTorrioV3` — no more relaying
 through PlayTorrioMod.
 
-**Last synced: `e560d4a`, 2026-09-08.** Ported the HindMoviez scraper,
-Castilian/Latino Spanish audio detection, and Arabic anime catalog fixes.
-"Builtin Providers" was reimplemented rather than ported — upstream's
-hardcoded 46-name roster does not match Mov's registered scraper set, so
-Settings enumerates `ScraperManager.instance.scrapers` and stores only the
-user's exceptions. Next step: check `v3/main` for commits past `e560d4a`
-and port anything applicable, file-by-file (git history was squashed at the
-fork point, so nothing arrives via `git merge`).
+**Last synced: `3670ae1`, 2026-09-10.** Ported download auto-reconnect,
+"Copy Stream URL", and the fullscreen-state-on-exit fix from that commit;
+deliberately not ported: its Support Dev sponsor monetization feature (out
+of scope for this fork) and its keyboard-driven aspect-cycle HUD (Mov
+already has an aspect ratio control in the player's Settings menu — a
+second, inconsistent affordance for the same setting would be a
+regression). Still unreviewed from the same batch: `9616808` (hero
+backdrop scaling for home/anime — anime_page.dart has diverged
+significantly since this session's `BrowseScaffold` migration, needs
+adapting rather than a direct port) and `d2f8074` (IPTV portal manager
+responsiveness — a near-total rewrite of `iptv_portals_modal.dart`, real
+mobile-first value but a large diff to review safely). Next step: review
+those two, then check `v3/main` for anything past `3670ae1`, file-by-file
+(git history was squashed at the fork point, so nothing arrives via
+`git merge`).
 
 ## Code and consistency
 

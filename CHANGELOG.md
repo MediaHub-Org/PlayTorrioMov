@@ -5,6 +5,28 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.1+20] - 2026-09-10
+
+### Added
+- Download resilience: an HTTP or HLS-segment download that drops mid-way
+  or closes just short of the expected size now auto-reconnects (up to 5
+  attempts) instead of failing outright
+- A "Copy Stream URL" button in the player, next to Cast
+
+### Changed
+- Leaving the player no longer force-exits fullscreen if the app was
+  already fullscreen before it opened (e.g. kiosk mode) — only fullscreen
+  the player itself entered. F11 now also toggles fullscreen, alongside F
+
+### Fixed
+- The Flatpak package failed to launch at all: "error while loading
+  shared libraries: libsecret-1.so.0: cannot open shared object file".
+  `flutter_secure_storage_linux` needs libsecret, which isn't part of the
+  base Freedesktop runtime — now built and bundled as its own module
+- The Flatpak's metainfo version was hand-written and already stale
+  (showing 1.3.0 for a 1.5.0 install); now stamped from the same
+  resolved version every other platform's filename uses
+
 ## [1.5.0+19] - 2026-09-10
 
 ### Added
