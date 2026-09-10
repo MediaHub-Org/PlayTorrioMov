@@ -11,6 +11,7 @@ import '../../services/simkl/simkl_service.dart';
 import 'appearance_settings_page.dart';
 import 'debrid_settings_page.dart';
 import 'addons_settings_page.dart';
+import 'builtin_providers_settings_page.dart';
 import 'general_settings_page.dart';
 import 'trakt_settings_page.dart';
 import 'simkl_settings_page.dart';
@@ -18,6 +19,9 @@ import 'updates_settings_page.dart';
 import 'about_settings_page.dart';
 import 'video_player_settings_page.dart';
 import '../../services/p2p/p2p_settings_service.dart';
+import '../../services/scraper/builtin_providers_service.dart';
+import '../../services/scraper/stream_scraper.dart';
+import '../../services/stream/stream_service.dart';
 import '../../widgets/p2p/p2p_warning_dialog.dart';
 import '../../services/discord/discord_rpc_service.dart';
 
@@ -193,7 +197,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
 
 
-              // 3. Debrid & Cloud Streaming
+              // 2. Debrid & Cloud Streaming
               _SettingsCategoryTile(
                 icon: Icons.cloud_download_rounded,
                 iconColor: const Color(0xFF00E5FF),
@@ -221,7 +225,39 @@ class _SettingsPageState extends State<SettingsPage> {
 
               const SizedBox(height: 12),
 
-              // 4. Built-in P2P Torrent Source Toggle (PlayTorrio)
+              // 4. Built-in scrapers, one row each
+              ValueListenableBuilder<int>(
+                valueListenable: BuiltinProvidersService.revision,
+                builder: (context, _, __) {
+                  // Registration is idempotent and cheap; doing it here means
+                  // the count is right even on a launch that never opened a
+                  // stream, which is when scrapers used to first register.
+                  StreamService.registerBuiltInScrapers();
+                  final providers = ScraperManager.instance.scrapers;
+                  final off = BuiltinProvidersService.disabledCountAmong(
+                    providers.map((p) => p.id),
+                  );
+                  final on = providers.length - off;
+
+                  return _SettingsCategoryTile(
+                    icon: Icons.travel_explore_rounded,
+                    iconColor: const Color(0xFF38BDF8),
+                    title: 'Built-in Providers',
+                    subtitle:
+                        'Choose which built-in scrapers are searched for sources',
+                    badgeText: '$on of ${providers.length} on',
+                    badgeColor: off == 0
+                        ? const Color(0xFF38BDF8)
+                        : const Color(0xFFF59E0B),
+                    onTap: () =>
+                        _navigateTo(const BuiltinProvidersSettingsPage()),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+
+              // 5. Built-in P2P Torrent Source Toggle (PlayTorrio)
               ValueListenableBuilder<bool>(
                 valueListenable: P2pSettingsService.isP2pEnabled,
                 builder: (context, isP2p, _) {
@@ -250,7 +286,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
               const SizedBox(height: 12),
 
-              // 5. Discord Rich Presence (Desktop Only)
+              // 6. Discord Rich Presence (Desktop Only)
               if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ...[
                 ValueListenableBuilder<bool>(
                   valueListenable: DiscordRpcService.instance.isEnabled,
@@ -274,7 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 12),
               ],
 
-              // 6. Trakt Sync
+              // 7. Trakt Sync
               _SettingsCategoryTile(
                 icon: Icons.movie_filter_rounded,
                 iconColor: const Color(0xFFED1C24),
@@ -287,7 +323,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
               const SizedBox(height: 12),
 
-              // 6. Simkl Sync
+              // 8. Simkl Sync
               _SettingsCategoryTile(
                 icon: Icons.tv_rounded,
                 iconColor: const Color(0xFF00ADFF),
@@ -322,7 +358,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
               const SizedBox(height: 12),
 
-              // 7. App Updates & System
+              // 9. App Updates & System
               _SettingsCategoryTile(
                 icon: Icons.system_update_rounded,
                 iconColor: const Color(0xFFF59E0B),
@@ -335,7 +371,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
               const SizedBox(height: 12),
 
-              // 8. About the app
+              // 10. About the app
               _SettingsCategoryTile(
                 icon: Icons.info_outline_rounded,
                 iconColor: Colors.white70,

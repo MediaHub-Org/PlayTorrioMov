@@ -66,6 +66,15 @@ import '../p2p/p2p_settings_service.dart';
 class StreamService {
   StreamService._();
 
+  /// Registers every built-in scraper with [ScraperManager], idempotently
+  /// (`registerScraper` de-duplicates on runtime type).
+  ///
+  /// Public because the Built-in Providers settings page lists whatever is
+  /// registered, and a user can reach Settings before ever opening a stream
+  /// -- which used to leave that list empty, since registration only
+  /// happened on the first fetch.
+  static void registerBuiltInScrapers() => _registerBuiltInScrapers();
+
   static void _registerBuiltInScrapers() {
     if (P2pSettingsService.isP2pEnabled.value) {
       ScraperManager.instance.registerScraper(KnabenScraper());

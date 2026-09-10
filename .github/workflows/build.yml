@@ -16,10 +16,11 @@
 #      tag (e.g. v1.1.3), so testers get download links instead of CI
 #      artifacts (which require a GitHub login and expire).
 #  Dispatched builds are marked as GitHub *prereleases* and titled
-#  "(dev)" while they are untested -- flip `dev_build` off once a build
-#  has been verified on a device. A pushed tag carrying a semver
-#  prerelease suffix (v1.2.0-beta.1) is a prerelease too; a plain
-#  v1.2.0 is a full release.
+#  "(dev)" while they are untested -- clear `dev_build` once a build has
+#  been verified on a device. A tag carrying a semver prerelease suffix
+#  (v1.2.0-beta.1) is a prerelease too, pushed or dispatched; a plain
+#  v1.2.0 is a full release. See APP_CHANNEL below, which is where that
+#  one decision is made for the binaries and the release alike.
 #  Environment: Injects --dart-define-from-file=.env using ${{ secrets.ENV_FILE }},
 #  plus --dart-define=APP_CHANNEL so the binary carries the same dev/stable
 #  marker as the release it ships in.
@@ -55,13 +56,24 @@ env:
   PUB_CACHE: ${{ github.workspace }}/.pub-cache
   # Build channel baked into the binary via AppInfo.channel, so an
   # unverified build says "1.4.0 (dev)" in Settings/About and shows the
-  # prerelease badge. Deliberately the same condition line 797 uses for the
-  # GitHub release's `prerelease` flag: computed once here, the marker
-  # inside the app cannot disagree with the label outside it. It used to be
-  # a hardcoded constant in app_info.dart that a human was expected to flip
-  # by hand each release, which meant a dev_build dispatch published
-  # binaries claiming to be verified.
-  APP_CHANNEL: ${{ (github.event.inputs.dev_build != 'false' || contains(github.ref_name, '-')) && 'dev' || '' }}
+  # prerelease badge. This is the ONE place the dev/stable decision is made:
+  # the Publish job derives both the release title and its `prerelease` flag
+  # from `env.APP_CHANNEL`, so the marker inside the app cannot disagree with
+  # the label outside it. It used to be a hardcoded constant in app_info.dart
+  # that a human was expected to flip by hand each release, which meant a
+  # dev_build dispatch published binaries claiming to be verified.
+  #
+  # A build is 'dev' when either:
+  #   - it is a manual dispatch that did not explicitly clear `dev_build`, or
+  #   - the tag being published carries a semver prerelease suffix
+  #     (v1.2.0-rc.1), whether that tag was pushed or named in the dispatch.
+  # The event_name guards matter. `github.event.inputs.dev_build` is an empty
+  # string on a tag push, so the old bare `!= 'false'` was true there too and
+  # a plain `v1.2.0` tag published as a prerelease titled "(dev)" -- the exact
+  # opposite of what the comment below it promised. And `github.ref_name` is a
+  # *branch* name on a dispatch, so testing it for '-' made every build from a
+  # branch like `claude/fix-thing` dev regardless of the flag.
+  APP_CHANNEL: ${{ ((github.event_name == 'workflow_dispatch' && github.event.inputs.dev_build != 'false') || (github.event_name == 'push' && contains(github.ref_name, '-')) || contains(github.event.inputs.release_tag, '-')) && 'dev' || '' }}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 jobs:
@@ -852,11 +864,14 @@ jobs:
           # On a dispatch the tag comes from the input and is created at the
           # dispatched ref; on a tag push it is the pushed tag.
           tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
-          name: "PlayTorrioMov ${{ github.event.inputs.release_tag || github.ref_name }}${{ github.event.inputs.dev_build == 'false' && ' ' || ' (dev)' }}"
+          name: "PlayTorrioMov ${{ github.event.inputs.release_tag || github.ref_name }}${{ env.APP_CHANNEL == 'dev' && ' (dev)' || '' }}"
           draft: false
+          # Both of these read the channel resolved once at the top of the
+          # workflow, so the badge on the release, the "(dev)" in its title and
+          # the channel compiled into every binary it ships can never disagree.
           # A dev dispatch is a prerelease, as is any tag carrying a semver
           # prerelease suffix (v1.2.0-rc.1). Plain v1.2.0 ships as full.
-          prerelease: ${{ github.event.inputs.dev_build != 'false' || contains(github.ref_name, '-') }}
+          prerelease: ${{ env.APP_CHANNEL == 'dev' }}
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |

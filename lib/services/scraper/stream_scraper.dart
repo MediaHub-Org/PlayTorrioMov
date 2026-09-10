@@ -3,9 +3,36 @@ import 'package:flutter/foundation.dart';
 import '../../models/stream/stream_model.dart';
 import '../stream/stream_health_checker.dart';
 import '../p2p/p2p_settings_service.dart';
+import 'builtin_providers_service.dart';
 
 abstract class StreamScraper {
   String get name;
+
+  /// Stable identity for this provider, used as the persistence key in
+  /// [BuiltinProvidersService] and to de-duplicate registration.
+  ///
+  /// Deliberately **not** [name]: `name` is the label stamped onto every
+  /// source a scraper yields ("PlayTorrioHTTP"), which 46 of the built-in
+  /// scrapers share -- it identifies the delivery path shown in the source
+  /// list, not the site the source came from. `runtimeType` is what
+  /// [ScraperManager.registerScraper] has always de-duplicated on, so it is
+  /// already the app's real notion of "which scraper is this".
+  String get id => runtimeType.toString();
+
+  /// Human-readable provider name for settings UI: the class name with its
+  /// `Scraper` suffix dropped (`VidSrcScraper` -> `VidSrc`). Override when
+  /// the class name is not what the site calls itself.
+  String get displayName {
+    final raw = id;
+    return raw.endsWith('Scraper')
+        ? raw.substring(0, raw.length - 'Scraper'.length)
+        : raw;
+  }
+
+  /// Whether this scraper reaches a torrent swarm rather than an HTTP host.
+  /// The P2P master switch in Settings turns these off as a group, so the
+  /// per-provider list marks them and defers to it.
+  bool get isTorrent => false;
 
   /// Yields sources progressively one-by-one as they are resolved.
   Stream<StreamSource> scrapeStream({
@@ -49,6 +76,15 @@ class ScraperManager {
   final List<StreamScraper> _scrapers = [];
   bool get hasScrapers => _scrapers.isNotEmpty;
 
+  /// Every built-in scraper that has been registered, in registration order.
+  ///
+  /// This is the list the Built-in Providers settings page renders. It is
+  /// generated from what the app actually registered rather than a
+  /// hand-maintained roster, so a scraper added to or dropped from
+  /// `StreamService.registerBuiltInScrapers` shows up in (or disappears
+  /// from) Settings with no second list to update.
+  List<StreamScraper> get scrapers => List.unmodifiable(_scrapers);
+
   void registerScraper(StreamScraper scraper) {
     if (!_scrapers.any((s) => s.runtimeType == scraper.runtimeType)) {
       _scrapers.add(scraper);
@@ -74,7 +110,9 @@ class ScraperManager {
       if (!p2pAllowed && s.name == 'PlayTorrio') {
         return false;
       }
-      return true;
+      // Per-provider opt-out. The P2P master switch above still wins for
+      // torrent scrapers: turning P2P off silences them whatever this says.
+      return BuiltinProvidersService.isEnabled(s.id);
     }).toList();
 
     if (activeScrapers.isEmpty) {
