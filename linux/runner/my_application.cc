@@ -1,9 +1,6 @@
 #include "my_application.h"
 
 #include <flutter_linux/flutter_linux.h>
-#ifdef GDK_WINDOWING_X11
-#include <gdk/gdkx.h>
-#endif
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -25,32 +22,17 @@ static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
-  // Use a header bar when running in GNOME as this is the common style used
-  // by applications and is the setup most users will be using (e.g. Ubuntu
-  // desktop).
-  // If running on X and not using GNOME then just use a traditional title bar
-  // in case the window manager does more exotic layout, e.g. tiling.
-  // If running on Wayland assume the header bar will work (may need changing
-  // if future cases occur).
-  gboolean use_header_bar = TRUE;
-#ifdef GDK_WINDOWING_X11
-  GdkScreen* screen = gtk_window_get_screen(window);
-  if (GDK_IS_X11_SCREEN(screen)) {
-    const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
-    if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
-      use_header_bar = FALSE;
-    }
-  }
-#endif
-  if (use_header_bar) {
-    GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
-    gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "PlayTorrioMov");
-    gtk_header_bar_set_show_close_button(header_bar, TRUE);
-    gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
-  } else {
-    gtk_window_set_title(window, "PlayTorrioMov");
-  }
+  // The stock Flutter template's default here creates a client-side
+  // GtkHeaderBar with a hardcoded title and close button -- its own
+  // Adwaita-derived chrome, unrelated to and inconsistent with the app's
+  // own dark UI, and taller than a plain title bar. It also renders with
+  // whatever GTK theme is actually available, which inside a Flatpak
+  // sandbox may not be the host's theme at all. The app has no custom
+  // in-app window controls (no Flutter-drawn minimize/maximize/close), so
+  // window decoration can't be removed outright -- this instead always
+  // takes the plain-title-bar path, letting the window manager/compositor
+  // draw its own (themed, slimmer) decoration instead of a bespoke CSD bar.
+  gtk_window_set_title(window, "PlayTorrioMov");
 
   gtk_window_set_default_size(window, 1280, 720);
 

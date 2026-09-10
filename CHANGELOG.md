@@ -5,6 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.3+22] - 2026-09-10
+
+### Fixed
+- The Linux window's title bar used the stock Flutter template's default: a
+  native `GtkHeaderBar` with a hardcoded title, styled by whatever GTK
+  theme happens to be available — inside a Flatpak sandbox, not
+  necessarily the host's own theme, and unrelated to the app's own dark
+  UI either way. It was also taller than a plain title bar. Now always
+  renders a plain title, letting the window manager/compositor draw its
+  own (themed, slimmer) decoration — confirmed by building and actually
+  running the window on this machine
+
 ## [1.5.2+21] - 2026-09-10
 
 ### Fixed
