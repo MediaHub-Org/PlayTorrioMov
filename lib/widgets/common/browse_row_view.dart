@@ -5,8 +5,36 @@ import '../movie/movie_card.dart';
 import 'section_header.dart';
 import 'slider_arrow.dart';
 
-/// One horizontal row of poster cards: a [SectionHeader], a horizontally
-/// scrolling list, and scroll arrows that fade in on hover.
+/// The four numbers a row needs to lay out its cards. Deliberately its own
+/// tiny class rather than reusing [MovieCardSizing] everywhere: a channel
+/// logo card and a movie poster card are legitimately different shapes, and
+/// forcing every row's content through one aspect ratio would be a real
+/// visual change, not a consistency fix. [MovieCardSizing.cardWidth]-shaped
+/// content is still the default -- most rows are posters.
+class RowCardSizing {
+  final double cardWidth;
+  final double totalHeight;
+  final double spacing;
+  final double sidePadding;
+
+  const RowCardSizing({
+    required this.cardWidth,
+    required this.totalHeight,
+    required this.spacing,
+    required this.sidePadding,
+  });
+
+  factory RowCardSizing.fromMovieSizing(MovieCardSizing sizing) =>
+      RowCardSizing(
+        cardWidth: sizing.cardWidth,
+        totalHeight: sizing.totalHeight,
+        spacing: sizing.spacing,
+        sidePadding: sizing.sidePadding,
+      );
+}
+
+/// One horizontal row of cards: a [SectionHeader], a horizontally scrolling
+/// list, and scroll arrows that fade in on hover.
 ///
 /// The single row implementation in the app. [BrowseScaffold] builds its rows
 /// from it, and [AnimeSliderSection] wraps it — before that they were two
@@ -24,8 +52,14 @@ class BrowseRowView<T> extends StatefulWidget {
   final List<T> items;
   final VoidCallback? onSeeAll;
 
-  /// Builds one card. Given a box already sized to [MovieCardSizing.cardWidth].
+  /// Builds one card. Given a box already sized to [sizingOf]'s `cardWidth`
+  /// (or [MovieCardSizing]'s, by default).
   final Widget Function(BuildContext context, T item) itemBuilder;
+
+  /// Overrides the default poster sizing -- e.g. Live TV's channel cards,
+  /// which are a logo/banner shape, not a poster shape. Null uses
+  /// [MovieCardSizing.fromWidth].
+  final RowCardSizing Function(double screenWidth)? sizingOf;
 
   const BrowseRowView({
     super.key,
@@ -34,6 +68,7 @@ class BrowseRowView<T> extends StatefulWidget {
     required this.itemBuilder,
     this.subtitle,
     this.onSeeAll,
+    this.sizingOf,
   });
 
   @override
@@ -93,7 +128,10 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
   Widget build(BuildContext context) {
     if (widget.items.isEmpty) return const SizedBox.shrink();
 
-    final sizing = MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width);
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final sizing = widget.sizingOf != null
+        ? widget.sizingOf!(screenWidth)
+        : RowCardSizing.fromMovieSizing(MovieCardSizing.fromWidth(screenWidth));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

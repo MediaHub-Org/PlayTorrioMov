@@ -57,6 +57,9 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// Builds one poster card inside a row.
   final Widget Function(BuildContext context, T item) itemBuilder;
 
+  /// Overrides [rows]' default poster sizing -- see [BrowseRowView.sizingOf].
+  final RowCardSizing Function(double screenWidth)? rowSizingOf;
+
   /// Shown above the hero — a search button, filters, a sub-tab bar.
   ///
   /// It sits in its own fixed band above the scroll viewport and stays
@@ -97,6 +100,7 @@ class BrowseScaffold<T> extends StatefulWidget {
     required this.rows,
     required this.heroBuilder,
     required this.itemBuilder,
+    this.rowSizingOf,
     this.header,
     this.belowHero,
     this.afterRows,
@@ -231,6 +235,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                   items: row.items,
                   onSeeAll: row.onSeeAll,
                   itemBuilder: widget.itemBuilder,
+                  sizingOf: widget.rowSizingOf,
                 ),
               ),
           if (widget.afterRows != null)

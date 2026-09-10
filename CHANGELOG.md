@@ -20,6 +20,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   hero carousel and state machine. No card's look or size changed — Anime's
   rows already used the shared `BrowseRowView`/`AnimeCard`, so this only
   consolidated the page chrome around them
+- Live TV's channel row (`IptvSliderSection`) now renders through the same
+  shared `BrowseRowView` every other row uses, instead of its own copy of
+  the scroll arrows, hover state and section header. Channel cards keep
+  their own logo/banner shape — `BrowseRowView` can now take a row-specific
+  card sizing instead of always using the poster one
 - Release builds now warn in CI when no `ENV_FILE`/`DOTENV` secret is
   set, instead of silently producing artifacts with an empty `.env` —
   which is what every release so far has shipped, leaving Trakt, Simkl,
