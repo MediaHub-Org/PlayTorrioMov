@@ -34,9 +34,9 @@
         "install -Dm644 flatpak/io.github.MediaHubOrg.PlayTorrioMov.metainfo.xml /app/share/metainfo/io.github.MediaHubOrg.PlayTorrioMov.metainfo.xml"
       ],
       "sources": [
-        { "type": "dir", "path": "bundle", "dest": "bundle" },
-        { "type": "dir", "path": "assets", "dest": "assets" },
-        { "type": "dir", "path": "flatpak", "dest": "flatpak" }
+        { "type": "dir", "path": "../bundle", "dest": "bundle" },
+        { "type": "dir", "path": "../assets", "dest": "assets" },
+        { "type": "dir", "path": ".", "dest": "flatpak" }
       ]
     }
   ]
