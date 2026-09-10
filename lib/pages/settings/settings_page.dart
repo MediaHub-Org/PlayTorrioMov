@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../services/addon/addon_manager.dart';
-import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../services/trakt/trakt_service.dart';
@@ -78,7 +77,6 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final addonCount = AddonManager.instance.addons.length;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final tier = AppBreakpoints.of(context);
     final syncedCount = (_traktConnected ? 1 : 0) + (_simklConnected ? 1 : 0);
 
     // Sorted A-Z by title, except About -- which stays last, the way a
@@ -151,30 +149,14 @@ class _SettingsPageState extends State<SettingsPage> {
       body: AnimatedAmbientBackground(
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: tier == ScreenTier.desktop ? 1100 : 800,
+            constraints: const BoxConstraints(maxWidth: 800),
+            child: ListView.separated(
+              padding: EdgeInsets.fromLTRB(16, 20, 16, 32 + bottomInset),
+              itemCount: tiles.length + 1,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, i) =>
+                  i < tiles.length ? tiles[i] : _aboutTile(),
             ),
-            child: tier == ScreenTier.mobile
-                ? ListView.separated(
-                    padding: EdgeInsets.fromLTRB(16, 20, 16, 32 + bottomInset),
-                    itemCount: tiles.length + 1,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, i) => i < tiles.length
-                        ? tiles[i]
-                        : _aboutTile(),
-                  )
-                : GridView.builder(
-                    padding: EdgeInsets.fromLTRB(20, 24, 20, 32 + bottomInset),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: tier == ScreenTier.desktop ? 3 : 2,
-                      mainAxisExtent: 76,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemCount: tiles.length + 1,
-                    itemBuilder: (context, i) =>
-                        i < tiles.length ? tiles[i] : _aboutTile(),
-                  ),
           ),
         ),
       ),
