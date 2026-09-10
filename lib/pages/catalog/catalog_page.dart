@@ -282,7 +282,9 @@ class _CatalogPageState extends State<CatalogPage> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
                 child: Container(
-                  padding: EdgeInsets.only(top: topPadding),
+                  padding: EdgeInsets.only(
+                    top: AppSpacing.floatingTopInset(context),
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,

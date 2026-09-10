@@ -746,7 +746,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
         child: Container(
-          padding: EdgeInsets.only(top: topPadding),
+          padding: EdgeInsets.only(top: AppSpacing.floatingTopInset(context)),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,

@@ -492,7 +492,10 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
                 child: Container(
-                  padding: EdgeInsets.only(top: topPadding + 4, bottom: 8),
+                  padding: EdgeInsets.only(
+                    top: AppSpacing.floatingTopInset(context),
+                    bottom: 8,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,

@@ -347,7 +347,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                 filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                 child: Container(
                   padding: EdgeInsets.only(
-                    top: MediaQuery.paddingOf(context).top + 8,
+                    top: AppSpacing.floatingTopInset(context),
                     bottom: 12,
                     left: AppSpacing.pageInset(context),
                     right: AppSpacing.pageInset(context),
