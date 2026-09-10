@@ -15,6 +15,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   to update
 
 ### Changed
+- Anime's page now uses `BrowseScaffold`, the same hero + row + loading/error
+  arrangement Movies and Series already use, instead of its own hand-rolled
+  hero carousel and state machine. No card's look or size changed — Anime's
+  rows already used the shared `BrowseRowView`/`AnimeCard`, so this only
+  consolidated the page chrome around them
 - Release builds now warn in CI when no `ENV_FILE`/`DOTENV` secret is
   set, instead of silently producing artifacts with an empty `.env` —
   which is what every release so far has shipped, leaving Trakt, Simkl,

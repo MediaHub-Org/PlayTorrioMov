@@ -3,8 +3,8 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
-Last reconciled against the tree: **2026-09-10** (v1.4.0+18), after the
-#30-#35 batch and the Built-in Providers work landed.
+Last reconciled against the tree: **2026-09-10** (v1.4.0+18), after Anime's
+page moved onto `BrowseScaffold`.
 
 ## Navigation
 
@@ -41,8 +41,8 @@ fork point, so nothing arrives via `git merge`).
 
 | #  | Task | Why it is still open |
 |----|------|------------------------|
-| 4  | Anime and Movies/Series share one row (`BrowseRowView`), but the *pages* still differ | Migrating Anime's page onto `BrowseScaffold` was dropped — `AnimeSliderSection` is also used by `anime_search_page`, so converting only the Anime page would leave two row implementations on adjacent screens. Revisit only if a third page wants Anime's hero-carousel + `ContinueWatchingSlider` arrangement. |
 | 10 | Verify the converged page gutter on a real phone and tablet | The values themselves are now one constant, `AppSpacing.pageInset` (16/20/24, mobile first) — the per-section 24/28/16/18/20/8 spread is gone. What is still open is the part this environment cannot do: there is no phone, tablet or emulator here, so the result has never been looked at on a real screen. |
+| 37 | Live TV still hand-rolls its own row (`IptvSliderSection`/`IptvCardSizing`), unlike Anime and Movies/Series | `IptvCardSizing` sizes channel cards to a `cardWidth * 1.35` logo/banner shape, not `MovieCardSizing`'s `cardWidth * 1.48` poster shape — `BrowseScaffold` always renders its rows through `BrowseRowView` with the caller's `itemBuilder`, so adopting it here would force channel cards into the poster aspect ratio. That is a real visual change to every channel card, and this environment has no display to render and look at the result (see #10). Anime didn't have this problem: `AnimeSliderSection` already wrapped `BrowseRowView` with poster-shaped `AnimeCard`s, so migrating Anime's *page* (hero, header band, scroll track, loading/error state) onto `BrowseScaffold` changed no card's shape — that part is done, see CHANGELOG.md. |
 
 ## Requested UI work
 
@@ -51,7 +51,7 @@ fork point, so nothing arrives via `git merge`).
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is now the mobile-first gutter to build against; still open for #10 and #36. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify on real Android/iOS hardware | Wired up (`lib/services/cast/cast_service.dart`, `flutter_chrome_cast`), but this environment has no Android SDK, no Xcode, and no Cast-capable device — the native manifest/plist config and the actual cast-a-stream flow are both unverified. |
-| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset` (filter bar, back button, header rows, section titles, card rows, grids), and `BrowseScaffold` has one arrangement for all of its states. Still open is the structural half — Anime and Live TV each still hand-roll a hero + `ListView` page rather than using `BrowseScaffold` (see #4), so "the same kind of page" is still three implementations. |
+| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`, and Movies/Series and Anime now both use `BrowseScaffold` for hero + header band + scroll track + loading/error state — one arrangement, not two. Still open: Live TV, see #37. |
 
 ## Signing and releases
 
