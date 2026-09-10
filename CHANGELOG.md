@@ -5,6 +5,25 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.2+21] - 2026-09-10
+
+### Fixed
+- The Flatpak still didn't start after 1.5.1's libsecret fix: "Failed to
+  create AOT data / Invalid ELF path specified". Flutter's Linux embedder
+  resolves `data/` and `lib/libapp.so` relative to `/proc/self/exe`'s own
+  directory (confirmed straight from the engine source, and from the
+  executable's own `RUNPATH: $ORIGIN/lib`) — the manifest installed them
+  as siblings of `/app/bin/` instead of inside it, so the executable could
+  never find its own assets. Fixed by installing everything the exe needs
+  under `/app/bin/` alongside it, the same layout `flutter build linux`
+  already produces
+- Every back button's vertical position is now standardized on the same
+  shared inset (`AppSpacing.floatingTopInset`) — it previously varied by a
+  few px depending on which page you opened it from. Details and Anime
+  Details still float the button directly over their full-bleed hero
+  rather than inside a header bar like every other page — a deliberate
+  difference for that layout, not left over from this fix
+
 ## [1.5.1+20] - 2026-09-10
 
 ### Added

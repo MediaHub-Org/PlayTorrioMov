@@ -49,9 +49,10 @@
       "buildsystem": "simple",
       "build-commands": [
         "install -Dm755 bundle/PlayTorrioMov /app/bin/PlayTorrioMov",
-        "mkdir -p /app/lib /app/data",
-        "cp -r bundle/lib/. /app/lib/",
-        "cp -r bundle/data/. /app/data/",
+        "mkdir -p /app/bin/lib /app/bin/data",
+        "cp -r bundle/lib/. /app/bin/lib/",
+        "cp -r bundle/data/. /app/bin/data/",
+        "cp -P /app/lib/libsecret-1.so* /app/bin/lib/",
         "install -Dm644 flatpak/icon-512.png /app/share/icons/hicolor/512x512/apps/io.github.MediaHubOrg.PlayTorrioMov.png",
         "install -Dm644 flatpak/io.github.MediaHubOrg.PlayTorrioMov.desktop /app/share/applications/io.github.MediaHubOrg.PlayTorrioMov.desktop",
         "install -Dm644 flatpak/io.github.MediaHubOrg.PlayTorrioMov.metainfo.xml /app/share/metainfo/io.github.MediaHubOrg.PlayTorrioMov.metainfo.xml"

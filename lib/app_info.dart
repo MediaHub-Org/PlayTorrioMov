@@ -51,10 +51,10 @@ abstract final class AppInfo {
   ///
   /// Kept in step with `pubspec.yaml` by a test, so it can never drift into
   /// reporting a version the app has not been at for several releases.
-  static const String fallbackVersion = '1.5.1';
+  static const String fallbackVersion = '1.5.2';
 
   /// Build-number counterpart to [fallbackVersion].
-  static const String fallbackBuildNumber = '20';
+  static const String fallbackBuildNumber = '21';
 
   /// Renders a version for display: `1.1.3` on a stable build, `1.1.3 (dev)`
   /// on a channel build. Every user-visible version string goes through here
