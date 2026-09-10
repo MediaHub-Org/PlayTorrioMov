@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Release builds now warn in CI when no `ENV_FILE`/`DOTENV` secret is
+  set, instead of silently producing artifacts with an empty `.env` —
+  which is what every release so far has shipped, leaving Trakt, Simkl,
+  Discord Rich Presence and TMDB cast photos inert in the binaries
+- A failed Windows release build now re-runs the failing CMake INSTALL
+  target verbosely, so the underlying error is in the log. `flutter
+  build` summarises MSBuild's output, so the v1.4.0 build failed twice
+  showing only `MSB3073` with no reason
+
 ### Fixed
 - An unverified build now actually says so. `dev_build` only ever set the
   GitHub release's title and prerelease flag; the binary carried a

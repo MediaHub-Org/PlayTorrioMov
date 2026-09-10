@@ -130,7 +130,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Install dependencies
@@ -143,7 +148,23 @@ jobs:
           # newer MSVC (VS 2026 / STL1011) treats as a hard error. Silence the
           # deprecation so the plugin compiles on the CI runner.
           export CXXFLAGS="-D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS"
-          flutter build windows --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
+
+          if flutter build windows --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}; then
+            exit 0
+          fi
+
+          # `flutter build` summarises MSBuild's output, so an INSTALL.vcxproj
+          # failure surfaces only as MSB3073 wrapping the cmake_install.cmake
+          # command line -- the actual reason (a missing file to copy, a
+          # locked target, no space) never reaches the log. That is exactly
+          # how the v1.4.0 release build failed twice with nothing to act on.
+          #
+          # Re-run just the failing target verbosely to print it, then still
+          # fail the step. Costs nothing on a successful build.
+          echo "::group::Re-running the INSTALL target to surface the real error"
+          cmake --build build/windows/x64 --config Release --target INSTALL --verbose 2>&1 | tail -80 || true
+          echo "::endgroup::"
+          exit 1
 
       - name: Install Inno Setup
         shell: pwsh
@@ -264,7 +285,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Install dependencies
@@ -386,7 +412,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Install dependencies
@@ -491,7 +522,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Generate Linux platform files if missing
@@ -583,7 +619,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Configure macOS platform files if missing
@@ -664,7 +705,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Install dependencies
@@ -735,7 +781,12 @@ jobs:
           elif [ -n "${{ secrets.DOTENV }}" ]; then
             echo "${{ secrets.DOTENV }}" > .env
           else
+            # An empty .env still builds, which is why this went unnoticed:
+            # every credential-backed feature simply no-ops in the artifact.
+            # Say so loudly rather than shipping a release that silently
+            # cannot sign in to anything.
             touch .env
+            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in, Discord Rich Presence and TMDB cast photos are all inert in this build. See docs/RELEASES.md for the keys .env is read for."
           fi
 
       - name: Install dependencies
