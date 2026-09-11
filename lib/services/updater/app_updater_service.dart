@@ -12,8 +12,19 @@ class AppUpdaterService {
   static const String githubRepo = 'MediaHub-Org/PlayTorrioMov';
   static const String githubApiUrl =
       'https://api.github.com/repos/$githubRepo/releases/latest';
+  static const String flatpakAppId = 'io.github.MediaHubOrg.PlayTorrioMov';
   static const String _keyDismissedVersion = 'dismissed_update_version';
   static const String _keyAutoCheckEnabled = 'auto_check_updates_enabled';
+
+  /// Whether this process is running inside a Flatpak sandbox -- FLATPAK_ID
+  /// is set by the sandbox itself (alongside a `/.flatpak-info` file),
+  /// confirmed present in an actual installed Flatpak run of this app.
+  /// A Flatpak install already has its own update mechanism (`flatpak
+  /// update`) and its files under /app are read-only at runtime anyway, so
+  /// downloading and "running" a release asset the way the desktop flow
+  /// does for every other Linux install doesn't apply here.
+  static bool get isFlatpak =>
+      !kIsWeb && Platform.isLinux && Platform.environment.containsKey('FLATPAK_ID');
 
   /// Whether the app should check for updates on launch without being asked.
   /// Manual checks (the Settings > Updates page's "Check for Updates"
@@ -98,6 +109,7 @@ class AppUpdaterService {
             publishedAt: publishedAt,
             isMacOS: kIsWeb ? false : Platform.isMacOS,
             isIOS: kIsWeb ? false : Platform.isIOS,
+            isFlatpak: isFlatpak,
           );
         }
       }
@@ -322,6 +334,7 @@ class UpdateInfo {
   final DateTime publishedAt;
   final bool isMacOS;
   final bool isIOS;
+  final bool isFlatpak;
 
   UpdateInfo({
     required this.currentVersion,
@@ -331,5 +344,6 @@ class UpdateInfo {
     required this.publishedAt,
     required this.isMacOS,
     this.isIOS = false,
+    this.isFlatpak = false,
   });
 }

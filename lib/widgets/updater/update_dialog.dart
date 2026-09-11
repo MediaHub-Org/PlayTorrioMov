@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:http/http.dart' as http;
 import 'package:ota_update/ota_update.dart';
 import 'package:path/path.dart' as path;
@@ -230,7 +231,65 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     ),
                   ),
 
-                  if (widget.updateInfo.isMacOS || widget.updateInfo.isIOS) ...[
+                  if (widget.updateInfo.isFlatpak) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.orange.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.orange.shade300,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Flatpak installs update through Flatpak itself, '
+                                  'not through this dialog:',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.orange.shade200,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _backgroundColor.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const SelectableText(
+                              'flatpak update ${AppUpdaterService.flatpakAppId}',
+                              style: TextStyle(
+                                color: _accentColor,
+                                fontSize: 12,
+                                fontFamily: 'monospace',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else if (widget.updateInfo.isMacOS ||
+                      widget.updateInfo.isIOS) ...[
                     const SizedBox(height: 16),
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -346,7 +405,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     Expanded(
                       flex: 2,
                       child: ElevatedButton(
-                        onPressed: _handleUpdate,
+                        onPressed: widget.updateInfo.isFlatpak
+                            ? _handleCopyFlatpakCommand
+                            : _handleUpdate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _accentColor,
                           foregroundColor: Colors.white,
@@ -356,18 +417,25 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Update Now',
-                              style: TextStyle(
+                              widget.updateInfo.isFlatpak
+                                  ? 'Copy Command'
+                                  : 'Update Now',
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.download_rounded, size: 20),
+                            const SizedBox(width: 8),
+                            Icon(
+                              widget.updateInfo.isFlatpak
+                                  ? Icons.copy_rounded
+                                  : Icons.download_rounded,
+                              size: 20,
+                            ),
                           ],
                         ),
                       ),
@@ -380,6 +448,20 @@ class _UpdateDialogState extends State<UpdateDialog> {
       ),
     ),
     );
+  }
+
+  Future<void> _handleCopyFlatpakCommand() async {
+    await Clipboard.setData(
+      const ClipboardData(
+        text: 'flatpak update ${AppUpdaterService.flatpakAppId}',
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Command copied to clipboard')),
+    );
+    AppUpdaterService.dismissVersion(widget.updateInfo.latestVersion);
+    Navigator.of(context).pop();
   }
 
   Future<void> _handleUpdate() async {
