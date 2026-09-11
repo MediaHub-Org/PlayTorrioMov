@@ -115,7 +115,7 @@ class PillFilterHeaderBar extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: transparent ? Colors.transparent : null,
-        border: Border(bottom: BorderSide(color: Colors.white10)),
+        border: const Border(bottom: BorderSide(color: Colors.white10)),
       ),
       child: bar,
     );

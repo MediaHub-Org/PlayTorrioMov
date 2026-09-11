@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../services/trakt/trakt_constants.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
 import '../../services/my_list/my_list_service.dart';
@@ -64,6 +65,12 @@ class _SyncCardChrome extends StatelessWidget {
   final String? userCode;
   final String pairingHint;
   final String verifyUrlLabel;
+
+  /// When set, this provider can't be connected right now -- shown as an
+  /// info banner instead of a "Connect" button that would just fail (e.g.
+  /// Trakt now gates new API-app registration behind Trakt VIP, so without
+  /// one configured, tapping Connect always errors with no explanation).
+  final String? unavailableNote;
   final VoidCallback onConnect;
   final VoidCallback onDisconnect;
   final VoidCallback onCopyCode;
@@ -81,6 +88,7 @@ class _SyncCardChrome extends StatelessWidget {
     required this.userCode,
     required this.pairingHint,
     required this.verifyUrlLabel,
+    this.unavailableNote,
     required this.onConnect,
     required this.onDisconnect,
     required this.onCopyCode,
@@ -196,7 +204,7 @@ class _SyncCardChrome extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-              ] else if (!pairing && !isLoading)
+              ] else if (unavailableNote == null && !pairing && !isLoading)
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
@@ -217,6 +225,38 @@ class _SyncCardChrome extends StatelessWidget {
                 ),
             ],
           ),
+          if (unavailableNote != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.orange.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.orange.shade300,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      unavailableNote!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade200,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (pairing && userCode != null) ...[
             const SizedBox(height: 20),
             const Divider(color: Colors.white10),
@@ -457,6 +497,18 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
       userCode: _userCode,
       pairingHint: 'Enter this activation code at trakt.tv/activate:',
       verifyUrlLabel: 'Open trakt.tv/activate',
+      // Trakt now gates creating a new API app behind a Trakt VIP
+      // subscription for whoever registers it (this app's maintainer, not
+      // each connecting user) -- confirmed via Trakt's own forums, this
+      // isn't a bug on our end. Until that's set up, kTraktClientId stays
+      // empty and Connect would just fail with no explanation, so this
+      // shows why instead of a dead-end button.
+      unavailableNote: kTraktClientId.isEmpty
+          ? "Trakt sync isn't set up yet -- Trakt now requires a VIP "
+                'subscription to register a new API app, which the '
+                "developer hasn't done. Simkl sync below works without "
+                'that.'
+          : null,
       onConnect: _startPairing,
       onDisconnect: _logout,
       onCopyCode: () {
