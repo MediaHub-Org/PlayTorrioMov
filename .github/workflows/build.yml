@@ -530,7 +530,7 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
-            clang cmake git ninja-build pkg-config \
+            clang lld cmake git ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
             libmpv-dev xvfb \
             libboost-all-dev libssl-dev libgcrypt20-dev \
@@ -560,6 +560,16 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      # Works around a Flutter 3.44.0 CMake bug (flutter/flutter#159199):
+      # cmake_install.cmake unconditionally tries to `file(INSTALL
+      # DIRECTORY build/native_assets/linux ...)`, which errors if that
+      # directory doesn't exist at all -- it's only created when a package
+      # actually declares a native-asset build hook, which none here do.
+      # Pre-creating it empty makes that install step a no-op instead of a
+      # hard failure.
+      - name: Work around missing native_assets directory
+        run: mkdir -p build/native_assets/linux
 
       - name: Build Linux Release
         run: flutter build linux --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
