@@ -83,6 +83,48 @@ pages, and the players.
 | 47 | Watch history is recorded but never shown | `ContinueWatchingService.historyItems` keeps every episode watched, up to 100, in its own `continue_watching_history_v1` store — and nothing renders it. The one consumer is `getHistoryProgress` in the player, which reads a single entry to resume that episode's position. So the data for a History view already exists and is already persisted; there is just no view. Worth deciding rather than leaving ambiguous: either surface it (a natural home once the Continue tab leaves under #43, and the only way to see anything older than the deduped Continue row) or stop maintaining the list and keep only the per-episode position lookup.
 | 48 | One search across Movies, Series and Anime | The genuinely useful half of "be more like a big streaming platform". There are four search surfaces today — `search_page` (addon movies/shows), `anime_search_page`, `iptv_search_page` and `discover_page` — and `SearchScope` already narrows the icon's behaviour to whichever section you are standing in, so which one you get depends on where you were. One search that queries movies, series and anime together and groups results by type gives the platform feel without collapsing the sections or touching the anime stack. Live TV stays out: channels are matched by keyword against a portal's stream list, not searched by title, and folding them in would mean two different meanings of "result" in one list.
 
+### How #48 fits together
+
+The groundwork is already there, which makes this smaller than it sounds.
+
+**There are not several search icons.** `PageSearchButton` is one shared
+widget, already rendered in the same header pill-row slot by
+`type_catalog_page`, `anime_page` and `iptv_page`. Anime and Live TV simply
+pass an `onTap` override to divert it to their own page. So "unify the
+entry points" is, mechanically, deleting two `onTap:` arguments.
+
+**Keep the icon in the header pill row; do not add a second one next to
+Settings.** It already sits in one consistent place, grouped with the
+filters it relates to, and within thumb reach on a phone. A global icon next
+to Settings would either duplicate it or force the pill out, and Settings is
+a different kind of destination — configuration, not content.
+
+**Make the scope a chip instead of a hidden mode.** Today `SearchScope`
+silently changes what the icon does: the same button means different things
+depending on where it was pressed, which is the actual complaint. Instead
+open one search page every time, with the current section **pre-selected as
+a type chip the user can clear**. Context is kept, reach becomes global, and
+nothing is invisible.
+
+**Filters.** Under the field: type chips (All / Movies / Series / Anime),
+then the existing `FilterDropdown` pills for genre / year / sort — the same
+widget the catalog header already uses, so this is reuse, not new UI. With
+**All** selected, group results by type under headings rather than
+interleaving them.
+
+**The other search pages.** `anime_search_page.dart` is 918 lines and most
+of that is anime-native filtering (AniList genre, season, format) that has
+no movie equivalent. Absorb those as options that appear when the Anime chip
+is active, rather than deleting the page wholesale and losing them.
+
+**Live TV stays out, at first.** Its search filters a channel and stream
+list by keyword; it does not search a title catalogue, so a result there is
+a different kind of object. Leaving its `onTap` override in place is the
+honest version: one rule, legible — *in Live TV you search channels,
+everywhere else you search titles*. A later pass can add a Live TV chip
+whose results render as channel cards, once the result list is ready to hold
+two shapes.
+
 ### Why Downloads stays in the Library (#43)
 
 Continue and Downloads look equally droppable and are not. Continue really
