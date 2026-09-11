@@ -3,9 +3,9 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
-Last reconciled against the tree: **2026-09-11** (v1.5.7+26), after Live TV
-moved onto `BrowseScaffold` — which closed the last of the page-consistency
-items — and after the standard library actions reached every section.
+Last reconciled against the tree: **2026-09-11** (v1.5.7+26), after the
+v1.5.7 Android build was tested on a real device. Everything below #38 came
+out of that session.
 
 ## Navigation
 
@@ -45,11 +45,29 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 (git history was squashed at the fork point, so nothing arrives via
 `git merge`).
 
+## Bugs
+
+Ordered by blast radius. **#38 is the one to do first** — it is the single
+cause of three separate symptoms reported from the device, and #39 is only
+visible once it lands.
+
+| #  | Bug | What is actually wrong |
+|----|-----|------------------------|
+| 38 | Cast and crew have no photos, no character names, and usually no director | **TMDB is never called.** `_fetchCastFromTmdb` returns on its first line unless `MovieDetail.tmdbId` is set, and that field is populated from exactly one place: `json['moviedb_id']` (`movie_detail.dart:85`). Cinemeta and most Stremio addons send `imdb_id`, not `moviedb_id`, so `tmdbId` is null for essentially every title and the request is never made. What renders is the addon's own `cast` — plain name strings, no photos, no characters — which is why the role line falls back to the literal "Cast". **The bundled TMDB key is not implicated**: no request reaches it. Fix: when `tmdbId` is null and the id looks like `tt…`, resolve it through TMDB's `/find/{id}?external_source=imdb_id` first, then carry on. Worth caching the resolved id per title. |
+| 39 | Series show no director even with a working TMDB id | Separate from #38 and hidden behind it. `/tv/{id}/credits` returns *series-level* crew, which for most shows lists producers and no director at all — TV directors are per-episode. TMDB exposes the useful answers elsewhere: `created_by` on `/tv/{id}` (the showrunner, which is what a viewer means by "who made this") and `/tv/{id}/aggregate_credits` for crew aggregated across episodes, whose entries carry a `jobs` array rather than a single `job`, so `TmdbService._directingJobs` needs a TV-shaped branch. Verify against the real API before building — this is reasoned from the API's shape, not yet observed. |
+| 40 | Text escapes its container in two IPTV places | In **IPTV Portals & Playlists**, label text renders outside its box; the **Reddit** button's drop-down renders its items outside the menu box. Both in `lib/pages/iptv/iptv_portals_modal.dart`. Upstream V3's `d2f8074` is a responsiveness rewrite of this same file (see Upstream sync) — check whether porting it fixes these before hand-patching, so the work is not done twice. |
+
 ## Code and consistency
 
-Nothing outstanding. Every browse section — Movies/Series, Anime and Live TV
-— now renders through `BrowseScaffold` and `BrowseRowView`, so "the same
-kind of page" really is one implementation.
+Every browse section — Movies/Series, Anime and Live TV — renders through
+`BrowseScaffold` and `BrowseRowView`, so "the same kind of page" is one
+implementation. What is still uneven is the *information* inside those
+pages, and the players.
+
+| #  | Task | Details |
+|----|------|---------|
+| 41 | Standardise what a details page shows across Movies, Series and Anime | Right now the three answer different questions. Movies/Series show Cast & Crew (when #38 lets them); Anime shows Characters & Cast, which is a different relation — character to voice actor. Decide the common spine — title, year, rating, genres, synopsis, credits, episodes — and what each section is allowed to add on top, then make the three match. Do this **after** #38, because today's inconsistency is partly just missing data. |
+| 42 | Standardise the Live TV player against the Movies/Series/Anime one | Cannot mean "identical": a live stream has no duration, so no seek bar, no resume, no ±N skip. What should match is everything that is not seek — control layout and iconography, the settings menu (audio track, aspect ratio), gesture zones, and the way the overlay appears and auto-hides. Worth writing down which controls are meaningless for live before starting. |
 
 ## Requested UI work
 
@@ -58,6 +76,8 @@ kind of page" really is one implementation.
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
+| 43 | Library: split the filter bar into two rows | Today one row mixes two unrelated axes. Row 1 = **media type** (All, Movies, Series, Anime, Live TV); row 2 = **library status** (Liked, Watchlist, Watched). One wrinkle to design around: Live TV has only Liked — a channel cannot be "watched" — *and* its likes live in `FavoriteChannelsService`, a different store from the `MyListService` the other three use, which `collection_page.dart` already special-cases at `_filterType == 'livetv'`. So either the status row hides Watchlist/Watched for Live TV, or the two stores get bridged first. Hiding is the smaller change and matches what a channel actually supports. |
+| 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | Requested for Movies, Series and Anime. Four skip affordances (−30, −10, +10, +30) is a lot of control surface on a phone, so decide the arrangement before building — see the open question in the session notes. The animation should read as a ripple on the side that was tapped, matching the existing double-tap feedback rather than introducing a second visual language. |
 
 ## Signing and releases
 
@@ -72,8 +92,9 @@ signing for updates, because none of them self-install — see
 `ENV_FILE`/`DOTENV` is **not** set, and that is the one outstanding release
 secret. Every published build ships an empty `.env`, so Trakt sign-in,
 Simkl sign-in and Discord Rich Presence are inert in released binaries.
-TMDB cast photos are unaffected — `TmdbSettings` carries a bundled fallback
-key.
+TMDB cast photos are unaffected by that secret — `TmdbSettings` carries a
+bundled fallback key. They are broken for a different reason entirely; see
+bug #38.
 
 ## Declined, so they do not get re-litigated
 
