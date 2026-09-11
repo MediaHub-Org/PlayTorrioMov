@@ -5,6 +5,49 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.6+25] - 2026-09-11
+
+### Fixed
+- The Linux taskbar icon and "pin to task manager" still didn't work after
+  1.5.5's fix — the wrong GTK property was changed (GApplication's
+  `application-id`, which the compositor doesn't use for this); the one
+  that actually drives it (`prgname`) is now aligned to the Flatpak's app-id
+  instead
+- That same 1.5.5 fix had silently forked every install's on-disk library
+  into an empty directory the moment it shipped — `path_provider`/
+  `shared_preferences` are now pinned back to the stable id, independent of
+  whatever the window/taskbar app-id is set to
+- The in-app updater's 1.5.5 Flatpak fix told users to run
+  `flatpak update`, which can never work for a bundle install (no live
+  repo behind it) — now downloads the actual `.flatpak` asset and shows a
+  `flatpak install --reinstall` command instead
+- Trakt sync silently failed with no explanation. Trakt now requires a VIP
+  subscription to register a new API app, which isn't set up; shows an
+  info note instead of a dead-end "Connect" button. Simkl is unaffected
+- Details pages (Movies/Series/Anime) had a large empty band at the top,
+  left over from before they rendered fullscreen
+- Movies/Series' Cast and Direction rows had different card heights,
+  creating an inconsistent gap between them
+- The browse header (search/filter pills) sat in its own band above the
+  hero carousel, visibly cutting it off at the top — now floats
+  transparently over the hero's top edge instead
+- A Flutter 3.44.0 CMake bug intermittently broke the Linux CI build
+
+### Changed
+- The player's subtitle button is now a plain on/off toggle (YouTube's CC
+  button); track and style picking moved into the Settings gear as a
+  "Subtitles" row, which now also caps its height and scrolls instead of
+  risking overflow on short mobile screens
+- Cast/crew photos without a picture now show a generic silhouette instead
+  of a colored gradient with initials
+- The like/save/watched icons on Details pages now share the same boxed
+  style
+- Director now appears before Cast on Details pages, on both Movies/Series
+  and Anime
+- Settings' "General & Data" split into "Backup & Data" and "Keyboard
+  Shortcuts"; TMDB and Discord Rich Presence moved into "Connect" (renamed
+  from "Sync"), alongside Trakt and Simkl
+
 ## [1.5.5+24] - 2026-09-11
 
 ### Fixed
