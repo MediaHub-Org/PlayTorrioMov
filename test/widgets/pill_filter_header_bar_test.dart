@@ -149,5 +149,57 @@ void main() {
         closeTo(1000 - expectedInset, 0.5),
       );
     });
+
+    Finder dividerFinder() => find.descendant(
+      of: find.byType(PillFilterHeaderBar),
+      matching: find.byType(DecoratedBox),
+    );
+
+    testWidgets('an opaque bar shows a divider by default', (tester) async {
+      setSurfaceWidth(tester, 1000);
+      await tester.pumpWidget(wrap(PillFilterHeaderBar(pills: [pill('a')])));
+
+      expect(dividerFinder(), findsOneWidget);
+    });
+
+    testWidgets(
+      'a transparent bar has no divider by default -- it floats over a '
+      'hero, and a hard line cutting across the image would look like a '
+      'rendering glitch, not a border',
+      (tester) async {
+        setSurfaceWidth(tester, 1000);
+        await tester.pumpWidget(
+          wrap(PillFilterHeaderBar(pills: [pill('a')], transparent: true)),
+        );
+
+        expect(dividerFinder(), findsNothing);
+      },
+    );
+
+    testWidgets('showDivider always overrides the transparent-based default', (
+      tester,
+    ) async {
+      setSurfaceWidth(tester, 1000);
+      await tester.pumpWidget(
+        wrap(
+          PillFilterHeaderBar(
+            pills: [pill('a')],
+            transparent: true,
+            showDivider: true,
+          ),
+        ),
+      );
+      expect(dividerFinder(), findsOneWidget);
+
+      await tester.pumpWidget(
+        wrap(
+          PillFilterHeaderBar(
+            pills: [pill('a')],
+            showDivider: false,
+          ),
+        ),
+      );
+      expect(dividerFinder(), findsNothing);
+    });
   });
 }

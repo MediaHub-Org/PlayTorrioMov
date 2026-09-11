@@ -40,8 +40,11 @@ class PillFilterHeaderBar extends StatelessWidget {
   final List<Widget> pills;
 
   /// Draws a hairline under the bar, separating it from the content below.
-  /// On by default; off for callers that supply their own separation.
-  final bool showDivider;
+  /// Null defaults to the opposite of [transparent]: an opaque bar sitting
+  /// in its own band above the content wants the hairline to mark that
+  /// edge, but a transparent bar floats *over* a hero image -- a hard line
+  /// cutting across it would look like a rendering glitch, not a border.
+  final bool? showDivider;
 
   /// When true, the fixed pill strip itself hides its own background and
   /// lets the hero/carousel show directly through. This supports the
@@ -53,12 +56,13 @@ class PillFilterHeaderBar extends StatelessWidget {
     super.key,
     required this.pills,
     this.leading = const [],
-    this.showDivider = true,
+    this.showDivider,
     this.transparent = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedShowDivider = showDivider ?? !transparent;
     final inset = AppSpacing.pageInset(context);
 
     // No SafeArea here: every page that uses this bar renders inside the
@@ -107,7 +111,7 @@ class PillFilterHeaderBar extends StatelessWidget {
       ),
     );
 
-    if (!showDivider) return bar;
+    if (!resolvedShowDivider) return bar;
 
     // DecoratedBox, not a Container with a border: a Container's border
     // becomes layout padding, which would make the bar 1px taller than

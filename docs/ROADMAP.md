@@ -4,7 +4,9 @@ What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.
 and git history, not here.
 
 Last reconciled against the tree: **2026-09-11**, after real Android
-hardware testing.
+hardware testing and a pass of Linux desktop fixes/UI work the same day
+(taskbar icon/pin, Details page layout, the floating hero header — see
+[CHANGELOG.md](../CHANGELOG.md) `1.5.6+25` for the full list).
 
 ## Navigation
 
@@ -48,7 +50,7 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 
 | #  | Task | Why it is still open |
 |----|------|------------------------|
-| 37 | Live TV's hero carousel (`IptvHeroCarousel`) is still its own implementation, unlike Anime's and Movies/Series' | Its row was converged (`IptvSliderSection` now wraps the shared `BrowseRowView`, via a new `BrowseRowView.sizingOf` override so channel cards keep their own logo/banner aspect ratio instead of being forced into a poster shape). The hero is a separate question: `IptvHeroCarousel` reads `IptvSettings.heroStyle` (compact/minimalist/immersive, three different height formulas) and `heroAutoRotate`/`heroRotateSeconds`, none of which `BrowseScaffold`'s hero supports — converging it would mean dropping user-facing settings or extending `BrowseScaffold` to carry them, either of which is a real product decision, not a mechanical de-duplication. |
+| 37 | Live TV's hero carousel (`IptvHeroCarousel`) is still its own implementation, unlike Anime's and Movies/Series' | Its row was converged (`IptvSliderSection` now wraps the shared `BrowseRowView`, via a new `BrowseRowView.sizingOf` override so channel cards keep their own logo/banner aspect ratio instead of being forced into a poster shape). The hero is a separate question: `IptvHeroCarousel` reads `IptvSettings.heroStyle` (compact/minimalist/immersive, three different height formulas) and `heroAutoRotate`/`heroRotateSeconds`, none of which `BrowseScaffold`'s hero supports — converging it would mean dropping user-facing settings or extending `BrowseScaffold` to carry them, either of which is a real product decision, not a mechanical de-duplication. Now a visible inconsistency, not just an internal one: Movies/Series, Anime and Live TV all pass `PillFilterHeaderBar(transparent: true)`, but only the first two actually float it over a full-bleed hero (`BrowseScaffold`'s `header` now lives inside the hero's own `Stack` — see `browse_scaffold.dart`); Live TV's page still puts the bar in its own band above `IptvHeroCarousel`, pushing it down and losing the transparency's whole point. Converging the hero fixes both at once. |
 
 ## Requested UI work
 
@@ -57,7 +59,7 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is now the mobile-first gutter to build against; still open for #36. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
-| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`; Movies/Series and Anime both use `BrowseScaffold` for hero + header band + scroll track + loading/error state; every row (Movies/Series, Anime, Live TV) now renders through the shared `BrowseRowView`. Still open: Live TV's page keeps its own hero, see #37. |
+| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`; Movies/Series and Anime both use `BrowseScaffold` for a full-bleed hero (with the filter bar floating transparently over it) + scroll track + loading/error state; every row (Movies/Series, Anime, Live TV) now renders through the shared `BrowseRowView`. Still open: Live TV's page keeps its own hero and a solid header band above it, see #37. |
 
 ## Signing and releases
 
