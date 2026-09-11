@@ -145,6 +145,13 @@ class _PlayerScreenState extends State<PlayerScreen>
   double _subtitleDelayMs = 0;
   double _subtitleScale = 1.0;
 
+  // Remembers the subtitle selection across a disable so the transport
+  // bar's toggle button (see _toggleSubtitlesEnabled) can turn the same
+  // track back on directly -- _disableSubtitles clears the active
+  // selection entirely, so this is the only place it survives.
+  SubtitleVariant? _lastSubtitleVariant;
+  int? _lastEmbeddedSubtitleIndex;
+
   // Skip Segments State (IntroDB)
   List<MediaSkipSegment> _skipSegments = [];
   MediaSkipSegment? _activeSkipSegment;
@@ -1045,6 +1052,41 @@ class _PlayerScreenState extends State<PlayerScreen>
       _currentCues = [];
     });
     _player.setSubtitleTrack(SubtitleTrack.no());
+  }
+
+  /// The transport bar's subtitle button: a plain on/off toggle (YouTube's
+  /// CC button), not the track/style picker -- that now lives behind the
+  /// settings gear (see PlayerSettingsMenu.onTapSubtitles).
+  void _toggleSubtitlesEnabled() {
+    if (_isSubtitleEnabled) {
+      _lastSubtitleVariant = _currentSubtitleVariant;
+      _lastEmbeddedSubtitleIndex = _selectedEmbeddedSubtitleIndex;
+      _disableSubtitles();
+      return;
+    }
+
+    if (_lastEmbeddedSubtitleIndex != null) {
+      PlayerEmbeddedSubtitle? embedded;
+      for (final e in _embeddedSubtitles) {
+        if (e.index == _lastEmbeddedSubtitleIndex) {
+          embedded = e;
+          break;
+        }
+      }
+      if (embedded != null) {
+        _selectEmbeddedSubtitle(embedded);
+        return;
+      }
+    }
+
+    if (_lastSubtitleVariant != null) {
+      _loadSubtitle(_lastSubtitleVariant!);
+      return;
+    }
+
+    // Nothing was ever selected this session -- there's nothing to turn
+    // back on, so open the picker instead of doing nothing silently.
+    _toggleMenu('subtitle');
   }
 
   Future<void> _loadSubtitle(SubtitleVariant variant) async {
@@ -2123,7 +2165,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onSeek: (pos) => _player.seek(pos),
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
-                    onToggleSubtitleMenu: () => _toggleMenu('subtitle'),
+                    onToggleSubtitles: _toggleSubtitlesEnabled,
                     onToggleSettingsMenu: () => _toggleMenu('settings'),
                   ),
                 ),
@@ -2274,6 +2316,10 @@ class _PlayerScreenState extends State<PlayerScreen>
               onTapAudio: () => setState(() => _activeMenu = 'audio'),
               onTapSpeed: () => setState(() => _activeMenu = 'speed'),
               onTapAspect: () => setState(() => _activeMenu = 'aspect'),
+              subtitleLabel: _isSubtitleEnabled
+                  ? (_currentSubtitleVariant?.language ?? 'On')
+                  : 'Off',
+              onTapSubtitles: () => setState(() => _activeMenu = 'subtitle'),
               onClose: () => setState(() => _activeMenu = null),
             ),
           ),

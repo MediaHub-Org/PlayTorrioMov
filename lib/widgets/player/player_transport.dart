@@ -26,7 +26,10 @@ class PlayerTransport extends StatelessWidget {
   final ValueChanged<Duration> onSeek;
   final ValueChanged<double> onVolumeChanged;
   final VoidCallback onToggleMute;
-  final VoidCallback onToggleSubtitleMenu;
+
+  /// Plain on/off, YouTube's CC-button style -- track and style selection
+  /// live in the settings menu instead (see PlayerSettingsMenu).
+  final VoidCallback onToggleSubtitles;
   final VoidCallback onToggleSettingsMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
@@ -45,7 +48,7 @@ class PlayerTransport extends StatelessWidget {
     required this.onSeek,
     required this.onVolumeChanged,
     required this.onToggleMute,
-    required this.onToggleSubtitleMenu,
+    required this.onToggleSubtitles,
     required this.onToggleSettingsMenu,
     this.onScrubbingChanged,
   });
@@ -124,15 +127,15 @@ class PlayerTransport extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Subtitles Menu Trigger
+                  // Subtitles On/Off Toggle
                   PlayerIconButton(
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: const Icon(Icons.subtitles_rounded),
-                    tooltip: 'Subtitles',
+                    tooltip: isSubtitlesActive ? 'Subtitles off' : 'Subtitles on',
                     showActiveBadge: isSubtitlesActive,
                     badgeColor: const Color(0xFF10B981), // Emerald
-                    onPressed: onToggleSubtitleMenu,
+                    onPressed: onToggleSubtitles,
                   ),
 
                   SizedBox(width: gap),

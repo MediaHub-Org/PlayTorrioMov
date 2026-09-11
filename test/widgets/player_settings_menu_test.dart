@@ -9,6 +9,8 @@ PlayerSettingsMenu menu({
   String? audioLabel,
   VoidCallback? onTapAudio,
   VoidCallback? onTapSpeed,
+  String? subtitleLabel,
+  VoidCallback? onTapSubtitles,
 }) {
   return PlayerSettingsMenu(
     currentRate: 1.0,
@@ -17,6 +19,8 @@ PlayerSettingsMenu menu({
     onTapAudio: onTapAudio,
     onTapSpeed: onTapSpeed ?? () {},
     onTapAspect: () {},
+    subtitleLabel: subtitleLabel,
+    onTapSubtitles: onTapSubtitles,
     onClose: () {},
   );
 }
@@ -64,6 +68,44 @@ void main() {
 
       expect(find.text('Audio track'), findsOneWidget);
       expect(find.text('Default'), findsOneWidget);
+    });
+
+    testWidgets('lists Subtitles when a handler is supplied', (tester) async {
+      // Track/style picking moved here from the transport bar's own
+      // subtitle button, which is now a plain on/off toggle.
+      await tester.pumpWidget(
+        wrap(menu(subtitleLabel: 'English', onTapSubtitles: () {})),
+      );
+
+      expect(find.text('Subtitles'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+    });
+
+    testWidgets('opens the subtitle menu when the row is tapped', (
+      tester,
+    ) async {
+      var opened = 0;
+      await tester.pumpWidget(
+        wrap(menu(subtitleLabel: 'English', onTapSubtitles: () => opened++)),
+      );
+
+      await tester.tap(find.text('Subtitles'));
+      expect(opened, 1);
+    });
+
+    testWidgets('hides the Subtitles row without a handler', (tester) async {
+      await tester.pumpWidget(wrap(menu()));
+
+      expect(find.text('Subtitles'), findsNothing);
+    });
+
+    testWidgets('falls back to Off before a subtitle is selected', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(menu(onTapSubtitles: () {})));
+
+      expect(find.text('Subtitles'), findsOneWidget);
+      expect(find.text('Off'), findsOneWidget);
     });
   });
 }

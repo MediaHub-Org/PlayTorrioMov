@@ -22,6 +22,16 @@ class PlayerSettingsMenu extends StatelessWidget {
   /// Offset control, and this row is its only entry point.
   final VoidCallback? onTapAudio;
 
+  /// Current subtitle state, e.g. a language name or "Off". Null hides the
+  /// row (nothing to configure -- no subtitles available at all).
+  final String? subtitleLabel;
+
+  /// Opens subtitle track/style picking. The transport bar's own subtitle
+  /// button stays a plain on/off toggle (YouTube's CC button); this row is
+  /// where track and appearance selection actually lives, same split as
+  /// YouTube's gear-menu "Subtitles/CC" entry.
+  final VoidCallback? onTapSubtitles;
+
   final VoidCallback onClose;
 
   const PlayerSettingsMenu({
@@ -33,66 +43,87 @@ class PlayerSettingsMenu extends StatelessWidget {
     required this.onClose,
     this.audioLabel,
     this.onTapAudio,
+    this.subtitleLabel,
+    this.onTapSubtitles,
   });
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenSize = MediaQuery.sizeOf(context);
+    // A short landscape phone screen can't fit five rows (header + up to
+    // four settings) without this: the popover is bottom-anchored with no
+    // top bound (see player_screen.dart's Positioned), so an unconstrained
+    // height just pushes it above the visible viewport instead of
+    // clipping -- capped and scrollable instead, same safeguard
+    // PlayerSubtitleMenu already has for its own, usually-longer lists.
+    final maxHeight = (screenSize.height - 120).clamp(160.0, double.infinity);
 
-    return PlayerGlassCard(
-      width: (260.0).clamp(220.0, screenWidth - 32),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: PlayerGlassCard(
+        width: (260.0).clamp(220.0, screenSize.width - 32),
+        padding: const EdgeInsets.all(12),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(
-                  'SETTINGS',
-                  style: TextStyle(
-                    color: PlayerTheme.inkSubtle,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Text(
+                      'SETTINGS',
+                      style: TextStyle(
+                        color: PlayerTheme.inkSubtle,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                   ),
+                  PlayerIconButton(
+                    size: 28,
+                    iconSize: 14,
+                    icon: const Icon(Icons.close_rounded),
+                    tooltip: 'Close',
+                    onPressed: onClose,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              if (onTapSubtitles != null)
+                _SettingsRow(
+                  icon: Icons.subtitles_rounded,
+                  label: 'Subtitles',
+                  value: subtitleLabel ?? 'Off',
+                  onTap: onTapSubtitles!,
                 ),
+              _SettingsRow(
+                icon: Icons.speed_rounded,
+                label: 'Playback speed',
+                value: currentRate == 1.0
+                    ? 'Normal'
+                    : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
+                onTap: onTapSpeed,
               ),
-              PlayerIconButton(
-                size: 28,
-                iconSize: 14,
-                icon: const Icon(Icons.close_rounded),
-                tooltip: 'Close',
-                onPressed: onClose,
+              _SettingsRow(
+                icon: Icons.aspect_ratio_rounded,
+                label: 'Aspect ratio',
+                value: aspectLabel,
+                onTap: onTapAspect,
               ),
+              if (onTapAudio != null)
+                _SettingsRow(
+                  icon: Icons.audiotrack_rounded,
+                  label: 'Audio track',
+                  value: audioLabel ?? 'Default',
+                  onTap: onTapAudio!,
+                ),
             ],
           ),
-          const SizedBox(height: 6),
-          _SettingsRow(
-            icon: Icons.speed_rounded,
-            label: 'Playback speed',
-            value: currentRate == 1.0
-                ? 'Normal'
-                : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
-            onTap: onTapSpeed,
-          ),
-          _SettingsRow(
-            icon: Icons.aspect_ratio_rounded,
-            label: 'Aspect ratio',
-            value: aspectLabel,
-            onTap: onTapAspect,
-          ),
-          if (onTapAudio != null)
-            _SettingsRow(
-              icon: Icons.audiotrack_rounded,
-              label: 'Audio track',
-              value: audioLabel ?? 'Default',
-              onTap: onTapAudio!,
-            ),
-        ],
+        ),
       ),
     );
   }
