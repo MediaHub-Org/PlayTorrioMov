@@ -66,13 +66,22 @@ is free and takes a minute to get — register at
 details. A user can always paste their own key under Settings → General,
 which takes precedence over whatever the build ships with.
 
-> **Neither secret is set on this repository today.** The v1.4.0 build
-> logs show the `.env` step falling through to `touch .env`, so every
-> published artifact so far ships with an empty `.env`: Trakt and Simkl
-> sign-in, Discord Rich Presence and TMDB cast photos are all inert in
-> the released binaries. Nothing fails and nothing is logged as an error,
-> which is why it went unnoticed — the build now emits a CI **warning**
-> when it happens. Setting `ENV_FILE` is what turns those features on.
+> **`ENV_FILE`/`DOTENV` is still unset on this repository.** The v1.5.6
+> build logs show the `.env` step falling through to `touch .env` (the
+> rendered command reads `if [ -n "" ]`, not `if [ -n "***" ]`), so every
+> published artifact ships with an empty `.env`: Trakt sign-in, Simkl
+> sign-in and Discord Rich Presence are inert in the released binaries.
+> Nothing fails and nothing is logged as an error, which is why it went
+> unnoticed — the build now emits a CI **warning** when it happens.
+> Setting `ENV_FILE` is what turns those features on.
+>
+> TMDB cast photos are **not** affected: `TmdbSettings` falls back to a key
+> bundled in the source, so cast and crew enrichment works with an empty
+> `.env`.
+>
+> Android signing, by contrast, **is** configured — the same run logs
+> `Release signing configured (alias: playtorriomov)`, so released APKs
+> install over one another and the in-app updater can replace an install.
 
 List secret **names** (GitHub never returns a secret's value once set, by
 design — there is no `gh` command or API call that reveals it, only who set

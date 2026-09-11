@@ -63,12 +63,19 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 
 ## Signing and releases
 
-Android release signing needs two repository secrets and is what lets the
-in-app updater replace an existing install — see
-[release signing](RELEASES.md#release-signing). Without them, builds still
-succeed, signed with a throwaway debug key. No other platform needs signing
-for updates, because none of them self-install — see
+Android release signing **is configured** — `ANDROID_KEYSTORE_BASE64` and
+`ANDROID_KEYSTORE_PASSWORD` are both set, and the v1.5.6 build log confirms
+it ("Release signing configured (alias: playtorriomov)"). Released APKs
+therefore install over each other and the in-app updater works. See
+[release signing](RELEASES.md#release-signing). No other platform needs
+signing for updates, because none of them self-install — see
 [RELEASES.md](RELEASES.md#other-platforms).
+
+`ENV_FILE`/`DOTENV` is **not** set, and that is the one outstanding release
+secret. Every published build ships an empty `.env`, so Trakt sign-in,
+Simkl sign-in and Discord Rich Presence are inert in released binaries.
+TMDB cast photos are unaffected — `TmdbSettings` carries a bundled fallback
+key.
 
 ## Declined, so they do not get re-litigated
 
