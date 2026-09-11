@@ -11,7 +11,8 @@ import 'appearance_settings_page.dart';
 import 'debrid_settings_page.dart';
 import 'addons_settings_page.dart';
 import 'builtin_providers_settings_page.dart';
-import 'general_settings_page.dart';
+import 'backup_settings_page.dart';
+import 'keyboard_shortcuts_page.dart';
 import 'sync_settings_page.dart';
 import 'about_settings_page.dart';
 import 'video_player_settings_page.dart';
@@ -110,19 +111,25 @@ class _SettingsPageState extends State<SettingsPage> {
         onTap: () => _navigateTo(const DebridSettingsPage()),
       ),
       _SettingsCategoryTile(
-        icon: Icons.tune_rounded,
+        icon: Icons.save_alt_rounded,
         iconColor: Colors.white70,
-        title: 'General & Data',
-        onTap: () => _navigateTo(const GeneralSettingsPage()),
+        title: 'Backup & Data',
+        onTap: () => _navigateTo(const BackupSettingsPage()),
       ),
       _SettingsCategoryTile(
-        icon: Icons.sync_rounded,
+        icon: Icons.link_rounded,
         iconColor: const Color(0xFFED1C24),
-        title: 'Sync',
+        title: 'Connect',
         badgeText: syncedCount == 0 ? 'Offline' : '$syncedCount/2 Connected',
         badgeColor:
             syncedCount == 0 ? Colors.white38 : const Color(0xFF10B981),
         onTap: () => _navigateTo(const SyncSettingsPage()),
+      ),
+      _SettingsCategoryTile(
+        icon: Icons.keyboard_rounded,
+        iconColor: Colors.white70,
+        title: 'Keyboard Shortcuts',
+        onTap: () => _navigateTo(const KeyboardShortcutsPage()),
       ),
       _SettingsCategoryTile(
         icon: Icons.play_circle_outline_rounded,
@@ -208,8 +215,8 @@ class _SettingsPageState extends State<SettingsPage> {
 /// size now; there used to also be a subtitle sentence under the title and
 /// a visually distinct switch-tile variant for the two toggles that lived
 /// here (P2P, Discord) -- both toggles moved to the page whose behavior
-/// they actually control (Built-in Providers, General & Data), so every
-/// remaining entry is just "go to this category", uniformly.
+/// they actually control (Built-in Providers, Connect), so every remaining
+/// entry is just "go to this category", uniformly.
 class _SettingsCategoryTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
