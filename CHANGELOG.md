@@ -5,6 +5,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.4+23] - 2026-09-11
+
+### Fixed
+- Settings' desktop/tablet layout showed categories as a 2-3 column grid;
+  every category is now stacked one per row on every screen size, like
+  mobile already was
+
 ## [1.5.3+22] - 2026-09-10
 
 ### Fixed
