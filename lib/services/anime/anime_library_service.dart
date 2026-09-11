@@ -84,6 +84,58 @@ class AnimeLibraryService extends ChangeNotifier {
     await _saveWatchlist();
   }
 
+  /// Whether this anime has playback progress worth resuming.
+  ///
+  /// The watchlist entry does two jobs at once: it records a list status
+  /// *and* it is the only carrier of `lastWatchedEpisode` /
+  /// `lastWatchedPositionSeconds`. Dropping it to clear a status would take
+  /// the resume point with it, which is why [clearListStatus] exists.
+  ///
+  /// Note that no current code path writes those progress fields -- anime
+  /// plays through the shared player, which records position in
+  /// `ContinueWatchingService` instead, and that is what the details page
+  /// reads. This guard is therefore defensive today: it exists so the
+  /// clear-status path stays correct for entries restored from older
+  /// installs, and if progress is ever written here again.
+  bool hasResumableProgress(int anilistId) {
+    final item = getWatchlistItem(anilistId);
+    if (item == null) return false;
+    return item.lastWatchedEpisode > 0 || item.lastWatchedPositionSeconds > 0;
+  }
+
+  /// Removes [anilistId] from the list *unless* it carries playback
+  /// progress, in which case the entry is kept so Play still resumes where
+  /// the user left off.
+  ///
+  /// Use this when the user clears a library status, rather than
+  /// [removeFromWatchlist]: taking a show off your watchlist means "I am
+  /// not planning to watch this", not "forget that I watched 12 episodes
+  /// of it".
+  Future<void> clearListStatus(int anilistId) async {
+    if (hasResumableProgress(anilistId)) return;
+    await removeFromWatchlist(anilistId);
+  }
+
+  /// Gives an existing entry playback progress, for tests.
+  ///
+  /// Exists because no production code path writes these fields today (see
+  /// [hasResumableProgress]), so a test otherwise cannot build the state
+  /// [clearListStatus] is meant to protect.
+  @visibleForTesting
+  void seedProgressForTest(int anilistId, {required int episode}) {
+    final idx = _watchlist.indexWhere((i) => i.anime.id == anilistId);
+    if (idx < 0) return;
+    final current = _watchlist[idx];
+    _watchlist[idx] = AnimeWatchlistItem(
+      anime: current.anime,
+      status: current.status,
+      lastWatchedEpisode: episode,
+      lastWatchedPositionSeconds: current.lastWatchedPositionSeconds,
+      totalDurationSeconds: current.totalDurationSeconds,
+      updatedAt: current.updatedAt,
+    );
+  }
+
   Future<void> removeFromWatchlist(int anilistId) async {
     _watchlist.removeWhere((i) => i.anime.id == anilistId);
     notifyListeners();

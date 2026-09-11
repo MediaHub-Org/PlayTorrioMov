@@ -113,6 +113,31 @@ class ContinueWatchingService {
     }
   }
 
+  /// The episode number most recently watched for [itemId], or null if the
+  /// show has never been played.
+  ///
+  /// This is the store that actually records anime progress: anime plays
+  /// through the shared [PlayerScreen] like everything else, so its
+  /// position lands here under `anilist:<id>`. The anime details page used
+  /// to read `AnimeLibraryService.lastWatchedEpisode` for the same
+  /// question, which nothing ever writes -- so Play always offered episode
+  /// 1 and no episode ever showed as watched.
+  static int? lastWatchedEpisodeFor(String itemId) {
+    for (final item in activeItems.value) {
+      if (item.id == itemId) return item.episode;
+    }
+    // activeItems keeps one card per show; history keeps every episode, so
+    // fall back to the furthest episode seen there for a show that has
+    // already dropped off the Continue Watching row.
+    int? best;
+    for (final item in historyItems.value) {
+      if (item.id != itemId) continue;
+      final ep = item.episode;
+      if (ep != null && (best == null || ep > best)) best = ep;
+    }
+    return best;
+  }
+
   /// Looks up a saved position by the same per-episode key [_saveHistoryItem]
   /// stores under -- used to resume playback when opening the player from
   /// any entry point other than the Continue Watching row.
