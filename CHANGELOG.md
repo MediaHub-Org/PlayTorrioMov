@@ -5,6 +5,31 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Anime now offers the same three library actions as Movies and Series —
+  **Watchlist**, **Watched**, **Like** — in place of its own AniList-style
+  menu (Watching / Plan to Watch / Completed / Dropped). All three sections
+  now share one set of verbs and one store, so the Library page's **Anime**
+  tab finally matches something: it filters on `MyListItem.type == 'anime'`,
+  and nothing had ever been written there. Per-episode progress and the
+  anime carousels are untouched — `AnimeLibraryService` still owns those and
+  is kept in step, with Watchlist mapping to Plan to Watch and Watched to
+  Completed
+- Direction and Cast are now one **Cast & Crew** row on movie and series
+  detail pages, crew first. They were two sections built from two nearly
+  identical card builders, which bought two scroll positions, two hover
+  states (only one with arrows) and two chances for the card geometry to
+  drift. Every card shows the person's name over what they did — the
+  character for cast, the job for crew
+
+### Fixed
+- Director names now appear on titles whose addon doesn't supply crew. The
+  TMDB `/credits` response carries cast *and* crew, but the crew half was
+  decoded and dropped, so Direction was empty for nearly everything even
+  with a working key. Cast enrichment also no longer skips a title just
+  because the addon sent cast photos — that short-circuit meant a
+  photo-rich cast list still left the Direction half blank
+
 ## [1.5.6+25] - 2026-09-11
 
 ### Fixed
