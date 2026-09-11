@@ -5,16 +5,22 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.7+26] - 2026-09-11
+
+### Added
+- Arabic anime pages get the same Watchlist / Watched / Like controls as
+  everywhere else. They had no library controls at all, so a show from the
+  Arabic catalogue was the one thing in the app you could not save
+
 ### Changed
 - Anime now offers the same three library actions as Movies and Series —
   **Watchlist**, **Watched**, **Like** — in place of its own AniList-style
   menu (Watching / Plan to Watch / Completed / Dropped). All three sections
   now share one set of verbs and one store, so the Library page's **Anime**
   tab finally matches something: it filters on `MyListItem.type == 'anime'`,
-  and nothing had ever been written there. Per-episode progress and the
-  anime carousels are untouched — `AnimeLibraryService` still owns those and
-  is kept in step, with Watchlist mapping to Plan to Watch and Watched to
-  Completed
+  and nothing had ever been written there. `AnimeLibraryService` keeps its
+  own AniList-shaped list and is kept in step, with Watchlist mapping to
+  Plan to Watch and Watched to Completed
 - Direction and Cast are now one **Cast & Crew** row on movie and series
   detail pages, crew first. They were two sections built from two nearly
   identical card builders, which bought two scroll positions, two hover
@@ -23,6 +29,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   character for cast, the job for crew
 
 ### Fixed
+- The anime details page reads playback progress from the store that
+  actually has it. Anime plays through the shared player, which saves
+  position to `ContinueWatchingService`, but the page asked
+  `AnimeLibraryService.lastWatchedEpisode` — a field no code path writes.
+  So Play offered "Play Ep 1" however far into a series you were, and the
+  episode grid never marked anything as watched. Both now follow your real
+  progress
+- Clearing an anime's library status no longer deletes its watchlist entry
+  outright. That entry is the only carrier of `lastWatchedEpisode`, so
+  removing it to clear a status would take any stored progress with it —
+  taking a show off your watchlist means "not planning to watch this", not
+  "forget that I watched 12 episodes of it"
 - Director names now appear on titles whose addon doesn't supply crew. The
   TMDB `/credits` response carries cast *and* crew, but the crew half was
   decoded and dropped, so Direction was empty for nearly everything even

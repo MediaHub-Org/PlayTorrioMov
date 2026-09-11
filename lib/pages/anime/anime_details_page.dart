@@ -8,6 +8,7 @@ import '../../models/anime/anime_media.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
+import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
@@ -674,10 +675,20 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     );
   }
 
+  /// The furthest episode actually watched, from Continue Watching.
+  ///
+  /// Anime plays through the shared PlayerScreen, so its progress is saved
+  /// under `anilist:<id>` in ContinueWatchingService along with everything
+  /// else. This page used to ask AnimeLibraryService instead, whose
+  /// `lastWatchedEpisode` no code path ever writes -- so Play always said
+  /// "Play Ep 1" however far in you were, and the episode grid never marked
+  /// anything watched.
+  int? get _lastWatchedEpisode =>
+      ContinueWatchingService.lastWatchedEpisodeFor('anilist:${_anime.id}');
+
   Widget _buildPlayButton({required bool fullWidth}) {
-    final library = AnimeLibraryService.instance;
-    final watchItem = library.getWatchlistItem(_anime.id);
-    final resumeEp = watchItem?.lastWatchedEpisode ?? 1;
+    final lastWatched = _lastWatchedEpisode;
+    final resumeEp = lastWatched ?? 1;
 
     return _HoverScale(
       onTap: () => _playEpisode(resumeEp),
@@ -704,7 +715,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
             const SizedBox(width: 6),
             Text(
-              watchItem != null && watchItem.lastWatchedEpisode > 0
+              lastWatched != null && lastWatched > 0
                   ? 'Resume Ep $resumeEp'
                   : 'Play Ep 1',
               style: const TextStyle(
@@ -730,8 +741,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   /// saved from here ever appeared under its Anime tab.
   ///
   /// [AnimeLibraryService] is still written through [_mirrorToAnimeLibrary]
-  /// -- it owns per-episode progress and feeds the anime carousels, which
-  /// My List has no concept of.
+  /// so its AniList-shaped list stays in step; playback progress comes from
+  /// [ContinueWatchingService], which is where the player actually saves
+  /// it.
   Widget _buildLibraryButton({required bool fullWidth}) {
     final row = LibraryActionsRow(
       itemBuilder: _buildMyListItem,
@@ -761,18 +773,18 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   }
 
   /// Keeps [AnimeLibraryService] in step with the shared row, mapping the
-  /// standard actions onto the AniList statuses the anime carousels read:
-  /// Watchlist -> Plan to Watch, Watched -> Completed, neither -> removed.
+  /// standard actions onto its statuses: Watchlist -> Plan to Watch,
+  /// Watched -> Completed, neither -> the list status is cleared.
+  ///
+  /// Clearing goes through [AnimeLibraryService.clearListStatus] rather
+  /// than `removeFromWatchlist`: that entry is also the only carrier of
+  /// `lastWatchedEpisode`, so deleting it to clear a list status would take
+  /// any stored progress with it.
   void _mirrorToAnimeLibrary(MyListItem? entry) {
     final library = AnimeLibraryService.instance;
     if (entry == null || (!entry.isWatchlist && !entry.isWatched)) {
-      // Liked alone is not a watch status, so it must not resurrect one --
-      // but it also must not drop an in-progress "watching" entry that
-      // carries episode position.
-      final existing = library.getWatchlistItem(_anime.id);
-      if (existing != null && existing.status != AnimeWatchStatus.watching) {
-        library.removeFromWatchlist(_anime.id);
-      }
+      // Liked alone is not a watch status, so it must not resurrect one.
+      library.clearListStatus(_anime.id);
     } else {
       library.setWatchlistStatus(
         _anime,
@@ -1004,8 +1016,6 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
 
   // ─── Episodes Section (50-Chunking, Jump Input, SUB/DUB) ────────
   Widget _buildEpisodesSection() {
-    final library = AnimeLibraryService.instance;
-    final watchItem = library.getWatchlistItem(_anime.id);
     final totalEps = _computedTotalEpisodes;
     final totalBatches = (totalEps / _chunkSize).ceil().clamp(1, 9999);
     final currentBatchSafe = _selectedEpisodeBatch.clamp(0, totalBatches - 1);
@@ -1188,7 +1198,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           totalEps,
           currentBatchSafe * _chunkSize,
           math.min((currentBatchSafe + 1) * _chunkSize, totalEps),
-          watchItem?.lastWatchedEpisode,
+          _lastWatchedEpisode,
         ),
       ],
     );

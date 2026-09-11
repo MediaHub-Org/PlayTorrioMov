@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/my_list/my_list_item.dart';
 import '../../services/app_spacing.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -9,6 +10,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/library_actions_row.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_arabic_stream_sheet.dart';
 import '../../services/app_breakpoints.dart';
@@ -445,6 +447,20 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
     );
   }
 
+  /// Saves under `type: 'anime'`, the same as the AniList anime page, so a
+  /// show saved from either catalogue lands in the Library's one Anime tab
+  /// rather than a per-catalogue list.
+  MyListItem _buildMyListItem() {
+    final year = _details?.year;
+    return MyListItem(
+      title: _details?.title ?? widget.anime.title,
+      year: year != null ? int.tryParse(year) : null,
+      type: 'anime',
+      poster: _details?.displayCover ?? widget.anime.cover,
+      addedAt: DateTime.now(),
+    );
+  }
+
   Widget _buildMetaDetails(String title) {
     final status = _details?.status ?? widget.anime.tag ?? 'يعرض الآن';
     final rating = _details?.rating ?? widget.anime.rating;
@@ -512,33 +528,45 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
 
         const SizedBox(height: 18),
 
-        // Action Button (Watch highlighted/latest/first ep)
-        if (_details != null && _details!.episodes.isNotEmpty)
-          Builder(
-            builder: (_) {
-              final targetEpNum = _highlightedEpisode ?? _details!.episodes.first.number;
-              final targetEp = _details!.episodes.firstWhere(
-                (e) => e.number == targetEpNum,
-                orElse: () => _details!.episodes.first,
-              );
-              return ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _Palette.accent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  elevation: 8,
-                  shadowColor: _Palette.accent.withValues(alpha: 0.5),
-                ),
-                onPressed: () => _playEpisode(targetEp),
-                icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                label: Text(
-                  'مشاهدة الحلقة $targetEpNum',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-                ),
-              );
-            },
-          ),
+        // Action row: watch, then the same Watchlist/Watched/Like controls
+        // every other details page carries. This page had no library
+        // controls at all, so an Arabic-catalogue show was the one thing in
+        // the app you could not save.
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            if (_details != null && _details!.episodes.isNotEmpty)
+              Builder(
+                builder: (_) {
+                  final targetEpNum =
+                      _highlightedEpisode ?? _details!.episodes.first.number;
+                  final targetEp = _details!.episodes.firstWhere(
+                    (e) => e.number == targetEpNum,
+                    orElse: () => _details!.episodes.first,
+                  );
+                  return ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _Palette.accent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 8,
+                      shadowColor: _Palette.accent.withValues(alpha: 0.5),
+                    ),
+                    onPressed: () => _playEpisode(targetEp),
+                    icon: const Icon(Icons.play_arrow_rounded, size: 24),
+                    label: Text(
+                      'مشاهدة الحلقة $targetEpNum',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                    ),
+                  );
+                },
+              ),
+            LibraryActionsRow(itemBuilder: _buildMyListItem),
+          ],
+        ),
 
         const SizedBox(height: 18),
 

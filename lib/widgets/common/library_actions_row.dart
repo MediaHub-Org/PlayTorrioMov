@@ -25,8 +25,8 @@ class LibraryActionsRow extends StatelessWidget {
 
   /// Called after a toggle is applied, with the item's state as it now
   /// stands. Anime uses this to mirror Watchlist/Watched onto
-  /// `AnimeLibraryService`, which owns per-episode progress and the anime
-  /// carousels, so the two stores cannot drift apart.
+  /// `AnimeLibraryService`, which keeps its own AniList-shaped list, so the
+  /// two stores cannot drift apart.
   final void Function(MyListItem? entry)? onChanged;
 
   const LibraryActionsRow({
