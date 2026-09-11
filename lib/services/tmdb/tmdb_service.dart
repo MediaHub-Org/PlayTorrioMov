@@ -86,6 +86,78 @@ abstract final class TmdbService {
     }
   }
 
+  /// Resolved IMDb -> TMDB ids, including negative results.
+  ///
+  /// A null *value* means "asked TMDB, it has no match" and is deliberately
+  /// cached too: without it, every rebuild of a details page for an obscure
+  /// title re-issues the same failing lookup.
+  static final Map<String, String?> _tmdbIdByImdbId = <String, String?>{};
+
+  /// Finds the TMDB id for an IMDb id (`tt0137523`), or null.
+  ///
+  /// This is what makes cast enrichment work at all. `MovieDetail.tmdbId` is
+  /// read from `moviedb_id`, a field Cinemeta and most Stremio addons simply
+  /// do not send -- they send `imdb_id`. So the id was null for essentially
+  /// every title, [fetchCredits] was never called, and the details page fell
+  /// back to the addon's plain name strings: no photos, no character names,
+  /// no crew.
+  static Future<String?> resolveTmdbIdFromImdb(
+    String imdbId, {
+    required bool isTvShow,
+  }) async {
+    final key = TmdbSettings.effectiveApiKey;
+    if (key == null) return null;
+
+    // Ids arrive as `tt0137523` but also as `tt0137523:1:5` for an episode;
+    // the lookup wants the title's id.
+    final clean = imdbId.split(':').first.trim();
+    if (!clean.startsWith('tt')) return null;
+
+    final cacheKey = '$clean|${isTvShow ? 'tv' : 'movie'}';
+    if (_tmdbIdByImdbId.containsKey(cacheKey)) return _tmdbIdByImdbId[cacheKey];
+
+    final uri = Uri.parse('$_baseUrl/find/$clean').replace(
+      queryParameters: {'api_key': key, 'external_source': 'imdb_id'},
+    );
+
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) return null;
+      final id = parseFindResponse(
+        jsonDecode(response.body),
+        isTvShow: isTvShow,
+      );
+      _tmdbIdByImdbId[cacheKey] = id;
+      return id;
+    } catch (e) {
+      debugPrint('[TmdbService] resolveTmdbIdFromImdb failed: $e');
+      // Deliberately not cached: a timeout is not evidence the title is
+      // absent, and the next details-page visit should try again.
+      return null;
+    }
+  }
+
+  /// Reads the first match out of a `/find` body. Separate from the request
+  /// so it is testable without a network round-trip or an API key.
+  @visibleForTesting
+  static String? parseFindResponse(dynamic body, {required bool isTvShow}) {
+    if (body is! Map) return null;
+    // A show reached through an episode id lands in tv_episode_results, whose
+    // entries carry `show_id` rather than being the show itself.
+    final keys = isTvShow
+        ? const ['tv_results', 'tv_episode_results']
+        : const ['movie_results'];
+    for (final k in keys) {
+      final results = body[k];
+      if (results is! List || results.isEmpty) continue;
+      final first = results.first;
+      if (first is! Map) continue;
+      final id = k == 'tv_episode_results' ? first['show_id'] : first['id'];
+      if (id != null) return id.toString();
+    }
+    return null;
+  }
+
   /// Turns a decoded TMDB `/credits` body into [TmdbCredits]. Separate from
   /// the request so the filtering rules below are testable without a network
   /// round-trip or an API key.
@@ -121,4 +193,8 @@ abstract final class TmdbService {
 
     return TmdbCredits(cast: cast, crew: crew);
   }
+
+  /// Clears the IMDb -> TMDB cache, for tests.
+  @visibleForTesting
+  static void resetForTest() => _tmdbIdByImdbId.clear();
 }

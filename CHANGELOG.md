@@ -5,6 +5,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Cast and crew now actually load from TMDB. `MovieDetail.tmdbId` is read
+  from a `moviedb_id` field that Cinemeta and most Stremio addons never
+  send — they send `imdb_id` — so the id was null for essentially every
+  title and the enrichment request was never made at all. The details page
+  fell back to the addon's plain name strings, which is why there were no
+  photos, why the role line read "Cast" instead of a character name, and
+  why films showed no director. IMDb ids are now resolved through TMDB's
+  `/find` endpoint first, with the result (including "no match") cached per
+  title. The bundled API key was never implicated — no request reached it
+
 ### Changed
 - Live TV now uses the same page template as Movies, Series and Anime. Its
   filter bar floats transparently over a full-bleed hero instead of sitting
