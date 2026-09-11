@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +16,10 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/like_button.dart';
-import '../../widgets/common/pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
+import '../../services/app_spacing.dart';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -551,25 +550,16 @@ class _DetailsPageState extends State<DetailsPage>
     final screenSize = MediaQuery.sizeOf(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    // This is now just how far down the *content* starts — the backdrop
-    // itself is full-viewport and persistent (see _buildBackdrop), so this
-    // no longer controls when the image "runs out".
-    final heroHeight = (screenSize.height * (isDesktop ? 0.46 : 0.4)).clamp(
-      320.0,
-      520.0,
-    );
     final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
-    final overlap = isDesktop ? 120.0 : 70.0;
-    // heroHeight/overlap were tuned back when this page sat below the hub's
-    // top bar (pillFilterHeaderContentHeight), which ate into screenSize and
-    // left less room above the content. Now that the page renders fullscreen
-    // (nothing covers it any more), that same gap leaves an oversized empty
-    // band at the very top -- subtract the bar's height back out, floored so
-    // there's still room for the floating back button.
-    final topGap = math.max(
-      heroHeight - overlap - pillFilterHeaderContentHeight,
-      _Space.xxl,
-    );
+    // How far down the poster/title block starts. Previously a fraction of
+    // a "hero height" left over from when this page sat below the hub's top
+    // bar -- once the page went fullscreen that read as an oversized empty
+    // band with nothing above it to justify the space. The only thing that
+    // actually needs guaranteed clearance up here is the floating back
+    // button (see FloatingBackButton), so size to its own footprint
+    // instead: status-bar inset down to its top edge, its own ~44px circle,
+    // a little breathing room after it.
+    final topGap = AppSpacing.floatingTopInset(context) + 44 + _Space.md;
 
     return Stack(
       children: [
@@ -599,15 +589,15 @@ class _DetailsPageState extends State<DetailsPage>
                               ? _buildDesktopLayout(meta, posterUrl)
                               : _buildMobileLayout(meta, posterUrl),
                           const SizedBox(height: _Space.xl),
+                          if (meta.directorsList.isNotEmpty ||
+                              meta.director.isNotEmpty) ...[
+                            _buildDirectorRow(meta),
+                            const SizedBox(height: _Space.xl),
+                          ],
                           if ((_enrichedCast?.isNotEmpty ?? false) ||
                               meta.castMembers.isNotEmpty ||
                               meta.cast.isNotEmpty) ...[
                             _buildCastRow(meta),
-                            const SizedBox(height: _Space.xl),
-                          ],
-                          if (meta.directorsList.isNotEmpty ||
-                              meta.director.isNotEmpty) ...[
-                            _buildDirectorRow(meta),
                             const SizedBox(height: _Space.xl),
                           ],
                           if (meta.videos.isNotEmpty) ...[

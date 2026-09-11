@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/app_breakpoints.dart';
+import '../../services/app_spacing.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
@@ -12,7 +13,6 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
-import '../../widgets/common/pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
 
@@ -273,17 +273,11 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     final isDesktop = _isDesktop();
     final screenSize = MediaQuery.sizeOf(context);
 
-    final heroHeight =
-        (screenSize.height * (isDesktop ? 0.46 : 0.4)).clamp(320.0, 520.0);
     final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
-    final overlap = isDesktop ? 120.0 : 70.0;
-    // See details_page.dart's identical comment: this page used to sit below
-    // the hub's top bar before rendering fullscreen, so the same
-    // heroHeight-based gap now leaves an oversized empty band at the top.
-    final topGap = math.max(
-      heroHeight - overlap - pillFilterHeaderContentHeight,
-      _Space.xxl,
-    );
+    // See details_page.dart's identical comment: sized to the floating back
+    // button's own footprint rather than a fraction of the hero's height,
+    // which read as an oversized empty band once the page went fullscreen.
+    final topGap = AppSpacing.floatingTopInset(context) + 44 + _Space.md;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -315,15 +309,15 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                 : _buildMobileLayout(posterUrl),
                             const SizedBox(height: _Space.xl),
 
-                            // Characters & Voice Cast Row
-                            if (_anime.characters.isNotEmpty) ...[
-                              _buildCharactersRow(),
-                              const SizedBox(height: _Space.xl),
-                            ],
-
                             // Director & Staff Row
                             if (_anime.staff.isNotEmpty) ...[
                               _buildStaffRow(),
+                              const SizedBox(height: _Space.xl),
+                            ],
+
+                            // Characters & Voice Cast Row
+                            if (_anime.characters.isNotEmpty) ...[
+                              _buildCharactersRow(),
                               const SizedBox(height: _Space.xl),
                             ],
 
