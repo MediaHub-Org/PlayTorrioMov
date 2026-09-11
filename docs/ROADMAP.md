@@ -3,8 +3,8 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
-Last reconciled against the tree: **2026-09-10**, after every back-button
-page moved onto the root navigator and Settings was redesigned.
+Last reconciled against the tree: **2026-09-11**, after real Android
+hardware testing.
 
 ## Navigation
 
@@ -48,17 +48,19 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 
 | #  | Task | Why it is still open |
 |----|------|------------------------|
-| 10 | Verify the converged page gutter on a real phone and tablet | The values themselves are now one constant, `AppSpacing.pageInset` (16/20/24, mobile first) — the per-section 24/28/16/18/20/8 spread is gone. What is still open is the part this environment cannot do: there is no phone, tablet or emulator here, so the result has never been looked at on a real screen. |
 | 37 | Live TV's hero carousel (`IptvHeroCarousel`) is still its own implementation, unlike Anime's and Movies/Series' | Its row was converged (`IptvSliderSection` now wraps the shared `BrowseRowView`, via a new `BrowseRowView.sizingOf` override so channel cards keep their own logo/banner aspect ratio instead of being forced into a poster shape). The hero is a separate question: `IptvHeroCarousel` reads `IptvSettings.heroStyle` (compact/minimalist/immersive, three different height formulas) and `heroAutoRotate`/`heroRotateSeconds`, none of which `BrowseScaffold`'s hero supports — converging it would mean dropping user-facing settings or extending `BrowseScaffold` to carry them, either of which is a real product decision, not a mechanical de-duplication. |
+| 38 | Details/Anime Details pages carry too much empty top space now | Both now render fullscreen (see #36's nav change) — nothing covers them anymore, so the page occupies the full window height, but their internal top spacing/padding was tuned back when a hub top bar sat above them and ate part of that height. Needs recalibrating for the extra room now that there's nothing above them. |
 
 ## Requested UI work
 
 | #  | Task | Details |
 |----|------|---------|
-| 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is now the mobile-first gutter to build against; still open for #10 and #36. |
+| 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is now the mobile-first gutter to build against; still open for #36. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
-| 28 | Google Cast: verify on real Android/iOS hardware | Wired up (`lib/services/cast/cast_service.dart`, `flutter_chrome_cast`), but this environment has no Android SDK, no Xcode, and no Cast-capable device — the native manifest/plist config and the actual cast-a-stream flow are both unverified. |
-| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`; Movies/Series and Anime both use `BrowseScaffold` for hero + header band + scroll track + loading/error state; every row (Movies/Series, Anime, Live TV) now renders through the shared `BrowseRowView`. Still open: Live TV's page keeps its own hero, see #37. |
+| 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
+| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`; Movies/Series and Anime both use `BrowseScaffold` for hero + header band + scroll track + loading/error state; every row (Movies/Series, Anime, Live TV) now renders through the shared `BrowseRowView`. Still open: Live TV's page keeps its own hero, see #37; Details/Anime Details' top spacing needs recalibrating now that they're fullscreen, see #38. |
+| 39 | Director credit, as its own row above Cast | Details pages currently show the Cast list but nothing about who directed it. |
+| 40 | Ship a default TMDB API key with the app | `TmdbSettings.bundledApiKey` only ever comes from `--dart-define=TMDB_API_KEY`, sourced from the `ENV_FILE` repository secret at build time (see docs/RELEASES.md) — if that secret isn't set, cast photos and character names don't work for anyone who hasn't pasted in their own personal key. Needs a key baked in so it works out of the box, weighed against TMDB's terms on sharing one key across every install. |
 
 ## Signing and releases
 
