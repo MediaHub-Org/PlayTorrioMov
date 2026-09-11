@@ -3,10 +3,9 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
-Last reconciled against the tree: **2026-09-11**, after real Android
-hardware testing and a pass of Linux desktop fixes/UI work the same day
-(taskbar icon/pin, Details page layout, the floating hero header — see
-[CHANGELOG.md](../CHANGELOG.md) `1.5.6+25` for the full list).
+Last reconciled against the tree: **2026-09-11** (v1.5.7+26), after Live TV
+moved onto `BrowseScaffold` — which closed the last of the page-consistency
+items — and after the standard library actions reached every section.
 
 ## Navigation
 
@@ -48,27 +47,33 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 
 ## Code and consistency
 
-| #  | Task | Why it is still open |
-|----|------|------------------------|
-| 37 | Live TV's hero carousel (`IptvHeroCarousel`) is still its own implementation, unlike Anime's and Movies/Series' | Its row was converged (`IptvSliderSection` now wraps the shared `BrowseRowView`, via a new `BrowseRowView.sizingOf` override so channel cards keep their own logo/banner aspect ratio instead of being forced into a poster shape). The hero is a separate question: `IptvHeroCarousel` reads `IptvSettings.heroStyle` (compact/minimalist/immersive, three different height formulas) and `heroAutoRotate`/`heroRotateSeconds`, none of which `BrowseScaffold`'s hero supports — converging it would mean dropping user-facing settings or extending `BrowseScaffold` to carry them, either of which is a real product decision, not a mechanical de-duplication. Now a visible inconsistency, not just an internal one: Movies/Series, Anime and Live TV all pass `PillFilterHeaderBar(transparent: true)`, but only the first two actually float it over a full-bleed hero (`BrowseScaffold`'s `header` now lives inside the hero's own `Stack` — see `browse_scaffold.dart`); Live TV's page still puts the bar in its own band above `IptvHeroCarousel`, pushing it down and losing the transparency's whole point. Converging the hero fixes both at once. |
+Nothing outstanding. Every browse section — Movies/Series, Anime and Live TV
+— now renders through `BrowseScaffold` and `BrowseRowView`, so "the same
+kind of page" really is one implementation.
 
 ## Requested UI work
 
 | #  | Task | Details |
 |----|------|---------|
-| 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is now the mobile-first gutter to build against; still open for #36. The converged page gutter itself is now verified on real Android hardware. |
+| 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
-| 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`; Movies/Series and Anime both use `BrowseScaffold` for a full-bleed hero (with the filter bar floating transparently over it) + scroll track + loading/error state; every row (Movies/Series, Anime, Live TV) now renders through the shared `BrowseRowView`. Still open: Live TV's page keeps its own hero and a solid header band above it, see #37. |
 
 ## Signing and releases
 
-Android release signing needs two repository secrets and is what lets the
-in-app updater replace an existing install — see
-[release signing](RELEASES.md#release-signing). Without them, builds still
-succeed, signed with a throwaway debug key. No other platform needs signing
-for updates, because none of them self-install — see
+Android release signing **is configured** — `ANDROID_KEYSTORE_BASE64` and
+`ANDROID_KEYSTORE_PASSWORD` are both set, and the v1.5.6 build log confirms
+it ("Release signing configured (alias: playtorriomov)"). Released APKs
+therefore install over each other and the in-app updater works. See
+[release signing](RELEASES.md#release-signing). No other platform needs
+signing for updates, because none of them self-install — see
 [RELEASES.md](RELEASES.md#other-platforms).
+
+`ENV_FILE`/`DOTENV` is **not** set, and that is the one outstanding release
+secret. Every published build ships an empty `.env`, so Trakt sign-in,
+Simkl sign-in and Discord Rich Presence are inert in released binaries.
+TMDB cast photos are unaffected — `TmdbSettings` carries a bundled fallback
+key.
 
 ## Declined, so they do not get re-litigated
 

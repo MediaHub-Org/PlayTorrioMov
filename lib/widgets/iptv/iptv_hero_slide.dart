@@ -1,205 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import '../../services/theme/app_theme_service.dart';
-import '../../services/content_display_enums.dart';
+
 import '../../services/iptv/hardcoded_channels.dart';
-import '../../services/iptv/iptv_settings.dart';
-import '../common/hero_carousel_auto_rotate.dart';
+import '../../services/theme/app_theme_service.dart';
 
-class IptvHeroCarousel extends StatefulWidget {
-  final List<HardcodedChannel> channels;
-  final Function(HardcodedChannel) onWatchNow;
-  final Function(HardcodedChannel) onSourcesTap;
+/// One full-bleed Live TV hero slide: the channel's art, its name and
+/// category, and the Watch / Sources actions.
+///
+/// Split out of the old `IptvHeroCarousel` so that [BrowseScaffold] can own
+/// the carousel mechanics -- page view, arrows, dots, auto-rotation -- the
+/// same way it does for Movies, Series and Anime, while Live TV keeps the
+/// slide it always had.
 
-  const IptvHeroCarousel({
-    super.key,
-    required this.channels,
-    required this.onWatchNow,
-    required this.onSourcesTap,
-  });
-
-  @override
-  State<IptvHeroCarousel> createState() => _IptvHeroCarouselState();
-}
-
-class _IptvHeroCarouselState extends State<IptvHeroCarousel>
-    with HeroCarouselAutoRotate<IptvHeroCarousel> {
-  @override
-  void initState() {
-    super.initState();
-    IptvSettings.changeNotifier.addListener(_onSettingsChanged);
-    AppThemeService.currentPalette.addListener(_onSettingsChanged);
-    _applyAutoRotateSetting();
-  }
-
-  void _onSettingsChanged() {
-    if (!mounted) return;
-    setState(() {});
-    _applyAutoRotateSetting();
-  }
-
-  void _applyAutoRotateSetting() {
-    if (!IptvSettings.heroAutoRotate.value) {
-      stopHeroAutoRotate();
-      return;
-    }
-    startHeroAutoRotate(
-      itemCount: widget.channels.length,
-      interval: Duration(seconds: IptvSettings.heroRotateSeconds.value),
-    );
-  }
-
-  @override
-  void dispose() {
-    IptvSettings.changeNotifier.removeListener(_onSettingsChanged);
-    AppThemeService.currentPalette.removeListener(_onSettingsChanged);
-    super.dispose();
-  }
-
-
-  double _heroHeight(double screenWidth, double screenHeight) {
-    final style = IptvSettings.heroStyle.value;
-    if (style == HeroStyle.compact) {
-      return (screenHeight * 0.38).clamp(300.0, 400.0);
-    } else if (style == HeroStyle.minimalist) {
-      return (screenHeight * 0.28).clamp(210.0, 260.0);
-    }
-    // Default Immersive
-    return (screenHeight * 0.52).clamp(380.0, 560.0);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.channels.isEmpty) return const SizedBox.shrink();
-
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final heroHeight = _heroHeight(screenWidth, screenHeight);
-    final primaryColor = AppThemeService.currentPalette.value.primaryColor;
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => isHoveringCarousel = true),
-      onExit: (_) => setState(() => isHoveringCarousel = false),
-      child: RepaintBoundary(
-        child: SizedBox(
-          height: heroHeight,
-          width: screenWidth,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Page View
-              PageView.builder(
-                controller: heroPageController,
-                itemCount: widget.channels.length,
-                onPageChanged: (idx) {
-                  setState(() => currentHeroIndex = idx);
-                },
-                itemBuilder: (context, index) {
-                  final ch = widget.channels[index];
-                  return _IptvHeroSlide(
-                    channel: ch,
-                    onWatchNow: () => widget.onWatchNow(ch),
-                    onSourcesTap: () => widget.onSourcesTap(ch),
-                  );
-                },
-              ),
-
-              // Hover alone gates these, the same way BrowseScaffold's
-              // arrows do: a touch device never fires onEnter, so it never
-              // sees an arrow, and a device with a pointer does -- which is
-              // the actual question. The platform check that used to sit
-              // here was both redundant with isHoveringCarousel and wrong
-              // in name, since every other _isDesktop() in the app asks
-              // about width.
-              if (isHoveringCarousel && widget.channels.length > 1) ...[
-                Positioned(
-                  left: 20,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: _HeroArrowButton(
-                      icon: Icons.chevron_left_rounded,
-                      onTap: () {
-                        final prev =
-                            (currentHeroIndex - 1 + widget.channels.length) %
-                            widget.channels.length;
-                        goToHeroPage(prev);
-                      },
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 20,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: _HeroArrowButton(
-                      icon: Icons.chevron_right_rounded,
-                      onTap: () {
-                        final next =
-                            (currentHeroIndex + 1) % widget.channels.length;
-                        goToHeroPage(next);
-                      },
-                    ),
-                  ),
-                ),
-              ],
-
-              // Indicator Dots
-              if (widget.channels.length > 1)
-                Positioned(
-                  bottom: 18,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: List.generate(
-                        widget.channels.length,
-                        (index) => GestureDetector(
-                          onTap: () => goToHeroPage(index),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            width: currentHeroIndex == index ? 26 : 7,
-                            height: 7,
-                            decoration: BoxDecoration(
-                              color: currentHeroIndex == index
-                                  ? primaryColor
-                                  : Colors.white.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(4),
-                              boxShadow: currentHeroIndex == index
-                                  ? [
-                                      BoxShadow(
-                                        color: primaryColor.withValues(
-                                          alpha: 0.6,
-                                        ),
-                                        blurRadius: 8,
-                                        spreadRadius: 1,
-                                      ),
-                                    ]
-                                  : null,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IptvHeroSlide extends StatelessWidget {
+class IptvHeroSlide extends StatelessWidget {
   final HardcodedChannel channel;
   final VoidCallback onWatchNow;
   final VoidCallback onSourcesTap;
 
-  const _IptvHeroSlide({
+  const IptvHeroSlide({
+    super.key,
     required this.channel,
     required this.onWatchNow,
     required this.onSourcesTap,
@@ -511,59 +330,6 @@ class _IptvHeroSlide extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _HeroArrowButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _HeroArrowButton({required this.icon, required this.onTap});
-
-  @override
-  State<_HeroArrowButton> createState() => _HeroArrowButtonState();
-}
-
-class _HeroArrowButtonState extends State<_HeroArrowButton> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: _isHovering
-                ? const Color(0xFF7C5CFF)
-                : Colors.black.withValues(alpha: 0.55),
-            border: Border.all(
-              color: _isHovering
-                  ? const Color(0xFF7C5CFF)
-                  : Colors.white.withValues(alpha: 0.2),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: _isHovering
-                    ? const Color(0xFF7C5CFF).withValues(alpha: 0.45)
-                    : Colors.black45,
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Icon(widget.icon, color: Colors.white, size: 26),
-        ),
-      ),
     );
   }
 }

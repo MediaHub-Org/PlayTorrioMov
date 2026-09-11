@@ -3,22 +3,22 @@ import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_controller.dart';
+import '../../services/content_display_enums.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../utils/navigation/route_transitions.dart';
-import '../../widgets/common/custom_scroll_track.dart';
-import '../../services/app_spacing.dart';
+import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/header_pill_style.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
-import '../../widgets/iptv/iptv_hero_carousel.dart';
-import '../../widgets/iptv/iptv_slider_section.dart';
+import '../../widgets/iptv/iptv_channel_card.dart';
+import '../../widgets/iptv/iptv_hero_slide.dart';
+import '../../widgets/iptv/iptv_slider_section.dart' show IptvCardSizing;
 import 'iptv_channel_sheet.dart';
 import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
 import 'iptv_portals_modal.dart';
 import 'iptv_search_page.dart';
-import '../../services/app_breakpoints.dart';
 
 class IptvPage extends StatefulWidget {
   const IptvPage({super.key});
@@ -29,7 +29,6 @@ class IptvPage extends StatefulWidget {
 
 class _IptvPageState extends State<IptvPage> {
   final IptvController _ctrl = IptvController.instance;
-  final ScrollController _scrollController = ScrollController();
 
   List<HardcodedChannel> _featured = [];
   List<HardcodedChannel> _espnAndCollege = [];
@@ -57,7 +56,6 @@ class _IptvPageState extends State<IptvPage> {
   void dispose() {
     IptvSettings.changeNotifier.removeListener(_onSettingsChanged);
     AppThemeService.currentPalette.removeListener(_onSettingsChanged);
-    _scrollController.dispose();
     DiscordRpcService.instance.clearToIdle();
     super.dispose();
   }
@@ -204,85 +202,75 @@ class _IptvPageState extends State<IptvPage> {
       onSourcesTap: () => IptvPortalsModal.show(context),
       onMultiViewTap: _navigateToMultiView,
     );
-    final heroWillRender = spotlightEnabled && _featured.isNotEmpty;
-
-    final listContent = RefreshIndicator(
-      color: palette.primaryColor,
-      backgroundColor: palette.cardBackgroundColor,
-      onRefresh: () async {
-        _ctrl.scrape();
-      },
-      child: ListView(
-        controller: _scrollController,
-        clipBehavior: Clip.none,
-        padding: EdgeInsets.zero,
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        children: [
-          // 1. Full Bleed Spotlight Hero Carousel
-          if (heroWillRender)
-            IptvHeroCarousel(
-              channels: _featured,
-              onWatchNow: _watchChannelNow,
-              onSourcesTap: _openChannel,
-            ),
-
-          const SizedBox(height: 20),
-
-          // 2. Curated Slider Sections (driven by user-customized category visibility and order)
-          for (final catName in visibleCategories)
-            if (categoryMap.containsKey(catName) &&
-                categoryMap[catName]!.$2.isNotEmpty)
-              IptvSliderSection(
-                title: catName,
-                subtitle: categoryMap[catName]!.$1,
-                channels: categoryMap[catName]!.$2,
-                onChannelTap: _openChannel,
-              ),
-
-          const SizedBox(height: 90),
-        ],
-      ),
-    );
-
-    // The header band sits above the scroll viewport, not pinned over it,
-    // so it stays put whether or not the spotlight hero is showing and
-    // nothing scrolls underneath it. It used to be nested inside the
-    // hero's own Stack, which moved it whenever the hero came or went.
-    final backgroundContent = Container(
-      color: palette.scaffoldBackgroundColor,
-      child: Column(
-        children: [
-          pillHeader,
-          const SizedBox(height: AppSpacing.sm),
-          Expanded(child: listContent),
-        ],
-      ),
-    );
-
-    final overlayChildren = <Widget>[
-      // Custom Scroll Track (Matching Home & Anime Page)
-      if (AppBreakpoints.of(context) == ScreenTier.desktop)
-        Positioned(
-          right: 24,
-          bottom: 40,
-          child: CustomScrollTrack(controller: _scrollController),
-        ),
+    // Live TV now renders through the same scaffold as Movies, Series and
+    // Anime, rather than hand-rolling a hero, a row list and a header band.
+    // Its three hero settings survive the move: auto-rotate and its interval
+    // map onto `heroInterval`, and the style-driven height goes through the
+    // `heroHeightOf` hook added for exactly this.
+    final rows = <BrowseRow<HardcodedChannel>>[
+      for (final catName in visibleCategories)
+        if (categoryMap.containsKey(catName) &&
+            categoryMap[catName]!.$2.isNotEmpty)
+          BrowseRow<HardcodedChannel>(
+            title: catName,
+            subtitle: categoryMap[catName]!.$1,
+            items: categoryMap[catName]!.$2,
+          ),
     ];
 
+    final content = BrowseScaffold<HardcodedChannel>(
+      // Spotlight off, or nothing featured, means no hero -- the scaffold
+      // then falls back to a fixed header band, which is what this page did
+      // unconditionally before.
+      heroItems: spotlightEnabled ? _featured : const [],
+      rows: rows,
+      header: pillHeader,
+      heroBuilder: (context, channel) => IptvHeroSlide(
+        channel: channel,
+        onWatchNow: () => _watchChannelNow(channel),
+        onSourcesTap: () => _openChannel(channel),
+      ),
+      itemBuilder: (context, channel) => IptvChannelCard(
+        channel: channel,
+        onTap: () => _openChannel(channel),
+      ),
+      // Channel art is a logo or a banner, not a poster, so these rows keep
+      // their own card shape rather than being forced into the 2:3 default.
+      rowSizingOf: (width) => IptvCardSizing.fromWidth(width).toRowSizing(),
+      heroHeightOf: _heroHeight,
+      heroInterval: IptvSettings.heroAutoRotate.value
+          ? Duration(seconds: IptvSettings.heroRotateSeconds.value)
+          : null,
+      onRefresh: () async {
+        await _ctrl.scrape();
+      },
+    );
+
+    // No scroll-track overlay here any more: BrowseScaffold floats its own
+    // over whatever it is scrolling. Keeping this page's copy would have
+    // left a second track driven by a controller no longer attached to any
+    // scroll view.
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: palette.scaffoldBackgroundColor,
       body: Container(
-        color: const Color(0xFF080A0F),
-        child: Stack(
-          children: [
-            RepaintBoundary(child: backgroundContent),
-            ...overlayChildren,
-          ],
-        ),
+        color: palette.scaffoldBackgroundColor,
+        child: RepaintBoundary(child: content),
       ),
     );
+  }
+
+  /// Live TV's user-selectable hero height. Immersive is the default and is
+  /// the same formula [BrowseScaffold] uses for a desktop-width hero; the
+  /// other two are the shorter variants this section has always offered.
+  double _heroHeight(double screenWidth, double screenHeight) {
+    switch (IptvSettings.heroStyle.value) {
+      case HeroStyle.compact:
+        return (screenHeight * 0.38).clamp(300.0, 400.0);
+      case HeroStyle.minimalist:
+        return (screenHeight * 0.28).clamp(210.0, 260.0);
+      case HeroStyle.immersive:
+        return (screenHeight * 0.52).clamp(380.0, 560.0);
+    }
   }
 }
 

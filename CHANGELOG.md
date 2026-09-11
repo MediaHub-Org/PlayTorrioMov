@@ -5,6 +5,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Live TV now uses the same page template as Movies, Series and Anime. Its
+  filter bar floats transparently over a full-bleed hero instead of sitting
+  in a solid band that pushed the hero down — the bar already asked to be
+  transparent, it just had nothing behind it to show through. Its own
+  569-line hero carousel is gone, replaced by the shared one; the three hero
+  settings (compact/minimalist/immersive, auto-rotate, rotation interval)
+  all still work
+
 ## [1.5.7+26] - 2026-09-11
 
 ### Added
