@@ -3,6 +3,14 @@
 What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
 and git history, not here.
 
+Items are numbered and never renumbered, so `#43` means the same thing in a
+commit message, a pull request and this file. A row whose Details open with
+**Decided** has had its design question settled — the reasoning is in the
+`###` section under the same number, and it is there so the decision is not
+re-argued from the one-line summary. Anything ruled out entirely goes to
+[Declined](#declined-so-they-do-not-get-re-litigated) with its reasoning
+rather than being deleted.
+
 Last reconciled against the tree: **2026-09-11** (v1.5.7+26), after the
 v1.5.7 Android build was tested on a real device. Everything below #38 came
 out of that session.
@@ -76,12 +84,12 @@ pages, and the players.
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
-| 43 | Library: make the three library states the tabs | Replaces the earlier two-filter-rows idea. Tabs become **Liked / Watchlist / Watched**, with the media-type pills (All, Movies, Series, Anime, Live TV) inside each. Verified safe: `MyListService._applyOrRemove` deletes an item once all three flags are false, so every stored item carries at least one and nothing can fall between the tabs. It also retires a compromise the code already admits to — `LibrarySection.saved`'s own comment says a heart "overclaims" for that bucket and settles for `inventory_2`; with the states promoted to tabs, each gets its right icon. **Drop the Continue tab** — verified redundant, it renders `ContinueWatchingService.activeItems`, the same deduped list the Continue Watching row already shows. **Keep Downloads** (see below). Live TV appears only under Liked, per #45.
-| 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | Requested for Movies, Series and Anime. **Arrangement decided:** the double-tap side zones keep ±10s — the convention people arrive with — and ±30s gets explicit buttons in the transport bar. No new gesture to learn, and five controls never share one row. Both paths animate on the side they affect, reusing the existing double-tap ripple rather than introducing a second visual language. |
+| 43 | Library: make the three library states the tabs | **Decided** — replaces the earlier two-filter-rows idea; reasoning under *Why Downloads stays in the Library*. Tabs become **Liked / Watchlist / Watched**, with the media-type pills (All, Movies, Series, Anime, Live TV) inside each. Verified safe: `MyListService._applyOrRemove` deletes an item once all three flags are false, so every stored item carries at least one and nothing can fall between the tabs. It also retires a compromise the code already admits to — `LibrarySection.saved`'s own comment says a heart "overclaims" for that bucket and settles for `inventory_2`; with the states promoted to tabs, each gets its right icon. **Drop the Continue tab** — verified redundant, it renders `ContinueWatchingService.activeItems`, the same deduped list the Continue Watching row already shows. **Keep Downloads** (see below). Live TV appears only under Liked, per #45.
+| 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | **Decided.** Requested for Movies, Series and Anime. The double-tap side zones keep ±10s — the convention people arrive with — and ±30s gets explicit buttons in the transport bar. No new gesture to learn, and five controls never share one row. Both paths animate on the side they affect, reusing the existing double-tap ripple rather than introducing a second visual language. |
 | 45 | Live TV's ❤️ / ⭐ split, and liked channels having nowhere to live | **Decided — see the reasoning below the table.** Keep ❤️ on the channel tile (the brand), add a **Liked row at the top of the Live TV page**, and demote the portal browser's ⭐ to a plainly-named in-browser bookmark so it stops competing with ❤️. Three stores are in play today: `MyListService.isLiked` (Movies/Series/Anime), `FavoriteChannelsService` (built-in channels, ❤️ in `iptv_channel_sheet`), and `IptvPortalFavoritesStore` (portal streams, ⭐ in the portal browser, keyed by `streamId` and namespaced per portal). The first two reach Library; portal favourites reach nothing. Do **not** merge the stores: a built-in channel id is stable app data, a `streamId` is meaningless outside the portal and credentials it came from. Unify the vocabulary, not the storage. Blocks #43 — "Liked" must mean one thing before it can be a filter. |
 | 46 | Custom Live TV channels from a portal stream | Optional follow-on to #45, and the reason its ⭐ is worth keeping rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source for the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal. |
 | 47 | Watch history is recorded but never shown | `ContinueWatchingService.historyItems` keeps every episode watched, up to 100, in its own `continue_watching_history_v1` store — and nothing renders it. The one consumer is `getHistoryProgress` in the player, which reads a single entry to resume that episode's position. So the data for a History view already exists and is already persisted; there is just no view. Worth deciding rather than leaving ambiguous: either surface it (a natural home once the Continue tab leaves under #43, and the only way to see anything older than the deduped Continue row) or stop maintaining the list and keep only the per-episode position lookup.
-| 48 | One search across Movies, Series and Anime | The genuinely useful half of "be more like a big streaming platform". There are four search surfaces today — `search_page` (addon movies/shows), `anime_search_page`, `iptv_search_page` and `discover_page` — and `SearchScope` already narrows the icon's behaviour to whichever section you are standing in, so which one you get depends on where you were. One search that queries movies, series and anime together and groups results by type gives the platform feel without collapsing the sections or touching the anime stack. Live TV stays out: channels are matched by keyword against a portal's stream list, not searched by title, and folding them in would mean two different meanings of "result" in one list.
+| 48 | One search across Movies, Series and Anime | **Decided — see *How #48 fits together*.** The genuinely useful half of "be more like a big streaming platform". There are four search surfaces today — `search_page` (addon movies/shows), `anime_search_page`, `iptv_search_page` and `discover_page` — and `SearchScope` already narrows the icon's behaviour to whichever section you are standing in, so which one you get depends on where you were. One search that queries movies, series and anime together and groups results by type gives the platform feel without collapsing the sections or touching the anime stack. Live TV stays out: channels are matched by keyword against a portal's stream list, not searched by title, and folding them in would mean two different meanings of "result" in one list.
 
 ### How #48 fits together
 
@@ -93,11 +101,13 @@ widget, already rendered in the same header pill-row slot by
 pass an `onTap` override to divert it to their own page. So "unify the
 entry points" is, mechanically, deleting two `onTap:` arguments.
 
-**Keep the icon in the header pill row; do not add a second one next to
-Settings.** It already sits in one consistent place, grouped with the
-filters it relates to, and within thumb reach on a phone. A global icon next
-to Settings would either duplicate it or force the pill out, and Settings is
-a different kind of destination — configuration, not content.
+**Decided: keep the icon in the header pill row, and do not add a second
+one next to Settings.** It already sits in one consistent place, grouped
+with the filters it relates to, and within thumb reach on a phone. A global
+icon next to Settings would either duplicate it or force the pill out, and
+Settings is a different kind of destination — configuration, not content.
+The goal here is to unify what search *does* while leaving where it *lives*
+alone.
 
 **Make the scope a chip instead of a hidden mode.** Today `SearchScope`
 silently changes what the icon does: the same button means different things
