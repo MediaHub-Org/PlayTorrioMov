@@ -654,7 +654,14 @@ jobs:
         with:
           bundle: PlayTorrioMov-${{ needs.version.outputs.version }}-Linux-x86_64.flatpak
           manifest-path: flatpak/io.github.MediaHubOrg.PlayTorrioMov.json
-          cache-key: flatpak-builder-${{ github.sha }}
+          # Keyed on github.sha before, which is unique per commit -- so the
+          # cache never actually hit, and every release re-downloaded the
+          # Freedesktop SDK/Platform runtimes and rebuilt libsecret from
+          # source from nothing (confirmed in a real run's logs: "No cache
+          # was found"). Neither changes unless the manifest itself does, so
+          # keying on the manifest's own hash lets flatpak-builder's ccache
+          # skip all of that on every release that doesn't touch it.
+          cache-key: flatpak-builder-${{ hashFiles('flatpak/io.github.MediaHubOrg.PlayTorrioMov.json') }}
 
       - name: Upload Flatpak Artifact
         uses: actions/upload-artifact@v6
