@@ -5,6 +5,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.5.5+24] - 2026-09-11
+
+### Fixed
+- The in-app updater offered a Flatpak install the AppImage to download
+  (and, had it picked the right asset, would have told you to `chmod +x`
+  and run a `.flatpak` file). It now detects the Flatpak sandbox and shows
+  the `flatpak update` command instead, the same way it already
+  special-cases macOS/iOS
+- The release build's Flatpak job cache key was unique per commit, so it
+  never actually hit -- every release rebuilt `libsecret` from source and
+  re-downloaded the Freedesktop SDK/Platform runtime from scratch. Keyed
+  on the manifest's own hash instead, so only a manifest change busts it
+
 ## [1.5.4+23] - 2026-09-11
 
 ### Fixed
