@@ -99,6 +99,16 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// How often the hero advances. Null disables auto-rotation.
   final Duration? heroInterval;
 
+  /// Overrides the hero's height for a section that lets the user choose it.
+  ///
+  /// Live TV exposes three hero styles (compact / minimalist / immersive),
+  /// each with its own height formula, and that setting is the reason its
+  /// hero could not simply be replaced by this one. Taking the formula as a
+  /// parameter keeps the setting working while still putting every section
+  /// on the same scaffold; sections without such a setting leave it null and
+  /// get [_defaultHeroHeight].
+  final double Function(double width, double screenHeight)? heroHeightOf;
+
   final Future<void> Function()? onRefresh;
 
   const BrowseScaffold({
@@ -116,6 +126,7 @@ class BrowseScaffold<T> extends StatefulWidget {
     this.onRetry,
     this.emptyState,
     this.heroInterval = const Duration(seconds: 7),
+    this.heroHeightOf,
     this.onRefresh,
   });
 
@@ -159,10 +170,15 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     startHeroAutoRotate(itemCount: widget.heroItems.length, interval: interval);
   }
 
+  /// The caller's formula when it has one, else [_defaultHeroHeight].
+  double _heroHeight(double width, double screenHeight) =>
+      widget.heroHeightOf?.call(width, screenHeight) ??
+      _defaultHeroHeight(width, screenHeight);
+
   // Height-relative like Anime's and Live TV's hero carousels, not the flat
   // 240/320/420 width tiers this used to have -- those capped out well under
   // upstream's own pre-fork hero (up to 680px on desktop).
-  double _heroHeight(double width, double screenHeight) {
+  double _defaultHeroHeight(double width, double screenHeight) {
     if (width < 600) return (screenHeight * 0.42).clamp(340.0, 420.0);
     if (width < 1100) return (screenHeight * 0.48).clamp(360.0, 480.0);
     return (screenHeight * 0.52).clamp(380.0, 560.0);
