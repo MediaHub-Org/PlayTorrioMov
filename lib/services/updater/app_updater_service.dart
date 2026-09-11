@@ -12,17 +12,22 @@ class AppUpdaterService {
   static const String githubRepo = 'MediaHub-Org/PlayTorrioMov';
   static const String githubApiUrl =
       'https://api.github.com/repos/$githubRepo/releases/latest';
-  static const String flatpakAppId = 'io.github.MediaHubOrg.PlayTorrioMov';
   static const String _keyDismissedVersion = 'dismissed_update_version';
   static const String _keyAutoCheckEnabled = 'auto_check_updates_enabled';
 
   /// Whether this process is running inside a Flatpak sandbox -- FLATPAK_ID
   /// is set by the sandbox itself (alongside a `/.flatpak-info` file),
   /// confirmed present in an actual installed Flatpak run of this app.
-  /// A Flatpak install already has its own update mechanism (`flatpak
-  /// update`) and its files under /app are read-only at runtime anyway, so
-  /// downloading and "running" a release asset the way the desktop flow
-  /// does for every other Linux install doesn't apply here.
+  /// Unlike an app installed from Flathub or a self-hosted repo, this app's
+  /// Flatpak is distributed as a standalone `.flatpak` bundle (downloaded
+  /// from GitHub Releases, same as the AppImage/tar.gz). Installing a bundle
+  /// creates a disabled, no-enumerate "origin" remote purely to track that
+  /// one install -- confirmed on an actual install (`flatpak remotes -d`
+  /// shows it `disabled,no-enumerate,no-gpg-verify`) -- so `flatpak update`
+  /// has no live repo to check and always reports nothing to do. The update
+  /// flow for a Flatpak install here is therefore the same download as any
+  /// other Linux asset, just pointed at the `.flatpak` bundle instead of the
+  /// AppImage, followed by `flatpak install --reinstall` on it.
   static bool get isFlatpak =>
       !kIsWeb && Platform.isLinux && Platform.environment.containsKey('FLATPAK_ID');
 
@@ -137,7 +142,7 @@ class AppUpdaterService {
     } else if (Platform.isWindows) {
       return _findWindowsAsset(assets, abi);
     } else if (Platform.isLinux) {
-      return _findLinuxAsset(assets, abi);
+      return isFlatpak ? _findFlatpakAsset(assets, abi) : _findLinuxAsset(assets, abi);
     } else if (Platform.isMacOS) {
       return _findMacOSAsset(assets, abi);
     }
@@ -248,10 +253,15 @@ class AppUpdaterService {
     return windowsAssets.first['browser_download_url'];
   }
 
-  /// Linux: match x64 or arm64 AppImage/deb
+  /// Linux (non-Flatpak): match x64 or arm64 AppImage/deb/tar.gz. Excludes
+  /// `.flatpak` bundles explicitly -- they share the same "linux" naming
+  /// convention as every other Linux asset, so a plain `contains('linux')`
+  /// check would match them too (see `_findFlatpakAsset`, used instead for
+  /// a Flatpak install).
   String? _findLinuxAsset(List assets, Abi? abi) {
     final linuxAssets = assets.where((a) {
       final name = (a['name'] as String).toLowerCase();
+      if (name.endsWith('.flatpak')) return false;
       return name.contains('linux') ||
           name.endsWith('.appimage') ||
           name.endsWith('.deb') ||
@@ -279,6 +289,35 @@ class AppUpdaterService {
     }
 
     return linuxAssets.first['browser_download_url'];
+  }
+
+  /// Flatpak: match the `.flatpak` bundle asset by architecture.
+  String? _findFlatpakAsset(List assets, Abi? abi) {
+    final flatpakAssets = assets
+        .where((a) => (a['name'] as String).toLowerCase().endsWith('.flatpak'))
+        .toList();
+
+    if (flatpakAssets.isEmpty) return null;
+
+    if (flatpakAssets.length == 1) {
+      return flatpakAssets.first['browser_download_url'];
+    }
+
+    List<String> archKeywords;
+    if (abi == Abi.linuxArm64) {
+      archKeywords = ['arm64', 'aarch64'];
+    } else {
+      archKeywords = ['x86_64', 'x64', 'amd64'];
+    }
+
+    for (final keyword in archKeywords) {
+      final match = flatpakAssets
+          .where((a) => (a['name'] as String).toLowerCase().contains(keyword))
+          .firstOrNull;
+      if (match != null) return match['browser_download_url'];
+    }
+
+    return flatpakAssets.first['browser_download_url'];
   }
 
   /// macOS: match dmg or zip

@@ -242,46 +242,22 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           color: Colors.orange.withValues(alpha: 0.3),
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: Colors.orange.shade300,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Text(
-                                  'Flatpak installs update through Flatpak itself, '
-                                  'not through this dialog:',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.orange.shade200,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.orange.shade300,
+                            size: 20,
                           ),
-                          const SizedBox(height: 10),
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _backgroundColor.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const SelectableText(
-                              'flatpak update ${AppUpdaterService.flatpakAppId}',
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "This Flatpak isn't on a live repo, so "
+                              "'flatpak update' won't find this release. "
+                              'Download the new bundle below, then reinstall it.',
                               style: TextStyle(
-                                color: _accentColor,
                                 fontSize: 12,
-                                fontFamily: 'monospace',
+                                color: Colors.orange.shade200,
                               ),
                             ),
                           ),
@@ -405,9 +381,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     Expanded(
                       flex: 2,
                       child: ElevatedButton(
-                        onPressed: widget.updateInfo.isFlatpak
-                            ? _handleCopyFlatpakCommand
-                            : _handleUpdate,
+                        onPressed: _handleUpdate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _accentColor,
                           foregroundColor: Colors.white,
@@ -417,25 +391,18 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           ),
                           elevation: 0,
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              widget.updateInfo.isFlatpak
-                                  ? 'Copy Command'
-                                  : 'Update Now',
-                              style: const TextStyle(
+                              'Update Now',
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              widget.updateInfo.isFlatpak
-                                  ? Icons.copy_rounded
-                                  : Icons.download_rounded,
-                              size: 20,
-                            ),
+                            SizedBox(width: 8),
+                            Icon(Icons.download_rounded, size: 20),
                           ],
                         ),
                       ),
@@ -448,20 +415,6 @@ class _UpdateDialogState extends State<UpdateDialog> {
       ),
     ),
     );
-  }
-
-  Future<void> _handleCopyFlatpakCommand() async {
-    await Clipboard.setData(
-      const ClipboardData(
-        text: 'flatpak update ${AppUpdaterService.flatpakAppId}',
-      ),
-    );
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Command copied to clipboard')),
-    );
-    AppUpdaterService.dismissVersion(widget.updateInfo.latestVersion);
-    Navigator.of(context).pop();
   }
 
   Future<void> _handleUpdate() async {
@@ -594,7 +547,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
         await dir.create(recursive: true);
       }
 
-      final extension = Platform.isWindows ? '.exe' : '.AppImage';
+      final extension = Platform.isWindows
+          ? '.exe'
+          : (widget.updateInfo.isFlatpak ? '.flatpak' : '.AppImage');
       final fileName =
           '${AppInfo.name}-${widget.updateInfo.latestVersion}$extension';
       final filePath = path.join(dir.path, fileName);
@@ -673,15 +628,59 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  Platform.isWindows
-                      ? 'Close ${AppInfo.name} and run the installer to update.'
-                      : 'Make the file executable and run it:\nchmod +x "$fileName"\n./$fileName',
-                  style: const TextStyle(color: Colors.white70),
-                ),
+                if (widget.updateInfo.isFlatpak) ...[
+                  const Text(
+                    'Reinstall the bundle to update:',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _backgroundColor.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SelectableText(
+                      'flatpak install --user --reinstall "$filePath"',
+                      style: const TextStyle(
+                        color: _accentColor,
+                        fontSize: 12,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+                ] else
+                  Text(
+                    Platform.isWindows
+                        ? 'Close ${AppInfo.name} and run the installer to update.'
+                        : 'Make the file executable and run it:\nchmod +x "$fileName"\n./$fileName',
+                    style: const TextStyle(color: Colors.white70),
+                  ),
               ],
             ),
             actions: [
+              if (widget.updateInfo.isFlatpak)
+                TextButton(
+                  onPressed: () async {
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text: 'flatpak install --user --reinstall "$filePath"',
+                      ),
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Command copied to clipboard'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Copy Command',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
               TextButton(
                 onPressed: () async {
                   if (Platform.isWindows) {
