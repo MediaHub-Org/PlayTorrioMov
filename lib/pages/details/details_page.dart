@@ -404,8 +404,7 @@ class _DetailsPageState extends State<DetailsPage>
 
   Future<void> _fetchCastFromTmdb() async {
     final meta = _detail;
-    final tmdbId = meta?.tmdbId;
-    if (meta == null || tmdbId == null || tmdbId.isEmpty) return;
+    if (meta == null) return;
     // isConfigured, not apiKey: a key can also come from the build
     // (--dart-define / .env), which is the whole point of #34.
     if (!TmdbSettings.isConfigured) return;
@@ -413,7 +412,8 @@ class _DetailsPageState extends State<DetailsPage>
     // Skip only when the addon already supplies BOTH halves of the credits
     // row. Cast photos alone are not enough: addons almost never send crew,
     // so a title with a photo-rich cast still had an empty Direction half
-    // until this stopped short-circuiting on photos alone.
+    // until this stopped short-circuiting on photos alone. Checked before
+    // the id lookup below, so a title that needs nothing costs no requests.
     final hasPhotos = meta.castMembers.any(
       (c) => c.profileUrl != null && c.profileUrl!.isNotEmpty,
     );
@@ -422,6 +422,23 @@ class _DetailsPageState extends State<DetailsPage>
 
     final isTvShow =
         widget.movie.type == 'series' || widget.movie.type == 'anime';
+
+    // `MovieDetail.tmdbId` is read from `moviedb_id`, which Cinemeta and
+    // most Stremio addons do not send -- they send `imdb_id`. Bailing out
+    // when it was null meant no TMDB request was made for essentially any
+    // title, so the page always fell back to the addon's plain name
+    // strings: no photos, no character names, no crew. Resolve the id from
+    // IMDb instead of giving up.
+    var tmdbId = meta.tmdbId;
+    if (tmdbId == null || tmdbId.isEmpty) {
+      tmdbId = await TmdbService.resolveTmdbIdFromImdb(
+        meta.id,
+        isTvShow: isTvShow,
+      );
+      if (!mounted) return;
+    }
+    if (tmdbId == null || tmdbId.isEmpty) return;
+
     final credits = await TmdbService.fetchCredits(tmdbId, isTvShow: isTvShow);
     if (credits.isEmpty || !mounted) return;
     setState(() {

@@ -81,4 +81,74 @@ void main() {
       );
     });
   });
+
+  group('TmdbService.parseFindResponse', () {
+    // Without this lookup nothing else in this file ever runs in production:
+    // MovieDetail.tmdbId comes from `moviedb_id`, which Cinemeta and most
+    // Stremio addons do not send, so the credits request was never made and
+    // the details page fell back to plain name strings.
+    test('reads a movie id', () {
+      expect(
+        TmdbService.parseFindResponse({
+          'movie_results': [
+            {'id': 550, 'title': 'Fight Club'},
+          ],
+        }, isTvShow: false),
+        '550',
+      );
+    });
+
+    test('reads a tv id', () {
+      expect(
+        TmdbService.parseFindResponse({
+          'tv_results': [
+            {'id': 1396, 'name': 'Breaking Bad'},
+          ],
+        }, isTvShow: true),
+        '1396',
+      );
+    });
+
+    test('does not read a tv id when asking for a movie', () {
+      // TMDB answers every /find with all five result arrays; taking the
+      // wrong one would fetch a completely different title's credits.
+      expect(
+        TmdbService.parseFindResponse({
+          'movie_results': const [],
+          'tv_results': [
+            {'id': 1396},
+          ],
+        }, isTvShow: false),
+        isNull,
+      );
+    });
+
+    test('an episode id resolves to its show', () {
+      // Ids arrive as `tt0903747:1:5` too; the show is what has credits.
+      expect(
+        TmdbService.parseFindResponse({
+          'tv_results': const [],
+          'tv_episode_results': [
+            {'id': 62085, 'show_id': 1396},
+          ],
+        }, isTvShow: true),
+        '1396',
+      );
+    });
+
+    test('no match is null, not a crash', () {
+      expect(
+        TmdbService.parseFindResponse({
+          'movie_results': const [],
+          'tv_results': const [],
+        }, isTvShow: false),
+        isNull,
+      );
+      expect(TmdbService.parseFindResponse(null, isTvShow: false), isNull);
+      expect(
+        TmdbService.parseFindResponse({'movie_results': 'nope'}, isTvShow: false),
+        isNull,
+      );
+    });
+  });
 }
