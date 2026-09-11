@@ -4,6 +4,18 @@
 
 #include "flutter/generated_plugin_registrant.h"
 
+// The Flatpak's own app-id (flatpak/io.github.MediaHubOrg.PlayTorrioMov.json,
+// and every file it exports -- the .desktop entry, the icon). Used both to
+// set the window's icon directly (gtk_window_set_icon_name, an icon-theme
+// lookup by this exact name) and as the GApplication's "application-id", so
+// the desktop environment/compositor can also associate the *running*
+// window with the installed .desktop file. Deliberately not APPLICATION_ID
+// (com.mediahub.playtorriomov): g_set_prgname in my_application_new drives
+// where path_provider stores app data on disk, and changing that would move
+// every existing install's saved library and settings to a new, empty
+// directory.
+#define GTK_APPLICATION_ID "io.github.MediaHubOrg.PlayTorrioMov"
+
 struct _MyApplication {
   GtkApplication parent_instance;
   char** dart_entrypoint_arguments;
@@ -21,6 +33,17 @@ static void my_application_activate(GApplication* application) {
   MyApplication* self = MY_APPLICATION(application);
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
+
+  // WM_CLASS/the Wayland app_id (both driven by g_set_prgname, not by the
+  // GApplication "application-id" set below) don't necessarily match a
+  // Flatpak's own app-id, so the compositor can't reliably resolve the
+  // window's icon by associating it with the installed .desktop file --
+  // confirmed directly: the launcher icon (read straight from that file)
+  // showed correctly while the running window's own icon fell back to a
+  // generic placeholder. Set it explicitly via the same icon-theme name the
+  // Flatpak already installs the icon under, which doesn't depend on any of
+  // that matching working.
+  gtk_window_set_icon_name(window, GTK_APPLICATION_ID);
 
   // The stock Flutter template's default here creates a client-side
   // GtkHeaderBar with a hardcoded title and close button -- its own
@@ -125,6 +148,6 @@ MyApplication* my_application_new() {
   g_set_prgname(APPLICATION_ID);
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
-                                     "application-id", APPLICATION_ID, "flags",
+                                     "application-id", GTK_APPLICATION_ID, "flags",
                                      G_APPLICATION_NON_UNIQUE, nullptr));
 }
