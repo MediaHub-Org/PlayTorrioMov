@@ -309,6 +309,7 @@ class _IptvGlassAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PillFilterHeaderBar(
+      transparent: true,
       leading: const [
         DecoratedBox(
           decoration: headerPillDecoration,

@@ -15,8 +15,11 @@ import '../config/env_service.dart';
 ///     same path Trakt's and Simkl's credentials take, so cast photos work
 ///     on a fresh install with no setup.
 ///
-/// Everything that depends on this no-ops when neither is present.
+/// If no external key is present, we ship a non-empty fallback constant so
+/// the cast-enrichment path remains enabled without forcing every user to
+/// register their own key first.
 abstract final class TmdbSettings {
+  static const String _fallbackBundledApiKey = '8e7f3533fd39d27a4f179aa0e8b4a305';
   static const _apiKeyKey = 'tmdb_api_key';
 
   /// The user's own key, or null if they have not set one. This is *not*
@@ -26,7 +29,8 @@ abstract final class TmdbSettings {
   /// The key this build ships with, if any.
   static String? get bundledApiKey {
     final key = EnvService.tmdbApiKey;
-    return key.isEmpty ? null : key;
+    if (key.isNotEmpty) return key;
+    return _fallbackBundledApiKey;
   }
 
   /// The key requests actually send: the user's, else the build's, else

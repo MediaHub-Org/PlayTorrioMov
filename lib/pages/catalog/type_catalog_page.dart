@@ -272,6 +272,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
       ..sort((a, b) => b.compareTo(a));
 
     return PillFilterHeaderBar(
+      transparent: true,
       pills: [
         if (_availableGenres.isNotEmpty) ...[
           FilterDropdown<String?>(

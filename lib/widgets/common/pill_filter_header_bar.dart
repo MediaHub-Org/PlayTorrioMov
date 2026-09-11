@@ -43,11 +43,18 @@ class PillFilterHeaderBar extends StatelessWidget {
   /// On by default; off for callers that supply their own separation.
   final bool showDivider;
 
+  /// When true, the fixed pill strip itself hides its own background and
+  /// lets the hero/carousel show directly through. This supports the
+  /// roadmap's transparent top-pills pattern without disturbing the rest of
+  /// the shared header layout.
+  final bool transparent;
+
   const PillFilterHeaderBar({
     super.key,
     required this.pills,
     this.leading = const [],
     this.showDivider = true,
+    this.transparent = false,
   });
 
   @override
@@ -106,7 +113,8 @@ class PillFilterHeaderBar extends StatelessWidget {
     // becomes layout padding, which would make the bar 1px taller than
     // pillFilterHeaderContentHeight says it is.
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
+        color: transparent ? Colors.transparent : null,
         border: Border(bottom: BorderSide(color: Colors.white10)),
       ),
       child: bar,

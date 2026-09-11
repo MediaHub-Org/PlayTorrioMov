@@ -263,6 +263,7 @@ class _AnimePageState extends State<AnimePage> {
   /// overlay, so it always scrolls away with whatever it sits above.
   Widget _buildPillHeader() {
     return PillFilterHeaderBar(
+      transparent: true,
       pills: [
         FilterDropdown<String?>(
           label: _genreFilter ?? 'All Genres',

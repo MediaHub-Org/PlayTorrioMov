@@ -59,9 +59,6 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
 | 36 | One page template, mobile-first | Partly done: every page's left edge now comes from `AppSpacing.pageInset`; Movies/Series and Anime both use `BrowseScaffold` for hero + header band + scroll track + loading/error state; every row (Movies/Series, Anime, Live TV) now renders through the shared `BrowseRowView`. Still open: Live TV's page keeps its own hero, see #37; Details/Anime Details' top spacing needs recalibrating now that they're fullscreen, see #38. |
-| 39 | Director credit, as its own row above Cast | Details pages currently show the Cast list but nothing about who directed it. |
-| 40 | Ship a default TMDB API key with the app | `TmdbSettings.bundledApiKey` only ever comes from `--dart-define=TMDB_API_KEY`, sourced from the `ENV_FILE` repository secret at build time (see docs/RELEASES.md) — if that secret isn't set, cast photos and character names don't work for anyone who hasn't pasted in their own personal key. Needs a key baked in so it works out of the box, weighed against TMDB's terms on sharing one key across every install. |
-| 41 | Top black bar of pills can be transparent to show the carraousel below and carrousel loads directly on top |
 
 ## Signing and releases
 
