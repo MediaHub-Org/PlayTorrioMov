@@ -77,8 +77,34 @@ pages, and the players.
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
 | 43 | Library: split the filter bar into two rows | Today one row mixes two unrelated axes. Row 1 = **media type** (All, Movies, Series, Anime, Live TV); row 2 = **library status** (Liked, Watchlist, Watched). One wrinkle to design around: Live TV has only Liked — a channel cannot be "watched" — *and* its likes live in `FavoriteChannelsService`, a different store from the `MyListService` the other three use, which `collection_page.dart` already special-cases at `_filterType == 'livetv'`. So either the status row hides Watchlist/Watched for Live TV, or the two stores get bridged first. Hiding is the smaller change and matches what a channel actually supports. |
-| 45 | Live TV has two "favourite" affordances, and a third concept app-wide | **The confusing part is real.** Three stores are in play: `MyListService.isLiked` (❤️ on Movies/Series/Anime details), `FavoriteChannelsService` (❤️ in `iptv_channel_sheet`, keyed by the built-in catalogue's `channel.id`), and `IptvPortalFavoritesStore` (⭐ "Favorites" category in the portal browser, keyed by `streamId` and namespaced per portal via `url\|user\|pass`). So Live TV shows a heart in one place and a star in another, for the same intent. Worse, only the first two ever reach Library — `collection_page.dart` special-cases `_filterType == 'livetv'` to read `FavoriteChannelsService` alone, so **portal favourites are invisible there**. Note the stores cannot simply be merged: a built-in channel id is stable app data, while a `streamId` means nothing outside the portal (and its credentials) it came from, and dies with it. The fix is to unify the *vocabulary*, not necessarily the storage — one word ("Liked"), one icon (❤️), everywhere; then decide whether Library's Live TV view lists portal favourites too, grouped or badged by which portal they came from. See #43: this must be settled before the Library status row can mean one thing. |
 | 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | Requested for Movies, Series and Anime. **Arrangement decided:** the double-tap side zones keep ±10s — the convention people arrive with — and ±30s gets explicit buttons in the transport bar. No new gesture to learn, and five controls never share one row. Both paths animate on the side they affect, reusing the existing double-tap ripple rather than introducing a second visual language. |
+| 45 | Live TV's ❤️ / ⭐ split, and liked channels having nowhere to live | **Decided — see the reasoning below the table.** Keep ❤️ on the channel tile (the brand), add a **Liked row at the top of the Live TV page**, and demote the portal browser's ⭐ to a plainly-named in-browser bookmark so it stops competing with ❤️. Three stores are in play today: `MyListService.isLiked` (Movies/Series/Anime), `FavoriteChannelsService` (built-in channels, ❤️ in `iptv_channel_sheet`), and `IptvPortalFavoritesStore` (portal streams, ⭐ in the portal browser, keyed by `streamId` and namespaced per portal). The first two reach Library; portal favourites reach nothing. Do **not** merge the stores: a built-in channel id is stable app data, a `streamId` is meaningless outside the portal and credentials it came from. Unify the vocabulary, not the storage. Blocks #43 — "Liked" must mean one thing before it can be a filter. |
+| 46 | Custom Live TV channels from a portal stream | Optional follow-on to #45, and the reason its ⭐ is worth keeping rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source for the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal. |
+
+### Why #45 lands where it does
+
+A Live TV tile is **not a channel**. `HardcodedChannel` is
+`{name, category, keywords[], exclude[]}` — UFC is literally
+`['ufc', 'fight pass', 'mma', 'ultimate fighting']` — and
+`HardcodedChannels.matches()` filters the streams your portals carry against
+those keywords. The tile is a *saved search over a brand*; what opens inside
+it is whatever your provider happens to stock, named however they named it.
+Those inner entries are not sub-channels, they are candidate sources.
+
+That is the same shape Movies and Series already have: one title, several
+sources, pick one. `DetailsPage` and `IptvChannelSheet` are the same screen
+wearing different words.
+
+So the ❤️ belongs on the tile, not on the streams inside it. The brand is
+stable — "UFC" means the same thing next month. A stream is disposable: one
+provider's line item, gone when they rotate their list or the user switches
+portals, and a favourite pointing at it rots silently. Liking an inner
+stream would be liking a specific torrent instead of the film.
+
+And it should surface on the **Live TV page**, not only in Library: someone
+about to watch television is on that page, not in their library. Today liked
+channels appear nowhere on it at all, which is the real gap — Library
+already lists them.
 
 ## Signing and releases
 
