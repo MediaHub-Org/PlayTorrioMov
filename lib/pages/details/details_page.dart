@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/like_button.dart';
+import '../../widgets/common/pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
@@ -558,6 +560,16 @@ class _DetailsPageState extends State<DetailsPage>
     );
     final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
     final overlap = isDesktop ? 120.0 : 70.0;
+    // heroHeight/overlap were tuned back when this page sat below the hub's
+    // top bar (pillFilterHeaderContentHeight), which ate into screenSize and
+    // left less room above the content. Now that the page renders fullscreen
+    // (nothing covers it any more), that same gap leaves an oversized empty
+    // band at the very top -- subtract the bar's height back out, floored so
+    // there's still room for the floating back button.
+    final topGap = math.max(
+      heroHeight - overlap - pillFilterHeaderContentHeight,
+      _Space.xxl,
+    );
 
     return Stack(
       children: [
@@ -582,7 +594,7 @@ class _DetailsPageState extends State<DetailsPage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: heroHeight - overlap),
+                          SizedBox(height: topGap),
                           isDesktop
                               ? _buildDesktopLayout(meta, posterUrl)
                               : _buildMobileLayout(meta, posterUrl),
@@ -1190,7 +1202,7 @@ class _DetailsPageState extends State<DetailsPage>
         final likedBtn = LikeButton(
           isLiked: isLiked,
           onTap: () => MyListService.toggleLiked(_buildMyListItem()),
-          style: LikeButtonStyle.icon,
+          style: LikeButtonStyle.boxedIcon,
         );
 
         return Row(
@@ -1234,6 +1246,92 @@ class _DetailsPageState extends State<DetailsPage>
           child: Icon(icon, color: active ? color : Colors.white, size: 22),
         ),
       ),
+    );
+  }
+
+  Widget _buildPersonAvatar(String? profileUrl, {required String name}) {
+    final initials = name.isNotEmpty
+        ? name
+            .trim()
+            .split(' ')
+            .map((e) => e.isNotEmpty ? e[0] : '')
+            .take(2)
+            .join('')
+            .toUpperCase()
+        : '?';
+    final pair = _Palette.avatarPairs[name.hashCode.abs() %
+        _Palette.avatarPairs.length];
+
+    return Container(
+      width: 76,
+      height: 76,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: profileUrl == null
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: pair,
+              )
+            : null,
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+          width: 1.5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      alignment: Alignment.center,
+      child: profileUrl != null
+          ? CachedNetworkImage(
+              imageUrl: profileUrl,
+              width: 76,
+              height: 76,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: pair,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              errorWidget: (_, __, ___) => Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: pair,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+          : Text(
+              initials,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
     );
   }
 
@@ -1341,112 +1439,26 @@ class _DetailsPageState extends State<DetailsPage>
                   itemBuilder: (context, index) {
                     final member = members[index];
                     final name = member.name;
-                    final initials = name.isNotEmpty
-                        ? name
-                              .trim()
-                              .split(' ')
-                              .map((e) => e.isNotEmpty ? e[0] : '')
-                              .take(2)
-                              .join('')
-                              .toUpperCase()
-                        : '?';
-                    final pair =
-                        _Palette.avatarPairs[name.hashCode.abs() %
-                            _Palette.avatarPairs.length];
 
                     return SizedBox(
                       width: 88,
                       child: Column(
                         children: [
-                          Builder(
-                            builder: (context) {
-                              return _HoverButton(
-                                onTap: () {
-                                  pushPage(
-                                    context,
-                                    DiscoverPage(
-                                      query: name,
-                                      isGenre: false,
-                                    ),
-                                  );
-                                },
-                                scaleAmount: 1.05,
-                                child: Container(
-                                  width: 76,
-                                  height: 76,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    gradient: member.profileUrl == null
-                                        ? LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: pair,
-                                          )
-                                        : null,
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.1),
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  alignment: Alignment.center,
-                                  child: member.profileUrl != null
-                                      ? CachedNetworkImage(
-                                          imageUrl: member.profileUrl!,
-                                          width: 76,
-                                          height: 76,
-                                          fit: BoxFit.cover,
-                                          placeholder: (_, __) => Container(
-                                            decoration: BoxDecoration(
-                                              gradient: LinearGradient(
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                                colors: pair,
-                                              ),
-                                            ),
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              initials,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          errorWidget: (_, __, ___) =>
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  gradient: LinearGradient(
-                                                    begin: Alignment.topLeft,
-                                                    end:
-                                                        Alignment.bottomRight,
-                                                    colors: pair,
-                                                  ),
-                                                ),
-                                                alignment: Alignment.center,
-                                                child: Text(
-                                                  initials,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 24,
-                                                    fontWeight:
-                                                        FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                        )
-                                      : Text(
-                                          initials,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                          _HoverButton(
+                            onTap: () {
+                              pushPage(
+                                context,
+                                DiscoverPage(
+                                  query: name,
+                                  isGenre: false,
                                 ),
                               );
                             },
+                            scaleAmount: 1.05,
+                            child: _buildPersonAvatar(
+                              member.profileUrl,
+                              name: member.name,
+                            ),
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -1525,7 +1537,11 @@ class _DetailsPageState extends State<DetailsPage>
       children: [
         _buildSectionHeader('Direction'),
         SizedBox(
-          height: 132,
+          // Matches _buildCastRow's card height exactly -- both show the
+          // same 76px avatar plus a two-line name/role text stack, so a
+          // mismatched box height here was purely an inconsistency, not a
+          // different content shape.
+          height: 148,
           child: ListView.separated(
             clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
@@ -1535,109 +1551,26 @@ class _DetailsPageState extends State<DetailsPage>
             itemBuilder: (context, index) {
               final director = directors[index];
               final name = director.name;
-              final initials = name.isNotEmpty
-                  ? name
-                        .trim()
-                        .split(' ')
-                        .map((e) => e.isNotEmpty ? e[0] : '')
-                        .take(2)
-                        .join('')
-                        .toUpperCase()
-                  : '?';
-              final pair =
-                  _Palette.avatarPairs[name.hashCode.abs() %
-                      _Palette.avatarPairs.length];
 
               return SizedBox(
                 width: 88,
                 child: Column(
                   children: [
-                    Builder(
-                      builder: (context) {
-                        return _HoverButton(
-                          onTap: () {
-                            pushPage(
-                              context,
-                              DiscoverPage(
-                                query: name,
-                                isGenre: false,
-                              ),
-                            );
-                          },
-                          scaleAmount: 1.05,
-                          child: Container(
-                            width: 76,
-                            height: 76,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: director.profileUrl == null
-                                  ? LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: pair,
-                                    )
-                                  : null,
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
-                                width: 1.5,
-                              ),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            alignment: Alignment.center,
-                            child: director.profileUrl != null
-                                ? CachedNetworkImage(
-                                    imageUrl: director.profileUrl!,
-                                    width: 76,
-                                    height: 76,
-                                    fit: BoxFit.cover,
-                                    placeholder: (_, __) => Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: pair,
-                                        ),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        initials,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    errorWidget: (_, __, ___) => Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: pair,
-                                        ),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        initials,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                : Text(
-                                    initials,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                    _HoverButton(
+                      onTap: () {
+                        pushPage(
+                          context,
+                          DiscoverPage(
+                            query: name,
+                            isGenre: false,
                           ),
                         );
                       },
+                      scaleAmount: 1.05,
+                      child: _buildPersonAvatar(
+                        director.profileUrl,
+                        name: director.name,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(

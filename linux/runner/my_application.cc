@@ -5,15 +5,24 @@
 #include "flutter/generated_plugin_registrant.h"
 
 // The Flatpak's own app-id (flatpak/io.github.MediaHubOrg.PlayTorrioMov.json,
-// and every file it exports -- the .desktop entry, the icon). Used both to
-// set the window's icon directly (gtk_window_set_icon_name, an icon-theme
-// lookup by this exact name) and as the GApplication's "application-id", so
-// the desktop environment/compositor can also associate the *running*
-// window with the installed .desktop file. Deliberately not APPLICATION_ID
-// (com.mediahub.playtorriomov): g_set_prgname in my_application_new drives
-// where path_provider stores app data on disk, and changing that would move
-// every existing install's saved library and settings to a new, empty
-// directory.
+// and every file it exports -- the .desktop entry, the icon). Used to set
+// the window's icon directly (gtk_window_set_icon_name, an icon-theme lookup
+// by this exact name), as the GApplication's "application-id", and as the
+// prgname (see my_application_new) -- on GTK3/Wayland the compositor's
+// xdg_toplevel app_id it uses to match a running window to an installed
+// .desktop file (for the taskbar icon and "pin to task manager") actually
+// comes from gdk_get_program_class(), which defaults to g_get_prgname(), NOT
+// from the GApplication "application-id" property; confirmed live after an
+// earlier attempt set only the latter and neither the icon nor pinning
+// changed. Previously prgname stayed at APPLICATION_ID
+// (com.mediahub.playtorriomov) because Flutter's path_provider_linux (and
+// shared_preferences_linux) resolve the on-disk data directory from
+// whichever of these two properties is authoritative, and changing it would
+// have moved every existing install's saved library to an empty directory.
+// That coupling is now broken deliberately: lib/main.dart pins both to
+// "com.mediahub.playtorriomov" directly, independent of prgname or
+// application-id, so both native identifiers are free to match the
+// Flatpak's real app-id here.
 #define GTK_APPLICATION_ID "io.github.MediaHubOrg.PlayTorrioMov"
 
 struct _MyApplication {
@@ -34,15 +43,9 @@ static void my_application_activate(GApplication* application) {
   GtkWindow* window =
       GTK_WINDOW(gtk_application_window_new(GTK_APPLICATION(application)));
 
-  // WM_CLASS/the Wayland app_id (both driven by g_set_prgname, not by the
-  // GApplication "application-id" set below) don't necessarily match a
-  // Flatpak's own app-id, so the compositor can't reliably resolve the
-  // window's icon by associating it with the installed .desktop file --
-  // confirmed directly: the launcher icon (read straight from that file)
-  // showed correctly while the running window's own icon fell back to a
-  // generic placeholder. Set it explicitly via the same icon-theme name the
-  // Flatpak already installs the icon under, which doesn't depend on any of
-  // that matching working.
+  // Belt-and-suspenders: set the icon explicitly via the same icon-theme
+  // name the Flatpak installs it under, so it doesn't depend on the
+  // app_id/.desktop-file matching below working in every compositor.
   gtk_window_set_icon_name(window, GTK_APPLICATION_ID);
 
   // The stock Flutter template's default here creates a client-side
@@ -141,11 +144,11 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
-  // Set the program name to the application ID, which helps various systems
-  // like GTK and desktop environments map this running application to its
-  // corresponding .desktop file. This ensures better integration by allowing
-  // the application to be recognized beyond its binary name.
-  g_set_prgname(APPLICATION_ID);
+  // Drives gdk_get_program_class(), which GTK3's Wayland backend uses as the
+  // xdg_toplevel app_id -- this, not the GApplication "application-id" set
+  // below, is what the compositor actually matches against the installed
+  // .desktop file's basename for the taskbar icon and "pin to task manager".
+  g_set_prgname(GTK_APPLICATION_ID);
 
   return MY_APPLICATION(g_object_new(my_application_get_type(),
                                      "application-id", GTK_APPLICATION_ID, "flags",

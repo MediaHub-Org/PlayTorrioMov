@@ -12,6 +12,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
 
@@ -276,6 +277,13 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
         (screenSize.height * (isDesktop ? 0.46 : 0.4)).clamp(320.0, 520.0);
     final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
     final overlap = isDesktop ? 120.0 : 70.0;
+    // See details_page.dart's identical comment: this page used to sit below
+    // the hub's top bar before rendering fullscreen, so the same
+    // heroHeight-based gap now leaves an oversized empty band at the top.
+    final topGap = math.max(
+      heroHeight - overlap - pillFilterHeaderContentHeight,
+      _Space.xxl,
+    );
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -301,7 +309,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(height: heroHeight - overlap),
+                            SizedBox(height: topGap),
                             isDesktop
                                 ? _buildDesktopLayout(posterUrl)
                                 : _buildMobileLayout(posterUrl),

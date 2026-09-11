@@ -12,6 +12,13 @@ enum LikeButtonStyle {
   /// A bare icon, for an app bar or a list row where there is no space for a
   /// label.
   icon,
+
+  /// The icon boxed in a bordered, tinted square -- for a details page's
+  /// action row, sitting next to other status toggles (watchlist, watched)
+  /// that already use that same boxed look. A bare [icon] there would be the
+  /// only one of the three without a background, breaking the row's
+  /// consistency.
+  boxedIcon,
 }
 
 /// The one "save this" toggle, for content types where saving is a boolean.
@@ -64,9 +71,11 @@ class _LikeButtonState extends State<LikeButton> {
     final label = widget.isLiked ? 'Liked' : 'Like';
     final semantics = widget.isLiked ? 'Remove from liked' : 'Add to liked';
 
-    final child = widget.style == LikeButtonStyle.pill
-        ? _buildPill(label)
-        : _buildIcon();
+    final child = switch (widget.style) {
+      LikeButtonStyle.pill => _buildPill(label),
+      LikeButtonStyle.icon => _buildIcon(),
+      LikeButtonStyle.boxedIcon => _buildBoxedIcon(),
+    };
 
     return Semantics(
       button: true,
@@ -145,6 +154,31 @@ class _LikeButtonState extends State<LikeButton> {
         widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
         // Red, not white: there is no fill to sit against.
         color: widget.isLiked ? kLikedColor : Colors.white70,
+        size: widget.size,
+      ),
+    );
+  }
+
+  Widget _buildBoxedIcon() {
+    // Mirrors details_page.dart's _libraryStatusButton exactly (padding,
+    // border, corner radius, inactive colours) so all three status buttons
+    // in that row read as one consistent set.
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: widget.isLiked
+            ? kLikedColor.withValues(alpha: 0.18)
+            : Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: widget.isLiked
+              ? kLikedColor.withValues(alpha: 0.35)
+              : Colors.white.withValues(alpha: 0.14),
+        ),
+      ),
+      child: Icon(
+        widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+        color: widget.isLiked ? kLikedColor : Colors.white,
         size: widget.size,
       ),
     );
