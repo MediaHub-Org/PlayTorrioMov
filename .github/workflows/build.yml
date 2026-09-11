@@ -30,8 +30,6 @@ name: Build and Release PlayTorrioMov
 on:
   push:
     tags: ['v*']
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -43,6 +41,15 @@ on:
         type: boolean
         required: false
         default: true
+
+# Two runs publishing the same tag would race on creating it and on
+# uploading assets to it. Queue them instead -- and never cancel in
+# progress: a half-finished release upload is worse than a slow one, and
+# unlike a superseded PR check there is nothing redundant about a release
+# build that is already most of the way through seven platforms.
+concurrency:
+  group: release-${{ github.event.inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
