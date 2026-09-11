@@ -9,13 +9,12 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/metadata/bestsimilar_scraper.dart';
 import '../../services/metadata/metadata_service.dart';
-import '../../services/my_list/my_list_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
-import '../../widgets/common/like_button.dart';
+import '../../widgets/common/library_actions_row.dart';
 import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
@@ -95,6 +94,11 @@ class _DetailsPageState extends State<DetailsPage>
   // TMDB cast enrichment (photos/character names), only when a key is
   // configured and the addon's own cast data has none.
   List<CastMember>? _enrichedCast;
+
+  /// Directing crew from the same TMDB `/credits` call that fills
+  /// [_enrichedCast]. Most addons send no crew at all, so without this the
+  /// Direction half of the credits row was empty for nearly everything.
+  List<CrewMember>? _enrichedCrew;
 
   String? _resolvedType;
   String? _resolvedBaseUrl;
@@ -406,18 +410,26 @@ class _DetailsPageState extends State<DetailsPage>
     // (--dart-define / .env), which is the whole point of #34.
     if (!TmdbSettings.isConfigured) return;
 
-    // Only enrich when the addon's own cast has no photos to show already.
+    // Skip only when the addon already supplies BOTH halves of the credits
+    // row. Cast photos alone are not enough: addons almost never send crew,
+    // so a title with a photo-rich cast still had an empty Direction half
+    // until this stopped short-circuiting on photos alone.
     final hasPhotos = meta.castMembers.any(
       (c) => c.profileUrl != null && c.profileUrl!.isNotEmpty,
     );
-    if (hasPhotos) return;
+    final hasCrew = meta.directorsList.isNotEmpty || meta.director.isNotEmpty;
+    if (hasPhotos && hasCrew) return;
 
     final isTvShow =
         widget.movie.type == 'series' || widget.movie.type == 'anime';
-    final cast = await TmdbService.fetchCast(tmdbId, isTvShow: isTvShow);
-    if (cast.isNotEmpty && mounted) {
-      setState(() => _enrichedCast = cast);
-    }
+    final credits = await TmdbService.fetchCredits(tmdbId, isTvShow: isTvShow);
+    if (credits.isEmpty || !mounted) return;
+    setState(() {
+      if (credits.cast.isNotEmpty) _enrichedCast = credits.cast;
+      // Crew is taken whenever TMDB has any: unlike cast, the addon almost
+      // never supplies it, so there is nothing better to preserve.
+      if (credits.crew.isNotEmpty) _enrichedCrew = credits.crew;
+    });
   }
 
   Future<void> _fetchSimilarContent() async {
@@ -589,15 +601,8 @@ class _DetailsPageState extends State<DetailsPage>
                               ? _buildDesktopLayout(meta, posterUrl)
                               : _buildMobileLayout(meta, posterUrl),
                           const SizedBox(height: _Space.xl),
-                          if (meta.directorsList.isNotEmpty ||
-                              meta.director.isNotEmpty) ...[
-                            _buildDirectorRow(meta),
-                            const SizedBox(height: _Space.xl),
-                          ],
-                          if ((_enrichedCast?.isNotEmpty ?? false) ||
-                              meta.castMembers.isNotEmpty ||
-                              meta.cast.isNotEmpty) ...[
-                            _buildCastRow(meta),
+                          if (_credits(meta).isNotEmpty) ...[
+                            _buildCreditsRow(meta),
                             const SizedBox(height: _Space.xl),
                           ],
                           if (meta.videos.isNotEmpty) ...[
@@ -1131,15 +1136,6 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  MyListItem? _myListEntry(List<MyListItem> items) {
-    if (_detail == null) return null;
-    final probe = _buildMyListItem();
-    for (final i in items) {
-      if (i.uniqueKey == probe.uniqueKey || i.matches(probe)) return i;
-    }
-    return null;
-  }
-
   MyListItem _buildMyListItem() {
     return MyListItem.fromMovieDetail(
       id: _detail!.id,
@@ -1152,91 +1148,10 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  /// Three independent buttons -- Watchlist and Watched are mutually
-  /// exclusive (tapping one clears the other), Liked is its own toggle and
-  /// can be on regardless of the other two. Replaces the old single "Add to
-  /// Library" toggle, which had no room for watched-tracking or liking
-  /// without cramming it into the same slot.
-  ///
-  /// Icon-only with a hover [Tooltip] for the label, mirroring
-  /// PlayTorrioMod: a labelled pill here didn't have room for "Watchlist"/
-  /// "Watched" once three buttons shared the row, and an icon can't overflow
-  /// the way that text did.
+  /// The shared Watchlist / Watched / Like row, so this page, Anime and
+  /// anything else offering library actions stay spelled the same way.
   Widget _buildLibraryButton() {
-    return ValueListenableBuilder<List<MyListItem>>(
-      valueListenable: MyListService.items,
-      builder: (context, items, _) {
-        final entry = _myListEntry(items);
-        final isWatched = entry?.isWatched ?? false;
-        final isWatchlist = entry?.isWatchlist ?? false;
-        final isLiked = entry?.isLiked ?? false;
-
-        final watchlistBtn = _libraryStatusButton(
-          icon: isWatchlist
-              ? Icons.bookmark_added_rounded
-              : Icons.bookmark_add_outlined,
-          label: isWatchlist ? 'Remove from watchlist' : 'Add to watchlist',
-          active: isWatchlist,
-          color: const Color(0xFF7C5CFF),
-          onTap: () => MyListService.setWatchlist(_buildMyListItem()),
-        );
-        final watchedBtn = _libraryStatusButton(
-          icon: isWatched
-              ? Icons.check_circle_rounded
-              : Icons.check_circle_outline_rounded,
-          label: isWatched ? 'Mark as unwatched' : 'Mark as watched',
-          active: isWatched,
-          color: const Color(0xFF00D294),
-          onTap: () => MyListService.setWatched(_buildMyListItem()),
-        );
-        final likedBtn = LikeButton(
-          isLiked: isLiked,
-          onTap: () => MyListService.toggleLiked(_buildMyListItem()),
-          style: LikeButtonStyle.boxedIcon,
-        );
-
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            watchlistBtn,
-            const SizedBox(width: 10),
-            watchedBtn,
-            const SizedBox(width: 10),
-            likedBtn,
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _libraryStatusButton({
-    required IconData icon,
-    required String label,
-    required bool active,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Tooltip(
-      message: label,
-      child: _HoverButton(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: active
-                ? color.withOpacity(0.18)
-                : Colors.white.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: active
-                  ? color.withOpacity(0.35)
-                  : Colors.white.withOpacity(0.14),
-            ),
-          ),
-          child: Icon(icon, color: active ? color : Colors.white, size: 22),
-        ),
-      ),
-    );
+    return LibraryActionsRow(itemBuilder: _buildMyListItem);
   }
 
   Widget _buildPersonAvatar(String? profileUrl, {required String name}) {
@@ -1400,12 +1315,47 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  Widget _buildCastRow(MovieDetail meta) {
-    final List<CastMember> members =
-        _enrichedCast ??
+  /// Everyone credited on this title, crew first, as one flat list.
+  ///
+  /// Direction and Cast used to be two sections with two nearly identical
+  /// card builders between them. They showed the same 76px avatar over the
+  /// same name/role text stack and differed only in which field fed the
+  /// second line -- `job` for crew, `character` for cast -- so the split
+  /// bought two scroll positions, two hover states (only one of which had
+  /// arrows) and two chances for the card geometry to drift apart.
+  ///
+  /// Crew leads because it is the shorter run and answers "whose film is
+  /// this" before the reader starts scrolling through actors.
+  List<_Credit> _credits(MovieDetail meta) {
+    final crew = _enrichedCrew ??
+        (meta.directorsList.isNotEmpty
+            ? meta.directorsList
+            : meta.director.map((d) => CrewMember(name: d, job: 'Director')).toList());
+
+    final cast = _enrichedCast ??
         (meta.castMembers.isNotEmpty
             ? meta.castMembers
             : meta.cast.map((c) => CastMember(name: c)).toList());
+
+    return [
+      for (final c in crew)
+        _Credit(name: c.name, role: c.job, profileUrl: c.profileUrl),
+      for (final c in cast)
+        _Credit(
+          name: c.name,
+          // The character they play, which is the whole reason a reader
+          // scans a cast list. Falls back to a plain "Cast" label rather
+          // than a blank line so every card is the same height.
+          role: (c.character != null && c.character!.isNotEmpty)
+              ? c.character!
+              : 'Cast',
+          profileUrl: c.profileUrl,
+        ),
+    ];
+  }
+
+  Widget _buildCreditsRow(MovieDetail meta) {
+    final credits = _credits(meta);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringCast = true),
@@ -1413,7 +1363,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Cast'),
+          _buildSectionHeader('Cast & Crew'),
           SizedBox(
             height: 148,
             child: Stack(
@@ -1424,64 +1374,9 @@ class _DetailsPageState extends State<DetailsPage>
                   controller: _castScrollController,
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
-                  itemCount: members.length,
+                  itemCount: credits.length,
                   separatorBuilder: (_, __) => const SizedBox(width: _Space.lg),
-                  itemBuilder: (context, index) {
-                    final member = members[index];
-                    final name = member.name;
-
-                    return SizedBox(
-                      width: 88,
-                      child: Column(
-                        children: [
-                          _HoverButton(
-                            onTap: () {
-                              pushPage(
-                                context,
-                                DiscoverPage(
-                                  query: name,
-                                  isGenre: false,
-                                ),
-                              );
-                            },
-                            scaleAmount: 1.05,
-                            child: _buildPersonAvatar(
-                              member.profileUrl,
-                              name: member.name,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            name,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
-                            ),
-                          ),
-                          if (member.character != null &&
-                              member.character!.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              member.character!,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 10.5,
-                                height: 1.1,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
+                  itemBuilder: (context, index) => _buildCreditCard(credits[index]),
                 ),
                 if (_isDesktop()) ...[
                   if (_canScrollCastLeft)
@@ -1515,85 +1410,49 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  Widget _buildDirectorRow(MovieDetail meta) {
-    final List<CrewMember> directors = meta.directorsList.isNotEmpty
-        ? meta.directorsList
-        : meta.director
-              .map((d) => CrewMember(name: d, job: 'Director'))
-              .toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('Direction'),
-        SizedBox(
-          // Matches _buildCastRow's card height exactly -- both show the
-          // same 76px avatar plus a two-line name/role text stack, so a
-          // mismatched box height here was purely an inconsistency, not a
-          // different content shape.
-          height: 148,
-          child: ListView.separated(
-            clipBehavior: Clip.none,
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: directors.length,
-            separatorBuilder: (_, __) => const SizedBox(width: _Space.lg),
-            itemBuilder: (context, index) {
-              final director = directors[index];
-              final name = director.name;
-
-              return SizedBox(
-                width: 88,
-                child: Column(
-                  children: [
-                    _HoverButton(
-                      onTap: () {
-                        pushPage(
-                          context,
-                          DiscoverPage(
-                            query: name,
-                            isGenre: false,
-                          ),
-                        );
-                      },
-                      scaleAmount: 1.05,
-                      child: _buildPersonAvatar(
-                        director.profileUrl,
-                        name: director.name,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      name,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      director.job,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 10.5,
-                        height: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
+  /// One person: avatar, their name, and what they did on this title.
+  Widget _buildCreditCard(_Credit credit) {
+    return SizedBox(
+      width: 88,
+      child: Column(
+        children: [
+          _HoverButton(
+            onTap: () {
+              pushPage(
+                context,
+                DiscoverPage(query: credit.name, isGenre: false),
               );
             },
+            scaleAmount: 1.05,
+            child: _buildPersonAvatar(credit.profileUrl, name: credit.name),
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+          Text(
+            credit.name,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            credit.role,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10.5,
+              height: 1.1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -2256,6 +2115,19 @@ class _DetailsPageState extends State<DetailsPage>
       ),
     );
   }
+}
+
+/// One credited person, flattened from either a [CastMember] or a
+/// [CrewMember] so the credits row has a single card shape to render.
+class _Credit {
+  final String name;
+
+  /// What they did: the character for cast, the job for crew.
+  final String role;
+
+  final String? profileUrl;
+
+  const _Credit({required this.name, required this.role, this.profileUrl});
 }
 
 class _EpisodeCard extends StatefulWidget {

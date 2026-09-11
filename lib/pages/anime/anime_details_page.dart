@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../models/anime/anime_media.dart';
+import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/anime/extractors/anidb_extractor.dart';
@@ -13,6 +14,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/library_actions_row.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
 
@@ -718,89 +720,68 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     );
   }
 
+  /// The same Watchlist / Watched / Like row Movies and Series use.
+  ///
+  /// This replaced a `PopupMenuButton` over AniList's own vocabulary
+  /// (Watching / Plan to Watch / Completed / Dropped) that wrote only to
+  /// [AnimeLibraryService]. Two things were wrong with that: anime was the
+  /// one section with a different set of library verbs, and because the
+  /// Library page filters anime by `MyListItem.type == 'anime'`, nothing
+  /// saved from here ever appeared under its Anime tab.
+  ///
+  /// [AnimeLibraryService] is still written through [_mirrorToAnimeLibrary]
+  /// -- it owns per-episode progress and feeds the anime carousels, which
+  /// My List has no concept of.
   Widget _buildLibraryButton({required bool fullWidth}) {
-    final library = AnimeLibraryService.instance;
-    final watchItem = library.getWatchlistItem(_anime.id);
-
-    return PopupMenuButton<AnimeWatchStatus>(
-      onSelected: (status) {
-        library.setWatchlistStatus(_anime, status);
-        setState(() {});
-      },
-      color: const Color(0xFF161A26),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: AnimeWatchStatus.watching,
-          child: Text('Watching', style: TextStyle(color: Colors.white)),
-        ),
-        const PopupMenuItem(
-          value: AnimeWatchStatus.planToWatch,
-          child: Text('Plan to Watch', style: TextStyle(color: Colors.white)),
-        ),
-        const PopupMenuItem(
-          value: AnimeWatchStatus.completed,
-          child: Text('Completed', style: TextStyle(color: Colors.white)),
-        ),
-        const PopupMenuItem(
-          value: AnimeWatchStatus.dropped,
-          child: Text('Dropped', style: TextStyle(color: Colors.white54)),
-        ),
-      ],
-      child: _HoverScale(
-        child: Container(
-          width: fullWidth ? double.infinity : null,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: watchItem != null
-                  ? const Color(0xFF00D294)
-                  : Colors.white.withValues(alpha: 0.15),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                watchItem != null
-                    ? Icons.check_circle_rounded
-                    : Icons.bookmark_outline_rounded,
-                color: watchItem != null
-                    ? const Color(0xFF00D294)
-                    : Colors.white70,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                watchItem != null
-                    ? watchItem.status.name.toUpperCase()
-                    : 'ADD TO LIST',
-                style: TextStyle(
-                  color: watchItem != null
-                      ? const Color(0xFF00D294)
-                      : Colors.white70,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(
-                Icons.arrow_drop_down_rounded,
-                color: Colors.white54,
-                size: 18,
-              ),
-            ],
-          ),
-        ),
-      ),
+    final row = LibraryActionsRow(
+      itemBuilder: _buildMyListItem,
+      onChanged: _mirrorToAnimeLibrary,
     );
+    // The wide slot under the poster centres the row; the narrow one sits
+    // beside Play and sizes to its content.
+    return fullWidth ? Center(child: row) : row;
+  }
+
+  MyListItem _buildMyListItem() {
+    return MyListItem(
+      // AniList ids are their own namespace, so they cannot be passed off as
+      // TMDB or IMDb ids. The title/year fallback in `uniqueKey` is what
+      // identifies these, which is also what lets an anime saved here match
+      // the same show saved from a Stremio catalogue.
+      title: _anime.titleUserPreferred.isNotEmpty
+          ? _anime.titleUserPreferred
+          : _anime.titleRomaji,
+      year: _anime.seasonYear > 0 ? _anime.seasonYear : null,
+      type: 'anime',
+      poster: _anime.coverImageLarge.isNotEmpty
+          ? _anime.coverImageLarge
+          : _anime.coverImageExtraLarge,
+      addedAt: DateTime.now(),
+    );
+  }
+
+  /// Keeps [AnimeLibraryService] in step with the shared row, mapping the
+  /// standard actions onto the AniList statuses the anime carousels read:
+  /// Watchlist -> Plan to Watch, Watched -> Completed, neither -> removed.
+  void _mirrorToAnimeLibrary(MyListItem? entry) {
+    final library = AnimeLibraryService.instance;
+    if (entry == null || (!entry.isWatchlist && !entry.isWatched)) {
+      // Liked alone is not a watch status, so it must not resurrect one --
+      // but it also must not drop an in-progress "watching" entry that
+      // carries episode position.
+      final existing = library.getWatchlistItem(_anime.id);
+      if (existing != null && existing.status != AnimeWatchStatus.watching) {
+        library.removeFromWatchlist(_anime.id);
+      }
+    } else {
+      library.setWatchlistStatus(
+        _anime,
+        entry.isWatched
+            ? AnimeWatchStatus.completed
+            : AnimeWatchStatus.planToWatch,
+      );
+    }
+    if (mounted) setState(() {});
   }
 
   Widget _buildSynopsis(String description) {
