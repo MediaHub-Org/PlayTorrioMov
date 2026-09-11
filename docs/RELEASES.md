@@ -1,13 +1,20 @@
 # Building and releases
 
-CI builds every platform. Pull requests run analysis, the test suite and an
-Android APK; merges to `main` run the same checks and refresh the shared
-build cache.
+CI builds every platform. Pull requests run analysis, the test suite, an
+Android APK and a Linux desktop build; merges to `main` run the same checks
+and refresh the shared build cache.
 
-To cut a downloadable build without tagging a release, dispatch the
-**Build and Release** workflow with a `release_tag` such as `v1.2.0` — it
-publishes all six platforms. Leave `release_tag` empty to build every
-platform and upload artifacts only.
+There are two ways to cut a release, and **the dispatch is the one to
+reach for**:
+
+1. **Dispatch** the **Build and Release** workflow with a `release_tag`
+   such as `v1.2.0`. It builds every platform, creates the tag at the
+   dispatched ref and publishes the release. Leave `release_tag` empty to
+   build everything and upload artifacts only, publishing nothing.
+2. **Push a `v*` tag.** Same result, but it needs push access for tags —
+   some tokens (including the one Claude Code sessions get) are granted
+   branch pushes and refused tag pushes with a `403`, so this route is not
+   always available. The dispatch always is.
 
 Dispatched builds default to `dev_build`, which titles the release `(dev)`
 and publishes it as a GitHub prerelease; the app shows the same marker next

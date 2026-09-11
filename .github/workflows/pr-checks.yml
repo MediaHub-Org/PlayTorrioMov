@@ -42,6 +42,82 @@ env:
   PUB_CACHE: ${{ github.workspace }}/.pub-cache
 
 jobs:
+  # Android is not the only platform that can break, and until now it was the
+  # only one a pull request compiled. Both failures that actually blocked a
+  # release were desktop and were found at release time, with the tag already
+  # pushed: Linux hit a Flutter 3.44.0 native-assets CMake bug
+  # (flutter/flutter#159199) and Windows hit the same install step as MSB3073.
+  # Linux is the cheap half of that coverage -- an ubuntu runner, the same
+  # tier the checks above already use -- and it exercises the CMake install
+  # path that broke. Windows and macOS stay release-only; their runners cost
+  # several times as much per minute and this is a per-PR check.
+  linux-desktop:
+    name: Linux Desktop Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      # Kept identical to build.yml's Linux job on purpose: a PR check that
+      # compiles against a different dependency set than the release build
+      # can go green on a tree the release then fails to build, which is
+      # exactly the failure mode this job exists to prevent.
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            clang lld cmake git ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libmpv-dev xvfb \
+            libboost-all-dev libssl-dev libgcrypt20-dev \
+            libsecret-1-dev libjsoncpp-dev
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          # Same as the job above: an empty .env is enough to compile, and
+          # secrets are unavailable to pull requests from forks.
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Generate Linux platform files if missing
+        run: |
+          if [ ! -d linux ]; then flutter create --platforms=linux .; fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # See build.yml: cmake_install.cmake installs this directory
+      # unconditionally, but nothing creates it when no package declares a
+      # native-asset build hook. Pre-create it so the install is a no-op.
+      - name: Work around missing native_assets directory
+        run: mkdir -p build/native_assets/linux
+
+      - name: Build Linux Release
+        run: flutter build linux --release --dart-define-from-file=.env
+
   verify:
     name: Analyze, Test & Android Build
     runs-on: ubuntu-latest
