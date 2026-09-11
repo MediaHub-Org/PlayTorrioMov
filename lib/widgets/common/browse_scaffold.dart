@@ -7,6 +7,7 @@ import 'browse_row_view.dart';
 import 'custom_scroll_track.dart';
 import 'error_view.dart';
 import 'hero_carousel_auto_rotate.dart';
+import 'pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import 'poster_skeleton.dart';
 import 'slider_arrow.dart';
 
@@ -60,14 +61,20 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// Overrides [rows]' default poster sizing -- see [BrowseRowView.sizingOf].
   final RowCardSizing Function(double screenWidth)? rowSizingOf;
 
-  /// Shown above the hero — a search button, filters, a sub-tab bar.
+  /// A search button, filters, a sub-tab bar.
   ///
-  /// It sits in its own fixed band above the scroll viewport and stays
-  /// there while the page scrolls, with the hero starting just below it.
-  /// Deliberately *outside* the scrollable rather than an overlay pinned
-  /// over it: that is what keeps it fixed without page content sliding
-  /// visibly underneath a translucent strip, which is what made the
-  /// pre-1.2.1 pinned header look broken.
+  /// When there's a hero to show, this floats transparently over its top
+  /// edge instead of reserving its own band above it -- full-bleed hero,
+  /// filters readable over the image, the way every streaming app does it.
+  /// It scrolls away together with the hero rather than staying pinned:
+  /// unlike a header fixed above the scroll viewport, one living inside the
+  /// hero's own box can never end up with *row* content sliding underneath
+  /// a translucent strip (the pre-1.2.1 bug that made a pinned header look
+  /// broken), because by the time rows are on screen the hero -- and this
+  /// with it -- has already scrolled past.
+  ///
+  /// Loading/error/empty states have no hero to float over, so this falls
+  /// back to its own fixed band above the content in those states.
   final Widget? header;
 
   /// Shown between the hero and the first row — e.g. a Continue Watching
@@ -166,27 +173,40 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     final width = MediaQuery.sizeOf(context).width;
     final sizing = MovieCardSizing.fromWidth(width);
 
+    final hasContent =
+        widget.error == null &&
+        (widget.heroItems.isNotEmpty ||
+            widget.rows.any((r) => r.items.isNotEmpty));
+    final showEmptyState =
+        !widget.isLoading && !hasContent && widget.emptyState != null;
+
+    // Whether the header can float transparently over the hero (see
+    // _buildHero) instead of reserving its own band above the content:
+    // only true once the hero is actually about to render, i.e. not while
+    // loading, erroring, or showing the empty state.
+    final headerOverlaysHero =
+        widget.header != null &&
+        !widget.isLoading &&
+        !showEmptyState &&
+        widget.heroItems.isNotEmpty;
+
     Widget content;
     if (widget.error != null) {
       content = ErrorView(
         error: widget.error,
         onRetry: widget.onRetry ?? () {},
       );
+    } else if (showEmptyState) {
+      content = widget.emptyState!;
     } else {
-      final hasContent =
-          widget.heroItems.isNotEmpty ||
-          widget.rows.any((r) => r.items.isNotEmpty);
-
-      content = (!widget.isLoading && !hasContent && widget.emptyState != null)
-          ? widget.emptyState!
-          : _buildScrollable(sizing, width);
+      content = _buildScrollable(
+        sizing,
+        width,
+        headerOverlay: headerOverlaysHero ? widget.header : null,
+      );
     }
 
-    // One arrangement for every state: the header band, a small gap, then
-    // whatever the page is currently showing. The loading skeleton, the
-    // error view and the empty state used to each re-derive this, and the
-    // hero path put the header somewhere else again.
-    final body = widget.header == null
+    final body = widget.header == null || headerOverlaysHero
         ? content
         : Column(
             children: [
@@ -212,9 +232,14 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     );
   }
 
-  Widget _buildScrollable(MovieCardSizing sizing, double width) {
-    // The header is not in here at all any more -- build() puts it above
-    // this viewport, so it stays put and nothing scrolls under it.
+  Widget _buildScrollable(
+    MovieCardSizing sizing,
+    double width, {
+    Widget? headerOverlay,
+  }) {
+    // When there's no header to overlay, build() puts it in its own band
+    // above this viewport instead, so it stays put and nothing scrolls
+    // under it.
     final content = CustomScrollView(
       controller: _scrollController,
       slivers: [
@@ -222,7 +247,9 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
           SliverToBoxAdapter(child: _buildLoading(sizing, width))
         else ...[
           if (widget.heroItems.isNotEmpty) ...[
-            SliverToBoxAdapter(child: _buildHero(width)),
+            SliverToBoxAdapter(
+              child: _buildHero(width, headerOverlay: headerOverlay),
+            ),
             if (widget.belowHero != null)
               SliverToBoxAdapter(child: widget.belowHero!),
           ],
@@ -249,7 +276,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     return RefreshIndicator(onRefresh: widget.onRefresh!, child: content);
   }
 
-  Widget _buildHero(double width) {
+  Widget _buildHero(double width, {Widget? headerOverlay}) {
     final height = _heroHeight(width, MediaQuery.sizeOf(context).height);
     return MouseRegion(
       onEnter: (_) => setState(() => isHoveringCarousel = true),
@@ -266,6 +293,30 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               itemBuilder: (context, i) =>
                   widget.heroBuilder(context, widget.heroItems[i]),
             ),
+            if (headerOverlay != null) ...[
+              // A per-slide hero image has no guaranteed top scrim of its
+              // own (most only fade left-to-right, for the title text), so
+              // a transparent header floating over it needs one here,
+              // centralized, rather than every heroBuilder adding its own.
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: pillFilterHeaderContentHeight * 2,
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xCC080A0F), Color(0x00080A0F)],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(top: 0, left: 0, right: 0, child: headerOverlay),
+            ],
             // Hover alone gates these: a touch device never fires onEnter, so
             // it never sees an arrow, and a device with a pointer does --
             // which is the actual question, unlike a width or platform check.

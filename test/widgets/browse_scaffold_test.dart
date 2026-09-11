@@ -226,7 +226,7 @@ void main() {
     });
 
     testWidgets(
-      'the header sits above the hero rather than over it',
+      'the header floats over the hero instead of its own band above it',
       (tester) async {
         setSurfaceWidth(tester, 1400); // desktop tier
         await tester.pumpWidget(
@@ -237,23 +237,24 @@ void main() {
         expect(find.text('filters'), findsOneWidget);
         expect(find.text('hero:a'), findsOneWidget);
 
-        // The header owns a band at the top of the page and the hero starts
-        // below it. It used to be nested in the hero's own Stack, drawn over
-        // a hero that ran to y = 0.
-        final headerBottom = tester.getBottomLeft(find.text('filters')).dy;
+        // Full-bleed hero starting at y = 0, header floating over its top
+        // edge instead of pushing it down -- see BrowseScaffold.header's
+        // doc comment for why this reversed a previous deliberate choice.
+        final headerTop = tester.getTopLeft(find.text('filters')).dy;
         final heroTop = tester.getTopLeft(find.byKey(const Key('hero-box'))).dy;
-        expect(heroTop, greaterThan(0.0));
-        expect(heroTop, greaterThanOrEqualTo(headerBottom));
+        expect(heroTop, 0.0);
+        expect(headerTop, heroTop);
       },
     );
 
     testWidgets(
-      'the header stays put while the page scrolls under it',
+      'the header scrolls away together with the hero it floats over',
       (tester) async {
-        // Regression test for the reverse of the old behaviour: the header
-        // used to be nested inside the hero, so it scrolled away with it.
-        // It now lives outside the scroll viewport, which is what makes it
-        // stay fixed without content sliding visibly underneath it.
+        // The header now lives inside the hero's own Stack rather than its
+        // own band above the scroll viewport, so it can never end up with
+        // *row* content sliding underneath a translucent strip (the old
+        // pinned-header bug) -- by the time rows are on screen, the hero and
+        // this with it have already scrolled past.
         setSurfaceWidth(tester, 1400);
         await tester.pumpWidget(
           wrap(
@@ -270,16 +271,31 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final headerY = tester.getTopLeft(find.text('filters')).dy;
-
         await tester.drag(find.byType(CustomScrollView), const Offset(0, -3000));
         await tester.pumpAndSettle();
 
-        expect(find.text('filters'), findsOneWidget);
-        expect(tester.getTopLeft(find.text('filters')).dy, headerY);
-        // The hero really did scroll -- otherwise the assertion above is
-        // only saying that nothing moved at all.
+        expect(find.text('filters'), findsNothing);
         expect(find.byKey(const Key('hero-box')), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'the header keeps its own band above the content when there is no '
+      'hero to float over',
+      (tester) async {
+        setSurfaceWidth(tester, 1400);
+        const empty = Text('nothing here');
+
+        await tester.pumpWidget(
+          wrap(build(isLoading: false, emptyState: empty, header: const Text('filters'))),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('filters'), findsOneWidget);
+        expect(find.text('nothing here'), findsOneWidget);
+        final headerBottom = tester.getBottomLeft(find.text('filters')).dy;
+        final emptyTop = tester.getTopLeft(find.text('nothing here')).dy;
+        expect(emptyTop, greaterThanOrEqualTo(headerBottom));
       },
     );
 
