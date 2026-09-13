@@ -183,15 +183,28 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
     return ValueListenableBuilder<AppThemePalette>(
       valueListenable: AppThemeService.currentPalette,
       builder: (context, palette, _) {
-        return MaterialApp(
-          navigatorKey: navigatorKey,
-          title: AppInfo.name,
-          debugShowCheckedModeBanner: false,
-          theme: AppThemeService.createThemeData(palette),
-          scrollBehavior: const MaterialScrollBehavior().copyWith(
-            overscroll: false,
-          ),
-          home: const HubPage(),
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: AppThemeService.themeMode,
+          builder: (context, mode, _) {
+            return MaterialApp(
+              navigatorKey: navigatorKey,
+              title: AppInfo.name,
+              debugShowCheckedModeBanner: false,
+              // Both are always built; `themeMode` picks between them, and
+              // ThemeMode.system defers to the platform brightness, which
+              // Flutter re-reads and rebuilds on when the OS toggles.
+              theme: AppThemeService.createThemeData(palette, Brightness.light),
+              darkTheme: AppThemeService.createThemeData(
+                palette,
+                Brightness.dark,
+              ),
+              themeMode: mode,
+              scrollBehavior: const MaterialScrollBehavior().copyWith(
+                overscroll: false,
+              ),
+              home: const HubPage(),
+            );
+          },
         );
       },
     );

@@ -15,10 +15,16 @@ class AppearanceSettingsPage extends StatefulWidget {
 class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
   @override
   Widget build(BuildContext context) {
+    // Colours come from the theme on this page, not from constants. It is
+    // the page the theme switch lives on, so it is the one page that has to
+    // be readable in whichever mode the switch just selected.
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: theme.appBarTheme.backgroundColor,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -40,11 +46,18 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               'Fine-tune the visual atmosphere, color palettes, and interface layouts.',
               style: TextStyle(
                 fontSize: 13.5,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: onSurface.withValues(alpha: 0.5),
                 height: 1.4,
               ),
             ),
           ),
+
+          // Theme mode. First on the page because it is the broadest
+          // visual choice here -- everything below it is a detail of
+          // whichever mode you land in.
+          const _ThemeModeSelector(),
+
+          const SizedBox(height: 20),
 
           // Button: Live TV & Sports UI
           ValueListenableBuilder<bool>(
@@ -83,6 +96,9 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
     required Color badgeColor,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -91,11 +107,9 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: const Color(0xFF12151E),
+            color: theme.cardTheme.color,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-            ),
+            border: Border.all(color: onSurface.withValues(alpha: 0.08)),
           ),
           child: Row(
             children: [
@@ -118,10 +132,10 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                         Flexible(
                           child: Text(
                             title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                              color: onSurface,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -149,7 +163,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.45),
+                        color: onSurface.withValues(alpha: 0.45),
                         height: 1.35,
                       ),
                     ),
@@ -160,7 +174,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 16,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: onSurface.withValues(alpha: 0.3),
               ),
             ],
           ),
@@ -169,4 +183,168 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
     );
   }
 
+}
+
+/// System / Light / Dark, as three segments rather than a toggle.
+///
+/// A two-state switch cannot express "follow the system", which is the
+/// default and the one most people want -- with a switch, the only way to
+/// say it is to leave the app's idea of the theme permanently out of step
+/// with the device's.
+class _ThemeModeSelector extends StatelessWidget {
+  const _ThemeModeSelector();
+
+  static const _options = <(ThemeMode, String, IconData)>[
+    (ThemeMode.system, 'System', Icons.brightness_auto_rounded),
+    (ThemeMode.light, 'Light', Icons.light_mode_rounded),
+    (ThemeMode.dark, 'Dark', Icons.dark_mode_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AppThemePalette>(
+      valueListenable: AppThemeService.currentPalette,
+      builder: (context, palette, _) {
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: AppThemeService.themeMode,
+          builder: (context, mode, _) {
+            final theme = Theme.of(context);
+            final onSurface = theme.colorScheme.onSurface;
+
+            return Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: theme.cardTheme.color,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: onSurface.withValues(alpha: 0.08)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.contrast_rounded,
+                        color: palette.primaryColor,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Theme',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              mode == ThemeMode.system
+                                  ? 'Following your device setting'
+                                  : 'Always ${mode == ThemeMode.light ? 'light' : 'dark'}',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.35,
+                                color: onSurface.withValues(alpha: 0.55),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      for (final (value, label, icon) in _options) ...[
+                        Expanded(
+                          child: _ThemeModeSegment(
+                            label: label,
+                            icon: icon,
+                            selected: mode == value,
+                            color: palette.primaryColor,
+                            onTap: () => AppThemeService.setThemeMode(value),
+                          ),
+                        ),
+                        if (value != _options.last.$1)
+                          const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ThemeModeSegment extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ThemeModeSegment({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: selected
+                ? color.withValues(alpha: 0.18)
+                : onSurface.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: selected
+                  ? color.withValues(alpha: 0.7)
+                  : onSurface.withValues(alpha: 0.10),
+              width: 1.2,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: selected ? color : onSurface.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
