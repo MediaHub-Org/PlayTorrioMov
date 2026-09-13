@@ -20,8 +20,14 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   Future<void> _exportData(BuildContext context) async {
     setState(() => _isBackingUp = true);
     try {
-      final path = await BackupService.export();
+      final path = await BackupService.exportToPickedFile();
       if (!context.mounted) return;
+      // Null is the user closing the save dialog, which is not a failure
+      // and should not claim a backup was written.
+      if (path == null) {
+        setState(() => _isBackingUp = false);
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Backup saved to $path'),
@@ -52,7 +58,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Restore backup?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
         content: Text(
-          'This overwrites your current library, settings and addon config with the last exported backup. This cannot be undone.',
+          'Pick a backup file to restore. This overwrites your current library, settings and addon config, and cannot be undone.',
           style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
         ),
         actions: [
@@ -75,8 +81,12 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
     setState(() => _isBackingUp = true);
     try {
-      final restored = await BackupService.import();
+      final restored = await BackupService.importFromPickedFile();
       if (!context.mounted) return;
+      if (restored == null) {
+        setState(() => _isBackingUp = false);
+        return;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Restored $restored settings — restart the app to see all changes.'),
@@ -288,7 +298,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Save your library, likes, playback history, settings and addon config to a local JSON file — or restore from one.',
+                      'Save your library, likes, playback history, settings and addon config to a JSON file anywhere on this device — or restore from one you saved earlier.',
                       style: TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
                     ),
                   ],
