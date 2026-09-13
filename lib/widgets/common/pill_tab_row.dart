@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
 
-/// One choice inside a [PillTabRow] / [SectionSubTabs] control.
+/// One choice inside a [PillTabRow].
 class SubTab {
   final String id;
   final String label;
@@ -12,9 +12,13 @@ class SubTab {
   const SubTab({required this.id, required this.label, required this.icon});
 }
 
-/// The segmented pill control itself, extracted from [SectionSubTabs] so a
-/// page can position it inline (e.g. beside other filter controls) instead
-/// of always wrapping the whole page in its own row above everything.
+/// A segmented pill control a page can position inline, beside other
+/// filter controls, rather than in a row of its own above everything.
+///
+/// This was once the inner half of a `SectionSubTabs` wrapper that owned
+/// the whole page layout. The wrapper was never used by any hub section --
+/// Movies and Series, the case it was built for, became two top-level
+/// sections instead -- so it has been removed and this is what remains.
 class PillTabRow extends StatelessWidget {
   final List<SubTab> tabs;
   final String activeId;

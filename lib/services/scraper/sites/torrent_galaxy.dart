@@ -4,6 +4,7 @@ import 'package:html/parser.dart' as parser;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import '../../../utils/torrent/parse_torrent_title.dart';
+import 'package:flutter/foundation.dart';
 
 class TorrentGalaxyScraper extends StreamScraper {
   @override
@@ -113,7 +114,7 @@ class TorrentGalaxyScraper extends StreamScraper {
       }
 
     } catch (e) {
-      print('TorrentGalaxy scrape error: $e');
+      debugPrint('TorrentGalaxy scrape error: $e');
     }
     
     return sources;
@@ -158,7 +159,7 @@ class TorrentGalaxyScraper extends StreamScraper {
         sources: trackers.isNotEmpty ? trackers : null,
       );
     } catch (e) {
-      print('TorrentGalaxy detail fetch error: $e');
+      debugPrint('TorrentGalaxy detail fetch error: $e');
       return null;
     }
   }

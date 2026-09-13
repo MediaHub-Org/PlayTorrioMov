@@ -4,6 +4,7 @@ import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
 import '../user_agent.dart';
+import 'package:flutter/foundation.dart';
 
 /// VidSrc / VSEmbed VOD Extractor ported 1:1 from Flyx (vidsrc.ts).
 class VidSrcScraper extends StreamScraper {
@@ -33,7 +34,7 @@ class VidSrcScraper extends StreamScraper {
     final sources = <StreamSource>[];
     final mediaType = (type == 'series' || type == 'tv') ? 'tv' : 'movie';
     final tmdbId = await TmdbHelper.resolveTmdbId(imdbId: imdbId, title: title, type: mediaType, year: year);
-    print('[VidSrcScraper] Resolved tmdbId: $tmdbId for "$title" (year: $year, imdbId: $imdbId)');
+    debugPrint('[VidSrcScraper] Resolved tmdbId: $tmdbId for "$title" (year: $year, imdbId: $imdbId)');
     if (tmdbId == null) return sources;
 
     try {
@@ -111,10 +112,10 @@ class VidSrcScraper extends StreamScraper {
         }
       }
     } catch (e) {
-      print('VidSrcScraper error: $e');
+      debugPrint('VidSrcScraper error: $e');
     }
 
-    print('[VidSrcScraper] Found ${sources.length} active stream(s)');
+    debugPrint('[VidSrcScraper] Found ${sources.length} active stream(s)');
     return sources;
   }
 }

@@ -1,0 +1,9 @@
+# Inherits every rule from the project root, then relaxes the one that does
+# not apply here.
+include: ../analysis_options.yaml
+
+analyzer:
+  errors:
+    # The scraper and extractor smoke tests print what they resolved -- that
+    # output is the point of running them, and it never ships anywhere.
+    avoid_print: ignore

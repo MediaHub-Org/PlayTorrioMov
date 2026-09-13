@@ -14,7 +14,14 @@ analyzer:
     - 'build/**'
   errors:
     deprecated_member_use: ignore
-    avoid_print: ignore
+    # Promoted from its default info severity, because CI analyses with
+    # --no-fatal-infos and an info would not have stopped anything. It was
+    # suppressed entirely while 71 bare print() calls sat in lib/, several
+    # printing resolved stream URLs and provider queries straight into
+    # release logs. Those are debugPrint now, matching the 400-odd log
+    # sites that already were. test/ relaxes this again -- the scraper
+    # smoke tests print their findings on purpose.
+    avoid_print: warning
     unnecessary_underscores: ignore
     dangling_library_doc_comments: ignore
     use_null_aware_elements: ignore

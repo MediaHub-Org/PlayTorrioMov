@@ -313,12 +313,12 @@ class _PlayerScreenState extends State<PlayerScreen>
       onShutdownDispose: () => _player.dispose(),
     );
 
-    print('[PlayerScreen] Initializing playback:');
-    print('[PlayerScreen]   Title: $_currentTitle');
-    print('[PlayerScreen]   Source Name: ${_currentSource.name}');
-    print('[PlayerScreen]   Addon Name: ${_currentSource.addonName}');
-    print('[PlayerScreen]   Source Title: ${_currentSource.title}');
-    print('[PlayerScreen]   Raw URL: ${_currentSource.url}');
+    debugPrint('[PlayerScreen] Initializing playback:');
+    debugPrint('[PlayerScreen]   Title: $_currentTitle');
+    debugPrint('[PlayerScreen]   Source Name: ${_currentSource.name}');
+    debugPrint('[PlayerScreen]   Addon Name: ${_currentSource.addonName}');
+    debugPrint('[PlayerScreen]   Source Title: ${_currentSource.title}');
+    debugPrint('[PlayerScreen]   Raw URL: ${_currentSource.url}');
 
     try {
       final rawUrl = _currentSource.url;
@@ -326,7 +326,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       // Handle offline downloaded file playback directly
       if (rawUrl != null &&
           (File(rawUrl).existsSync() || _currentSource.name == 'Downloaded')) {
-        print(
+        debugPrint(
           '[PlayerScreen] Initializing offline local file playback: $rawUrl',
         );
         await PlayerSettings.applyPreOpenProperties(_player);
@@ -384,7 +384,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           }
 
           streamUrl = debridFiles.first.downloadUrl;
-          print('[PlayerScreen] Debrid resolved stream URL: $streamUrl');
+          debugPrint('[PlayerScreen] Debrid resolved stream URL: $streamUrl');
         } else {
           if (!mounted) return;
           setState(() => _statusMessage = 'Gathering metadata & peers...');
@@ -420,7 +420,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       }
 
       final cleanUri = Uri.parse(sanitizedUrlStr);
-      print(
+      debugPrint(
         '[PlayerScreen] Opening direct network stream URL: $cleanUri (headers: ${playerHeaders.keys})',
       );
 
@@ -467,7 +467,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             }
           }
         } catch (e) {
-          print('[PlayerScreen] Warning setting native header properties: $e');
+          debugPrint('[PlayerScreen] Warning setting native header properties: $e');
         }
       }
 
@@ -495,7 +495,7 @@ class _PlayerScreenState extends State<PlayerScreen>
 
       _setSubtitleScale(_subtitleScale);
 
-      print(
+      debugPrint(
         '[PlayerScreen SUCCESS] Player opened media successfully for $streamUrl',
       );
 
@@ -570,11 +570,11 @@ class _PlayerScreenState extends State<PlayerScreen>
         _savePlaybackProgress();
       });
     } catch (e, stackTrace) {
-      print(
+      debugPrint(
         '[PlayerScreen ERROR] Failed to initialize stream URL: "$streamUrl"',
       );
-      print('[PlayerScreen ERROR] Exception: $e');
-      print('[PlayerScreen ERROR] StackTrace:\n$stackTrace');
+      debugPrint('[PlayerScreen ERROR] Exception: $e');
+      debugPrint('[PlayerScreen ERROR] StackTrace:\n$stackTrace');
 
       if (!mounted) return;
 
@@ -845,7 +845,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       final targetEpisode = isColl ? null : _currentEpisode?.episode;
       final showName = cleanMediaTitle(targetName);
 
-      print('[PlayerScreen] Scraping initial subtitles for "$showName" (year: $targetYear, imdb: $targetImdbId)...');
+      debugPrint('[PlayerScreen] Scraping initial subtitles for "$showName" (year: $targetYear, imdb: $targetImdbId)...');
 
       final groups = await SubtitleService().fetchAllSubtitles(
         showName,
@@ -854,7 +854,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         episode: targetEpisode,
         year: targetYear,
       );
-      print(
+      debugPrint(
         '[PlayerScreen] Scraped ${groups.length} subtitle language groups with ${groups.fold(0, (s, g) => s + g.variants.length)} total variants',
       );
       if (mounted && groups.isNotEmpty) {
@@ -1104,7 +1104,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         _currentSubFormat = parseResult.format;
       }
     } catch (e) {
-      print('[PlayerScreen] Subtitle cues parse error: $e');
+      debugPrint('[PlayerScreen] Subtitle cues parse error: $e');
     }
 
     _currentSubtitlePath = path;
@@ -1166,7 +1166,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     try {
       np.setProperty('sub-delay', delaySec.toString());
     } catch (e) {
-      print('[PlayerScreen] applyLiveDelay error: $e');
+      debugPrint('[PlayerScreen] applyLiveDelay error: $e');
     }
   }
 
@@ -1257,7 +1257,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     }
 
     // 4. Critical error on dead stream
-    print('[PlayerScreen ERROR] Critical player error on dead stream: $errorMsg');
+    debugPrint('[PlayerScreen ERROR] Critical player error on dead stream: $errorMsg');
 
     if (_currentEpisode != null && widget.detail?.videos.isNotEmpty == true) {
       setState(() {

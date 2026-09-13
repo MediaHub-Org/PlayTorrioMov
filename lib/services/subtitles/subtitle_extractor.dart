@@ -5,6 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'subtitle_parser.dart';
+import 'package:flutter/foundation.dart';
 
 class SubtitleExtractor {
   /// Downloads a file (ZIP, GZ, SRT, VTT, ASS) and extracts/cleans the subtitle on the fly.
@@ -33,7 +34,7 @@ class SubtitleExtractor {
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode != 200) {
-        print('[SubtitleExtractor] Download failed for $url (Status: ${response.statusCode})');
+        debugPrint('[SubtitleExtractor] Download failed for $url (Status: ${response.statusCode})');
         return null;
       }
 
@@ -107,7 +108,7 @@ class SubtitleExtractor {
             extractedRawBytes = bestFile.content as List<int>;
           }
         } catch (e) {
-          print('[SubtitleExtractor] Zip decoding error: $e');
+          debugPrint('[SubtitleExtractor] Zip decoding error: $e');
         }
       } else if (isGzip) {
         try {
@@ -115,7 +116,7 @@ class SubtitleExtractor {
           extractedRawBytes = decompressed;
           targetExt = url.toLowerCase().contains('.vtt') ? 'vtt' : 'srt';
         } catch (e) {
-          print('[SubtitleExtractor] GZip decoding error: $e');
+          debugPrint('[SubtitleExtractor] GZip decoding error: $e');
         }
       }
 
@@ -136,10 +137,10 @@ class SubtitleExtractor {
       final localFile = File(savePath);
       await localFile.writeAsBytes(utf8Bytes, flush: true);
 
-      print('[SubtitleExtractor SUCCESS] Extracted subtitle to $savePath (${utf8Bytes.length} bytes)');
+      debugPrint('[SubtitleExtractor SUCCESS] Extracted subtitle to $savePath (${utf8Bytes.length} bytes)');
       return savePath;
     } catch (e, st) {
-      print('[SubtitleExtractor ERROR] Subtitle extraction error ($providerName): $e\n$st');
+      debugPrint('[SubtitleExtractor ERROR] Subtitle extraction error ($providerName): $e\n$st');
     }
     return null;
   }

@@ -6,6 +6,7 @@ import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
 import '../user_agent.dart';
+import 'glendale_master_url.dart';
 
 /// Pure-Dart Bcine Stream Scraper for PlayTorrioHTTP.
 ///
@@ -18,75 +19,11 @@ class BcineScraper extends StreamScraper {
   static const _ua =
       kDefaultUA;
 
-  static const _vParam = '_v=34403446';
-  static const _nD = '4860ac8bfddb';
-  static const _aD = '224eff10e662e9635c9f671cf46351dcd69af42b1edd56f5e5fa21751f44b9c8';
-  static const _ls = [17, 91, 203, 44, 8, 177, 62, 239, 119, 3, 154, 81, 28, 210, 101, 7];
-  static const _wa = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-
   static const _servers = [
     {'id': 'NIGHT', 'endpoint': '/server/night', 'name': 'Night'},
     {'id': 'EMP', 'endpoint': '/server/emp', 'name': 'Empire'},
     {'id': 'MAIN', 'endpoint': '/server/vidsrc', 'name': 'VidSrc'},
   ];
-
-  static int _ab(int e) {
-    var t = e & 0xFFFFFFFF;
-    t ^= (t >> 16);
-    t = (t * 2146121005) & 0xFFFFFFFF;
-    t ^= (t >> 15);
-    t = (t * 2221713035) & 0xFFFFFFFF;
-    return (t ^ (t >> 16)) & 0xFFFFFFFF;
-  }
-
-  static Uint8List _sD(int e) {
-    final t = utf8.encode(_aD);
-    final r = (e + 17).clamp(32, 128);
-    final n = Uint8List(r);
-    var a = 2166136261;
-    for (var s = 0; s < r; s++) {
-      a ^= t[s % t.length];
-      a = _ab((a + _ls[s % _ls.length] + ((2654435761 * s) & 0xFFFFFFFF)) & 0xFFFFFFFF);
-      n[s] = a & 255;
-    }
-    return n;
-  }
-
-  static String _iD(Uint8List e) {
-    var t = '';
-    for (var r = 0; r < e.length; r += 3) {
-      final n = e[r];
-      final a = (r + 1 < e.length) ? e[r + 1] : null;
-      final s = (r + 2 < e.length) ? e[r + 2] : null;
-      t += _wa[n >> 2];
-      t += _wa[((3 & n) << 4) | ((a ?? 0) >> 4)];
-      if (a == null) break;
-      t += _wa[((15 & a) << 2) | ((s ?? 0) >> 6)];
-      if (s == null) break;
-      t += _wa[63 & s];
-    }
-    return t;
-  }
-
-  static String _generateDirectHlsUrl(int tmdbId, int? s, int? e) {
-    final isTv = s != null && e != null;
-    final season = isTv ? s : 0;
-    final episode = isTv ? e : 0;
-
-    final str = '$_nD:${isTv ? 's' : 'm'}:$tmdbId:$season:$episode';
-    final a = utf8.encode(str);
-    final sArr = _sD(a.length);
-    final i = Uint8List(a.length + 2);
-    i[0] = a.length & 255;
-    i[1] = (a.length >> 8) & 255;
-    var o = (2654435769 ^ a.length) & 0xFFFFFFFF;
-    for (var l = 0; l < a.length; l++) {
-      o = _ab((o + sArr[l % sArr.length] + _ls[l % _ls.length] + l) & 0xFFFFFFFF);
-      i[l + 2] = (a[l] ^ (255 & o)) ^ sArr[(7 * l + 3) % sArr.length];
-    }
-
-    return 'https://glendale-plumbing.com/c/v1/${_iD(i)}/master.m3u8';
-  }
 
   Future<String?> _fetchInternalToken(http.Client client) async {
     try {
@@ -135,7 +72,8 @@ class BcineScraper extends StreamScraper {
       }
 
       // 1. Direct Cryptographic HLS Master Stream
-      final directHls = '${_generateDirectHlsUrl(tmdbId, season, episode)}?$_vParam';
+      final directHls =
+          '${glendaleMasterUrl(tmdbId, season, episode)}?$glendaleVersionParam';
       final directHeaders = {
         'User-Agent': _ua,
         'Referer': 'https://bcine.ru/',

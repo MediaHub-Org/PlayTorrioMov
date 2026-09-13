@@ -184,12 +184,20 @@ abstract final class BackupService {
   }
 
   /// Refuses a plaintext-HTTP WebDAV URL unless it points at the local
-  /// machine/network -- the backup envelope carries every SharedPreferences
-  /// key (including Trakt/Simkl tokens and the WebDAV password itself, via
-  /// the Basic Auth header), so an `http://` URL to a real remote host would
-  /// send all of it in cleartext. Loopback/private-LAN/.local addresses are
-  /// exempt since that traffic never leaves the local network either way --
-  /// the common case for a self-hosted server reached by its bare LAN IP.
+  /// machine/network.
+  ///
+  /// Trakt and Simkl tokens and the WebDAV password now live in
+  /// `SecureValueStore` (flutter_secure_storage), not SharedPreferences, so
+  /// they are *not* in the envelope -- an earlier version of this comment
+  /// said they were, and that is no longer the threat being defended
+  /// against. What the envelope does carry is every other preference,
+  /// including the TMDB and Simkl keys the user pasted in, plus the Basic
+  /// Auth header on the request itself. That is still worth not sending in
+  /// cleartext.
+  ///
+  /// Loopback/private-LAN/.local addresses are exempt since that traffic
+  /// never leaves the local network either way -- the common case for a
+  /// self-hosted server reached by its bare LAN IP.
   static void _assertSecureUri(Uri uri) {
     if (uri.scheme == 'https') return;
     if (isPrivateOrLoopbackHost(uri.host)) return;

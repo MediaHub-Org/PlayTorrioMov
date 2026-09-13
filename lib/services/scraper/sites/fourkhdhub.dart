@@ -4,6 +4,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:html/dom.dart' as dom;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
+import 'package:flutter/foundation.dart';
 
 /// 1:1 port of webstreamr-0.69.1 src/source/FourKHDHub.ts
 /// + src/source/hd-hub-helper.ts (resolveRedirectUrl)
@@ -76,7 +77,7 @@ class FourKHDHubScraper extends StreamScraper {
     String? imdbId,
   }) async {
     final sources = <StreamSource>[];
-    print('[4KHDHub] Starting scrape for title="$title", type=$type, year=$year, S${season}E$episode');
+    debugPrint('[4KHDHub] Starting scrape for title="$title", type=$type, year=$year, S${season}E$episode');
 
     try {
       final pageUrl = await _fetchPageUrl(
@@ -85,11 +86,11 @@ class FourKHDHubScraper extends StreamScraper {
         isSeries: type == 'series',
       );
       if (pageUrl == null) {
-        print('[4KHDHub] No detail page URL found for "$title"');
+        debugPrint('[4KHDHub] No detail page URL found for "$title"');
         return sources;
       }
 
-      print('[4KHDHub] Fetching detail page: $pageUrl');
+      debugPrint('[4KHDHub] Fetching detail page: $pageUrl');
       final html = await _fetchText(pageUrl);
       final doc = html_parser.parse(html);
 
@@ -116,17 +117,17 @@ class FourKHDHubScraper extends StreamScraper {
         }
       } else {
         final items = doc.querySelectorAll('.download-item');
-        print('[4KHDHub] Found ${items.length} download items on page');
+        debugPrint('[4KHDHub] Found ${items.length} download items on page');
         for (final dl in items) {
           final srcs = await _extractSourceResults(dl);
           sources.addAll(srcs);
         }
       }
     } catch (e, stack) {
-      print('[4KHDHub ERROR] Scrape failed: $e\n$stack');
+      debugPrint('[4KHDHub ERROR] Scrape failed: $e\n$stack');
     }
 
-    print('[4KHDHub] Scrape completed. Found ${sources.length} active sources for "$title"');
+    debugPrint('[4KHDHub] Scrape completed. Found ${sources.length} active sources for "$title"');
     return sources;
   }
 
@@ -139,7 +140,7 @@ class FourKHDHubScraper extends StreamScraper {
     try {
       final baseUrl = await _getBaseUrl();
       final searchUrl = '$baseUrl/?s=${Uri.encodeComponent(name)}';
-      print('[4KHDHub] Searching $searchUrl');
+      debugPrint('[4KHDHub] Searching $searchUrl');
       final html = await _fetchText(searchUrl);
       final doc = html_parser.parse(html);
 
@@ -171,11 +172,11 @@ class FourKHDHubScraper extends StreamScraper {
         if (href == null) continue;
 
         final fullUrl = Uri.parse(baseUrl).resolve(href).toString();
-        print('[4KHDHub] Matched page card "$cardTitle" -> $fullUrl');
+        debugPrint('[4KHDHub] Matched page card "$cardTitle" -> $fullUrl');
         return fullUrl;
       }
     } catch (e) {
-      print('[4KHDHub ERROR] fetchPageUrl error: $e');
+      debugPrint('[4KHDHub ERROR] fetchPageUrl error: $e');
     }
     return null;
   }
@@ -218,14 +219,14 @@ class FourKHDHubScraper extends StreamScraper {
       if (redirectUrl == null) return sources;
 
       try {
-        print('[4KHDHub] Resolving redirect link: $redirectUrl');
+        debugPrint('[4KHDHub] Resolving redirect link: $redirectUrl');
         final resolvedUrl = await _resolveRedirectUrl(redirectUrl);
         if (resolvedUrl != null) {
           final safeUrl = _sanitizeStreamUrl(resolvedUrl);
           // Perform quick stream health check to prevent 403 quota / HTML error pages from crashing player
           final isValid = await _validateStreamUrl(safeUrl);
           if (isValid) {
-            print('[4KHDHub SUCCESS] Added valid stream source: $safeUrl');
+            debugPrint('[4KHDHub SUCCESS] Added valid stream source: $safeUrl');
             sources.add(StreamSource(
               name: 'PlayTorrioHTTP',
               addonName: 'PlayTorrioHTTP',
@@ -233,14 +234,14 @@ class FourKHDHubScraper extends StreamScraper {
               url: safeUrl,
             ));
           } else {
-            print('[4KHDHub FILTERED] Skipped invalid/quota-exceeded stream URL: $safeUrl');
+            debugPrint('[4KHDHub FILTERED] Skipped invalid/quota-exceeded stream URL: $safeUrl');
           }
         }
       } catch (e) {
-        print('[4KHDHub ERROR] resolveRedirectUrl error: $e');
+        debugPrint('[4KHDHub ERROR] resolveRedirectUrl error: $e');
       }
     } catch (e) {
-      print('[4KHDHub ERROR] extract source error: $e');
+      debugPrint('[4KHDHub ERROR] extract source error: $e');
     }
     return sources;
   }
@@ -272,7 +273,7 @@ class FourKHDHubScraper extends StreamScraper {
       final isHtmlOrJsonError = contentType.contains('text/html') || contentType.contains('application/json');
 
       if (!isSuccess || isHtmlOrJsonError) {
-        print('[4KHDHub HEALTH CHECK] Stream URL returned HTTP ${response.statusCode} (content-type: $contentType) -> INVALID');
+        debugPrint('[4KHDHub HEALTH CHECK] Stream URL returned HTTP ${response.statusCode} (content-type: $contentType) -> INVALID');
         return false;
       }
       return true;
@@ -311,7 +312,7 @@ class FourKHDHubScraper extends StreamScraper {
         // Fallback to original obfuscated logic just in case older links still use it
         final match = RegExp(r"'o','(.*?)'").firstMatch(html);
         if (match == null) {
-          print('4khdhub no redirect link found in html');
+          debugPrint('4khdhub no redirect link found in html');
           return null;
         }
         final rawData = match.group(1)!;
@@ -332,10 +333,10 @@ class FourKHDHubScraper extends StreamScraper {
         return finalLinkMatch.group(1)!;
       }
 
-      print('4khdhub final link not found in intermediate page');
+      debugPrint('4khdhub final link not found in intermediate page');
       return null;
     } catch (e) {
-      print('4khdhub resolveRedirectUrl error: $e');
+      debugPrint('4khdhub resolveRedirectUrl error: $e');
       return null;
     }
   }

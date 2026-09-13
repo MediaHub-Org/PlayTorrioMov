@@ -3,6 +3,7 @@ import 'package:html/parser.dart' as parser;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import '../../../utils/torrent/parse_torrent_title.dart';
+import 'package:flutter/foundation.dart';
 
 class KnabenScraper extends StreamScraper {
   @override
@@ -115,7 +116,7 @@ class KnabenScraper extends StreamScraper {
         ));
       }
     } catch (e) {
-      print('Knaben scrape error: $e');
+      debugPrint('Knaben scrape error: $e');
     }
     
     return sources;

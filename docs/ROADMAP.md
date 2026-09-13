@@ -11,7 +11,8 @@ Items are numbered and never renumbered, so `#43` means the same thing in a
 commit message, a pull request and this file. Numbers are not reused when an
 item closes.
 
-Last reconciled against the tree: **2026-09-13**, on `v1.5.8+27`.
+Last reconciled against the tree: **2026-09-13**, on `v1.5.8+27`, after a
+full engineering audit — see *Code and consistency* and *Testing gaps*.
 
 ---
 
@@ -77,7 +78,47 @@ merely inconsistent.
 
 ### Code and consistency
 
-**None open.** Every browse section renders through `BrowseScaffold` and
+An engineering audit ran on 2026-09-13. What it fixed is in git; what it
+found and left is here.
+
+**Still open, in rough value order:**
+
+| What | Why it was left |
+|:-----|:----------------|
+| 90 of 182 HTTP call sites in `lib/` have **no timeout** | The aggregate risk is now bounded by a 30s per-scraper deadline in `ScraperManager`, so the search can no longer hang. Adding a timeout at each site is still right, but it is 90 edits across scrapers that would each need re-testing against a live host. |
+| `iptv_portals_modal` ↔ `live_tv_settings_page` share 45 duplicated 12-line windows | UI duplication, lower stakes than the logic duplication that was fixed. Needs a look at whether the shared part is a widget or a coincidence. |
+| 126 empty `catch` blocks | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
+| `megasource` / `nova` (49 duplicated windows) | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
+
+**Came back clean** (recorded so they are not re-audited): no TLS bypass
+anywhere; no plaintext `http://` to non-local hosts; no leaked credentials
+(tokens are in `flutter_secure_storage`, with a lazy migration off the old
+plaintext prefs); no undisposed controllers, timers or subscriptions; no
+unused dependencies — the two that look unused in Dart
+(`media_kit_libs_video`, `media_kit_libs_windows_video`) ship native
+libraries and must stay. Every file in `lib/` is reachable from
+`main.dart`.
+
+### Testing gaps
+
+**The scrapers and anime extractors are effectively untested in CI.**
+13 of 89 test files are `@Tags(['network'])` and excluded by
+`flutter test --exclude-tags network`, and they are exactly the files
+covering `lib/services/scraper` and `lib/services/anime` — the two
+least-covered areas by class count (26 public classes each with no test
+naming them). 143 of 370 public classes are named anywhere in a test.
+
+That is a reasonable trade: those tests hit live third-party sites and
+would make CI flaky and slow. The gap it leaves is that a scraper's
+*parsing* is only ever exercised against whatever the site returned that
+day.
+
+The fix is not to un-tag them. It is to split the pure logic out and test
+it without a network, the way `glendale_master_url_test` and
+`subtitle_languages_test` now do — both of which were written during the
+audit and both of which found real bugs. Candidates in rough order: the
+per-site HTML/JSON parsers, `SubtitleExtractor`'s archive and encoding
+handling, and the IPTV playlist parsers. Every browse section renders through `BrowseScaffold` and
 `BrowseRowView`; the three details pages share one spine and one section
 heading (#41); and both players now draw from the same widgets — see
 *The two players* below.
@@ -307,6 +348,12 @@ be the record.
 | #46 | Channels you make yourself |
 | #47 | Watch history |
 | #48 | One search across Movies, Series and Anime |
+| #53 | One ISO-639 table for subtitle providers (two were 51 languages short) |
+| #54 | Wyzie subtitle downloads go through `SubtitleExtractor` like the rest |
+| #55 | One master-URL builder for cinesrc/cine.su/bcine (was triplicated) |
+| #56 | One pipeline for vidfast/vidup (was two ~200-line near-clones) |
+| #57 | `print()` out of `lib/`, `avoid_print` enforced as a warning |
+| #58 | A silent scraper no longer holds the stream search open forever |
 | #49 | Settings scroll from anywhere in the window, not just the centre column |
 | #50 | Backup export/import through the system file picker |
 | #51 | User-supplied Simkl client ID, and a reason when Connect fails |
