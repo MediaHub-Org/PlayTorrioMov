@@ -1,7 +1,7 @@
 // Ported from upstream ayman708-UX/PlayTorrioV3 (e560d4a). Dropped the two
 // upstream tests that depend on providerId/providerName and
-// BuiltinProvidersSettingsService -- neither exists here, see
-// docs/ROADMAP.md for why that feature wasn't ported along with the scraper.
+// BuiltinProvidersSettingsService -- neither exists here, so that feature
+// was not ported along with the scraper.
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
