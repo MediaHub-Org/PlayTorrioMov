@@ -22,6 +22,7 @@ import '../trakt/trakt_service.dart';
 import '../trakt/trakt_continue_watching_service.dart';
 import '../simkl/simkl_service.dart';
 import '../simkl/simkl_continue_watching_service.dart';
+import '../../services/theme/app_colors.dart';
 
 class ContinueWatchingService {
   static const _storageKey = 'continue_watching_sessions_v1';
@@ -623,9 +624,9 @@ class ContinueWatchingService {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
             decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+              border: Border.all(color: AppColors.inkAlpha(0.12)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -641,8 +642,8 @@ class ContinueWatchingService {
                 const SizedBox(width: 16),
                 Text(
                   message,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppColors.ink,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.none,

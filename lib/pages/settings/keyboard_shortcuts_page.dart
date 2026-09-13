@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 /// A reference list of the player's keyboard shortcuts -- split out of the
 /// old "General & Data" catch-all so it reads as its own category, matching
@@ -20,9 +21,9 @@ class KeyboardShortcutsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -38,9 +39,9 @@ class KeyboardShortcutsPage extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: AppColors.inkAlpha(0.08)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,16 +54,16 @@ class KeyboardShortcutsPage extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.06),
+                            color: AppColors.inkAlpha(0.06),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             key,
-                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                            style: TextStyle(color: AppColors.ink, fontSize: 12, fontWeight: FontWeight.w700),
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Text(action, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                        Text(action, style: TextStyle(color: AppColors.inkMuted, fontSize: 13)),
                       ],
                     ),
                   ),

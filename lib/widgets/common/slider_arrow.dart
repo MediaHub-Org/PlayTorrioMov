@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 class SliderArrow extends StatefulWidget {
   final IconData icon;
@@ -51,12 +52,12 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _isHovered
-                      ? Colors.white.withValues(alpha: 0.15)
-                      : const Color(0xFF080A0F).withValues(alpha: 0.5),
+                      ? AppColors.inkAlpha(0.15)
+                      : AppColors.canvas.withValues(alpha: 0.5),
                   border: Border.all(
                     color: _isHovered
-                        ? Colors.white.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.1),
+                        ? AppColors.inkAlpha(0.3)
+                        : AppColors.inkAlpha(0.1),
                     width: 1.5,
                   ),
                   boxShadow: _isHovered
@@ -71,7 +72,7 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
                 ),
                 child: Icon(
                   widget.icon,
-                  color: Colors.white.withValues(alpha: _isHovered ? 1.0 : 0.7),
+                  color: AppColors.ink.withValues(alpha: _isHovered ? 1.0 : 0.7),
                   size: 20,
                 ),
               ),

@@ -6,6 +6,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../common/interactive_card_shell.dart';
 import '../common/like_button.dart';
+import '../../services/theme/app_colors.dart';
 
 class IptvChannelCard extends StatelessWidget {
   final HardcodedChannel channel;
@@ -46,7 +47,7 @@ class IptvChannelCard extends StatelessWidget {
                           colors: [
                             primaryColor.withValues(alpha: 0.85),
                             secondaryColor.withValues(alpha: 0.70),
-                            const Color(0xFF0D1017),
+                            AppColors.bar,
                           ],
                           stops: const [0.0, 0.55, 1.0],
                         ),
@@ -62,7 +63,7 @@ class IptvChannelCard extends StatelessWidget {
                         border: Border.all(
                           color: hovered
                               ? primaryColor.withValues(alpha: 0.8)
-                              : Colors.white.withValues(alpha: 0.12),
+                              : AppColors.inkAlpha(0.12),
                           width: hovered ? 1.5 : 1.0,
                         ),
                       ),
@@ -80,7 +81,7 @@ class IptvChannelCard extends StatelessWidget {
                                 height: 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.1),
+                                  color: AppColors.inkAlpha(0.1),
                                 ),
                               ),
                             ),
@@ -102,7 +103,7 @@ class IptvChannelCard extends StatelessWidget {
                                               height: 24,
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 2,
-                                                color: Colors.white.withValues(alpha: 0.3),
+                                                color: AppColors.inkAlpha(0.3),
                                               ),
                                             ),
                                           ),
@@ -146,10 +147,10 @@ class IptvChannelCard extends StatelessWidget {
                                         ),
                                       ),
                                       const SizedBox(width: 4),
-                                      const Text(
+                                      Text(
                                         'LIVE',
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: AppColors.ink,
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w900,
                                           letterSpacing: 0.6,
@@ -168,13 +169,13 @@ class IptvChannelCard extends StatelessWidget {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
+                                    color: AppColors.inkAlpha(0.15),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     ch.category,
-                                    style: const TextStyle(
-                                      color: Colors.white70,
+                                    style: TextStyle(
+                                      color: AppColors.inkMuted,
                                       fontSize: 9,
                                       fontWeight: FontWeight.w700,
                                     ),
@@ -215,7 +216,7 @@ class IptvChannelCard extends StatelessWidget {
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
                                       colors: [
-                                        Colors.white.withValues(alpha: 0.12),
+                                        AppColors.inkAlpha(0.12),
                                         Colors.transparent,
                                       ],
                                     ),
@@ -234,11 +235,11 @@ class IptvChannelCard extends StatelessWidget {
                     ch.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14.5,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.2,
-                      color: Colors.white,
+                      color: AppColors.ink,
                     ),
                   ),
 
@@ -251,7 +252,7 @@ class IptvChannelCard extends StatelessWidget {
                           ch.category,
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.white.withValues(alpha: 0.52),
+                            color: AppColors.inkAlpha(0.52),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -261,7 +262,7 @@ class IptvChannelCard extends StatelessWidget {
                             width: 3.5,
                             height: 3.5,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.3),
+                              color: AppColors.inkAlpha(0.3),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -292,12 +293,12 @@ class IptvChannelCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            border: Border.all(color: AppColors.inkAlpha(0.2)),
           ),
           child: Text(
             ch.short,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppColors.ink,
               fontSize: 22,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.2,

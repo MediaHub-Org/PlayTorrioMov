@@ -7,9 +7,10 @@ import '../../services/app_spacing.dart';
 import '../../services/updater/app_updater_service.dart';
 import '../../widgets/updater/update_dialog.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
-const Color _kBackground = Color(0xFF080A0F);
-const Color _kSurface = Color(0xFF12151E);
+Color _kBackground = AppColors.canvas;
+Color _kSurface = AppColors.surface;
 const Color _kAccent = Color(0xFF7C5CFF);
 const Color _kAccentAlt = Color(0xFF00E5FF);
 
@@ -83,7 +84,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
     return Scaffold(
       backgroundColor: _kBackground,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -184,7 +185,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
             style: TextStyle(
               fontSize: 11.5,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.3),
+              color: AppColors.inkAlpha(0.3),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -220,20 +221,20 @@ class _BrandHeader extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.play_arrow_rounded,
-              color: Colors.white,
+              color: AppColors.ink,
               size: 44,
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             AppInfo.name,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.5,
-              color: Colors.white,
+              color: AppColors.ink,
             ),
           ),
           const SizedBox(height: 6),
@@ -248,7 +249,7 @@ class _BrandHeader extends StatelessWidget {
                 'Version $version · build $build',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.45),
+                  color: AppColors.inkAlpha(0.45),
                   fontWeight: FontWeight.w500,
                 ),
               );
@@ -284,7 +285,7 @@ class _UpdatesRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: _kSurface,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Row(
         children: [
@@ -315,9 +316,9 @@ class _UpdatesRow extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Text(
+          Text(
             'Auto-check',
-            style: TextStyle(fontSize: 12.5, color: Colors.white54),
+            style: TextStyle(fontSize: 12.5, color: AppColors.inkSubtle),
           ),
           Switch(
             value: autoCheckEnabled,
@@ -376,7 +377,7 @@ class _TestingNotice extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12.5,
                     height: 1.4,
-                    color: Colors.white.withValues(alpha: 0.55),
+                    color: AppColors.inkAlpha(0.55),
                   ),
                 ),
               ],
@@ -399,7 +400,7 @@ class _SectionLabel extends StatelessWidget {
       style: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
-        color: Colors.white.withValues(alpha: 0.35),
+        color: AppColors.inkAlpha(0.35),
         letterSpacing: 1.1,
       ),
     );
@@ -419,17 +420,17 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: _kSurface,
         borderRadius: BorderRadius.circular(AppRadii.lg),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: AppColors.ink,
             ),
           ),
           const SizedBox(height: 8),
@@ -437,7 +438,7 @@ class _Card extends StatelessWidget {
             body,
             style: TextStyle(
               fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: AppColors.inkAlpha(0.5),
               height: 1.45,
             ),
           ),
@@ -460,7 +461,7 @@ class _Tile extends StatelessWidget {
       decoration: BoxDecoration(
         color: _kSurface,
         borderRadius: BorderRadius.circular(AppRadii.md),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: AppColors.inkAlpha(0.05)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,10 +482,10 @@ class _Tile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -493,7 +494,7 @@ class _Tile extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     height: 1.35,
-                    color: Colors.white.withValues(alpha: 0.4),
+                    color: AppColors.inkAlpha(0.4),
                   ),
                 ),
               ],
@@ -543,7 +544,7 @@ class _LinkTile extends StatelessWidget {
           decoration: BoxDecoration(
             color: _kSurface,
             borderRadius: BorderRadius.circular(AppRadii.md),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+            border: Border.all(color: AppColors.inkAlpha(0.05)),
           ),
           child: Row(
             children: [
@@ -555,10 +556,10 @@ class _LinkTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.ink,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -567,7 +568,7 @@ class _LinkTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.35,
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: AppColors.inkAlpha(0.4),
                       ),
                     ),
                   ],
@@ -576,7 +577,7 @@ class _LinkTile extends StatelessWidget {
               Icon(
                 Icons.open_in_new_rounded,
                 size: 16,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: AppColors.inkAlpha(0.3),
               ),
             ],
           ),

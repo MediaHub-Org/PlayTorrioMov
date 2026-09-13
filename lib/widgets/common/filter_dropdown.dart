@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_breakpoints.dart';
 import 'header_pill_style.dart';
+import '../../services/theme/app_colors.dart';
 
 /// A small pill button that opens a popup menu — used for sort/filter
 /// controls on catalog pages (e.g. decade filter + sort on Movies/Series,
@@ -28,7 +29,7 @@ class FilterDropdown<T> extends StatelessWidget {
     return PopupMenuButton<T>(
       itemBuilder: (context) => items,
       onSelected: onSelected,
-      color: const Color(0xFF151822),
+      color: AppColors.raised,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       tooltip: isMobile ? label : '',
       child: Container(
@@ -45,21 +46,21 @@ class FilterDropdown<T> extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: headerPillIconSize, color: Colors.white70),
+            Icon(icon, size: headerPillIconSize, color: AppColors.inkMuted),
             if (!isMobile) ...[
               const SizedBox(width: 6),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppColors.ink,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
-            const Icon(
+            Icon(
               Icons.arrow_drop_down_rounded,
-              color: Colors.white54,
+              color: AppColors.inkSubtle,
               size: 18,
             ),
           ],

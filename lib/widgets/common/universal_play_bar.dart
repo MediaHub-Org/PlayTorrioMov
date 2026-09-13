@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/playback_coordinator.dart';
 import 'like_button.dart';
+import '../../services/theme/app_colors.dart';
 
 /// A universal bottom play bar shown above the hub's content.
 ///
@@ -89,8 +90,8 @@ class UniversalPlayBar extends StatelessWidget {
                       onTap: PlaybackCoordinator.expand,
                       child: Text(
                         title,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.ink,
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
@@ -105,8 +106,8 @@ class UniversalPlayBar extends StatelessWidget {
                         onTap: PlaybackCoordinator.openArtist,
                         child: Text(
                           subtitle,
-                          style: const TextStyle(
-                            color: Colors.white54,
+                          style: TextStyle(
+                            color: AppColors.inkSubtle,
                             fontSize: 11,
                           ),
                           maxLines: 1,
@@ -119,8 +120,8 @@ class UniversalPlayBar extends StatelessWidget {
               if (!isMobile) ...[
                 Text(
                   _kindLabel(kind),
-                  style: const TextStyle(
-                    color: Colors.white38,
+                  style: TextStyle(
+                    color: AppColors.inkDisabled,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -140,11 +141,11 @@ class UniversalPlayBar extends StatelessWidget {
               // the media-session notification publishes, so the bar and the
               // shade offer the same controls instead of diverging.
               if (PlaybackCoordinator.canSkipPrevious && !isMobile)
-                const IconButton(
+                IconButton(
                   tooltip: 'Previous',
                   icon: Icon(
                     Icons.skip_previous_rounded,
-                    color: Colors.white70,
+                    color: AppColors.inkMuted,
                     size: 24,
                   ),
                   onPressed: PlaybackCoordinator.skipToPrevious,
@@ -162,21 +163,21 @@ class UniversalPlayBar extends StatelessWidget {
                 onPressed: PlaybackCoordinator.togglePlayPause,
               ),
               if (PlaybackCoordinator.canSkipNext)
-                const IconButton(
+                IconButton(
                   tooltip: 'Next',
                   icon: Icon(
                     Icons.skip_next_rounded,
-                    color: Colors.white70,
+                    color: AppColors.inkMuted,
                     size: 24,
                   ),
                   onPressed: PlaybackCoordinator.skipToNext,
                 ),
               // Close (dismiss the bar)
-              const IconButton(
+              IconButton(
                 tooltip: 'Close',
                 icon: Icon(
                   Icons.close_rounded,
-                  color: Colors.white54,
+                  color: AppColors.inkSubtle,
                   size: 20,
                 ),
                 onPressed: PlaybackCoordinator.dismiss,
@@ -191,7 +192,7 @@ class UniversalPlayBar extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: durMs > 0 ? progress : null,
                     minHeight: 3,
-                    backgroundColor: Colors.white10,
+                    backgroundColor: AppColors.inkAlpha(0.10),
                     color: const Color(0xFF7C5CFF),
                   ),
                 ),

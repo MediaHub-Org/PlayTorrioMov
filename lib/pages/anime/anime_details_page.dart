@@ -19,6 +19,7 @@ import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_actions_row.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
+import '../../services/theme/app_colors.dart';
 
 class _Space {
   static const sm = 12.0;
@@ -569,7 +570,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             fontWeight: FontWeight.w900,
             height: 1.12,
             letterSpacing: -0.8,
-            color: Colors.white,
+            color: AppColors.ink,
             shadows: [
               Shadow(
                 color: Colors.black.withValues(alpha: 0.7),
@@ -586,7 +587,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             child: Text(
               _anime.titleNative,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppColors.inkAlpha(0.5),
                 fontSize: isDesktop ? 14 : 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -603,8 +604,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       items.add(
         Text(
           '${_anime.seasonYear}',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppColors.ink,
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
@@ -616,7 +617,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       items.add(
         Text(
           _anime.formattedFormat,
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
         ),
       );
     }
@@ -626,7 +627,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       items.add(
         Text(
           '$totalEps Ep${totalEps > 1 ? "s" : ""}',
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
         ),
       );
     }
@@ -636,9 +637,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.12),
+            color: AppColors.inkAlpha(0.12),
             borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+            border: Border.all(color: AppColors.inkAlpha(0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -647,8 +648,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               const SizedBox(width: 4),
               Text(
                 _anime.formattedScore,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppColors.ink,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -663,7 +664,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       items.add(
         Text(
           _anime.studioName,
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
         ),
       );
     }
@@ -673,9 +674,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       spaced.add(items[i]);
       if (i < items.length - 1) {
         spaced.add(
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: _Space.sm),
-            child: Text('•', style: TextStyle(color: Colors.white30, fontSize: 16)),
+            child: Text('•', style: TextStyle(color: AppColors.inkAlpha(0.30), fontSize: 16)),
           ),
         );
       }
@@ -725,14 +726,14 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
+            Icon(Icons.play_arrow_rounded, color: AppColors.ink, size: 24),
             const SizedBox(width: 6),
             Text(
               lastWatched != null && lastWatched > 0
                   ? 'Resume Ep $resumeEp'
                   : 'Play Ep 1',
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppColors.ink,
                 fontSize: 15,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 0.3,
@@ -818,16 +819,16 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           description,
           maxLines: 4,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: AppColors.inkMuted,
             fontSize: 14.5,
             height: 1.55,
           ),
         ),
         secondChild: Text(
           description,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: AppColors.inkMuted,
             fontSize: 14.5,
             height: 1.55,
           ),
@@ -885,9 +886,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                   width: 100,
                                   height: 110,
                                   color: _Palette.surface,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.person_rounded,
-                                    color: Colors.white24,
+                                    color: AppColors.inkFaint,
                                   ),
                                 ),
                               ),
@@ -896,8 +897,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                           const SizedBox(height: 6),
                           Text(
                             char.nameFull,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: AppColors.ink,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
                             ),
@@ -906,8 +907,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                           ),
                           Text(
                             char.role,
-                            style: const TextStyle(
-                              color: Colors.white38,
+                            style: TextStyle(
+                              color: AppColors.inkDisabled,
                               fontSize: 10,
                             ),
                             maxLines: 1,
@@ -988,9 +989,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                           width: 100,
                           height: 110,
                           color: _Palette.surface,
-                          child: const Icon(
+                          child: Icon(
                             Icons.person_rounded,
-                            color: Colors.white24,
+                            color: AppColors.inkFaint,
                           ),
                         ),
                       ),
@@ -998,8 +999,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     const SizedBox(height: 6),
                     Text(
                       member.nameFull,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.ink,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1008,8 +1009,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     ),
                     Text(
                       member.role,
-                      style: const TextStyle(
-                        color: Colors.white38,
+                      style: TextStyle(
+                        color: AppColors.inkDisabled,
                         fontSize: 10,
                       ),
                       maxLines: 1,
@@ -1045,7 +1046,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               'Episodes',
               trailing: Text(
                 '($totalEps total)',
-                style: const TextStyle(color: Colors.white54, fontSize: 14),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: 14),
               ),
             ),
 
@@ -1058,7 +1059,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                   decoration: BoxDecoration(
                     color: const Color(0xFF141724),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white12),
+                    border: Border.all(color: AppColors.inkAlpha(0.12)),
                   ),
                   child: Row(
                     children: [
@@ -1073,10 +1074,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                             color: !_isDub ? _Palette.accent : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
+                          child: Text(
                             'SUB',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.ink,
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                             ),
@@ -1094,10 +1095,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                             color: _isDub ? _Palette.accent : Colors.transparent,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
+                          child: Text(
                             'DUB',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.ink,
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                             ),
@@ -1117,17 +1118,17 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                   decoration: BoxDecoration(
                     color: const Color(0xFF141724),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white12),
+                    border: Border.all(color: AppColors.inkAlpha(0.12)),
                   ),
                   child: TextField(
                     controller: _jumpEpController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.go,
                     onSubmitted: _jumpToEpisode,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    style: TextStyle(color: AppColors.ink, fontSize: 12),
                     decoration: InputDecoration(
                       hintText: 'Jump to ep #',
-                      hintStyle: const TextStyle(color: Colors.white38, fontSize: 11),
+                      hintStyle: TextStyle(color: AppColors.inkDisabled, fontSize: 11),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -1165,8 +1166,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                       value: currentBatchSafe,
                       underline: const SizedBox.shrink(),
                       dropdownColor: const Color(0xFF141724),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.ink,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1246,7 +1247,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                   : isCurrent
                       ? _Palette.accent.withValues(alpha: 0.35)
                       : (isWatched
-                          ? Colors.white.withValues(alpha: 0.08)
+                          ? AppColors.inkAlpha(0.08)
                           : const Color(0xFF141724)),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
@@ -1255,8 +1256,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     : isCurrent
                         ? _Palette.accent
                         : (isWatched
-                            ? Colors.white24
-                            : Colors.white.withValues(alpha: 0.08)),
+                            ? AppColors.inkFaint
+                            : AppColors.inkAlpha(0.08)),
                 width: (isCurrent || isHighlighted) ? 1.5 : 1,
               ),
             ),
@@ -1268,7 +1269,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                       ? const Color(0xFFEF4444)
                       : isCurrent
                           ? _Palette.accent
-                          : (isWatched ? Colors.white70 : Colors.white),
+                          : (isWatched ? AppColors.inkMuted : AppColors.ink),
                   fontSize: 13.5,
                   fontWeight: (isCurrent || isHighlighted)
                       ? FontWeight.w900
@@ -1347,9 +1348,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                     fit: BoxFit.cover,
                                     errorWidget: (_, __, ___) => Container(
                                       color: _Palette.surface,
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.movie_creation_outlined,
-                                        color: Colors.white24,
+                                        color: AppColors.inkFaint,
                                         size: 32,
                                       ),
                                     ),
@@ -1382,8 +1383,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                             const SizedBox(height: 4),
                             Text(
                               rel.title,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: AppColors.ink,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
                                 height: 1.2,
@@ -1496,9 +1497,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                       fit: BoxFit.cover,
                                       errorWidget: (_, __, ___) => Container(
                                         color: _Palette.surface,
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.movie_creation_outlined,
-                                          color: Colors.white24,
+                                          color: AppColors.inkFaint,
                                           size: 32,
                                         ),
                                       ),
@@ -1509,8 +1510,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                               const SizedBox(height: 8),
                               Text(
                                 rec.displayTitle,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: AppColors.ink,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
                                   height: 1.25,
@@ -1523,8 +1524,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                   padding: const EdgeInsets.only(top: 2),
                                   child: Text(
                                     rec.formattedFormat,
-                                    style: const TextStyle(
-                                      color: Colors.white38,
+                                    style: TextStyle(
+                                      color: AppColors.inkDisabled,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
                                     ),

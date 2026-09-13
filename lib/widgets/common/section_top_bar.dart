@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
+import '../../services/theme/app_colors.dart';
 
 const Color _kBarBackground = Color(0xFF0C0E17);
 const Color _kAccent = Color(0xFF7C5CFF);
@@ -26,9 +27,9 @@ class SectionTopBar extends StatelessWidget {
 
     return Container(
       height: 44,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: _kBarBackground,
-        border: Border(bottom: BorderSide(color: Colors.white10)),
+        border: Border(bottom: BorderSide(color: AppColors.inkAlpha(0.10))),
       ),
       child: ListenableBuilder(
         listenable: HubController.instance,
@@ -101,14 +102,14 @@ class _Chip extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: selected ? Colors.white : Colors.white38,
+              color: selected ? AppColors.ink : AppColors.inkDisabled,
               size: 16,
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: selected ? Colors.white : Colors.white54,
+                color: selected ? AppColors.ink : AppColors.inkSubtle,
                 fontSize: 12,
                 fontWeight: selected ? FontWeight.bold : FontWeight.w500,
               ),

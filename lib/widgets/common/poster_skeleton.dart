@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Animated shimmer skeleton shown while a poster image is loading.
 class PosterSkeleton extends StatefulWidget {
@@ -57,7 +58,7 @@ class MissingPoster extends StatelessWidget {
         child: Icon(
           Icons.movie_rounded,
           size: 46,
-          color: Colors.white.withOpacity(0.22),
+          color: AppColors.ink.withOpacity(0.22),
         ),
       ),
     );

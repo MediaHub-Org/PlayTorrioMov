@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../utils/hub_controller.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The `Scaffold > section content` shell shared by hubs that just switch a
 /// flat list of sections (Watch, Read). Rebuilds whenever [HubController]
@@ -33,7 +34,7 @@ class SectionedHubScaffold extends StatelessWidget {
       builder: (context, _) {
         final activeSection = activeSectionOf();
         return Scaffold(
-          backgroundColor: const Color(0xFF080A0F),
+          backgroundColor: AppColors.canvas,
           body: buildSection(activeSection),
         );
       },

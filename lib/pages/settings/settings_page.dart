@@ -24,6 +24,7 @@ import '../../widgets/common/animated_ambient_background.dart';
 import '../../app_info.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -108,12 +109,12 @@ class _SettingsPageState extends State<SettingsPage> {
         badgeText: _useDebrid
             ? (_debridProvider != 'None' ? _debridProvider : 'Active')
             : 'Disabled',
-        badgeColor: _useDebrid ? const Color(0xFF00E5FF) : Colors.white38,
+        badgeColor: _useDebrid ? const Color(0xFF00E5FF) : AppColors.inkDisabled,
         onTap: () => _navigateTo(const DebridSettingsPage()),
       ),
       _SettingsCategoryTile(
         icon: Icons.save_alt_rounded,
-        iconColor: Colors.white70,
+        iconColor: AppColors.inkMuted,
         title: 'Backup & Data',
         onTap: () => _navigateTo(const BackupSettingsPage()),
       ),
@@ -123,12 +124,12 @@ class _SettingsPageState extends State<SettingsPage> {
         title: 'Connect',
         badgeText: syncedCount == 0 ? 'Offline' : '$syncedCount/2 Connected',
         badgeColor:
-            syncedCount == 0 ? Colors.white38 : const Color(0xFF10B981),
+            syncedCount == 0 ? AppColors.inkDisabled : const Color(0xFF10B981),
         onTap: () => _navigateTo(const SyncSettingsPage()),
       ),
       _SettingsCategoryTile(
         icon: Icons.keyboard_rounded,
-        iconColor: Colors.white70,
+        iconColor: AppColors.inkMuted,
         title: 'Keyboard Shortcuts',
         onTap: () => _navigateTo(const KeyboardShortcutsPage()),
       ),
@@ -143,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017).withValues(alpha: 0.85),
+        backgroundColor: AppColors.bar.withValues(alpha: 0.85),
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -193,10 +194,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _aboutTile() {
     return _SettingsCategoryTile(
       icon: Icons.info_outline_rounded,
-      iconColor: Colors.white70,
+      iconColor: AppColors.inkMuted,
       title: 'About ${AppInfo.name}',
       badgeText: _appVersion,
-      badgeColor: Colors.white38,
+      badgeColor: AppColors.inkDisabled,
       onTap: () => _navigateTo(const AboutSettingsPage()),
     );
   }
@@ -241,10 +242,10 @@ class _SettingsCategoryTile extends StatelessWidget {
           height: 76,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF12151E),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: AppColors.inkAlpha(0.08),
             ),
           ),
           child: Row(
@@ -262,10 +263,10 @@ class _SettingsCategoryTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.ink,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -294,7 +295,7 @@ class _SettingsCategoryTile extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: Colors.white.withValues(alpha: 0.25),
+                color: AppColors.inkAlpha(0.25),
               ),
             ],
           ),

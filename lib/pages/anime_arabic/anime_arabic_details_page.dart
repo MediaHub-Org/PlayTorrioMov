@@ -15,6 +15,7 @@ import '../../widgets/common/slider_arrow.dart';
 import 'anime_arabic_stream_sheet.dart';
 import '../../services/app_breakpoints.dart';
 import '../../widgets/common/details_section_header.dart';
+import '../../services/theme/app_colors.dart';
 
 class _Space {
   static const md = 16.0;
@@ -273,7 +274,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                           children: [
                             const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 48),
                             const SizedBox(height: 16),
-                            Text(_error!, style: const TextStyle(color: Colors.white70, fontSize: 16)),
+                            Text(_error!, style: TextStyle(color: AppColors.inkMuted, fontSize: 16)),
                             const SizedBox(height: 16),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: _Palette.accent),
@@ -361,7 +362,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                     color: _Palette.bg.withValues(alpha: 0.65),
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.06),
+                        color: AppColors.inkAlpha(0.06),
                       ),
                     ),
                   ),
@@ -374,8 +375,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppColors.ink,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -442,7 +443,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                 fit: BoxFit.cover,
                 errorWidget: (_, __, ___) => Container(
                   color: _Palette.surface,
-                  child: const Icon(Icons.broken_image_rounded, color: Colors.white24, size: 40),
+                  child: Icon(Icons.broken_image_rounded, color: AppColors.inkFaint, size: 40),
                 ),
               )
             : Container(color: _Palette.surface),
@@ -477,8 +478,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppColors.ink,
             fontSize: 26,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.5,
@@ -517,10 +518,10 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                 ),
               ),
             if (year != null && year.isNotEmpty)
-              _buildPill(year, Colors.white.withValues(alpha: 0.1), Colors.white70),
+              _buildPill(year, AppColors.inkAlpha(0.1), AppColors.inkMuted),
             _buildPill(status, _Palette.accent.withValues(alpha: 0.2), _Palette.accent),
             if (studio != null && studio.isNotEmpty)
-              _buildPill(studio, Colors.white.withValues(alpha: 0.08), Colors.white60),
+              _buildPill(studio, AppColors.inkAlpha(0.08), AppColors.inkAlpha(0.60)),
           ],
         ),
 
@@ -552,7 +553,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                   return ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _Palette.accent,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.ink,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       elevation: 8,
@@ -583,7 +584,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                 maxLines: _isSynopsisExpanded ? null : 3,
                 overflow: _isSynopsisExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: AppColors.inkAlpha(0.7),
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -646,11 +647,11 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                     controller: _jumpEpController,
                     keyboardType: TextInputType.number,
                     onSubmitted: _jumpToEpisode,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: AppColors.ink, fontSize: 13),
                     decoration: InputDecoration(
                       hintText: 'اذهب لرقم...',
                       hintStyle: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.35),
+                        color: AppColors.inkAlpha(0.35),
                         fontSize: 12,
                       ),
                       contentPadding: const EdgeInsets.symmetric(
@@ -658,11 +659,11 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                         vertical: 0,
                       ),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.06),
+                      fillColor: AppColors.inkAlpha(0.06),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: AppColors.inkAlpha(0.1),
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
@@ -700,18 +701,18 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                     decoration: BoxDecoration(
                       color: isSelected
                           ? _Palette.accent.withValues(alpha: 0.25)
-                          : Colors.white.withValues(alpha: 0.05),
+                          : AppColors.inkAlpha(0.05),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: isSelected
                             ? _Palette.accent
-                            : Colors.white.withValues(alpha: 0.08),
+                            : AppColors.inkAlpha(0.08),
                       ),
                     ),
                     child: Text(
                       '$batchStart - $batchEnd',
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white60,
+                        color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                         fontSize: 13,
                       ),
@@ -776,7 +777,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
             border: Border.all(
               color: isHighlighted
                   ? _Palette.accent
-                  : Colors.white.withValues(alpha: 0.08),
+                  : AppColors.inkAlpha(0.08),
               width: isHighlighted ? 2 : 1,
             ),
             boxShadow: isHighlighted
@@ -824,8 +825,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                       ),
                       child: Text(
                         'EP ${episode.number}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.ink,
                           fontSize: 11,
                           fontWeight: FontWeight.w900,
                         ),
@@ -837,8 +838,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                         episode.title.isNotEmpty ? episode.title : 'الحلقة ${episode.number}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.ink,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -855,7 +856,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                     color: Colors.black.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
+                  child: Icon(Icons.play_arrow_rounded, color: AppColors.ink, size: 20),
                 ),
               ),
             ],
@@ -916,9 +917,9 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                                           imageUrl: item.cover!,
                                           fit: BoxFit.cover,
                                           errorWidget: (_, __, ___) =>
-                                              const Icon(Icons.movie_rounded, color: Colors.white24),
+                                              Icon(Icons.movie_rounded, color: AppColors.inkFaint),
                                         )
-                                      : const Icon(Icons.movie_rounded, color: Colors.white24),
+                                      : Icon(Icons.movie_rounded, color: AppColors.inkFaint),
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -926,8 +927,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                                 item.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: AppColors.ink,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                 ),

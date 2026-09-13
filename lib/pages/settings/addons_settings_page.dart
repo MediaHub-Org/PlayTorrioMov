@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/addon/addon.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 class AddonsSettingsPage extends StatefulWidget {
   const AddonsSettingsPage({super.key});
@@ -53,7 +54,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF151822),
+          backgroundColor: AppColors.raised,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -69,7 +70,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                 'Paste the Stremio addon manifest.json URL to install catalogs, metadata, streams, or subtitles.',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withValues(alpha: 0.50),
+                  color: AppColors.inkAlpha(0.50),
                   height: 1.35,
                 ),
               ),
@@ -77,25 +78,25 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               TextField(
                 controller: controller,
                 autofocus: true,
-                style: const TextStyle(fontSize: 13.5, color: Colors.white),
+                style: TextStyle(fontSize: 13.5, color: AppColors.ink),
                 decoration: InputDecoration(
                   hintText: 'https://opensubtitles-v3.strem.io/manifest.json',
                   hintStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.22),
+                    color: AppColors.inkAlpha(0.22),
                     fontSize: 12.5,
                   ),
                   filled: true,
-                  fillColor: const Color(0xFF0D1017),
+                  fillColor: AppColors.bar,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.10),
+                      color: AppColors.inkAlpha(0.10),
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.10),
+                      color: AppColors.inkAlpha(0.10),
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
@@ -116,14 +117,14 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.45)),
+                style: TextStyle(color: AppColors.inkAlpha(0.45)),
               ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, controller.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF7C5CFF),
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.ink,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -151,21 +152,21 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF151822),
+          backgroundColor: AppColors.raised,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           title: Text('Remove ${addon.manifest.name}?'),
           content: Text(
             'Its catalogs and metadata will be removed from your home page.',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 13.5),
+            style: TextStyle(color: AppColors.inkAlpha(0.55), fontSize: 13.5),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Cancel',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.45)),
+                style: TextStyle(color: AppColors.inkAlpha(0.45)),
               ),
             ),
             ElevatedButton(
@@ -180,9 +181,9 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Remove',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -196,9 +197,9 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
     final addons = _manager.addons;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -220,7 +221,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               'Addons provide movie, series, and anime metadata catalogs for your home page and search.',
               style: TextStyle(
                 fontSize: 13.5,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppColors.inkAlpha(0.5),
                 height: 1.4,
               ),
             ),
@@ -238,7 +239,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
+                  color: AppColors.inkAlpha(0.35),
                   letterSpacing: 1.1,
                 ),
               ),
@@ -267,23 +268,23 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
             Container(
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
-                color: const Color(0xFF12151E),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                border: Border.all(color: AppColors.inkAlpha(0.06)),
               ),
               child: Column(
                 children: [
-                  Icon(Icons.extension_off_rounded, size: 40, color: Colors.white.withValues(alpha: 0.25)),
+                  Icon(Icons.extension_off_rounded, size: 40, color: AppColors.inkAlpha(0.25)),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'No Addons Installed',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.inkMuted),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     'Click "Add Addon" above to install a Stremio manifest URL.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12.5, color: Colors.white.withValues(alpha: 0.4)),
+                    style: TextStyle(fontSize: 12.5, color: AppColors.inkAlpha(0.4)),
                   ),
                 ],
               ),
@@ -359,12 +360,12 @@ class _AddonCard extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: addon.enabled
               ? const Color(0xFF7C5CFF).withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.06),
+              : AppColors.inkAlpha(0.06),
         ),
       ),
       child: Column(
@@ -393,10 +394,10 @@ class _AddonCard extends StatelessWidget {
                   children: [
                     Text(
                       m.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15.5,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.ink,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -406,7 +407,7 @@ class _AddonCard extends StatelessWidget {
                           : 'v${m.version}  ·  ${m.catalogs.length} catalog${m.catalogs.length == 1 ? '' : 's'}${m.supportsSubtitles ? '  ·  Subtitles' : ''}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: AppColors.inkAlpha(0.4),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -430,7 +431,7 @@ class _AddonCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 12.5,
-                color: Colors.white.withValues(alpha: 0.45),
+                color: AppColors.inkAlpha(0.45),
                 height: 1.35,
               ),
             ),
@@ -445,7 +446,7 @@ class _AddonCard extends StatelessWidget {
                 color: Colors.black.withValues(alpha: 0.25),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: AppColors.inkAlpha(0.05),
                 ),
               ),
               child: Column(
@@ -456,7 +457,7 @@ class _AddonCard extends StatelessWidget {
                       Icon(
                         Icons.tune_rounded,
                         size: 13,
-                        color: Colors.white.withValues(alpha: 0.45),
+                        color: AppColors.inkAlpha(0.45),
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -465,7 +466,7 @@ class _AddonCard extends StatelessWidget {
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
-                          color: Colors.white.withValues(alpha: 0.45),
+                          color: AppColors.inkAlpha(0.45),
                         ),
                       ),
                     ],
@@ -533,14 +534,14 @@ class _AddonCard extends StatelessWidget {
                       vertical: 3.5,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: AppColors.inkAlpha(0.06),
                       borderRadius: BorderRadius.circular(7),
                     ),
                     child: Text(
                       type,
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppColors.inkAlpha(0.5),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -606,13 +607,13 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
                     ? activeColor.withValues(alpha: 0.25)
                     : activeColor.withValues(alpha: 0.15))
                 : (_hovered
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.white.withValues(alpha: 0.03)),
+                    ? AppColors.inkAlpha(0.08)
+                    : AppColors.inkAlpha(0.03)),
             borderRadius: BorderRadius.circular(9),
             border: Border.all(
               color: isEnabled
                   ? activeColor.withValues(alpha: 0.50)
-                  : Colors.white.withValues(alpha: 0.08),
+                  : AppColors.inkAlpha(0.08),
               width: 1,
             ),
             boxShadow: isEnabled && _hovered
@@ -633,7 +634,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
                 size: 14,
                 color: isEnabled
                     ? activeColor
-                    : Colors.white.withValues(alpha: 0.35),
+                    : AppColors.inkAlpha(0.35),
               ),
               const SizedBox(width: 6),
               Text(
@@ -644,8 +645,8 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
                   fontSize: 12,
                   fontWeight: isEnabled ? FontWeight.w600 : FontWeight.w500,
                   color: isEnabled
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.45),
+                      ? AppColors.ink
+                      : AppColors.inkAlpha(0.45),
                 ),
               ),
               const SizedBox(width: 6),
@@ -656,7 +657,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
                 size: 13,
                 color: isEnabled
                     ? const Color(0xFF34D399)
-                    : Colors.white.withValues(alpha: 0.25),
+                    : AppColors.inkAlpha(0.25),
               ),
             ],
           ),

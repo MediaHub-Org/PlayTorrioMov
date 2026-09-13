@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The one background/border every header pill control shares --
 /// [FilterDropdown]'s genre/decade/sort pills, [PageSearchButton], and
@@ -6,8 +7,8 @@ import 'package:flutter/material.dart';
 /// button) never reads as visually different from the dropdown pills it
 /// sits next to in the same row. Also used by Live TV's own header, which
 /// used to carry a completely different, bespoke "glass" look.
-const BoxDecoration headerPillDecoration = BoxDecoration(
-  color: Color(0x0FFFFFFF), // Colors.white @ 6%
+BoxDecoration headerPillDecoration = BoxDecoration(
+  color: Color(0x0FFFFFFF), // AppColors.ink @ 6%
   borderRadius: BorderRadius.all(Radius.circular(10)),
   border: Border.fromBorderSide(
     BorderSide(color: Color(0x1AFFFFFF)),
@@ -56,7 +57,7 @@ class HeaderPillIconButton extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: headerPillDecoration,
             alignment: Alignment.center,
-            child: Icon(icon, size: headerPillIconSize, color: Colors.white70),
+            child: Icon(icon, size: headerPillIconSize, color: AppColors.inkMuted),
           ),
         ),
       ),

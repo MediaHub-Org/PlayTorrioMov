@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/p2p/p2p_settings_service.dart';
+import '../../services/theme/app_colors.dart';
 
 class P2pWarningDialog extends StatelessWidget {
   const P2pWarningDialog({super.key});
@@ -112,12 +113,12 @@ class P2pWarningDialog extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 5),
-                              const Text(
+                              Text(
                                 'P2P Torrent Streaming Notice',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: AppColors.ink,
                                   letterSpacing: -0.2,
                                 ),
                               ),
@@ -125,7 +126,7 @@ class P2pWarningDialog extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close_rounded, color: Colors.white60),
+                          icon: Icon(Icons.close_rounded, color: AppColors.inkAlpha(0.60)),
                           tooltip: 'Exit',
                           onPressed: () => Navigator.of(context).pop(),
                         ),
@@ -145,7 +146,7 @@ class P2pWarningDialog extends StatelessWidget {
                             'P2P (peer-to-peer torrent) streaming connects directly to public torrent swarms to download and seed video pieces. In certain countries and regions, unencrypted torrent activity may be monitored and could result in warning letters or notices from your Internet Service Provider (ISP).',
                             style: TextStyle(
                               fontSize: 13.5,
-                              color: Colors.white.withValues(alpha: 0.88),
+                              color: AppColors.inkAlpha(0.88),
                               height: 1.45,
                             ),
                           ),
@@ -158,7 +159,7 @@ class P2pWarningDialog extends StatelessWidget {
                               color: _backgroundColor.withValues(alpha: 0.7),
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.08),
+                                color: AppColors.inkAlpha(0.08),
                               ),
                             ),
                             child: Column(
@@ -173,7 +174,7 @@ class P2pWarningDialog extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(vertical: 10),
                                   child: Divider(
                                     height: 1,
-                                    color: Colors.white.withValues(alpha: 0.06),
+                                    color: AppColors.inkAlpha(0.06),
                                   ),
                                 ),
                                 _buildSourceInfoRow(
@@ -212,7 +213,7 @@ class P2pWarningDialog extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white.withValues(alpha: 0.95),
+                                      color: AppColors.inkAlpha(0.95),
                                       height: 1.35,
                                     ),
                                   ),
@@ -225,7 +226,7 @@ class P2pWarningDialog extends StatelessWidget {
                             'Note: You can easily toggle the built-in P2P source back on or off anytime in Settings.',
                             style: TextStyle(
                               fontSize: 11.5,
-                              color: Colors.white.withValues(alpha: 0.45),
+                              color: AppColors.inkAlpha(0.45),
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -241,7 +242,7 @@ class P2pWarningDialog extends StatelessWidget {
                       color: _backgroundColor.withValues(alpha: 0.95),
                       border: Border(
                         top: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: AppColors.inkAlpha(0.08),
                         ),
                       ),
                     ),
@@ -282,10 +283,10 @@ class P2pWarningDialog extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.ink,
                 ),
               ),
               const SizedBox(height: 2),
@@ -293,7 +294,7 @@ class P2pWarningDialog extends StatelessWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.55),
+                  color: AppColors.inkAlpha(0.55),
                   height: 1.25,
                 ),
               ),
@@ -312,7 +313,7 @@ class P2pWarningDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            foregroundColor: Colors.white60,
+            foregroundColor: AppColors.inkAlpha(0.60),
           ),
           child: const Text('Exit', style: TextStyle(fontWeight: FontWeight.w600)),
         ),
@@ -325,8 +326,8 @@ class P2pWarningDialog extends StatelessWidget {
             if (context.mounted) Navigator.of(context).pop();
           },
           style: OutlinedButton.styleFrom(
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.20)),
-            foregroundColor: Colors.white70,
+            side: BorderSide(color: AppColors.inkAlpha(0.20)),
+            foregroundColor: AppColors.inkMuted,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
@@ -415,8 +416,8 @@ class P2pWarningDialog extends StatelessWidget {
                   if (context.mounted) Navigator.of(context).pop();
                 },
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.20)),
-                  foregroundColor: Colors.white70,
+                  side: BorderSide(color: AppColors.inkAlpha(0.20)),
+                  foregroundColor: AppColors.inkMuted,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -431,7 +432,7 @@ class P2pWarningDialog extends StatelessWidget {
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                foregroundColor: Colors.white60,
+                foregroundColor: AppColors.inkAlpha(0.60),
               ),
               child: const Text('Exit', style: TextStyle(fontWeight: FontWeight.w600)),
             ),

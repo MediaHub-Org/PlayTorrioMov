@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
 import 'header_pill_style.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Vertical breathing room above and below the pill row.
 const double _kBarVerticalPadding = 12;
@@ -119,7 +120,7 @@ class PillFilterHeaderBar extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: transparent ? Colors.transparent : null,
-        border: const Border(bottom: BorderSide(color: Colors.white10)),
+        border: Border(bottom: BorderSide(color: AppColors.inkAlpha(0.10))),
       ),
       child: bar,
     );

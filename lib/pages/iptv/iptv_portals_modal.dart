@@ -6,6 +6,7 @@ import '../../services/iptv/iptv_network.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import 'iptv_portal_browser_page.dart';
+import '../../services/theme/app_colors.dart';
 
 class IptvPortalsModal extends StatefulWidget {
   const IptvPortalsModal({super.key});
@@ -185,7 +186,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
           backgroundColor: const Color(0xFF10131C),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+            side: BorderSide(color: AppColors.inkAlpha(0.12)),
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 480),
@@ -200,31 +201,31 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       Icon(Icons.tune_rounded, color: palette.primaryColor, size: 20),
                       const SizedBox(width: 10),
                       // Same shape, same fix as the main modal's title.
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Customize Portals Modal',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.ink,
                             fontSize: 16.5,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 20),
+                        icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 20),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Divider(color: Colors.white.withValues(alpha: 0.08)),
+                  Divider(color: AppColors.inkAlpha(0.08)),
                   const SizedBox(height: 12),
 
-                  const Text(
+                  Text(
                     'Card Display Style',
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
                   ValueListenableBuilder<PortalCardStyle>(
@@ -239,16 +240,16 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                               label: Text(s.label),
                               selected: isSelected,
                               selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                              backgroundColor: const Color(0xFF0D1017),
+                              backgroundColor: AppColors.bar,
                               labelStyle: TextStyle(
-                                color: isSelected ? palette.primaryColor : Colors.white70,
+                                color: isSelected ? palette.primaryColor : AppColors.inkMuted,
                                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
                                 fontSize: 12,
                               ),
                               side: BorderSide(
                                 color: isSelected
                                     ? palette.primaryColor.withValues(alpha: 0.6)
-                                    : Colors.white.withValues(alpha: 0.08),
+                                    : AppColors.inkAlpha(0.08),
                               ),
                               onSelected: (selected) {
                                 if (selected) IptvSettings.setPortalCardStyle(s);
@@ -267,7 +268,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     builder: (context, showExpiry, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Show Portal Expiry Date', style: TextStyle(color: Colors.white, fontSize: 13.5)),
+                        title: Text('Show Portal Expiry Date', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showExpiry,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowPortalExpiry(val),
@@ -280,7 +281,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     builder: (context, showConn, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Show Max Connections', style: TextStyle(color: Colors.white, fontSize: 13.5)),
+                        title: Text('Show Max Connections', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showConn,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowPortalConnections(val),
@@ -290,9 +291,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
 
                   const SizedBox(height: 8),
 
-                  const Text(
+                  Text(
                     'Default Starting Tab',
-                    style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
+                    style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
                   ValueListenableBuilder<int>(
@@ -304,16 +305,16 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                             label: const Text('Xtream Panels'),
                             selected: tabIdx == 0,
                             selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                            backgroundColor: const Color(0xFF0D1017),
+                            backgroundColor: AppColors.bar,
                             labelStyle: TextStyle(
-                              color: tabIdx == 0 ? palette.primaryColor : Colors.white70,
+                              color: tabIdx == 0 ? palette.primaryColor : AppColors.inkMuted,
                               fontWeight: tabIdx == 0 ? FontWeight.w800 : FontWeight.w500,
                               fontSize: 12,
                             ),
                             side: BorderSide(
                               color: tabIdx == 0
                                   ? palette.primaryColor.withValues(alpha: 0.6)
-                                  : Colors.white.withValues(alpha: 0.08),
+                                  : AppColors.inkAlpha(0.08),
                             ),
                             onSelected: (selected) {
                               if (selected) IptvSettings.setDefaultPortalTab(0);
@@ -324,16 +325,16 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                             label: const Text('M3U Playlists'),
                             selected: tabIdx == 1,
                             selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                            backgroundColor: const Color(0xFF0D1017),
+                            backgroundColor: AppColors.bar,
                             labelStyle: TextStyle(
-                              color: tabIdx == 1 ? palette.primaryColor : Colors.white70,
+                              color: tabIdx == 1 ? palette.primaryColor : AppColors.inkMuted,
                               fontWeight: tabIdx == 1 ? FontWeight.w800 : FontWeight.w500,
                               fontSize: 12,
                             ),
                             side: BorderSide(
                               color: tabIdx == 1
                                   ? palette.primaryColor.withValues(alpha: 0.6)
-                                  : Colors.white.withValues(alpha: 0.08),
+                                  : AppColors.inkAlpha(0.08),
                             ),
                             onSelected: (selected) {
                               if (selected) IptvSettings.setDefaultPortalTab(1);
@@ -363,7 +364,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
           backgroundColor: const Color(0xFF0C0E15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+            side: BorderSide(color: AppColors.inkAlpha(0.12)),
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 680, maxHeight: 680),
@@ -391,25 +392,25 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       // Row does not shrink -- it paints outside the box.
                       // Expanded hands it the leftover width, which is what
                       // the Spacer was standing in for anyway.
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'IPTV Portals & Playlists',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.ink,
                             fontSize: 20,
                             fontWeight: FontWeight.w900,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.tune_rounded, color: Colors.white70, size: 20),
+                        icon: Icon(Icons.tune_rounded, color: AppColors.inkMuted, size: 20),
                         tooltip: 'Customize Modal Style',
                         onPressed: () => _openModalCustomizer(context),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                        icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ],
@@ -421,8 +422,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   controller: _tabController,
                   indicatorColor: palette.primaryColor,
                   indicatorWeight: 3,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.white54,
+                  labelColor: AppColors.ink,
+                  unselectedLabelColor: AppColors.inkSubtle,
                   labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
                   tabs: [
                     Tab(text: 'Xtream Panels (${_ctrl.verified.length})'),
@@ -430,7 +431,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   ],
                 ),
 
-                const Divider(color: Colors.white10, height: 1),
+                Divider(color: AppColors.inkAlpha(0.10), height: 1),
 
                 // Tab Views
                 Expanded(
@@ -472,17 +473,17 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
                 icon: _ctrl.isScraping
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 14,
                         height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
                       )
-                    : const Icon(Icons.radar_rounded, size: 16, color: Colors.white),
+                    : Icon(Icons.radar_rounded, size: 16, color: AppColors.ink),
                 label: Text(
                   _ctrl.isScraping
                       ? 'Finding ${_ctrl.scrapeSource == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit'}…'
                       : 'Generate Portals',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                 ),
                 onPressed: _ctrl.isScraping ? null : _ctrl.scrape,
               ),
@@ -497,15 +498,15 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+                  side: BorderSide(color: AppColors.inkAlpha(0.12)),
                 ),
                 color: const Color(0xFF161A26),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9.5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: AppColors.inkAlpha(0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                    border: Border.all(color: AppColors.inkAlpha(0.15)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -522,14 +523,14 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       const SizedBox(width: 6),
                       Text(
                         _ctrl.scrapeSource == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.ink,
                           fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_drop_down_rounded, size: 18, color: Colors.white70),
+                      Icon(Icons.arrow_drop_down_rounded, size: 18, color: AppColors.inkMuted),
                     ],
                   ),
                 ),
@@ -567,10 +568,10 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 runSpacing: 2,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Cloud Vault (9k+)',
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: AppColors.ink,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                     ),
@@ -597,11 +598,11 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   ),
                                 ],
                               ),
-                              const Text(
+                              Text(
                                 'High-speed cloud database with 9,000+ live '
                                 'IPTV servers',
                                 style: TextStyle(
-                                  color: Colors.white60,
+                                  color: AppColors.inkAlpha(0.60),
                                   fontSize: 10.5,
                                 ),
                               ),
@@ -611,7 +612,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       ],
                     ),
                   ),
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: CatalogSource.reddit,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -633,7 +634,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                               Text(
                                 'Reddit Communities',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.ink,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                 ),
@@ -642,7 +643,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 'Scrapes live shared pastes from IPTV '
                                 'subreddits',
                                 style: TextStyle(
-                                  color: Colors.white60,
+                                  color: AppColors.inkAlpha(0.60),
                                   fontSize: 10.5,
                                 ),
                               ),
@@ -657,8 +658,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
 
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+                  foregroundColor: AppColors.ink,
+                  side: BorderSide(color: AppColors.inkAlpha(0.2)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
@@ -672,9 +673,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
               if (_ctrl.verified.isNotEmpty)
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: _isPortalsEditMode ? const Color(0xFF00D2EF) : Colors.white,
+                    foregroundColor: _isPortalsEditMode ? const Color(0xFF00D2EF) : AppColors.ink,
                     side: BorderSide(
-                      color: _isPortalsEditMode ? const Color(0xFF00D2EF) : Colors.white.withValues(alpha: 0.2),
+                      color: _isPortalsEditMode ? const Color(0xFF00D2EF) : AppColors.inkAlpha(0.2),
                     ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -718,7 +719,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     children: [
                       TextButton.icon(
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.ink,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
@@ -755,7 +756,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       Text(
                         '(${_selectedPortalKeys.length}/${_ctrl.verified.length})',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: AppColors.inkAlpha(0.7),
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -769,7 +770,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.ink,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -837,19 +838,19 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: AppColors.inkAlpha(0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                border: Border.all(color: AppColors.inkAlpha(0.1)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Add Xtream Codes Portal',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  Text('Add Xtream Codes Portal',
+                      style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _urlCtrl,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: AppColors.ink, fontSize: 13),
                     decoration: const InputDecoration(
                       labelText: 'Server URL (e.g. http://example.com:8080)',
                       isDense: true,
@@ -862,7 +863,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       Expanded(
                         child: TextField(
                           controller: _userCtrl,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: TextStyle(color: AppColors.ink, fontSize: 13),
                           decoration: const InputDecoration(
                             labelText: 'Username',
                             isDense: true,
@@ -874,7 +875,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       Expanded(
                         child: TextField(
                           controller: _passCtrl,
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: TextStyle(color: AppColors.ink, fontSize: 13),
                           decoration: const InputDecoration(
                             labelText: 'Password',
                             isDense: true,
@@ -895,10 +896,10 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7C5CFF)),
                       onPressed: _ctrl.isAdding ? null : _submitAddPortal,
                       child: _ctrl.isAdding
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
                             )
                           : const Text('Verify & Save'),
                     ),
@@ -916,7 +917,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                 ? Center(
                     child: Text(
                       'No verified portals. Tap "Generate Portals" (${_ctrl.scrapeSource == CatalogSource.cloudVault ? "Cloud Vault" : "Reddit"}) to auto-discover.',
-                      style: const TextStyle(color: Colors.white54),
+                      style: TextStyle(color: AppColors.inkSubtle),
                     ),
                   )
                 : ListView.separated(
@@ -956,12 +957,12 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? palette.primaryColor.withValues(alpha: 0.15)
-                                  : Colors.white.withValues(alpha: 0.04),
+                                  : AppColors.inkAlpha(0.04),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
                                     ? palette.primaryColor
-                                    : Colors.white.withValues(alpha: 0.08),
+                                    : AppColors.inkAlpha(0.08),
                                 width: isSelected ? 1.5 : 1.0,
                               ),
                             ),
@@ -976,12 +977,12 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       color: isSelected ? palette.primaryColor : Colors.transparent,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: isSelected ? palette.primaryColor : Colors.white38,
+                                        color: isSelected ? palette.primaryColor : AppColors.inkDisabled,
                                         width: 2,
                                       ),
                                     ),
                                     child: isSelected
-                                        ? const Icon(Icons.check_rounded, color: Colors.white, size: 15)
+                                        ? Icon(Icons.check_rounded, color: AppColors.ink, size: 15)
                                         : null,
                                   )
                                 else ...[
@@ -1001,8 +1002,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                     children: [
                                       Text(
                                         p.name.isNotEmpty ? p.name : p.portal.url,
-                                        style: const TextStyle(
-                                          color: Colors.white,
+                                        style: TextStyle(
+                                          color: AppColors.ink,
                                           fontWeight: FontWeight.w700,
                                           fontSize: 13.5,
                                         ),
@@ -1017,7 +1018,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                             p.portal.url,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(color: Colors.white.withValues(alpha: 0.45), fontSize: 11),
+                                            style: TextStyle(color: AppColors.inkAlpha(0.45), fontSize: 11),
                                           ),
                                           if (showExp)
                                             Container(
@@ -1035,12 +1036,12 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                                               decoration: BoxDecoration(
-                                                color: Colors.white.withValues(alpha: 0.08),
+                                                color: AppColors.inkAlpha(0.08),
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: Text(
                                                 'Conn: ${p.activeConnections}/${p.maxConnections}',
-                                                style: const TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.w600),
+                                                style: TextStyle(color: AppColors.inkMuted, fontSize: 10, fontWeight: FontWeight.w600),
                                               ),
                                             ),
                                           if (p.portal.source.isNotEmpty)
@@ -1051,7 +1052,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                                     ? const Color(0xFF00E5FF).withValues(alpha: 0.15)
                                                     : (p.portal.source.toLowerCase().contains('reddit')
                                                         ? const Color(0xFFFF5722).withValues(alpha: 0.15)
-                                                        : Colors.white.withValues(alpha: 0.08)),
+                                                        : AppColors.inkAlpha(0.08)),
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: Text(
@@ -1061,7 +1062,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                                       ? const Color(0xFF00E5FF)
                                                       : (p.portal.source.toLowerCase().contains('reddit')
                                                           ? const Color(0xFFFF7043)
-                                                          : Colors.white70),
+                                                          : AppColors.inkMuted),
                                                   fontSize: 9.5,
                                                   fontWeight: FontWeight.w700,
                                                 ),
@@ -1073,7 +1074,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.copy_rounded, color: Colors.white54, size: 18),
+                                  icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: 18),
                                   tooltip: 'Copy Login (url:username:password)',
                                   onPressed: () {
                                     final text = '${p.portal.url}:${p.portal.username}:${p.portal.password}';
@@ -1090,7 +1091,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 IconButton(
                                   icon: Icon(
                                     isFav ? Icons.star_rounded : Icons.star_outline_rounded,
-                                    color: isFav ? const Color(0xFFFFC107) : Colors.white38,
+                                    color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
                                     size: 20,
                                   ),
                                   onPressed: () => _ctrl.toggleFavoritePortal(p.key),
@@ -1099,7 +1100,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                                   onPressed: () => _ctrl.deletePortalsByKeys({p.key}),
                                 ),
-                                const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 20),
+                                Icon(Icons.chevron_right_rounded, color: AppColors.inkDisabled, size: 20),
                               ],
                             ),
                           ),
@@ -1130,8 +1131,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
-                icon: const Icon(Icons.playlist_add_rounded, size: 18, color: Colors.white),
-                label: const Text('Add M3U URL', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                icon: Icon(Icons.playlist_add_rounded, size: 18, color: AppColors.ink),
+                label: Text('Add M3U URL', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700)),
                 onPressed: () => setState(() => _showM3uForm = !_showM3uForm),
               ),
 
@@ -1139,9 +1140,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                 const SizedBox(width: 8),
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: _isM3uEditMode ? const Color(0xFF00D2EF) : Colors.white,
+                    foregroundColor: _isM3uEditMode ? const Color(0xFF00D2EF) : AppColors.ink,
                     side: BorderSide(
-                      color: _isM3uEditMode ? const Color(0xFF00D2EF) : Colors.white.withValues(alpha: 0.2),
+                      color: _isM3uEditMode ? const Color(0xFF00D2EF) : AppColors.inkAlpha(0.2),
                     ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1186,7 +1187,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     children: [
                       TextButton.icon(
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.ink,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
@@ -1223,7 +1224,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       Text(
                         '(${_selectedM3uIds.length}/${_ctrl.m3uPlaylists.length})',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: AppColors.inkAlpha(0.7),
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1237,7 +1238,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.ink,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -1296,19 +1297,19 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: AppColors.inkAlpha(0.05),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                border: Border.all(color: AppColors.inkAlpha(0.1)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Add M3U Playlist Subscription',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                  Text('Add M3U Playlist Subscription',
+                      style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _m3uNameCtrl,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: AppColors.ink, fontSize: 13),
                     decoration: const InputDecoration(
                       labelText: 'Playlist Name',
                       isDense: true,
@@ -1318,7 +1319,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   const SizedBox(height: 8),
                   TextField(
                     controller: _m3uUrlCtrl,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: AppColors.ink, fontSize: 13),
                     decoration: const InputDecoration(
                       labelText: 'M3U / M3U8 URL',
                       isDense: true,
@@ -1332,10 +1333,10 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7C5CFF)),
                       onPressed: _ctrl.isM3uLoading ? null : _submitAddM3u,
                       child: _ctrl.isM3uLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
                             )
                           : const Text('Fetch & Save'),
                     ),
@@ -1349,8 +1350,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
 
           Expanded(
             child: _ctrl.m3uPlaylists.isEmpty
-                ? const Center(
-                    child: Text('No M3U playlists saved.', style: TextStyle(color: Colors.white54)),
+                ? Center(
+                    child: Text('No M3U playlists saved.', style: TextStyle(color: AppColors.inkSubtle)),
                   )
                 : ListView.separated(
                     itemCount: _ctrl.m3uPlaylists.length,
@@ -1384,12 +1385,12 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? palette.primaryColor.withValues(alpha: 0.15)
-                                  : Colors.white.withValues(alpha: 0.04),
+                                  : AppColors.inkAlpha(0.04),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
                                     ? palette.primaryColor
-                                    : Colors.white.withValues(alpha: 0.08),
+                                    : AppColors.inkAlpha(0.08),
                                 width: isSelected ? 1.5 : 1.0,
                               ),
                             ),
@@ -1404,12 +1405,12 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       color: isSelected ? palette.primaryColor : Colors.transparent,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: isSelected ? palette.primaryColor : Colors.white38,
+                                        color: isSelected ? palette.primaryColor : AppColors.inkDisabled,
                                         width: 2,
                                       ),
                                     ),
                                     child: isSelected
-                                        ? const Icon(Icons.check_rounded, color: Colors.white, size: 15)
+                                        ? Icon(Icons.check_rounded, color: AppColors.ink, size: 15)
                                         : null,
                                   )
                                 else ...[
@@ -1422,19 +1423,19 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                     children: [
                                       Text(
                                         pl.name,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13.5),
+                                        style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: 13.5),
                                       ),
                                       Text(
                                         '${pl.channels.length} channels ${pl.sourceUrl != null ? '· ${pl.sourceUrl!}' : ''}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 11),
+                                        style: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 11),
                                       ),
                                     ],
                                   ),
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.copy_rounded, color: Colors.white54, size: 18),
+                                  icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: 18),
                                   tooltip: 'Copy Playlist URL',
                                   onPressed: () {
                                     final text = pl.sourceUrl ?? '';
@@ -1454,7 +1455,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                                   onPressed: () => _ctrl.deleteM3uPlaylist(pl.id),
                                 ),
-                                const Icon(Icons.chevron_right_rounded, color: Colors.white38, size: 20),
+                                Icon(Icons.chevron_right_rounded, color: AppColors.inkDisabled, size: 20),
                               ],
                             ),
                           ),

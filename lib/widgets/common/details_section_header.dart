@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The heading above a section on a details page — Cast & Crew, Episodes,
 /// Related, and so on.
@@ -22,8 +23,8 @@ class DetailsSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final heading = Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: AppColors.ink,
         fontSize: 20,
         fontWeight: FontWeight.w800,
         letterSpacing: -0.4,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/backup/backup_service.dart';
 import '../../services/backup/cloud_backup_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Local export/import plus optional WebDAV cloud backup -- split out of the
 /// old "General & Data" catch-all so it reads as its own category, matching
@@ -54,17 +55,17 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF151822),
+        backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Restore backup?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+        title: Text('Restore backup?', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
         content: Text(
           'Pick a backup file to restore. This overwrites your current library, settings and addon config, and cannot be undone.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+          style: TextStyle(color: AppColors.inkAlpha(0.65)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: Colors.white.withValues(alpha: 0.45))),
+            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.45))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -72,7 +73,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: Colors.red.shade700,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Restore', style: TextStyle(color: Colors.white)),
+            child: Text('Restore', style: TextStyle(color: AppColors.ink)),
           ),
         ],
       ),
@@ -118,35 +119,35 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     final result = await showDialog<CloudBackupConfig>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF151822),
+        backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Connect WebDAV', style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white)),
+        title: Text('Connect WebDAV', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Point this at a WebDAV endpoint on your own server (Nextcloud, etc.) — the full URL of the file to write, e.g. https://cloud.example.com/remote.php/dav/files/you/playtorrio_backup.json',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+              style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: 13),
             ),
             const SizedBox(height: 14),
             TextField(
               controller: urlController,
               autofocus: true,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: _cloudFieldDecoration('WebDAV URL'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: userController,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: _cloudFieldDecoration('Username'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: passController,
               obscureText: true,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: _cloudFieldDecoration('Password'),
             ),
           ],
@@ -154,7 +155,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
+            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.6))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -169,7 +170,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text('Save', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -181,9 +182,9 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
   InputDecoration _cloudFieldDecoration(String hint) => InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+        hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
         filled: true,
-        fillColor: const Color(0xFF0D1017),
+        fillColor: AppColors.bar,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
       );
 
@@ -218,17 +219,17 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF151822),
+        backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Restore from cloud?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+        title: Text('Restore from cloud?', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
         content: Text(
           'This overwrites your current library, settings and addon config with the backup stored on your WebDAV server. This cannot be undone.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+          style: TextStyle(color: AppColors.inkAlpha(0.65)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: Colors.white.withValues(alpha: 0.45))),
+            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.45))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -236,7 +237,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: Colors.red.shade700,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Restore', style: TextStyle(color: Colors.white)),
+            child: Text('Restore', style: TextStyle(color: AppColors.ink)),
           ),
         ],
       ),
@@ -269,9 +270,9 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,7 +289,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                 child: const Icon(Icons.save_alt_rounded, color: Color(0xFF7C5CFF)),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -299,7 +300,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                     SizedBox(height: 4),
                     Text(
                       'Save your library, likes, playback history, settings and addon config to a JSON file anywhere on this device — or restore from one you saved earlier.',
-                      style: TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
+                      style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),
                     ),
                   ],
                 ),
@@ -313,8 +314,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                 child: OutlinedButton.icon(
                   onPressed: _isBackingUp ? null : () => _exportData(context),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+                    foregroundColor: AppColors.ink,
+                    side: BorderSide(color: AppColors.inkAlpha(0.16)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -327,8 +328,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                 child: OutlinedButton.icon(
                   onPressed: _isBackingUp ? null : () => _importData(context),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+                    foregroundColor: AppColors.ink,
+                    side: BorderSide(color: AppColors.inkAlpha(0.16)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
@@ -351,10 +352,10 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF12151E),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: connected ? const Color(0xFF01B4E4).withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.08),
+              color: connected ? const Color(0xFF01B4E4).withValues(alpha: 0.3) : AppColors.inkAlpha(0.08),
             ),
           ),
           child: Column(
@@ -382,7 +383,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                           connected
                               ? 'Connected to your own WebDAV server.'
                               : 'Point this at a WebDAV endpoint on your own server to sync the same backup this app already writes locally.',
-                          style: const TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
+                          style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),
                         ),
                       ],
                     ),
@@ -390,7 +391,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                   if (connected)
                     TextButton(
                       onPressed: () => CloudBackupSettings.setConfig(null),
-                      child: Text('Disconnect', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13)),
+                      child: Text('Disconnect', style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: 13)),
                     )
                   else
                     ElevatedButton(
@@ -412,8 +413,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                       child: OutlinedButton.icon(
                         onPressed: _isBackingUp ? null : () => _uploadCloud(context),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+                          foregroundColor: AppColors.ink,
+                          side: BorderSide(color: AppColors.inkAlpha(0.16)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -426,8 +427,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                       child: OutlinedButton.icon(
                         onPressed: _isBackingUp ? null : () => _downloadCloud(context),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.16)),
+                          foregroundColor: AppColors.ink,
+                          side: BorderSide(color: AppColors.inkAlpha(0.16)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
@@ -448,9 +449,9 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),

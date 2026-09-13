@@ -5,6 +5,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/player/player_sub_style_modal.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 class VideoPlayerSettingsPage extends StatefulWidget {
   const VideoPlayerSettingsPage({super.key});
@@ -35,7 +36,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
         return Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            backgroundColor: const Color(0xFF0D1017).withValues(alpha: 0.85),
+            backgroundColor: AppColors.bar.withValues(alpha: 0.85),
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -130,7 +131,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
         style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: Colors.white.withValues(alpha: 0.35),
+          color: AppColors.inkAlpha(0.35),
           letterSpacing: 1.1,
         ),
       ),
@@ -187,10 +188,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       children: [
                         Text(
                           '$_platformName Video Engine',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16.5,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: AppColors.ink,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -227,7 +228,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       'libmpv hardware accelerated pipeline with auto software failover.',
                       style: TextStyle(
                         fontSize: 12.5,
-                        color: Colors.white.withValues(alpha: 0.55),
+                        color: AppColors.inkAlpha(0.55),
                         height: 1.3,
                       ),
                     ),
@@ -242,15 +243,15 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+              border: Border.all(color: AppColors.inkAlpha(0.06)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.hub_rounded, size: 14, color: Colors.white54),
+                Icon(Icons.hub_rounded, size: 14, color: AppColors.inkSubtle),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'Active Decoder Chain: ',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white70),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
                 ),
                 Expanded(
                   child: Text(
@@ -279,9 +280,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,22 +295,22 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               decoration: BoxDecoration(
                 color: isForceSoftware
                     ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
-                    : Colors.white.withValues(alpha: 0.05),
+                    : AppColors.inkAlpha(0.05),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 Icons.memory_rounded,
-                color: isForceSoftware ? const Color(0xFFF59E0B) : Colors.white54,
+                color: isForceSoftware ? const Color(0xFFF59E0B) : AppColors.inkSubtle,
                 size: 20,
               ),
             ),
-            title: const Text(
+            title: Text(
               'Software Safe Mode (CPU Decode)',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Bypasses GPU hardware decoders. Recommended on Android if video & audio lose sync when buffering stalls.',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: isForceSoftware,
             activeColor: const Color(0xFFF59E0B),
@@ -317,7 +318,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           const SizedBox(height: 14),
-          Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1),
           const SizedBox(height: 14),
 
           Text(
@@ -325,7 +326,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: 0.4),
+              color: AppColors.inkAlpha(0.4),
               letterSpacing: 0.8,
             ),
           ),
@@ -357,12 +358,12 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? palette.primaryColor.withValues(alpha: 0.12)
-                          : Colors.white.withValues(alpha: 0.02),
+                          : AppColors.inkAlpha(0.02),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
                             ? palette.primaryColor.withValues(alpha: 0.5)
-                            : Colors.white.withValues(alpha: 0.06),
+                            : AppColors.inkAlpha(0.06),
                         width: isSelected ? 1.2 : 0.8,
                       ),
                     ),
@@ -372,7 +373,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           isSelected
                               ? Icons.radio_button_checked_rounded
                               : Icons.radio_button_off_rounded,
-                          color: isSelected ? palette.primaryColor : Colors.white38,
+                          color: isSelected ? palette.primaryColor : AppColors.inkDisabled,
                           size: 18,
                         ),
                         const SizedBox(width: 12),
@@ -385,7 +386,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                 style: TextStyle(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
-                                  color: isForceSoftware ? Colors.white38 : Colors.white,
+                                  color: isForceSoftware ? AppColors.inkDisabled : AppColors.ink,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -393,7 +394,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                 preset.description,
                                 style: TextStyle(
                                   fontSize: 11.5,
-                                  color: Colors.white.withValues(alpha: 0.45),
+                                  color: AppColors.inkAlpha(0.45),
                                   height: 1.25,
                                 ),
                               ),
@@ -402,7 +403,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                         ),
                         if (isCustom)
                           IconButton(
-                            icon: const Icon(Icons.tune_rounded, size: 18, color: Colors.white70),
+                            icon: Icon(Icons.tune_rounded, size: 18, color: AppColors.inkMuted),
                             onPressed: isForceSoftware ? null : () => _showCustomDecodersDialog(palette),
                           ),
                       ],
@@ -421,9 +422,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -439,13 +440,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               child: Icon(Icons.flash_on_rounded, color: palette.primaryColor, size: 20),
             ),
-            title: const Text(
+            title: Text(
               'Fast Video Decoding (vd-lavc-fast)',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Enables high-throughput FFmpeg fast decode paths to minimize stutter on high-bitrate streams.',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.enableFastDecode.value,
             activeColor: palette.primaryColor,
@@ -453,7 +454,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           const SizedBox(height: 12),
-          Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1),
           const SizedBox(height: 12),
 
           // 2. Loop Filter Skipping
@@ -472,13 +473,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Deblocking Loop Filter',
-                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
                     ),
                     Text(
                       'Skip deblocking filter on non-critical frames to reduce CPU/GPU load.',
-                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
+                      style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5)),
                     ),
                   ],
                 ),
@@ -487,7 +488,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 value: PlayerSettings.skipLoopFilter.value,
                 dropdownColor: const Color(0xFF1E2330),
                 underline: const SizedBox(),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
                 items: const [
                   DropdownMenuItem(value: 'nonkey', child: Text('Non-Key (Fast)')),
                   DropdownMenuItem(value: 'noref', child: Text('Non-Ref')),
@@ -502,7 +503,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           const SizedBox(height: 12),
-          Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1),
           const SizedBox(height: 12),
 
           // 3. Decoding Threads
@@ -521,13 +522,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Decoder Worker Threads',
-                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
                     ),
                     Text(
                       'Multi-threaded FFmpeg decode workers (Default: 4).',
-                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
+                      style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5)),
                     ),
                   ],
                 ),
@@ -536,7 +537,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 value: PlayerSettings.lavcThreads.value,
                 dropdownColor: const Color(0xFF1E2330),
                 underline: const SizedBox(),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Colors.white),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
                 items: const [
                   DropdownMenuItem(value: 0, child: Text('Auto')),
                   DropdownMenuItem(value: 1, child: Text('1 Thread')),
@@ -552,7 +553,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           const SizedBox(height: 12),
-          Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1),
           const SizedBox(height: 12),
 
           // 4. Disk Stream Cache
@@ -566,13 +567,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               child: const Icon(Icons.disc_full_rounded, color: Color(0xFF8B5CF6), size: 20),
             ),
-            title: const Text(
+            title: Text(
               'Disk Stream Buffer Cache',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Smoothly caches media chunks into the OS temporary directory to eliminate RAM pressure.',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.enableDiskCache.value,
             activeColor: const Color(0xFF8B5CF6),
@@ -589,9 +590,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -607,17 +608,17 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 child: const Icon(Icons.speed_rounded, color: Color(0xFF00E5FF), size: 20),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Preload Buffer Cushion',
-                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
                     ),
                     Text(
                       'Higher cushions buffer ahead to prevent playback hiccups and A/V desync.',
-                      style: TextStyle(fontSize: 11.5, color: Colors.white54),
+                      style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                     ),
                   ],
                 ),
@@ -645,12 +646,12 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF00E5FF).withValues(alpha: 0.1)
-                          : Colors.white.withValues(alpha: 0.02),
+                          : AppColors.inkAlpha(0.02),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
                             ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
-                            : Colors.white.withValues(alpha: 0.06),
+                            : AppColors.inkAlpha(0.06),
                         width: isSelected ? 1.2 : 0.8,
                       ),
                     ),
@@ -660,7 +661,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           isSelected
                               ? Icons.radio_button_checked_rounded
                               : Icons.radio_button_off_rounded,
-                          color: isSelected ? const Color(0xFF00E5FF) : Colors.white38,
+                          color: isSelected ? const Color(0xFF00E5FF) : AppColors.inkDisabled,
                           size: 18,
                         ),
                         const SizedBox(width: 12),
@@ -672,10 +673,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                 children: [
                                   Text(
                                     preset.label,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
-                                      color: Colors.white,
+                                      color: AppColors.ink,
                                     ),
                                   ),
                                   if (preset == BufferResiliencePreset.highResilience && Platform.isAndroid) ...[
@@ -703,7 +704,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                 preset.subtitle,
                                 style: TextStyle(
                                   fontSize: 11.5,
-                                  color: Colors.white.withValues(alpha: 0.45),
+                                  color: AppColors.inkAlpha(0.45),
                                   height: 1.25,
                                 ),
                               ),
@@ -726,7 +727,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.25),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                border: Border.all(color: AppColors.inkAlpha(0.06)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -734,9 +735,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Buffer Duration Cushion',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white70),
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
                       ),
                       Text(
                         '${PlayerSettings.customBufferMs.value} ms (${(PlayerSettings.customBufferMs.value / 1000).toStringAsFixed(1)}s)',
@@ -757,9 +758,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Packet Count Buffer',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white70),
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
                       ),
                       Text(
                         '${PlayerSettings.customBufferCount.value} pkts',
@@ -790,9 +791,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -807,14 +808,14 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               child: const Icon(Icons.sync_problem_rounded, color: Color(0xFF10B981), size: 20),
             ),
-            title: const Text(
+            title: Text(
               'Network Auto-Reconnect',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Seamlessly reconnects HLS / HTTP video demuxers without tearing down playback or corrupting timestamps on brief connection drops. '
               'Always on for Live TV. Enabling it for movies and episodes can disable seeking on some HLS streams.',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.enableNetworkReconnect.value,
             activeColor: const Color(0xFF10B981),
@@ -834,9 +835,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Max Reconnect Delay Timeout',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: Colors.white70),
+                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
                       ),
                       Text(
                         '${PlayerSettings.reconnectDelayMax.value}s',
@@ -865,9 +866,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -882,13 +883,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               child: Icon(Icons.lock_clock_rounded, color: palette.primaryColor, size: 20),
             ),
-            title: const Text(
+            title: Text(
               'Auto-Resync On Buffer Recovery',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Recalibrates the video clock with the master audio timeline immediately after a network stall recovers.',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.autoResyncOnStall.value,
             activeColor: palette.primaryColor,
@@ -896,7 +897,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           const SizedBox(height: 8),
-          Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1),
           const SizedBox(height: 8),
 
           SwitchListTile.adaptive(
@@ -909,13 +910,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               child: const Icon(Icons.graphic_eq_rounded, color: Color(0xFF7C5CFF), size: 20),
             ),
-            title: const Text(
+            title: Text(
               'Master Audio Clock Sync',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Uses hardware audio clock as master timeline for uncompromised audio fidelity and tight frame locking.',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.hardwareAudioClock.value,
             activeColor: const Color(0xFF7C5CFF),
@@ -923,7 +924,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           const SizedBox(height: 8),
-          Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1),
           const SizedBox(height: 8),
 
           SwitchListTile.adaptive(
@@ -931,18 +932,18 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             secondary: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
+                color: AppColors.inkAlpha(0.06),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.bolt_rounded, color: Colors.white70, size: 20),
+              child: Icon(Icons.bolt_rounded, color: AppColors.inkMuted, size: 20),
             ),
-            title: const Text(
+            title: Text(
               'Low Latency Mode',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
             ),
             subtitle: Text(
               'Minimizes buffering queue for live streams (disables deep preloading cushion).',
-              style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.lowLatency.value,
             activeColor: palette.primaryColor,
@@ -951,7 +952,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
           if (Platform.isAndroid) ...[
             const SizedBox(height: 8),
-            Divider(color: Colors.white.withValues(alpha: 0.06), height: 1),
+            Divider(color: AppColors.inkAlpha(0.06), height: 1),
             const SizedBox(height: 8),
 
             SwitchListTile.adaptive(
@@ -964,13 +965,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 ),
                 child: Icon(Icons.layers_rounded, color: palette.primaryColor, size: 20),
               ),
-              title: const Text(
+              title: Text(
                 'Direct Surface (SurfaceView)',
-                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
               ),
               subtitle: Text(
                 'Renders frames directly to the hardware surface without texture blitting. Boosts 4K/60fps playback and reduces battery usage. Keep disabled if your device shows display glitches.',
-                style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5), height: 1.3),
+                style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
               ),
               value: PlayerSettings.enableSurfaceProducer.value,
               activeColor: palette.primaryColor,
@@ -988,7 +989,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     final size = PlayerSettings.subFontSize.value;
     final scale = (PlayerSettings.subScale.value * 100).round();
 
-    Color parseColor(String hex, {Color fallback = Colors.white}) {
+    Color parseColor(String hex, {Color fallback = AppColors.ink}) {
       var str = hex.replaceAll('#', '').trim();
       if (str.length == 6) str = 'FF$str';
       if (str.length == 8) {
@@ -1005,9 +1006,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1030,13 +1031,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Subtitle Styling & Engine Customization',
-                        style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: Colors.white),
+                        style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
                       ),
                       Text(
                         'Preset: ${currentPreset.label} • $fontName (${size}pt / $scale%)',
-                        style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5)),
+                        style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5)),
                       ),
                     ],
                   ),
@@ -1047,7 +1048,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 label: const Text('Customize'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.ink,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -1065,7 +1066,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             decoration: BoxDecoration(
               color: const Color(0xFF0A0D14),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+              border: Border.all(color: AppColors.inkAlpha(0.06)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1125,11 +1126,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
         title: const Text('Reset Player Settings?'),
         content: Text(
           'This will restore all video decoding, fast-decode optimizations, caching, buffering, and sync settings to recommended defaults for $_platformName.',
-          style: const TextStyle(color: Colors.white70),
+          style: TextStyle(color: AppColors.inkMuted),
         ),
         actions: [
           TextButton(
-            child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: Text('Cancel', style: TextStyle(color: AppColors.inkSubtle)),
             onPressed: () => Navigator.pop(ctx, false),
           ),
           TextButton(
@@ -1159,8 +1160,8 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
         icon: const Icon(Icons.restart_alt_rounded, size: 18),
         label: const Text('Reset Video Engine to Platform Defaults'),
         style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white70,
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+          foregroundColor: AppColors.inkMuted,
+          side: BorderSide(color: AppColors.inkAlpha(0.15)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
@@ -1184,9 +1185,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           return AlertDialog(
             backgroundColor: const Color(0xFF13151F),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.tune_rounded, color: Colors.white),
+                Icon(Icons.tune_rounded, color: AppColors.ink),
                 SizedBox(width: 10),
                 Text('Custom Decoder Chain', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
               ],
@@ -1202,9 +1203,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Select prioritized decoders. FFmpeg (software) will always be appended as final crash-free safety fallback.',
-                    style: TextStyle(fontSize: 12, color: Colors.white54),
+                    style: TextStyle(fontSize: 12, color: AppColors.inkSubtle),
                   ),
                   const SizedBox(height: 14),
                   ...available.map((d) {
@@ -1219,7 +1220,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: isChecked ? FontWeight.w700 : FontWeight.w500,
-                          color: isFfmpeg ? const Color(0xFF10B981) : Colors.white,
+                          color: isFfmpeg ? const Color(0xFF10B981) : AppColors.ink,
                         ),
                       ),
                       value: isFfmpeg ? true : isChecked,
@@ -1242,7 +1243,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ),
             actions: [
               TextButton(
-                child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                child: Text('Cancel', style: TextStyle(color: AppColors.inkSubtle)),
                 onPressed: () => Navigator.pop(ctx),
               ),
               ElevatedButton(
@@ -1250,7 +1251,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   backgroundColor: palette.primaryColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('Save Chain', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: Text('Save Chain', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold)),
                 onPressed: () async {
                   if (!selected.contains('FFmpeg')) selected.add('FFmpeg');
                   await PlayerSettings.setCustomDecoders(selected);

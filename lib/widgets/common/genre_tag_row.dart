@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Icon for a genre/category tag, shared by every content-detail page so a
 /// given genre always reads the same way whether it's on a movie, a series,
@@ -116,13 +117,13 @@ class GenreTagRow extends StatelessWidget {
                   width: size,
                   height: size,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: AppColors.inkAlpha(0.06),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                    border: Border.all(color: AppColors.inkAlpha(0.12)),
                   ),
                   child: Icon(
                     genreTagIcon(g),
-                    color: Colors.white70,
+                    color: AppColors.inkMuted,
                     size: size * 0.5,
                   ),
                 ),

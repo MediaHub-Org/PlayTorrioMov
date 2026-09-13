@@ -21,6 +21,7 @@ import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
 import 'iptv_portals_modal.dart';
 import 'iptv_search_page.dart';
+import '../../services/theme/app_colors.dart';
 
 class IptvPage extends StatefulWidget {
   const IptvPage({super.key});
@@ -330,7 +331,7 @@ class _IptvGlassAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return PillFilterHeaderBar(
       transparent: true,
-      leading: const [
+      leading: [
         DecoratedBox(
           decoration: headerPillDecoration,
           child: Padding(
@@ -340,14 +341,14 @@ class _IptvGlassAppBar extends StatelessWidget {
               children: [
                 Icon(
                   Icons.live_tv_rounded,
-                  color: Colors.white70,
+                  color: AppColors.inkMuted,
                   size: headerPillIconSize,
                 ),
                 SizedBox(width: 6),
                 Text(
                   'LIVE TV',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.ink,
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.6,
@@ -364,7 +365,7 @@ class _IptvGlassAppBar extends StatelessWidget {
             child: Text(
               '60+ CHANNELS',
               style: TextStyle(
-                color: Colors.white70,
+                color: AppColors.inkMuted,
                 fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.4,

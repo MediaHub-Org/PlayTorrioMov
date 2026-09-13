@@ -10,6 +10,7 @@ import '../../widgets/common/error_view.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
+import '../../services/theme/app_colors.dart';
 
 class CatalogPage extends StatefulWidget {
   final MovieSection section;
@@ -226,7 +227,7 @@ class _CatalogPageState extends State<CatalogPage> {
     final gridTopPadding = topPadding + kToolbarHeight + (hasFilters ? 60 : 20) + 20;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       body: Stack(
         children: [
           // ── Main Content Grid ──
@@ -240,10 +241,10 @@ class _CatalogPageState extends State<CatalogPage> {
               onRetry: () => _loadItems(refresh: true),
             )
           else if (_items.isEmpty)
-            const Center(
+            Center(
               child: Text(
                 'No items found',
-                style: TextStyle(color: Colors.white54, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
               ),
             )
           else
@@ -290,13 +291,13 @@ class _CatalogPageState extends State<CatalogPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFF080A0F).withValues(alpha: 0.90),
-                        const Color(0xFF080A0F).withValues(alpha: 0.60),
+                        AppColors.canvas.withValues(alpha: 0.90),
+                        AppColors.canvas.withValues(alpha: 0.60),
                       ],
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.06),
+                        color: AppColors.inkAlpha(0.06),
                       ),
                     ),
                   ),
@@ -315,10 +316,10 @@ class _CatalogPageState extends State<CatalogPage> {
                               Expanded(
                                 child: Text(
                                   widget.section.title,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.white,
+                                    color: AppColors.ink,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -331,16 +332,16 @@ class _CatalogPageState extends State<CatalogPage> {
                                   child: TextField(
                                     controller: _searchController,
                                     autofocus: true,
-                                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                                    style: TextStyle(color: AppColors.ink, fontSize: 16),
                                     textInputAction: TextInputAction.search,
                                     onSubmitted: _onSearchSubmitted,
                                     decoration: InputDecoration(
                                       hintText: 'Search...',
-                                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                                      hintStyle: TextStyle(color: AppColors.inkAlpha(0.4)),
                                       border: InputBorder.none,
                                       suffixIcon: IconButton(
                                         icon: const Icon(Icons.close_rounded, size: 20),
-                                        color: Colors.white70,
+                                        color: AppColors.inkMuted,
                                         onPressed: _clearSearch,
                                       ),
                                     ),
@@ -350,7 +351,7 @@ class _CatalogPageState extends State<CatalogPage> {
                             if (!_isSearching && widget.section.catalog.supportsSearch)
                               IconButton(
                                 icon: const Icon(Icons.search_rounded),
-                                color: Colors.white70,
+                                color: AppColors.inkMuted,
                                 onPressed: () {
                                   setState(() {
                                     _isSearching = true;
@@ -466,14 +467,14 @@ class _CatalogPageState extends State<CatalogPage> {
             color: const Color(0xFF15171F),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+              side: BorderSide(color: AppColors.inkAlpha(0.1)),
             ),
             onSelected: (val) => _onExtraSelected(extra.name, val),
             itemBuilder: (context) => [
               if (!extra.isRequired)
-                const PopupMenuItem<String?>(
+                PopupMenuItem<String?>(
                   value: null,
-                  child: Text('All', style: TextStyle(color: Colors.white)),
+                  child: Text('All', style: TextStyle(color: AppColors.ink)),
                 ),
               ...extra.options.map(
                 (opt) => PopupMenuItem<String?>(
@@ -481,7 +482,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   child: Text(
                     opt,
                     style: TextStyle(
-                      color: opt == currentVal ? const Color(0xFF7C5CFF) : Colors.white,
+                      color: opt == currentVal ? const Color(0xFF7C5CFF) : AppColors.ink,
                       fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
@@ -491,10 +492,10 @@ class _CatalogPageState extends State<CatalogPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: currentVal != null ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.08),
+                color: currentVal != null ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.08),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: currentVal != null ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.12),
+                  color: currentVal != null ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.12),
                 ),
               ),
               child: Row(
@@ -503,7 +504,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   Text(
                     '${extra.name.toUpperCase()}: $label',
                     style: TextStyle(
-                      color: currentVal != null ? Colors.white : Colors.white.withValues(alpha: 0.8),
+                      color: currentVal != null ? AppColors.ink : AppColors.inkAlpha(0.8),
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -512,7 +513,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   Icon(
                     Icons.arrow_drop_down,
                     size: 18,
-                    color: currentVal != null ? Colors.white : Colors.white70,
+                    color: currentVal != null ? AppColors.ink : AppColors.inkMuted,
                   ),
                 ],
               ),
@@ -538,9 +539,9 @@ class _CatalogPageState extends State<CatalogPage> {
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.7),
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.white24),
+                border: Border.all(color: AppColors.inkFaint),
               ),
-              child: Icon(icon, color: Colors.white, size: 16),
+              child: Icon(icon, color: AppColors.ink, size: 16),
             ),
           ),
         ),
@@ -568,12 +569,12 @@ class _GenreChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.08),
+          color: isSelected ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.08),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected 
               ? const Color(0xFF7C5CFF) 
-              : Colors.white.withValues(alpha: 0.12),
+              : AppColors.inkAlpha(0.12),
           ),
           boxShadow: isSelected 
             ? [BoxShadow(color: const Color(0xFF7C5CFF).withValues(alpha: 0.3), blurRadius: 8)] 
@@ -583,7 +584,7 @@ class _GenreChip extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
+            color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.7),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
             fontSize: 13,
           ),

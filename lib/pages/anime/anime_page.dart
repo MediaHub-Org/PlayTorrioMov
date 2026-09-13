@@ -22,6 +22,7 @@ import '../search/search_page.dart';
 import 'anime_search_page.dart';
 import '../anime_arabic/anime_arabic_details_page.dart';
 import '../anime_arabic/anime_arabic_stream_sheet.dart';
+import '../../services/theme/app_colors.dart';
 
 const _kAnimeGenres = [
   'Action',
@@ -331,7 +332,7 @@ class _AnimePageState extends State<AnimePage> {
       return Center(
         child: Text(
           'No $_genreFilter anime found.',
-          style: const TextStyle(color: Colors.white54, fontSize: 16),
+          style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
         ),
       );
     }
@@ -545,18 +546,18 @@ class _AnimePageState extends State<AnimePage> {
             itemBuilder: (context, anime) =>
                 AnimeCard(anime: anime, onTap: () => _openDetails(anime)),
             onRefresh: _loadAnimeData,
-            emptyState: const Center(
+            emptyState: Center(
               child: Text(
                 'Failed to load the Anime catalog.',
-                style: TextStyle(color: Colors.white54, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
               ),
             ),
           );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       body: Container(
-        color: const Color(0xFF080A0F),
+        color: AppColors.canvas,
         child: Stack(
           children: [
             RepaintBoundary(
@@ -624,9 +625,9 @@ class _AnimeHeroSlide extends StatelessWidget {
           fit: BoxFit.cover,
           alignment: const Alignment(0, -0.15),
           filterQuality: FilterQuality.medium,
-          placeholder: (_, __) => const ColoredBox(color: Color(0xFF151822)),
+          placeholder: (_, __) => ColoredBox(color: AppColors.raised),
           errorWidget: (_, __, ___) =>
-              const ColoredBox(color: Color(0xFF151822)),
+              ColoredBox(color: AppColors.raised),
         ),
 
         // Left horizontal wash for cinematic readability
@@ -638,8 +639,8 @@ class _AnimeHeroSlide extends StatelessWidget {
                 end: Alignment.centerRight,
                 stops: const [0.0, 0.38, 0.85],
                 colors: [
-                  const Color(0xFF080A0F).withValues(alpha: 0.95),
-                  const Color(0xFF080A0F).withValues(alpha: 0.70),
+                  AppColors.canvas.withValues(alpha: 0.95),
+                  AppColors.canvas.withValues(alpha: 0.70),
                   Colors.transparent,
                 ],
               ),
@@ -655,7 +656,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.center,
                 colors: [
-                  const Color(0xFF080A0F).withValues(alpha: 0.75),
+                  AppColors.canvas.withValues(alpha: 0.75),
                   Colors.transparent,
                 ],
               ),
@@ -672,8 +673,8 @@ class _AnimeHeroSlide extends StatelessWidget {
                 end: Alignment.topCenter,
                 stops: const [0.0, 0.30, 0.75],
                 colors: [
-                  const Color(0xFF080A0F),
-                  const Color(0xFF080A0F).withValues(alpha: 0.80),
+                  AppColors.canvas,
+                  AppColors.canvas.withValues(alpha: 0.80),
                   Colors.transparent,
                 ],
               ),
@@ -743,7 +744,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                           '${anime.seasonYear}',
                           style: TextStyle(
                             fontSize: 15,
-                            color: Colors.white.withValues(alpha: 0.55),
+                            color: AppColors.inkAlpha(0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -753,14 +754,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                           child: Icon(
                             Icons.circle,
                             size: 4,
-                            color: Colors.white.withValues(alpha: 0.25),
+                            color: AppColors.inkAlpha(0.25),
                           ),
                         ),
                         Text(
                           '${anime.totalEpisodes} Episodes',
                           style: TextStyle(
                             fontSize: 15,
-                            color: Colors.white.withValues(alpha: 0.55),
+                            color: AppColors.inkAlpha(0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -771,14 +772,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                           child: Icon(
                             Icons.circle,
                             size: 4,
-                            color: Colors.white.withValues(alpha: 0.25),
+                            color: AppColors.inkAlpha(0.25),
                           ),
                         ),
                         Text(
                           anime.studioName,
                           style: TextStyle(
                             fontSize: 15,
-                            color: Colors.white.withValues(alpha: 0.55),
+                            color: AppColors.inkAlpha(0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -796,7 +797,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1.2,
                       height: 1.05,
-                      color: Colors.white,
+                      color: AppColors.ink,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -815,7 +816,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: isCompact ? 14.5 : 15.5,
-                          color: Colors.white.withValues(alpha: 0.65),
+                          color: AppColors.inkAlpha(0.65),
                           height: 1.5,
                         ),
                       ),
@@ -845,7 +846,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               AppThemeService.currentPalette.value.primaryColor,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.ink,
                           padding: EdgeInsets.symmetric(
                             horizontal: isCompact ? 18 : 28,
                             vertical: isCompact ? 12 : 16,
@@ -867,14 +868,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                         icon: Icon(
                           Icons.info_outline_rounded,
                           size: isCompact ? 18 : 21,
-                          color: Colors.white.withValues(alpha: 0.80),
+                          color: AppColors.inkAlpha(0.80),
                         ),
                         label: Text(
                           'Details',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: isCompact ? 14 : 15.5,
-                            color: Colors.white.withValues(alpha: 0.80),
+                            color: AppColors.inkAlpha(0.80),
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -886,7 +887,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           side: BorderSide(
-                            color: Colors.white.withValues(alpha: 0.18),
+                            color: AppColors.inkAlpha(0.18),
                             width: 1.2,
                           ),
                         ),

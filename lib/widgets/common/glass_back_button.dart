@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The single back-navigation button design used across every page that
 /// pushes content on top of the hub (Details, Search, and so on). Used to
@@ -25,14 +26,14 @@ class GlassBackButton extends StatelessWidget {
         child: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: AppColors.ink,
             size: size,
           ),
           onPressed: onPressed ?? () => Navigator.pop(context),
           style: IconButton.styleFrom(
-            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            backgroundColor: AppColors.inkAlpha(0.1),
             padding: const EdgeInsets.all(12),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+            side: BorderSide(color: AppColors.inkAlpha(0.12)),
           ),
         ),
       ),
