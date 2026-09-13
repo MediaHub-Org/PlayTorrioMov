@@ -1,131 +1,83 @@
 # Project Roadmap — PlayTorrioMov
 
-**The app is in maintenance mode.** Every numbered feature item is closed;
-what this file tracks now is what is *known broken*, what is *waiting on a
-device*, and which decisions are settled so they do not get re-argued.
-Shipped work lives in [CHANGELOG.md](../CHANGELOG.md) and git history, not
-here — a roadmap that also carries a changelog stops being readable as
-either.
+**The app is in maintenance mode.** This file tracks three things: what is
+**open**, what is **waiting on a device**, and which **decisions are
+settled** so they do not get re-argued. Shipped work lives in
+[CHANGELOG.md](../CHANGELOG.md) and git history — a roadmap that also
+carries a changelog stops being readable as either.
 
-Items are numbered and never renumbered, so `#43` means the same thing in a
-commit message, a pull request and this file. Numbers are not reused when an
-item closes.
+Items are numbered and never renumbered or reused, so `#43` means the same
+thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-13**, on `v1.5.8+27`, after a
-full engineering audit — see *Code and consistency* and *Testing gaps*.
+Last reconciled against the tree: **2026-09-13**, on `v1.5.8+27`, at commit
+`d1c8965`. Every count below was measured at that commit.
 
 ---
 
 ## Open
 
-### Bugs
+### 1. TMDB is quiet on device, and we do not know why
 
-| # | What | State |
-|:--|:-----|:------|
-| — | TMDB shows no cast photos and no character names on a real device | **Investigating** — see below |
+Cast photos and character names do not appear. Three causes on our side are
+fixed (see #38, #53 and the TMDB commits); what remains is whether the
+bundled API key still works, and `api.themoviedb.org` is blocked from CI, so
+that is the one thing that could not be checked from here.
 
-**TMDB enrichment is quiet on device and we do not yet know why.** Three
-things were wrong on our side and are fixed:
-
-1. The missing-character fallback printed the literal word *"Cast"*, which
-   reads as a role every actor shares rather than as absent data. The second
-   line is blank now, with its height reserved so one uncredited actor
-   cannot shorten a column.
-2. Enrichment short-circuited on `hasPhotos && hasCrew`. Character names are
-   the third part of that row and were not in the test, so an addon that
-   sent photos and a director stopped the lookup cold.
-3. Nothing said *why* when TMDB itself was the problem. Every failure in
-   `TmdbService` is swallowed on purpose — a dead key should cost cast
-   photos, not the details page — which left a rejected key looking exactly
-   like a working one on the Settings card.
-
-**The next step is yours, and it is one tap:** open **Settings → Sync →
-TMDB Cast Photos** and read the status line under the card. It now reports
-the most recent request's outcome.
+**The next step is one tap.** Open **Settings → Sync → TMDB Cast Photos**
+and read the status line under the card:
 
 | What it says | What it means |
 |:-------------|:--------------|
-| *Loaded N cast and M crew from TMDB* | TMDB is fine; if the row still looks wrong the bug is in the page, not the service |
-| *TMDB rejected the API key (401)* | The bundled key is dead or revoked — add your own free key on that same card |
+| *Loaded N cast and M crew from TMDB* | TMDB is fine — if the row still looks wrong the bug is in the page, not the service |
+| *TMDB rejected the API key (401)* | The bundled key is dead. Add your own free key on that same card |
 | *Could not reach TMDB* | Network, DNS or a captive portal |
 | *TMDB has no entry for this title (404)* | That one title only; try another |
 | nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
 
-`api.themoviedb.org` is blocked from the CI environment, so whether the
-bundled key is live is exactly the thing that could not be checked from
-here. That status line is how it gets checked.
+### 2. Light mode is wired up but not painted (#52)
 
-### Light mode is wired up but not painted
+The switch works: System / Light / Dark in **Appearance & Interface**,
+persisted, defaulting to the system setting, with a real `theme`/`darkTheme`
+pair and per-palette light surfaces.
 
-The theme switch (System / Light / Dark) is in **Appearance & Interface**,
-persisted, defaulting to the system setting, and `MaterialApp` now carries
-a real `theme`/`darkTheme` pair. Each palette derives light surfaces from
-its own hue, so the eight themes stay distinguishable rather than all
-becoming the same off-white.
+**The app's own colours ignore it.** 1300 `Colors.white` references and 978
+hardcoded hex values across 79 files — 22 pages paint their own dark
+`Scaffold`, 12 their own dark `AppBar`. Selecting Light gives a correct
+Appearance & Interface page (migrated in full, to prove the mechanism) and a
+still-dark everything else.
 
-**What is not done is the app's own colours.** Roughly **1300
-`Colors.white` references and 978 hardcoded hex values across 79 files**
-ignore the theme entirely — 22 pages paint their own dark `Scaffold`, 12
-their own dark `AppBar`. So selecting Light gives a correct Appearance &
-Interface page (migrated in full, to prove the mechanism end to end) and a
-still-dark everything-else.
-
-Finishing it is mechanical but wide: replace hardcoded colours with
-`Theme.of(context).colorScheme` / `cardTheme` tokens, page by page. It
-wants doing as its own systematic pass rather than a page at a time,
-because half-migrated is the one state that looks broken rather than
+Finishing it means replacing hardcoded colours with
+`Theme.of(context).colorScheme` / `cardTheme` tokens. It wants doing as one
+systematic pass: half-migrated is the state that looks broken rather than
 merely inconsistent.
 
-### Code and consistency
+### 3. Engineering debt, from the 2026-09-13 audit
 
-An engineering audit ran on 2026-09-13. What it fixed is in git; what it
-found and left is here.
-
-**Still open, in rough value order:**
+What the audit fixed is in git. What it found and deliberately left:
 
 | What | Why it was left |
 |:-----|:----------------|
-| 90 of 182 HTTP call sites in `lib/` have **no timeout** | The aggregate risk is now bounded by a 30s per-scraper deadline in `ScraperManager`, so the search can no longer hang. Adding a timeout at each site is still right, but it is 90 edits across scrapers that would each need re-testing against a live host. |
-| `iptv_portals_modal` ↔ `live_tv_settings_page` share 45 duplicated 12-line windows | UI duplication, lower stakes than the logic duplication that was fixed. Needs a look at whether the shared part is a widget or a coincidence. |
-| 126 empty `catch` blocks | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
-| `megasource` / `nova` (49 duplicated windows) | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
+| **90 of 183 HTTP call sites have no timeout** | No longer a hang — a 30s per-scraper deadline in `ScraperManager` bounds the search (#58). Fixing each site is still right, but it is 90 edits that each want re-testing against a live host. |
+| `iptv_portals_modal` ↔ `live_tv_settings_page` share **45** duplicated 12-line windows | UI duplication, lower stakes than the logic duplication that was fixed. Needs a look at whether the shared part is a widget or a coincidence. |
+| **126 empty `catch` blocks** | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
+| `megasource` / `nova` share **49** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
 
-**Came back clean** (recorded so they are not re-audited): no TLS bypass
-anywhere; no plaintext `http://` to non-local hosts; no leaked credentials
-(tokens are in `flutter_secure_storage`, with a lazy migration off the old
-plaintext prefs); no undisposed controllers, timers or subscriptions; no
-unused dependencies — the two that look unused in Dart
-(`media_kit_libs_video`, `media_kit_libs_windows_video`) ship native
-libraries and must stay. Every file in `lib/` is reachable from
-`main.dart`.
+### 4. The scrapers are effectively untested in CI
 
-### Testing gaps
+**13 of 89 test files are `@Tags(['network'])`** and excluded by
+`flutter test --exclude-tags network` — and they are exactly the files
+covering `lib/services/scraper` and `lib/services/anime`, the two
+least-covered areas. 143 of 370 public classes are named in any test.
 
-**The scrapers and anime extractors are effectively untested in CI.**
-13 of 89 test files are `@Tags(['network'])` and excluded by
-`flutter test --exclude-tags network`, and they are exactly the files
-covering `lib/services/scraper` and `lib/services/anime` — the two
-least-covered areas by class count (26 public classes each with no test
-naming them). 143 of 370 public classes are named anywhere in a test.
+That trade is reasonable: those tests hit live third-party sites and would
+make CI flaky and slow. The gap it leaves is that a scraper's *parsing* is
+only ever exercised against whatever the site returned that day.
 
-That is a reasonable trade: those tests hit live third-party sites and
-would make CI flaky and slow. The gap it leaves is that a scraper's
-*parsing* is only ever exercised against whatever the site returned that
-day.
-
-The fix is not to un-tag them. It is to split the pure logic out and test
-it without a network, the way `glendale_master_url_test` and
-`subtitle_languages_test` now do — both of which were written during the
-audit and both of which found real bugs. Candidates in rough order: the
-per-site HTML/JSON parsers, `SubtitleExtractor`'s archive and encoding
-handling, and the IPTV playlist parsers. Every browse section renders through `BrowseScaffold` and
-`BrowseRowView`; the three details pages share one spine and one section
-heading (#41); and both players now draw from the same widgets — see
-*The two players* below.
-
-### Requested UI work
-
-**None open.**
+The fix is not to un-tag them but to split the pure logic out and test it
+offline, the way `glendale_master_url_test` and `subtitle_languages_test`
+now do — both written during the audit, both of which found real bugs.
+Candidates in order: the per-site HTML/JSON parsers, `SubtitleExtractor`'s
+archive and encoding handling, the IPTV playlist parsers.
 
 ---
 
@@ -133,24 +85,9 @@ heading (#41); and both players now draw from the same widgets — see
 
 CI can prove a parser handles a shape and a widget lays out at a width. It
 cannot tell you whether a stream reaches a TV or whether a tap *feels*
-immediate. These are the open questions, each already built and tested as
-far as it can be.
+immediate. Each of these is already built and tested as far as it can be.
 
-### 1. Cast, against a real receiver (#28)
-
-The sender path has been read for defects and had two, both fixed:
-`streamType` was hardcoded to `buffered` (a live channel announced that way
-gets a seek bar and a duration the receiver cannot honour), and `.ts` was
-being called `video/mp4` (IPTV portals serve MPEG-TS constantly, and that
-hands the receiver a demuxer that cannot read it).
-
-The button is also no longer hidden on most sources: it used to be gated on
-*"is this a torrent"*, when what actually matters is whether the receiver
-can reach the host. A torrent resolved through a debrid or served from
-another machine is as fetchable as any CDN; only this device's own loopback
-is not.
-
-**To answer:**
+### Cast, against a real receiver (#28)
 
 1. Does a **movie** reach the TV and play? (Known limit: the Cast SDK has no
    sender-side way to attach Referer/User-Agent, so scraper sources needing
@@ -158,96 +95,117 @@ is not.
 2. Does a **Live TV channel** reach the TV, and does the receiver show it as
    live — no seek bar, no phantom duration?
 3. Does **disconnect** return playback cleanly?
-4. On a stream a receiver *cannot* reach, does tapping Cast now explain
-   itself rather than doing nothing?
+4. On a stream a receiver *cannot* reach, does tapping Cast explain itself
+   rather than doing nothing?
 
-### 2. Series creators (#39)
+### Series creators (#39)
 
-`created_by` on `/tv/{id}` is the showrunner, fetched only for a series
-whose `/credits` had no directing crew. The parser is covered by tests for
-an absent, empty and malformed field — being wrong costs nothing, it just
-yields no crew, which is today's behaviour. What tests cannot confirm is
-whether the field is **populated in practice**.
+`created_by` on `/tv/{id}` is fetched only for a series whose `/credits` had
+no directing crew. The parser is covered for absent, empty and malformed
+fields; what tests cannot confirm is whether the field is **populated in
+practice**.
 
 **To answer:** open a series whose director was missing and look for a
-*Creator* card. `/tv/{id}/aggregate_credits` is the heavier fallback if
-`created_by` proves thin — a large payload whose entries carry a `jobs`
+*Creator* card. If `created_by` proves thin, the fallback is
+`/tv/{id}/aggregate_credits` — a larger payload whose entries carry a `jobs`
 array instead of a single `job`, needing a TV-shaped branch in the parser.
 
-### 3. The player, on a phone in your hand
+### The player, in your hand
 
-Everything here is laid out and guarded by tests, but "does it fit" and
-"does it feel right" are different questions.
+Laid out and guarded by tests, but "does it fit" and "does it feel right"
+are different questions.
 
-- **The menus fit the screen.** The speed menu used to run off the top of a
-  landscape phone. Every popover now goes through `PlayerMenuAnchor`, which
-  bounds it top *and* bottom and scrolls the difference. Worth checking in
-  landscape on the shortest device you have.
-- **No close buttons.** Tapping off a panel dismisses it; the back arrow
-  returns to the settings root. Check that dismissing never feels stuck.
-- **Audio track leads the settings list**, ahead of subtitles, speed and
-  aspect.
-- **Seek amounts:** double-tap the sides for ±10s, the centre buttons for
-  ±30s. Two ways in, two different amounts.
-- **The CC button is a plain on/off**, and what it turns on is the track
-  matching the audio language — no picker, no dialog. Track and style
-  selection live behind the gear.
-- **Live TV's single tap** should reveal the controls immediately; it used
-  to wait out the double-tap window.
+- **Menus in landscape** on the shortest device you have — the speed menu is
+  the one that used to run off the top of the screen.
+- **Dismissing a panel** never feels stuck, now that there are no close
+  buttons (tap off, or the back arrow).
+- **Seek amounts:** double-tap the sides for ±10s, centre buttons for ±30s.
+- **The CC button** turns on the track matching the audio language — no
+  picker, no dialog.
+- **Live TV's single tap** reveals the controls immediately.
+- **Backup export** (#50) actually lands where you pick it on Android.
+- **Simkl** (#51) connects once you paste your own client ID.
 
 ---
 
-## The two players
+## Settled decisions
 
-Live TV is meant to be the Movies/Series/Anime player **with fewer parts** —
-not a second player that happens to look similar. Both now draw from the
-same widgets: `PlayerIconButton`, `PlayerCenterControls`,
-`PlayerVolumeControl`, `PlayerSettingsMenu`, `PlayerAspectMenu` and
-`PlayerMenuAnchor`.
+### The two players
 
-`test/player_convergence_test.dart` guards the shape, because the drift is
-always the same one: a control gets hand-rolled on one page instead of
-reaching for the shared widget. It asserts the shared widgets stay
-referenced, that neither player hand-places a popover, and that no menu
-grows a close button back.
+Live TV is the Movies/Series/Anime player **with fewer parts**, not a second
+player that looks similar. `test/player_convergence_test.dart` guards that:
+the shared widgets stay referenced, neither player hand-places a popover,
+and no menu grows a close button back.
 
 **What Live TV legitimately lacks**, because a live feed has no use for it:
-seeking (the centre buttons' callbacks go null and the play button stands
-alone), a seek bar (a live-edge row sits where it would be, because absence
-alone read as a control that failed to load), and playback speed (the
-settings row is optional for exactly this).
+seeking, a seek bar (a live-edge row sits where it would be — absence alone
+read as a control that failed to load), and playback speed.
 
-**A note on a reversed decision.** This file used to record the Live TV
-aspect-ratio pill as a divergence kept on purpose — one setting behind a
-gear costs a click rather than saving one. That reasoning was sound in
-isolation and wrong against the larger goal: it was the last control on the
-page with no counterpart in the other player, and "same panel, fewer rows"
-is worth more than the tap. It is the shared gear now.
+**A reversed decision, recorded as reversed.** This file used to keep the
+Live TV aspect-ratio pill as a deliberate divergence: one setting behind a
+gear costs a click rather than saving one. Sound in isolation, wrong against
+the larger goal — it was the last control on the page with no counterpart in
+the other player, and "same panel, fewer rows" is worth more than the tap.
+
+### Declined, so they do not get re-litigated
+
+- **Multiple hubs / a hub switcher of any shape.** There is one hub; a second
+  is a bigger conversation than reintroducing the old chrome.
+- **Forcing all playback sources onto one `PlaybackCoordinator` contract
+  beyond what exists.** No second controller type to unify against.
+- **`interneto/tv-multiview`'s channel data.** No stated license, no
+  direct-stream-URL field. IPTV multi-view shipped as an original grid
+  feature instead.
+- **Renaming the Kotlin source package** from `com.example.playtorrio`. It is
+  a namespace, not an identifier anything outside the module sees.
+- **Merging Movies, Series and Anime into one section.** Movies and Series
+  are *already* one implementation — `TypeCatalogPage(type: 'movie')` and
+  `TypeCatalogPage(type: 'series')` are the same widget with a different
+  string, both opening the same `DetailsPage`; merging them removes a
+  navigation entry, not a duplicate. Anime is a different stack on purpose:
+  `AnimeMedia` from AniList rather than `MovieDetail` from addons, its own
+  library service, scraper and Arabic variant, and a character-to-voice-actor
+  relation with no equivalent for film. Flattening it would cost the
+  anime-native data that is the reason to have the section. The part worth
+  building was the single search, shipped as #48.
+- **The two recommendation rows on a details page are not duplicates.**
+  `relatedItems` is the set the title belongs to, passed in; `_similarItems`
+  comes from the BestSimilar scraper.
+
+### Audit results that came back clean
+
+Recorded so they are not re-audited from scratch: no TLS bypass anywhere; no
+plaintext `http://` to non-local hosts; no leaked credentials (tokens live in
+`flutter_secure_storage`, with a lazy migration off the old plaintext prefs);
+no undisposed controllers, timers or subscriptions; no unused dependencies —
+the two that look unused in Dart (`media_kit_libs_video`,
+`media_kit_libs_windows_video`) ship native libraries and must stay. Every
+file in `lib/` is reachable from `main.dart`.
 
 ---
 
-## Navigation
+## Reference
+
+### Navigation
 
 One hub, five sections, the last always Library:
 
-| Section      | Content                        |
-|:-------------|:-------------------------------|
-| **Movies**   | TMDB-catalog movies            |
-| **Series**   | TMDB-catalog series            |
-| **Anime**    | Its own catalog and scraper    |
-| **Live TV**  | IPTV channels                  |
-| **Library**  | Everything you've saved        |
+| Section     | Content                     |
+|:------------|:----------------------------|
+| **Movies**  | TMDB-catalog movies         |
+| **Series**  | TMDB-catalog series         |
+| **Anime**   | Its own catalog and scraper |
+| **Live TV** | IPTV channels               |
+| **Library** | Everything you've saved     |
 
-Phones show sections in the bottom tab bar; tablet and desktop show them as
-a chip row under the top bar. Search stays an icon, not a section.
+Phones show sections in the bottom tab bar; tablet and desktop show them as a
+chip row under the top bar. Search stays an icon, not a section.
 
----
+### Upstream sync
 
-## Upstream sync
-
-PlayTorrioMov originated as a fork of `MediaHub-Org/PlayTorrioMod`; that repo
-is now **archived**, so Mov is the only active app in the family and the
-direct downstream of upstream `ayman708-UX/PlayTorrioV3`.
+PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod`; that repo is
+**archived**, so Mov is the only active app in the family and the direct
+downstream of `ayman708-UX/PlayTorrioV3`.
 
 **Reviewed through `f69617b` (2026-09-13). The list is empty.**
 
@@ -261,76 +219,37 @@ Not taken, with reasons, so they are not re-reviewed:
 |:-------|:--------|
 | `9616808` | Blurred dual-layer hero backdrop to kill black bars. Every hero in this fork already uses `BoxFit.cover`, which fills and crops. It fixes a problem we do not have. |
 | `29a4127`, `1da1940` | IPTV channels, search and storage — the area this fork has diverged furthest in (#45, #46 and the portal browser are ours). Read as ideas, not ported as patches. |
-| `d2f8074` | IPTV portal manager responsiveness. A near-total rewrite of `iptv_portals_modal.dart`; our copy carries Cloud Vault, the modal customizer and the M3U tab, so a straight port would drop them. The reported overflows were hand-fixed in #40 instead — all four of them, not the two reported. |
+| `d2f8074` | IPTV portal manager responsiveness. A near-total rewrite of `iptv_portals_modal.dart`; our copy carries Cloud Vault, the modal customizer and the M3U tab, so a straight port would drop them. The reported overflows were hand-fixed in #40 instead — all four, not the two reported. |
 | Support Dev sponsor monetization | Out of scope for this fork. |
 | Keyboard aspect-cycle HUD | Mov already has an aspect control in the player's settings; a second affordance for one setting is a regression. |
 
----
-
-## Signing and releases
+### Signing and releases
 
 Android release signing **is configured** — `ANDROID_KEYSTORE_BASE64` and
-`ANDROID_KEYSTORE_PASSWORD` are both set. Released APKs therefore install
-over each other and the in-app updater works. See
-[release signing](RELEASES.md#release-signing). No other platform needs
-signing for updates, because none of them self-install — see
+`ANDROID_KEYSTORE_PASSWORD` are both set, so released APKs install over each
+other and the in-app updater works (see
+[release signing](RELEASES.md#release-signing)). No other platform needs
+signing, because none of them self-install — see
 [RELEASES.md](RELEASES.md#other-platforms).
 
-`ENV_FILE`/`DOTENV` is **not** set, and that is the one outstanding release
+`ENV_FILE`/`DOTENV` is **not set**, and that is the one outstanding release
 secret. Every published build ships an empty `.env`, so Trakt sign-in and
-Discord Rich Presence are inert in released binaries.
+Discord Rich Presence are inert in released binaries. TMDB is unaffected —
+`TmdbSettings` carries a bundled fallback key (whether it still works is open
+item 1). **Simkl is no longer blocked by it** (#51): register a free app at
+simkl.com/settings/developer and paste the client ID — Simkl's PIN flow
+authenticates with the id alone, so there is no secret to ship.
 
-**Simkl is no longer stuck behind it** (#51): the user can register a free
-app at simkl.com/settings/developer and paste its client ID into the Simkl
-card. Simkl's PIN flow authenticates with the id alone, so there is no
-secret to ship. Setting `ENV_FILE` would still make it work out of the box.
+**`build.yml` has no analyze or test step.** Only `pr-checks.yml` runs them,
+and only on a pull request, so a PR merged before its checks finish ships
+unverified — that is how v1.5.8 went out. Either wait for `pr-checks` before
+merging, or accept that the release build proves only that it compiles.
 
-TMDB is *not* affected by that secret — `TmdbSettings` carries a bundled
-fallback key. Whether that key still works is the open bug above.
+### Closed items
 
-**One thing to know about the release pipeline:** `build.yml` has **no
-analyze or test step**. Only `pr-checks.yml` runs them, and only on a pull
-request. A PR merged before its checks finish ships unverified — that is how
-v1.5.8 went out, with the version pin confirmed by reading `pubspec.yaml`,
-`app_info.dart` and the CHANGELOG off `main` directly instead. Either wait
-for `pr-checks` before merging, or accept that the release build proves only
-that it compiles.
-
----
-
-## Declined, so they do not get re-litigated
-
-- **Multiple hubs / a hub switcher of any shape.** There is one hub now; a
-  second is a bigger conversation than reintroducing the old chrome.
-- **Forcing all playback sources onto one `PlaybackCoordinator` contract
-  beyond what exists.** No second controller type to unify against.
-- **`interneto/tv-multiview`'s channel data.** No stated license, no
-  direct-stream-URL field. IPTV multi-view shipped as an original grid
-  feature instead.
-- **Renaming the Kotlin source package** from `com.example.playtorrio`. It is
-  a namespace, not an identifier anything outside the module sees.
-- **Merging Movies, Series and Anime into one section.** Measured against the
-  tree, no. Movies and Series are *already* one implementation —
-  `TypeCatalogPage(type: 'movie')` and `TypeCatalogPage(type: 'series')` are
-  the same widget with a different string, both opening the same
-  `DetailsPage`. Merging them removes a navigation entry, not a duplicate.
-  Anime is a different stack on purpose: `AnimeMedia` from AniList rather
-  than `MovieDetail` from addons, its own library service, its own scraper,
-  its own Arabic variant, and a character-to-voice-actor relation with no
-  equivalent for film. Flattening it would cost the anime-native data —
-  AniList scores, seasonal grouping, sub/dub, episode numbering — that is the
-  reason to have the section. The part of the request worth building was the
-  single search, shipped as #48.
-- **The two recommendation rows on a details page are not duplicates.**
-  `relatedItems` is the set the title belongs to, passed in; `_similarItems`
-  comes from the BestSimilar scraper. Recorded so it is not re-flagged.
-
----
-
-## Closed items
-
-For the reasoning behind any of these, read the commit — each was written to
-be the record.
+An index of what each number means, for reading old commits and PRs. #1–#14
+closed before this file was rewritten for maintenance mode and are not listed
+— they live in git history.
 
 | # | Item |
 |:--|:-----|
@@ -348,13 +267,13 @@ be the record.
 | #46 | Channels you make yourself |
 | #47 | Watch history |
 | #48 | One search across Movies, Series and Anime |
+| #49 | Settings scroll from anywhere in the window, not just the centre column |
+| #50 | Backup export/import through the system file picker |
+| #51 | User-supplied Simkl client ID, and a reason when Connect fails |
+| #52 | System / Light / Dark switch (the colour migration is open item 2) |
 | #53 | One ISO-639 table for subtitle providers (two were 51 languages short) |
 | #54 | Wyzie subtitle downloads go through `SubtitleExtractor` like the rest |
 | #55 | One master-URL builder for cinesrc/cine.su/bcine (was triplicated) |
 | #56 | One pipeline for vidfast/vidup (was two ~200-line near-clones) |
 | #57 | `print()` out of `lib/`, `avoid_print` enforced as a warning |
 | #58 | A silent scraper no longer holds the stream search open forever |
-| #49 | Settings scroll from anywhere in the window, not just the centre column |
-| #50 | Backup export/import through the system file picker |
-| #51 | User-supplied Simkl client ID, and a reason when Connect fails |
-| #52 | System / Light / Dark switch (light mode's colour migration is open, above) |
