@@ -49,27 +49,38 @@ class PlayerSeekFeedback extends StatefulWidget {
 
 class _PlayerSeekFeedbackState extends State<PlayerSeekFeedback>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 700),
-  );
+  // Built in initState, not as `late final` field initializers. Those are
+  // lazy: with no seek yet there is nothing to animate, so nothing would
+  // touch them -- and then dispose()'s `_controller.dispose()` would be the
+  // first read, constructing a ticker against an element that is already
+  // deactivated. Opening the player and leaving without seeking is the
+  // ordinary way to hit that.
+  late final AnimationController _controller;
 
   /// Quick in, brief hold, slower out -- long enough to read at a glance,
   /// short enough not to sit over the picture.
-  late final Animation<double> _opacity = TweenSequence<double>([
-    TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 18),
-    TweenSequenceItem(tween: ConstantTween(1.0), weight: 47),
-    TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 35),
-  ]).animate(_controller);
-
-  late final Animation<double> _scale = Tween<double>(
-    begin: 0.88,
-    end: 1.0,
-  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+  late final Animation<double> _opacity;
+  late final Animation<double> _scale;
+  late final CurvedAnimation _scaleCurve;
 
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _opacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 18),
+      TweenSequenceItem(tween: ConstantTween(1.0), weight: 47),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 35),
+    ]).animate(_controller);
+    _scaleCurve = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+    _scale = Tween<double>(begin: 0.88, end: 1.0).animate(_scaleCurve);
+
     if (widget.flash != null) _controller.forward(from: 0);
   }
 
@@ -84,6 +95,7 @@ class _PlayerSeekFeedbackState extends State<PlayerSeekFeedback>
 
   @override
   void dispose() {
+    _scaleCurve.dispose();
     _controller.dispose();
     super.dispose();
   }
