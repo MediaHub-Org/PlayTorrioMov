@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
+import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/iptv_controller.dart';
 import '../../services/content_display_enums.dart';
@@ -52,6 +53,7 @@ class _IptvPageState extends State<IptvPage> {
     // Liking a channel has to reorder the row it appears in, and the sheet
     // that does the liking sits over this page rather than replacing it.
     FavoriteChannelsService.items.addListener(_onSettingsChanged);
+    CustomChannelsService.items.addListener(_onSettingsChanged);
     _ctrl.init();
     _loadSections();
   }
@@ -61,6 +63,7 @@ class _IptvPageState extends State<IptvPage> {
     IptvSettings.changeNotifier.removeListener(_onSettingsChanged);
     AppThemeService.currentPalette.removeListener(_onSettingsChanged);
     FavoriteChannelsService.items.removeListener(_onSettingsChanged);
+    CustomChannelsService.items.removeListener(_onSettingsChanged);
     DiscordRpcService.instance.clearToIdle();
     super.dispose();
   }
@@ -217,6 +220,12 @@ class _IptvPageState extends State<IptvPage> {
     // now, which is the wrong place: you go to Library to manage what you
     // saved, and to Live TV to actually watch.
     final liked = FavoriteChannelsService.resolvedChannels;
+    // Channels the user built from a portal stream. Their own row rather
+    // than folded into a category: they exist because the built-in
+    // catalogue had no entry, so filing them under one of its headings
+    // would hide exactly what makes them worth having. Second, after Liked,
+    // because a liked channel is a stronger signal than a saved one.
+    final mine = CustomChannelsService.items.value;
 
     final rows = <BrowseRow<HardcodedChannel>>[
       if (liked.isNotEmpty)
@@ -224,6 +233,12 @@ class _IptvPageState extends State<IptvPage> {
           title: 'Liked',
           subtitle: 'Channels you keep, most recent first',
           items: liked,
+        ),
+      if (mine.isNotEmpty)
+        BrowseRow<HardcodedChannel>(
+          title: 'Your channels',
+          subtitle: 'Built from a stream you found in a portal',
+          items: mine,
         ),
       for (final catName in visibleCategories)
         if (categoryMap.containsKey(catName) &&

@@ -45,16 +45,31 @@ class HardcodedChannels {
     return false;
   }
 
+  /// Channels the user built from a portal stream, pushed in here by
+  /// `CustomChannelsService` once it has loaded them.
+  ///
+  /// The registry takes them rather than reading them, so this file stays a
+  /// catalog with no dependency on storage -- and so a user channel is the
+  /// same kind of record as a built-in one everywhere downstream: same
+  /// lookup, same tile, same like button, same keyword matching.
+  static List<HardcodedChannel> custom = const [];
+
+  /// Built-ins plus the user's own. This is what a lookup should use;
+  /// [all] alone would make a user channel invisible to everything that
+  /// resolves by id, its own Liked entry included.
+  static List<HardcodedChannel> get everything => [...all, ...custom];
+
   static HardcodedChannel? byId(String id) {
-    try {
-      return all.firstWhere((c) => c.id == id);
-    } catch (_) {
-      return null;
+    for (final channel in everything) {
+      if (channel.id == id) return channel;
     }
+    return null;
   }
 
   static List<HardcodedChannel> byCategory(String category) {
-    return all.where((c) => c.category.toLowerCase() == category.toLowerCase()).toList();
+    return everything
+        .where((c) => c.category.toLowerCase() == category.toLowerCase())
+        .toList();
   }
 
   static const List<HardcodedChannel> all = [

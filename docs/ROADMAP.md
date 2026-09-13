@@ -90,7 +90,39 @@ pages, and the players.
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
-| 46 | Custom Live TV channels from a portal stream | **Decided: build it.** #45 has shipped, so this is unblocked. It is what makes the portal browser's star worth demoting rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source feeding the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal.
+
+### Channels you make yourself (shipped, #46)
+
+A channel tile is a **saved search**, not a bookmark: a `HardcodedChannel`
+is `{name, category, keywords[], exclude[]}` and `matches()` filters a
+portal's streams by keyword. So a user-defined channel is not a new concept
+— it is the same record with the stream's own name as its keyword, which is
+why it can be liked, listed, searched and matched by everything that already
+handles the built-ins, with no special case anywhere downstream.
+
+**The seam is in the registry, not the catalog file.** `HardcodedChannels`
+gained `custom` and `everything`, and `CustomChannelsService` *pushes* its
+list in once loaded. The catalog file keeps no dependency on storage, and
+`byId` — which is how favorites, Library and the hub all resolve a channel —
+searches both. Without that a liked custom channel would resolve to null and
+vanish from Library without a word.
+
+**Where you make one:** the Live TV player's top bar, shown only when the
+channel was built ad hoc from a portal stream (its id is not in the
+catalogue; a real channel's is). That is the moment the user knows they want
+the stream again, and the ad-hoc channel otherwise dies with the route. The
+portal browser's four stream-tile variants were the other candidate — four
+widgets and five call sites to thread one callback through, for an action
+taken at the moment you have not yet watched the thing.
+
+**Where you undo one:** the channel sheet, and only for a custom channel —
+a built-in has nothing to delete, it is catalog data. A channel you can
+create but never remove is a trap.
+
+**On the Live TV page** they get their own row, "Your channels", after
+Liked. Not folded into a category: they exist *because* the built-in
+catalogue had no entry, so filing them under one of its headings would hide
+the thing that makes them worth having.
 
 ### The Live TV player, converged (partly shipped, #42)
 

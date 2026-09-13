@@ -8,6 +8,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../models/iptv/iptv_models.dart';
+import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/playback_coordinator.dart';
 import '../../services/player/player_settings.dart';
@@ -431,6 +432,33 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   void _togglePlayPause() {
     _player.playOrPause();
     _startHideControlsTimer();
+  }
+
+  /// True when this page was opened from a portal stream rather than from a
+  /// channel tile. The ad-hoc channel built for a stream carries the
+  /// stream's own id, which is not in the catalogue -- a real channel's is.
+  bool get _canSaveAsChannel =>
+      HardcodedChannels.byId(widget.channel.id) == null;
+
+  bool _savedAsChannel = false;
+
+  Future<void> _saveAsChannel() async {
+    final saved = await CustomChannelsService.addFromStream(
+      streamName: widget.channel.name,
+      category: widget.categoryTitle ?? widget.channel.category,
+    );
+    if (!mounted) return;
+    setState(() => _savedAsChannel = saved != null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          saved == null
+              ? 'Could not save this stream as a channel'
+              : 'Saved "${saved.name}" to Live TV',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _adjustVolume(double delta) =>
@@ -891,6 +919,31 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   ),
                                 ),
                                 const SizedBox(width: 12),
+                                // Save this stream as a Live TV channel.
+                                // Only shown for a stream that is not
+                                // already one: opened from a portal, the
+                                // channel handed to this page is built ad
+                                // hoc from the stream and disappears with
+                                // the route, so this is the moment the user
+                                // can keep it -- and the moment they know
+                                // they want to.
+                                if (_canSaveAsChannel)
+                                  IconButton(
+                                    icon: Icon(
+                                      _savedAsChannel
+                                          ? Icons.library_add_check_rounded
+                                          : Icons.library_add_outlined,
+                                      color: _savedAsChannel
+                                          ? const Color(0xFF00D2EF)
+                                          : Colors.white,
+                                    ),
+                                    tooltip: _savedAsChannel
+                                        ? 'Saved to Live TV'
+                                        : 'Save as a Live TV channel',
+                                    onPressed: _savedAsChannel
+                                        ? null
+                                        : _saveAsChannel,
+                                  ),
                                 // Category Channels / Sources Drawer Toggle
                                 if (widget.hits.length > 1)
                                   IconButton(
