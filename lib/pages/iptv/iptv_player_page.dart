@@ -13,7 +13,9 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/playback_coordinator.dart';
 import '../../services/player/player_settings.dart';
 import '../../services/window/window_service.dart';
+import '../../services/cast/cast_service.dart';
 import '../../services/discord/discord_rpc_service.dart';
+import '../../widgets/player/player_cast_sheet.dart';
 import '../../widgets/player/player_aspect_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
@@ -432,6 +434,31 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   void _togglePlayPause() {
     _player.playOrPause();
     _startHideControlsTimer();
+  }
+
+  /// The stream currently playing, as a URL a Cast receiver on the network
+  /// could fetch. Null when there is no hit to play, which is also when
+  /// there is nothing to cast.
+  String? get _castableUrl {
+    if (widget.hits.isEmpty) return null;
+    final url = widget.hits[_activeHitIndex].streamUrl;
+    // A portal stream is already a plain HTTP(S) URL -- unlike the VOD
+    // player, there is no torrent or local-file case to rule out here.
+    return url.isEmpty ? null : url;
+  }
+
+  bool get _canCast =>
+      CastService.isSupported && !_isLoading && _castableUrl != null;
+
+  void _handleCast() {
+    final url = _castableUrl;
+    if (url == null) return;
+    PlayerCastSheet.show(
+      context,
+      title: widget.channel.name,
+      streamUrl: url,
+      posterUrl: widget.channel.iconUrl,
+    );
   }
 
   /// True when this page was opened from a portal stream rather than from a
@@ -919,6 +946,19 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   ),
                                 ),
                                 const SizedBox(width: 12),
+                                // Cast. Live TV had none at all, while
+                                // Movies/Series/Anime have carried one in
+                                // this same slot -- and a channel is the
+                                // most natural thing to throw at a TV.
+                                if (_canCast)
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.cast_rounded,
+                                      color: Colors.white,
+                                    ),
+                                    tooltip: 'Cast to device',
+                                    onPressed: _handleCast,
+                                  ),
                                 // Save this stream as a Live TV channel.
                                 // Only shown for a stream that is not
                                 // already one: opened from a portal, the
@@ -1000,12 +1040,16 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           child: PlayerCenterControls(
                             isPlaying: _isPlaying,
                             onPlayPause: _togglePlayPause,
-                            onSeekBack10: isLive
+                            // ±30s, matching Movies/Series/Anime: the
+                            // buttons are the bigger jump, the double-tap
+                            // zones the small nudge. Null on live, where
+                            // seeking has no meaning.
+                            onSeekBack30: isLive
                                 ? null
-                                : () => _seekRelative(-10),
-                            onSeekForward10: isLive
+                                : () => _seekRelative(-30),
+                            onSeekForward30: isLive
                                 ? null
-                                : () => _seekRelative(10),
+                                : () => _seekRelative(30),
                           ),
                         ),
 

@@ -25,6 +25,10 @@ class PlayerSubtitleMenu extends StatefulWidget {
   final VoidCallback onOpenTextSync;
   final VoidCallback onClose;
 
+  /// Back to the settings root, when this menu was stepped into from
+  /// there rather than opened directly from the transport bar.
+  final VoidCallback? onBack;
+
   const PlayerSubtitleMenu({
     super.key,
     required this.groups,
@@ -45,6 +49,7 @@ class PlayerSubtitleMenu extends StatefulWidget {
     required this.onOpenStyleBar,
     required this.onOpenTextSync,
     required this.onClose,
+    this.onBack,
   });
 
   @override
@@ -236,6 +241,20 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Back to the settings root. This menu is the deepest
+                      // thing behind the gear and had no way back, so
+                      // reaching Aspect ratio from here meant closing and
+                      // reopening it.
+                      if (widget.onBack != null) ...[
+                        PlayerIconButton(
+                          size: buttonSize,
+                          iconSize: iconSize,
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                          tooltip: 'Back to settings',
+                          onPressed: widget.onBack,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
                       const Text(
                         'Subtitles',
                         style: TextStyle(

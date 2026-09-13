@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// Centered play/pause with ±10s seek on either side -- YouTube/Netflix
-/// style. Lives over the middle of the video, not in the bottom transport
-/// bar, so it stays reachable (and visible) regardless of how far down the
-/// bottom bar's own controls get trimmed.
+/// Centered play/pause with ±30s seek on either side. Lives over the middle
+/// of the video, not in the bottom transport bar, so it stays reachable (and
+/// visible) regardless of how far down the bottom bar's own controls get
+/// trimmed.
+///
+/// ±30s rather than ±10s so that each amount has exactly one affordance:
+/// the double-tap side zones are the small nudge, these buttons are the
+/// bigger jump. They used to be ±10s as well, which on a phone meant the
+/// gesture and the buttons did the same thing while ±30s sat in a third
+/// place, the transport bar -- three seek controls, two of them identical.
 ///
 /// The seek callbacks are optional so a live stream can use the same widget:
 /// seeking has no meaning without a duration, and the alternative -- a
@@ -14,15 +20,15 @@ import 'package:flutter/material.dart';
 class PlayerCenterControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onPlayPause;
-  final VoidCallback? onSeekBack10;
-  final VoidCallback? onSeekForward10;
+  final VoidCallback? onSeekBack30;
+  final VoidCallback? onSeekForward30;
 
   const PlayerCenterControls({
     super.key,
     required this.isPlaying,
     required this.onPlayPause,
-    this.onSeekBack10,
-    this.onSeekForward10,
+    this.onSeekBack30,
+    this.onSeekForward30,
   });
 
   @override
@@ -35,8 +41,8 @@ class PlayerCenterControls extends StatelessWidget {
     final playIconSize = isCompact ? 34.0 : 42.0;
     final gap = isCompact ? 28.0 : 44.0;
 
-    final seekBack = onSeekBack10;
-    final seekForward = onSeekForward10;
+    final seekBack = onSeekBack30;
+    final seekForward = onSeekForward30;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -46,8 +52,8 @@ class PlayerCenterControls extends StatelessWidget {
           _CenterButton(
             size: sideSize,
             iconSize: sideIconSize,
-            icon: Icons.replay_10_rounded,
-            tooltip: 'Seek -10s',
+            icon: Icons.replay_30_rounded,
+            tooltip: 'Back 30 seconds',
             onTap: seekBack,
           ),
           SizedBox(width: gap),
@@ -63,8 +69,8 @@ class PlayerCenterControls extends StatelessWidget {
           _CenterButton(
             size: sideSize,
             iconSize: sideIconSize,
-            icon: Icons.forward_10_rounded,
-            tooltip: 'Seek +10s',
+            icon: Icons.forward_30_rounded,
+            tooltip: 'Forward 30 seconds',
             onTap: seekForward,
           ),
         ],

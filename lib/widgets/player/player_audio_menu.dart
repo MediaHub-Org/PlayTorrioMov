@@ -28,6 +28,10 @@ class PlayerAudioMenu extends StatelessWidget {
   final ValueChanged<double> onDelayChanged;
   final VoidCallback onClose;
 
+  /// Back to the settings root, when this menu was stepped into from
+  /// there rather than opened directly.
+  final VoidCallback? onBack;
+
   const PlayerAudioMenu({
     super.key,
     required this.audioTracks,
@@ -36,6 +40,7 @@ class PlayerAudioMenu extends StatelessWidget {
     required this.onTrackSelected,
     required this.onDelayChanged,
     required this.onClose,
+    this.onBack,
   });
 
   String _getLanguageEmoji(String? lang) {
@@ -99,6 +104,18 @@ class PlayerAudioMenu extends StatelessWidget {
               children: [
                 Row(
                   children: [
+                    // Back to the settings root -- this menu is reached from
+                    // there, and had no way back to it.
+                    if (onBack != null) ...[
+                      PlayerIconButton(
+                        size: 28,
+                        iconSize: 14,
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        tooltip: 'Back to settings',
+                        onPressed: onBack,
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: isCompactH ? 4 : 8,

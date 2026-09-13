@@ -39,6 +39,18 @@ is now **archived**, so Mov is the only active app in the family and the
 direct downstream of upstream `ayman708-UX/PlayTorrioV3` — no more relaying
 through PlayTorrioMod.
 
+**Last synced: `3670ae1`, 2026-09-10. Reviewed again 2026-09-13** — upstream
+has seven commits since, and only two were worth taking: `db2a4b9` and
+`0343720`, both hardening the Linux CI job against a `dl.google.com` apt
+source the runner image ships that periodically breaks `apt-get update`.
+**Ported to both `build.yml` and `pr-checks.yml`** (our Linux builds were
+passing, so this is pre-emptive: it is a red build that would not have been
+ours). Of the rest: `7b32112` is an upstream version bump, `f69617b` a merge
+commit, and `29a4127`/`1da1940` add IPTV channels, search and storage —
+which is the area this fork has diverged furthest in (#45, #46 and the
+portal browser are all ours), so they need reading as ideas rather than
+porting as patches. `9616808` remains as before.
+
 **Last synced: `3670ae1`, 2026-09-10.** Ported download auto-reconnect,
 "Copy Stream URL", and the fullscreen-state-on-exit fix from that commit;
 deliberately not ported: its Support Dev sponsor monetization feature (out
@@ -153,6 +165,35 @@ create but never remove is a trap.
 Liked. Not folded into a category: they exist *because* the built-in
 catalogue had no entry, so filing them under one of its headings would hide
 the thing that makes them worth having.
+
+### The player's menus became one panel (shipped)
+
+Requested: *subtitle config inside settings, opening with a back button, no
+extra pop-up, fewer clicks.*
+
+The six menus behind the gear — settings, subtitles, audio, speed, aspect,
+style — were already one panel swapping its contents rather than a stack of
+pop-ups. What made them *read* as pop-ups is that **none of them led back**:
+stepping from Settings into Subtitles and then wanting Aspect ratio meant
+closing the panel and reopening the gear. A shared `PlayerMenuHeader` now
+carries an optional back arrow, and the player tracks which menu a sub-menu
+was stepped into from, so the arrow appears only when there is somewhere to
+go. Opened straight from the transport bar, a menu still shows no arrow —
+promising a screen the user never came from would be worse than none.
+
+Two clicks from the gear to anything, one from any sub-menu back to the
+root.
+
+**Cast is in the Live TV player now** too. Movies/Series/Anime have carried
+a cast icon in that same top-bar slot all along; Live TV had none, and a
+channel is the most natural thing to throw at a TV. Unlike the VOD player
+there is no torrent or local-file case to rule out — a portal stream is
+already a plain HTTP(S) URL a receiver can fetch — so the button appears
+whenever Cast is supported and a stream is playing.
+
+**The subtitle icon was already a plain on/off toggle** (YouTube's CC
+button), with track and style selection behind the gear, so nothing was
+needed there.
 
 ### The Live TV player, converged (partly shipped, #42)
 
@@ -299,33 +340,76 @@ child in a `Row`, which does not shrink; it paints outside the box**:
   `Wrap` of two groups with `spaceBetween`: unchanged on a wide dialog, and
   the delete pair drops to a second line on a narrow one.
 
-### Where the ±30s buttons went (shipped, #44)
+### One amount, one affordance (shipped, #44)
 
-The centred overlay keeps play/pause and ±10s and gained nothing: five
-controls in one row is one too many to aim at, especially on a phone. ±30s
-went to the **centre of the transport bar's bottom row** instead — between
-volume and the subtitle/settings group, which is empty space on a phone and
-within thumb reach. The side groups became `Expanded`, so the pair is
-centred on the bar rather than on whatever room the volume control happens
-to leave; under `spaceBetween` it would have sat off-centre, and shifted as
-the left group changed shape between compact and wide.
+Requested as ±30s alongside the existing ±10s. It shipped first with ±30s
+in the transport bar and ±10s on the centred buttons — which, on a phone,
+meant **three** seek controls on one screen and two of them doing the same
+thing: the double-tap side zones and the centred buttons were both ±10s.
 
-The two steps are for different things, which is why both exist: ±10s to
-catch a line of dialogue, ±30s to clear an ad break or an opening.
+Settled, on the user's call:
 
-**One feedback path, not four.** Every fixed step — the double-tap zones,
-the centred ±10s buttons, the new ±30s buttons, the arrow keys — already
-routed through `_seekRelative`, so the flash was added there once. There is
-no second path that could animate differently, or not at all. It appears on
-the side matching the direction, and is deliberately **not** gated on the
+| control | amount |
+|---|---|
+| double-tap side zones (touch) | ±10s |
+| centred buttons beside play | ±30s |
+| transport bar | *nothing* — its ±30s pair was removed |
+| arrow keys / J / L (desktop) | ±10s |
+
+The gesture is the small nudge, the visible buttons the bigger jump — the
+shape YouTube uses. Desktop keeps ±10s on the keyboard, which was already
+wired, so nothing is lost there by the centred buttons moving to ±30s.
+
+**One feedback path, still.** Every fixed step routes through
+`_seekRelative`, so the flash was added there once and shows on the side
+that moved, whatever asked for it. It is deliberately not gated on the
 controls being visible: a double-tap seek happens with the overlay hidden,
-which is exactly when confirmation that the tap registered matters most.
+which is when confirmation matters most. Repeat taps accumulate, so three
+quick +10s taps read "30 seconds"; turning around starts a new count.
 
-**It counts.** Repeat taps in the same direction accumulate, so three quick
-+10s taps read "30 seconds" — what the viewer is actually asking for —
-rather than flashing "10 seconds" three times. Turning around starts a new
-count instead of cancelling out: the number describes the current gesture,
-not a running total of the session.
+### The CC button answers instead of asking (shipped)
+
+The subtitle button is a toggle, and a toggle should never open a menu — but
+with nothing selected yet it did exactly that, opening the picker.
+
+**The answer is the audio language.** Subtitles exist to put in writing what
+is being said, so the track matching the selected audio track is the one that
+makes the words on screen the words in the room. Everything below that is a
+fallback for when no such track exists: the file's own `default` flag, then
+English, then simply the first — a subtitle in the wrong language still
+answers "turn subtitles on" better than nothing happening.
+
+Matching had to be **by language, not by string**. Audio and subtitle tracks
+in the same file are routinely labelled in different schemes — an `eng` audio
+track beside an `English` subtitle is the common case, not the exotic one —
+so `languageKey` reduces both to one comparable key across the spellings
+these actually arrive as (`en`, `eng`, `English`, `en-US`, `Español`,
+`ja (Japanese)`). Whole-word matching matters here: a naive `contains('en')`
+picks a **Slovenian** track for English audio.
+
+With no embedded track it falls back to whatever a subtitle search has
+already turned up, and **never starts a new search**: a toggle should not
+leave the user waiting on the network to find out whether it worked. With
+genuinely nothing available it says so rather than leaving a button that
+looks broken.
+
+The rules live in `SubtitleAutoPick`, in the model layer rather than the
+player, because they are a judgement call about what "best" means and worth
+reading on their own. The full picker is still one tap away behind the gear.
+
+**Note:** this app has no preferred-subtitle-language setting, and none was
+added — the audio track is a better signal than a preference set once and
+forgotten. If one is ever wanted it slots in above the `default` flag, not
+above the audio match.
+
+### Swipe-to-adjust is gone (shipped)
+
+Vertical drag set volume on the left half and brightness on the right. Mobile
+had already lost it — hardware volume keys and the OS brightness control do
+the same job reliably, and an accidental swipe changed either one mid-watch.
+Removed on desktop too, on the same argument: there is a volume slider in the
+bar, and screen brightness is the display's business, not a video player's.
+The brightness dim overlay and the gesture HUD went with it.
 
 ### Why Downloads stays in the Library (shipped, #43)
 
