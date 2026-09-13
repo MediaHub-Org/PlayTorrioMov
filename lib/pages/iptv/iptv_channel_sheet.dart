@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/iptv/iptv_models.dart';
+import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_controller.dart';
@@ -244,6 +245,25 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                         );
                       },
                     ),
+
+                    // Delete, for a channel the user made themselves. A
+                    // built-in has nothing to delete -- it is catalog data --
+                    // so this is the only place a custom one can be undone,
+                    // and a channel you can create but never remove is a
+                    // trap.
+                    if (CustomChannelsService.isCustom(ch.id))
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Colors.white70,
+                          size: 22,
+                        ),
+                        tooltip: 'Delete this channel',
+                        onPressed: () async {
+                          await CustomChannelsService.remove(ch.id);
+                          if (context.mounted) Navigator.pop(context);
+                        },
+                      ),
 
                     // Pen / Edit Button
                     if (results.isNotEmpty)

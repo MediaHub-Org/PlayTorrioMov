@@ -4,18 +4,25 @@ import 'package:flutter/material.dart';
 /// style. Lives over the middle of the video, not in the bottom transport
 /// bar, so it stays reachable (and visible) regardless of how far down the
 /// bottom bar's own controls get trimmed.
+///
+/// The seek callbacks are optional so a live stream can use the same widget:
+/// seeking has no meaning without a duration, and the alternative -- a
+/// second, near-identical play/pause somewhere else -- is how the Live TV
+/// player drifted away from this one in the first place. With them null the
+/// play button stands alone, centred, at the same size and in the same
+/// place.
 class PlayerCenterControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onPlayPause;
-  final VoidCallback onSeekBack10;
-  final VoidCallback onSeekForward10;
+  final VoidCallback? onSeekBack10;
+  final VoidCallback? onSeekForward10;
 
   const PlayerCenterControls({
     super.key,
     required this.isPlaying,
     required this.onPlayPause,
-    required this.onSeekBack10,
-    required this.onSeekForward10,
+    this.onSeekBack10,
+    this.onSeekForward10,
   });
 
   @override
@@ -28,32 +35,39 @@ class PlayerCenterControls extends StatelessWidget {
     final playIconSize = isCompact ? 34.0 : 42.0;
     final gap = isCompact ? 28.0 : 44.0;
 
+    final seekBack = onSeekBack10;
+    final seekForward = onSeekForward10;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        _CenterButton(
-          size: sideSize,
-          iconSize: sideIconSize,
-          icon: Icons.replay_10_rounded,
-          tooltip: 'Seek -10s',
-          onTap: onSeekBack10,
-        ),
-        SizedBox(width: gap),
+        if (seekBack != null) ...[
+          _CenterButton(
+            size: sideSize,
+            iconSize: sideIconSize,
+            icon: Icons.replay_10_rounded,
+            tooltip: 'Seek -10s',
+            onTap: seekBack,
+          ),
+          SizedBox(width: gap),
+        ],
         _PlayPauseButton(
           isPlaying: isPlaying,
           size: playSize,
           iconSize: playIconSize,
           onTap: onPlayPause,
         ),
-        SizedBox(width: gap),
-        _CenterButton(
-          size: sideSize,
-          iconSize: sideIconSize,
-          icon: Icons.forward_10_rounded,
-          tooltip: 'Seek +10s',
-          onTap: onSeekForward10,
-        ),
+        if (seekForward != null) ...[
+          SizedBox(width: gap),
+          _CenterButton(
+            size: sideSize,
+            iconSize: sideIconSize,
+            icon: Icons.forward_10_rounded,
+            tooltip: 'Seek +10s',
+            onTap: seekForward,
+          ),
+        ],
       ],
     );
   }

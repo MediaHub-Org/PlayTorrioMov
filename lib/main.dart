@@ -18,6 +18,7 @@ import './services/updater/app_updater_service.dart';
 import './services/backup/cloud_backup_settings.dart';
 import './services/download/download_service.dart';
 import './services/continue_watching/continue_watching_service.dart';
+import './services/iptv/custom_channels_service.dart';
 import './services/iptv/favorite_channels_service.dart';
 import './services/iptv/iptv_controller.dart';
 import './services/iptv/iptv_settings.dart';
@@ -92,6 +93,7 @@ void main() async {
     CastService.initialize(),
     CloudBackupSettings.initialize(),
     ContinueWatchingService.initialize(),
+    CustomChannelsService.initialize(),
     FavoriteChannelsService.initialize(),
     IptvController.instance.init(),
     IptvSettings.initialize(),
