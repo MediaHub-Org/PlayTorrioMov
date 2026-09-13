@@ -475,7 +475,12 @@ class _PlayerScreenState extends State<PlayerScreen>
       _applyVolume(_isMuted ? 0.0 : _volume);
 
       _resolvedStreamUrl = cleanUri.toString();
-      _isCastableSource = !isTorrentStream;
+      // Where the stream lives, not what produced it. The old test was
+      // `!isTorrentStream`, which hid the Cast button on most of this app's
+      // sources -- including the many torrent ones that resolve through a
+      // debrid or a torrent server on another machine and are perfectly
+      // fetchable by a receiver.
+      _isCastableSource = CastService.canCastUrl(_resolvedStreamUrl);
 
       await _player.open(
         Media(
@@ -1951,7 +1956,22 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   void _handleCast() {
     final url = _resolvedStreamUrl;
-    if (url == null) return;
+    // A null url is the offline path: a downloaded file played straight off
+    // this device's disk, which has no URL at all for a receiver to fetch.
+    // Same answer as an unreachable one, so the button never just does
+    // nothing.
+    if (url == null || !_isCastableSource) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'This source plays from your device, so a Cast receiver on the '
+            'network cannot reach it. Pick a different source to cast.',
+          ),
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
     PlayerCastSheet.show(
       context,
       title: widget.detail?.name ?? _currentTitle,
@@ -2026,13 +2046,14 @@ class _PlayerScreenState extends State<PlayerScreen>
                   title: widget.detail?.name ?? _currentTitle,
                   subtitle: episodeSubtitle,
                   quality: _currentSource.name,
-                  // No Cast SDK on desktop; a downloaded file or a torrent
-                  // source (resolved to this device's own 127.0.0.1 server)
-                  // has no URL a Cast receiver on the network could fetch.
-                  onCast:
-                      (_isLoading ||
-                          !_isCastableSource ||
-                          !CastService.isSupported)
+                  // Shown whenever the platform has a Cast SDK at all --
+                  // there is none on desktop. It used to be hidden for any
+                  // source this device serves itself, which on a phone meant
+                  // it was absent from the movie player almost always, with
+                  // nothing to say why. Now it is there, and tapping it on
+                  // an unreachable stream explains the problem instead of
+                  // the button silently not existing.
+                  onCast: (_isLoading || !CastService.isSupported)
                       ? null
                       : _handleCast,
                   onCopyStreamUrl: (_isLoading || _resolvedStreamUrl == null)
