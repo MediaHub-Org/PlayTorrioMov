@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
+import '../../widgets/common/details_section_header.dart';
 import '../../models/anime/anime_media.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anilist_service.dart';
@@ -849,8 +850,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Characters & Cast'),
-        const SizedBox(height: _Space.md),
+        DetailsSectionHeader('Characters & Cast'),
         MouseRegion(
           onEnter: (_) => setState(() => _isHoveringCast = true),
           onExit: (_) => setState(() => _isHoveringCast = false),
@@ -961,8 +961,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Staff'),
-        const SizedBox(height: _Space.md),
+        DetailsSectionHeader('Staff'),
         SizedBox(
           height: 180,
           child: ListView.separated(
@@ -1042,16 +1041,12 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           crossAxisAlignment: WrapCrossAlignment.center,
           alignment: WrapAlignment.spaceBetween,
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildSectionHeader('Episodes'),
-                const SizedBox(width: 8),
-                Text(
-                  '($totalEps total)',
-                  style: const TextStyle(color: Colors.white54, fontSize: 14),
-                ),
-              ],
+            DetailsSectionHeader(
+              'Episodes',
+              trailing: Text(
+                '($totalEps total)',
+                style: const TextStyle(color: Colors.white54, fontSize: 14),
+              ),
             ),
 
             Row(
@@ -1296,8 +1291,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Franchise & Relations'),
-        const SizedBox(height: _Space.md),
+        DetailsSectionHeader('Franchise & Relations'),
         MouseRegion(
           onEnter: (_) => setState(() => _isHoveringRelations = true),
           onExit: (_) => setState(() => _isHoveringRelations = false),
@@ -1452,8 +1446,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('You May Also Like'),
-          const SizedBox(height: _Space.md),
+          DetailsSectionHeader('You May Also Like'),
           MouseRegion(
             onEnter: (_) => setState(() => _isHoveringRecs = true),
             onExit: (_) => setState(() => _isHoveringRecs = false),
@@ -1584,17 +1577,6 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.4,
-        color: Colors.white,
-      ),
-    );
-  }
 }
 
 class _HoverScale extends StatefulWidget {

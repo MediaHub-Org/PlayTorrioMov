@@ -11,11 +11,11 @@ re-argued from the one-line summary. Anything ruled out entirely goes to
 [Declined](#declined-so-they-do-not-get-re-litigated) with its reasoning
 rather than being deleted.
 
-Last reconciled against the tree: **2026-09-13**, after PR #16 merged
-(#39, #40, #44, #47, #48). Items #38-#48 came out of testing the v1.5.7
-Android build on a real device; the Bugs section that testing filled is now
-empty, and what is left is standardisation (#41, #42), one feature (#46),
-and three that need a person rather than a patch (#15, #21, #28).
+Last reconciled against the tree: **2026-09-13**. **Every numbered item is
+closed.** What remains is not a list of tasks but three things only a device
+can answer, each noted in its own section: whether TMDB's `created_by` is
+populated in practice (#39), whether a stream actually reaches a TV (#28),
+and whether the Live TV tap now feels immediate (#42).
 
 ## Navigation
 
@@ -49,7 +49,10 @@ ours). Of the rest: `7b32112` is an upstream version bump, `f69617b` a merge
 commit, and `29a4127`/`1da1940` add IPTV channels, search and storage —
 which is the area this fork has diverged furthest in (#45, #46 and the
 portal browser are all ours), so they need reading as ideas rather than
-porting as patches. `9616808` remains as before.
+porting as patches. `9616808` is **closed as not needed**: it adds a blurred dual-layer hero
+backdrop to eliminate black bars, and every hero in this fork already uses
+`BoxFit.cover`, which fills and crops. It fixes a problem we do not have.
+With that, **the upstream list is empty** — reviewed through `f69617b`.
 
 **Last synced: `3670ae1`, 2026-09-10.** Ported download auto-reconnect,
 "Copy Stream URL", and the fullscreen-state-on-exit fix from that commit;
@@ -85,52 +88,124 @@ verified against the live API from CI (see its note).
 
 ## Code and consistency
 
-Every browse section — Movies/Series, Anime and Live TV — renders through
-`BrowseScaffold` and `BrowseRowView`, so "the same kind of page" is one
-implementation. What is still uneven is the *information* inside those
-pages, and the players.
-
-| #  | Task | Details |
-|----|------|---------|
-| 41 | Details pages: Arabic anime still stands apart | **Movies/Series and Anime now match — see *The details spine, measured*.** What is left is `anime_arabic_details_page.dart`: its own hero, no section headers at all, and none of the shared blocks. Close to a rewrite of its 996 lines, so it is its own pass — and worth taking **after** the Movies/Series and Anime alignment has been seen on a device, since that is the layout it would be rewritten to match. |
+**None open.** Every browse section — Movies/Series, Anime and Live TV —
+renders through `BrowseScaffold` and `BrowseRowView`; the three details
+pages share one spine and one section heading (#41); and the two players
+share their controls (#42). What each converged on, and the few divergences
+kept deliberately, are recorded in the sections below.
 
 ## Requested UI work
 
-| #  | Task | Details |
-|----|------|---------|
-| 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
-| 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
-| 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
+**None open.** The last three — mobile-first as a standing policy (#15), the
+logo accent (#21) and Google Cast (#28) — are covered below. #28 is the one
+that still wants a person: its code is fixed and tested, but whether a
+stream actually reaches a TV can only be answered with a receiver on the
+network.
 
-### The details spine, measured (#41)
+### Mobile-first, made checkable (shipped, #15)
+
+A policy nobody can check is a wish, so #15 shipped as a rule with a test
+behind it rather than a paragraph. **No `SizedBox` in `lib/` may declare a
+fixed width of 360 or more** — 360dp is the narrowest width the app is
+expected to work at, and a fixed width larger than that cannot shrink:
+whatever it holds is painted past the edge of the screen. A clamped or
+computed width is fine, and is what the fix looks like.
+
+The audit turned up **one** real offender out of three candidates: the
+custom decoder-chain dialog in video player settings, pinned at `width:
+400`, which overflowed on exactly the devices this app is mostly used on.
+It is clamped to the available width now, and still 400 wherever there is
+room. The other two were false positives worth naming so they are not
+"fixed" later by mistake: `anime_page`'s 500/450 boxes are decorative glow
+blobs deliberately positioned off-screen, and `cast_service`'s 480 is a
+poster *resolution* sent to the receiver, not a layout width.
+
+### The logo's film-strip rule (shipped, #21)
+
+A short film-strip rule under the wordmark: a bar with sprocket holes
+punched along it, in the theme's accent colour.
+
+**Under, not beside.** The icon already owns the left of the header, and a
+second mark there would crowd a phone header that also carries Settings.
+Underlining costs no horizontal room, which is the scarce dimension.
+
+**Short, not a full underline.** Stretching it to the available width would
+run it far past the text on a desktop header, and measuring the text's own
+width would cost an `IntrinsicWidth` for the sake of an accent.
+
+**Drawn, not an asset**, so it takes the theme colour — and drawn as a
+single even-odd path rather than a bar with holes painted over it, so the
+holes are genuinely transparent and the rule works over the header's
+gradient instead of only over whatever flat colour it was designed against.
+
+### Cast: the code is ready, the receiver is yours (#28)
+
+This could never be finished from CI — whether a stream reaches a TV needs
+a Cast-capable receiver on the network. What *could* be done was reading
+the path for defects, and it had two, both only reachable once Live TV
+gained a cast button:
+
+- **`streamType` was hardcoded to `buffered`.** A live channel announced
+  that way gets a seek bar and a duration the receiver cannot honour. The
+  SDK has a `live` type for exactly this; `isLive` now threads from the
+  player through the cast sheet to `loadMedia`.
+- **`.ts` was being called `video/mp4`.** IPTV portals serve MPEG-TS
+  constantly, and that hands the receiver a demuxer that cannot read it.
+  Now `video/mp2t`.
+
+**What a device test needs to answer**, none of which CI can:
+
+1. Does a **movie** reach the TV and play? (The known limit stands: the Cast
+   SDK has no sender-side way to attach Referer/User-Agent, so scraper
+   sources needing them will fail on the TV while playing fine locally.
+   Direct/CDN sources are the ones to try.)
+2. Does a **Live TV channel** reach the TV, and does the receiver show it as
+   live — no seek bar, no phantom duration?
+3. Does **disconnect** return playback cleanly?
+
+### The details spine, measured (shipped, #41)
 
 Measured against the tree before changing anything, the three pages were
 further along than the item assumed. Movies/Series and Anime **already**
-agreed on the whole upper half, mobile and desktop alike: title, then the
-metadata row, then play and the library action row, then synopsis, then
-genres. Earlier work had converged them — `LibraryActionsRow` gave them one
-library row, and #38 gave both real credits.
+agreed on the whole upper half, mobile and desktop alike: title, metadata
+row, play and the library action row, synopsis, genres. Earlier work had
+converged them — `LibraryActionsRow` gave them one library row, #38 gave
+both real credits.
 
-**One thing was genuinely out of order,** and it is now fixed: anime put
-**Staff** before **Characters & Cast**, so its credits came second and its
-section-specific block led the page. Credits now lead, where Movies and
-Series put Cast & Crew.
-
-**Characters & Cast is the credits block for anime** — a
+**Anime's credits were out of order** and now lead, where Movies and Series
+put Cast & Crew. Characters & Cast is the credits block for anime — a
 character-to-voice-actor list answers for anime what actor-to-character
 answers for film — and **Staff stays** as anime's one section-specific
-block. It answers what Characters cannot (who directed it, who scored it,
-which studio) and has no other home on the page, so folding it in would
-have meant a mixed row and dropping it would have lost the information.
+block: it answers what Characters cannot (who directed it, who scored it,
+which studio) and has no other home.
+
+**The real drift was the section headings**, and it had already happened.
+Movies/Series used `FontWeight.bold` at `-0.3` letter spacing with 16px
+beneath; Anime used `w800` at `-0.4` with none; Arabic anime prefixed an
+accent icon and set no letter spacing. Each was defensible alone; together
+the same page type read as three. One `DetailsSectionHeader` now serves all
+three, with a `trailing` slot for the two headings that carry something on
+the right (Anime's episode count, Arabic's jump-to-episode field) — those
+were hand-built rows before, which is why they were the ones that drifted
+furthest. A guard test catches the fourth.
+
+**Arabic anime's gutter joined its family.** It used `60 / 32 / 16` where
+its two siblings use `48 / 24`. Note this is *not* `AppSpacing.pageInset`
+(`16 / 20 / 24`): that is the browse-page gutter, and a details page sits in
+a narrower max-width column with a wider inset. Converging Arabic onto the
+browse value would have moved it out of the family it belongs to.
 
 **One thing that looked like duplication is not.** Movies/Series carries
-both a *More Like This* row and a *Similar Content* row, which reads as two
-recommendation blocks. They are different sources answering different
-questions: `relatedItems` is passed in by the caller — the set this title
-belongs to — while `_similarItems` comes from the BestSimilar scraper. Both
-stay.
+both a *More Like This* row and a *Similar Content* row. They are different
+sources answering different questions: `relatedItems` is passed in by the
+caller — the set this title belongs to — while `_similarItems` comes from
+the BestSimilar scraper. Both stay.
 
-**Arabic anime is the remainder** and is tracked as #41's open half.
+**Still divergent, and left alone deliberately:** Arabic anime derives
+`isDesktop` from a hand-rolled `screenWidth > 900` rather than
+`AppBreakpoints`, in one place while using `AppBreakpoints` in another.
+Worth fixing, but it is a behaviour change at the boundary rather than a
+layout one, so it does not ride along with a visual convergence.
 
 ### Channels you make yourself (shipped, #46)
 

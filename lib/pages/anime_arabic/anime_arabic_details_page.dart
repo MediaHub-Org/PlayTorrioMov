@@ -14,10 +14,13 @@ import '../../widgets/common/library_actions_row.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_arabic_stream_sheet.dart';
 import '../../services/app_breakpoints.dart';
+import '../../widgets/common/details_section_header.dart';
 
 class _Space {
   static const md = 16.0;
+  static const lg = 24.0;
   static const xl = 32.0;
+  static const xxl = 48.0;
 }
 
 class _Palette {
@@ -294,7 +297,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                               SliverToBoxAdapter(
                                 child: Padding(
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: isDesktop ? 60 : (isMobile ? 16 : 32),
+                                    horizontal: isDesktop ? _Space.xxl : _Space.lg,
                                     vertical: _Space.md,
                                   ),
                                   child: isMobile
@@ -310,7 +313,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                                 SliverToBoxAdapter(
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: isDesktop ? 60 : (isMobile ? 16 : 32),
+                                      horizontal: isDesktop ? _Space.xxl : _Space.lg,
                                     ),
                                     child: _buildEpisodesSection(),
                                   ),
@@ -323,7 +326,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                                 SliverToBoxAdapter(
                                   child: Padding(
                                     padding: EdgeInsets.only(
-                                      left: isDesktop ? 60 : (isMobile ? 16 : 32),
+                                      left: isDesktop ? _Space.xxl : _Space.lg,
                                       bottom: 60,
                                     ),
                                     child: _buildRelatedSection(),
@@ -632,52 +635,46 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header
-        Row(
-          children: [
-            Icon(Icons.video_library_rounded, color: _Palette.accent, size: 22),
-            const SizedBox(width: 10),
-            Text(
-              'الحلقات ($totalEpisodes)',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const Spacer(),
-
-            // Jump to Episode field
-            if (totalEpisodes > 1)
-              SizedBox(
-                width: 110,
-                height: 36,
-                child: TextField(
-                  controller: _jumpEpController,
-                  keyboardType: TextInputType.number,
-                  onSubmitted: _jumpToEpisode,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: 'اذهب لرقم...',
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.35), fontSize: 12),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                    filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.06),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: _Palette.accent),
+        DetailsSectionHeader(
+          'الحلقات ($totalEpisodes)',
+          // Jump to Episode field
+          trailing: totalEpisodes > 1
+              ? SizedBox(
+                  width: 110,
+                  height: 36,
+                  child: TextField(
+                    controller: _jumpEpController,
+                    keyboardType: TextInputType.number,
+                    onSubmitted: _jumpToEpisode,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'اذهب لرقم...',
+                      hintStyle: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.35),
+                        fontSize: 12,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 0,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withValues(alpha: 0.06),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: _Palette.accent),
+                      ),
                     ),
                   ),
-                ),
-              ),
-          ],
+                )
+              : null,
         ),
 
-        const SizedBox(height: 16),
 
         // Batches tabs if > 50 episodes
         if (totalBatches > 1)
@@ -877,21 +874,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(Icons.recommend_rounded, color: _Palette.accent, size: 22),
-              const SizedBox(width: 10),
-              const Text(
-                'أنميات ذات صلة',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
+          const DetailsSectionHeader('أنميات ذات صلة'),
           MouseRegion(
             onEnter: (_) => setState(() => _isHoveringRecs = true),
             onExit: (_) => setState(() => _isHoveringRecs = false),

@@ -485,6 +485,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       title: widget.channel.name,
       streamUrl: url,
       posterUrl: widget.channel.iconUrl,
+      isLive: _isLiveStream,
     );
   }
 

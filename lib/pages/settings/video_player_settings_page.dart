@@ -1195,7 +1195,12 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ],
             ),
             content: SizedBox(
-              width: 400,
+              // Mobile-first: a flat 400 is wider than a 360dp phone once
+              // the dialog's own margins are taken out, so this overflowed
+              // on exactly the devices the app is mostly used on. Clamped
+              // to what is actually available, and still 400 wherever
+              // there is room.
+              width: (MediaQuery.sizeOf(context).width - 80).clamp(0.0, 400.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
