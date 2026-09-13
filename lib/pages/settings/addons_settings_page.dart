@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/addon/addon.dart';
 import '../../services/addon/addon_manager.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 class AddonsSettingsPage extends StatefulWidget {
   const AddonsSettingsPage({super.key});
@@ -208,119 +209,115 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      body: SettingsScrollView(
+        topPadding: 20,
+        bottomPadding: 20,
+        children: [
+          // Description
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Text(
+              'Addons provide movie, series, and anime metadata catalogs for your home page and search.',
+              style: TextStyle(
+                fontSize: 13.5,
+                color: Colors.white.withValues(alpha: 0.5),
+                height: 1.4,
+              ),
+            ),
+          ),
+
+          // Add Addon Button
+          _AddAddonButton(isLoading: _isAdding, onTap: _addAddon),
+          const SizedBox(height: 24),
+
+          // Section Header
+          Row(
             children: [
-              // Description
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
+              Text(
+                'INSTALLED ADDONS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white.withValues(alpha: 0.35),
+                  letterSpacing: 1.1,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 child: Text(
-                  'Addons provide movie, series, and anime metadata catalogs for your home page and search.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.white.withValues(alpha: 0.5),
-                    height: 1.4,
+                  '${addons.length} Total',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF7C5CFF),
                   ),
                 ),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
 
-              // Add Addon Button
-              _AddAddonButton(isLoading: _isAdding, onTap: _addAddon),
-              const SizedBox(height: 24),
-
-              // Section Header
-              Row(
+          // Addons List or Empty State
+          if (addons.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: const Color(0xFF12151E),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+              ),
+              child: Column(
                 children: [
-                  Text(
-                    'INSTALLED ADDONS',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white.withValues(alpha: 0.35),
-                      letterSpacing: 1.1,
-                    ),
+                  Icon(Icons.extension_off_rounded, size: 40, color: Colors.white.withValues(alpha: 0.25)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'No Addons Installed',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF7C5CFF).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '${addons.length} Total',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF7C5CFF),
-                      ),
-                    ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Click "Add Addon" above to install a Stremio manifest URL.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12.5, color: Colors.white.withValues(alpha: 0.4)),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-
-              // Addons List or Empty State
-              if (addons.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF12151E),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.extension_off_rounded, size: 40, color: Colors.white.withValues(alpha: 0.25)),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'No Addons Installed',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white70),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Click "Add Addon" above to install a Stremio manifest URL.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12.5, color: Colors.white.withValues(alpha: 0.4)),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                ...addons.map(
-                  (addon) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _AddonCard(
-                      addon: addon,
-                      onToggle: (enabled) async {
-                        await _manager.toggleAddon(addon.manifest.id, enabled);
-                        setState(() {});
-                      },
-                      onUpdateFeature: ({
-                        enableCatalogs,
-                        enableSearch,
-                        enableSubtitles,
-                        enableStreams,
-                      }) async {
-                        await _manager.updateAddonFeature(
-                          addonId: addon.manifest.id,
-                          enableCatalogs: enableCatalogs,
-                          enableSearch: enableSearch,
-                          enableSubtitles: enableSubtitles,
-                          enableStreams: enableStreams,
-                        );
-                        setState(() {});
-                      },
-                      onRemove: () => _confirmRemove(addon),
-                    ),
-                  ),
+            )
+          else
+            ...addons.map(
+              (addon) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _AddonCard(
+                  addon: addon,
+                  onToggle: (enabled) async {
+                    await _manager.toggleAddon(addon.manifest.id, enabled);
+                    setState(() {});
+                  },
+                  onUpdateFeature: ({
+                    enableCatalogs,
+                    enableSearch,
+                    enableSubtitles,
+                    enableStreams,
+                  }) async {
+                    await _manager.updateAddonFeature(
+                      addonId: addon.manifest.id,
+                      enableCatalogs: enableCatalogs,
+                      enableSearch: enableSearch,
+                      enableSubtitles: enableSubtitles,
+                      enableStreams: enableStreams,
+                    );
+                    setState(() {});
+                  },
+                  onRemove: () => _confirmRemove(addon),
                 ),
-            ],
-          ),
-        ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -24,6 +24,7 @@ class AppThemePalette {
 
 abstract final class AppThemeService {
   static const _storageKey = 'app_theme_id';
+  static const _modeStorageKey = 'app_theme_mode';
 
   static const List<AppThemePalette> palettes = [
     AppThemePalette(
@@ -103,6 +104,16 @@ abstract final class AppThemeService {
   static final ValueNotifier<AppThemePalette> currentPalette =
       ValueNotifier<AppThemePalette>(palettes[0]);
 
+  /// Light, dark, or whatever the device is set to.
+  ///
+  /// [ThemeMode.system] is the default, and is the honest one: the app has
+  /// no business overriding a preference the user already expressed to
+  /// their OS. It only becomes an explicit light or dark once they pick
+  /// one in Appearance & Interface.
+  static final ValueNotifier<ThemeMode> themeMode = ValueNotifier<ThemeMode>(
+    ThemeMode.system,
+  );
+
   static Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString(_storageKey);
@@ -113,6 +124,7 @@ abstract final class AppThemeService {
       );
       currentPalette.value = found;
     }
+    themeMode.value = decodeMode(prefs.getString(_modeStorageKey));
   }
 
   static Future<void> setPalette(AppThemePalette palette) async {
@@ -121,18 +133,90 @@ abstract final class AppThemeService {
     await prefs.setString(_storageKey, palette.id);
   }
 
-  static ThemeData createThemeData(AppThemePalette palette) {
+  static Future<void> setThemeMode(ThemeMode mode) async {
+    if (themeMode.value == mode) return;
+    themeMode.value = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_modeStorageKey, encodeMode(mode));
+  }
+
+  /// Stored as a stable string rather than an enum index, so reordering
+  /// ThemeMode upstream cannot silently flip everyone's saved choice.
+  @visibleForTesting
+  static String encodeMode(ThemeMode mode) => switch (mode) {
+    ThemeMode.light => 'light',
+    ThemeMode.dark => 'dark',
+    ThemeMode.system => 'system',
+  };
+
+  /// Anything unrecognised -- including null, which is a fresh install --
+  /// means follow the system.
+  @visibleForTesting
+  static ThemeMode decodeMode(String? stored) => switch (stored) {
+    'light' => ThemeMode.light,
+    'dark' => ThemeMode.dark,
+    _ => ThemeMode.system,
+  };
+
+  /// The palette's surfaces for a given brightness.
+  ///
+  /// Light surfaces are derived rather than hand-written: each is the
+  /// palette's own hue at low saturation and high lightness, so Emerald's
+  /// light theme reads green-tinted and Sunset's warm, the same way their
+  /// dark surfaces do. Hand-writing twenty-four more constants would have
+  /// let them drift from the primary they are supposed to belong to.
+  static Color surfaceFor(
+    AppThemePalette palette,
+    Brightness brightness, {
+    required AppThemeSurface surface,
+  }) {
+    if (brightness == Brightness.dark) {
+      return switch (surface) {
+        AppThemeSurface.scaffold => palette.scaffoldBackgroundColor,
+        AppThemeSurface.card => palette.cardBackgroundColor,
+        AppThemeSurface.appBar => palette.appBarBackgroundColor,
+      };
+    }
+    final hsl = HSLColor.fromColor(palette.primaryColor);
+    final lightness = switch (surface) {
+      AppThemeSurface.scaffold => 0.955,
+      AppThemeSurface.card => 0.995,
+      AppThemeSurface.appBar => 0.92,
+    };
+    // Saturation 0.45, not something subtler. At this lightness an 8-bit
+    // channel is the limit: at 0.22 the tint rounded away and Cyberpunk,
+    // Sunset and Pink Barbie all resolved to the same #F9F6F7, which would
+    // have collapsed three palettes into one in light mode. 0.45 survives
+    // the rounding and still reads as a white page, not a coloured one.
+    return HSLColor.fromAHSL(1, hsl.hue, 0.45, lightness).toColor();
+  }
+
+  static ThemeData createThemeData(
+    AppThemePalette palette, [
+    Brightness brightness = Brightness.dark,
+  ]) {
     return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: palette.scaffoldBackgroundColor,
+      brightness: brightness,
+      scaffoldBackgroundColor: surfaceFor(
+        palette,
+        brightness,
+        surface: AppThemeSurface.scaffold,
+      ),
       useMaterial3: true,
-      colorSchemeSeed: palette.primaryColor,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: palette.primaryColor,
+        brightness: brightness,
+      ),
       appBarTheme: AppBarTheme(
-        backgroundColor: palette.appBarBackgroundColor,
+        backgroundColor: surfaceFor(
+          palette,
+          brightness,
+          surface: AppThemeSurface.appBar,
+        ),
         surfaceTintColor: Colors.transparent,
       ),
       cardTheme: CardThemeData(
-        color: palette.cardBackgroundColor,
+        color: surfaceFor(palette, brightness, surface: AppThemeSurface.card),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
@@ -146,3 +230,8 @@ abstract final class AppThemeService {
     );
   }
 }
+
+/// The three surfaces a palette paints. Public because [AppThemeService.surfaceFor]
+/// takes one, and a private type in a public signature is both a lint and a
+/// method nobody outside this library can call.
+enum AppThemeSurface { scaffold, card, appBar }

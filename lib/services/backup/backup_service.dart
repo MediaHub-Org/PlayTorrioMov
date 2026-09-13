@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_info.dart';
@@ -38,19 +39,16 @@ bool isPrivateOrLoopbackHost(String host) {
 /// on purpose -- the local and cloud transports both ship the same
 /// [_buildEnvelopeJson] envelope, just to a different destination.
 abstract final class BackupService {
-  static const _fileName = 'playtorrio_backup.json';
-
-  static Future<File> _backupFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File('${dir.path}/$_fileName');
-  }
-
-  /// Absolute path of the backup file (whether or not it exists yet), so
-  /// the UI can show the user where their data lives.
-  static Future<String> backupFilePath() async => (await _backupFile()).path;
-
   /// Builds the same versioned JSON envelope both the local file and the
   /// cloud transport write.
+  ///
+  /// Visible for tests: the destination is now a dialog the user drives,
+  /// which a unit test cannot, but the part worth covering -- that every
+  /// SharedPreferences value type survives a round trip -- lives here and
+  /// is unchanged by that.
+  @visibleForTesting
+  static Future<String> buildEnvelopeJson() => _buildEnvelopeJson();
+
   static Future<String> _buildEnvelopeJson() async {
     final prefs = await SharedPreferences.getInstance();
     final data = <String, dynamic>{
@@ -65,9 +63,12 @@ abstract final class BackupService {
     return jsonEncode(envelope);
   }
 
-  /// Restores every key found in an envelope produced by [_buildEnvelopeJson].
+  /// Restores every key found in an envelope produced by [buildEnvelopeJson].
   /// Returns how many keys were restored. Existing keys not present in the
   /// backup are left untouched.
+  @visibleForTesting
+  static Future<int> applyEnvelopeJson(String raw) => _applyEnvelopeJson(raw);
+
   static Future<int> _applyEnvelopeJson(String raw) async {
     final envelope = jsonDecode(raw);
     if (envelope is! Map || envelope['data'] is! Map) {
@@ -100,21 +101,81 @@ abstract final class BackupService {
     return restored;
   }
 
-  /// Writes every SharedPreferences key to the backup file and returns its
-  /// path.
-  static Future<String> export() async {
-    final file = await _backupFile();
-    await file.writeAsString(await _buildEnvelopeJson());
-    return file.path;
+  /// The filename offered in the save dialog. Dated, because a backup you
+  /// can only ever have one of is a backup you overwrite before you have
+  /// checked the last one.
+  static String suggestedFileName([DateTime? now]) {
+    final d = now ?? DateTime.now();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return 'playtorrio-backup-${d.year}-${two(d.month)}-${two(d.day)}.json';
   }
 
-  /// Restores every key found in the backup file written by [export].
-  static Future<int> import() async {
-    final file = await _backupFile();
-    if (!await file.exists()) {
-      throw Exception('No backup file found at ${file.path}');
+  /// Writes every SharedPreferences key to a file the user picks, and
+  /// returns where it went. Null means they cancelled the dialog.
+  ///
+  /// This used to write to the app documents directory and hand back
+  /// the path. On desktop that is merely inconvenient; on Android it is
+  /// app-private storage (`/data/user/0/<package>/app_flutter`), which no
+  /// file manager can open and no other app can read -- so the export
+  /// reported a path the user could not reach and could not act on. A
+  /// backup nobody can get at is not a backup.
+  static Future<String?> exportToPickedFile() async {
+    final json = await _buildEnvelopeJson();
+    final bytes = Uint8List.fromList(utf8.encode(json));
+
+    final destination = await FilePicker.platform.saveFile(
+      dialogTitle: 'Save your ${AppInfo.name} backup',
+      fileName: suggestedFileName(),
+      bytes: bytes,
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+    );
+    if (destination == null) return null;
+
+    // On Android and iOS the plugin writes `bytes` itself, through the
+    // system document provider, and what comes back can be a content:// URI
+    // that File() cannot open. On desktop it only returns the chosen path
+    // and the write is ours to do.
+    if (!_pluginWritesTheFile) {
+      await File(destination).writeAsString(json);
     }
-    return _applyEnvelopeJson(await file.readAsString());
+    return destination;
+  }
+
+  /// True on the platforms where file_picker's saveFile performs the write.
+  static bool get _pluginWritesTheFile =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+  /// Restores every key found in a backup file the user picks. Null means
+  /// they cancelled.
+  ///
+  /// Picked rather than read from a fixed path for the same reason as the
+  /// export: the file now lives wherever they chose to put it, which may be
+  /// another device's Downloads folder entirely.
+  static Future<int?> importFromPickedFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      dialogTitle: 'Choose a ${AppInfo.name} backup',
+      type: FileType.custom,
+      allowedExtensions: const ['json'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return null;
+
+    final picked = result.files.single;
+
+    // `withData` gives bytes on every platform including Android, where
+    // `path` may be absent or point at a cache copy.
+    final data = picked.bytes;
+    final String contents;
+    if (data != null) {
+      contents = utf8.decode(data);
+    } else if (picked.path != null) {
+      contents = await File(picked.path!).readAsString();
+    } else {
+      throw Exception('Could not read the selected file.');
+    }
+
+    return _applyEnvelopeJson(contents);
   }
 
   static Map<String, String> _webDavAuthHeader(CloudBackupConfig config) {

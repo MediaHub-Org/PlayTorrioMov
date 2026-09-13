@@ -54,6 +54,27 @@ the most recent request's outcome.
 bundled key is live is exactly the thing that could not be checked from
 here. That status line is how it gets checked.
 
+### Light mode is wired up but not painted
+
+The theme switch (System / Light / Dark) is in **Appearance & Interface**,
+persisted, defaulting to the system setting, and `MaterialApp` now carries
+a real `theme`/`darkTheme` pair. Each palette derives light surfaces from
+its own hue, so the eight themes stay distinguishable rather than all
+becoming the same off-white.
+
+**What is not done is the app's own colours.** Roughly **1300
+`Colors.white` references and 978 hardcoded hex values across 79 files**
+ignore the theme entirely — 22 pages paint their own dark `Scaffold`, 12
+their own dark `AppBar`. So selecting Light gives a correct Appearance &
+Interface page (migrated in full, to prove the mechanism end to end) and a
+still-dark everything-else.
+
+Finishing it is mechanical but wide: replace hardcoded colours with
+`Theme.of(context).colorScheme` / `cardTheme` tokens, page by page. It
+wants doing as its own systematic pass rather than a page at a time,
+because half-migrated is the one state that looks broken rather than
+merely inconsistent.
+
 ### Code and consistency
 
 **None open.** Every browse section renders through `BrowseScaffold` and
@@ -215,8 +236,13 @@ signing for updates, because none of them self-install — see
 [RELEASES.md](RELEASES.md#other-platforms).
 
 `ENV_FILE`/`DOTENV` is **not** set, and that is the one outstanding release
-secret. Every published build ships an empty `.env`, so Trakt sign-in, Simkl
-sign-in and Discord Rich Presence are inert in released binaries.
+secret. Every published build ships an empty `.env`, so Trakt sign-in and
+Discord Rich Presence are inert in released binaries.
+
+**Simkl is no longer stuck behind it** (#51): the user can register a free
+app at simkl.com/settings/developer and paste its client ID into the Simkl
+card. Simkl's PIN flow authenticates with the id alone, so there is no
+secret to ship. Setting `ENV_FILE` would still make it work out of the box.
 
 TMDB is *not* affected by that secret — `TmdbSettings` carries a bundled
 fallback key. Whether that key still works is the open bug above.
@@ -281,3 +307,7 @@ be the record.
 | #46 | Channels you make yourself |
 | #47 | Watch history |
 | #48 | One search across Movies, Series and Anime |
+| #49 | Settings scroll from anywhere in the window, not just the centre column |
+| #50 | Backup export/import through the system file picker |
+| #51 | User-supplied Simkl client ID, and a reason when Connect fails |
+| #52 | System / Light / Dark switch (light mode's colour migration is open, above) |

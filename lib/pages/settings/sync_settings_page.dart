@@ -6,11 +6,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../services/trakt/trakt_constants.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
+import '../../services/simkl/simkl_settings.dart';
 import '../../services/my_list/my_list_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
 /// Simkl, TMDB and Discord Rich Presence. Trakt/Simkl used to be the whole
@@ -39,24 +41,18 @@ class SyncSettingsPage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-            children: [
-              const _TraktSyncCard(),
-              const SizedBox(height: 16),
-              const _SimklSyncCard(),
-              const SizedBox(height: 16),
-              const _TmdbConnectCard(),
-              if (_isDesktop) ...[
-                const SizedBox(height: 16),
-                const _DiscordPresenceCard(),
-              ],
-            ],
-          ),
-        ),
+      body: SettingsScrollView(
+        children: [
+          const _TraktSyncCard(),
+          const SizedBox(height: 16),
+          const _SimklSyncCard(),
+          const SizedBox(height: 16),
+          const _TmdbConnectCard(),
+          if (_isDesktop) ...[
+            const SizedBox(height: 16),
+            const _DiscordPresenceCard(),
+          ],
+        ],
       ),
     );
   }
@@ -82,6 +78,17 @@ class _SyncCardChrome extends StatelessWidget {
   /// Trakt now gates new API-app registration behind Trakt VIP, so without
   /// one configured, tapping Connect always errors with no explanation).
   final String? unavailableNote;
+
+  /// An action offered alongside [unavailableNote] -- for the case where
+  /// the user can fix the unavailability themselves. Simkl's is "paste your
+  /// own client ID"; Trakt has none, because only the developer can clear
+  /// its blocker.
+  final String? unavailableActionLabel;
+  final VoidCallback? onUnavailableAction;
+
+  /// The most recent auth outcome, shown under the card. Null hides it.
+  final String? statusNote;
+
   final VoidCallback onConnect;
   final VoidCallback onDisconnect;
   final VoidCallback onCopyCode;
@@ -100,6 +107,9 @@ class _SyncCardChrome extends StatelessWidget {
     required this.pairingHint,
     required this.verifyUrlLabel,
     this.unavailableNote,
+    this.unavailableActionLabel,
+    this.onUnavailableAction,
+    this.statusNote,
     required this.onConnect,
     required this.onDisconnect,
     required this.onCopyCode,
@@ -266,6 +276,54 @@ class _SyncCardChrome extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ],
+          // Outside the note on purpose: once the user has supplied a
+          // client ID the note is gone, but they still need a way back to
+          // the field to change or clear it.
+          if (onUnavailableAction != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: onUnavailableAction,
+                child: Text(
+                  unavailableActionLabel ?? 'Fix this',
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+          ],
+          // What the last auth attempt actually did. Connect used to fail
+          // with one generic line whatever went wrong -- a missing client
+          // ID, an ID the provider rejected, and a dead network all read
+          // the same, though only two of those are the user's to fix.
+          if (statusNote != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 15,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    statusNote!,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontSize: 12,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
           if (pairing && userCode != null) ...[
@@ -584,8 +642,15 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
     if (!mounted) return;
     if (res == null) {
       setState(() => _pairing = false);
+      // The card's own status line carries the reason; the snackbar would
+      // otherwise repeat a generic failure over the top of it.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to request Simkl PIN code.')),
+        SnackBar(
+          content: Text(
+            SimklSettings.lastStatus.value ??
+                'Failed to request Simkl PIN code.',
+          ),
+        ),
       );
       return;
     }
@@ -624,8 +689,99 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
     await _checkStatus();
   }
 
+  Future<void> _showClientIdDialog() async {
+    final controller = TextEditingController(
+      text: SimklSettings.clientId.value ?? '',
+    );
+
+    final id = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF151822),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Simkl client ID',
+          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Register an app at simkl.com/settings/developer (free, takes '
+              'a minute) and paste its Client ID here. Any redirect URI will '
+              'do -- this app signs in with a PIN code, not a redirect.',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'Client ID',
+                hintStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.3),
+                ),
+                filled: true,
+                fillColor: const Color(0xFF0D1017),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF00ADFF),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text(
+              'Save',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (id == null) return;
+    await SimklSettings.setClientId(id.isEmpty ? null : id);
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<String?>(
+      valueListenable: SimklSettings.clientId,
+      builder: (context, _, __) => ValueListenableBuilder<String?>(
+        valueListenable: SimklSettings.lastStatus,
+        builder: (context, status, __) => _buildCard(status),
+      ),
+    );
+  }
+
+  Widget _buildCard(String? status) {
     return _SyncCardChrome(
       icon: Icons.tv_rounded,
       color: const Color(0xFF00ADFF),
@@ -637,6 +793,19 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
       userCode: _userCode,
       pairingHint: 'Enter this PIN code at simkl.com/pin:',
       verifyUrlLabel: 'Open simkl.com/pin',
+      // Every published build ships an empty .env, so there is no Simkl
+      // client ID in it and Connect could only ever fail. Unlike Trakt's
+      // blocker, this one the user can clear themselves in a minute.
+      unavailableNote: SimklSettings.needsUserClientId
+          ? 'This build shipped without a Simkl client ID, so Connect has '
+                'nothing to sign in with. Registering your own app at '
+                'simkl.com/settings/developer is free and takes a minute.'
+          : null,
+      unavailableActionLabel: SimklSettings.clientId.value == null
+          ? 'Add a client ID'
+          : 'Change client ID',
+      onUnavailableAction: _showClientIdDialog,
+      statusNote: status,
       onConnect: _startPairing,
       onDisconnect: _logout,
       onCopyCode: () {

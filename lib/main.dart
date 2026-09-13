@@ -25,6 +25,7 @@ import './services/iptv/iptv_settings.dart';
 import './services/media_session/media_session_service.dart';
 import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
+import 'services/simkl/simkl_settings.dart';
 import './services/tmdb/tmdb_settings.dart';
 import './services/stream/torrent_stream_service.dart';
 import './services/config/env_service.dart';
@@ -99,6 +100,7 @@ void main() async {
     IptvSettings.initialize(),
     MyListService.initialize(),
     TmdbSettings.initialize(),
+    SimklSettings.initialize(),
     P2pSettingsService.initialize(),
     // Loads which built-in scrapers the user switched off. Must land before
     // the first scrapeAll, which reads the result synchronously.
@@ -181,15 +183,28 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
     return ValueListenableBuilder<AppThemePalette>(
       valueListenable: AppThemeService.currentPalette,
       builder: (context, palette, _) {
-        return MaterialApp(
-          navigatorKey: navigatorKey,
-          title: AppInfo.name,
-          debugShowCheckedModeBanner: false,
-          theme: AppThemeService.createThemeData(palette),
-          scrollBehavior: const MaterialScrollBehavior().copyWith(
-            overscroll: false,
-          ),
-          home: const HubPage(),
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: AppThemeService.themeMode,
+          builder: (context, mode, _) {
+            return MaterialApp(
+              navigatorKey: navigatorKey,
+              title: AppInfo.name,
+              debugShowCheckedModeBanner: false,
+              // Both are always built; `themeMode` picks between them, and
+              // ThemeMode.system defers to the platform brightness, which
+              // Flutter re-reads and rebuilds on when the OS toggles.
+              theme: AppThemeService.createThemeData(palette, Brightness.light),
+              darkTheme: AppThemeService.createThemeData(
+                palette,
+                Brightness.dark,
+              ),
+              themeMode: mode,
+              scrollBehavior: const MaterialScrollBehavior().copyWith(
+                overscroll: false,
+              ),
+              home: const HubPage(),
+            );
+          },
         );
       },
     );

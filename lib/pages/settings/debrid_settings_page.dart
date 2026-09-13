@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/debrid/debrid_service.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 class DebridSettingsPage extends StatefulWidget {
   const DebridSettingsPage({super.key});
@@ -263,315 +264,311 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            children: [
-              // Header description
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Text(
-                  'Stream torrents and magnet links instantly through high-speed cloud debrid providers without local peer-to-peer downloading.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.white.withValues(alpha: 0.5),
-                    height: 1.4,
-                  ),
-                ),
+      body: SettingsScrollView(
+        topPadding: 20,
+        bottomPadding: 20,
+        children: [
+          // Header description
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Text(
+              'Stream torrents and magnet links instantly through high-speed cloud debrid providers without local peer-to-peer downloading.',
+              style: TextStyle(
+                fontSize: 13.5,
+                color: Colors.white.withValues(alpha: 0.5),
+                height: 1.4,
               ),
+            ),
+          ),
 
-              // Master Debrid Toggle Card
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF12151E),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _useDebrid
-                        ? const Color(0xFF00E5FF).withValues(alpha: 0.35)
-                        : Colors.white.withValues(alpha: 0.08),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Master Debrid Toggle Card
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xFF12151E),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: _useDebrid
+                    ? const Color(0xFF00E5FF).withValues(alpha: 0.35)
+                    : Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.cloud_download_rounded,
-                            color: Color(0xFF00E5FF),
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Use Debrid for Streams',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Route torrent links through cloud servers',
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Switch.adaptive(
-                          value: _useDebrid,
-                          activeColor: const Color(0xFF00E5FF),
-                          onChanged: (val) async {
-                            setState(() => _useDebrid = val);
-                            await _debrid.saveUseDebridForStreams(val);
-                            if (val) {
-                              final service = _selectedService;
-                              if (service == 'None') {
-                                _showSnack(
-                                  'Select an active Debrid provider and save your API key below.',
-                                  isError: true,
-                                );
-                              } else {
-                                final hasKey = await _debrid.hasKeyForService(service);
-                                if (!hasKey) {
-                                  _showSnack(
-                                    '$service has no API key saved. Please enter and save your key below.',
-                                    isError: true,
-                                  );
-                                } else {
-                                  _showSnack('Debrid streaming activated via $service');
-                                }
-                              }
-                            } else {
-                              _showSnack('Debrid streaming disabled. Using local engine.');
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'When enabled, all torrents from PlayTorrio and Stremio addons are resolved exclusively through your active Debrid provider without touching the local torrent engine.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 12,
-                        height: 1.35,
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.cloud_download_rounded,
+                        color: Color(0xFF00E5FF),
+                        size: 24,
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Active Provider Selector
-              Text(
-                'ACTIVE PROVIDER',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF12151E),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Select Default Debrid Provider',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'PlayTorrio will send requests to this provider when streaming.',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.45),
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: services.contains(_selectedService) ? _selectedService : 'None',
-                      dropdownColor: const Color(0xFF151822),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFF0D1017),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Color(0xFF00E5FF)),
-                        ),
-                      ),
-                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
-                      items: services.map((s) {
-                        return DropdownMenuItem<String>(
-                          value: s,
-                          child: Row(
-                            children: [
-                              Icon(
-                                s == 'None' ? Icons.block_rounded : Icons.flash_on_rounded,
-                                size: 16,
-                                color: s == 'None' ? Colors.white38 : const Color(0xFF00E5FF),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(s),
-                            ],
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Use Debrid for Streams',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        );
-                      }).toList(),
+                          SizedBox(height: 4),
+                          Text(
+                            'Route torrent links through cloud servers',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Switch.adaptive(
+                      value: _useDebrid,
+                      activeColor: const Color(0xFF00E5FF),
                       onChanged: (val) async {
-                        if (val != null) {
-                          setState(() => _selectedService = val);
-                          await _debrid.saveSelectedService(val);
-                          if (val != 'None') {
-                            final hasKey = await _debrid.hasKeyForService(val);
+                        setState(() => _useDebrid = val);
+                        await _debrid.saveUseDebridForStreams(val);
+                        if (val) {
+                          final service = _selectedService;
+                          if (service == 'None') {
+                            _showSnack(
+                              'Select an active Debrid provider and save your API key below.',
+                              isError: true,
+                            );
+                          } else {
+                            final hasKey = await _debrid.hasKeyForService(service);
                             if (!hasKey) {
                               _showSnack(
-                                '$val selected, but has no API key saved yet. Please enter and save your key below.',
+                                '$service has no API key saved. Please enter and save your key below.',
+                                isError: true,
                               );
-                              return;
+                            } else {
+                              _showSnack('Debrid streaming activated via $service');
                             }
                           }
-                          _showSnack('Active Debrid service set to $val');
+                        } else {
+                          _showSnack('Debrid streaming disabled. Using local engine.');
                         }
                       },
                     ),
                   ],
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Provider API Keys
-              Text(
-                'PROVIDER CREDENTIALS',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
+                const SizedBox(height: 14),
+                Text(
+                  'When enabled, all torrents from PlayTorrio and Stremio addons are resolved exclusively through your active Debrid provider without touching the local torrent engine.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 12,
+                    height: 1.35,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-
-              // Real-Debrid Card
-              _buildProviderCard(
-                name: 'Real-Debrid',
-                subtitle: _statusMap['Real-Debrid'] != null
-                    ? 'Logged in as ${_statusMap['Real-Debrid']}'
-                    : 'Get token from real-debrid.com/apitoken',
-                statusBadge: _statusMap['Real-Debrid'],
-                badgeColor: const Color(0xFF10B981),
-                controller: _rdKeyCtrl,
-                isLoading: _loadingMap['Real-Debrid'] == true,
-                isActive: _selectedService == 'Real-Debrid',
-                onSave: () => _saveProviderKey('Real-Debrid', _rdKeyCtrl),
-              ),
-              const SizedBox(height: 12),
-
-              // TorBox Card
-              _buildProviderCard(
-                name: 'TorBox',
-                subtitle: _statusMap['TorBox'] != null
-                    ? 'Account: ${_statusMap['TorBox']}'
-                    : 'Get key from torbox.app/settings',
-                statusBadge: _statusMap['TorBox'],
-                badgeColor: const Color(0xFF10B981),
-                controller: _torboxKeyCtrl,
-                isLoading: _loadingMap['TorBox'] == true,
-                isActive: _selectedService == 'TorBox',
-                onSave: () => _saveProviderKey('TorBox', _torboxKeyCtrl),
-              ),
-              const SizedBox(height: 12),
-
-              // AllDebrid Card
-              _buildProviderCard(
-                name: 'AllDebrid',
-                subtitle: _statusMap['AllDebrid'] != null
-                    ? 'Account: ${_statusMap['AllDebrid']}'
-                    : 'Get key from alldebrid.com/apikeys',
-                statusBadge: _statusMap['AllDebrid'],
-                badgeColor: const Color(0xFF10B981),
-                controller: _alldebridKeyCtrl,
-                isLoading: _loadingMap['AllDebrid'] == true,
-                isActive: _selectedService == 'AllDebrid',
-                onSave: () => _saveProviderKey('AllDebrid', _alldebridKeyCtrl),
-              ),
-              const SizedBox(height: 12),
-
-              // Premiumize Card
-              _buildProviderCard(
-                name: 'Premiumize',
-                subtitle: _statusMap['Premiumize'] != null
-                    ? 'Account: Connected'
-                    : 'Get key from premiumize.me/account',
-                statusBadge: _statusMap['Premiumize'],
-                badgeColor: const Color(0xFF10B981),
-                controller: _premiumizeKeyCtrl,
-                isLoading: _loadingMap['Premiumize'] == true,
-                isActive: _selectedService == 'Premiumize',
-                onSave: () => _saveProviderKey('Premiumize', _premiumizeKeyCtrl),
-              ),
-              const SizedBox(height: 12),
-
-              // Debrid-Link Card
-              _buildProviderCard(
-                name: 'Debrid-Link',
-                subtitle: _statusMap['Debrid-Link'] != null
-                    ? 'Account: ${_statusMap['Debrid-Link']}'
-                    : 'Get key from debrid-link.com/webapp/apikey',
-                statusBadge: _statusMap['Debrid-Link'],
-                badgeColor: const Color(0xFF10B981),
-                controller: _debridlinkKeyCtrl,
-                isLoading: _loadingMap['Debrid-Link'] == true,
-                isActive: _selectedService == 'Debrid-Link',
-                onSave: () => _saveProviderKey('Debrid-Link', _debridlinkKeyCtrl),
-              ),
-              const SizedBox(height: 20),
-            ],
+              ],
+            ),
           ),
-        ),
+
+          const SizedBox(height: 24),
+
+          // Active Provider Selector
+          Text(
+            'ACTIVE PROVIDER',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFF12151E),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Select Default Debrid Provider',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'PlayTorrio will send requests to this provider when streaming.',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.45),
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  value: services.contains(_selectedService) ? _selectedService : 'None',
+                  dropdownColor: const Color(0xFF151822),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color(0xFF0D1017),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Color(0xFF00E5FF)),
+                    ),
+                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  items: services.map((s) {
+                    return DropdownMenuItem<String>(
+                      value: s,
+                      child: Row(
+                        children: [
+                          Icon(
+                            s == 'None' ? Icons.block_rounded : Icons.flash_on_rounded,
+                            size: 16,
+                            color: s == 'None' ? Colors.white38 : const Color(0xFF00E5FF),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(s),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (val) async {
+                    if (val != null) {
+                      setState(() => _selectedService = val);
+                      await _debrid.saveSelectedService(val);
+                      if (val != 'None') {
+                        final hasKey = await _debrid.hasKeyForService(val);
+                        if (!hasKey) {
+                          _showSnack(
+                            '$val selected, but has no API key saved yet. Please enter and save your key below.',
+                          );
+                          return;
+                        }
+                      }
+                      _showSnack('Active Debrid service set to $val');
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Provider API Keys
+          Text(
+            'PROVIDER CREDENTIALS',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Real-Debrid Card
+          _buildProviderCard(
+            name: 'Real-Debrid',
+            subtitle: _statusMap['Real-Debrid'] != null
+                ? 'Logged in as ${_statusMap['Real-Debrid']}'
+                : 'Get token from real-debrid.com/apitoken',
+            statusBadge: _statusMap['Real-Debrid'],
+            badgeColor: const Color(0xFF10B981),
+            controller: _rdKeyCtrl,
+            isLoading: _loadingMap['Real-Debrid'] == true,
+            isActive: _selectedService == 'Real-Debrid',
+            onSave: () => _saveProviderKey('Real-Debrid', _rdKeyCtrl),
+          ),
+          const SizedBox(height: 12),
+
+          // TorBox Card
+          _buildProviderCard(
+            name: 'TorBox',
+            subtitle: _statusMap['TorBox'] != null
+                ? 'Account: ${_statusMap['TorBox']}'
+                : 'Get key from torbox.app/settings',
+            statusBadge: _statusMap['TorBox'],
+            badgeColor: const Color(0xFF10B981),
+            controller: _torboxKeyCtrl,
+            isLoading: _loadingMap['TorBox'] == true,
+            isActive: _selectedService == 'TorBox',
+            onSave: () => _saveProviderKey('TorBox', _torboxKeyCtrl),
+          ),
+          const SizedBox(height: 12),
+
+          // AllDebrid Card
+          _buildProviderCard(
+            name: 'AllDebrid',
+            subtitle: _statusMap['AllDebrid'] != null
+                ? 'Account: ${_statusMap['AllDebrid']}'
+                : 'Get key from alldebrid.com/apikeys',
+            statusBadge: _statusMap['AllDebrid'],
+            badgeColor: const Color(0xFF10B981),
+            controller: _alldebridKeyCtrl,
+            isLoading: _loadingMap['AllDebrid'] == true,
+            isActive: _selectedService == 'AllDebrid',
+            onSave: () => _saveProviderKey('AllDebrid', _alldebridKeyCtrl),
+          ),
+          const SizedBox(height: 12),
+
+          // Premiumize Card
+          _buildProviderCard(
+            name: 'Premiumize',
+            subtitle: _statusMap['Premiumize'] != null
+                ? 'Account: Connected'
+                : 'Get key from premiumize.me/account',
+            statusBadge: _statusMap['Premiumize'],
+            badgeColor: const Color(0xFF10B981),
+            controller: _premiumizeKeyCtrl,
+            isLoading: _loadingMap['Premiumize'] == true,
+            isActive: _selectedService == 'Premiumize',
+            onSave: () => _saveProviderKey('Premiumize', _premiumizeKeyCtrl),
+          ),
+          const SizedBox(height: 12),
+
+          // Debrid-Link Card
+          _buildProviderCard(
+            name: 'Debrid-Link',
+            subtitle: _statusMap['Debrid-Link'] != null
+                ? 'Account: ${_statusMap['Debrid-Link']}'
+                : 'Get key from debrid-link.com/webapp/apikey',
+            statusBadge: _statusMap['Debrid-Link'],
+            badgeColor: const Color(0xFF10B981),
+            controller: _debridlinkKeyCtrl,
+            isLoading: _loadingMap['Debrid-Link'] == true,
+            isActive: _selectedService == 'Debrid-Link',
+            onSave: () => _saveProviderKey('Debrid-Link', _debridlinkKeyCtrl),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }

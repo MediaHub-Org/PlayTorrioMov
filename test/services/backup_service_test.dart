@@ -1,26 +1,14 @@
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:playtorriomov/services/backup/backup_service.dart';
 import 'package:playtorriomov/services/backup/cloud_backup_settings.dart';
 
-class _FakePathProvider extends PathProviderPlatform {
-  _FakePathProvider(this.tempDir);
-  final Directory tempDir;
-
-  @override
-  Future<String?> getApplicationDocumentsPath() async => tempDir.path;
-}
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late Directory tempDir;
 
   setUp(() async {
-    tempDir = await Directory.systemTemp.createTemp('playtorrio_backup_test');
-    PathProviderPlatform.instance = _FakePathProvider(tempDir);
     SharedPreferences.setMockInitialValues({
       'a_string': 'hello',
       'a_bool': true,
@@ -30,19 +18,16 @@ void main() {
     });
   });
 
-  tearDown(() async {
-    if (await tempDir.exists()) {
-      await tempDir.delete(recursive: true);
-    }
-  });
+  // Export and import now go through the system save/open dialogs, which a
+  // unit test cannot drive. The part worth covering did not move: the
+  // envelope is still what gets written and read, whether the destination
+  // is a picked file or a WebDAV endpoint.
+  test('the envelope round-trips every value type', () async {
+    final json = await BackupService.buildEnvelopeJson();
 
-  test('export writes a JSON file and import round-trips every value type', () async {
-    final path = await BackupService.export();
-    expect(File(path).existsSync(), isTrue);
-
-    // Simulate a fresh install / different device: clear prefs, then import.
+    // A fresh install / different device: clear prefs, then restore.
     SharedPreferences.setMockInitialValues({});
-    final restored = await BackupService.import();
+    final restored = await BackupService.applyEnvelopeJson(json);
     expect(restored, 5);
 
     final prefs = await SharedPreferences.getInstance();
@@ -53,8 +38,43 @@ void main() {
     expect(prefs.getStringList('a_list'), ['x', 'y', 'z']);
   });
 
-  test('import throws when no backup file exists', () async {
-    expect(BackupService.import(), throwsException);
+  test('the envelope is versioned and names the app that wrote it', () async {
+    final envelope =
+        jsonDecode(await BackupService.buildEnvelopeJson()) as Map;
+
+    expect(envelope['version'], 1);
+    expect(envelope['app'], isNotEmpty);
+    expect(envelope['exportedAt'], isNotEmpty);
+    expect(envelope['data'], isA<Map>());
+  });
+
+  test('a file that is not a backup is refused, not half-applied', () async {
+    // Now that the user picks the file themselves, they can pick the wrong
+    // one -- so the shape check matters more than it did when the path was
+    // fixed.
+    expect(
+      BackupService.applyEnvelopeJson('not json at all'),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      BackupService.applyEnvelopeJson('{"app":"x","version":1}'),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      BackupService.applyEnvelopeJson('[]'),
+      throwsA(isA<FormatException>()),
+    );
+  });
+
+  test('keys absent from the backup are left alone', () async {
+    final json = await BackupService.buildEnvelopeJson();
+
+    SharedPreferences.setMockInitialValues({'kept': 'yes'});
+    await BackupService.applyEnvelopeJson(json);
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getString('kept'), 'yes');
+    expect(prefs.getString('a_string'), 'hello');
   });
 
   group('isPrivateOrLoopbackHost', () {

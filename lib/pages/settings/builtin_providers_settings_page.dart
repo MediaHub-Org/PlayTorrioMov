@@ -5,6 +5,7 @@ import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/scraper/builtin_providers_service.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/stream/stream_service.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 import '../../widgets/p2p/p2p_warning_dialog.dart';
 
 /// Per-provider control over the app's built-in scrapers.
@@ -24,6 +25,16 @@ class _BuiltinProvidersSettingsPageState
     extends State<BuiltinProvidersSettingsPage> {
   late List<StreamScraper> _providers;
   String _query = '';
+
+  // Shared with the Scrollbar so the thumb tracks this list. Without a
+  // controller on both, the bar has nothing to attach to and does not draw.
+  final ScrollController _listController = ScrollController();
+
+  @override
+  void dispose() {
+    _listController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -74,30 +85,40 @@ class _BuiltinProvidersSettingsPageState
           );
           final on = _providers.length - off;
 
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 800),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(inset, 20, inset, 0),
-                    child: _header(on, _providers.length, visible),
-                  ),
-                  Expanded(
-                    child: _providers.isEmpty
-                        ? _empty()
-                        : ListView.separated(
-                            padding: EdgeInsets.fromLTRB(inset, 16, inset, 24),
-                            itemCount: visible.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 8),
-                            itemBuilder: (context, i) => _row(visible[i]),
-                          ),
-                  ),
-                ],
+          // Full width, with the content centred by padding rather than by
+          // a ConstrainedBox around the list. This page has a pinned header
+          // so it cannot use SettingsScrollView directly, but it borrows
+          // that widget's gutter so it lines up with every other settings
+          // page -- and, like them, keeps the scrollable the full width of
+          // the window so the wheel works wherever the pointer is.
+          final gutter = SettingsScrollView.gutterFor(
+            MediaQuery.sizeOf(context).width,
+            minGutter: inset,
+          );
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(gutter, 20, gutter, 0),
+                child: _header(on, _providers.length, visible),
               ),
-            ),
+              Expanded(
+                child: _providers.isEmpty
+                    ? _empty()
+                    : Scrollbar(
+                        controller: _listController,
+                        child: ListView.separated(
+                          controller: _listController,
+                          padding: EdgeInsets.fromLTRB(gutter, 16, gutter, 24),
+                          itemCount: visible.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 8),
+                          itemBuilder: (context, i) => _row(visible[i]),
+                        ),
+                      ),
+              ),
+            ],
           );
         },
       ),

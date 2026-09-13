@@ -5,7 +5,7 @@ import '../storage/secure_value_store.dart';
 
 /// A WebDAV endpoint the user points at their own server (Nextcloud, a
 /// self-hosted WebDAV server, etc.) to store the same JSON envelope
-/// [BackupService.export] already writes locally. No vendor lock-in, no
+/// the local export already writes to a file. No vendor lock-in, no
 /// request-signing dependency to add -- plain HTTP PUT/GET with Basic Auth.
 class CloudBackupConfig {
   final String url;

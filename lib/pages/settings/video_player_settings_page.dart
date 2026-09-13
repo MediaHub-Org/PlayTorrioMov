@@ -4,6 +4,7 @@ import '../../services/player/player_settings.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/player/player_sub_style_modal.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 class VideoPlayerSettingsPage extends StatefulWidget {
   const VideoPlayerSettingsPage({super.key});
@@ -54,66 +55,62 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ],
           ),
           body: AnimatedAmbientBackground(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 820),
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(16, 20, 16, 32 + bottomInset),
-                  children: [
-                    // ── Device & Platform Status Card ──
-                    _buildDeviceStatusCard(palette),
+            child: SettingsScrollView(
+              maxContentWidth: 820,
+              bottomPadding: 32 + bottomInset,
+              children: [
+                // ── Device & Platform Status Card ──
+                _buildDeviceStatusCard(palette),
 
-                    const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                    // ── Section 1: Video Decoders & Hardware Acceleration ──
-                    _buildSectionHeader('VIDEO DECODERS & HARDWARE ACCELERATION'),
-                    const SizedBox(height: 12),
-                    _buildDecodersCard(palette),
+                // ── Section 1: Video Decoders & Hardware Acceleration ──
+                _buildSectionHeader('VIDEO DECODERS & HARDWARE ACCELERATION'),
+                const SizedBox(height: 12),
+                _buildDecodersCard(palette),
 
-                    const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                    // ── Section 2: Engine Performance & Fast Decode (AnymeX) ──
-                    _buildSectionHeader('ENGINE DECODE OPTIMIZATIONS & CACHING'),
-                    const SizedBox(height: 12),
-                    _buildPerformanceOptimizationCard(palette),
+                // ── Section 2: Engine Performance & Fast Decode (AnymeX) ──
+                _buildSectionHeader('ENGINE DECODE OPTIMIZATIONS & CACHING'),
+                const SizedBox(height: 12),
+                _buildPerformanceOptimizationCard(palette),
 
-                    const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                    // ── Section 3: Buffer Cushion & Anti-Desync Engine ──
-                    _buildSectionHeader('BUFFER CUSHION & DEMUXER RESILIENCE'),
-                    const SizedBox(height: 12),
-                    _buildBufferCushionCard(palette),
+                // ── Section 3: Buffer Cushion & Anti-Desync Engine ──
+                _buildSectionHeader('BUFFER CUSHION & DEMUXER RESILIENCE'),
+                const SizedBox(height: 12),
+                _buildBufferCushionCard(palette),
 
-                    const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                    // ── Section 4: Network Continuity & Auto-Reconnect ──
-                    _buildSectionHeader('STREAM CONTINUITY & NETWORK RECONNECT'),
-                    const SizedBox(height: 12),
-                    _buildNetworkReconnectCard(palette),
+                // ── Section 4: Network Continuity & Auto-Reconnect ──
+                _buildSectionHeader('STREAM CONTINUITY & NETWORK RECONNECT'),
+                const SizedBox(height: 12),
+                _buildNetworkReconnectCard(palette),
 
-                    const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                    // ── Section 5: A/V Master Clock & Sync Calibration ──
-                    _buildSectionHeader('A/V MASTER CLOCK & SYNC CALIBRATION'),
-                    const SizedBox(height: 12),
-                    _buildAudioSyncCard(palette),
+                // ── Section 5: A/V Master Clock & Sync Calibration ──
+                _buildSectionHeader('A/V MASTER CLOCK & SYNC CALIBRATION'),
+                const SizedBox(height: 12),
+                _buildAudioSyncCard(palette),
 
-                    const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                    // ── Section 6: Subtitle Appearance & libass Styling ──
-                    _buildSectionHeader('SUBTITLE APPEARANCE & LIBASS STYLING'),
-                    const SizedBox(height: 12),
-                    _buildSubtitleAppearanceCard(palette),
+                // ── Section 6: Subtitle Appearance & libass Styling ──
+                _buildSectionHeader('SUBTITLE APPEARANCE & LIBASS STYLING'),
+                const SizedBox(height: 12),
+                _buildSubtitleAppearanceCard(palette),
 
-                    const SizedBox(height: 32),
+                const SizedBox(height: 32),
 
-                    // ── Reset to Defaults ──
-                    _buildResetButton(palette),
+                // ── Reset to Defaults ──
+                _buildResetButton(palette),
 
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
+                const SizedBox(height: 16),
+              ],
             ),
           ),
         );
