@@ -16,6 +16,7 @@ import '../../services/window/window_service.dart';
 import '../../services/cast/cast_service.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../widgets/player/player_cast_sheet.dart';
+import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_aspect_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
@@ -370,6 +371,32 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     });
   }
 
+  DateTime? _lastScreenTapTime;
+
+  /// Taps on the video surface, detected by hand rather than with
+  /// `onTap` + `onDoubleTap` on the same detector.
+  ///
+  /// Those two together make Flutter wait to see whether a second tap
+  /// follows before firing either, so every single tap -- the common one,
+  /// the one that just reveals the controls -- landed with a visible delay.
+  /// Movies/Series/Anime already detect this by hand for exactly that
+  /// reason; this is the same 280ms window, so both players answer a tap at
+  /// the same speed.
+  void _handleScreenTap(TapDownDetails details) {
+    final now = DateTime.now();
+    if (_lastScreenTapTime != null &&
+        now.difference(_lastScreenTapTime!) <
+            const Duration(milliseconds: 280)) {
+      _lastScreenTapTime = null;
+      if (WindowService.instance.isDesktop) {
+        WindowService.instance.toggleFullscreen();
+      }
+      return;
+    }
+    _lastScreenTapTime = now;
+    _toggleControls();
+  }
+
   void _toggleControls() {
     if (_showAspectMenu) {
       setState(() => _showAspectMenu = false);
@@ -622,20 +649,15 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
           },
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
-            // A single tap only reveals/hides the controls overlay. It used
-            // to also toggle play/pause, but requiring onDoubleTap on the
-            // same detector means Flutter must wait to see whether a second
-            // tap follows before either callback fires -- so a lone tap
-            // toggling playback landed with a real, noticeable delay, and
-            // an accidental tap (repositioning the device, wiping the
-            // screen) silently paused a live channel. The dedicated
-            // play/pause button is the one deliberate way to do that now.
-            onTap: _toggleControls,
-            onDoubleTap: () {
-              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-                WindowService.instance.toggleFullscreen();
-              }
-            },
+            // A single tap only reveals/hides the controls overlay; it never
+            // toggles playback, because an accidental tap (repositioning the
+            // device, wiping the screen) would silently pause a live
+            // channel. The dedicated play/pause button is the one
+            // deliberate way to do that.
+            //
+            // Detected by hand -- see _handleScreenTap -- so that the
+            // single tap is not held up waiting for a second one.
+            onTapDown: _handleScreenTap,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -868,12 +890,17 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                             ),
                             child: Row(
                               children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.arrow_back_rounded,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
+                                // The same pill as every button in the
+                                // Movies/Series/Anime top bar. These were
+                                // bare IconButtons, which is why the two top
+                                // bars read as different chrome even once
+                                // they carried the same actions.
+                                PlayerIconButton(
+                                  size: 40,
+                                  iconSize: 20,
+                                  icon: const Icon(Icons.arrow_back_rounded),
+                                  tooltip: 'Back',
+                                  backgroundColor: const Color(0x22080C12),
                                   onPressed: () => Navigator.pop(context),
                                 ),
                                 const SizedBox(width: 8),
@@ -951,12 +978,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 // this same slot -- and a channel is the
                                 // most natural thing to throw at a TV.
                                 if (_canCast)
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.cast_rounded,
-                                      color: Colors.white,
-                                    ),
-                                    tooltip: 'Cast to device',
+                                  PlayerIconButton(
+                                    size: 40,
+                                    iconSize: 20,
+                                    icon: const Icon(Icons.cast_rounded),
+                                    tooltip: 'Cast',
+                                    backgroundColor: const Color(0x22080C12),
                                     onPressed: _handleCast,
                                   ),
                                 // Save this stream as a Live TV channel.
@@ -968,14 +995,16 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 // can keep it -- and the moment they know
                                 // they want to.
                                 if (_canSaveAsChannel)
-                                  IconButton(
+                                  PlayerIconButton(
+                                    size: 40,
+                                    iconSize: 20,
+                                    backgroundColor: const Color(0x22080C12),
+                                    active: _savedAsChannel,
+                                    activeColor: const Color(0xFF00D2EF),
                                     icon: Icon(
                                       _savedAsChannel
                                           ? Icons.library_add_check_rounded
                                           : Icons.library_add_outlined,
-                                      color: _savedAsChannel
-                                          ? const Color(0xFF00D2EF)
-                                          : Colors.white,
                                     ),
                                     tooltip: _savedAsChannel
                                         ? 'Saved to Live TV'
@@ -986,12 +1015,14 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   ),
                                 // Category Channels / Sources Drawer Toggle
                                 if (widget.hits.length > 1)
-                                  IconButton(
+                                  PlayerIconButton(
+                                    size: 40,
+                                    iconSize: 20,
+                                    backgroundColor: const Color(0x22080C12),
                                     icon: Icon(
                                       isCategoryList
                                           ? Icons.format_list_bulleted_rounded
                                           : Icons.video_library_rounded,
-                                      color: Colors.white,
                                     ),
                                     tooltip: isCategoryList
                                         ? (widget.categoryTitle ??
@@ -1008,13 +1039,16 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         .instance
                                         .isFullscreenNotifier,
                                     builder: (context, isFullscreen, _) {
-                                      return IconButton(
+                                      return PlayerIconButton(
+                                        size: 40,
+                                        iconSize: 20,
+                                        backgroundColor: const Color(
+                                          0x22080C12,
+                                        ),
                                         icon: Icon(
                                           isFullscreen
                                               ? Icons.fullscreen_exit_rounded
                                               : Icons.fullscreen_rounded,
-                                          color: Colors.white,
-                                          size: 24,
                                         ),
                                         tooltip: isFullscreen
                                             ? 'Exit Fullscreen (F11)'
@@ -1216,14 +1250,17 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                             .instance
                                             .isFullscreenNotifier,
                                         builder: (context, isFullscreen, _) {
-                                          return IconButton(
+                                          return PlayerIconButton(
+                                            size: 40,
+                                            iconSize: 20,
+                                            backgroundColor: const Color(
+                                              0x22080C12,
+                                            ),
                                             icon: Icon(
                                               isFullscreen
                                                   ? Icons
                                                         .fullscreen_exit_rounded
                                                   : Icons.fullscreen_rounded,
-                                              color: Colors.white,
-                                              size: 24,
                                             ),
                                             tooltip: isFullscreen
                                                 ? 'Exit Fullscreen (F11)'
