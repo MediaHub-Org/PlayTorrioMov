@@ -888,6 +888,21 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                     ),
                   ),
 
+                // Tap anywhere off an open menu to dismiss it -- the same
+                // barrier the Movies/Series/Anime player puts behind its
+                // popovers, and the reason neither needs a close button.
+                if (_activeMenu != null)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        setState(() => _activeMenu = null);
+                        _startHideControlsTimer();
+                      },
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+
                 // Controls Overlay
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
@@ -1253,21 +1268,6 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                     ),
                   ),
                 ),
-
-                // Tap anywhere off an open menu to dismiss it -- the same
-                // barrier the Movies/Series/Anime player puts behind its
-                // popovers, and the reason neither needs a close button.
-                if (_activeMenu != null)
-                  Positioned.fill(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        setState(() => _activeMenu = null);
-                        _startHideControlsTimer();
-                      },
-                      child: const SizedBox.expand(),
-                    ),
-                  ),
 
                 // The gear's root list. Shorter than the other player's --
                 // no playback speed on a live feed, and no subtitle rows
