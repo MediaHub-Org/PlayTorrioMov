@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -42,6 +41,14 @@ bool isPrivateOrLoopbackHost(String host) {
 abstract final class BackupService {
   /// Builds the same versioned JSON envelope both the local file and the
   /// cloud transport write.
+  ///
+  /// Visible for tests: the destination is now a dialog the user drives,
+  /// which a unit test cannot, but the part worth covering -- that every
+  /// SharedPreferences value type survives a round trip -- lives here and
+  /// is unchanged by that.
+  @visibleForTesting
+  static Future<String> buildEnvelopeJson() => _buildEnvelopeJson();
+
   static Future<String> _buildEnvelopeJson() async {
     final prefs = await SharedPreferences.getInstance();
     final data = <String, dynamic>{
@@ -56,9 +63,12 @@ abstract final class BackupService {
     return jsonEncode(envelope);
   }
 
-  /// Restores every key found in an envelope produced by [_buildEnvelopeJson].
+  /// Restores every key found in an envelope produced by [buildEnvelopeJson].
   /// Returns how many keys were restored. Existing keys not present in the
   /// backup are left untouched.
+  @visibleForTesting
+  static Future<int> applyEnvelopeJson(String raw) => _applyEnvelopeJson(raw);
+
   static Future<int> _applyEnvelopeJson(String raw) async {
     final envelope = jsonDecode(raw);
     if (envelope is! Map || envelope['data'] is! Map) {
