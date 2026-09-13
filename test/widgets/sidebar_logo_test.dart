@@ -3,10 +3,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/app_info.dart';
 import 'package:playtorriomov/widgets/common/sidebar_logo.dart';
 
+/// Mirrors how the header actually places it: `Flexible`, so the logo gets
+/// a bounded width and the wordmark can ellipsize.
+///
+/// A bare `Row(children: [SidebarLogo()])` would hand it *unbounded* width
+/// -- that is what a Row gives a non-flex child -- and then nothing inside
+/// can shrink. That models a placement the app does not use, and the first
+/// version of this test did exactly that and failed on it.
 Widget wrap({double width = 800}) => MaterialApp(
   home: Scaffold(
     body: Center(
-      child: SizedBox(width: width, child: const Row(children: [SidebarLogo()])),
+      child: SizedBox(
+        width: width,
+        child: const Row(children: [Flexible(child: SidebarLogo())]),
+      ),
     ),
   ),
 );
@@ -38,6 +48,8 @@ void main() {
   });
 
   testWidgets('survives a narrow header without overflowing', (tester) async {
+    // 200px is narrower than the logo's natural width, so the wordmark has
+    // to ellipsize and the accent has to still fit beneath it.
     tester.view.physicalSize = const Size(320, 640);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
@@ -45,5 +57,6 @@ void main() {
     await tester.pumpWidget(wrap(width: 200));
 
     expect(tester.takeException(), isNull);
+    expect(find.text(AppInfo.name), findsOneWidget);
   });
 }
