@@ -312,15 +312,27 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                 : _buildMobileLayout(posterUrl),
                             const SizedBox(height: _Space.xl),
 
-                            // Director & Staff Row
-                            if (_anime.staff.isNotEmpty) ...[
-                              _buildStaffRow(),
+                            // Credits, in the spine's position -- before
+                            // episodes, where Movies and Series put Cast &
+                            // Crew. Characters & Voice Cast *is* the anime
+                            // form of that block: a character-to-voice-actor
+                            // list answers for anime what actor-to-character
+                            // answers for film, so it replaces Cast & Crew
+                            // rather than sitting beside it.
+                            if (_anime.characters.isNotEmpty) ...[
+                              _buildCharactersRow(),
                               const SizedBox(height: _Space.xl),
                             ],
 
-                            // Characters & Voice Cast Row
-                            if (_anime.characters.isNotEmpty) ...[
-                              _buildCharactersRow(),
+                            // Director & Staff: anime's one section-specific
+                            // block, and the reason it comes after credits
+                            // rather than leading. It answers something
+                            // Characters cannot -- who directed it, who
+                            // scored it, which studio made it -- and has no
+                            // other home on the page, which is why it is
+                            // kept rather than folded in or dropped.
+                            if (_anime.staff.isNotEmpty) ...[
+                              _buildStaffRow(),
                               const SizedBox(height: _Space.xl),
                             ],
 
