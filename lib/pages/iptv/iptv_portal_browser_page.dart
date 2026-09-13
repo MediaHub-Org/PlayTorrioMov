@@ -353,7 +353,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   String _selectedCategoryName() {
-    if (_selectedCategoryId == favoritesCategoryId) return 'Bookmarked';
+    if (_selectedCategoryId == favoritesCategoryId) return 'Pinned';
     if (_selectedCategoryId.isEmpty) return 'All Categories';
     final found = _categories.firstWhere(
       (c) => c.id == _selectedCategoryId,
@@ -384,7 +384,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         setState(() {
           _categories = [
             const IptvCategory(id: '', name: 'All Categories'),
-            const IptvCategory(id: favoritesCategoryId, name: 'Bookmarked'),
+            const IptvCategory(id: favoritesCategoryId, name: 'Pinned'),
             ...cats,
           ];
           _selectedCategoryId = '';
@@ -421,7 +421,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         setState(() {
           _categories = [
             const IptvCategory(id: '', name: 'All Categories'),
-            const IptvCategory(id: favoritesCategoryId, name: 'Bookmarked'),
+            const IptvCategory(id: favoritesCategoryId, name: 'Pinned'),
             ...cats,
           ];
           _selectedCategoryId = '';
@@ -1338,16 +1338,16 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                   color: Colors.white.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.bookmark_border_rounded, color: Colors.white54, size: 48),
+                child: const Icon(Icons.push_pin_outlined, color: Colors.white54, size: 48),
               ),
               const SizedBox(height: 16),
               const Text(
-                'No bookmarks yet',
+                'Nothing pinned yet',
                 style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 6),
               const Text(
-                'Bookmark a stream here to find it again while browsing this portal.',
+                'Pin a stream to keep it at hand while you browse this portal.',
                 style: TextStyle(color: Colors.white54, fontSize: 13.5),
               ),
             ],
@@ -1598,7 +1598,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
                 ),
                 const SizedBox(width: 8),
                 if (isFavCategory) ...[
-                  const Icon(Icons.bookmark_rounded, color: Colors.white70, size: 16),
+                  const Icon(Icons.push_pin_rounded, color: Colors.white70, size: 16),
                   const SizedBox(width: 6),
                 ],
                 Expanded(
@@ -1866,17 +1866,18 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                 IconButton(
                   icon: Icon(
                     widget.isFavorite
-                        ? Icons.bookmark_rounded
-                        : Icons.bookmark_border_rounded,
+                        ? Icons.push_pin_rounded
+                        : Icons.push_pin_outlined,
                     color: widget.isFavorite ? Colors.white : Colors.white38,
                     size: 21,
                   ),
-                  // A bookmark, not a favourite: this pins one portal's
-                  // stream while browsing it. Liking lives on the channel
-                  // tile and survives the portal; see roadmap #45.
+                  // A pin, not a favourite: it keeps one provider's stream
+                  // at hand while browsing this portal. Liking lives on the
+                  // channel tile and survives the portal (roadmap #45), and
+                  // the bookmark metaphor is already Watchlist's.
                   tooltip: widget.isFavorite
-                      ? 'Remove bookmark'
-                      : 'Bookmark in this portal',
+                      ? 'Unpin'
+                      : 'Pin in this portal',
                   onPressed: widget.onToggleFavorite,
                 ),
 
@@ -2023,8 +2024,8 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                       onTap: widget.onToggleFavorite,
                       child: Icon(
                         widget.isFavorite
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_border_rounded,
+                            ? Icons.push_pin_rounded
+                            : Icons.push_pin_outlined,
                         color: widget.isFavorite ? Colors.white : Colors.white30,
                         size: 19,
                       ),
@@ -2189,8 +2190,8 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                   onTap: widget.onToggleFavorite,
                   child: Icon(
                     widget.isFavorite
-                        ? Icons.bookmark_rounded
-                        : Icons.bookmark_border_rounded,
+                        ? Icons.push_pin_rounded
+                        : Icons.push_pin_outlined,
                     color: widget.isFavorite ? Colors.white : Colors.white30,
                     size: 18,
                   ),
@@ -2316,8 +2317,8 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                                   ),
                                   child: Icon(
                                     widget.isFavorite
-                                        ? Icons.bookmark_rounded
-                                        : Icons.bookmark_border_rounded,
+                                        ? Icons.push_pin_rounded
+                                        : Icons.push_pin_outlined,
                                     color: widget.isFavorite ? Colors.white : Colors.white70,
                                     size: 16,
                                   ),

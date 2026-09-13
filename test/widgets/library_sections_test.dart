@@ -11,14 +11,29 @@ const _libraryPages = [
 
 void main() {
   group('LibrarySection', () {
-    test('is exactly three tabs, in a fixed order', () {
-      // History was dropped 2026-09-02 -- it and Continue rendered through
-      // the same row list and looked like duplicates of each other.
-      expect(LibrarySection.values.length, 3);
+    test('is the three library states, then Downloads', () {
+      // History was dropped 2026-09-02, and Continue on 2026-09-13: Continue
+      // rendered ContinueWatchingService.activeItems, the identical deduped
+      // list the Continue Watching row already shows.
+      //
+      // The first three are the states LibraryActionsRow writes on every
+      // details page, so a tab here means what the button there meant. The
+      // generic "Saved" bucket is gone: it needed a generic icon precisely
+      // because it held two unlike things at once.
       expect(
         LibrarySection.values.map((s) => s.label).toList(),
-        ['Saved', 'Continue', 'Downloads'],
+        ['Liked', 'Watchlist', 'Watched', 'Downloads'],
       );
+    });
+
+    test('only Downloads is not a My List state', () {
+      // Downloads reads DownloadService, not MyListService, and is kept
+      // because it is the only place an in-app download can be managed.
+      expect(
+        LibrarySection.values.where((s) => s.isLibraryState).map((s) => s.name),
+        ['liked', 'watchlist', 'watched'],
+      );
+      expect(LibrarySection.downloads.isLibraryState, isFalse);
     });
 
     test('every label and icon is distinct', () {
