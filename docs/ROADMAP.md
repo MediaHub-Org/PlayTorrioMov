@@ -93,7 +93,6 @@ pages, and the players.
 | #  | Task | Details |
 |----|------|---------|
 | 41 | Details pages: Arabic anime still stands apart | **Movies/Series and Anime now match — see *The details spine, measured*.** What is left is `anime_arabic_details_page.dart`: its own hero, no section headers at all, and none of the shared blocks. Close to a rewrite of its 996 lines, so it is its own pass — and worth taking **after** the Movies/Series and Anime alignment has been seen on a device, since that is the layout it would be rewritten to match. |
-| 42 | Live TV player: the last of the divergence | **Partly shipped — see *The Live TV player, converged*.** Layout is done: centred play/pause through the shared widget, the shared volume control, a live-edge row where the seek bar sits. What is left is iconography and menu plumbing: the aspect-ratio trigger is a hand-rolled `InkWell` rather than the shared settings menu, the fullscreen and back buttons are bare `IconButton`s rather than `PlayerIconButton` pills, and the gesture zones have not been compared against `player_screen`'s. Small and separable; none of it changes where a control sits. |
 
 ## Requested UI work
 
@@ -195,7 +194,7 @@ whenever Cast is supported and a stream is playing.
 button), with track and style selection behind the gear, so nothing was
 needed there.
 
-### The Live TV player, converged (partly shipped, #42)
+### The Live TV player, converged (shipped, #42)
 
 The decision was "match everything except seek". What shipped is the part
 that made Live TV read as a different app:
@@ -216,12 +215,29 @@ that made Live TV read as a different app:
   and there is nothing to scrub, in the same red as the LIVE badge above.
 - The overlay's auto-hide was **already** 4 seconds on both, so nothing to do.
 
-**Still divergent, and deliberately left:** the aspect-ratio trigger is a
-hand-rolled `InkWell` rather than the shared settings menu, the fullscreen
-and back buttons are bare `IconButton`s rather than `PlayerIconButton`
-pills, and the gesture zones have not been compared. Those are iconography
-and menu plumbing rather than layout, and each one is a separate small
-change; #42 stays open for them rather than being called done.
+**The rest of it, finished in a second pass:**
+
+- **The top bar's buttons are the shared pill now.** Back, cast, save-as-
+  channel, the category drawer and both fullscreen toggles were bare
+  `IconButton`s, which is why the two top bars read as different chrome even
+  once they carried the same actions.
+- **The single-tap delay is gone.** Live TV put `onTap` and `onDoubleTap` on
+  the same detector, so Flutter had to wait to see whether a second tap
+  followed before firing either — every tap that just reveals the controls
+  landed late. Detected by hand now, on the same 280ms window
+  Movies/Series/Anime already used for exactly this reason, so both players
+  answer a tap at the same speed.
+
+**One divergence kept on purpose.** The aspect-ratio control stays a direct,
+labelled pill (FIT / ZOOM / STRETCH) rather than moving behind a settings
+gear. Movies/Series/Anime bury it because they have four settings to bury;
+Live TV has one, and putting a single setting behind a menu adds a click
+rather than saving one. It wears the shared pill styling, so it matches
+without pretending to be a menu it does not need.
+
+**Volume is the one thing Live TV still lacks** that the other player has:
+no vertical-drag gesture. That is not divergence any more — swipe-to-adjust
+was removed from the VOD player too, so neither has it.
 
 ### Series creators (shipped, #39 — but verify it on device)
 
