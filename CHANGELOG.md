@@ -3,9 +3,32 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.5.8+27] - 2026-09-13
 
 ### Added
+- **One search** for Movies, Series and Anime. The search icon used to mean
+  different things depending on where you pressed it — an addon search on
+  Movies and Series, a separate AniList page on Anime — and silently
+  narrowed results to whichever section you were standing in. One page now
+  answers for all three, with the section you came from pre-selected as a
+  chip you can clear rather than a hidden mode. Anime's own filters (genre,
+  season, format) are still there, reached through the page instead of
+  beside it, and they carry your query across. Live TV keeps its own search:
+  it matches a portal's streams by keyword rather than searching a title
+  catalogue
+- **Live TV channels you can make yourself.** If a portal carries something
+  the built-in catalogue has no entry for, save it from the player's top bar
+  and it becomes a real channel — likeable, listed, and found again by name
+  across portals, because a channel tile is a saved search rather than a
+  bookmark. They get their own row on the Live TV page, and can be deleted
+  from the channel sheet
+- **Cast in the Live TV player.** Movies, Series and Anime have had a cast
+  button all along; Live TV had none
+- **±30s skip** on the buttons either side of play, with a flash on the side
+  of the screen that moved — including when the controls are hidden, which
+  is exactly when a double-tap needs confirming. Repeat taps count up, so
+  three quick skips read "30 seconds" rather than flashing "10" three times
+- A **film-strip accent** under the wordmark, drawn in the theme's colour
 - **History**: the Continue Watching row now has a *See all* opening the full
   log of what you have watched, newest first. That log was already being
   recorded and saved to disk — every episode, up to 100 — with nothing in
@@ -19,6 +42,36 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Live TV to actually watch something
 
 ### Changed
+- **The subtitle button answers instead of asking.** With nothing selected
+  yet it used to open the track picker — the one thing a CC toggle should
+  never do. It now turns on the subtitle **matching the audio you are
+  listening to**, so the words on screen are the words in the room, falling
+  back to the file's own default, then English, then whatever exists.
+  Matching is by language rather than by spelling, since an `eng` audio
+  track beside an `English` subtitle is the common case. The full picker is
+  still one tap away behind the gear
+- **One seek amount per control.** A phone was showing three ways to skip
+  and two of them did the same thing. Now the double-tap zones are ±10s, the
+  buttons beside play are ±30s, and the transport bar's duplicate pair is
+  gone. Arrow keys and J/L still do ±10s on desktop
+- **The player's menus lead back.** Stepping from Settings into Subtitles
+  and then wanting Aspect ratio meant closing the panel and reopening the
+  gear. Sub-menus now carry a back arrow — but only when you actually
+  stepped into them, since an arrow to a screen you never came from is worse
+  than none
+- **Swipe-to-adjust is gone.** Dragging up and down set volume on one half
+  of the screen and brightness on the other. Hardware keys and the OS do
+  both more reliably, and an accidental swipe changed either one mid-watch
+- **The Live TV player matches the others.** Play/pause is centred over the
+  video rather than tucked at the left of the bar, the volume control is the
+  shared one (which also lifts its ceiling from 100% to the app's 250%
+  boost — portal streams are often quiet), the top-bar buttons wear the same
+  pills, and a live-edge row sits where the seek bar would be, so its
+  absence reads as deliberate rather than broken
+- **Details pages share one section heading.** Movies/Series, Anime and
+  Arabic anime had each drifted to their own weight, letter spacing and
+  spacing beneath. Anime's credits now lead the page as they do elsewhere,
+  with Staff following
 - Library's tabs are now **Liked / Watchlist / Watched / Downloads**, with
   the media-type pills inside each. They were Saved / Continue / Downloads,
   where "Saved" mixed two unlike states behind a deliberately generic icon.
@@ -34,6 +87,22 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   change
 
 ### Fixed
+- **Series now show a Creator** where TMDB has no director. A series'
+  credits are series-level crew, which for most shows is producers and no
+  director at all — TV directors are credited per episode — so the Direction
+  half came back empty even with everything else working. The showrunner is
+  what a viewer means by "whose show is this"
+- **Text no longer escapes its box in IPTV Portals & Playlists** — the
+  modal's title, the source dropdown's descriptions, and both Manage-mode
+  toolbars, all of which painted outside their containers on a phone
+- **Live TV's controls appear immediately on a tap.** A single tap had to
+  wait to see whether a second one followed before anything happened
+- A settings dialog was pinned wider than a phone screen and overflowed on
+  exactly the devices the app is mostly used on
+- **Casting a live channel** told the receiver it was a normal recording,
+  giving it a seek bar and a duration it could not honour; MPEG-TS streams
+  were also announced as MP4, which hands the TV a decoder that cannot read
+  them
 - Cast and crew now actually load from TMDB. `MovieDetail.tmdbId` is read
   from a `moviedb_id` field that Cinemeta and most Stremio addons never
   send — they send `imdb_id` — so the id was null for essentially every
