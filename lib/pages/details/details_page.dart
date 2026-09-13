@@ -410,16 +410,23 @@ class _DetailsPageState extends State<DetailsPage>
     // (--dart-define / .env), which is the whole point of #34.
     if (!TmdbSettings.isConfigured) return;
 
-    // Skip only when the addon already supplies BOTH halves of the credits
+    // Skip only when the addon already supplies every part of the credits
     // row. Cast photos alone are not enough: addons almost never send crew,
     // so a title with a photo-rich cast still had an empty Direction half
-    // until this stopped short-circuiting on photos alone. Checked before
-    // the id lookup below, so a title that needs nothing costs no requests.
+    // until this stopped short-circuiting on photos alone. Character names
+    // are the third part, and were missing from this test -- an addon that
+    // sent photos and a director stopped the lookup cold, leaving every
+    // actor's card with a blank role even though TMDB had the characters.
+    // Checked before the id lookup below, so a title that needs nothing
+    // costs no requests.
     final hasPhotos = meta.castMembers.any(
       (c) => c.profileUrl != null && c.profileUrl!.isNotEmpty,
     );
+    final hasCharacters = meta.castMembers.any(
+      (c) => c.character != null && c.character!.trim().isNotEmpty,
+    );
     final hasCrew = meta.directorsList.isNotEmpty || meta.director.isNotEmpty;
-    if (hasPhotos && hasCrew) return;
+    if (hasPhotos && hasCharacters && hasCrew) return;
 
     final isTvShow =
         widget.movie.type == 'series' || widget.movie.type == 'anime';
@@ -1347,11 +1354,12 @@ class _DetailsPageState extends State<DetailsPage>
         _Credit(
           name: c.name,
           // The character they play, which is the whole reason a reader
-          // scans a cast list. Falls back to a plain "Cast" label rather
-          // than a blank line so every card is the same height.
-          role: (c.character != null && c.character!.isNotEmpty)
-              ? c.character!
-              : 'Cast',
+          // scans a cast list. Left null when it is unknown: the card keeps
+          // the line's height regardless, and a blank second line is
+          // honest where the old "Cast" placeholder was not.
+          role: (c.character != null && c.character!.trim().isNotEmpty)
+              ? c.character!.trim()
+              : null,
           profileUrl: c.profileUrl,
         ),
     ];
@@ -1443,15 +1451,22 @@ class _DetailsPageState extends State<DetailsPage>
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            credit.role,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white54,
-              fontSize: 10.5,
-              height: 1.1,
+          // Fixed height, not a conditional child: a card whose role is
+          // unknown has to occupy the same box as one whose role is known,
+          // or a single uncredited actor shortens their column and the
+          // whole row's avatars stop lining up.
+          SizedBox(
+            height: 12,
+            child: Text(
+              credit.role ?? '',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 10.5,
+                height: 1.1,
+              ),
             ),
           ),
         ],
@@ -2125,12 +2140,19 @@ class _DetailsPageState extends State<DetailsPage>
 class _Credit {
   final String name;
 
-  /// What they did: the character for cast, the job for crew.
-  final String role;
+  /// What they did: the character for cast, the job for crew. Null when
+  /// nobody told us -- an addon that sends bare name strings and a TMDB
+  /// lookup that did not land leave this empty.
+  ///
+  /// It used to fall back to the literal word "Cast", which read as a role
+  /// every actor happened to share rather than as the missing data it was.
+  /// The card reserves the line either way, so a blank one costs no
+  /// alignment.
+  final String? role;
 
   final String? profileUrl;
 
-  const _Credit({required this.name, required this.role, this.profileUrl});
+  const _Credit({required this.name, this.role, this.profileUrl});
 }
 
 class _EpisodeCard extends StatefulWidget {
