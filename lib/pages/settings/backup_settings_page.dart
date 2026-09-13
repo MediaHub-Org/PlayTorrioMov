@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/backup/backup_service.dart';
 import '../../services/backup/cloud_backup_settings.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 /// Local export/import plus optional WebDAV cloud backup -- split out of the
 /// old "General & Data" catch-all so it reads as its own category, matching
@@ -447,18 +448,15 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
         ),
         title: const Text('Backup & Data', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            children: [
-              _buildBackupSection(),
-              const SizedBox(height: 12),
-              _buildCloudBackupSection(),
-            ],
-          ),
-        ),
+      body: SettingsScrollView(
+        minGutter: 20,
+        topPadding: 24,
+        bottomPadding: 24,
+        children: [
+          _buildBackupSection(),
+          const SizedBox(height: 12),
+          _buildCloudBackupSection(),
+        ],
       ),
     );
   }

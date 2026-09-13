@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../services/theme/app_theme_service.dart';
 import '../../../services/content_display_enums.dart';
 import '../../../services/iptv/iptv_settings.dart';
+import '../../../widgets/settings/settings_scroll_view.dart';
 
 class LiveTvSettingsPage extends StatefulWidget {
   const LiveTvSettingsPage({super.key});
@@ -29,89 +30,85 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            children: [
-              // ── 1. Hero Spotlight Carousel ──
-              Text(
-                'LIVE SPOTLIGHT & HERO BANNER',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildHeroSpotlightCard(palette),
-
-              const SizedBox(height: 28),
-
-              // ── 2. Card Layout & Poster Density ──
-              Text(
-                'CHANNEL CARDS & POSTER DENSITY',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildCardDensityCard(palette),
-
-              const SizedBox(height: 28),
-
-              // ── 3. Category Visibility & Ordering ──
-              Text(
-                'SECTIONS & CATEGORY MANAGER',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildCategoryManagerCard(palette),
-
-              const SizedBox(height: 28),
-
-              // ── 4. Portals Modal Customization ──
-              Text(
-                'PORTALS & PLAYLISTS MODAL',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildPortalsModalCustomizerCard(palette),
-
-              const SizedBox(height: 28),
-
-              // ── 5. Portal Browser Customization ──
-              Text(
-                'PORTAL BROWSER & CHANNEL GUIDE',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white.withValues(alpha: 0.35),
-                  letterSpacing: 1.1,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildPortalBrowserCustomizerCard(palette),
-
-              const SizedBox(height: 36),
-            ],
+      body: SettingsScrollView(
+        topPadding: 20,
+        bottomPadding: 20,
+        children: [
+          // ── 1. Hero Spotlight Carousel ──
+          Text(
+            'LIVE SPOTLIGHT & HERO BANNER',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
           ),
-        ),
+          const SizedBox(height: 12),
+          _buildHeroSpotlightCard(palette),
+
+          const SizedBox(height: 28),
+
+          // ── 2. Card Layout & Poster Density ──
+          Text(
+            'CHANNEL CARDS & POSTER DENSITY',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildCardDensityCard(palette),
+
+          const SizedBox(height: 28),
+
+          // ── 3. Category Visibility & Ordering ──
+          Text(
+            'SECTIONS & CATEGORY MANAGER',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildCategoryManagerCard(palette),
+
+          const SizedBox(height: 28),
+
+          // ── 4. Portals Modal Customization ──
+          Text(
+            'PORTALS & PLAYLISTS MODAL',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildPortalsModalCustomizerCard(palette),
+
+          const SizedBox(height: 28),
+
+          // ── 5. Portal Browser Customization ──
+          Text(
+            'PORTAL BROWSER & CHANNEL GUIDE',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.35),
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _buildPortalBrowserCustomizerCard(palette),
+
+          const SizedBox(height: 36),
+        ],
       ),
     );
   }

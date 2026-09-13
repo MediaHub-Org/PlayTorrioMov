@@ -6,6 +6,7 @@ import '../../app_info.dart';
 import '../../services/app_spacing.dart';
 import '../../services/updater/app_updater_service.dart';
 import '../../widgets/updater/update_dialog.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 const Color _kBackground = Color(0xFF080A0F);
 const Color _kSurface = Color(0xFF12151E);
@@ -93,105 +94,101 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            children: [
-              const _BrandHeader(),
-              const SizedBox(height: AppSpacing.md),
-              _UpdatesRow(
-                isChecking: _isCheckingForUpdates,
-                autoCheckEnabled: _autoCheckEnabled,
-                onCheckNow: _checkForUpdates,
-                onAutoCheckChanged: (value) {
-                  setState(() => _autoCheckEnabled = value);
-                  AppUpdaterService.setAutoCheckEnabled(value);
-                },
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              if (AppInfo.isPrerelease) ...[
-                const _TestingNotice(),
-                const SizedBox(height: AppSpacing.md),
-              ],
-              const _Card(
-                title: 'One app for streaming media',
-                body:
-                    'Movies, Series, Anime and Live TV, plus your Library. '
-                    'The same search, library and playback surface serves '
-                    'every section.',
-              ),
-              const SizedBox(height: AppSpacing.md),
-              const _SectionLabel('HOW IT WORKS'),
-              const SizedBox(height: AppSpacing.sm),
-              const _Tile(
-                title: 'Stremio-compatible addons',
-                subtitle:
-                    'Catalogs, metadata and streams come from addons you '
-                    'install. Nothing is bundled or hosted by this app.',
-              ),
-              const SizedBox(height: 10),
-              const _Tile(
-                title: 'media_kit / libmpv playback',
-                subtitle:
-                    'Hardware-accelerated decoding on every platform, with '
-                    'the same subtitle and track handling throughout.',
-              ),
-              const SizedBox(height: 10),
-              const _Tile(
-                title: 'Torrent and debrid sources',
-                subtitle:
-                    'Streams resolve from torrent swarms directly, or through '
-                    'Real-Debrid and TorBox when an account is connected.',
-              ),
-              const SizedBox(height: 10),
-              const _Tile(
-                title: 'Trakt and Simkl sync',
-                subtitle:
-                    'Optional. Watchlist, episode progress and scrobbling '
-                    'stay in step across devices.',
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              const _SectionLabel('PROJECT'),
-              const SizedBox(height: AppSpacing.sm),
-              const _LinkTile(
-                icon: Icons.code_rounded,
-                title: 'Source code',
-                subtitle: 'MediaHub-Org/PlayTorrioMov — GPL-3.0',
-                url: _kRepoUrl,
-              ),
-              const SizedBox(height: 10),
-              const _LinkTile(
-                icon: Icons.bug_report_outlined,
-                title: 'Report a problem',
-                subtitle: 'Open an issue with your platform and build number',
-                url: '$_kRepoUrl/issues/new',
-              ),
-              const SizedBox(height: 10),
-              const _LinkTile(
-                icon: Icons.favorite_outline_rounded,
-                title: 'Original project',
-                subtitle:
-                    'A fork of PlayTorrioV3 by Ayman, who wrote the addon '
-                    'integration, scrapers, torrent engine and reader',
-                url: _kUpstreamUrl,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                'Licensed under GPL-3.0. Built with Flutter and Dart. '
-                'Playback via media_kit and libmpv.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  height: 1.5,
-                  color: Colors.white.withValues(alpha: 0.3),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
+      body: SettingsScrollView(
+        topPadding: 24,
+        bottomPadding: 24,
+        children: [
+          const _BrandHeader(),
+          const SizedBox(height: AppSpacing.md),
+          _UpdatesRow(
+            isChecking: _isCheckingForUpdates,
+            autoCheckEnabled: _autoCheckEnabled,
+            onCheckNow: _checkForUpdates,
+            onAutoCheckChanged: (value) {
+              setState(() => _autoCheckEnabled = value);
+              AppUpdaterService.setAutoCheckEnabled(value);
+            },
           ),
-        ),
+          const SizedBox(height: AppSpacing.lg),
+          if (AppInfo.isPrerelease) ...[
+            const _TestingNotice(),
+            const SizedBox(height: AppSpacing.md),
+          ],
+          const _Card(
+            title: 'One app for streaming media',
+            body:
+                'Movies, Series, Anime and Live TV, plus your Library. '
+                'The same search, library and playback surface serves '
+                'every section.',
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const _SectionLabel('HOW IT WORKS'),
+          const SizedBox(height: AppSpacing.sm),
+          const _Tile(
+            title: 'Stremio-compatible addons',
+            subtitle:
+                'Catalogs, metadata and streams come from addons you '
+                'install. Nothing is bundled or hosted by this app.',
+          ),
+          const SizedBox(height: 10),
+          const _Tile(
+            title: 'media_kit / libmpv playback',
+            subtitle:
+                'Hardware-accelerated decoding on every platform, with '
+                'the same subtitle and track handling throughout.',
+          ),
+          const SizedBox(height: 10),
+          const _Tile(
+            title: 'Torrent and debrid sources',
+            subtitle:
+                'Streams resolve from torrent swarms directly, or through '
+                'Real-Debrid and TorBox when an account is connected.',
+          ),
+          const SizedBox(height: 10),
+          const _Tile(
+            title: 'Trakt and Simkl sync',
+            subtitle:
+                'Optional. Watchlist, episode progress and scrobbling '
+                'stay in step across devices.',
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          const _SectionLabel('PROJECT'),
+          const SizedBox(height: AppSpacing.sm),
+          const _LinkTile(
+            icon: Icons.code_rounded,
+            title: 'Source code',
+            subtitle: 'MediaHub-Org/PlayTorrioMov — GPL-3.0',
+            url: _kRepoUrl,
+          ),
+          const SizedBox(height: 10),
+          const _LinkTile(
+            icon: Icons.bug_report_outlined,
+            title: 'Report a problem',
+            subtitle: 'Open an issue with your platform and build number',
+            url: '$_kRepoUrl/issues/new',
+          ),
+          const SizedBox(height: 10),
+          const _LinkTile(
+            icon: Icons.favorite_outline_rounded,
+            title: 'Original project',
+            subtitle:
+                'A fork of PlayTorrioV3 by Ayman, who wrote the addon '
+                'integration, scrapers, torrent engine and reader',
+            url: _kUpstreamUrl,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'Licensed under GPL-3.0. Built with Flutter and Dart. '
+            'Playback via media_kit and libmpv.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.5,
+              color: Colors.white.withValues(alpha: 0.3),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
       ),
     );
   }

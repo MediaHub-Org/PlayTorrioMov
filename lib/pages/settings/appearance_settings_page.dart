@@ -3,6 +3,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/iptv_settings.dart';
 import 'appearance/live_tv_settings_page.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
   const AppearanceSettingsPage({super.key});
@@ -28,51 +29,47 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            children: [
-              // Header description
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Text(
-                  'Fine-tune the visual atmosphere, color palettes, and interface layouts.',
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.white.withValues(alpha: 0.5),
-                    height: 1.4,
-                  ),
-                ),
+      body: SettingsScrollView(
+        topPadding: 20,
+        bottomPadding: 20,
+        children: [
+          // Header description
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Text(
+              'Fine-tune the visual atmosphere, color palettes, and interface layouts.',
+              style: TextStyle(
+                fontSize: 13.5,
+                color: Colors.white.withValues(alpha: 0.5),
+                height: 1.4,
               ),
+            ),
+          ),
 
-              // Button: Live TV & Sports UI
-              ValueListenableBuilder<bool>(
-                valueListenable: IptvSettings.enableSpotlight,
-                builder: (context, spotlightEnabled, _) {
-                  return ValueListenableBuilder<AppThemePalette>(
-                    valueListenable: AppThemeService.currentPalette,
-                    builder: (context, currentPalette, _) {
-                      return _buildSectionButton(
-                        icon: Icons.live_tv_rounded,
-                        iconColor: currentPalette.primaryColor,
-                        title: 'Live TV & Sports UI',
-                        subtitle: 'Broadcast hero spotlight, channel card density, category ordering, and live badge styling',
-                        badgeText: spotlightEnabled ? 'Spotlight ON' : 'Compact',
-                        badgeColor: currentPalette.primaryColor,
-                        onTap: () async {
-                          await pushPage(context, const LiveTvSettingsPage());
-                          setState(() {});
-                        },
-                      );
+          // Button: Live TV & Sports UI
+          ValueListenableBuilder<bool>(
+            valueListenable: IptvSettings.enableSpotlight,
+            builder: (context, spotlightEnabled, _) {
+              return ValueListenableBuilder<AppThemePalette>(
+                valueListenable: AppThemeService.currentPalette,
+                builder: (context, currentPalette, _) {
+                  return _buildSectionButton(
+                    icon: Icons.live_tv_rounded,
+                    iconColor: currentPalette.primaryColor,
+                    title: 'Live TV & Sports UI',
+                    subtitle: 'Broadcast hero spotlight, channel card density, category ordering, and live badge styling',
+                    badgeText: spotlightEnabled ? 'Spotlight ON' : 'Compact',
+                    badgeColor: currentPalette.primaryColor,
+                    onTap: () async {
+                      await pushPage(context, const LiveTvSettingsPage());
+                      setState(() {});
                     },
                   );
                 },
-              ),
-            ],
+              );
+            },
           ),
-        ),
+        ],
       ),
     );
   }

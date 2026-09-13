@@ -11,6 +11,7 @@ import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
 /// Simkl, TMDB and Discord Rich Presence. Trakt/Simkl used to be the whole
@@ -39,24 +40,18 @@ class SyncSettingsPage extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
-            children: [
-              const _TraktSyncCard(),
-              const SizedBox(height: 16),
-              const _SimklSyncCard(),
-              const SizedBox(height: 16),
-              const _TmdbConnectCard(),
-              if (_isDesktop) ...[
-                const SizedBox(height: 16),
-                const _DiscordPresenceCard(),
-              ],
-            ],
-          ),
-        ),
+      body: SettingsScrollView(
+        children: [
+          const _TraktSyncCard(),
+          const SizedBox(height: 16),
+          const _SimklSyncCard(),
+          const SizedBox(height: 16),
+          const _TmdbConnectCard(),
+          if (_isDesktop) ...[
+            const SizedBox(height: 16),
+            const _DiscordPresenceCard(),
+          ],
+        ],
       ),
     );
   }

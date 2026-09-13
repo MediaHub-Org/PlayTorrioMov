@@ -23,6 +23,7 @@ import '../../services/stream/stream_service.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../app_info.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/settings/settings_scroll_view.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -154,17 +155,12 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: AnimatedAmbientBackground(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: ListView.separated(
-              padding: EdgeInsets.fromLTRB(16, 20, 16, 32 + bottomInset),
-              itemCount: tiles.length + 1,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, i) =>
-                  i < tiles.length ? tiles[i] : _aboutTile(),
-            ),
-          ),
+        child: SettingsScrollView.separated(
+          bottomPadding: 32 + bottomInset,
+          itemCount: tiles.length + 1,
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (context, i) =>
+              i < tiles.length ? tiles[i] : _aboutTile(),
         ),
       ),
     );
