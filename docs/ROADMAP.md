@@ -11,11 +11,11 @@ re-argued from the one-line summary. Anything ruled out entirely goes to
 [Declined](#declined-so-they-do-not-get-re-litigated) with its reasoning
 rather than being deleted.
 
-Last reconciled against the tree: **2026-09-13**, after PR #16 merged
-(#39, #40, #44, #47, #48). Items #38-#48 came out of testing the v1.5.7
-Android build on a real device; the Bugs section that testing filled is now
-empty, and what is left is standardisation (#41, #42), one feature (#46),
-and three that need a person rather than a patch (#15, #21, #28).
+Last reconciled against the tree: **2026-09-13**. **Every numbered item is
+closed.** What remains is not a list of tasks but three things only a device
+can answer, each noted in its own section: whether TMDB's `created_by` is
+populated in practice (#39), whether a stream actually reaches a TV (#28),
+and whether the Live TV tap now feels immediate (#42).
 
 ## Navigation
 
@@ -49,7 +49,10 @@ ours). Of the rest: `7b32112` is an upstream version bump, `f69617b` a merge
 commit, and `29a4127`/`1da1940` add IPTV channels, search and storage —
 which is the area this fork has diverged furthest in (#45, #46 and the
 portal browser are all ours), so they need reading as ideas rather than
-porting as patches. `9616808` remains as before.
+porting as patches. `9616808` is **closed as not needed**: it adds a blurred dual-layer hero
+backdrop to eliminate black bars, and every hero in this fork already uses
+`BoxFit.cover`, which fills and crops. It fixes a problem we do not have.
+With that, **the upstream list is empty** — reviewed through `f69617b`.
 
 **Last synced: `3670ae1`, 2026-09-10.** Ported download auto-reconnect,
 "Copy Stream URL", and the fullscreen-state-on-exit fix from that commit;
@@ -85,21 +88,80 @@ verified against the live API from CI (see its note).
 
 ## Code and consistency
 
-Every browse section — Movies/Series, Anime and Live TV — renders through
-`BrowseScaffold` and `BrowseRowView`, so "the same kind of page" is one
-implementation. What is still uneven is the *information* inside those
-pages, and the players.
-
-| #  | Task | Details |
-|----|------|---------|
+**None open.** Every browse section — Movies/Series, Anime and Live TV —
+renders through `BrowseScaffold` and `BrowseRowView`; the three details
+pages share one spine and one section heading (#41); and the two players
+share their controls (#42). What each converged on, and the few divergences
+kept deliberately, are recorded in the sections below.
 
 ## Requested UI work
 
-| #  | Task | Details |
-|----|------|---------|
-| 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
-| 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
-| 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
+**None open.** The last three — mobile-first as a standing policy (#15), the
+logo accent (#21) and Google Cast (#28) — are covered below. #28 is the one
+that still wants a person: its code is fixed and tested, but whether a
+stream actually reaches a TV can only be answered with a receiver on the
+network.
+
+### Mobile-first, made checkable (shipped, #15)
+
+A policy nobody can check is a wish, so #15 shipped as a rule with a test
+behind it rather than a paragraph. **No `SizedBox` in `lib/` may declare a
+fixed width of 360 or more** — 360dp is the narrowest width the app is
+expected to work at, and a fixed width larger than that cannot shrink:
+whatever it holds is painted past the edge of the screen. A clamped or
+computed width is fine, and is what the fix looks like.
+
+The audit turned up **one** real offender out of three candidates: the
+custom decoder-chain dialog in video player settings, pinned at `width:
+400`, which overflowed on exactly the devices this app is mostly used on.
+It is clamped to the available width now, and still 400 wherever there is
+room. The other two were false positives worth naming so they are not
+"fixed" later by mistake: `anime_page`'s 500/450 boxes are decorative glow
+blobs deliberately positioned off-screen, and `cast_service`'s 480 is a
+poster *resolution* sent to the receiver, not a layout width.
+
+### The logo's film-strip rule (shipped, #21)
+
+A short film-strip rule under the wordmark: a bar with sprocket holes
+punched along it, in the theme's accent colour.
+
+**Under, not beside.** The icon already owns the left of the header, and a
+second mark there would crowd a phone header that also carries Settings.
+Underlining costs no horizontal room, which is the scarce dimension.
+
+**Short, not a full underline.** Stretching it to the available width would
+run it far past the text on a desktop header, and measuring the text's own
+width would cost an `IntrinsicWidth` for the sake of an accent.
+
+**Drawn, not an asset**, so it takes the theme colour — and drawn as a
+single even-odd path rather than a bar with holes painted over it, so the
+holes are genuinely transparent and the rule works over the header's
+gradient instead of only over whatever flat colour it was designed against.
+
+### Cast: the code is ready, the receiver is yours (#28)
+
+This could never be finished from CI — whether a stream reaches a TV needs
+a Cast-capable receiver on the network. What *could* be done was reading
+the path for defects, and it had two, both only reachable once Live TV
+gained a cast button:
+
+- **`streamType` was hardcoded to `buffered`.** A live channel announced
+  that way gets a seek bar and a duration the receiver cannot honour. The
+  SDK has a `live` type for exactly this; `isLive` now threads from the
+  player through the cast sheet to `loadMedia`.
+- **`.ts` was being called `video/mp4`.** IPTV portals serve MPEG-TS
+  constantly, and that hands the receiver a demuxer that cannot read it.
+  Now `video/mp2t`.
+
+**What a device test needs to answer**, none of which CI can:
+
+1. Does a **movie** reach the TV and play? (The known limit stands: the Cast
+   SDK has no sender-side way to attach Referer/User-Agent, so scraper
+   sources needing them will fail on the TV while playing fine locally.
+   Direct/CDN sources are the ones to try.)
+2. Does a **Live TV channel** reach the TV, and does the receiver show it as
+   live — no seek bar, no phantom duration?
+3. Does **disconnect** return playback cleanly?
 
 ### The details spine, measured (shipped, #41)
 

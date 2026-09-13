@@ -12,10 +12,15 @@ class PlayerCastSheet extends StatelessWidget {
   final String? posterUrl;
   final String streamUrl;
 
+  /// A live channel, so the receiver is told `live` rather than `buffered`
+  /// and does not offer a seek bar over a stream with no end.
+  final bool isLive;
+
   const PlayerCastSheet({
     super.key,
     required this.title,
     required this.streamUrl,
+    this.isLive = false,
     this.posterUrl,
   });
 
@@ -23,6 +28,7 @@ class PlayerCastSheet extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String streamUrl,
+    bool isLive = false,
     String? posterUrl,
   }) {
     showModalBottomSheet(
@@ -31,6 +37,7 @@ class PlayerCastSheet extends StatelessWidget {
       builder: (_) => PlayerCastSheet(
         title: title,
         streamUrl: streamUrl,
+        isLive: isLive,
         posterUrl: posterUrl,
       ),
     );
@@ -106,6 +113,7 @@ class PlayerCastSheet extends StatelessWidget {
                                 await CastService.connect(device);
                                 await CastService.loadMedia(
                                   url: streamUrl,
+                                  isLive: isLive,
                                   title: title,
                                   posterUrl: posterUrl,
                                 );

@@ -57,12 +57,18 @@ abstract final class CastService {
 
   /// Best-effort guess from the URL -- the Cast receiver needs a content
   /// type to pick a demuxer. Most sources here are progressive MP4; HLS/DASH
-  /// playlists are the only common exceptions worth detecting explicitly.
-  static String _contentTypeFor(String url) {
+  /// playlists and raw transport streams are the exceptions worth detecting.
+  ///
+  /// `.ts` matters now that Live TV can cast: IPTV portals serve MPEG-TS
+  /// constantly, and calling one `video/mp4` hands the receiver a demuxer
+  /// that cannot read it.
+  @visibleForTesting
+  static String contentTypeFor(String url) {
     final lower = url.toLowerCase();
     if (lower.contains('.m3u8')) return 'application/x-mpegurl';
     if (lower.contains('.mpd')) return 'application/dash+xml';
     if (lower.contains('.mkv')) return 'video/x-matroska';
+    if (lower.contains('.ts')) return 'video/mp2t';
     return 'video/mp4';
   }
 
@@ -72,16 +78,24 @@ abstract final class CastService {
   /// requires them (many do) will fail to play on the TV even though it
   /// plays fine locally, where this app's own player sends those headers
   /// itself. Direct/CDN sources are the ones most likely to work.
+  /// [isLive] picks the receiver's stream type. A live channel announced as
+  /// `buffered` gets a seek bar and a duration the receiver cannot honour;
+  /// the Cast SDK has a `live` type precisely for this. It was hardcoded to
+  /// `buffered` when only Movies/Series/Anime could cast, and casting a
+  /// Live TV channel is what made that wrong.
   static Future<void> loadMedia({
     required String url,
     required String title,
     String? posterUrl,
+    bool isLive = false,
   }) {
     final mediaInfo = GoogleCastMediaInformation(
       contentId: url,
-      streamType: CastMediaStreamType.buffered,
+      streamType: isLive
+          ? CastMediaStreamType.live
+          : CastMediaStreamType.buffered,
       contentUrl: Uri.parse(url),
-      contentType: _contentTypeFor(url),
+      contentType: contentTypeFor(url),
       metadata: GoogleCastMovieMediaMetadata(
         title: title,
         images: posterUrl == null
