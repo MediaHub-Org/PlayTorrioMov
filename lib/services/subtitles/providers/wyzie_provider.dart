@@ -5,6 +5,7 @@ import '../../../models/subtitle/subtitle_model.dart';
 import '../subtitle_extractor.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_languages.dart';
+import 'package:flutter/foundation.dart';
 
 class WyzieProvider extends SubtitleProvider {
   @override
@@ -92,7 +93,7 @@ class WyzieProvider extends SubtitleProvider {
         );
       }
     } catch (e) {
-      print('[WyzieProvider] search error: $e');
+      debugPrint('[WyzieProvider] search error: $e');
     }
 
     return results;

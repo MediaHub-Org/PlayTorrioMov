@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
+import 'package:flutter/foundation.dart';
 
 /// Scraper for All Movies Downloader (Films365) producing direct MP4 stream sources.
 class XDownloaderScraper extends StreamScraper {
@@ -149,7 +150,7 @@ class XDownloaderScraper extends StreamScraper {
         }
       }
     } catch (e) {
-      print('XDownloaderScraper error: $e');
+      debugPrint('XDownloaderScraper error: $e');
     }
 
     return sources;

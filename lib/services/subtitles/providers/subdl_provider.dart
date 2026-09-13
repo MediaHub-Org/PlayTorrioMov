@@ -5,6 +5,7 @@ import 'package:html/parser.dart' as html_parser;
 import '../../../models/subtitle/subtitle_model.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_extractor.dart';
+import 'package:flutter/foundation.dart';
 
 class SubdlProvider extends SubtitleProvider {
   @override
@@ -183,7 +184,7 @@ class SubdlProvider extends SubtitleProvider {
         }
       }
     } catch (e) {
-      print('Subdl search error: $e');
+      debugPrint('Subdl search error: $e');
     }
 
     return results;

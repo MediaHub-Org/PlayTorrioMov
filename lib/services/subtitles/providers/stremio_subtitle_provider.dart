@@ -6,6 +6,7 @@ import '../../addon/addon_manager.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_extractor.dart';
 import '../subtitle_languages.dart';
+import 'package:flutter/foundation.dart';
 
 class StremioSubtitleProvider extends SubtitleProvider {
   @override
@@ -50,7 +51,7 @@ class StremioSubtitleProvider extends SubtitleProvider {
     for (final addon in activeAddons) {
       try {
         final url = '${addon.baseUrl}/subtitles/$type/$id.json';
-        print('[StremioSubtitleProvider] Querying ${addon.manifest.name}: $url');
+        debugPrint('[StremioSubtitleProvider] Querying ${addon.manifest.name}: $url');
         final res = await http
             .get(Uri.parse(url), headers: _headers)
             .timeout(const Duration(seconds: 6));
@@ -98,10 +99,10 @@ class StremioSubtitleProvider extends SubtitleProvider {
               ),
             );
           }
-          print('[StremioSubtitleProvider] ${addon.manifest.name} returned $idx subtitles');
+          debugPrint('[StremioSubtitleProvider] ${addon.manifest.name} returned $idx subtitles');
         }
       } catch (e) {
-        print('[StremioSubtitleProvider] Error querying ${addon.manifest.name}: $e');
+        debugPrint('[StremioSubtitleProvider] Error querying ${addon.manifest.name}: $e');
       }
     }
 

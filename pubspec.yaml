@@ -60,8 +60,9 @@ dependencies:
   archive: ^4.0.9
   path_provider: ^2.1.6
   path_provider_linux: ^2.2.1
-  # Used directly by main.dart to pin the on-disk data directory, and by
-  # backup_service_test to stub the platform channel.
+  # Used directly by main.dart to pin the on-disk data directory. (It was
+  # also a test dependency until the backup tests stopped needing a fake
+  # path provider.)
   path_provider_platform_interface: ^2.1.2
   ota_update: ^7.1.0
   package_info_plus: ^8.3.1
