@@ -87,11 +87,11 @@ pages, and the players.
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
 | 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | **Decided.** Requested for Movies, Series and Anime. The double-tap side zones keep ±10s — the convention people arrive with — and ±30s gets explicit buttons in the transport bar. No new gesture to learn, and five controls never share one row. Both paths animate on the side they affect, reusing the existing double-tap ripple rather than introducing a second visual language. |
 | 46 | Custom Live TV channels from a portal stream | **Decided: build it.** #45 has shipped, so this is unblocked. It is what makes the portal browser's star worth demoting rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source feeding the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal.
-| 48 | One search across Movies, Series and Anime | **Decided — see *How #48 fits together*.** The genuinely useful half of "be more like a big streaming platform". There are four search surfaces today — `search_page` (addon movies/shows), `anime_search_page`, `iptv_search_page` and `discover_page` — and `SearchScope` already narrows the icon's behaviour to whichever section you are standing in, so which one you get depends on where you were. One search that queries movies, series and anime together and groups results by type gives the platform feel without collapsing the sections or touching the anime stack. Live TV stays out: channels are matched by keyword against a portal's stream list, not searched by title, and folding them in would mean two different meanings of "result" in one list.
 
-### How #48 fits together
+### How search came together (shipped, #48)
 
-The groundwork is already there, which makes this smaller than it sounds.
+One search page now answers for Movies, Series and Anime. The groundwork
+was already there, which made it smaller than it sounded.
 
 **There are not several search icons.** `PageSearchButton` is one shared
 widget, already rendered in the same header pill-row slot by
@@ -114,18 +114,34 @@ open one search page every time, with the current section **pre-selected as
 a type chip the user can clear**. Context is kept, reach becomes global, and
 nothing is invisible.
 
-**Filters.** Under the field: type chips (All / Movies / Series / Anime),
-then the existing `FilterDropdown` pills for genre / year / sort — the same
-widget the catalog header already uses, so this is reuse, not new UI. With
-**All** selected, group results by type under headings rather than
-interleaving them.
+**Filters.** Under the field sits a fixed row of type chips — All, Movies,
+Series, Anime — as `SearchFilter`, which is also what decides where a query
+is actually sent: addons, AniList, or both at once. With **All** selected
+the two catalogues are queried in parallel and results stay grouped by type
+under their own headings rather than interleaved.
+
+The genre / year / sort `FilterDropdown` pills planned here were **not**
+built, and the plan was wrong to assume them: `AddonManager.searchAll` takes
+a query and a content type and nothing else, so those pills would have had
+nothing to narrow on the addon side. They belong to catalog browsing, where
+they already live. The anime-native filters, which do exist as a real API,
+are reached instead through the handover described below.
 
 **The other search pages.** `anime_search_page.dart` is 918 lines and most
 of that is anime-native filtering (AniList genre, season, format) that has
-no movie equivalent. Absorb those as options that appear when the Anime chip
-is active, rather than deleting the page wholesale and losing them.
+no movie equivalent, so it was kept rather than deleted. It is now reached
+*through* the unified page: an **Anime filters** pill appears beside the
+chips when Anime is selected, and the anime results row's "See all" leads to
+the same place. Both hand the typed query across via a new `initialQuery`,
+so nothing has to be retyped — the filters became a step deeper into search
+instead of a separate front door.
 
-**Live TV stays out, at first.** Its search filters a channel and stream
+Anime's own search button follows the same rule: in AniList mode it opens
+the unified page (arriving with the Anime chip pre-selected, so it reads the
+same as Movies and Series), and only **Arabic mode** still opens the anime
+page directly, because the unified search has no source for that catalogue.
+
+**Live TV stays out, for now.** Its search filters a channel and stream
 list by keyword; it does not search a title catalogue, so a result there is
 a different kind of object. Leaving its `onTap` override in place is the
 honest version: one rule, legible — *in Live TV you search channels,
