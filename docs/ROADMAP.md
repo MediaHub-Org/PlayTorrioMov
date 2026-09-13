@@ -48,7 +48,10 @@ backdrop scaling for home/anime — anime_page.dart has diverged
 significantly since this session's `BrowseScaffold` migration, needs
 adapting rather than a direct port) and `d2f8074` (IPTV portal manager
 responsiveness — a near-total rewrite of `iptv_portals_modal.dart`, real
-mobile-first value but a large diff to review safely). Next step: review
+mobile-first value but a large diff to review safely; **no longer blocking
+anything**, since the reported overflows were fixed directly in #40 and our
+copy of that file has diverged too far for a straight port — see *The IPTV
+overflows*). Next step: review
 those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 (git history was squashed at the fork point, so nothing arrives via
 `git merge`).
@@ -64,7 +67,6 @@ became visible once that landed.
 | #  | Bug | What is actually wrong |
 |----|-----|------------------------|
 | 39 | Series show no director even with a working TMDB id | **Decided: read `created_by` from `/tv/{id}`, label it "Creator".** `/tv/{id}/credits` returns series-level crew, which for most shows is producers and no director — TV directors are per-episode. `created_by` is the showrunner, which is what a viewer means by "whose show is this", and it arrives in the detail response the app can already ask for: one extra request, no new response shape. `/tv/{id}/aggregate_credits` is the heavier alternative — a large payload whose entries carry a `jobs` array instead of a single `job`, needing a TV-shaped branch in `_directingJobs` — so reach for it only if `created_by` proves thin in practice. **Verify against the live API before building**: this is reasoned from the API's documented shape, not yet observed.
-| 40 | Text escapes its container in two IPTV places | **Decided: try the upstream port first, timeboxed.** In **IPTV Portals & Playlists** label text renders outside its box, and the **Reddit** button's drop-down renders items outside the menu box; both in `lib/pages/iptv/iptv_portals_modal.dart`. Upstream V3's `d2f8074` is a responsiveness rewrite of that same file (see Upstream sync) and would likely fix both plus more. Read it first: if it ports cleanly, take it; if the diff is too large to review safely, hand-patch the two overflows and leave the port on the upstream list. Do not do both.
 
 ## Code and consistency
 
@@ -147,6 +149,37 @@ honest version: one rule, legible — *in Live TV you search channels,
 everywhere else you search titles*. A later pass can add a Live TV chip
 whose results render as channel cards, once the result list is ready to hold
 two shapes.
+
+### The IPTV overflows: hand-patched, not ported (shipped, #40)
+
+The choice was between porting upstream's `d2f8074` — a responsiveness
+rewrite of this same `iptv_portals_modal.dart` — and patching the overflows
+directly. **Patched directly**, for a reason that only became clear on
+reading our copy: the file has diverged. Cloud Vault as a second portal
+source, the modal-style customizer, and the whole M3U Playlists tab are
+Mov's, not upstream's, so a near-total rewrite of the file would have had to
+be re-adapted around all three. `d2f8074` stays on the upstream list, no
+longer as a fix for anything reported.
+
+Four overflows, all the same bug in different clothes — **an unconstrained
+child in a `Row`, which does not shrink; it paints outside the box**:
+
+- **The modal's title.** "IPTV Portals & Playlists" at 20pt w900, plus the
+  icon and two trailing buttons, is wider than a phone dialog. Now
+  `Expanded` with an ellipsis — which is what the `Spacer` after it was
+  standing in for anyway.
+- **The customizer sheet's title**, the same shape, found while fixing the
+  first.
+- **The source dropdown's items** (the one the user reached via Reddit).
+  Their descriptions run to ~50 characters; a popup menu sizes itself to
+  what fits on screen and does not grow past the edge to suit its contents.
+  The text columns are now `Expanded` and wrap, and Cloud Vault's count
+  badge sits in a `Wrap` so it drops under the title instead of pushing the
+  row out.
+- **Both selection toolbars** (Manage mode, portals and M3U). Select-all
+  plus the two delete buttons are together wider than a phone dialog. Now a
+  `Wrap` of two groups with `spaceBetween`: unchanged on a wide dialog, and
+  the delete pair drops to a second line on a narrow one.
 
 ### Where the ±30s buttons went (shipped, #44)
 
