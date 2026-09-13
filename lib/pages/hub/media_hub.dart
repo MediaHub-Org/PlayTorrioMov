@@ -19,30 +19,30 @@ class MediaHub extends StatelessWidget {
   static Widget _buildSection(String activeSection) {
     switch (activeSection) {
       case 'movies':
-        SearchScope.set('movie', label: 'Movies');
+        SearchScope.set('movie');
         return const TypeCatalogPage(
           key: ValueKey('movie'),
           type: 'movie',
           title: 'Movies',
         );
       case 'series':
-        SearchScope.set('series', label: 'Series');
+        SearchScope.set('series');
         return const TypeCatalogPage(
           key: ValueKey('series'),
           type: 'series',
           title: 'Series',
         );
       case 'anime':
-        SearchScope.set('anime', label: 'Anime');
+        SearchScope.set('anime');
         return const AnimePage();
       case 'iptv':
-        SearchScope.set('iptv', label: 'Live TV');
+        SearchScope.set('iptv');
         return const IptvPage();
       case 'collection':
-        SearchScope.set(null, label: 'Library');
+        SearchScope.set(null);
         return const CollectionPage();
       default:
-        SearchScope.set('movie', label: 'Movies');
+        SearchScope.set('movie');
         return const TypeCatalogPage(
           key: ValueKey('movie'),
           type: 'movie',

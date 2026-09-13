@@ -48,23 +48,26 @@ backdrop scaling for home/anime — anime_page.dart has diverged
 significantly since this session's `BrowseScaffold` migration, needs
 adapting rather than a direct port) and `d2f8074` (IPTV portal manager
 responsiveness — a near-total rewrite of `iptv_portals_modal.dart`, real
-mobile-first value but a large diff to review safely). Next step: review
+mobile-first value but a large diff to review safely; **no longer blocking
+anything**, since the reported overflows were fixed directly in #40 and our
+copy of that file has diverged too far for a straight port — see *The IPTV
+overflows*). Next step: review
 those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 (git history was squashed at the fork point, so nothing arrives via
 `git merge`).
 
 ## Bugs
 
-From testing the v1.5.7 Android build on a device. The cast-and-crew bug
-that caused three of the reported symptoms at once — missing photos, the
-role line reading "Cast", and missing directors — is fixed and therefore
-gone from this list; see CHANGELOG. #39 is what remains of it, and only
-became visible once that landed.
+**None open.** Everything reported from testing the v1.5.7 Android build on
+a device has been fixed: the cast-and-crew bug that caused three symptoms at
+once (missing photos, the role line reading "Cast", missing directors) in
+#38, the empty Direction half on series in #39, and the text escaping its
+container in the IPTV portals modal in #40. See *Series creators* and *The
+IPTV overflows* below for what shipped, and the CHANGELOG for #38.
 
-| #  | Bug | What is actually wrong |
-|----|-----|------------------------|
-| 39 | Series show no director even with a working TMDB id | **Decided: read `created_by` from `/tv/{id}`, label it "Creator".** `/tv/{id}/credits` returns series-level crew, which for most shows is producers and no director — TV directors are per-episode. `created_by` is the showrunner, which is what a viewer means by "whose show is this", and it arrives in the detail response the app can already ask for: one extra request, no new response shape. `/tv/{id}/aggregate_credits` is the heavier alternative — a large payload whose entries carry a `jobs` array instead of a single `job`, needing a TV-shaped branch in `_directingJobs` — so reach for it only if `created_by` proves thin in practice. **Verify against the live API before building**: this is reasoned from the API's documented shape, not yet observed.
-| 40 | Text escapes its container in two IPTV places | **Decided: try the upstream port first, timeboxed.** In **IPTV Portals & Playlists** label text renders outside its box, and the **Reddit** button's drop-down renders items outside the menu box; both in `lib/pages/iptv/iptv_portals_modal.dart`. Upstream V3's `d2f8074` is a responsiveness rewrite of that same file (see Upstream sync) and would likely fix both plus more. Read it first: if it ports cleanly, take it; if the diff is too large to review safely, hand-patch the two overflows and leave the port on the upstream list. Do not do both.
+Next device test to run: a series whose director was missing, to confirm a
+**Creator** card now appears — #39 is the one fix that could not be
+verified against the live API from CI (see its note).
 
 ## Code and consistency
 
@@ -85,14 +88,37 @@ pages, and the players.
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
-| 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | **Decided.** Requested for Movies, Series and Anime. The double-tap side zones keep ±10s — the convention people arrive with — and ±30s gets explicit buttons in the transport bar. No new gesture to learn, and five controls never share one row. Both paths animate on the side they affect, reusing the existing double-tap ripple rather than introducing a second visual language. |
 | 46 | Custom Live TV channels from a portal stream | **Decided: build it.** #45 has shipped, so this is unblocked. It is what makes the portal browser's star worth demoting rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source feeding the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal.
-| 47 | Watch history is recorded but never shown | **Decided: surface it as the Continue Watching row's "see all", not a Library tab.** `ContinueWatchingService.historyItems` already keeps every episode watched, up to 100, in its own persisted `continue_watching_history_v1` store; the only consumer is `getHistoryProgress`, reading one entry to resume a position. So the data and the persistence exist and only the view is missing. It does not belong in Library: #43 (shipped) makes those tabs mean *what you chose to keep*, and history is a record of what happened, not an intent — a fifth tab would also be one too many. Hanging it off the row it belongs to keeps Library coherent and puts history where the user already looks for recent viewing.
-| 48 | One search across Movies, Series and Anime | **Decided — see *How #48 fits together*.** The genuinely useful half of "be more like a big streaming platform". There are four search surfaces today — `search_page` (addon movies/shows), `anime_search_page`, `iptv_search_page` and `discover_page` — and `SearchScope` already narrows the icon's behaviour to whichever section you are standing in, so which one you get depends on where you were. One search that queries movies, series and anime together and groups results by type gives the platform feel without collapsing the sections or touching the anime stack. Live TV stays out: channels are matched by keyword against a portal's stream list, not searched by title, and folding them in would mean two different meanings of "result" in one list.
 
-### How #48 fits together
+### Series creators (shipped, #39 — but verify it on device)
 
-The groundwork is already there, which makes this smaller than it sounds.
+A series' `/credits` is **series-level** crew, which for most shows is
+producers and no director at all: TV directors are credited per episode.
+That is why the Direction half came back empty even once #38 had the ids
+working. `created_by` on `/tv/{id}` is the showrunner — what a viewer means
+by "whose show is this" — and it is one extra request, made **only** for a
+series whose `/credits` had no directing crew, so a series that already has
+one costs nothing.
+
+`/tv/{id}/aggregate_credits` remains the heavier alternative: a large
+payload whose entries carry a `jobs` array instead of a single `job`,
+needing a TV-shaped branch in the parser. Reach for it only if `created_by`
+proves thin in practice.
+
+**The live check this item asked for could not be done here.** This
+session's network policy blocks `api.themoviedb.org`, so the response shape
+is still reasoned from TMDB's documentation rather than observed. The code
+is written so that being wrong costs nothing — an absent, empty, or
+malformed `created_by` yields no crew, which is exactly today's behaviour —
+and the parser is covered by tests for each of those shapes. What tests
+cannot confirm is whether the field is **populated in practice**, so the
+Android release is the real check: open a series whose director is missing
+and look for a "Creator" card.
+
+### How search came together (shipped, #48)
+
+One search page now answers for Movies, Series and Anime. The groundwork
+was already there, which made it smaller than it sounded.
 
 **There are not several search icons.** `PageSearchButton` is one shared
 widget, already rendered in the same header pill-row slot by
@@ -115,24 +141,99 @@ open one search page every time, with the current section **pre-selected as
 a type chip the user can clear**. Context is kept, reach becomes global, and
 nothing is invisible.
 
-**Filters.** Under the field: type chips (All / Movies / Series / Anime),
-then the existing `FilterDropdown` pills for genre / year / sort — the same
-widget the catalog header already uses, so this is reuse, not new UI. With
-**All** selected, group results by type under headings rather than
-interleaving them.
+**Filters.** Under the field sits a fixed row of type chips — All, Movies,
+Series, Anime — as `SearchFilter`, which is also what decides where a query
+is actually sent: addons, AniList, or both at once. With **All** selected
+the two catalogues are queried in parallel and results stay grouped by type
+under their own headings rather than interleaved.
+
+The genre / year / sort `FilterDropdown` pills planned here were **not**
+built, and the plan was wrong to assume them: `AddonManager.searchAll` takes
+a query and a content type and nothing else, so those pills would have had
+nothing to narrow on the addon side. They belong to catalog browsing, where
+they already live. The anime-native filters, which do exist as a real API,
+are reached instead through the handover described below.
 
 **The other search pages.** `anime_search_page.dart` is 918 lines and most
 of that is anime-native filtering (AniList genre, season, format) that has
-no movie equivalent. Absorb those as options that appear when the Anime chip
-is active, rather than deleting the page wholesale and losing them.
+no movie equivalent, so it was kept rather than deleted. It is now reached
+*through* the unified page: an **Anime filters** pill appears beside the
+chips when Anime is selected, and the anime results row's "See all" leads to
+the same place. Both hand the typed query across via a new `initialQuery`,
+so nothing has to be retyped — the filters became a step deeper into search
+instead of a separate front door.
 
-**Live TV stays out, at first.** Its search filters a channel and stream
+Anime's own search button follows the same rule: in AniList mode it opens
+the unified page (arriving with the Anime chip pre-selected, so it reads the
+same as Movies and Series), and only **Arabic mode** still opens the anime
+page directly, because the unified search has no source for that catalogue.
+
+**Live TV stays out, for now.** Its search filters a channel and stream
 list by keyword; it does not search a title catalogue, so a result there is
 a different kind of object. Leaving its `onTap` override in place is the
 honest version: one rule, legible — *in Live TV you search channels,
 everywhere else you search titles*. A later pass can add a Live TV chip
 whose results render as channel cards, once the result list is ready to hold
 two shapes.
+
+### The IPTV overflows: hand-patched, not ported (shipped, #40)
+
+The choice was between porting upstream's `d2f8074` — a responsiveness
+rewrite of this same `iptv_portals_modal.dart` — and patching the overflows
+directly. **Patched directly**, for a reason that only became clear on
+reading our copy: the file has diverged. Cloud Vault as a second portal
+source, the modal-style customizer, and the whole M3U Playlists tab are
+Mov's, not upstream's, so a near-total rewrite of the file would have had to
+be re-adapted around all three. `d2f8074` stays on the upstream list, no
+longer as a fix for anything reported.
+
+Four overflows, all the same bug in different clothes — **an unconstrained
+child in a `Row`, which does not shrink; it paints outside the box**:
+
+- **The modal's title.** "IPTV Portals & Playlists" at 20pt w900, plus the
+  icon and two trailing buttons, is wider than a phone dialog. Now
+  `Expanded` with an ellipsis — which is what the `Spacer` after it was
+  standing in for anyway.
+- **The customizer sheet's title**, the same shape, found while fixing the
+  first.
+- **The source dropdown's items** (the one the user reached via Reddit).
+  Their descriptions run to ~50 characters; a popup menu sizes itself to
+  what fits on screen and does not grow past the edge to suit its contents.
+  The text columns are now `Expanded` and wrap, and Cloud Vault's count
+  badge sits in a `Wrap` so it drops under the title instead of pushing the
+  row out.
+- **Both selection toolbars** (Manage mode, portals and M3U). Select-all
+  plus the two delete buttons are together wider than a phone dialog. Now a
+  `Wrap` of two groups with `spaceBetween`: unchanged on a wide dialog, and
+  the delete pair drops to a second line on a narrow one.
+
+### Where the ±30s buttons went (shipped, #44)
+
+The centred overlay keeps play/pause and ±10s and gained nothing: five
+controls in one row is one too many to aim at, especially on a phone. ±30s
+went to the **centre of the transport bar's bottom row** instead — between
+volume and the subtitle/settings group, which is empty space on a phone and
+within thumb reach. The side groups became `Expanded`, so the pair is
+centred on the bar rather than on whatever room the volume control happens
+to leave; under `spaceBetween` it would have sat off-centre, and shifted as
+the left group changed shape between compact and wide.
+
+The two steps are for different things, which is why both exist: ±10s to
+catch a line of dialogue, ±30s to clear an ad break or an opening.
+
+**One feedback path, not four.** Every fixed step — the double-tap zones,
+the centred ±10s buttons, the new ±30s buttons, the arrow keys — already
+routed through `_seekRelative`, so the flash was added there once. There is
+no second path that could animate differently, or not at all. It appears on
+the side matching the direction, and is deliberately **not** gated on the
+controls being visible: a double-tap seek happens with the overlay hidden,
+which is exactly when confirmation that the tap registered matters most.
+
+**It counts.** Repeat taps in the same direction accumulate, so three quick
++10s taps read "30 seconds" — what the viewer is actually asking for —
+rather than flashing "10 seconds" three times. Turning around starts a new
+count instead of cancelling out: the number describes the current gesture,
+not a running total of the session.
 
 ### Why Downloads stays in the Library (shipped, #43)
 

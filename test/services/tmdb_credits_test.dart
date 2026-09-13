@@ -151,4 +151,86 @@ void main() {
       );
     });
   });
+
+  group('parseCreators', () {
+    test('created_by becomes crew labelled Creator', () {
+      // A series' /credits carries producers and no director -- TV
+      // directors are per-episode -- so the showrunner from /tv/{id} is
+      // what answers "whose show is this".
+      final creators = TmdbService.parseCreators({
+        'created_by': [
+          {
+            'id': 66633,
+            'name': 'Vince Gilligan',
+            'profile_path': '/rLSUjr725ez1cK7SKVxC9udO03Y.jpg',
+          },
+        ],
+      });
+
+      expect(creators, hasLength(1));
+      expect(creators.single.name, 'Vince Gilligan');
+      expect(creators.single.job, 'Creator');
+      expect(
+        creators.single.profileUrl,
+        'https://image.tmdb.org/t/p/w276_and_h350_face'
+        '/rLSUjr725ez1cK7SKVxC9udO03Y.jpg',
+      );
+    });
+
+    test('several creators all come through, in order', () {
+      final creators = TmdbService.parseCreators({
+        'created_by': [
+          {'name': 'David Benioff'},
+          {'name': 'D. B. Weiss'},
+        ],
+      });
+
+      expect(creators.map((c) => c.name), ['David Benioff', 'D. B. Weiss']);
+      expect(creators.every((c) => c.job == 'Creator'), isTrue);
+    });
+
+    test('a repeated name gets one card, not two', () {
+      final creators = TmdbService.parseCreators({
+        'created_by': [
+          {'name': 'Vince Gilligan'},
+          {'name': 'Vince Gilligan', 'profile_path': '/other.jpg'},
+        ],
+      });
+
+      expect(creators, hasLength(1));
+    });
+
+    test('a creator with no photo still lists', () {
+      final creators = TmdbService.parseCreators({
+        'created_by': [
+          {'name': 'Jane Doe', 'profile_path': null},
+        ],
+      });
+
+      expect(creators.single.name, 'Jane Doe');
+      expect(creators.single.profileUrl, isNull);
+    });
+
+    test('nameless entries are dropped rather than shown as Unknown', () {
+      final creators = TmdbService.parseCreators({
+        'created_by': [
+          {'profile_path': '/nobody.jpg'},
+          {'name': ''},
+          {'name': 'Real Person'},
+        ],
+      });
+
+      expect(creators.map((c) => c.name), ['Real Person']);
+    });
+
+    test('a body with no created_by is empty, not a crash', () {
+      // The field is absent on a movie response, and TMDB sends an empty
+      // list for plenty of series -- neither is an error.
+      expect(TmdbService.parseCreators({'created_by': []}), isEmpty);
+      expect(TmdbService.parseCreators({'name': 'Some Show'}), isEmpty);
+      expect(TmdbService.parseCreators({'created_by': 'nope'}), isEmpty);
+      expect(TmdbService.parseCreators(null), isEmpty);
+      expect(TmdbService.parseCreators('a string'), isEmpty);
+    });
+  });
 }

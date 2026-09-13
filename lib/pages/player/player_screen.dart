@@ -27,6 +27,7 @@ import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_top_bar.dart';
 import '../../widgets/player/player_transport.dart';
 import '../../widgets/player/player_center_controls.dart';
+import '../../widgets/player/player_seek_feedback.dart';
 import '../../widgets/player/player_settings_menu.dart';
 import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
@@ -1439,7 +1440,32 @@ class _PlayerScreenState extends State<PlayerScreen>
         ? Duration.zero
         : (dur > Duration.zero && target > dur ? dur : target);
     _player.seek(clamped);
+    _flashSeek(offset.inSeconds);
     _startHideControlsTimer();
+  }
+
+  SeekFlash? _seekFlash;
+  int _seekFlashSeq = 0;
+  Timer? _seekFlashTimer;
+
+  /// Shows the step that was just taken, on the side it moved the video.
+  /// Every fixed-step seek routes through [_seekRelative], so the double-tap
+  /// zones, the centred ±10s buttons, the ±30s buttons and the arrow keys
+  /// all land here -- there is no second path that could animate
+  /// differently, or not at all.
+  void _flashSeek(int seconds) {
+    if (seconds == 0) return;
+    // Keep counting while the taps keep coming the same way: three quick
+    // +10s taps should read "30 seconds", which is what the viewer is
+    // actually doing, rather than flashing "10 seconds" three times.
+    setState(() {
+      _seekFlash = SeekFlash.next(_seekFlash, seconds, id: ++_seekFlashSeq);
+    });
+    _seekFlashTimer?.cancel();
+    _seekFlashTimer = Timer(const Duration(milliseconds: 900), () {
+      if (!mounted) return;
+      setState(() => _seekFlash = null);
+    });
   }
 
   void _toggleEpisodesPanel() {
@@ -1701,6 +1727,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       WindowService.instance.exitFullscreen();
     }
     DiscordRpcService.instance.clearToIdle();
+    _seekFlashTimer?.cancel();
     super.dispose();
   }
 
@@ -2102,6 +2129,15 @@ class _PlayerScreenState extends State<PlayerScreen>
           ),
         ),
 
+        // Seek feedback. Deliberately not gated on _showControls: a
+        // double-tap seek happens with the overlay hidden, and that is
+        // exactly when some confirmation that the tap registered matters
+        // most.
+        if (!_isLoading)
+          Positioned.fill(
+            child: PlayerSeekFeedback(flash: _seekFlash),
+          ),
+
         // Centered Play/Pause + ±10s (YouTube/Netflix style)
         if (!_isLoading)
           Positioned.fill(
@@ -2167,6 +2203,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onToggleMute: () => _toggleMute(),
                     onToggleSubtitles: _toggleSubtitlesEnabled,
                     onToggleSettingsMenu: () => _toggleMenu('settings'),
+                    onSeekBack30: () =>
+                        _seekRelative(const Duration(seconds: -30)),
+                    onSeekForward30: () =>
+                        _seekRelative(const Duration(seconds: 30)),
                   ),
                 ),
               ),

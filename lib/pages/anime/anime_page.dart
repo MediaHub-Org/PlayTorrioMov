@@ -18,6 +18,7 @@ import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
 import 'anime_stream_sheet.dart';
+import '../search/search_page.dart';
 import 'anime_search_page.dart';
 import '../anime_arabic/anime_arabic_details_page.dart';
 import '../anime_arabic/anime_arabic_stream_sheet.dart';
@@ -385,8 +386,17 @@ class _AnimePageState extends State<AnimePage> {
     pushPage(context, AnimeDetailsPage(anime: anime));
   }
 
+  /// AniList anime is searchable from the unified search page -- arriving
+  /// from here pre-selects its Anime chip via [SearchScope], so the button
+  /// means the same thing it does on Movies and Series. Arabic mode keeps
+  /// its own page: the unified search has no source for that catalogue.
   void _navigateToSearch() {
-    pushPage(context, AnimeSearchPage(initialArabicMode: _isArabicMode));
+    pushPage(
+      context,
+      _isArabicMode
+          ? const AnimeSearchPage(initialArabicMode: true)
+          : const SearchPage(),
+    );
   }
 
   /// The hero carousel's items -- the same "newest first" slides both modes

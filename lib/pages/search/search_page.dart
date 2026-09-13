@@ -5,11 +5,17 @@ import 'package:flutter/material.dart';
 import '../../services/app_spacing.dart';
 import '../../models/movie/movie_section.dart';
 import '../../models/stream/stream_model.dart';
+import '../../models/anime/anime_media.dart';
 import '../../services/addon/addon_manager.dart';
+import '../../services/anime/anilist_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/movie/movie_slider_section.dart';
+import '../anime/anime_details_page.dart';
+import '../anime/anime_search_page.dart';
 import '../../widgets/search/magnet_files_view.dart';
 import '../player/player_screen.dart';
 
@@ -27,7 +33,21 @@ class _SearchPageState extends State<SearchPage> {
   Timer? _debounce;
   bool _isLoading = false;
   List<MovieSection> _results = [];
+  List<AnimeMedia> _animeResults = [];
   String _lastQuery = '';
+
+  /// Bumped on every search so a slow reply from an earlier one cannot land
+  /// on top of a newer result set. Comparing queries is not enough: changing
+  /// a chip re-searches the same text with a different filter.
+  int _searchSeq = 0;
+
+  /// Which content types to search. Seeded from [SearchScope] so the section
+  /// the user came from is pre-selected — but as a chip they can clear, not
+  /// as a hidden mode. The same button used to mean different things
+  /// depending on where it was pressed, which is the thing this fixes.
+  late SearchFilter _typeFilter = SearchFilter.fromScope(
+    SearchScope.contentType,
+  );
 
   bool _isMagnetMode = false;
   String _magnetQuery = '';
@@ -88,6 +108,7 @@ class _SearchPageState extends State<SearchPage> {
     if (trimmed.isEmpty) {
       setState(() {
         _results.clear();
+        _animeResults.clear();
         _isLoading = false;
         _lastQuery = '';
         _isMagnetMode = false;
@@ -107,6 +128,7 @@ class _SearchPageState extends State<SearchPage> {
         _magnetQuery = trimmed;
         _isLoading = false;
         _results.clear();
+        _animeResults.clear();
       });
       return;
     } else if (_isMagnetMode) {
@@ -136,34 +158,166 @@ class _SearchPageState extends State<SearchPage> {
         _magnetQuery = trimmed;
         _isLoading = false;
         _results.clear();
+        _animeResults.clear();
       });
       return;
     }
 
+    final seq = ++_searchSeq;
     setState(() {
       _isLoading = true;
       _lastQuery = trimmed;
       _isMagnetMode = false;
     });
 
-    try {
-      final results = await AddonManager.instance.searchAll(
-        trimmed,
-        contentType: SearchScope.contentType,
-      );
-      if (!mounted) return;
-      
-      setState(() {
-        _results = results;
-        _isLoading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _results = [];
-      });
-    }
+    // Both catalogues are asked at once. They are separate APIs, so running
+    // them in sequence would make every "All" search as slow as the slower
+    // of the two; and each swallows its own failure, so AniList being down
+    // does not blank out addon results that arrived fine.
+    final addonFuture = _typeFilter.searchesAddons
+        ? AddonManager.instance
+              .searchAll(trimmed, contentType: _typeFilter.addonContentType)
+              .catchError((Object _) => <MovieSection>[])
+        : Future<List<MovieSection>>.value(const []);
+    final animeFuture = _typeFilter.searchesAnime
+        ? AnilistService.instance
+              .searchAnime(trimmed)
+              .catchError((Object _) => <AnimeMedia>[])
+        : Future<List<AnimeMedia>>.value(const []);
+
+    final addonResults = await addonFuture;
+    final animeResults = await animeFuture;
+    if (!mounted) return;
+    // A newer query (or a chip change) started while these were in flight --
+    // its own results are the ones to show.
+    if (seq != _searchSeq) return;
+
+    setState(() {
+      _results = addonResults;
+      _animeResults = animeResults;
+      _isLoading = false;
+    });
+  }
+
+  void _onTypeChanged(SearchFilter value) {
+    if (value == _typeFilter) return;
+    setState(() {
+      _typeFilter = value;
+      // Results from the old filter would otherwise sit there looking like
+      // an answer to the new one until the request came back.
+      _results = [];
+      _animeResults = [];
+    });
+    if (_lastQuery.isNotEmpty) _performSearch(_lastQuery);
+  }
+
+  /// Anime rows lead when the Anime chip is active and trail otherwise, so
+  /// whichever catalogue the user asked for is the one at the top.
+  List<Widget> _resultSections() {
+    final animeSection = _animeResults.isEmpty
+        ? null
+        : AnimeSliderSection(
+            title: 'Anime',
+            subtitle: 'From AniList',
+            animeList: _animeResults,
+            onAnimeTap: (anime) =>
+                pushPage(context, AnimeDetailsPage(anime: anime)),
+            onSeeAll: _openAnimeFilters,
+          );
+    return [
+      if (_typeFilter == SearchFilter.anime && animeSection != null) animeSection,
+      for (final section in _results) MovieSliderSection(section: section),
+      if (_typeFilter != SearchFilter.anime && animeSection != null) animeSection,
+    ];
+  }
+
+  /// The AniList-native filters (genre, season, format, status, sort) live
+  /// on their own page and stay there -- reaching them from here carries the
+  /// query across so nothing has to be retyped.
+  void _openAnimeFilters() {
+    pushPage(
+      context,
+      AnimeSearchPage(initialQuery: _lastQuery.isEmpty ? null : _lastQuery),
+    );
+  }
+
+  Widget _buildTypeChips() {
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.pageInset(context),
+          vertical: 6,
+        ),
+        physics: const BouncingScrollPhysics(),
+        children: [
+          for (final filter in SearchFilter.values) ...[
+            _buildChoiceChip(filter),
+            const SizedBox(width: 6),
+          ],
+          if (_typeFilter == SearchFilter.anime)
+            GestureDetector(
+              onTap: _openAnimeFilters,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF141824),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.12),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.tune_rounded,
+                      size: 13,
+                      color: Colors.white70,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      'Anime filters',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChoiceChip(SearchFilter filter) {
+    final isSelected = _typeFilter == filter;
+    return GestureDetector(
+      onTap: () => _onTypeChanged(filter),
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF7C5CFF) : const Color(0xFF141824),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          filter.label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : Colors.white60,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -228,9 +382,8 @@ class _SearchPageState extends State<SearchPage> {
                           onChanged: _onSearchChanged,
                           onSubmitted: _performSearch,
                           decoration: InputDecoration(
-                            hintText: SearchScope.label != null
-                                ? 'Search ${SearchScope.label}...'
-                                : 'Search movies and shows, paste magnet or stream link',
+                            hintText: 'Search ${_typeFilter.scopeLabel}, '
+                                'or paste a magnet or stream link',
                             hintStyle: TextStyle(
                               color: Colors.white.withValues(alpha: 0.35),
                               fontSize: 14,
@@ -265,77 +418,89 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          if (_isMagnetMode && _magnetQuery.isNotEmpty)
-            MagnetFilesView(
-              key: ValueKey(_magnetQuery),
-              magnet: _magnetQuery,
-            )
-          else if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
-            )
-          else if (_lastQuery.isNotEmpty && _results.isEmpty)
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.search_off_rounded,
-                    size: 64,
-                    color: Colors.white.withValues(alpha: 0.2),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No results for "$_lastQuery"',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          else if (_results.isNotEmpty)
-            ListView.builder(
-              clipBehavior: Clip.none,
-              padding: EdgeInsets.only(
-                top: topPadding + kToolbarHeight + 40,
-                bottom: 40 + MediaQuery.paddingOf(context).bottom,
-              ),
-              physics: const BouncingScrollPhysics(),
-              itemCount: _results.length,
-              itemBuilder: (context, index) {
-                return MovieSliderSection(section: _results[index]);
-              },
-            )
-          else
-            Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.manage_search_rounded,
-                    size: 72,
-                    color: Colors.white.withValues(alpha: 0.15),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    SearchScope.label != null
-                        ? 'Search ${SearchScope.label}'
-                        : 'Search across all addons',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+          // The blurred bar overlays the body (extendBodyBehindAppBar), so
+          // the band is reserved here rather than as scroll padding -- that
+          // keeps the chips fixed under it instead of scrolling away with
+          // the results.
+          SizedBox(height: topPadding + kToolbarHeight + 10),
+          if (!_isMagnetMode) _buildTypeChips(),
+          Expanded(
+            child: _buildResults(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResults() {
+    if (_isMagnetMode && _magnetQuery.isNotEmpty) {
+      return MagnetFilesView(key: ValueKey(_magnetQuery), magnet: _magnetQuery);
+    }
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+      );
+    }
+
+    final sections = _resultSections();
+    if (sections.isNotEmpty) {
+      return ListView.builder(
+        clipBehavior: Clip.none,
+        padding: EdgeInsets.only(
+          top: 8,
+          bottom: 40 + MediaQuery.paddingOf(context).bottom,
+        ),
+        physics: const BouncingScrollPhysics(),
+        itemCount: sections.length,
+        itemBuilder: (context, index) => sections[index],
+      );
+    }
+
+    if (_lastQuery.isNotEmpty) {
+      return _buildPlaceholder(
+        Icons.search_off_rounded,
+        64,
+        0.2,
+        'No results for "$_lastQuery"',
+      );
+    }
+    return _buildPlaceholder(
+      Icons.manage_search_rounded,
+      72,
+      0.15,
+      'Search ${_typeFilter.scopeLabel}',
+    );
+  }
+
+  Widget _buildPlaceholder(
+    IconData icon,
+    double size,
+    double iconAlpha,
+    String label,
+  ) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.pageInset(context),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: size, color: Colors.white.withValues(alpha: iconAlpha)),
+            const SizedBox(height: 16),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.5),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

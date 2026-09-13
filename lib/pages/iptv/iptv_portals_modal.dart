@@ -199,15 +199,19 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     children: [
                       Icon(Icons.tune_rounded, color: palette.primaryColor, size: 20),
                       const SizedBox(width: 10),
-                      const Text(
-                        'Customize Portals Modal',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.5,
-                          fontWeight: FontWeight.w800,
+                      // Same shape, same fix as the main modal's title.
+                      const Expanded(
+                        child: Text(
+                          'Customize Portals Modal',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.5,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 20),
                         onPressed: () => Navigator.pop(ctx),
@@ -380,15 +384,25 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                             color: palette.primaryColor, size: 22),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'IPTV Portals & Playlists',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
+                      // Expanded, not a bare Text followed by a Spacer: at
+                      // 20pt w900 this title is wider than a phone dialog's
+                      // remaining room once the icon and the two trailing
+                      // buttons are taken out, and an unconstrained Text in a
+                      // Row does not shrink -- it paints outside the box.
+                      // Expanded hands it the leftover width, which is what
+                      // the Spacer was standing in for anyway.
+                      const Expanded(
+                        child: Text(
+                          'IPTV Portals & Playlists',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.tune_rounded, color: Colors.white70, size: 20),
                         tooltip: 'Customize Modal Style',
@@ -519,42 +533,80 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     ],
                   ),
                 ),
+                // Each item's text column is Expanded and its description is
+                // allowed to wrap. Unconstrained, those descriptions are
+                // wider than a phone-width menu and get painted straight out
+                // of it: a popup menu sizes itself to what it can fit on
+                // screen, it does not grow past the edge to suit its
+                // contents.
                 itemBuilder: (ctx) => [
                   PopupMenuItem(
                     value: CatalogSource.cloudVault,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.cloud_done_rounded, color: Color(0xFF00E5FF), size: 18),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.cloud_done_rounded,
+                            color: Color(0xFF00E5FF),
+                            size: 18,
+                          ),
+                        ),
                         const SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  'Cloud Vault (9k+)',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF00E5FF).withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(4),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Wrap, so the count badge drops under the
+                              // title on a narrow menu rather than pushing
+                              // the row past its edge.
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 2,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Cloud Vault (9k+)',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
                                   ),
-                                  child: const Text(
-                                    '9,600+ Portals',
-                                    style: TextStyle(color: Color(0xFF00E5FF), fontSize: 9.5, fontWeight: FontWeight.w800),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 5,
+                                      vertical: 1,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(
+                                        0xFF00E5FF,
+                                      ).withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      '9,600+ Portals',
+                                      style: TextStyle(
+                                        color: Color(0xFF00E5FF),
+                                        fontSize: 9.5,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
                                   ),
+                                ],
+                              ),
+                              const Text(
+                                'High-speed cloud database with 9,000+ live '
+                                'IPTV servers',
+                                style: TextStyle(
+                                  color: Colors.white60,
+                                  fontSize: 10.5,
                                 ),
-                              ],
-                            ),
-                            const Text(
-                              'High-speed cloud database with 9,000+ live IPTV servers',
-                              style: TextStyle(color: Colors.white60, fontSize: 10.5),
-                            ),
-                          ],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -562,22 +614,40 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   const PopupMenuItem(
                     value: CatalogSource.reddit,
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.forum_rounded, color: Color(0xFFFF5722), size: 18),
+                        Padding(
+                          padding: EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.forum_rounded,
+                            color: Color(0xFFFF5722),
+                            size: 18,
+                          ),
+                        ),
                         SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Reddit Communities',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                            ),
-                            Text(
-                              'Scrapes live shared pastes from IPTV subreddits',
-                              style: TextStyle(color: Colors.white60, fontSize: 10.5),
-                            ),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Reddit Communities',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                'Scrapes live shared pastes from IPTV '
+                                'subreddits',
+                                style: TextStyle(
+                                  color: Colors.white60,
+                                  fontSize: 10.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -631,76 +701,122 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFF7C5CFF).withValues(alpha: 0.3)),
               ),
-              child: Row(
+              // A Wrap of two groups rather than one Row with a Spacer
+              // between them: on a phone the select-all control and the two
+              // delete buttons are together wider than the dialog, and a Row
+              // has no way to give -- the buttons keep their width and
+              // whatever does not fit is painted outside the box. Wrapped,
+              // the delete pair drops to a second line instead. On a wide
+              // dialog spaceBetween puts them back where they were.
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runSpacing: 8,
                 children: [
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: Icon(
-                      allSelected ? Icons.deselect_rounded : Icons.select_all_rounded,
-                      size: 17,
-                      color: const Color(0xFF00D2EF),
-                    ),
-                    label: Text(
-                      allSelected ? 'Deselect All' : 'Select All',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (allSelected) {
-                          _selectedPortalKeys.clear();
-                        } else {
-                          _selectedPortalKeys.clear();
-                          _selectedPortalKeys.addAll(_ctrl.verified.map((v) => v.key));
-                        }
-                      });
-                    },
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: Icon(
+                          allSelected
+                              ? Icons.deselect_rounded
+                              : Icons.select_all_rounded,
+                          size: 17,
+                          color: const Color(0xFF00D2EF),
+                        ),
+                        label: Text(
+                          allSelected ? 'Deselect All' : 'Select All',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (allSelected) {
+                              _selectedPortalKeys.clear();
+                            } else {
+                              _selectedPortalKeys.clear();
+                              _selectedPortalKeys.addAll(_ctrl.verified.map((v) => v.key));
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '(${_selectedPortalKeys.length}/${_ctrl.verified.length})',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '(${_selectedPortalKeys.length}/${_ctrl.verified.length})',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Spacer(),
-                  // Delete Selected
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: const Icon(Icons.delete_rounded, size: 14),
-                    label: Text(
-                      'Delete (${_selectedPortalKeys.length})',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: _selectedPortalKeys.isEmpty ? null : _deleteSelectedPortals,
-                  ),
-                  const SizedBox(width: 6),
-                  // Delete All
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
-                      side: const BorderSide(color: Colors.redAccent),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: _deleteAllPortals,
-                    child: const Text('Delete All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Delete Selected
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(Icons.delete_rounded, size: 14),
+                        label: Text(
+                          'Delete (${_selectedPortalKeys.length})',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onPressed: _selectedPortalKeys.isEmpty ? null : _deleteSelectedPortals,
+                      ),
+                      const SizedBox(width: 6),
+                      // Delete All
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.redAccent,
+                          side: const BorderSide(color: Colors.redAccent),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: _deleteAllPortals,
+                        child: const Text(
+                          'Delete All',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -1053,76 +1169,122 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: palette.primaryColor.withValues(alpha: 0.3)),
               ),
-              child: Row(
+              // A Wrap of two groups rather than one Row with a Spacer
+              // between them: on a phone the select-all control and the two
+              // delete buttons are together wider than the dialog, and a Row
+              // has no way to give -- the buttons keep their width and
+              // whatever does not fit is painted outside the box. Wrapped,
+              // the delete pair drops to a second line instead. On a wide
+              // dialog spaceBetween puts them back where they were.
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runSpacing: 8,
                 children: [
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: Icon(
-                      allSelected ? Icons.deselect_rounded : Icons.select_all_rounded,
-                      size: 17,
-                      color: const Color(0xFF00D2EF),
-                    ),
-                    label: Text(
-                      allSelected ? 'Deselect All' : 'Select All',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (allSelected) {
-                          _selectedM3uIds.clear();
-                        } else {
-                          _selectedM3uIds.clear();
-                          _selectedM3uIds.addAll(_ctrl.m3uPlaylists.map((pl) => pl.id));
-                        }
-                      });
-                    },
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: Icon(
+                          allSelected
+                              ? Icons.deselect_rounded
+                              : Icons.select_all_rounded,
+                          size: 17,
+                          color: const Color(0xFF00D2EF),
+                        ),
+                        label: Text(
+                          allSelected ? 'Deselect All' : 'Select All',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            if (allSelected) {
+                              _selectedM3uIds.clear();
+                            } else {
+                              _selectedM3uIds.clear();
+                              _selectedM3uIds.addAll(_ctrl.m3uPlaylists.map((m) => m.id));
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '(${_selectedM3uIds.length}/${_ctrl.m3uPlaylists.length})',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '(${_selectedM3uIds.length}/${_ctrl.m3uPlaylists.length})',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Spacer(),
-                  // Delete Selected
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    icon: const Icon(Icons.delete_rounded, size: 14),
-                    label: Text(
-                      'Delete (${_selectedM3uIds.length})',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: _selectedM3uIds.isEmpty ? null : _deleteSelectedM3u,
-                  ),
-                  const SizedBox(width: 6),
-                  // Delete All
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
-                      side: const BorderSide(color: Colors.redAccent),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: _deleteAllM3u,
-                    child: const Text('Delete All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Delete Selected
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        icon: const Icon(Icons.delete_rounded, size: 14),
+                        label: Text(
+                          'Delete (${_selectedM3uIds.length})',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onPressed: _selectedM3uIds.isEmpty ? null : _deleteSelectedM3u,
+                      ),
+                      const SizedBox(width: 6),
+                      // Delete All
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.redAccent,
+                          side: const BorderSide(color: Colors.redAccent),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        onPressed: _deleteAllM3u,
+                        child: const Text(
+                          'Delete All',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

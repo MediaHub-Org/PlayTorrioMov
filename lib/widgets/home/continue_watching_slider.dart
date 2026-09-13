@@ -10,6 +10,7 @@ import '../../pages/anime/anime_details_page.dart';
 import '../../pages/anime_arabic/anime_arabic_details_page.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../pages/history/watch_history_page.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../common/slider_arrow.dart';
@@ -99,30 +100,12 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
     return ValueListenableBuilder<List<ContinueWatchingItem>>(
       valueListenable: ContinueWatchingService.activeItems,
       builder: (context, allItems, _) {
-        final items = allItems.where((i) {
-          if (widget.typeFilter == 'main') {
-            return i.type != 'anime' &&
-                !i.id.startsWith('anilist:') &&
-                !i.id.startsWith('arabic_anime:');
-          } else if (widget.typeFilter == 'anime') {
-            return i.type == 'anime' ||
-                i.id.startsWith('anilist:') ||
-                i.id.startsWith('arabic_anime:') ||
-                i.addonName == 'ArabicAnime';
-          } else if (widget.typeFilter == 'arabic_anime') {
-            return i.id.startsWith('arabic_anime:') ||
-                i.addonName == 'ArabicAnime';
-          } else if (widget.typeFilter == 'general_anime') {
-            return (i.type == 'anime' || i.id.startsWith('anilist:')) &&
-                !i.id.startsWith('arabic_anime:') &&
-                i.addonName != 'ArabicAnime';
-          } else if (widget.typeFilter == 'movie') {
-            return i.type == 'movie';
-          } else if (widget.typeFilter == 'series') {
-            return i.type == 'series';
-          }
-          return true;
-        }).toList();
+        final items = allItems
+            .where(
+              (i) =>
+                  ContinueWatchingService.matchesTypeFilter(i, widget.typeFilter),
+            )
+            .toList();
 
         if (items.isEmpty) return const SizedBox.shrink();
 
@@ -191,6 +174,27 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         ),
                       ),
                     ),
+                    const Spacer(),
+                    // The row shows one card per show and drops a title once
+                    // it is finished; the full per-episode log lives behind
+                    // this. It was being recorded all along with nothing to
+                    // render it.
+                    if (ContinueWatchingService.historyItems.value.any(
+                      (i) => ContinueWatchingService.matchesTypeFilter(
+                        i,
+                        widget.typeFilter,
+                      ),
+                    ))
+                      TextButton(
+                        onPressed: () => pushPage(
+                          context,
+                          WatchHistoryPage(
+                            typeFilter: widget.typeFilter,
+                            title: 'History',
+                          ),
+                        ),
+                        child: const Text('See all'),
+                      ),
                   ],
                 ),
               ),
@@ -216,7 +220,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         separatorBuilder: (_, __) => const SizedBox(width: 14),
                         itemBuilder: (context, index) {
                           final item = items[index];
-                          return _ContinueWatchingCard(
+                          return ContinueWatchingCard(
                             item: item,
                             width: cardWidth,
                             palette: palette,
@@ -273,14 +277,18 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
   }
 }
 
-class _ContinueWatchingCard extends StatefulWidget {
+/// One Continue Watching card: art, progress, and a remove affordance.
+///
+/// Public because the watch-history view renders the same thing; the only
+/// difference there is which list it is fed from and what removing means.
+class ContinueWatchingCard extends StatefulWidget {
   final ContinueWatchingItem item;
   final double width;
   final AppThemePalette palette;
   final VoidCallback onTap;
   final VoidCallback onRemove;
 
-  const _ContinueWatchingCard({
+  const ContinueWatchingCard({
     required this.item,
     required this.width,
     required this.palette,
@@ -289,10 +297,10 @@ class _ContinueWatchingCard extends StatefulWidget {
   });
 
   @override
-  State<_ContinueWatchingCard> createState() => _ContinueWatchingCardState();
+  State<ContinueWatchingCard> createState() => ContinueWatchingCardState();
 }
 
-class _ContinueWatchingCardState extends State<_ContinueWatchingCard> {
+class ContinueWatchingCardState extends State<ContinueWatchingCard> {
   bool _isHovered = false;
 
   void _openDetails(BuildContext context) {

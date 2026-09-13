@@ -79,10 +79,49 @@ abstract final class TmdbService {
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
       if (response.statusCode != 200) return TmdbCredits.empty;
 
-      return parseCredits(jsonDecode(response.body));
+      final credits = parseCredits(jsonDecode(response.body));
+
+      // A series' `/credits` is series-level crew, which for most shows is
+      // producers and no director at all -- TV directors are credited per
+      // episode. That is why a series' Direction half came back empty even
+      // with a working id. The showrunner is what a viewer means by "whose
+      // show is this", and it lives on the detail response instead.
+      if (isTvShow && credits.crew.isEmpty) {
+        final creators = await _fetchSeriesCreators(tmdbId, key);
+        if (creators.isNotEmpty) {
+          return TmdbCredits(cast: credits.cast, crew: creators);
+        }
+      }
+
+      return credits;
     } catch (e) {
       debugPrint('[TmdbService] fetchCredits failed: $e');
       return TmdbCredits.empty;
+    }
+  }
+
+  /// The showrunners from `/tv/{id}`'s `created_by`, as crew labelled
+  /// "Creator".
+  ///
+  /// One extra request, and only for a series whose `/credits` had no
+  /// directing crew to show -- so a series that already has one costs
+  /// nothing. `/tv/{id}/aggregate_credits` is the heavier alternative: a
+  /// large payload whose entries carry a `jobs` array instead of a single
+  /// `job`, needing a TV-shaped branch in [parseCredits]. Worth reaching
+  /// for only if `created_by` proves thin in practice.
+  static Future<List<CrewMember>> _fetchSeriesCreators(
+    String tmdbId,
+    String key,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/tv/$tmdbId')
+        .replace(queryParameters: {'api_key': key});
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) return const [];
+      return parseCreators(jsonDecode(response.body));
+    } catch (e) {
+      debugPrint('[TmdbService] fetchSeriesCreators failed: $e');
+      return const [];
     }
   }
 
@@ -192,6 +231,32 @@ abstract final class TmdbService {
     }
 
     return TmdbCredits(cast: cast, crew: crew);
+  }
+
+  /// Reads `created_by` out of a decoded `/tv/{id}` body.
+  ///
+  /// Entries there carry a name and a `profile_path` but no `job`, so the
+  /// label comes from this side. Anything without a usable name is dropped
+  /// rather than rendered as an "Unknown" card.
+  @visibleForTesting
+  static List<CrewMember> parseCreators(dynamic body) {
+    if (body is! Map) return const [];
+    final raw = body['created_by'];
+    if (raw is! List) return const [];
+
+    final creators = <CrewMember>[];
+    final seen = <String>{};
+    for (final entry in raw.whereType<Map>()) {
+      final member = CrewMember.fromJson(
+        entry.cast<String, dynamic>(),
+        job: 'Creator',
+      );
+      final name = member.name.trim();
+      if (name.isEmpty || name == 'Unknown') continue;
+      if (!seen.add(name)) continue;
+      creators.add(member);
+    }
+    return creators;
   }
 
   /// Clears the IMDb -> TMDB cache, for tests.

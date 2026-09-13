@@ -1,23 +1,64 @@
-/// Tracks the currently active search scope so that search results are limited
-/// to the section the user is currently browsing.
+/// Tracks the section the user is currently browsing, so search opens on it.
 ///
 /// Each hub/section registers its content type (e.g. 'movie', 'series',
-/// 'anime', 'audiobook', 'manga') when it becomes active. The [SearchPage]
-/// reads the current scope and passes it to the addon search so results are
-/// scoped accordingly.
+/// 'anime') when it becomes active. The search page reads it once, to
+/// pre-select a [SearchFilter] chip. It is a starting point, not a cage: the
+/// user can widen to All from the chip row without leaving the page.
 abstract final class SearchScope {
   static String? _contentType;
-  static String? _label;
 
   /// Sets the active search scope. Pass `null` to search everything.
-  static void set(String? contentType, {String? label}) {
+  static void set(String? contentType) {
     _contentType = contentType;
-    _label = label;
   }
 
   /// The content type to scope search to, or null for "all".
   static String? get contentType => _contentType;
+}
 
-  /// A human-readable label describing the current scope (e.g. "Movies").
-  static String? get label => _label;
+/// The content-type filter the unified search page runs with.
+///
+/// Search used to mean different things depending on which button opened it:
+/// the same icon led to an addon search on Movies and Series, and to a
+/// separate AniList page on Anime. One page now serves all three and this
+/// decides where a query is actually sent -- addons, AniList, or both.
+///
+/// Live TV is deliberately not a value here. Its search matches a portal's
+/// stream list by keyword rather than searching a title catalogue, so a
+/// result there is a different kind of object; it keeps its own search.
+enum SearchFilter {
+  all('all', 'All', 'movies, series and anime'),
+  movie('movie', 'Movies', 'movies'),
+  series('series', 'Series', 'series'),
+  anime('anime', 'Anime', 'anime');
+
+  /// Matches the addon `contentType` strings, so [addonContentType] can pass
+  /// it straight through.
+  final String id;
+
+  /// Chip text.
+  final String label;
+
+  /// Reads inside a sentence: "Search $scopeLabel".
+  final String scopeLabel;
+
+  const SearchFilter(this.id, this.label, this.scopeLabel);
+
+  /// AniList is a separate API from the addons, so anime-only queries skip
+  /// the addon fan-out entirely rather than asking for nothing.
+  bool get searchesAddons => this != SearchFilter.anime;
+
+  bool get searchesAnime => this == SearchFilter.all || this == SearchFilter.anime;
+
+  /// `null` means "every catalog" to the addon search.
+  String? get addonContentType => this == SearchFilter.all ? null : id;
+
+  /// A scope with no chip of its own (Live TV, or the Library's null) opens
+  /// on [all] rather than on a filter the user cannot see or undo.
+  static SearchFilter fromScope(String? contentType) {
+    for (final filter in values) {
+      if (filter.id == contentType) return filter;
+    }
+    return SearchFilter.all;
+  }
 }

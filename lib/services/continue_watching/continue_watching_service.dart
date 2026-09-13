@@ -113,6 +113,40 @@ class ContinueWatchingService {
     }
   }
 
+  /// Whether [item] belongs to the section identified by [typeFilter].
+  ///
+  /// Lives here rather than inside `ContinueWatchingSlider` because the
+  /// history view has to answer the identical question, and anime is not
+  /// identifiable by `type` alone: entries arrive from three places (the
+  /// AniList catalogue, the Arabic catalogue, and addons that report
+  /// `type == 'anime'`) and are told apart by id prefix and addon name.
+  /// Duplicating that into a second screen is how the two would drift.
+  ///
+  /// A null or unrecognised [typeFilter] matches everything.
+  static bool matchesTypeFilter(ContinueWatchingItem item, String? typeFilter) {
+    final isArabicAnime =
+        item.id.startsWith('arabic_anime:') || item.addonName == 'ArabicAnime';
+    final isAnime =
+        item.type == 'anime' || item.id.startsWith('anilist:') || isArabicAnime;
+
+    switch (typeFilter) {
+      case 'main':
+        return !isAnime;
+      case 'anime':
+        return isAnime;
+      case 'arabic_anime':
+        return isArabicAnime;
+      case 'general_anime':
+        return isAnime && !isArabicAnime;
+      case 'movie':
+        return item.type == 'movie';
+      case 'series':
+        return item.type == 'series';
+      default:
+        return true;
+    }
+  }
+
   /// The episode number most recently watched for [itemId], or null if the
   /// show has never been played.
   ///

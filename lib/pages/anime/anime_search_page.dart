@@ -18,9 +18,15 @@ import '../anime_arabic/anime_arabic_details_page.dart';
 class AnimeSearchPage extends StatefulWidget {
   final bool initialArabicMode;
 
+  /// Pre-fills the field and searches straight away. Set when the unified
+  /// search hands a query over here for its AniList filters, so the user
+  /// does not have to type the same thing a second time.
+  final String? initialQuery;
+
   const AnimeSearchPage({
     super.key,
     this.initialArabicMode = false,
+    this.initialQuery,
   });
 
   @override
@@ -77,8 +83,13 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
     super.initState();
     _isArabicMode = widget.initialArabicMode;
     _loadInitialSliders();
+    final handover = widget.initialQuery?.trim() ?? '';
+    if (handover.isNotEmpty) _searchController.text = handover;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
+      // After the first frame, so the search's own setState lands on a
+      // mounted, built page rather than mid-initState.
+      if (handover.isNotEmpty) _performSearch(handover);
     });
   }
 
