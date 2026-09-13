@@ -41,7 +41,6 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
           PlayerMenuHeader(
             title: 'PLAYBACK SPEED',
             onBack: widget.onBack,
-            onClose: widget.onClose,
           ),
 
           const SizedBox(height: 6),

@@ -103,9 +103,91 @@ class PlayerGlassCard extends StatelessWidget {
   }
 }
 
+/// Where every player popover sits: pinned above the transport bar, inset
+/// from the screen edge, and never taller than the space it has.
+///
+/// This replaced six hand-tuned `Positioned` blocks in player_screen.dart
+/// that each carried their own breakpoint ladder. They had drifted -- only
+/// the subtitle menu handled a narrow screen by spanning both edges, and
+/// none of them bounded their own height, so the speed menu (seven presets,
+/// a divider and a sleep-timer row, about 430px of card) simply ran off the
+/// top of a landscape phone: the card is bottom-anchored, so height it does
+/// not have goes upward, out of the viewport, with nothing to clip or
+/// scroll it.
+///
+/// Must be a direct child of a [Stack] -- it builds a [Positioned].
+class PlayerMenuAnchor extends StatelessWidget {
+  final Widget child;
+
+  const PlayerMenuAnchor({super.key, required this.child});
+
+  /// Clearance for the transport bar the popover sits above, plus whatever
+  /// the system puts below it (gesture bar, home indicator).
+  static double bottomInset(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final isShort = size.height < 500;
+    final isCompact = size.width < 680;
+    return (isShort ? 46.0 : (isCompact ? 76.0 : 96.0)) +
+        MediaQuery.paddingOf(context).bottom;
+  }
+
+  /// Clearance for the title bar above. Being bounded at the top is the
+  /// whole point: it is what turns "too tall" into a scroll instead of an
+  /// overflow off-screen.
+  static double topInset(BuildContext context) =>
+      MediaQuery.paddingOf(context).top +
+      (MediaQuery.sizeOf(context).height < 500 ? 8.0 : 12.0);
+
+  static double sideInset(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    if (width < 560) return 8.0;
+    if (width < 680) return 12.0;
+    return 28.0;
+  }
+
+  /// How tall a popover can be before it has to scroll.
+  ///
+  /// A menu that sets its own fixed height -- the subtitle panel does, so
+  /// its two columns can share one [Expanded] -- should clamp to this
+  /// rather than to a number of its own, or it picks a height the anchor
+  /// cannot give it and scrolls for the difference.
+  static double availableHeight(BuildContext context) =>
+      (MediaQuery.sizeOf(context).height -
+              topInset(context) -
+              bottomInset(context))
+          .clamp(160.0, double.infinity);
+
+  @override
+  Widget build(BuildContext context) {
+    final isNarrow = MediaQuery.sizeOf(context).width < 560;
+    final top = topInset(context);
+    final bottom = bottomInset(context);
+    final side = sideInset(context);
+
+    return Positioned(
+      top: top,
+      bottom: bottom,
+      // Both edges, always: pinning only `right` leaves the child with an
+      // unbounded width, which is how a Row inside one of these overflows
+      // instead of laying out.
+      left: side,
+      right: side,
+      child: Align(
+        // Wide enough to have a corner to sit in, it sits in it; a narrow
+        // screen has no spare width, so the card centres over the full span.
+        alignment: isNarrow ? Alignment.bottomCenter : Alignment.bottomRight,
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Interactive button with smooth hover effects, tooltips, and badges.
-/// The header every player menu wears: a label, an optional way back, and a
-/// close.
+/// The header every player menu wears: a label and, below the root, a way
+/// back.
 ///
 /// The menus are one panel that swaps contents, not a stack of popovers --
 /// but without [onBack] they read as the latter: opening Settings, stepping
@@ -113,6 +195,12 @@ class PlayerGlassCard extends StatelessWidget {
 /// gear, because nothing on the panel led back. The arrow makes the panel
 /// navigable, so the deepest thing in it is two taps from the gear and one
 /// tap from anywhere else.
+///
+/// There is deliberately no close button. Tapping anywhere off the panel
+/// dismisses it (player_screen.dart puts a full-screen barrier behind every
+/// open menu), so an X was a third way to do what the barrier and the back
+/// arrow already did -- and it cost the header's whole right end, which on a
+/// narrow card is the room the title needed.
 class PlayerMenuHeader extends StatelessWidget {
   final String title;
 
@@ -120,18 +208,21 @@ class PlayerMenuHeader extends StatelessWidget {
   /// which has nowhere to go back to.
   final VoidCallback? onBack;
 
-  final VoidCallback onClose;
+  /// Sits at the trailing end of the header, for a menu that has a real
+  /// action to put there. Not a close button.
+  final Widget? trailing;
 
   const PlayerMenuHeader({
     super.key,
     required this.title,
-    required this.onClose,
     this.onBack,
+    this.trailing,
   });
 
   @override
   Widget build(BuildContext context) {
     final back = onBack;
+    final end = trailing;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -171,13 +262,7 @@ class PlayerMenuHeader extends StatelessWidget {
             ],
           ),
         ),
-        PlayerIconButton(
-          size: 28,
-          iconSize: 14,
-          icon: const Icon(Icons.close_rounded),
-          tooltip: 'Close',
-          onPressed: onClose,
-        ),
+        if (end != null) end,
       ],
     );
   }

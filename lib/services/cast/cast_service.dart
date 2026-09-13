@@ -55,6 +55,42 @@ abstract final class CastService {
   static Future<void> disconnect() =>
       GoogleCastSessionManager.instance.endSessionAndStopCasting();
 
+  /// Whether a Cast receiver on the network could actually fetch [url].
+  ///
+  /// The receiver is a separate box: it opens the URL itself, over the LAN.
+  /// So anything served from this device's own loopback is unreachable to
+  /// it -- a downloaded file played from disk, the local Mega proxy, or a
+  /// torrent server bound to 127.0.0.1 -- and so is a `file://` path.
+  ///
+  /// Deliberately a host test rather than the old "is this a torrent"
+  /// test. A torrent source is not inherently uncastable: plenty resolve
+  /// through a debrid or a torrent server on another machine, and those
+  /// URLs are as fetchable as any other. What makes a stream uncastable is
+  /// where it lives, which is exactly what the host says.
+  static bool canCastUrl(String? url) {
+    if (url == null || url.isEmpty) return false;
+    final uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    if (uri.scheme == 'file' || uri.scheme.isEmpty) return false;
+    if (!(uri.scheme == 'http' || uri.scheme == 'https')) return false;
+
+    final host = uri.host.toLowerCase();
+    if (host.isEmpty) return false;
+    if (host == 'localhost' || host.endsWith('.localhost')) return false;
+    if (host == '::1' || host == '[::1]') return false;
+
+    // 127.0.0.0/8 -- the whole block, not just 127.0.0.1: media servers
+    // bind to 127.0.0.2 and friends often enough to matter.
+    final octets = host.split('.');
+    if (octets.length == 4) {
+      final first = int.tryParse(octets.first);
+      if (first == 127) return false;
+      if (first == 0) return false;
+    }
+
+    return true;
+  }
+
   /// Best-effort guess from the URL -- the Cast receiver needs a content
   /// type to pick a demuxer. Most sources here are progressive MP4; HLS/DASH
   /// playlists and raw transport streams are the exceptions worth detecting.

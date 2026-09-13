@@ -9,6 +9,7 @@ import '../../services/simkl/simkl_service.dart';
 import '../../services/my_list/my_list_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/discord/discord_rpc_service.dart';
+import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
@@ -731,64 +732,113 @@ class _TmdbConnectCard extends StatelessWidget {
               color: connected ? const Color(0xFF01B4E4).withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.08),
             ),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF01B4E4).withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.theaters_rounded, color: Color(0xFF01B4E4)),
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF01B4E4).withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.theaters_rounded, color: Color(0xFF01B4E4)),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'TMDB Cast Photos',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          ownKey
+                              ? 'Connected with your own key — cast photos and character names load when available.'
+                              : bundled
+                              ? 'Using this build\'s included key — cast photos and character names load when available. Add your own if you would rather not share it.'
+                              : 'Add your own free TMDB API key to fill in cast photos and character names most addons don\'t provide.',
+                          style: const TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Only the user's own key is theirs to disconnect; the
+                  // built-in one is part of the build.
+                  if (ownKey)
+                    TextButton(
+                      onPressed: () => TmdbSettings.setApiKey(null),
+                      child: Text(
+                        'Disconnect',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                      ),
+                    )
+                  else
+                    ElevatedButton(
+                      onPressed: () => _showTmdbKeyDialog(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF01B4E4),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      ),
+                      child: Text(
+                        bundled ? 'Use my key' : 'Connect',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'TMDB Cast Photos',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              // What the last TMDB request actually did. A key that is
+              // present but rejected looks exactly like a working one from
+              // this card otherwise -- same "Connected" copy, same colour --
+              // while every details page quietly shows bare actor names.
+              ValueListenableBuilder<String?>(
+                valueListenable: TmdbService.lastStatus,
+                builder: (context, status, _) {
+                  if (status == null) return const SizedBox.shrink();
+                  final bad =
+                      status.contains('rejected') ||
+                      status.contains('Could not reach') ||
+                      status.contains('rate-limited');
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          bad
+                              ? Icons.error_outline_rounded
+                              : Icons.check_circle_outline_rounded,
+                          size: 15,
+                          color: bad
+                              ? const Color(0xFFEF4444)
+                              : const Color(0xFF10B981),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              color: bad
+                                  ? const Color(0xFFEF4444)
+                                  : Colors.white54,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      ownKey
-                          ? 'Connected with your own key — cast photos and character names load when available.'
-                          : bundled
-                          ? 'Using this build\'s included key — cast photos and character names load when available. Add your own if you would rather not share it.'
-                          : 'Add your own free TMDB API key to fill in cast photos and character names most addons don\'t provide.',
-                      style: const TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-              // Only the user's own key is theirs to disconnect; the
-              // built-in one is part of the build.
-              if (ownKey)
-                TextButton(
-                  onPressed: () => TmdbSettings.setApiKey(null),
-                  child: Text(
-                    'Disconnect',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
-                  ),
-                )
-              else
-                ElevatedButton(
-                  onPressed: () => _showTmdbKeyDialog(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF01B4E4),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  ),
-                  child: Text(
-                    bundled ? 'Use my key' : 'Connect',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
             ],
           ),
         );

@@ -233,4 +233,49 @@ void main() {
       expect(TmdbService.parseCreators('a string'), isEmpty);
     });
   });
+
+  group('TmdbService.lastStatus', () {
+    setUp(TmdbService.resetForTest);
+
+    test('starts empty, so Settings shows nothing before a request', () {
+      expect(TmdbService.lastStatus.value, isNull);
+    });
+
+    test('names a rejected key, the one failure the user can fix', () {
+      // A dead or revoked key is indistinguishable from a working one on
+      // the Settings card otherwise: same "Connected" copy, same colour,
+      // while every details page quietly shows bare actor names.
+      final message = TmdbService.describeStatusForTest(401);
+      expect(message, contains('401'));
+      expect(message, contains('rejected'));
+      expect(message.toLowerCase(), contains('key'));
+    });
+
+    test('distinguishes a missing title from a broken key', () {
+      expect(TmdbService.describeStatusForTest(404), contains('no entry'));
+      expect(TmdbService.describeStatusForTest(404), isNot(contains('key')));
+    });
+
+    test('names rate limiting as temporary', () {
+      final message = TmdbService.describeStatusForTest(429);
+      expect(message, contains('429'));
+      expect(message, contains('again'));
+    });
+
+    test('falls back to the bare code for anything unrecognised', () {
+      expect(TmdbService.describeStatusForTest(503), contains('503'));
+    });
+
+    test('every failure message trips the Settings card error styling', () {
+      // sync_settings_page decides red-vs-grey by substring. If a message
+      // is reworded out of that set it silently renders as a success line.
+      bool readsAsError(String s) =>
+          s.contains('rejected') ||
+          s.contains('Could not reach') ||
+          s.contains('rate-limited');
+
+      expect(readsAsError(TmdbService.describeStatusForTest(401)), isTrue);
+      expect(readsAsError(TmdbService.describeStatusForTest(429)), isTrue);
+    });
+  });
 }

@@ -475,7 +475,12 @@ class _PlayerScreenState extends State<PlayerScreen>
       _applyVolume(_isMuted ? 0.0 : _volume);
 
       _resolvedStreamUrl = cleanUri.toString();
-      _isCastableSource = !isTorrentStream;
+      // Where the stream lives, not what produced it. The old test was
+      // `!isTorrentStream`, which hid the Cast button on most of this app's
+      // sources -- including the many torrent ones that resolve through a
+      // debrid or a torrent server on another machine and are perfectly
+      // fetchable by a receiver.
+      _isCastableSource = CastService.canCastUrl(_resolvedStreamUrl);
 
       await _player.open(
         Media(
@@ -1951,7 +1956,22 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   void _handleCast() {
     final url = _resolvedStreamUrl;
-    if (url == null) return;
+    // A null url is the offline path: a downloaded file played straight off
+    // this device's disk, which has no URL at all for a receiver to fetch.
+    // Same answer as an unreachable one, so the button never just does
+    // nothing.
+    if (url == null || !_isCastableSource) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'This source plays from your device, so a Cast receiver on the '
+            'network cannot reach it. Pick a different source to cast.',
+          ),
+          duration: Duration(seconds: 4),
+        ),
+      );
+      return;
+    }
     PlayerCastSheet.show(
       context,
       title: widget.detail?.name ?? _currentTitle,
@@ -2026,13 +2046,14 @@ class _PlayerScreenState extends State<PlayerScreen>
                   title: widget.detail?.name ?? _currentTitle,
                   subtitle: episodeSubtitle,
                   quality: _currentSource.name,
-                  // No Cast SDK on desktop; a downloaded file or a torrent
-                  // source (resolved to this device's own 127.0.0.1 server)
-                  // has no URL a Cast receiver on the network could fetch.
-                  onCast:
-                      (_isLoading ||
-                          !_isCastableSource ||
-                          !CastService.isSupported)
+                  // Shown whenever the platform has a Cast SDK at all --
+                  // there is none on desktop. It used to be hidden for any
+                  // source this device serves itself, which on a phone meant
+                  // it was absent from the movie player almost always, with
+                  // nothing to say why. Now it is there, and tapping it on
+                  // an unreachable stream explains the problem instead of
+                  // the button silently not existing.
+                  onCast: (_isLoading || !CastService.isSupported)
                       ? null
                       : _handleCast,
                   onCopyStreamUrl: (_isLoading || _resolvedStreamUrl == null)
@@ -2139,96 +2160,78 @@ class _PlayerScreenState extends State<PlayerScreen>
 
         // Floating Subtitle Menu Popover
         if (_activeMenu == 'subtitle' && !_isLoading)
-          Positioned(
-            bottom: MediaQuery.sizeOf(context).height < 500
-                ? 44
-                : (MediaQuery.sizeOf(context).width < 560
-                      ? 60
-                      : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96)),
-            right: MediaQuery.sizeOf(context).width < 560
-                ? 8
-                : (MediaQuery.sizeOf(context).width < 680 ? 12 : 28),
-            left: MediaQuery.sizeOf(context).width < 560 ? 8 : null,
-            child: Align(
-              alignment: MediaQuery.sizeOf(context).width < 560
-                  ? Alignment.bottomCenter
-                  : Alignment.bottomRight,
-              child: PlayerSubtitleMenu(
-                onBack: _backToSettings,
-                groups: _subtitleGroups,
-                embeddedSubtitles: _embeddedSubtitles,
-                selectedEmbeddedIndex: _selectedEmbeddedSubtitleIndex,
-                selectedVariant: _currentSubtitleVariant,
-                isSubtitleEnabled: _isSubtitleEnabled,
-                movieTitle: widget.detail?.name ?? widget.title,
-                imdbId: widget.detail?.id,
-                season: _currentEpisode?.season,
-                episode: _currentEpisode?.episode,
-                year: widget.detail?.year != null
-                    ? int.tryParse(widget.detail!.year!)
-                    : null,
-                delaySec: _subtitleDelayMs / 1000.0,
-                onSelectVariant: (v) {
-                  if (v != null) _loadSubtitle(v);
-                },
-                onSelectEmbedded: (emb) => _selectEmbeddedSubtitle(emb),
-                onToggleOff: _disableSubtitles,
-                onOpenSyncBar: () {
-                  if (_selectedEmbeddedSubtitleIndex != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Subtitle sync is not supported for embedded subtitles.',
-                        ),
-                        duration: Duration(seconds: 2),
+          PlayerMenuAnchor(
+            child: PlayerSubtitleMenu(
+              onBack: _backToSettings,
+              groups: _subtitleGroups,
+              embeddedSubtitles: _embeddedSubtitles,
+              selectedEmbeddedIndex: _selectedEmbeddedSubtitleIndex,
+              selectedVariant: _currentSubtitleVariant,
+              isSubtitleEnabled: _isSubtitleEnabled,
+              movieTitle: widget.detail?.name ?? widget.title,
+              imdbId: widget.detail?.id,
+              season: _currentEpisode?.season,
+              episode: _currentEpisode?.episode,
+              year: widget.detail?.year != null
+                  ? int.tryParse(widget.detail!.year!)
+                  : null,
+              delaySec: _subtitleDelayMs / 1000.0,
+              onSelectVariant: (v) {
+                if (v != null) _loadSubtitle(v);
+              },
+              onSelectEmbedded: (emb) => _selectEmbeddedSubtitle(emb),
+              onToggleOff: _disableSubtitles,
+              onOpenSyncBar: () {
+                if (_selectedEmbeddedSubtitleIndex != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Subtitle sync is not supported for embedded subtitles.',
                       ),
-                    );
-                    return;
-                  }
-                  setState(() {
-                    _activeMenu = null;
-                    _menuParent = null;
-                    _showSubSyncBar = true;
-                  });
-                },
-                onOpenStyleBar: () {
-                  setState(() => _activeMenu = 'style');
-                },
-                onOpenTextSync: () {
-                  if (_selectedEmbeddedSubtitleIndex != null ||
-                      _currentSubtitlePath == null ||
-                      _currentCues.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Speech sync requires an external subtitle file.',
-                        ),
-                        duration: Duration(seconds: 2),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                setState(() {
+                  _activeMenu = null;
+                  _menuParent = null;
+                  _showSubSyncBar = true;
+                });
+              },
+              onOpenStyleBar: () {
+                setState(() => _activeMenu = 'style');
+              },
+              onOpenTextSync: () {
+                if (_selectedEmbeddedSubtitleIndex != null ||
+                    _currentSubtitlePath == null ||
+                    _currentCues.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Speech sync requires an external subtitle file.',
                       ),
-                    );
-                    return;
-                  }
-                  setState(() {
-                    _activeMenu = null;
-                    _menuParent = null;
-                    _showTextSyncOverlay = true;
-                  });
-                },
-                onClose: () => setState(() {
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+                setState(() {
+                  _activeMenu = null;
+                  _menuParent = null;
+                  _showTextSyncOverlay = true;
+                });
+              },
+              onClose: () => setState(() {
                 _activeMenu = null;
                 _menuParent = null;
               }),
-              ),
             ),
           ),
 
         // Floating Audio Menu Popover
         if (_activeMenu == 'audio' && !_isLoading)
-          Positioned(
-            bottom: MediaQuery.sizeOf(context).height < 500
-                ? 46
-                : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
-            right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
+          PlayerMenuAnchor(
             child: PlayerAudioMenu(
               onBack: _backToSettings,
               audioTracks: _audioTracks,
@@ -2260,20 +2263,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                   'AUDIO SYNC: ${sec > 0 ? "+" : ""}${sec.toStringAsFixed(2)}s',
                 );
               },
-              onClose: () => setState(() {
-                _activeMenu = null;
-                _menuParent = null;
-              }),
             ),
           ),
 
         // Floating Settings Menu Popover (playback speed + aspect ratio index)
         if (_activeMenu == 'settings' && !_isLoading)
-          Positioned(
-            bottom: MediaQuery.sizeOf(context).height < 500
-                ? 46
-                : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
-            right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
+          PlayerMenuAnchor(
             child: PlayerSettingsMenu(
               currentRate: _playbackRate,
               aspectLabel: switch (_videoFit) {
@@ -2306,20 +2301,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                 _activeMenu = 'subtitle';
                 _menuParent = 'settings';
               }),
-              onClose: () => setState(() {
-                _activeMenu = null;
-                _menuParent = null;
-              }),
             ),
           ),
 
         // Floating Speed Menu Popover
         if (_activeMenu == 'speed' && !_isLoading)
-          Positioned(
-            bottom: MediaQuery.sizeOf(context).height < 500
-                ? 46
-                : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
-            right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
+          PlayerMenuAnchor(
             child: PlayerSpeedMenu(
               onBack: _backToSettings,
               currentRate: _playbackRate,
@@ -2336,11 +2323,7 @@ class _PlayerScreenState extends State<PlayerScreen>
 
         // Floating Aspect Ratio Popover
         if (_activeMenu == 'aspect' && !_isLoading)
-          Positioned(
-            bottom: MediaQuery.sizeOf(context).height < 500
-                ? 46
-                : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
-            right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
+          PlayerMenuAnchor(
             child: PlayerAspectMenu(
               onBack: _backToSettings,
               currentFit: _videoFit,

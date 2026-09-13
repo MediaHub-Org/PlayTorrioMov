@@ -32,6 +32,28 @@ class TmdbCredits {
 abstract final class TmdbService {
   static const _baseUrl = 'https://api.themoviedb.org/3';
 
+  /// What happened on the most recent TMDB request, for the Settings page
+  /// to show.
+  ///
+  /// Every failure here is swallowed on purpose -- a dead key or a captive
+  /// portal should cost cast photos, not the details page. The cost of that
+  /// is a screen that silently shows bare actor names with no way to tell
+  /// a rejected key from a title TMDB has never heard of. This is that way:
+  /// one line, read straight off the device, no log capture needed.
+  static final ValueNotifier<String?> lastStatus = ValueNotifier<String?>(null);
+
+  static void _note(String message) => lastStatus.value = message;
+
+  /// Maps a non-200 into something a person can act on. 401 is the one that
+  /// matters: it means the key is wrong or revoked, which is the only
+  /// failure the user can actually fix from Settings.
+  static String _describeStatus(int code) => switch (code) {
+    401 => 'TMDB rejected the API key (401). Add your own key below.',
+    404 => 'TMDB has no entry for this title (404).',
+    429 => 'TMDB rate-limited this device (429). Try again shortly.',
+    _ => 'TMDB returned HTTP $code.',
+  };
+
   /// Crew jobs worth showing under Direction. TMDB's crew array is long --
   /// every gaffer and boom operator on a feature -- and listing all of it
   /// would bury the handful of names anyone actually looks for.
@@ -69,7 +91,10 @@ abstract final class TmdbService {
     // The user's key when they set one, otherwise the key this build
     // ships with.
     final key = TmdbSettings.effectiveApiKey;
-    if (key == null || tmdbId.isEmpty) return TmdbCredits.empty;
+    if (key == null || tmdbId.isEmpty) {
+      _note('No TMDB API key configured.');
+      return TmdbCredits.empty;
+    }
 
     final kind = isTvShow ? 'tv' : 'movie';
     final uri = Uri.parse('$_baseUrl/$kind/$tmdbId/credits')
@@ -77,9 +102,16 @@ abstract final class TmdbService {
 
     try {
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) return TmdbCredits.empty;
+      if (response.statusCode != 200) {
+        _note(_describeStatus(response.statusCode));
+        return TmdbCredits.empty;
+      }
 
       final credits = parseCredits(jsonDecode(response.body));
+      _note(
+        'Loaded ${credits.cast.length} cast and ${credits.crew.length} crew '
+        'from TMDB.',
+      );
 
       // A series' `/credits` is series-level crew, which for most shows is
       // producers and no director at all -- TV directors are credited per
@@ -96,6 +128,7 @@ abstract final class TmdbService {
       return credits;
     } catch (e) {
       debugPrint('[TmdbService] fetchCredits failed: $e');
+      _note('Could not reach TMDB: $e');
       return TmdbCredits.empty;
     }
   }
@@ -161,7 +194,10 @@ abstract final class TmdbService {
 
     try {
       final response = await http.get(uri).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+        _note(_describeStatus(response.statusCode));
+        return null;
+      }
       final id = parseFindResponse(
         jsonDecode(response.body),
         isTvShow: isTvShow,
@@ -170,6 +206,7 @@ abstract final class TmdbService {
       return id;
     } catch (e) {
       debugPrint('[TmdbService] resolveTmdbIdFromImdb failed: $e');
+      _note('Could not reach TMDB: $e');
       // Deliberately not cached: a timeout is not evidence the title is
       // absent, and the next details-page visit should try again.
       return null;
@@ -259,7 +296,14 @@ abstract final class TmdbService {
     return creators;
   }
 
-  /// Clears the IMDb -> TMDB cache, for tests.
+  /// Clears the IMDb -> TMDB cache and the status line, for tests.
   @visibleForTesting
-  static void resetForTest() => _tmdbIdByImdbId.clear();
+  static void resetForTest() {
+    _tmdbIdByImdbId.clear();
+    lastStatus.value = null;
+  }
+
+  /// The status text for a given HTTP code, for tests.
+  @visibleForTesting
+  static String describeStatusForTest(int code) => _describeStatus(code);
 }

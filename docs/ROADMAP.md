@@ -1,568 +1,283 @@
 # Project Roadmap — PlayTorrioMov
 
-What is **outstanding**. Shipped work is tracked in [CHANGELOG.md](../CHANGELOG.md)
-and git history, not here.
+**The app is in maintenance mode.** Every numbered feature item is closed;
+what this file tracks now is what is *known broken*, what is *waiting on a
+device*, and which decisions are settled so they do not get re-argued.
+Shipped work lives in [CHANGELOG.md](../CHANGELOG.md) and git history, not
+here — a roadmap that also carries a changelog stops being readable as
+either.
 
 Items are numbered and never renumbered, so `#43` means the same thing in a
-commit message, a pull request and this file. A row whose Details open with
-**Decided** has had its design question settled — the reasoning is in the
-`###` section under the same number, and it is there so the decision is not
-re-argued from the one-line summary. Anything ruled out entirely goes to
-[Declined](#declined-so-they-do-not-get-re-litigated) with its reasoning
-rather than being deleted.
+commit message, a pull request and this file. Numbers are not reused when an
+item closes.
 
-Last reconciled against the tree: **2026-09-13**. **Every numbered item is
-closed.** What remains is not a list of tasks but three things only a device
-can answer, each noted in its own section: whether TMDB's `created_by` is
-populated in practice (#39), whether a stream actually reaches a TV (#28),
-and whether the Live TV tap now feels immediate (#42).
+Last reconciled against the tree: **2026-09-13**, on `v1.5.8+27`.
+
+---
+
+## Open
+
+### Bugs
+
+| # | What | State |
+|:--|:-----|:------|
+| — | TMDB shows no cast photos and no character names on a real device | **Investigating** — see below |
+
+**TMDB enrichment is quiet on device and we do not yet know why.** Three
+things were wrong on our side and are fixed:
+
+1. The missing-character fallback printed the literal word *"Cast"*, which
+   reads as a role every actor shares rather than as absent data. The second
+   line is blank now, with its height reserved so one uncredited actor
+   cannot shorten a column.
+2. Enrichment short-circuited on `hasPhotos && hasCrew`. Character names are
+   the third part of that row and were not in the test, so an addon that
+   sent photos and a director stopped the lookup cold.
+3. Nothing said *why* when TMDB itself was the problem. Every failure in
+   `TmdbService` is swallowed on purpose — a dead key should cost cast
+   photos, not the details page — which left a rejected key looking exactly
+   like a working one on the Settings card.
+
+**The next step is yours, and it is one tap:** open **Settings → Sync →
+TMDB Cast Photos** and read the status line under the card. It now reports
+the most recent request's outcome.
+
+| What it says | What it means |
+|:-------------|:--------------|
+| *Loaded N cast and M crew from TMDB* | TMDB is fine; if the row still looks wrong the bug is in the page, not the service |
+| *TMDB rejected the API key (401)* | The bundled key is dead or revoked — add your own free key on that same card |
+| *Could not reach TMDB* | Network, DNS or a captive portal |
+| *TMDB has no entry for this title (404)* | That one title only; try another |
+| nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
+
+`api.themoviedb.org` is blocked from the CI environment, so whether the
+bundled key is live is exactly the thing that could not be checked from
+here. That status line is how it gets checked.
+
+### Code and consistency
+
+**None open.** Every browse section renders through `BrowseScaffold` and
+`BrowseRowView`; the three details pages share one spine and one section
+heading (#41); and both players now draw from the same widgets — see
+*The two players* below.
+
+### Requested UI work
+
+**None open.**
+
+---
+
+## Waiting on a device
+
+CI can prove a parser handles a shape and a widget lays out at a width. It
+cannot tell you whether a stream reaches a TV or whether a tap *feels*
+immediate. These are the open questions, each already built and tested as
+far as it can be.
+
+### 1. Cast, against a real receiver (#28)
+
+The sender path has been read for defects and had two, both fixed:
+`streamType` was hardcoded to `buffered` (a live channel announced that way
+gets a seek bar and a duration the receiver cannot honour), and `.ts` was
+being called `video/mp4` (IPTV portals serve MPEG-TS constantly, and that
+hands the receiver a demuxer that cannot read it).
+
+The button is also no longer hidden on most sources: it used to be gated on
+*"is this a torrent"*, when what actually matters is whether the receiver
+can reach the host. A torrent resolved through a debrid or served from
+another machine is as fetchable as any CDN; only this device's own loopback
+is not.
+
+**To answer:**
+
+1. Does a **movie** reach the TV and play? (Known limit: the Cast SDK has no
+   sender-side way to attach Referer/User-Agent, so scraper sources needing
+   them fail on the TV while playing fine locally. Try direct/CDN sources.)
+2. Does a **Live TV channel** reach the TV, and does the receiver show it as
+   live — no seek bar, no phantom duration?
+3. Does **disconnect** return playback cleanly?
+4. On a stream a receiver *cannot* reach, does tapping Cast now explain
+   itself rather than doing nothing?
+
+### 2. Series creators (#39)
+
+`created_by` on `/tv/{id}` is the showrunner, fetched only for a series
+whose `/credits` had no directing crew. The parser is covered by tests for
+an absent, empty and malformed field — being wrong costs nothing, it just
+yields no crew, which is today's behaviour. What tests cannot confirm is
+whether the field is **populated in practice**.
+
+**To answer:** open a series whose director was missing and look for a
+*Creator* card. `/tv/{id}/aggregate_credits` is the heavier fallback if
+`created_by` proves thin — a large payload whose entries carry a `jobs`
+array instead of a single `job`, needing a TV-shaped branch in the parser.
+
+### 3. The player, on a phone in your hand
+
+Everything here is laid out and guarded by tests, but "does it fit" and
+"does it feel right" are different questions.
+
+- **The menus fit the screen.** The speed menu used to run off the top of a
+  landscape phone. Every popover now goes through `PlayerMenuAnchor`, which
+  bounds it top *and* bottom and scrolls the difference. Worth checking in
+  landscape on the shortest device you have.
+- **No close buttons.** Tapping off a panel dismisses it; the back arrow
+  returns to the settings root. Check that dismissing never feels stuck.
+- **Audio track leads the settings list**, ahead of subtitles, speed and
+  aspect.
+- **Seek amounts:** double-tap the sides for ±10s, the centre buttons for
+  ±30s. Two ways in, two different amounts.
+- **The CC button is a plain on/off**, and what it turns on is the track
+  matching the audio language — no picker, no dialog. Track and style
+  selection live behind the gear.
+- **Live TV's single tap** should reveal the controls immediately; it used
+  to wait out the double-tap window.
+
+---
+
+## The two players
+
+Live TV is meant to be the Movies/Series/Anime player **with fewer parts** —
+not a second player that happens to look similar. Both now draw from the
+same widgets: `PlayerIconButton`, `PlayerCenterControls`,
+`PlayerVolumeControl`, `PlayerSettingsMenu`, `PlayerAspectMenu` and
+`PlayerMenuAnchor`.
+
+`test/player_convergence_test.dart` guards the shape, because the drift is
+always the same one: a control gets hand-rolled on one page instead of
+reaching for the shared widget. It asserts the shared widgets stay
+referenced, that neither player hand-places a popover, and that no menu
+grows a close button back.
+
+**What Live TV legitimately lacks**, because a live feed has no use for it:
+seeking (the centre buttons' callbacks go null and the play button stands
+alone), a seek bar (a live-edge row sits where it would be, because absence
+alone read as a control that failed to load), and playback speed (the
+settings row is optional for exactly this).
+
+**A note on a reversed decision.** This file used to record the Live TV
+aspect-ratio pill as a divergence kept on purpose — one setting behind a
+gear costs a click rather than saving one. That reasoning was sound in
+isolation and wrong against the larger goal: it was the last control on the
+page with no counterpart in the other player, and "same panel, fewer rows"
+is worth more than the tap. It is the shared gear now.
+
+---
 
 ## Navigation
 
 One hub, five sections, the last always Library:
 
-| Section      | Content                       |
-|:-------------|:--------------------------------|
-| **Movies**   | TMDB-catalog movies             |
-| **Series**   | TMDB-catalog series              |
-| **Anime**    | Its own catalog and scraper      |
-| **Live TV**  | IPTV channels                    |
-| **Library**  | Everything you've saved          |
+| Section      | Content                        |
+|:-------------|:-------------------------------|
+| **Movies**   | TMDB-catalog movies            |
+| **Series**   | TMDB-catalog series            |
+| **Anime**    | Its own catalog and scraper    |
+| **Live TV**  | IPTV channels                  |
+| **Library**  | Everything you've saved        |
 
 Phones show sections in the bottom tab bar; tablet and desktop show them as
 a chip row under the top bar. Search stays an icon, not a section.
+
+---
 
 ## Upstream sync
 
 PlayTorrioMov originated as a fork of `MediaHub-Org/PlayTorrioMod`; that repo
 is now **archived**, so Mov is the only active app in the family and the
-direct downstream of upstream `ayman708-UX/PlayTorrioV3` — no more relaying
-through PlayTorrioMod.
+direct downstream of upstream `ayman708-UX/PlayTorrioV3`.
 
-**Last synced: `3670ae1`, 2026-09-10. Reviewed again 2026-09-13** — upstream
-has seven commits since, and only two were worth taking: `db2a4b9` and
-`0343720`, both hardening the Linux CI job against a `dl.google.com` apt
-source the runner image ships that periodically breaks `apt-get update`.
-**Ported to both `build.yml` and `pr-checks.yml`** (our Linux builds were
-passing, so this is pre-emptive: it is a red build that would not have been
-ours). Of the rest: `7b32112` is an upstream version bump, `f69617b` a merge
-commit, and `29a4127`/`1da1940` add IPTV channels, search and storage —
-which is the area this fork has diverged furthest in (#45, #46 and the
-portal browser are all ours), so they need reading as ideas rather than
-porting as patches. `9616808` is **closed as not needed**: it adds a blurred dual-layer hero
-backdrop to eliminate black bars, and every hero in this fork already uses
-`BoxFit.cover`, which fills and crops. It fixes a problem we do not have.
-With that, **the upstream list is empty** — reviewed through `f69617b`.
+**Reviewed through `f69617b` (2026-09-13). The list is empty.**
 
-**Last synced: `3670ae1`, 2026-09-10.** Ported download auto-reconnect,
-"Copy Stream URL", and the fullscreen-state-on-exit fix from that commit;
-deliberately not ported: its Support Dev sponsor monetization feature (out
-of scope for this fork) and its keyboard-driven aspect-cycle HUD (Mov
-already has an aspect ratio control in the player's Settings menu — a
-second, inconsistent affordance for the same setting would be a
-regression). Still unreviewed from the same batch: `9616808` (hero
-backdrop scaling for home/anime — anime_page.dart has diverged
-significantly since this session's `BrowseScaffold` migration, needs
-adapting rather than a direct port) and `d2f8074` (IPTV portal manager
-responsiveness — a near-total rewrite of `iptv_portals_modal.dart`, real
-mobile-first value but a large diff to review safely; **no longer blocking
-anything**, since the reported overflows were fixed directly in #40 and our
-copy of that file has diverged too far for a straight port — see *The IPTV
-overflows*). Next step: review
-those two, then check `v3/main` for anything past `3670ae1`, file-by-file
-(git history was squashed at the fork point, so nothing arrives via
-`git merge`).
+Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
+`dl.google.com` apt source the runner image ships that periodically breaks
+`apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`.
 
-## Bugs
+Not taken, with reasons, so they are not re-reviewed:
 
-**None open.** Everything reported from testing the v1.5.7 Android build on
-a device has been fixed: the cast-and-crew bug that caused three symptoms at
-once (missing photos, the role line reading "Cast", missing directors) in
-#38, the empty Direction half on series in #39, and the text escaping its
-container in the IPTV portals modal in #40. See *Series creators* and *The
-IPTV overflows* below for what shipped, and the CHANGELOG for #38.
+| Commit | Why not |
+|:-------|:--------|
+| `9616808` | Blurred dual-layer hero backdrop to kill black bars. Every hero in this fork already uses `BoxFit.cover`, which fills and crops. It fixes a problem we do not have. |
+| `29a4127`, `1da1940` | IPTV channels, search and storage — the area this fork has diverged furthest in (#45, #46 and the portal browser are ours). Read as ideas, not ported as patches. |
+| `d2f8074` | IPTV portal manager responsiveness. A near-total rewrite of `iptv_portals_modal.dart`; our copy carries Cloud Vault, the modal customizer and the M3U tab, so a straight port would drop them. The reported overflows were hand-fixed in #40 instead — all four of them, not the two reported. |
+| Support Dev sponsor monetization | Out of scope for this fork. |
+| Keyboard aspect-cycle HUD | Mov already has an aspect control in the player's settings; a second affordance for one setting is a regression. |
 
-Next device test to run: a series whose director was missing, to confirm a
-**Creator** card now appears — #39 is the one fix that could not be
-verified against the live API from CI (see its note).
-
-## Code and consistency
-
-**None open.** Every browse section — Movies/Series, Anime and Live TV —
-renders through `BrowseScaffold` and `BrowseRowView`; the three details
-pages share one spine and one section heading (#41); and the two players
-share their controls (#42). What each converged on, and the few divergences
-kept deliberately, are recorded in the sections below.
-
-## Requested UI work
-
-**None open.** The last three — mobile-first as a standing policy (#15), the
-logo accent (#21) and Google Cast (#28) — are covered below. #28 is the one
-that still wants a person: its code is fixed and tested, but whether a
-stream actually reaches a TV can only be answered with a receiver on the
-network.
-
-### Mobile-first, made checkable (shipped, #15)
-
-A policy nobody can check is a wish, so #15 shipped as a rule with a test
-behind it rather than a paragraph. **No `SizedBox` in `lib/` may declare a
-fixed width of 360 or more** — 360dp is the narrowest width the app is
-expected to work at, and a fixed width larger than that cannot shrink:
-whatever it holds is painted past the edge of the screen. A clamped or
-computed width is fine, and is what the fix looks like.
-
-The audit turned up **one** real offender out of three candidates: the
-custom decoder-chain dialog in video player settings, pinned at `width:
-400`, which overflowed on exactly the devices this app is mostly used on.
-It is clamped to the available width now, and still 400 wherever there is
-room. The other two were false positives worth naming so they are not
-"fixed" later by mistake: `anime_page`'s 500/450 boxes are decorative glow
-blobs deliberately positioned off-screen, and `cast_service`'s 480 is a
-poster *resolution* sent to the receiver, not a layout width.
-
-### The logo's film-strip rule (shipped, #21)
-
-A short film-strip rule under the wordmark: a bar with sprocket holes
-punched along it, in the theme's accent colour.
-
-**Under, not beside.** The icon already owns the left of the header, and a
-second mark there would crowd a phone header that also carries Settings.
-Underlining costs no horizontal room, which is the scarce dimension.
-
-**Short, not a full underline.** Stretching it to the available width would
-run it far past the text on a desktop header, and measuring the text's own
-width would cost an `IntrinsicWidth` for the sake of an accent.
-
-**Drawn, not an asset**, so it takes the theme colour — and drawn as a
-single even-odd path rather than a bar with holes painted over it, so the
-holes are genuinely transparent and the rule works over the header's
-gradient instead of only over whatever flat colour it was designed against.
-
-### Cast: the code is ready, the receiver is yours (#28)
-
-This could never be finished from CI — whether a stream reaches a TV needs
-a Cast-capable receiver on the network. What *could* be done was reading
-the path for defects, and it had two, both only reachable once Live TV
-gained a cast button:
-
-- **`streamType` was hardcoded to `buffered`.** A live channel announced
-  that way gets a seek bar and a duration the receiver cannot honour. The
-  SDK has a `live` type for exactly this; `isLive` now threads from the
-  player through the cast sheet to `loadMedia`.
-- **`.ts` was being called `video/mp4`.** IPTV portals serve MPEG-TS
-  constantly, and that hands the receiver a demuxer that cannot read it.
-  Now `video/mp2t`.
-
-**What a device test needs to answer**, none of which CI can:
-
-1. Does a **movie** reach the TV and play? (The known limit stands: the Cast
-   SDK has no sender-side way to attach Referer/User-Agent, so scraper
-   sources needing them will fail on the TV while playing fine locally.
-   Direct/CDN sources are the ones to try.)
-2. Does a **Live TV channel** reach the TV, and does the receiver show it as
-   live — no seek bar, no phantom duration?
-3. Does **disconnect** return playback cleanly?
-
-### The details spine, measured (shipped, #41)
-
-Measured against the tree before changing anything, the three pages were
-further along than the item assumed. Movies/Series and Anime **already**
-agreed on the whole upper half, mobile and desktop alike: title, metadata
-row, play and the library action row, synopsis, genres. Earlier work had
-converged them — `LibraryActionsRow` gave them one library row, #38 gave
-both real credits.
-
-**Anime's credits were out of order** and now lead, where Movies and Series
-put Cast & Crew. Characters & Cast is the credits block for anime — a
-character-to-voice-actor list answers for anime what actor-to-character
-answers for film — and **Staff stays** as anime's one section-specific
-block: it answers what Characters cannot (who directed it, who scored it,
-which studio) and has no other home.
-
-**The real drift was the section headings**, and it had already happened.
-Movies/Series used `FontWeight.bold` at `-0.3` letter spacing with 16px
-beneath; Anime used `w800` at `-0.4` with none; Arabic anime prefixed an
-accent icon and set no letter spacing. Each was defensible alone; together
-the same page type read as three. One `DetailsSectionHeader` now serves all
-three, with a `trailing` slot for the two headings that carry something on
-the right (Anime's episode count, Arabic's jump-to-episode field) — those
-were hand-built rows before, which is why they were the ones that drifted
-furthest. A guard test catches the fourth.
-
-**Arabic anime's gutter joined its family.** It used `60 / 32 / 16` where
-its two siblings use `48 / 24`. Note this is *not* `AppSpacing.pageInset`
-(`16 / 20 / 24`): that is the browse-page gutter, and a details page sits in
-a narrower max-width column with a wider inset. Converging Arabic onto the
-browse value would have moved it out of the family it belongs to.
-
-**One thing that looked like duplication is not.** Movies/Series carries
-both a *More Like This* row and a *Similar Content* row. They are different
-sources answering different questions: `relatedItems` is passed in by the
-caller — the set this title belongs to — while `_similarItems` comes from
-the BestSimilar scraper. Both stay.
-
-**Still divergent, and left alone deliberately:** Arabic anime derives
-`isDesktop` from a hand-rolled `screenWidth > 900` rather than
-`AppBreakpoints`, in one place while using `AppBreakpoints` in another.
-Worth fixing, but it is a behaviour change at the boundary rather than a
-layout one, so it does not ride along with a visual convergence.
-
-### Channels you make yourself (shipped, #46)
-
-A channel tile is a **saved search**, not a bookmark: a `HardcodedChannel`
-is `{name, category, keywords[], exclude[]}` and `matches()` filters a
-portal's streams by keyword. So a user-defined channel is not a new concept
-— it is the same record with the stream's own name as its keyword, which is
-why it can be liked, listed, searched and matched by everything that already
-handles the built-ins, with no special case anywhere downstream.
-
-**The seam is in the registry, not the catalog file.** `HardcodedChannels`
-gained `custom` and `everything`, and `CustomChannelsService` *pushes* its
-list in once loaded. The catalog file keeps no dependency on storage, and
-`byId` — which is how favorites, Library and the hub all resolve a channel —
-searches both. Without that a liked custom channel would resolve to null and
-vanish from Library without a word.
-
-**Where you make one:** the Live TV player's top bar, shown only when the
-channel was built ad hoc from a portal stream (its id is not in the
-catalogue; a real channel's is). That is the moment the user knows they want
-the stream again, and the ad-hoc channel otherwise dies with the route. The
-portal browser's four stream-tile variants were the other candidate — four
-widgets and five call sites to thread one callback through, for an action
-taken at the moment you have not yet watched the thing.
-
-**Where you undo one:** the channel sheet, and only for a custom channel —
-a built-in has nothing to delete, it is catalog data. A channel you can
-create but never remove is a trap.
-
-**On the Live TV page** they get their own row, "Your channels", after
-Liked. Not folded into a category: they exist *because* the built-in
-catalogue had no entry, so filing them under one of its headings would hide
-the thing that makes them worth having.
-
-### The player's menus became one panel (shipped)
-
-Requested: *subtitle config inside settings, opening with a back button, no
-extra pop-up, fewer clicks.*
-
-The six menus behind the gear — settings, subtitles, audio, speed, aspect,
-style — were already one panel swapping its contents rather than a stack of
-pop-ups. What made them *read* as pop-ups is that **none of them led back**:
-stepping from Settings into Subtitles and then wanting Aspect ratio meant
-closing the panel and reopening the gear. A shared `PlayerMenuHeader` now
-carries an optional back arrow, and the player tracks which menu a sub-menu
-was stepped into from, so the arrow appears only when there is somewhere to
-go. Opened straight from the transport bar, a menu still shows no arrow —
-promising a screen the user never came from would be worse than none.
-
-Two clicks from the gear to anything, one from any sub-menu back to the
-root.
-
-**Cast is in the Live TV player now** too. Movies/Series/Anime have carried
-a cast icon in that same top-bar slot all along; Live TV had none, and a
-channel is the most natural thing to throw at a TV. Unlike the VOD player
-there is no torrent or local-file case to rule out — a portal stream is
-already a plain HTTP(S) URL a receiver can fetch — so the button appears
-whenever Cast is supported and a stream is playing.
-
-**The subtitle icon was already a plain on/off toggle** (YouTube's CC
-button), with track and style selection behind the gear, so nothing was
-needed there.
-
-### The Live TV player, converged (shipped, #42)
-
-The decision was "match everything except seek". What shipped is the part
-that made Live TV read as a different app:
-
-- **Play/pause is centred over the video**, through the same
-  `PlayerCenterControls` every other player uses. It was a bare `IconButton`
-  at the left end of the bottom bar. The widget's seek callbacks became
-  optional so live can use it: with them null the play button stands alone,
-  same size, same place. The alternative — a second, near-identical
-  play/pause of its own — is how the two drifted apart to begin with.
-- **The volume control is the shared `PlayerVolumeControl`**, not a
-  hand-rolled `Slider`. That also lifts the ceiling from 100% to the app's
-  250% boost, which matters more here than anywhere: portal streams are
-  often quiet. `_applyVolume` and `_toggleMute` now follow the VOD player's
-  semantics, restoring the pre-mute level instead of jumping to 50%.
-- **A live-edge row sits where the seek bar would be.** Absence alone read
-  as a control that failed to load; this says the stream is at its live edge
-  and there is nothing to scrub, in the same red as the LIVE badge above.
-- The overlay's auto-hide was **already** 4 seconds on both, so nothing to do.
-
-**The rest of it, finished in a second pass:**
-
-- **The top bar's buttons are the shared pill now.** Back, cast, save-as-
-  channel, the category drawer and both fullscreen toggles were bare
-  `IconButton`s, which is why the two top bars read as different chrome even
-  once they carried the same actions.
-- **The single-tap delay is gone.** Live TV put `onTap` and `onDoubleTap` on
-  the same detector, so Flutter had to wait to see whether a second tap
-  followed before firing either — every tap that just reveals the controls
-  landed late. Detected by hand now, on the same 280ms window
-  Movies/Series/Anime already used for exactly this reason, so both players
-  answer a tap at the same speed.
-
-**One divergence kept on purpose.** The aspect-ratio control stays a direct,
-labelled pill (FIT / ZOOM / STRETCH) rather than moving behind a settings
-gear. Movies/Series/Anime bury it because they have four settings to bury;
-Live TV has one, and putting a single setting behind a menu adds a click
-rather than saving one. It wears the shared pill styling, so it matches
-without pretending to be a menu it does not need.
-
-**Volume is the one thing Live TV still lacks** that the other player has:
-no vertical-drag gesture. That is not divergence any more — swipe-to-adjust
-was removed from the VOD player too, so neither has it.
-
-### Series creators (shipped, #39 — but verify it on device)
-
-A series' `/credits` is **series-level** crew, which for most shows is
-producers and no director at all: TV directors are credited per episode.
-That is why the Direction half came back empty even once #38 had the ids
-working. `created_by` on `/tv/{id}` is the showrunner — what a viewer means
-by "whose show is this" — and it is one extra request, made **only** for a
-series whose `/credits` had no directing crew, so a series that already has
-one costs nothing.
-
-`/tv/{id}/aggregate_credits` remains the heavier alternative: a large
-payload whose entries carry a `jobs` array instead of a single `job`,
-needing a TV-shaped branch in the parser. Reach for it only if `created_by`
-proves thin in practice.
-
-**The live check this item asked for could not be done here.** This
-session's network policy blocks `api.themoviedb.org`, so the response shape
-is still reasoned from TMDB's documentation rather than observed. The code
-is written so that being wrong costs nothing — an absent, empty, or
-malformed `created_by` yields no crew, which is exactly today's behaviour —
-and the parser is covered by tests for each of those shapes. What tests
-cannot confirm is whether the field is **populated in practice**, so the
-Android release is the real check: open a series whose director is missing
-and look for a "Creator" card.
-
-### How search came together (shipped, #48)
-
-One search page now answers for Movies, Series and Anime. The groundwork
-was already there, which made it smaller than it sounded.
-
-**There are not several search icons.** `PageSearchButton` is one shared
-widget, already rendered in the same header pill-row slot by
-`type_catalog_page`, `anime_page` and `iptv_page`. Anime and Live TV simply
-pass an `onTap` override to divert it to their own page. So "unify the
-entry points" is, mechanically, deleting two `onTap:` arguments.
-
-**Decided: keep the icon in the header pill row, and do not add a second
-one next to Settings.** It already sits in one consistent place, grouped
-with the filters it relates to, and within thumb reach on a phone. A global
-icon next to Settings would either duplicate it or force the pill out, and
-Settings is a different kind of destination — configuration, not content.
-The goal here is to unify what search *does* while leaving where it *lives*
-alone.
-
-**Make the scope a chip instead of a hidden mode.** Today `SearchScope`
-silently changes what the icon does: the same button means different things
-depending on where it was pressed, which is the actual complaint. Instead
-open one search page every time, with the current section **pre-selected as
-a type chip the user can clear**. Context is kept, reach becomes global, and
-nothing is invisible.
-
-**Filters.** Under the field sits a fixed row of type chips — All, Movies,
-Series, Anime — as `SearchFilter`, which is also what decides where a query
-is actually sent: addons, AniList, or both at once. With **All** selected
-the two catalogues are queried in parallel and results stay grouped by type
-under their own headings rather than interleaved.
-
-The genre / year / sort `FilterDropdown` pills planned here were **not**
-built, and the plan was wrong to assume them: `AddonManager.searchAll` takes
-a query and a content type and nothing else, so those pills would have had
-nothing to narrow on the addon side. They belong to catalog browsing, where
-they already live. The anime-native filters, which do exist as a real API,
-are reached instead through the handover described below.
-
-**The other search pages.** `anime_search_page.dart` is 918 lines and most
-of that is anime-native filtering (AniList genre, season, format) that has
-no movie equivalent, so it was kept rather than deleted. It is now reached
-*through* the unified page: an **Anime filters** pill appears beside the
-chips when Anime is selected, and the anime results row's "See all" leads to
-the same place. Both hand the typed query across via a new `initialQuery`,
-so nothing has to be retyped — the filters became a step deeper into search
-instead of a separate front door.
-
-Anime's own search button follows the same rule: in AniList mode it opens
-the unified page (arriving with the Anime chip pre-selected, so it reads the
-same as Movies and Series), and only **Arabic mode** still opens the anime
-page directly, because the unified search has no source for that catalogue.
-
-**Live TV stays out, for now.** Its search filters a channel and stream
-list by keyword; it does not search a title catalogue, so a result there is
-a different kind of object. Leaving its `onTap` override in place is the
-honest version: one rule, legible — *in Live TV you search channels,
-everywhere else you search titles*. A later pass can add a Live TV chip
-whose results render as channel cards, once the result list is ready to hold
-two shapes.
-
-### The IPTV overflows: hand-patched, not ported (shipped, #40)
-
-The choice was between porting upstream's `d2f8074` — a responsiveness
-rewrite of this same `iptv_portals_modal.dart` — and patching the overflows
-directly. **Patched directly**, for a reason that only became clear on
-reading our copy: the file has diverged. Cloud Vault as a second portal
-source, the modal-style customizer, and the whole M3U Playlists tab are
-Mov's, not upstream's, so a near-total rewrite of the file would have had to
-be re-adapted around all three. `d2f8074` stays on the upstream list, no
-longer as a fix for anything reported.
-
-Four overflows, all the same bug in different clothes — **an unconstrained
-child in a `Row`, which does not shrink; it paints outside the box**:
-
-- **The modal's title.** "IPTV Portals & Playlists" at 20pt w900, plus the
-  icon and two trailing buttons, is wider than a phone dialog. Now
-  `Expanded` with an ellipsis — which is what the `Spacer` after it was
-  standing in for anyway.
-- **The customizer sheet's title**, the same shape, found while fixing the
-  first.
-- **The source dropdown's items** (the one the user reached via Reddit).
-  Their descriptions run to ~50 characters; a popup menu sizes itself to
-  what fits on screen and does not grow past the edge to suit its contents.
-  The text columns are now `Expanded` and wrap, and Cloud Vault's count
-  badge sits in a `Wrap` so it drops under the title instead of pushing the
-  row out.
-- **Both selection toolbars** (Manage mode, portals and M3U). Select-all
-  plus the two delete buttons are together wider than a phone dialog. Now a
-  `Wrap` of two groups with `spaceBetween`: unchanged on a wide dialog, and
-  the delete pair drops to a second line on a narrow one.
-
-### One amount, one affordance (shipped, #44)
-
-Requested as ±30s alongside the existing ±10s. It shipped first with ±30s
-in the transport bar and ±10s on the centred buttons — which, on a phone,
-meant **three** seek controls on one screen and two of them doing the same
-thing: the double-tap side zones and the centred buttons were both ±10s.
-
-Settled, on the user's call:
-
-| control | amount |
-|---|---|
-| double-tap side zones (touch) | ±10s |
-| centred buttons beside play | ±30s |
-| transport bar | *nothing* — its ±30s pair was removed |
-| arrow keys / J / L (desktop) | ±10s |
-
-The gesture is the small nudge, the visible buttons the bigger jump — the
-shape YouTube uses. Desktop keeps ±10s on the keyboard, which was already
-wired, so nothing is lost there by the centred buttons moving to ±30s.
-
-**One feedback path, still.** Every fixed step routes through
-`_seekRelative`, so the flash was added there once and shows on the side
-that moved, whatever asked for it. It is deliberately not gated on the
-controls being visible: a double-tap seek happens with the overlay hidden,
-which is when confirmation matters most. Repeat taps accumulate, so three
-quick +10s taps read "30 seconds"; turning around starts a new count.
-
-### The CC button answers instead of asking (shipped)
-
-The subtitle button is a toggle, and a toggle should never open a menu — but
-with nothing selected yet it did exactly that, opening the picker.
-
-**The answer is the audio language.** Subtitles exist to put in writing what
-is being said, so the track matching the selected audio track is the one that
-makes the words on screen the words in the room. Everything below that is a
-fallback for when no such track exists: the file's own `default` flag, then
-English, then simply the first — a subtitle in the wrong language still
-answers "turn subtitles on" better than nothing happening.
-
-Matching had to be **by language, not by string**. Audio and subtitle tracks
-in the same file are routinely labelled in different schemes — an `eng` audio
-track beside an `English` subtitle is the common case, not the exotic one —
-so `languageKey` reduces both to one comparable key across the spellings
-these actually arrive as (`en`, `eng`, `English`, `en-US`, `Español`,
-`ja (Japanese)`). Whole-word matching matters here: a naive `contains('en')`
-picks a **Slovenian** track for English audio.
-
-With no embedded track it falls back to whatever a subtitle search has
-already turned up, and **never starts a new search**: a toggle should not
-leave the user waiting on the network to find out whether it worked. With
-genuinely nothing available it says so rather than leaving a button that
-looks broken.
-
-The rules live in `SubtitleAutoPick`, in the model layer rather than the
-player, because they are a judgement call about what "best" means and worth
-reading on their own. The full picker is still one tap away behind the gear.
-
-**Note:** this app has no preferred-subtitle-language setting, and none was
-added — the audio track is a better signal than a preference set once and
-forgotten. If one is ever wanted it slots in above the `default` flag, not
-above the audio match.
-
-### Swipe-to-adjust is gone (shipped)
-
-Vertical drag set volume on the left half and brightness on the right. Mobile
-had already lost it — hardware volume keys and the OS brightness control do
-the same job reliably, and an accidental swipe changed either one mid-watch.
-Removed on desktop too, on the same argument: there is a volume slider in the
-bar, and screen brightness is the display's business, not a video player's.
-The brightness dim overlay and the gesture HUD went with it.
-
-### Why Downloads stays in the Library (shipped, #43)
-
-Continue and Downloads look equally droppable and are not. Continue really
-is redundant: its tab renders `ContinueWatchingService.activeItems`, the
-identical deduped list the Continue Watching row already shows.
-
-Downloads is not "just the user's disk". `DownloadService` tracks in-app
-tasks with live state — progress, pause, resume, delete — and only two files
-in the app touch it: `watch_screen.dart`, where a download is started, and
-the Library tab, which is the **only** place it can be seen or managed
-afterwards. Android app-private storage is not browsable, so removing that
-tab would leave a download with no UI at all: no way to watch it, cancel it,
-or reclaim the space. Keeping it as a fourth tab alongside the three states
-is also what every comparable app does.
-
-### Why the ❤️ sits on the Live TV channel tile (shipped, #45)
-
-A Live TV tile is **not a channel**. `HardcodedChannel` is
-`{name, category, keywords[], exclude[]}` — UFC is literally
-`['ufc', 'fight pass', 'mma', 'ultimate fighting']` — and
-`HardcodedChannels.matches()` filters the streams your portals carry against
-those keywords. The tile is a *saved search over a brand*; what opens inside
-it is whatever your provider happens to stock, named however they named it.
-Those inner entries are not sub-channels, they are candidate sources.
-
-That is the same shape Movies and Series already have: one title, several
-sources, pick one. `DetailsPage` and `IptvChannelSheet` are the same screen
-wearing different words.
-
-So the ❤️ belongs on the tile, not on the streams inside it. The brand is
-stable — "UFC" means the same thing next month. A stream is disposable: one
-provider's line item, gone when they rotate their list or the user switches
-portals, and a favourite pointing at it rots silently. Liking an inner
-stream would be liking a specific torrent instead of the film.
-
-And it should surface on the **Live TV page**, not only in Library: someone
-about to watch television is on that page, not in their library. Today liked
-channels appear nowhere on it at all, which is the real gap — Library
-already lists them.
+---
 
 ## Signing and releases
 
 Android release signing **is configured** — `ANDROID_KEYSTORE_BASE64` and
-`ANDROID_KEYSTORE_PASSWORD` are both set, and the v1.5.6 build log confirms
-it ("Release signing configured (alias: playtorriomov)"). Released APKs
-therefore install over each other and the in-app updater works. See
+`ANDROID_KEYSTORE_PASSWORD` are both set. Released APKs therefore install
+over each other and the in-app updater works. See
 [release signing](RELEASES.md#release-signing). No other platform needs
 signing for updates, because none of them self-install — see
 [RELEASES.md](RELEASES.md#other-platforms).
 
 `ENV_FILE`/`DOTENV` is **not** set, and that is the one outstanding release
-secret. Every published build ships an empty `.env`, so Trakt sign-in,
-Simkl sign-in and Discord Rich Presence are inert in released binaries.
-TMDB cast photos are unaffected by that secret — `TmdbSettings` carries a
-bundled fallback key. They are broken for a different reason entirely; see
-bug #38.
+secret. Every published build ships an empty `.env`, so Trakt sign-in, Simkl
+sign-in and Discord Rich Presence are inert in released binaries.
+
+TMDB is *not* affected by that secret — `TmdbSettings` carries a bundled
+fallback key. Whether that key still works is the open bug above.
+
+**One thing to know about the release pipeline:** `build.yml` has **no
+analyze or test step**. Only `pr-checks.yml` runs them, and only on a pull
+request. A PR merged before its checks finish ships unverified — that is how
+v1.5.8 went out, with the version pin confirmed by reading `pubspec.yaml`,
+`app_info.dart` and the CHANGELOG off `main` directly instead. Either wait
+for `pr-checks` before merging, or accept that the release build proves only
+that it compiles.
+
+---
 
 ## Declined, so they do not get re-litigated
 
-- **Multiple hubs / a hub switcher of any shape.** There is one hub now; a second is a bigger conversation than reintroducing the old chrome.
-- **Forcing all playback sources onto one `PlaybackCoordinator` contract beyond what exists.** No second controller type to unify against.
-- **`interneto/tv-multiview`'s channel data.** No stated license, no direct-stream-URL field. IPTV multi-view shipped as an original grid feature instead.
-- **Renaming the Kotlin source package** from `com.example.playtorrio`. It is a namespace, not an identifier anything outside the module sees.
-- **Merging Movies, Series and Anime into one section.** Asked as "would one streaming category with one search be simpler, and better code?" Measured against the tree, no. **Movies and Series are already one implementation** — `TypeCatalogPage(type: 'movie')` and `TypeCatalogPage(type: 'series')` are the same widget with a different string, and both open the same `DetailsPage`. Merging them removes a navigation entry, not a duplicate: there is no consolidation left to win. **Anime is a different stack on purpose** — `AnimePage` and `anime_details_page.dart` against `AnimeMedia` from AniList, not `MovieDetail` from addons, with its own library service, its own scraper, its own Arabic variant, and a Characters & Cast relation (character to voice actor) that has no equivalent for film. Putting it behind a shared tab would hide two code paths under one label rather than unify them, and flattening its model would cost the anime-native data — AniList scores, seasonal grouping, sub/dub, episode numbering — that is the reason to have the section. The part of the request worth building is the single search, tracked as #48.
+- **Multiple hubs / a hub switcher of any shape.** There is one hub now; a
+  second is a bigger conversation than reintroducing the old chrome.
+- **Forcing all playback sources onto one `PlaybackCoordinator` contract
+  beyond what exists.** No second controller type to unify against.
+- **`interneto/tv-multiview`'s channel data.** No stated license, no
+  direct-stream-URL field. IPTV multi-view shipped as an original grid
+  feature instead.
+- **Renaming the Kotlin source package** from `com.example.playtorrio`. It is
+  a namespace, not an identifier anything outside the module sees.
+- **Merging Movies, Series and Anime into one section.** Measured against the
+  tree, no. Movies and Series are *already* one implementation —
+  `TypeCatalogPage(type: 'movie')` and `TypeCatalogPage(type: 'series')` are
+  the same widget with a different string, both opening the same
+  `DetailsPage`. Merging them removes a navigation entry, not a duplicate.
+  Anime is a different stack on purpose: `AnimeMedia` from AniList rather
+  than `MovieDetail` from addons, its own library service, its own scraper,
+  its own Arabic variant, and a character-to-voice-actor relation with no
+  equivalent for film. Flattening it would cost the anime-native data —
+  AniList scores, seasonal grouping, sub/dub, episode numbering — that is the
+  reason to have the section. The part of the request worth building was the
+  single search, shipped as #48.
+- **The two recommendation rows on a details page are not duplicates.**
+  `relatedItems` is the set the title belongs to, passed in; `_similarItems`
+  comes from the BestSimilar scraper. Recorded so it is not re-flagged.
+
+---
+
+## Closed items
+
+For the reasoning behind any of these, read the commit — each was written to
+be the record.
+
+| # | Item |
+|:--|:-----|
+| #15 | Mobile-first, made checkable (`test/mobile_first_test.dart`) |
+| #21 | The logo's film-strip rule |
+| #28 | Google Cast — sender path fixed; receiver test is above |
+| #38 | Cast and crew actually load |
+| #39 | Series creators — device check is above |
+| #40 | IPTV portal modal overflows (four, not two) |
+| #41 | One details spine and one section heading |
+| #42 | The Live TV player converged on the shared controls |
+| #43 | Library tabs became the three states |
+| #44 | One amount per seek control (±10s double-tap, ±30s buttons) |
+| #45 | Live TV Liked row and portal pin |
+| #46 | Channels you make yourself |
+| #47 | Watch history |
+| #48 | One search across Movies, Series and Anime |

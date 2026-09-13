@@ -26,7 +26,6 @@ class PlayerAudioMenu extends StatelessWidget {
   final double delaySec;
   final ValueChanged<int> onTrackSelected;
   final ValueChanged<double> onDelayChanged;
-  final VoidCallback onClose;
 
   /// Back to the settings root, when this menu was stepped into from
   /// there rather than opened directly.
@@ -39,7 +38,6 @@ class PlayerAudioMenu extends StatelessWidget {
     required this.delaySec,
     required this.onTrackSelected,
     required this.onDelayChanged,
-    required this.onClose,
     this.onBack,
   });
 
@@ -92,17 +90,16 @@ class PlayerAudioMenu extends StatelessWidget {
     return PlayerGlassCard(
       width: cardWidth,
       padding: EdgeInsets.all(isCompactH ? 8 : 12),
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header. No close button: tapping off the panel dismisses it,
+          // and the back arrow returns to the settings root.
+          Row(
+            children: [
+              Expanded(
+                child: Row(
                   children: [
                     // Back to the settings root -- this menu is reached from
                     // there, and had no way back to it.
@@ -149,272 +146,265 @@ class PlayerAudioMenu extends StatelessWidget {
                       ),
                   ],
                 ),
-                PlayerIconButton(
-                  size: isCompactH ? 24 : 28,
-                  iconSize: isCompactH ? 12 : 14,
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: 'Close',
-                  onPressed: onClose,
+              ),
+            ],
+          ),
+
+          SizedBox(height: isCompactH ? 4 : 6),
+
+          // Track List
+          ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: maxTrackListHeight),
+            child: hasTracks
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: audioTracks.length,
+                    itemBuilder: (context, i) {
+                      final track = audioTracks[i];
+                      final isSelected = track.index == selectedIndex;
+                      final subtitle = _getTrackSubtitle(track);
+
+                      return Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () {
+                            onTrackSelected(track.index);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            margin: const EdgeInsets.only(bottom: 4),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF7C5CFF).withValues(alpha: 0.18)
+                                  : Colors.white.withValues(alpha: 0.03),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF7C5CFF).withValues(alpha: 0.6)
+                                    : Colors.white.withValues(alpha: 0.06),
+                                width: isSelected ? 1.4 : 1.0,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.08),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected ? const Color(0xFF7C5CFF) : Colors.white30,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: isSelected
+                                      ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
+                                      : null,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  _getLanguageEmoji(track.language),
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        track.title,
+                                        style: TextStyle(
+                                          color: isSelected ? Colors.white : Colors.white70,
+                                          fontSize: 13,
+                                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (subtitle != null) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          subtitle,
+                                          style: TextStyle(
+                                            color: isSelected
+                                                ? const Color(0xFF00D2EF)
+                                                : Colors.white.withValues(alpha: 0.4),
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w600,
+                                            letterSpacing: 0.4,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    child: Row(
+                      children: [
+                        Icon(Icons.audiotrack_rounded, size: 16, color: Colors.white38),
+                        SizedBox(width: 8),
+                        Text(
+                          'Default audio stream playing.',
+                          style: TextStyle(color: Colors.white54, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+
+          SizedBox(height: isCompactH ? 4 : 8),
+          const Divider(color: PlayerTheme.edgeSoft, height: 1),
+          SizedBox(height: isCompactH ? 4 : 8),
+
+          // Audio Sync Offset Row
+          Container(
+            padding: EdgeInsets.all(isCompactH ? 6 : 9),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.sync_rounded, size: 14, color: Colors.white70),
+                        const SizedBox(width: 5),
+                        Text(
+                          'Audio Sync Offset',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: isCompactH ? 11 : 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: delaySec != 0
+                                ? const Color(0xFF7C5CFF).withValues(alpha: 0.25)
+                                : Colors.white.withValues(alpha: 0.06),
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: delaySec != 0
+                                  ? const Color(0xFF7C5CFF).withValues(alpha: 0.5)
+                                  : Colors.transparent,
+                            ),
+                          ),
+                          child: Text(
+                            '${delaySec > 0 ? "+" : ""}${delaySec.toStringAsFixed(2)}s',
+                            style: TextStyle(
+                              color: delaySec != 0 ? const Color(0xFF00D2EF) : Colors.white60,
+                              fontSize: isCompactH ? 11.5 : 12.5,
+                              fontWeight: FontWeight.w800,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ),
+                        if (delaySec != 0) ...[
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () => onDelayChanged(0.0),
+                            child: const Icon(
+                              Icons.refresh_rounded,
+                              size: 16,
+                              color: Color(0xFF00D2EF),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: isCompactH ? 5 : 8),
+                Row(
+                  children: [
+                    // -0.5s
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
+                          minimumSize: Size(0, isCompactH ? 26 : 32),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                        ),
+                        onPressed: () => onDelayChanged(((delaySec - 0.5) * 10).round() / 10.0),
+                        child: Text('−0.5s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    // -0.1s
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
+                          minimumSize: Size(0, isCompactH ? 26 : 32),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                        ),
+                        onPressed: () => onDelayChanged(((delaySec - 0.1) * 10).round() / 10.0),
+                        child: Text('−0.1s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    // +0.1s
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
+                          minimumSize: Size(0, isCompactH ? 26 : 32),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                        ),
+                        onPressed: () => onDelayChanged(((delaySec + 0.1) * 10).round() / 10.0),
+                        child: Text('+0.1s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    // +0.5s
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
+                          minimumSize: Size(0, isCompactH ? 26 : 32),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                        ),
+                        onPressed: () => onDelayChanged(((delaySec + 0.5) * 10).round() / 10.0),
+                        child: Text('+0.5s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-
-            SizedBox(height: isCompactH ? 4 : 6),
-
-            // Track List
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxTrackListHeight),
-              child: hasTracks
-                  ? ListView.builder(
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: audioTracks.length,
-                      itemBuilder: (context, i) {
-                        final track = audioTracks[i];
-                        final isSelected = track.index == selectedIndex;
-                        final subtitle = _getTrackSubtitle(track);
-
-                        return Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () {
-                              onTrackSelected(track.index);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              margin: const EdgeInsets.only(bottom: 4),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? const Color(0xFF7C5CFF).withValues(alpha: 0.18)
-                                    : Colors.white.withValues(alpha: 0.03),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? const Color(0xFF7C5CFF).withValues(alpha: 0.6)
-                                      : Colors.white.withValues(alpha: 0.06),
-                                  width: isSelected ? 1.4 : 1.0,
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 20,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.08),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: isSelected ? const Color(0xFF7C5CFF) : Colors.white30,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: isSelected
-                                        ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    _getLanguageEmoji(track.language),
-                                    style: const TextStyle(fontSize: 15),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          track.title,
-                                          style: TextStyle(
-                                            color: isSelected ? Colors.white : Colors.white70,
-                                            fontSize: 13,
-                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        if (subtitle != null) ...[
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            subtitle,
-                                            style: TextStyle(
-                                              color: isSelected
-                                                  ? const Color(0xFF00D2EF)
-                                                  : Colors.white.withValues(alpha: 0.4),
-                                              fontSize: 10.5,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 0.4,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                      child: Row(
-                        children: [
-                          Icon(Icons.audiotrack_rounded, size: 16, color: Colors.white38),
-                          SizedBox(width: 8),
-                          Text(
-                            'Default audio stream playing.',
-                            style: TextStyle(color: Colors.white54, fontSize: 13),
-                          ),
-                        ],
-                      ),
-                    ),
-            ),
-
-            SizedBox(height: isCompactH ? 4 : 8),
-            const Divider(color: PlayerTheme.edgeSoft, height: 1),
-            SizedBox(height: isCompactH ? 4 : 8),
-
-            // Audio Sync Offset Row
-            Container(
-              padding: EdgeInsets.all(isCompactH ? 6 : 9),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.sync_rounded, size: 14, color: Colors.white70),
-                          const SizedBox(width: 5),
-                          Text(
-                            'Audio Sync Offset',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: isCompactH ? 11 : 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: delaySec != 0
-                                  ? const Color(0xFF7C5CFF).withValues(alpha: 0.25)
-                                  : Colors.white.withValues(alpha: 0.06),
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                color: delaySec != 0
-                                    ? const Color(0xFF7C5CFF).withValues(alpha: 0.5)
-                                    : Colors.transparent,
-                              ),
-                            ),
-                            child: Text(
-                              '${delaySec > 0 ? "+" : ""}${delaySec.toStringAsFixed(2)}s',
-                              style: TextStyle(
-                                color: delaySec != 0 ? const Color(0xFF00D2EF) : Colors.white60,
-                                fontSize: isCompactH ? 11.5 : 12.5,
-                                fontWeight: FontWeight.w800,
-                                fontFamily: 'monospace',
-                              ),
-                            ),
-                          ),
-                          if (delaySec != 0) ...[
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: () => onDelayChanged(0.0),
-                              child: const Icon(
-                                Icons.refresh_rounded,
-                                size: 16,
-                                color: Color(0xFF00D2EF),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: isCompactH ? 5 : 8),
-                  Row(
-                    children: [
-                      // -0.5s
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                            padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                            minimumSize: Size(0, isCompactH ? 26 : 32),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                          ),
-                          onPressed: () => onDelayChanged(((delaySec - 0.5) * 10).round() / 10.0),
-                          child: Text('−0.5s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      // -0.1s
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                            padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                            minimumSize: Size(0, isCompactH ? 26 : 32),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                          ),
-                          onPressed: () => onDelayChanged(((delaySec - 0.1) * 10).round() / 10.0),
-                          child: Text('−0.1s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      // +0.1s
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                            padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                            minimumSize: Size(0, isCompactH ? 26 : 32),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                          ),
-                          onPressed: () => onDelayChanged(((delaySec + 0.1) * 10).round() / 10.0),
-                          child: Text('+0.1s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      // +0.5s
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                            padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                            minimumSize: Size(0, isCompactH ? 26 : 32),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                          ),
-                          onPressed: () => onDelayChanged(((delaySec + 0.5) * 10).round() / 10.0),
-                          child: Text('+0.5s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

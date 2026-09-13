@@ -10,58 +10,68 @@ void main() {
     testWidgets('a root menu offers no way back', (tester) async {
       // Nothing was stepped into, so a back arrow would promise a screen
       // the user never came from.
-      await tester.pumpWidget(wrap(
-        PlayerMenuHeader(title: 'SETTINGS', onClose: () {}),
-      ));
+      await tester.pumpWidget(wrap(const PlayerMenuHeader(title: 'SETTINGS')));
 
       expect(find.text('SETTINGS'), findsOneWidget);
       expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsNothing);
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     });
 
-    testWidgets('a stepped-into menu offers back and close', (tester) async {
-      await tester.pumpWidget(wrap(
-        PlayerMenuHeader(
-          title: 'PLAYBACK SPEED',
-          onBack: () {},
-          onClose: () {},
-        ),
-      ));
+    testWidgets('a stepped-into menu offers a way back', (tester) async {
+      await tester.pumpWidget(
+        wrap(PlayerMenuHeader(title: 'PLAYBACK SPEED', onBack: () {})),
+      );
 
       expect(find.byIcon(Icons.arrow_back_ios_new_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     });
 
-    testWidgets('back and close are separate actions', (tester) async {
-      // Back returns to settings; close dismisses the panel. Wiring one to
-      // the other would make the arrow a second close button.
+    testWidgets('carries no close button, at any depth', (tester) async {
+      // Tapping off the panel dismisses it -- player_screen puts a
+      // full-screen barrier behind every open menu -- so an X was a third
+      // way to do what the barrier and the back arrow already did, and it
+      // cost the header's whole right end.
+      await tester.pumpWidget(wrap(const PlayerMenuHeader(title: 'SETTINGS')));
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
+
+      await tester.pumpWidget(
+        wrap(PlayerMenuHeader(title: 'ASPECT RATIO', onBack: () {})),
+      );
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
+    });
+
+    testWidgets('the back arrow reports back, and only back', (tester) async {
       var backs = 0;
-      var closes = 0;
-      await tester.pumpWidget(wrap(
-        PlayerMenuHeader(
-          title: 'ASPECT RATIO',
-          onBack: () => backs++,
-          onClose: () => closes++,
-        ),
-      ));
+      await tester.pumpWidget(
+        wrap(PlayerMenuHeader(title: 'ASPECT RATIO', onBack: () => backs++)),
+      );
 
       await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
       expect(backs, 1);
-      expect(closes, 0);
-
-      await tester.tap(find.byIcon(Icons.close_rounded));
-      expect(backs, 1);
-      expect(closes, 1);
     });
 
     testWidgets('the back arrow leads the title', (tester) async {
-      await tester.pumpWidget(wrap(
-        PlayerMenuHeader(title: 'SUBTITLES', onBack: () {}, onClose: () {}),
-      ));
+      await tester.pumpWidget(
+        wrap(PlayerMenuHeader(title: 'SUBTITLES', onBack: () {})),
+      );
 
       expect(
         tester.getCenter(find.byIcon(Icons.arrow_back_ios_new_rounded)).dx,
         lessThan(tester.getCenter(find.text('SUBTITLES')).dx),
+      );
+    });
+
+    testWidgets('a trailing widget sits at the far end', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          const PlayerMenuHeader(
+            title: 'AUDIO',
+            trailing: Icon(Icons.headphones_rounded),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getCenter(find.byIcon(Icons.headphones_rounded)).dx,
+        greaterThan(tester.getCenter(find.text('AUDIO')).dx),
       );
     });
 
@@ -70,13 +80,14 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(wrap(
-        PlayerMenuHeader(
-          title: 'A VERY LONG MENU TITLE THAT WOULD NOT OTHERWISE FIT',
-          onBack: () {},
-          onClose: () {},
+      await tester.pumpWidget(
+        wrap(
+          PlayerMenuHeader(
+            title: 'A VERY LONG MENU TITLE THAT WOULD NOT OTHERWISE FIT',
+            onBack: () {},
+          ),
         ),
-      ));
+      );
 
       expect(tester.takeException(), isNull);
     });

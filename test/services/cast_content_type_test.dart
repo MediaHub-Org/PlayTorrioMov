@@ -55,4 +55,52 @@ void main() {
       );
     });
   });
+
+  group('CastService.canCastUrl', () {
+    test('a public http(s) stream is castable', () {
+      expect(CastService.canCastUrl('https://cdn.example.com/a.mp4'), isTrue);
+      expect(CastService.canCastUrl('http://203.0.113.9:8090/stream'), isTrue);
+    });
+
+    test('a torrent source on another machine is castable', () {
+      // The old test was "is this a torrent", which hid the Cast button on
+      // most of this app's sources. A torrent that resolves through a
+      // debrid or a torrent server elsewhere on the network is as fetchable
+      // by a receiver as any other URL.
+      expect(
+        CastService.canCastUrl('http://192.168.1.40:8090/stream?link=abc'),
+        isTrue,
+      );
+      expect(
+        CastService.canCastUrl('https://debrid.example.net/dl/abc.mkv'),
+        isTrue,
+      );
+    });
+
+    test('loopback is not castable -- the receiver is a separate box', () {
+      expect(CastService.canCastUrl('http://127.0.0.1:8090/stream'), isFalse);
+      expect(CastService.canCastUrl('http://localhost:9000/v/x.mp4'), isFalse);
+    });
+
+    test('the whole 127/8 block is loopback, not just 127.0.0.1', () {
+      // Media servers bind to 127.0.0.2 and friends often enough to matter.
+      expect(CastService.canCastUrl('http://127.0.0.2:8090/s'), isFalse);
+      expect(CastService.canCastUrl('http://127.53.1.9/s'), isFalse);
+    });
+
+    test('a local file has no URL a receiver could open', () {
+      expect(CastService.canCastUrl('file:///storage/emulated/0/a.mp4'), isFalse);
+      expect(CastService.canCastUrl('/storage/emulated/0/a.mp4'), isFalse);
+    });
+
+    test('nothing at all is not castable', () {
+      expect(CastService.canCastUrl(null), isFalse);
+      expect(CastService.canCastUrl(''), isFalse);
+    });
+
+    test('a non-http scheme is not castable', () {
+      expect(CastService.canCastUrl('magnet:?xt=urn:btih:abc'), isFalse);
+      expect(CastService.canCastUrl('rtsp://example.com/live'), isFalse);
+    });
+  });
 }
