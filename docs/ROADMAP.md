@@ -58,15 +58,16 @@ those two, then check `v3/main` for anything past `3670ae1`, file-by-file
 
 ## Bugs
 
-From testing the v1.5.7 Android build on a device. The cast-and-crew bug
-that caused three of the reported symptoms at once — missing photos, the
-role line reading "Cast", and missing directors — is fixed and therefore
-gone from this list; see CHANGELOG. #39 is what remains of it, and only
-became visible once that landed.
+**None open.** Everything reported from testing the v1.5.7 Android build on
+a device has been fixed: the cast-and-crew bug that caused three symptoms at
+once (missing photos, the role line reading "Cast", missing directors) in
+#38, the empty Direction half on series in #39, and the text escaping its
+container in the IPTV portals modal in #40. See *Series creators* and *The
+IPTV overflows* below for what shipped, and the CHANGELOG for #38.
 
-| #  | Bug | What is actually wrong |
-|----|-----|------------------------|
-| 39 | Series show no director even with a working TMDB id | **Decided: read `created_by` from `/tv/{id}`, label it "Creator".** `/tv/{id}/credits` returns series-level crew, which for most shows is producers and no director — TV directors are per-episode. `created_by` is the showrunner, which is what a viewer means by "whose show is this", and it arrives in the detail response the app can already ask for: one extra request, no new response shape. `/tv/{id}/aggregate_credits` is the heavier alternative — a large payload whose entries carry a `jobs` array instead of a single `job`, needing a TV-shaped branch in `_directingJobs` — so reach for it only if `created_by` proves thin in practice. **Verify against the live API before building**: this is reasoned from the API's documented shape, not yet observed.
+Next device test to run: a series whose director was missing, to confirm a
+**Creator** card now appears — #39 is the one fix that could not be
+verified against the live API from CI (see its note).
 
 ## Code and consistency
 
@@ -88,6 +89,31 @@ pages, and the players.
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
 | 46 | Custom Live TV channels from a portal stream | **Decided: build it.** #45 has shipped, so this is unblocked. It is what makes the portal browser's star worth demoting rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source feeding the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal.
+
+### Series creators (shipped, #39 — but verify it on device)
+
+A series' `/credits` is **series-level** crew, which for most shows is
+producers and no director at all: TV directors are credited per episode.
+That is why the Direction half came back empty even once #38 had the ids
+working. `created_by` on `/tv/{id}` is the showrunner — what a viewer means
+by "whose show is this" — and it is one extra request, made **only** for a
+series whose `/credits` had no directing crew, so a series that already has
+one costs nothing.
+
+`/tv/{id}/aggregate_credits` remains the heavier alternative: a large
+payload whose entries carry a `jobs` array instead of a single `job`,
+needing a TV-shaped branch in the parser. Reach for it only if `created_by`
+proves thin in practice.
+
+**The live check this item asked for could not be done here.** This
+session's network policy blocks `api.themoviedb.org`, so the response shape
+is still reasoned from TMDB's documentation rather than observed. The code
+is written so that being wrong costs nothing — an absent, empty, or
+malformed `created_by` yields no crew, which is exactly today's behaviour —
+and the parser is covered by tests for each of those shapes. What tests
+cannot confirm is whether the field is **populated in practice**, so the
+Android release is the real check: open a series whose director is missing
+and look for a "Creator" card.
 
 ### How search came together (shipped, #48)
 
