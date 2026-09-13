@@ -85,7 +85,6 @@ pages, and the players.
 | 15 | Design mobile-first, as a standing policy | Not a single fix — design new/reworked screens for mobile first, then scale up. `AppSpacing.pageInset` is the mobile-first gutter to build against. The converged page gutter itself is now verified on real Android hardware. |
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
-| 44 | Player: ±30s skip alongside the existing ±10s, with per-side animation | **Decided.** Requested for Movies, Series and Anime. The double-tap side zones keep ±10s — the convention people arrive with — and ±30s gets explicit buttons in the transport bar. No new gesture to learn, and five controls never share one row. Both paths animate on the side they affect, reusing the existing double-tap ripple rather than introducing a second visual language. |
 | 46 | Custom Live TV channels from a portal stream | **Decided: build it.** #45 has shipped, so this is unblocked. It is what makes the portal browser's star worth demoting rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source feeding the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal.
 
 ### How search came together (shipped, #48)
@@ -148,6 +147,34 @@ honest version: one rule, legible — *in Live TV you search channels,
 everywhere else you search titles*. A later pass can add a Live TV chip
 whose results render as channel cards, once the result list is ready to hold
 two shapes.
+
+### Where the ±30s buttons went (shipped, #44)
+
+The centred overlay keeps play/pause and ±10s and gained nothing: five
+controls in one row is one too many to aim at, especially on a phone. ±30s
+went to the **centre of the transport bar's bottom row** instead — between
+volume and the subtitle/settings group, which is empty space on a phone and
+within thumb reach. The side groups became `Expanded`, so the pair is
+centred on the bar rather than on whatever room the volume control happens
+to leave; under `spaceBetween` it would have sat off-centre, and shifted as
+the left group changed shape between compact and wide.
+
+The two steps are for different things, which is why both exist: ±10s to
+catch a line of dialogue, ±30s to clear an ad break or an opening.
+
+**One feedback path, not four.** Every fixed step — the double-tap zones,
+the centred ±10s buttons, the new ±30s buttons, the arrow keys — already
+routed through `_seekRelative`, so the flash was added there once. There is
+no second path that could animate differently, or not at all. It appears on
+the side matching the direction, and is deliberately **not** gated on the
+controls being visible: a double-tap seek happens with the overlay hidden,
+which is exactly when confirmation that the tap registered matters most.
+
+**It counts.** Repeat taps in the same direction accumulate, so three quick
++10s taps read "30 seconds" — what the viewer is actually asking for —
+rather than flashing "10 seconds" three times. Turning around starts a new
+count instead of cancelling out: the number describes the current gesture,
+not a running total of the session.
 
 ### Why Downloads stays in the Library (shipped, #43)
 

@@ -5,11 +5,16 @@ import 'player_glass.dart';
 import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
 
-/// Bottom transport bar: timeline scrubber, volume, and the audio/subtitle/
-/// settings menu triggers. Play/pause and the ±10s seek buttons live in the
-/// centered overlay instead (see PlayerCenterControls) -- YouTube/Netflix
-/// style, not duplicated here. Episode switching lives in PlayerTopBar's own
-/// "Episodes" badge, not duplicated here either.
+/// Bottom transport bar: timeline scrubber, the ±30s skips, volume, and the
+/// audio/subtitle/settings menu triggers. Play/pause and the ±10s seek
+/// buttons live in the centered overlay instead (see PlayerCenterControls)
+/// -- YouTube/Netflix style, not duplicated here. Episode switching lives in
+/// PlayerTopBar's own "Episodes" badge, not duplicated here either.
+///
+/// ±30s sits here rather than beside the ±10s buttons on purpose: five
+/// controls in the centre row is one too many to aim at, and the two steps
+/// are for different things -- ±10s to catch a line of dialogue, ±30s to
+/// clear an ad break or an opening.
 class PlayerTransport extends StatelessWidget {
   final Duration position;
   final Duration duration;
@@ -33,6 +38,11 @@ class PlayerTransport extends StatelessWidget {
   final VoidCallback onToggleSettingsMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
+  /// The larger skip step. Both are required: a bar that showed only one
+  /// direction would be a worse control than none.
+  final VoidCallback onSeekBack30;
+  final VoidCallback onSeekForward30;
+
   const PlayerTransport({
     super.key,
     required this.position,
@@ -50,6 +60,8 @@ class PlayerTransport extends StatelessWidget {
     required this.onToggleMute,
     required this.onToggleSubtitles,
     required this.onToggleSettingsMenu,
+    required this.onSeekBack30,
+    required this.onSeekForward30,
     this.onScrubbingChanged,
   });
 
@@ -96,60 +108,95 @@ class PlayerTransport extends StatelessWidget {
 
           SizedBox(height: isCompact ? 8 : 14),
 
-          // Bottom Controls Row
+          // Bottom Controls Row. The side groups are Expanded so the skip
+          // pair is centred on the bar itself rather than on whatever space
+          // the volume control happens to leave -- spaceBetween would park
+          // it off-centre, and move it as the left group changes shape
+          // between compact and wide.
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               // Volume Control (Full slider on wide screens, Mute button on compact)
-              if (!isCompact)
-                PlayerVolumeControl(
-                  volume: volume,
-                  isMuted: isMuted,
-                  onVolumeChanged: onVolumeChanged,
-                  onToggleMute: onToggleMute,
-                )
-              else
-                PlayerIconButton(
-                  size: btnSize,
-                  iconSize: btnIconSize,
-                  icon: Icon(
-                    isMuted || volume == 0
-                        ? Icons.volume_off_rounded
-                        : (volume > 1.0 ? Icons.volume_up_rounded : Icons.volume_down_rounded),
-                  ),
-                  tooltip: isMuted ? 'Unmute' : 'Mute',
-                  onPressed: onToggleMute,
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: !isCompact
+                      ? PlayerVolumeControl(
+                          volume: volume,
+                          isMuted: isMuted,
+                          onVolumeChanged: onVolumeChanged,
+                          onToggleMute: onToggleMute,
+                        )
+                      : PlayerIconButton(
+                          size: btnSize,
+                          iconSize: btnIconSize,
+                          icon: Icon(
+                            isMuted || volume == 0
+                                ? Icons.volume_off_rounded
+                                : (volume > 1.0
+                                      ? Icons.volume_up_rounded
+                                      : Icons.volume_down_rounded),
+                          ),
+                          tooltip: isMuted ? 'Unmute' : 'Mute',
+                          onPressed: onToggleMute,
+                        ),
                 ),
+              ),
+
+              // The larger skip step, centred and within thumb reach.
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PlayerIconButton(
+                    size: btnSize,
+                    iconSize: btnIconSize,
+                    icon: const Icon(Icons.replay_30_rounded),
+                    tooltip: 'Back 30 seconds',
+                    onPressed: onSeekBack30,
+                  ),
+                  SizedBox(width: isCompact ? 6 : 10),
+                  PlayerIconButton(
+                    size: btnSize,
+                    iconSize: btnIconSize,
+                    icon: const Icon(Icons.forward_30_rounded),
+                    tooltip: 'Forward 30 seconds',
+                    onPressed: onSeekForward30,
+                  ),
+                ],
+              ),
 
               // Right Group: Subtitles, Settings (speed, aspect, audio track).
               // Audio moved behind the gear -- picking a dub is a set-once
               // choice, unlike subtitles, which get toggled mid-scene.
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Subtitles On/Off Toggle
-                  PlayerIconButton(
-                    size: btnSize,
-                    iconSize: btnIconSize,
-                    icon: const Icon(Icons.subtitles_rounded),
-                    tooltip: isSubtitlesActive ? 'Subtitles off' : 'Subtitles on',
-                    showActiveBadge: isSubtitlesActive,
-                    badgeColor: const Color(0xFF10B981), // Emerald
-                    onPressed: onToggleSubtitles,
-                  ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Subtitles On/Off Toggle
+                    PlayerIconButton(
+                      size: btnSize,
+                      iconSize: btnIconSize,
+                      icon: const Icon(Icons.subtitles_rounded),
+                      tooltip: isSubtitlesActive
+                          ? 'Subtitles off'
+                          : 'Subtitles on',
+                      showActiveBadge: isSubtitlesActive,
+                      badgeColor: const Color(0xFF10B981), // Emerald
+                      onPressed: onToggleSubtitles,
+                    ),
 
-                  SizedBox(width: gap),
+                    SizedBox(width: gap),
 
-                  // Settings Menu Trigger (playback speed + aspect ratio)
-                  PlayerIconButton(
-                    size: btnSize,
-                    iconSize: btnIconSize,
-                    icon: const Icon(Icons.settings_rounded),
-                    tooltip: 'Settings',
-                    showActiveBadge: playbackRate != 1.0,
-                    onPressed: onToggleSettingsMenu,
-                  ),
-                ],
+                    // Settings Menu Trigger (playback speed + aspect ratio)
+                    PlayerIconButton(
+                      size: btnSize,
+                      iconSize: btnIconSize,
+                      icon: const Icon(Icons.settings_rounded),
+                      tooltip: 'Settings',
+                      showActiveBadge: playbackRate != 1.0,
+                      onPressed: onToggleSettingsMenu,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
