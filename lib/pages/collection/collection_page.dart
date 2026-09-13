@@ -1,12 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/continue_watching/continue_watching_item.dart';
 import '../../models/download/download_task_model.dart';
 import '../../models/movie/movie.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
-import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
@@ -29,17 +27,8 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-  String _filterType = 'all'; // 'all', 'movie', 'series', 'anime'
+  String _filterType = 'all'; // 'all', 'movie', 'series', 'anime', 'livetv'
   String _sortBy = 'recent'; // 'recent', 'title', 'year'
-
-  /// Narrows Saved to items flagged as "watch later". This used to be its own
-  /// tab, but a watchlist item is just a My List item with `isWatchlist` set,
-  /// so it belongs beside the type chips rather than duplicating the whole
-  /// grid, its filter bar and its empty state one tab over.
-  bool _watchlistOnly = false;
-
-  /// Narrows Saved to items already marked watched (`MyListItem.isWatched`).
-  bool _watchedOnly = false;
 
   @override
   void initState() {
@@ -47,17 +36,29 @@ class _CollectionPageState extends State<CollectionPage> {
     AnimeLibraryService.instance.init();
   }
 
-  List<MyListItem> _getFilteredAndSortedItems(List<MyListItem> allItems) {
+  List<MyListItem> _getFilteredAndSortedItems(
+    List<MyListItem> allItems,
+    LibrarySection section,
+  ) {
+    final type = _typeFor(section);
     var filtered = allItems.where((item) {
-      if (_watchlistOnly && !item.isWatchlist) return false;
-      if (_watchedOnly && !item.isWatched) return false;
-      if (_filterType == 'movie' && item.type != 'movie') return false;
-      if (_filterType == 'series' &&
+      switch (section) {
+        case LibrarySection.liked:
+          if (!item.isLiked) return false;
+        case LibrarySection.watchlist:
+          if (!item.isWatchlist) return false;
+        case LibrarySection.watched:
+          if (!item.isWatched) return false;
+        case LibrarySection.downloads:
+          break; // Not a My List view; see _buildDownloadsTab.
+      }
+      if (type == 'movie' && item.type != 'movie') return false;
+      if (type == 'series' &&
           item.type != 'series' &&
           item.type != 'anime') {
         return false;
       }
-      if (_filterType == 'anime' && item.type != 'anime') return false;
+      if (type == 'anime' && item.type != 'anime') return false;
 
       return true;
     }).toList();
@@ -157,30 +158,42 @@ class _CollectionPageState extends State<CollectionPage> {
           LibraryTab(
             label: section.label,
             icon: section.icon,
-            builder: (context) => switch (section) {
-              LibrarySection.saved => _buildSavedTab(),
-              LibrarySection.inProgress => _buildInProgressTab(),
-              LibrarySection.downloads => _buildDownloadsTab(),
-            },
+            builder: (context) => section == LibrarySection.downloads
+                ? _buildDownloadsTab()
+                : _buildStateTab(section),
           ),
       ],
     );
   }
 
-  Widget _buildSavedTab() {
-    if (_filterType == 'livetv') {
+  /// One of the three library-state tabs. Live TV appears under Liked only:
+  /// a channel cannot be on a watchlist or marked watched, and its likes live
+  /// in [FavoriteChannelsService] rather than [MyListService].
+  /// The type filter as it applies to [section]. Live TV is only selectable
+  /// under Liked, so elsewhere a leftover 'livetv' reads as "everything"
+  /// rather than leaving the chip row with nothing highlighted.
+  String _typeFor(LibrarySection section) =>
+      (_filterType == 'livetv' && section != LibrarySection.liked)
+      ? 'all'
+      : _filterType;
+
+  Widget _buildStateTab(LibrarySection section) {
+    // The type filter is shared across tabs, so a Live TV selection made
+    // under Liked would otherwise follow the user into Watchlist and show
+    // channels in a tab that does not offer the chip at all.
+    if (_filterType == 'livetv' && section == LibrarySection.liked) {
       return ValueListenableBuilder<List<FavoriteChannel>>(
         valueListenable: FavoriteChannelsService.items,
         builder: (context, favorites, _) {
           final channels = _sortedFavoriteChannels(favorites);
           return Column(
             children: [
-              _buildFilterBar(favorites.length),
+              _buildFilterBar(favorites.length, section),
               Expanded(
                 child: channels.isEmpty
                     ? const LibraryEmptyState(
                         icon: Icons.live_tv_rounded,
-                        title: 'No favorite channels yet',
+                        title: 'No liked channels yet',
                         subtitle:
                             'Tap the heart on a channel in Live TV to save it here.',
                       )
@@ -195,169 +208,50 @@ class _CollectionPageState extends State<CollectionPage> {
     return ValueListenableBuilder<List<MyListItem>>(
       valueListenable: MyListService.items,
       builder: (context, allItems, _) {
-        final items = _getFilteredAndSortedItems(allItems);
+        final items = _getFilteredAndSortedItems(allItems, section);
+        final anyInSection = allItems.any(
+          (i) => switch (section) {
+            LibrarySection.liked => i.isLiked,
+            LibrarySection.watchlist => i.isWatchlist,
+            LibrarySection.watched => i.isWatched,
+            LibrarySection.downloads => false,
+          },
+        );
 
         return Column(
           children: [
-            _buildFilterBar(allItems.length),
+            _buildFilterBar(allItems.length, section),
             Expanded(
               child: items.isEmpty
                   ? LibraryEmptyState(
-                      icon: _watchlistOnly
-                          ? Icons.bookmark_border_rounded
-                          : _watchedOnly
-                              ? Icons.check_circle_outline_rounded
-                              : Icons.video_library_rounded,
-                      title: allItems.isEmpty
-                          ? 'Nothing saved yet'
-                          : (_watchlistOnly
-                                ? 'Nothing on your watchlist'
-                                : _watchedOnly
-                                    ? 'Nothing marked watched yet'
-                                    : 'No matching items'),
-                      subtitle: allItems.isEmpty
-                          ? 'Add movies, series or anime to access them quickly.'
-                          : (_watchlistOnly
-                                ? 'Bookmark something to watch later and it lands here.'
-                                : _watchedOnly
-                                    ? 'Mark something watched and it lands here.'
-                                    : 'Try adjusting your filters.'),
+                      icon: section.icon,
+                      // Distinguishes "this tab is empty" from "your filter
+                      // hid everything", which otherwise read the same.
+                      title: anyInSection
+                          ? 'No matching items'
+                          : switch (section) {
+                              LibrarySection.liked => 'Nothing liked yet',
+                              LibrarySection.watchlist =>
+                                'Nothing on your watchlist',
+                              LibrarySection.watched =>
+                                'Nothing marked watched yet',
+                              LibrarySection.downloads => '',
+                            },
+                      subtitle: anyInSection
+                          ? 'Try adjusting your filters.'
+                          : switch (section) {
+                              LibrarySection.liked =>
+                                'Tap the heart on anything and it lands here.',
+                              LibrarySection.watchlist =>
+                                'Add something to watch later and it lands here.',
+                              LibrarySection.watched =>
+                                'Mark something watched and it lands here.',
+                              LibrarySection.downloads => '',
+                            },
                     )
                   : _buildGrid(items),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  Widget _buildInProgressTab() {
-    return ValueListenableBuilder<List<ContinueWatchingItem>>(
-      valueListenable: ContinueWatchingService.activeItems,
-      builder: (context, items, _) {
-        if (items.isEmpty) {
-          return const LibraryEmptyState(
-            icon: Icons.play_circle_outline_rounded,
-            title: 'Nothing in progress',
-            subtitle: 'Start a movie or episode and it will wait for you here.',
-          );
-        }
-        return _progressList(items);
-      },
-    );
-  }
-
-  Widget _progressList(List<ContinueWatchingItem> items) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final item = items[index];
-        final progressPercent = (item.progressPercent * 100).toInt();
-
-        return InkWell(
-          borderRadius: BorderRadius.circular(14),
-          // Rows had no tap handler at all -- clicking one did nothing.
-          onTap: () => pushPage(
-            context,
-            DetailsPage(
-              movie: Movie(
-                id: item.id,
-                name: item.title,
-                poster: item.posterUrl,
-                year: item.year,
-                type: item.type,
-                addonBaseUrl: 'https://v3-cinemeta.strem.io',
-              ),
-            ),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: item.posterUrl != null
-                      ? CachedNetworkImage(
-                          imageUrl: item.posterUrl!,
-                          width: 50,
-                          height: 75,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, __, ___) => Container(
-                            width: 50,
-                            height: 75,
-                            color: Colors.white10,
-                            child: const Icon(
-                              Icons.movie_rounded,
-                              color: Colors.white30,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          width: 50,
-                          height: 75,
-                          color: Colors.white10,
-                          child: const Icon(
-                            Icons.movie_rounded,
-                            color: Colors.white30,
-                          ),
-                        ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (item.episodeTitle != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          'S${item.season ?? 1} E${item.episode ?? 1} \u2022 ${item.episodeTitle!}',
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      const SizedBox(height: 8),
-                      LinearProgressIndicator(
-                        value: item.progressPercent,
-                        backgroundColor: Colors.white10,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Color(0xFF7C5CFF),
-                        ),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$progressPercent% completed',
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       },
     );
@@ -510,7 +404,7 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  Widget _buildFilterBar(int totalCount) {
+  Widget _buildFilterBar(int totalCount, LibrarySection section) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -523,34 +417,19 @@ class _CollectionPageState extends State<CollectionPage> {
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      _buildChoiceChip('All', 'all'),
+                      _buildChoiceChip('All', 'all', section),
                       const SizedBox(width: 6),
-                      _buildChoiceChip('Movies', 'movie'),
+                      _buildChoiceChip('Movies', 'movie', section),
                       const SizedBox(width: 6),
-                      _buildChoiceChip('Series', 'series'),
+                      _buildChoiceChip('Series', 'series', section),
                       const SizedBox(width: 6),
-                      _buildChoiceChip('Anime', 'anime'),
-                      const SizedBox(width: 6),
-                      _buildChoiceChip('Live TV', 'livetv'),
-                      if (_filterType != 'livetv') ...[
-                        const SizedBox(width: 12),
-                        _ToggleChip(
-                          label: 'Watchlist',
-                          icon: Icons.bookmark_border_rounded,
-                          selectedIcon: Icons.bookmark_rounded,
-                          selected: _watchlistOnly,
-                          onTap: () =>
-                              setState(() => _watchlistOnly = !_watchlistOnly),
-                        ),
+                      _buildChoiceChip('Anime', 'anime', section),
+                      // Only under Liked: a channel cannot be watchlisted or
+                      // marked watched, so offering the chip in those tabs
+                      // would promise a filter with nothing behind it.
+                      if (section == LibrarySection.liked) ...[
                         const SizedBox(width: 6),
-                        _ToggleChip(
-                          label: 'Watched',
-                          icon: Icons.check_circle_outline_rounded,
-                          selectedIcon: Icons.check_circle_rounded,
-                          selected: _watchedOnly,
-                          onTap: () =>
-                              setState(() => _watchedOnly = !_watchedOnly),
-                        ),
+                        _buildChoiceChip('Live TV', 'livetv', section),
                       ],
                     ],
                   ),
@@ -616,8 +495,8 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  Widget _buildChoiceChip(String label, String value) {
-    final isSelected = _filterType == value;
+  Widget _buildChoiceChip(String label, String value, LibrarySection section) {
+    final isSelected = _typeFor(section) == value;
     return GestureDetector(
       onTap: () => setState(() => _filterType = value),
       child: Container(
@@ -733,59 +612,3 @@ class _CollectionPageState extends State<CollectionPage> {
 /// A toggle chip for a boolean filter on the Saved tab (Watchlist, Watched)
 /// -- same shape as the type chips but its own on/off state instead of a
 /// mutually-exclusive selection.
-class _ToggleChip extends StatelessWidget {
-  final bool selected;
-  final VoidCallback onTap;
-  final String label;
-  final IconData icon;
-  final IconData selectedIcon;
-
-  const _ToggleChip({
-    required this.selected,
-    required this.onTap,
-    required this.label,
-    required this.icon,
-    required this.selectedIcon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: selected ? 'Showing $label only' : '$label only',
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: selected ? const Color(0xFF7C5CFF) : const Color(0xFF141824),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: selected
-                  ? Colors.transparent
-                  : Colors.white.withValues(alpha: 0.1),
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                selected ? selectedIcon : icon,
-                size: 14,
-                color: selected ? Colors.white : Colors.white60,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? Colors.white : Colors.white60,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// The three tabs every hub's Library has, in this order.
+/// The tabs every hub's Library has, in this order.
 ///
 /// Before this existed each hub picked its own: Watch had My List / Watchlist /
 /// History / Downloads, Read had Audiobooks / Books / Manga / History /
@@ -9,23 +9,36 @@ import 'package:flutter/material.dart';
 /// concept ("what I saved") sitting under three different names — so moving
 /// between hubs meant relearning the Library each time.
 ///
-/// A hub with several content types puts them behind a sub-tab inside
-/// [saved], the same way Movies/Series and Comics/Manga share one hub section
-/// rather than each claiming their own.
+/// The first three are the app's three library states, the same ones
+/// `LibraryActionsRow` writes on every details page, so a tab here means
+/// exactly what the button there meant. That is why there is no longer a
+/// generic "Saved" bucket: it needed a generic icon (`inventory_2`) precisely
+/// because it held two unlike things, and its own doc comment admitted the
+/// heart it wanted "overclaims". Splitting them lets each carry its real name
+/// and its real icon.
 ///
-/// History was dropped 2026-09-02: it and [inProgress] rendered through the
-/// same row list and looked like duplicates of each other, and Continue is
-/// the more actionable of the two (resume something, not just audit a log).
+/// Nothing can fall between them: `MyListService` deletes an item once all
+/// three flags are false, so everything it stores carries at least one.
+///
+/// History was dropped 2026-09-02, and Continue on 2026-09-13: Continue
+/// rendered `ContinueWatchingService.activeItems`, the identical deduped list
+/// the Continue Watching row already shows, so the tab was a second window
+/// onto the same thing.
+///
+/// [downloads] stays despite not being a library *state*. It is the only
+/// place an in-app download can be seen or managed — `DownloadService` tracks
+/// live progress/pause/resume, and app-private storage is not browsable — so
+/// dropping it would strand downloads with no UI at all.
 enum LibrarySection {
-  /// Everything the user deliberately kept: liked, favourited, bookmarked.
-  ///
-  /// A heart overclaims here -- it implies "liked" specifically, but this
-  /// bucket also holds Watchlist. `inventory_2` reads as generic storage
-  /// instead; the heart lives on the Liked chip inside this tab.
-  saved('Saved', Icons.inventory_2_rounded),
+  /// Favourited. Independent of watch progress, so something can be both
+  /// Watched and Liked. The only state Live TV channels can be in.
+  liked('Liked', Icons.favorite_rounded),
 
-  /// Partway through and resumable.
-  inProgress('Continue', Icons.play_circle_outline_rounded),
+  /// Kept to watch later. Mutually exclusive with [watched].
+  watchlist('Watchlist', Icons.bookmark_added_rounded),
+
+  /// Already seen. Mutually exclusive with [watchlist].
+  watched('Watched', Icons.check_circle_rounded),
 
   /// Available offline.
   downloads('Downloads', Icons.download_rounded);
@@ -34,4 +47,8 @@ enum LibrarySection {
   final IconData icon;
 
   const LibrarySection(this.label, this.icon);
+
+  /// Whether this tab filters [MyListService] by a flag, as opposed to
+  /// [downloads], which reads a different store entirely.
+  bool get isLibraryState => this != LibrarySection.downloads;
 }
