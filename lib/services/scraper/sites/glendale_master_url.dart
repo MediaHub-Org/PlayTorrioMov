@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
-
 /// Builds the obfuscated master-playlist URL that cinesrc.st, cine.su and
 /// bcine all resolve to.
 ///
@@ -18,6 +14,10 @@ import 'package:flutter/foundation.dart';
 /// between the three scrapers is only where they say they came from -- the
 /// Referer and Origin headers -- and that stays with each scraper.
 library;
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 
 const String _nD = '4860ac8bfddb';
 const String _aD =
