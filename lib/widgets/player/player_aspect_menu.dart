@@ -23,6 +23,10 @@ class PlayerAspectMenu extends StatelessWidget {
   final ValueChanged<double> onSubtitleScaleChanged;
   final VoidCallback onClose;
 
+  /// Back to the settings root, when this menu was stepped into from
+  /// there rather than opened directly.
+  final VoidCallback? onBack;
+
   const PlayerAspectMenu({
     super.key,
     required this.currentFit,
@@ -30,6 +34,7 @@ class PlayerAspectMenu extends StatelessWidget {
     required this.onFitSelected,
     required this.onSubtitleScaleChanged,
     required this.onClose,
+    this.onBack,
   });
 
   @override
@@ -43,30 +48,10 @@ class PlayerAspectMenu extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Text(
-                  'ASPECT RATIO',
-                  style: TextStyle(
-                    color: PlayerTheme.inkSubtle,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ),
-              PlayerIconButton(
-                size: 28,
-                iconSize: 14,
-                icon: const Icon(Icons.close_rounded),
-                tooltip: 'Close',
-                onPressed: onClose,
-              ),
-            ],
+          PlayerMenuHeader(
+            title: 'ASPECT RATIO',
+            onBack: onBack,
+            onClose: onClose,
           ),
 
           const SizedBox(height: 6),

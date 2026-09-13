@@ -535,7 +535,16 @@ jobs:
 
       - name: Install Linux build dependencies
         run: |
-          sudo apt-get update -y
+          # Ported from upstream's db2a4b9 + 0343720. The ubuntu-latest
+          # image ships a dl.google.com apt source that periodically breaks
+          # `apt-get update`, failing the build for a repository none of
+          # these packages come from. Purge it, and let update fail soft --
+          # a genuinely missing package still fails loudly at install.
+          sudo grep -rl "dl.google.com" /etc/apt/ 2>/dev/null | xargs -r sudo rm -f
+          sudo rm -f /etc/apt/sources.list.d/*chrome* /etc/apt/sources.list.d/*google*
+          sudo rm -rf /var/lib/apt/lists/*
+          sudo apt-get clean
+          sudo apt-get update -y || true
           sudo apt-get install -y \
             clang lld cmake git ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \

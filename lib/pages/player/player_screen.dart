@@ -999,9 +999,14 @@ class _PlayerScreenState extends State<PlayerScreen>
     setState(() {
       if (_activeMenu == menuName) {
         _activeMenu = null;
+        _menuParent = null;
         _startHideControlsTimer();
       } else {
         _activeMenu = menuName;
+        // Opened straight from the transport bar, so there is nothing
+        // behind it: a stale parent here would show a back arrow leading
+        // to a panel the user never came from.
+        _menuParent = null;
         _showSubSyncBar = false;
         _showTextSyncOverlay = false;
         _hideTimer?.cancel();
@@ -1444,6 +1449,20 @@ class _PlayerScreenState extends State<PlayerScreen>
     _startHideControlsTimer();
   }
 
+  /// Which menu, if any, the open one was stepped into from. Only
+  /// 'settings' today: a sub-menu opened straight from the transport bar
+  /// has nothing to go back to, and offering an arrow there would promise a
+  /// screen that does not exist.
+  String? _menuParent;
+
+  /// The back action for a sub-menu, or null when it was not stepped into.
+  VoidCallback? get _backToSettings => _menuParent == 'settings'
+      ? () => setState(() {
+          _activeMenu = 'settings';
+          _menuParent = null;
+        })
+      : null;
+
   SeekFlash? _seekFlash;
   int _seekFlashSeq = 0;
   Timer? _seekFlashTimer;
@@ -1474,6 +1493,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       if (_showEpisodesPanel) {
         _showSourcesPanel = false;
         _activeMenu = null;
+        _menuParent = null;
         _showSubSyncBar = false;
         _showTextSyncOverlay = false;
         _showControls = true;
@@ -1488,6 +1508,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       _sourcesEpisode = episode;
       _sourcesErrorMessage = null;
       _activeMenu = null;
+      _menuParent = null;
       _showControls = true;
     });
   }
@@ -1529,6 +1550,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       _showEpisodesPanel = false;
       _showSourcesPanel = false;
       _activeMenu = null;
+      _menuParent = null;
       _showSubSyncBar = false;
       _showTextSyncOverlay = false;
       _showSkipButton = false;
@@ -2062,7 +2084,10 @@ class _PlayerScreenState extends State<PlayerScreen>
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: () => setState(() => _activeMenu = null),
+              onTap: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
               child: Container(color: Colors.transparent),
             ),
           ),
@@ -2230,6 +2255,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   ? Alignment.bottomCenter
                   : Alignment.bottomRight,
               child: PlayerSubtitleMenu(
+                onBack: _backToSettings,
                 groups: _subtitleGroups,
                 embeddedSubtitles: _embeddedSubtitles,
                 selectedEmbeddedIndex: _selectedEmbeddedSubtitleIndex,
@@ -2262,6 +2288,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   }
                   setState(() {
                     _activeMenu = null;
+                    _menuParent = null;
                     _showSubSyncBar = true;
                   });
                 },
@@ -2284,10 +2311,14 @@ class _PlayerScreenState extends State<PlayerScreen>
                   }
                   setState(() {
                     _activeMenu = null;
+                    _menuParent = null;
                     _showTextSyncOverlay = true;
                   });
                 },
-                onClose: () => setState(() => _activeMenu = null),
+                onClose: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
               ),
             ),
           ),
@@ -2300,6 +2331,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
             right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
             child: PlayerAudioMenu(
+              onBack: _backToSettings,
               audioTracks: _audioTracks,
               selectedIndex: _selectedAudioTrackIndex,
               delaySec: _audioDelaySec,
@@ -2329,7 +2361,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                   'AUDIO SYNC: ${sec > 0 ? "+" : ""}${sec.toStringAsFixed(2)}s',
                 );
               },
-              onClose: () => setState(() => _activeMenu = null),
+              onClose: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
             ),
           ),
 
@@ -2353,14 +2388,29 @@ class _PlayerScreenState extends State<PlayerScreen>
               // bar's audio button gone this row is its only way in. Gating
               // it on a track count stranded sync on single-track media,
               // which is most media.
-              onTapAudio: () => setState(() => _activeMenu = 'audio'),
-              onTapSpeed: () => setState(() => _activeMenu = 'speed'),
-              onTapAspect: () => setState(() => _activeMenu = 'aspect'),
+              onTapAudio: () => setState(() {
+                _activeMenu = 'audio';
+                _menuParent = 'settings';
+              }),
+              onTapSpeed: () => setState(() {
+                _activeMenu = 'speed';
+                _menuParent = 'settings';
+              }),
+              onTapAspect: () => setState(() {
+                _activeMenu = 'aspect';
+                _menuParent = 'settings';
+              }),
               subtitleLabel: _isSubtitleEnabled
                   ? (_currentSubtitleVariant?.language ?? 'On')
                   : 'Off',
-              onTapSubtitles: () => setState(() => _activeMenu = 'subtitle'),
-              onClose: () => setState(() => _activeMenu = null),
+              onTapSubtitles: () => setState(() {
+                _activeMenu = 'subtitle';
+                _menuParent = 'settings';
+              }),
+              onClose: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
             ),
           ),
 
@@ -2372,12 +2422,16 @@ class _PlayerScreenState extends State<PlayerScreen>
                 : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
             right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
             child: PlayerSpeedMenu(
+              onBack: _backToSettings,
               currentRate: _playbackRate,
               onRateSelected: (rate) {
                 setState(() => _playbackRate = rate);
                 _player.setRate(rate);
               },
-              onClose: () => setState(() => _activeMenu = null),
+              onClose: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
             ),
           ),
 
@@ -2389,11 +2443,15 @@ class _PlayerScreenState extends State<PlayerScreen>
                 : (MediaQuery.sizeOf(context).width < 680 ? 76 : 96),
             right: MediaQuery.sizeOf(context).width < 680 ? 12 : 28,
             child: PlayerAspectMenu(
+              onBack: _backToSettings,
               currentFit: _videoFit,
               subtitleScale: _subtitleScale,
               onFitSelected: (fit) => setState(() => _videoFit = fit),
               onSubtitleScaleChanged: _setSubtitleScale,
-              onClose: () => setState(() => _activeMenu = null),
+              onClose: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
             ),
           ),
 
@@ -2402,7 +2460,10 @@ class _PlayerScreenState extends State<PlayerScreen>
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => setState(() => _activeMenu = null),
+              onTap: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
               child: Container(
                 color: Colors.black54,
                 alignment: Alignment.center,
@@ -2411,7 +2472,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                   onTap: () {}, // Prevent tap through
                   child: PlayerSubStyleModal(
                     player: _player,
-                    onClose: () => setState(() => _activeMenu = null),
+                    onClose: () => setState(() {
+                _activeMenu = null;
+                _menuParent = null;
+              }),
                   ),
                 ),
               ),

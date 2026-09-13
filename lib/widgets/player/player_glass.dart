@@ -104,6 +104,85 @@ class PlayerGlassCard extends StatelessWidget {
 }
 
 /// Interactive button with smooth hover effects, tooltips, and badges.
+/// The header every player menu wears: a label, an optional way back, and a
+/// close.
+///
+/// The menus are one panel that swaps contents, not a stack of popovers --
+/// but without [onBack] they read as the latter: opening Settings, stepping
+/// into Subtitles, then wanting Aspect ratio meant closing and reopening the
+/// gear, because nothing on the panel led back. The arrow makes the panel
+/// navigable, so the deepest thing in it is two taps from the gear and one
+/// tap from anywhere else.
+class PlayerMenuHeader extends StatelessWidget {
+  final String title;
+
+  /// Shown as a back arrow to the left of the title. Null on a root menu,
+  /// which has nowhere to go back to.
+  final VoidCallback? onBack;
+
+  final VoidCallback onClose;
+
+  const PlayerMenuHeader({
+    super.key,
+    required this.title,
+    required this.onClose,
+    this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final back = onBack;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (back != null)
+                PlayerIconButton(
+                  size: 28,
+                  iconSize: 14,
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  tooltip: 'Back to settings',
+                  onPressed: back,
+                ),
+              Flexible(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: back != null ? 4 : 8,
+                    right: 8,
+                    top: 4,
+                    bottom: 4,
+                  ),
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: PlayerTheme.inkSubtle,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        PlayerIconButton(
+          size: 28,
+          iconSize: 14,
+          icon: const Icon(Icons.close_rounded),
+          tooltip: 'Close',
+          onPressed: onClose,
+        ),
+      ],
+    );
+  }
+}
+
 class PlayerIconButton extends StatefulWidget {
   final Widget icon;
   final VoidCallback? onPressed;

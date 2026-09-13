@@ -39,6 +39,18 @@ is now **archived**, so Mov is the only active app in the family and the
 direct downstream of upstream `ayman708-UX/PlayTorrioV3` — no more relaying
 through PlayTorrioMod.
 
+**Last synced: `3670ae1`, 2026-09-10. Reviewed again 2026-09-13** — upstream
+has seven commits since, and only two were worth taking: `db2a4b9` and
+`0343720`, both hardening the Linux CI job against a `dl.google.com` apt
+source the runner image ships that periodically breaks `apt-get update`.
+**Ported to both `build.yml` and `pr-checks.yml`** (our Linux builds were
+passing, so this is pre-emptive: it is a red build that would not have been
+ours). Of the rest: `7b32112` is an upstream version bump, `f69617b` a merge
+commit, and `29a4127`/`1da1940` add IPTV channels, search and storage —
+which is the area this fork has diverged furthest in (#45, #46 and the
+portal browser are all ours), so they need reading as ideas rather than
+porting as patches. `9616808` remains as before.
+
 **Last synced: `3670ae1`, 2026-09-10.** Ported download auto-reconnect,
 "Copy Stream URL", and the fullscreen-state-on-exit fix from that commit;
 deliberately not ported: its Support Dev sponsor monetization feature (out
@@ -153,6 +165,35 @@ create but never remove is a trap.
 Liked. Not folded into a category: they exist *because* the built-in
 catalogue had no entry, so filing them under one of its headings would hide
 the thing that makes them worth having.
+
+### The player's menus became one panel (shipped)
+
+Requested: *subtitle config inside settings, opening with a back button, no
+extra pop-up, fewer clicks.*
+
+The six menus behind the gear — settings, subtitles, audio, speed, aspect,
+style — were already one panel swapping its contents rather than a stack of
+pop-ups. What made them *read* as pop-ups is that **none of them led back**:
+stepping from Settings into Subtitles and then wanting Aspect ratio meant
+closing the panel and reopening the gear. A shared `PlayerMenuHeader` now
+carries an optional back arrow, and the player tracks which menu a sub-menu
+was stepped into from, so the arrow appears only when there is somewhere to
+go. Opened straight from the transport bar, a menu still shows no arrow —
+promising a screen the user never came from would be worse than none.
+
+Two clicks from the gear to anything, one from any sub-menu back to the
+root.
+
+**Cast is in the Live TV player now** too. Movies/Series/Anime have carried
+a cast icon in that same top-bar slot all along; Live TV had none, and a
+channel is the most natural thing to throw at a TV. Unlike the VOD player
+there is no torrent or local-file case to rule out — a portal stream is
+already a plain HTTP(S) URL a receiver can fetch — so the button appears
+whenever Cast is supported and a stream is playing.
+
+**The subtitle icon was already a plain on/off toggle** (YouTube's CC
+button), with track and style selection behind the gear, so nothing was
+needed there.
 
 ### The Live TV player, converged (partly shipped, #42)
 
