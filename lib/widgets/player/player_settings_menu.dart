@@ -17,7 +17,11 @@ class PlayerSettingsMenu extends StatelessWidget {
   /// its tracks yet.
   final String? audioLabel;
 
-  final VoidCallback onTapSpeed;
+  /// Null hides the playback-speed row. Live TV passes null: a live feed
+  /// plays at the rate it arrives, and a row that opens a picker with no
+  /// effect is worse than no row.
+  final VoidCallback? onTapSpeed;
+
   final VoidCallback onTapAspect;
 
   /// Null hides the audio row. Callers should normally supply it even for
@@ -39,8 +43,8 @@ class PlayerSettingsMenu extends StatelessWidget {
     super.key,
     required this.currentRate,
     required this.aspectLabel,
-    required this.onTapSpeed,
     required this.onTapAspect,
+    this.onTapSpeed,
     this.audioLabel,
     this.onTapAudio,
     this.subtitleLabel,
@@ -85,14 +89,15 @@ class PlayerSettingsMenu extends StatelessWidget {
               value: subtitleLabel ?? 'Off',
               onTap: onTapSubtitles!,
             ),
-          _SettingsRow(
-            icon: Icons.speed_rounded,
-            label: 'Playback speed',
-            value: currentRate == 1.0
-                ? 'Normal'
-                : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
-            onTap: onTapSpeed,
-          ),
+          if (onTapSpeed != null)
+            _SettingsRow(
+              icon: Icons.speed_rounded,
+              label: 'Playback speed',
+              value: currentRate == 1.0
+                  ? 'Normal'
+                  : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
+              onTap: onTapSpeed!,
+            ),
           _SettingsRow(
             icon: Icons.aspect_ratio_rounded,
             label: 'Aspect ratio',

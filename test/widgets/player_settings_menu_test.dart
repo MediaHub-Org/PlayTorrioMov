@@ -5,6 +5,8 @@ import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
 
+void _noop() {}
+
 PlayerSettingsMenu menu({
   String? audioLabel,
   VoidCallback? onTapAudio,
@@ -140,6 +142,27 @@ void main() {
         tester.getCenter(find.text('Audio track')).dy,
         lessThan(tester.getCenter(find.text('Playback speed')).dy),
       );
+    });
+
+    testWidgets('hides playback speed when there is no rate to set', (
+      tester,
+    ) async {
+      // Live TV: a live feed plays at the rate it arrives, so a row that
+      // opens a picker with no effect is worse than no row. This is what
+      // lets the Live TV player reuse this exact panel with fewer rows
+      // rather than growing a bespoke control of its own.
+      await tester.pumpWidget(
+        wrap(
+          const PlayerSettingsMenu(
+            currentRate: 1.0,
+            aspectLabel: 'Fit',
+            onTapAspect: _noop,
+          ),
+        ),
+      );
+
+      expect(find.text('Playback speed'), findsNothing);
+      expect(find.text('Aspect ratio'), findsOneWidget);
     });
 
     testWidgets('carries no close button', (tester) async {

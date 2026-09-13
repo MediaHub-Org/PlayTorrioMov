@@ -18,6 +18,7 @@ import '../../services/discord/discord_rpc_service.dart';
 import '../../widgets/player/player_cast_sheet.dart';
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_aspect_menu.dart';
+import '../../widgets/player/player_settings_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
 
@@ -72,7 +73,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   late final ScrollController _sourcesScrollController;
 
   BoxFit _videoFit = BoxFit.contain;
-  bool _showAspectMenu = false;
+  /// Which popover is open, by the same names the Movies/Series/Anime
+  /// player uses: 'settings' for the gear's root list, 'aspect' for the
+  /// panel it steps into. A bool could only ever describe one menu, which
+  /// is why this page had a bespoke aspect-ratio pill instead of the gear
+  /// every other player has.
+  String? _activeMenu;
   bool _showAspectHud = false;
   String _aspectHudText = '';
   Timer? _aspectHudTimer;
@@ -398,18 +404,32 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   }
 
   void _toggleControls() {
-    if (_showAspectMenu) {
-      setState(() => _showAspectMenu = false);
+    if (_activeMenu != null) {
+      setState(() => _activeMenu = null);
       return;
     }
     setState(() {
       _showControls = !_showControls;
       if (!_showControls) {
         _showSourcesDrawer = false;
-        _showAspectMenu = false;
+        _activeMenu = null;
       }
     });
     if (_showControls) _startHideControlsTimer();
+  }
+
+  /// Opens the gear, or closes whatever it opened. Same contract as the
+  /// Movies/Series/Anime player's `_toggleMenu`.
+  void _toggleSettingsMenu() {
+    setState(() {
+      _activeMenu = _activeMenu == null ? 'settings' : null;
+      if (_activeMenu != null) _showSourcesDrawer = false;
+    });
+    if (_activeMenu != null) {
+      _hideControlsTimer?.cancel();
+    } else {
+      _startHideControlsTimer();
+    }
   }
 
   void _setVideoFit(BoxFit fit) {
@@ -417,7 +437,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       _videoFit = fit;
       _aspectHudText = _fitLabel(fit);
       _showAspectHud = true;
-      _showAspectMenu = false;
+      _activeMenu = null;
     });
     _aspectHudTimer?.cancel();
     _aspectHudTimer = Timer(const Duration(milliseconds: 1600), () {
@@ -475,7 +495,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   }
 
   bool get _canCast =>
-      CastService.isSupported && !_isLoading && _castableUrl != null;
+      CastService.isSupported &&
+      !_isLoading &&
+      CastService.canCastUrl(_castableUrl);
 
   void _handleCast() {
     final url = _castableUrl;
@@ -639,7 +661,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
             // chain, not just the arena winner -- without this guard,
             // scrolling a panel's own list (sources drawer, aspect menu)
             // also changed the volume underneath it.
-            if (_showSourcesDrawer || _showAspectMenu) return;
+            if (_showSourcesDrawer || _activeMenu != null) return;
             if (pointerSignal is PointerScrollEvent) {
               if (pointerSignal.scrollDelta.dy < 0) {
                 _adjustVolume(0.05); // Scroll up -> Volume up
@@ -1170,75 +1192,23 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
                                     const Spacer(),
 
-                                    // Aspect Ratio Selector / Popover Button
-                                    Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            _showAspectMenu = !_showAspectMenu;
-                                            _showSourcesDrawer = false;
-                                          });
-                                          if (_showAspectMenu) {
-                                            _hideControlsTimer?.cancel();
-                                          } else {
-                                            _startHideControlsTimer();
-                                          }
-                                        },
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 5,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: _showAspectMenu
-                                                ? const Color(
-                                                    0xFF7C5CFF,
-                                                  ).withValues(alpha: 0.3)
-                                                : Colors.white.withValues(
-                                                    alpha: 0.12,
-                                                  ),
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: _showAspectMenu
-                                                  ? const Color(
-                                                      0xFF7C5CFF,
-                                                    ).withValues(alpha: 0.6)
-                                                  : Colors.white.withValues(
-                                                      alpha: 0.15,
-                                                    ),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.aspect_ratio_rounded,
-                                                color: Colors.white,
-                                                size: 16,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                _videoFit == BoxFit.contain
-                                                    ? 'FIT'
-                                                    : (_videoFit == BoxFit.cover
-                                                          ? 'ZOOM'
-                                                          : 'STRETCH'),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w700,
-                                                  letterSpacing: 0.4,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                    // The same gear, in the same corner of
+                                    // the same bar, as Movies/Series/Anime.
+                                    // This was a bespoke bordered pill
+                                    // reading FIT/ZOOM/STRETCH -- the last
+                                    // control on this page that had no
+                                    // counterpart in the other player. The
+                                    // menu behind it is shorter, because a
+                                    // live stream has fewer settings, which
+                                    // is the whole intended difference.
+                                    PlayerIconButton(
+                                      size: 40,
+                                      iconSize: 20,
+                                      icon: const Icon(Icons.settings_rounded),
+                                      tooltip: 'Settings',
+                                      active: _activeMenu != null,
+                                      backgroundColor: const Color(0x22080C12),
+                                      onPressed: _toggleSettingsMenu,
                                     ),
 
                                     // Fullscreen toggle on desktop
@@ -1284,19 +1254,51 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                   ),
                 ),
 
+                // Tap anywhere off an open menu to dismiss it -- the same
+                // barrier the Movies/Series/Anime player puts behind its
+                // popovers, and the reason neither needs a close button.
+                if (_activeMenu != null)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        setState(() => _activeMenu = null);
+                        _startHideControlsTimer();
+                      },
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+
+                // The gear's root list. Shorter than the other player's --
+                // no playback speed on a live feed, and no subtitle rows
+                // until a portal stream carries subtitles -- which is the
+                // intended relationship between the two: same panel, fewer
+                // rows.
+                if (_activeMenu == 'settings')
+                  PlayerMenuAnchor(
+                    child: PlayerSettingsMenu(
+                      currentRate: 1.0,
+                      aspectLabel: switch (_videoFit) {
+                        BoxFit.cover => 'Fill',
+                        BoxFit.fill => 'Stretch',
+                        _ => 'Fit',
+                      },
+                      onTapAspect: () => setState(() => _activeMenu = 'aspect'),
+                    ),
+                  ),
+
                 // Floating Aspect Ratio Popover
-                if (_showAspectMenu)
-                  Positioned(
-                    bottom: 74,
-                    right: 20,
+                if (_activeMenu == 'aspect')
+                  PlayerMenuAnchor(
                     child: PlayerAspectMenu(
+                      onBack: () => setState(() => _activeMenu = 'settings'),
                       currentFit: _videoFit,
                       subtitleScale: PlayerSettings.subScale.value,
                       onFitSelected: (fit) => _setVideoFit(fit),
                       onSubtitleScaleChanged: (scale) {
                         PlayerSettings.setSubScale(scale, player: _player);
                       },
-                      onClose: () => setState(() => _showAspectMenu = false),
+                      onClose: () => setState(() => _activeMenu = null),
                     ),
                   ),
 
