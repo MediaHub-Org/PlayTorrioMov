@@ -13,6 +13,7 @@ import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/genre_tag_row.dart';
+import '../../widgets/common/details_section_header.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_actions_row.dart';
 import '../discover/discover_page.dart';
@@ -632,7 +633,7 @@ class _DetailsPageState extends State<DetailsPage>
                               _buildSeasonSelector(meta),
                               const SizedBox(height: _Space.lg),
                             ] else ...[
-                              _buildSectionHeader(_isCollection ? 'Movies in Collection' : 'Episodes'),
+                              DetailsSectionHeader(_isCollection ? 'Movies in Collection' : 'Episodes'),
                             ],
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 550),
@@ -716,7 +717,7 @@ class _DetailsPageState extends State<DetailsPage>
                             _buildSimilarRow(),
                             const SizedBox(height: _Space.xl),
                           ] else if (_isFetchingSimilar) ...[
-                            _buildSectionHeader('Similar Content'),
+                            DetailsSectionHeader('Similar Content'),
                             const Center(
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40),
@@ -1317,21 +1318,6 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: _Space.md),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          letterSpacing: -0.3,
-        ),
-      ),
-    );
-  }
-
   /// Everyone credited on this title, crew first, as one flat list.
   ///
   /// Direction and Cast used to be two sections with two nearly identical
@@ -1380,7 +1366,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Cast & Crew'),
+          DetailsSectionHeader('Cast & Crew'),
           SizedBox(
             height: 148,
             child: Stack(
@@ -1704,7 +1690,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('More Like This'),
+          DetailsSectionHeader('More Like This'),
           SizedBox(
             height: cardWidth * 1.5 + 8,
             child: Stack(
@@ -1849,7 +1835,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Similar Content'),
+          DetailsSectionHeader('Similar Content'),
           SizedBox(
             height: cardHeight,
             child: Stack(

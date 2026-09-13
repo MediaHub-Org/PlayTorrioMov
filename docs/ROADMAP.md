@@ -92,7 +92,6 @@ pages, and the players.
 
 | #  | Task | Details |
 |----|------|---------|
-| 41 | Details pages: Arabic anime still stands apart | **Movies/Series and Anime now match — see *The details spine, measured*.** What is left is `anime_arabic_details_page.dart`: its own hero, no section headers at all, and none of the shared blocks. Close to a rewrite of its 996 lines, so it is its own pass — and worth taking **after** the Movies/Series and Anime alignment has been seen on a device, since that is the layout it would be rewritten to match. |
 
 ## Requested UI work
 
@@ -102,35 +101,49 @@ pages, and the players.
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
 
-### The details spine, measured (#41)
+### The details spine, measured (shipped, #41)
 
 Measured against the tree before changing anything, the three pages were
 further along than the item assumed. Movies/Series and Anime **already**
-agreed on the whole upper half, mobile and desktop alike: title, then the
-metadata row, then play and the library action row, then synopsis, then
-genres. Earlier work had converged them — `LibraryActionsRow` gave them one
-library row, and #38 gave both real credits.
+agreed on the whole upper half, mobile and desktop alike: title, metadata
+row, play and the library action row, synopsis, genres. Earlier work had
+converged them — `LibraryActionsRow` gave them one library row, #38 gave
+both real credits.
 
-**One thing was genuinely out of order,** and it is now fixed: anime put
-**Staff** before **Characters & Cast**, so its credits came second and its
-section-specific block led the page. Credits now lead, where Movies and
-Series put Cast & Crew.
-
-**Characters & Cast is the credits block for anime** — a
+**Anime's credits were out of order** and now lead, where Movies and Series
+put Cast & Crew. Characters & Cast is the credits block for anime — a
 character-to-voice-actor list answers for anime what actor-to-character
 answers for film — and **Staff stays** as anime's one section-specific
-block. It answers what Characters cannot (who directed it, who scored it,
-which studio) and has no other home on the page, so folding it in would
-have meant a mixed row and dropping it would have lost the information.
+block: it answers what Characters cannot (who directed it, who scored it,
+which studio) and has no other home.
+
+**The real drift was the section headings**, and it had already happened.
+Movies/Series used `FontWeight.bold` at `-0.3` letter spacing with 16px
+beneath; Anime used `w800` at `-0.4` with none; Arabic anime prefixed an
+accent icon and set no letter spacing. Each was defensible alone; together
+the same page type read as three. One `DetailsSectionHeader` now serves all
+three, with a `trailing` slot for the two headings that carry something on
+the right (Anime's episode count, Arabic's jump-to-episode field) — those
+were hand-built rows before, which is why they were the ones that drifted
+furthest. A guard test catches the fourth.
+
+**Arabic anime's gutter joined its family.** It used `60 / 32 / 16` where
+its two siblings use `48 / 24`. Note this is *not* `AppSpacing.pageInset`
+(`16 / 20 / 24`): that is the browse-page gutter, and a details page sits in
+a narrower max-width column with a wider inset. Converging Arabic onto the
+browse value would have moved it out of the family it belongs to.
 
 **One thing that looked like duplication is not.** Movies/Series carries
-both a *More Like This* row and a *Similar Content* row, which reads as two
-recommendation blocks. They are different sources answering different
-questions: `relatedItems` is passed in by the caller — the set this title
-belongs to — while `_similarItems` comes from the BestSimilar scraper. Both
-stay.
+both a *More Like This* row and a *Similar Content* row. They are different
+sources answering different questions: `relatedItems` is passed in by the
+caller — the set this title belongs to — while `_similarItems` comes from
+the BestSimilar scraper. Both stay.
 
-**Arabic anime is the remainder** and is tracked as #41's open half.
+**Still divergent, and left alone deliberately:** Arabic anime derives
+`isDesktop` from a hand-rolled `screenWidth > 900` rather than
+`AppBreakpoints`, in one place while using `AppBreakpoints` in another.
+Worth fixing, but it is a behaviour change at the boundary rather than a
+layout one, so it does not ride along with a visual convergence.
 
 ### Channels you make yourself (shipped, #46)
 
