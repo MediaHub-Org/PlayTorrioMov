@@ -208,14 +208,26 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       cardWidth = (540.0).clamp(400.0, screen.width - 48);
     }
 
-    final double cardHeight;
+    // This panel fixes its own height -- its two columns share one Expanded,
+    // which needs a bounded box -- so it has to agree with the anchor about
+    // how much room there is. Clamping to the anchor's figure is what keeps
+    // a landscape phone from being handed a card taller than the gap above
+    // the transport bar.
+    final roomForCard = PlayerMenuAnchor.availableHeight(context);
+    final double preferredHeight;
     if (isLandscapeMobile) {
-      cardHeight = (screen.height - 56).clamp(200.0, screen.height - 48);
+      preferredHeight = roomForCard;
     } else if (isCompact) {
-      cardHeight = (screen.height * 0.65).clamp(340.0, 520.0);
+      preferredHeight = (screen.height * 0.65).clamp(340.0, 520.0);
     } else {
-      cardHeight = (screen.height * 0.65).clamp(380.0, 540.0);
+      preferredHeight = (screen.height * 0.65).clamp(380.0, 540.0);
     }
+    // min, not clamp: clamp(lower, upper) throws when upper < lower, and a
+    // very short viewport can leave less room than any of the preferred
+    // heights above.
+    final cardHeight = preferredHeight < roomForCard
+        ? preferredHeight
+        : roomForCard;
 
     final headerPaddingV = (isLandscapeMobile || isCompact) ? 8.0 : 12.0;
     final buttonSize = (isLandscapeMobile || isCompact) ? 30.0 : 34.0;
@@ -351,15 +363,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                       ),
                       const SizedBox(width: 4),
                     ],
-
-                    // Close Button
-                    PlayerIconButton(
-                      size: buttonSize,
-                      iconSize: iconSize,
-                      icon: const Icon(Icons.close_rounded),
-                      tooltip: 'Close',
-                      onPressed: widget.onClose,
-                    ),
+                    // No close button: the full-screen barrier behind every
+                    // open menu dismisses on a tap anywhere off the panel,
+                    // and the back arrow returns to the settings root.
                   ],
                 ),
               ],

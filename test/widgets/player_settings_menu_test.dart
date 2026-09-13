@@ -21,7 +21,6 @@ PlayerSettingsMenu menu({
     onTapAspect: () {},
     subtitleLabel: subtitleLabel,
     onTapSubtitles: onTapSubtitles,
-    onClose: () {},
   );
 }
 
@@ -106,6 +105,51 @@ void main() {
 
       expect(find.text('Subtitles'), findsOneWidget);
       expect(find.text('Off'), findsOneWidget);
+    });
+
+    testWidgets('audio track leads the list', (tester) async {
+      // It is the choice a viewer makes before any of the others -- picking
+      // the dub you can follow comes before deciding how fast to play it --
+      // and on a dubbed title it is the row that has to be found fast.
+      await tester.pumpWidget(
+        wrap(
+          menu(
+            audioLabel: 'English',
+            onTapAudio: () {},
+            subtitleLabel: 'Off',
+            onTapSubtitles: () {},
+          ),
+        ),
+      );
+
+      double y(String label) => tester.getCenter(find.text(label)).dy;
+
+      expect(y('Audio track'), lessThan(y('Subtitles')));
+      expect(y('Subtitles'), lessThan(y('Playback speed')));
+      expect(y('Playback speed'), lessThan(y('Aspect ratio')));
+    });
+
+    testWidgets('audio still leads when subtitles are unavailable', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(menu(audioLabel: 'Japanese', onTapAudio: () {})),
+      );
+
+      expect(
+        tester.getCenter(find.text('Audio track')).dy,
+        lessThan(tester.getCenter(find.text('Playback speed')).dy),
+      );
+    });
+
+    testWidgets('carries no close button', (tester) async {
+      // Tapping off the panel dismisses it; the X was a third way to do
+      // what the barrier behind the menu already did.
+      await tester.pumpWidget(
+        wrap(menu(audioLabel: 'English', onTapAudio: () {})),
+      );
+
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
     });
   });
 }

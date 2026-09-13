@@ -6,6 +6,9 @@ import 'player_glass.dart';
 /// transport bar. Picking a row opens that row's own existing popover
 /// (PlayerSpeedMenu / PlayerAspectMenu / PlayerAudioMenu); this widget only
 /// lists them, YouTube-gear-menu style.
+///
+/// Rows run audio, subtitles, speed, aspect: the two that change what you
+/// hear and read first, then the two that change how it plays.
 class PlayerSettingsMenu extends StatelessWidget {
   final double currentRate;
   final String aspectLabel;
@@ -32,15 +35,12 @@ class PlayerSettingsMenu extends StatelessWidget {
   /// YouTube's gear-menu "Subtitles/CC" entry.
   final VoidCallback? onTapSubtitles;
 
-  final VoidCallback onClose;
-
   const PlayerSettingsMenu({
     super.key,
     required this.currentRate,
     required this.aspectLabel,
     required this.onTapSpeed,
     required this.onTapAspect,
-    required this.onClose,
     this.audioLabel,
     this.onTapAudio,
     this.subtitleLabel,
@@ -49,81 +49,57 @@ class PlayerSettingsMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context);
-    // A short landscape phone screen can't fit five rows (header + up to
-    // four settings) without this: the popover is bottom-anchored with no
-    // top bound (see player_screen.dart's Positioned), so an unconstrained
-    // height just pushes it above the visible viewport instead of
-    // clipping -- capped and scrollable instead, same safeguard
-    // PlayerSubtitleMenu already has for its own, usually-longer lists.
-    final maxHeight = (screenSize.height - 120).clamp(160.0, double.infinity);
+    final screenWidth = MediaQuery.sizeOf(context).width;
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: maxHeight),
-      child: PlayerGlassCard(
-        width: (260.0).clamp(220.0, screenSize.width - 32),
-        padding: const EdgeInsets.all(12),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: Text(
-                      'SETTINGS',
-                      style: TextStyle(
-                        color: PlayerTheme.inkSubtle,
-                        fontSize: 10.5,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                  PlayerIconButton(
-                    size: 28,
-                    iconSize: 14,
-                    icon: const Icon(Icons.close_rounded),
-                    tooltip: 'Close',
-                    onPressed: onClose,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              if (onTapSubtitles != null)
-                _SettingsRow(
-                  icon: Icons.subtitles_rounded,
-                  label: 'Subtitles',
-                  value: subtitleLabel ?? 'Off',
-                  onTap: onTapSubtitles!,
-                ),
-              _SettingsRow(
-                icon: Icons.speed_rounded,
-                label: 'Playback speed',
-                value: currentRate == 1.0
-                    ? 'Normal'
-                    : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
-                onTap: onTapSpeed,
-              ),
-              _SettingsRow(
-                icon: Icons.aspect_ratio_rounded,
-                label: 'Aspect ratio',
-                value: aspectLabel,
-                onTap: onTapAspect,
-              ),
-              if (onTapAudio != null)
-                _SettingsRow(
-                  icon: Icons.audiotrack_rounded,
-                  label: 'Audio track',
-                  value: audioLabel ?? 'Default',
-                  onTap: onTapAudio!,
-                ),
-            ],
+    // No height cap and no scroll view of its own: PlayerMenuAnchor bounds
+    // the popover to the space above the transport bar and scrolls it when
+    // the rows do not fit. This used to carry its own `screenHeight - 120`
+    // clamp, which each sibling menu either duplicated or -- in the speed
+    // menu's case -- did not, and that inconsistency is what put the speed
+    // card off the top of a landscape phone.
+    return PlayerGlassCard(
+      width: (260.0).clamp(220.0, screenWidth - 32),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const PlayerMenuHeader(title: 'SETTINGS'),
+          const SizedBox(height: 6),
+
+          // Audio first. It is the choice a viewer makes before anything
+          // else -- picking the dub you can follow comes before deciding
+          // how fast to play it -- and on a dubbed title it is the only row
+          // here that has to be found in a hurry.
+          if (onTapAudio != null)
+            _SettingsRow(
+              icon: Icons.audiotrack_rounded,
+              label: 'Audio track',
+              value: audioLabel ?? 'Default',
+              onTap: onTapAudio!,
+            ),
+          if (onTapSubtitles != null)
+            _SettingsRow(
+              icon: Icons.subtitles_rounded,
+              label: 'Subtitles',
+              value: subtitleLabel ?? 'Off',
+              onTap: onTapSubtitles!,
+            ),
+          _SettingsRow(
+            icon: Icons.speed_rounded,
+            label: 'Playback speed',
+            value: currentRate == 1.0
+                ? 'Normal'
+                : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
+            onTap: onTapSpeed,
           ),
-        ),
+          _SettingsRow(
+            icon: Icons.aspect_ratio_rounded,
+            label: 'Aspect ratio',
+            value: aspectLabel,
+            onTap: onTapAspect,
+          ),
+        ],
       ),
     );
   }

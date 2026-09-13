@@ -51,7 +51,6 @@ class PlayerAspectMenu extends StatelessWidget {
           PlayerMenuHeader(
             title: 'ASPECT RATIO',
             onBack: onBack,
-            onClose: onClose,
           ),
 
           const SizedBox(height: 6),
