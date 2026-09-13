@@ -78,8 +78,8 @@ pages, and the players.
 
 | #  | Task | Details |
 |----|------|---------|
+| 42 | Live TV player: the last of the divergence | **Partly shipped — see *The Live TV player, converged*.** Layout is done: centred play/pause through the shared widget, the shared volume control, a live-edge row where the seek bar sits. What is left is iconography and menu plumbing: the aspect-ratio trigger is a hand-rolled `InkWell` rather than the shared settings menu, the fullscreen and back buttons are bare `IconButton`s rather than `PlayerIconButton` pills, and the gesture zones have not been compared against `player_screen`'s. Small and separable; none of it changes where a control sits. |
 | 41 | Standardise what a details page shows across Movies, Series and Anime | **Decided: one spine, one section-specific block each.** The common spine, in order: hero, title/year/rating/genres, the library action row, synopsis, credits, then episodes or related. Each section may add **at most one** block of its own on top. Anime's Characters & Cast is the anime-native form of credits and *replaces* Cast & Crew rather than sitting alongside it — a character-to-voice-actor list answers the same question for anime that actor-to-character does for film. Do this **after** #38, because today's unevenness is partly just missing data rather than differing layout.
-| 42 | Standardise the Live TV player against the Movies/Series/Anime one | **Decided: match everything except seek.** Same control layout and iconography, same settings menu (audio track, aspect ratio), same gesture zones, same overlay appear/auto-hide timing. Deliberately absent for live, because they have no meaning without a duration: the seek bar, resume, ±10s/±30s skip (#44) and playback speed. Put a **LIVE** indicator where the seek bar would otherwise sit, so the control bar reads as deliberately different rather than broken.
 
 ## Requested UI work
 
@@ -89,6 +89,34 @@ pages, and the players.
 | 21 | Logo: add a film-strip/clapperboard line accent | On top of the current wordmark/`SidebarLogo`. A design call (icon choice, placement, prominence), not a quick code fix. |
 | 28 | Google Cast: verify the actual cast-a-stream flow | The app itself is now verified on real Android hardware, but that didn't cover Cast specifically — still need a Cast-capable receiver on the network to confirm `lib/services/cast/cast_service.dart` actually casts a stream end to end, on both Android and iOS. |
 | 46 | Custom Live TV channels from a portal stream | **Decided: build it.** #45 has shipped, so this is unblocked. It is what makes the portal browser's star worth demoting rather than deleting. A `HardcodedChannel` is just `{name, category, keywords[], exclude[]}`, so a user-defined one is the same record with the stream's name as its keyword — no new concept, just a second source feeding the same list. Closes a real gap: today, if a portal carries something the built-in catalogue has no entry for, there is no way to give it a tile, like it, or find it again except by re-browsing the portal.
+
+### The Live TV player, converged (partly shipped, #42)
+
+The decision was "match everything except seek". What shipped is the part
+that made Live TV read as a different app:
+
+- **Play/pause is centred over the video**, through the same
+  `PlayerCenterControls` every other player uses. It was a bare `IconButton`
+  at the left end of the bottom bar. The widget's seek callbacks became
+  optional so live can use it: with them null the play button stands alone,
+  same size, same place. The alternative — a second, near-identical
+  play/pause of its own — is how the two drifted apart to begin with.
+- **The volume control is the shared `PlayerVolumeControl`**, not a
+  hand-rolled `Slider`. That also lifts the ceiling from 100% to the app's
+  250% boost, which matters more here than anywhere: portal streams are
+  often quiet. `_applyVolume` and `_toggleMute` now follow the VOD player's
+  semantics, restoring the pre-mute level instead of jumping to 50%.
+- **A live-edge row sits where the seek bar would be.** Absence alone read
+  as a control that failed to load; this says the stream is at its live edge
+  and there is nothing to scrub, in the same red as the LIVE badge above.
+- The overlay's auto-hide was **already** 4 seconds on both, so nothing to do.
+
+**Still divergent, and deliberately left:** the aspect-ratio trigger is a
+hand-rolled `InkWell` rather than the shared settings menu, the fullscreen
+and back buttons are bare `IconButton`s rather than `PlayerIconButton`
+pills, and the gesture zones have not been compared. Those are iconography
+and menu plumbing rather than layout, and each one is a separate small
+change; #42 stays open for them rather than being called done.
 
 ### Series creators (shipped, #39 — but verify it on device)
 

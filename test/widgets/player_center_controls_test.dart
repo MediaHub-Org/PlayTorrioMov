@@ -63,5 +63,67 @@ void main() {
       expect(back10Taps, 1);
       expect(forward10Taps, 1);
     });
+
+    testWidgets('a live stream gets play/pause alone, still centred', (
+      tester,
+    ) async {
+      // Seeking has no meaning without a duration, so the ±10s buttons take
+      // no callbacks on a live stream. The button that remains has to stay
+      // where it was, or Live TV reads as a different player -- which is
+      // what sharing this widget is for.
+      await tester.pumpWidget(
+        wrap(PlayerCenterControls(isPlaying: false, onPlayPause: () {})),
+      );
+
+      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.replay_10_rounded), findsNothing);
+      expect(find.byIcon(Icons.forward_10_rounded), findsNothing);
+
+      final screenCentre = tester.getCenter(find.byType(Scaffold)).dx;
+      expect(
+        tester.getCenter(find.byIcon(Icons.play_arrow_rounded)).dx,
+        moreOrLessEquals(screenCentre, epsilon: 1.0),
+      );
+    });
+
+    testWidgets('the seekable layout keeps play/pause between the skips', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          PlayerCenterControls(
+            isPlaying: true,
+            onPlayPause: () {},
+            onSeekBack10: () {},
+            onSeekForward10: () {},
+          ),
+        ),
+      );
+
+      final back = tester.getCenter(find.byIcon(Icons.replay_10_rounded)).dx;
+      final play = tester.getCenter(find.byIcon(Icons.pause_rounded)).dx;
+      final forward =
+          tester.getCenter(find.byIcon(Icons.forward_10_rounded)).dx;
+
+      expect(back, lessThan(play));
+      expect(forward, greaterThan(play));
+    });
+
+    testWidgets('one side alone is honoured rather than dropping both', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          PlayerCenterControls(
+            isPlaying: true,
+            onPlayPause: () {},
+            onSeekForward10: () {},
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.replay_10_rounded), findsNothing);
+      expect(find.byIcon(Icons.forward_10_rounded), findsOneWidget);
+    });
   });
 }

@@ -14,6 +14,8 @@ import '../../services/player/player_settings.dart';
 import '../../services/window/window_service.dart';
 import '../../services/discord/discord_rpc_service.dart';
 import '../../widgets/player/player_aspect_menu.dart';
+import '../../widgets/player/player_center_controls.dart';
+import '../../widgets/player/player_volume_control.dart';
 
 class IptvPlayerPage extends StatefulWidget {
   final HardcodedChannel channel;
@@ -71,6 +73,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   String _aspectHudText = '';
   Timer? _aspectHudTimer;
   double _volume = 1.0;
+  double _lastVolumeBeforeMute = 1.0;
   bool _isMuted = false;
   bool _showVolumeHud = false;
   Timer? _volumeHudTimer;
@@ -430,36 +433,45 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     _startHideControlsTimer();
   }
 
-  void _adjustVolume(double delta) {
+  void _adjustVolume(double delta) =>
+      _applyVolume((_volume + delta).clamp(0.0, PlayerVolumeControl.maxVolume));
+
+  /// Sets the volume, matching the VOD player's semantics rather than this
+  /// page's old 0-100% Slider: the same 250% boost ceiling, the same
+  /// "0 means muted" rule, the same rounding.
+  void _applyVolume(double vol) {
+    final clamped = ((vol * 100).round() / 100.0).clamp(
+      0.0,
+      PlayerVolumeControl.maxVolume,
+    );
     setState(() {
-      if (_isMuted && delta > 0) {
-        _isMuted = false;
-      }
-      _volume = (_volume + delta).clamp(0.0, 1.0);
-      if (_volume == 0.0) {
-        _isMuted = true;
-      } else if (_isMuted) {
-        _isMuted = false;
-      }
-      _player.setVolume(_isMuted ? 0.0 : _volume * 100.0);
+      _volume = clamped;
+      _isMuted = clamped == 0;
       _showVolumeHud = true;
     });
-    _volumeHudTimer?.cancel();
-    _volumeHudTimer = Timer(const Duration(milliseconds: 1600), () {
-      if (mounted) setState(() => _showVolumeHud = false);
-    });
-    _startHideControlsTimer();
+    _player.setVolume(clamped * 100.0);
+    _restartVolumeHud();
   }
 
   void _toggleMute() {
     setState(() {
-      _isMuted = !_isMuted;
-      if (!_isMuted && _volume == 0) {
-        _volume = 0.5;
+      if (_volume > 0 && !_isMuted) {
+        _lastVolumeBeforeMute = _volume;
+        _isMuted = true;
+        _player.setVolume(0.0);
+      } else {
+        // Unmuting a stream that was left at zero has to land somewhere
+        // audible, or the button looks broken.
+        _volume = _lastVolumeBeforeMute > 0 ? _lastVolumeBeforeMute : 0.5;
+        _isMuted = false;
+        _player.setVolume(_volume * 100.0);
       }
-      _player.setVolume(_isMuted ? 0.0 : _volume * 100.0);
       _showVolumeHud = true;
     });
+    _restartVolumeHud();
+  }
+
+  void _restartVolumeHud() {
     _volumeHudTimer?.cancel();
     _volumeHudTimer = Timer(const Duration(milliseconds: 1600), () {
       if (mounted) setState(() => _showVolumeHud = false);
@@ -689,7 +701,11 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(4),
                                 child: LinearProgressIndicator(
-                                  value: _isMuted ? 0.0 : _volume,
+                                  // Over the full range, boost included --
+                                  // at 250% a 0..1 bar would sit pinned at
+                                  // the end and stop telling you anything.
+                                  value: (_isMuted ? 0.0 : _volume) /
+                                      PlayerVolumeControl.maxVolume,
                                   backgroundColor: Colors.white24,
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     _isMuted
@@ -921,6 +937,25 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           ),
                         ),
 
+                        // Centred play/pause -- the same widget, size and
+                        // position as Movies/Series/Anime, minus the ±10s
+                        // buttons, which have no meaning on a live stream.
+                        // It used to be a bare IconButton at the left end of
+                        // the bottom bar, which is the single most visible
+                        // way this player read as a different app.
+                        Center(
+                          child: PlayerCenterControls(
+                            isPlaying: _isPlaying,
+                            onPlayPause: _togglePlayPause,
+                            onSeekBack10: isLive
+                                ? null
+                                : () => _seekRelative(-10),
+                            onSeekForward10: isLive
+                                ? null
+                                : () => _seekRelative(10),
+                          ),
+                        ),
+
                         // Bottom Bar
                         Positioned(
                           bottom: 0,
@@ -950,46 +985,23 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     onSeekEnd: () => _startHideControlsTimer(),
                                   ),
                                   const SizedBox(height: 6),
+                                ] else ...[
+                                  // Where the seek bar would be. Without it
+                                  // the bar just had a gap, which reads as a
+                                  // control that failed to load rather than
+                                  // one that does not apply; this says the
+                                  // stream is live and there is nothing to
+                                  // scrub.
+                                  const _LiveEdgeRow(),
+                                  const SizedBox(height: 6),
                                 ],
 
-                                // Controls Buttons Row
+                                // Controls Buttons Row. Play/pause is not
+                                // here: it is centred over the video like
+                                // every other player in the app.
                                 Row(
                                   children: [
-                                    // Play / Pause
-                                    IconButton(
-                                      icon: Icon(
-                                        _isPlaying
-                                            ? Icons.pause_rounded
-                                            : Icons.play_arrow_rounded,
-                                        color: Colors.white,
-                                        size: 30,
-                                      ),
-                                      onPressed: _togglePlayPause,
-                                    ),
-
                                     if (!isLive) ...[
-                                      const SizedBox(width: 4),
-                                      // Replay -10s
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.replay_10_rounded,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                        tooltip: 'Seek -10s',
-                                        onPressed: () => _seekRelative(-10),
-                                      ),
-                                      // Forward +10s
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.forward_10_rounded,
-                                          color: Colors.white,
-                                          size: 24,
-                                        ),
-                                        tooltip: 'Seek +10s',
-                                        onPressed: () => _seekRelative(10),
-                                      ),
-                                      const SizedBox(width: 8),
                                       // Position / Duration Readout
                                       ValueListenableBuilder<Duration>(
                                         valueListenable: _positionNotifier,
@@ -1009,97 +1021,19 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
                                     const SizedBox(width: 8),
 
-                                    // ── INTERACTIVE VOLUME SLIDER & MUTE TOGGLE ──
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(
-                                            _isMuted || _volume == 0
-                                                ? Icons.volume_off_rounded
-                                                : (_volume < 0.5
-                                                      ? Icons
-                                                            .volume_down_rounded
-                                                      : Icons
-                                                            .volume_up_rounded),
-                                            color: _isMuted
-                                                ? Colors.redAccent
-                                                : Colors.white,
-                                            size: 22,
-                                          ),
-                                          tooltip: _isMuted
-                                              ? 'Unmute (M)'
-                                              : 'Mute (M)',
-                                          onPressed: _toggleMute,
-                                        ),
-                                        SizedBox(
-                                          width: 86,
-                                          child: SliderTheme(
-                                            data: SliderTheme.of(context).copyWith(
-                                              trackHeight: 3.5,
-                                              thumbShape:
-                                                  const RoundSliderThumbShape(
-                                                    enabledThumbRadius: 5.5,
-                                                  ),
-                                              overlayShape:
-                                                  const RoundSliderOverlayShape(
-                                                    overlayRadius: 10,
-                                                  ),
-                                              activeTrackColor: const Color(
-                                                0xFF7C5CFF,
-                                              ),
-                                              inactiveTrackColor:
-                                                  Colors.white24,
-                                              thumbColor: Colors.white,
-                                            ),
-                                            child: Slider(
-                                              value: _isMuted ? 0.0 : _volume,
-                                              min: 0.0,
-                                              max: 1.0,
-                                              onChanged: (val) {
-                                                setState(() {
-                                                  _volume = val;
-                                                  _isMuted = val == 0.0;
-                                                  _player.setVolume(
-                                                    _isMuted
-                                                        ? 0.0
-                                                        : val * 100.0,
-                                                  );
-                                                  _showVolumeHud = true;
-                                                });
-                                                _volumeHudTimer?.cancel();
-                                                _volumeHudTimer = Timer(
-                                                  const Duration(
-                                                    milliseconds: 1600,
-                                                  ),
-                                                  () {
-                                                    if (mounted) {
-                                                      setState(
-                                                        () => _showVolumeHud =
-                                                            false,
-                                                      );
-                                                    }
-                                                  },
-                                                );
-                                                _hideControlsTimer?.cancel();
-                                              },
-                                              onChangeEnd: (_) =>
-                                                  _startHideControlsTimer(),
-                                            ),
-                                          ),
-                                        ),
-                                        Text(
-                                          '${((_isMuted ? 0.0 : _volume) * 100).toInt()}%',
-                                          style: TextStyle(
-                                            color: _isMuted
-                                                ? Colors.redAccent
-                                                : Colors.white70,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: 'monospace',
-                                          ),
-                                        ),
-                                      ],
+                                    // The same volume control as every
+                                    // other player: one widget, so the mute
+                                    // icon, the track and the boost range
+                                    // cannot drift. This page had its own
+                                    // Slider, capped at 100% where the rest
+                                    // of the app boosts to 250% -- which
+                                    // matters more here than anywhere, since
+                                    // portal streams are often quiet.
+                                    PlayerVolumeControl(
+                                      volume: _volume,
+                                      isMuted: _isMuted || _volume == 0,
+                                      onVolumeChanged: _applyVolume,
+                                      onToggleMute: _toggleMute,
                                     ),
 
                                     const Spacer(),
@@ -1520,6 +1454,54 @@ String _formatDuration(Duration duration) {
     return '${duration.inHours}:$twoDigitMinutes:$twoDigitSeconds';
   }
   return '$twoDigitMinutes:$twoDigitSeconds';
+}
+
+/// What sits where the seek bar would be on a live stream.
+///
+/// A live stream has no duration to scrub, so the seek bar is absent -- but
+/// absent alone reads as a control that failed to load. This says the stream
+/// is at its live edge and there is nothing to scrub, using the same red the
+/// LIVE badge in the top bar uses so the two read as one statement.
+class _LiveEdgeRow extends StatelessWidget {
+  const _LiveEdgeRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 8,
+          height: 8,
+          decoration: const BoxDecoration(
+            color: Color(0xFFFF3B30),
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        const Text(
+          'Live',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Takes the seek bar's width so the bar keeps its shape, and reads
+        // as a track already at its end rather than an empty gap.
+        Expanded(
+          child: Container(
+            height: 3,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _IptvCustomProgressBar extends StatefulWidget {
