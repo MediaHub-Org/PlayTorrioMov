@@ -4,6 +4,7 @@ import '../../models/continue_watching/continue_watching_item.dart';
 import '../../services/app_spacing.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_tabs.dart' show LibraryEmptyState;
 import '../../widgets/home/continue_watching_slider.dart';
 
@@ -40,9 +41,13 @@ class WatchHistoryPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D1017),
         surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
-          onPressed: () => Navigator.pop(context),
+        // Same leading inset and shared button as every other pushed page
+        // -- AppBar's own 56px slot would centre it somewhere else, and a
+        // narrower slot clamps the 48x48 button into an ellipse.
+        leadingWidth: inset + 48,
+        leading: Padding(
+          padding: EdgeInsets.only(left: inset),
+          child: const Center(child: GlassBackButton()),
         ),
         title: Text(
           title,
