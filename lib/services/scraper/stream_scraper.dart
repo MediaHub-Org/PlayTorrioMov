@@ -73,6 +73,14 @@ class ScraperManager {
   ScraperManager._internal();
   static final ScraperManager instance = ScraperManager._internal();
 
+  /// How long one scraper may take before the search stops waiting on it.
+  ///
+  /// Generous on purpose: the slowest built-in scrapers chain three or four
+  /// requests with their own 4-15s timeouts, and cutting a scraper off that
+  /// would have answered costs a source. What this is really for is the
+  /// scraper that never answers at all.
+  static const Duration _scraperDeadline = Duration(seconds: 30);
+
   final List<StreamScraper> _scrapers = [];
   bool get hasScrapers => _scrapers.isNotEmpty;
 
@@ -94,6 +102,12 @@ class ScraperManager {
   void unregisterTorrentScrapers() {
     _scrapers.removeWhere((s) => s.name == 'PlayTorrio');
   }
+
+  /// Empties the roster. The manager is a singleton, so a test that
+  /// registers a fake scraper would otherwise leak it into every test that
+  /// runs after it.
+  @visibleForTesting
+  void resetForTest() => _scrapers.clear();
 
   Stream<StreamSource> scrapeAll({
     required String type,
@@ -126,6 +140,8 @@ class ScraperManager {
     int inFlightChecks = 0;
     final seenHashes = <String>{};
     final seenUrls = <String>{};
+    final subscriptions = <StreamSubscription<StreamSource>>[];
+    final deadlines = <Timer>[];
 
     void checkClose() {
       if (pendingScrapers == 0 && inFlightChecks == 0 && !controller.isClosed) {
@@ -133,8 +149,37 @@ class ScraperManager {
       }
     }
 
+    // Nothing downstream is listening any more -- the user closed the source
+    // sheet or picked something. Stop the remaining scrapers rather than
+    // letting forty-odd HTTP requests finish into a dead controller.
+    controller.onCancel = () {
+      for (final timer in deadlines) {
+        timer.cancel();
+      }
+      for (final sub in subscriptions) {
+        sub.cancel();
+      }
+    };
+
     for (final scraper in activeScrapers) {
-      scraper
+      // Each scraper gets a deadline of its own. `pendingScrapers` only fell
+      // when a scraper's stream completed, and most scrapers issue HTTP
+      // requests with no timeout, so a single host that accepted a
+      // connection and then went quiet held `checkClose` off forever: the
+      // controller never closed and the picker sat on a spinner even though
+      // the other forty-odd scrapers had long since answered.
+      var finished = false;
+      Timer? deadline;
+
+      void finish() {
+        if (finished) return;
+        finished = true;
+        deadline?.cancel();
+        pendingScrapers--;
+        checkClose();
+      }
+
+      final subscription = scraper
           .scrapeStream(
         type: type,
         title: title,
@@ -186,12 +231,29 @@ class ScraperManager {
             controller.add(source);
           }
         },
-        onError: (_) {},
-        onDone: () {
-          pendingScrapers--;
-          checkClose();
-        },
+        onError: (_) => finish(),
+        onDone: finish,
       );
+
+      subscriptions.add(subscription);
+
+      // Only if it is still running: a stream that completed while we were
+      // still wiring it up needs no deadline, and arming one would hold a
+      // closure alive for thirty seconds to do nothing.
+      if (finished) {
+        continue;
+      }
+      deadline = Timer(_scraperDeadline, () {
+        if (finished) return;
+        debugPrint(
+          '[ScraperManager] ${scraper.runtimeType} passed '
+          '${_scraperDeadline.inSeconds}s with no result -- dropping it so '
+          'the search can finish.',
+        );
+        subscription.cancel();
+        finish();
+      });
+      deadlines.add(deadline);
     }
 
     return controller.stream;
