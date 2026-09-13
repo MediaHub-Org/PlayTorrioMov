@@ -6,6 +6,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **History**: the Continue Watching row now has a *See all* opening the full
+  log of what you have watched, newest first. That log was already being
+  recorded and saved to disk — every episode, up to 100 — with nothing in
+  the app rendering it; the only reader was the player, looking up one entry
+  to resume a position. It hangs off the row rather than living in Library,
+  because Library's tabs mean what you chose to keep and this is a record of
+  what happened
 - Liked Live TV channels now have a **Liked** row at the top of the Live TV
   page, newest first. They only ever appeared in Library before, which is
   the wrong place for them: you open Library to manage what you saved, and

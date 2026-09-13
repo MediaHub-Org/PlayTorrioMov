@@ -2,6 +2,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
+import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 import 'package:playtorriomov/models/movie/movie_detail.dart';
 import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/models/stream/stream_model.dart';
@@ -134,6 +135,115 @@ void main() {
     test('an unknown show is a no-op, not a crash', () async {
       await AnimeLibraryService.instance.clearListStatus(424242);
       expect(AnimeLibraryService.instance.hasResumableProgress(424242), isFalse);
+    });
+  });
+
+  group('ContinueWatchingService.matchesTypeFilter', () {
+    // Anime is not identifiable by `type` alone: entries arrive from the
+    // AniList catalogue, the Arabic catalogue, and addons reporting
+    // type == 'anime', and are told apart by id prefix and addon name. This
+    // lived inside the slider until the history view needed the same answer.
+    ContinueWatchingItem item({
+      String id = 'tt1',
+      String type = 'movie',
+      String? addonName,
+    }) => ContinueWatchingItem(
+      id: id,
+      title: 'T',
+      type: type,
+      positionSeconds: 1,
+      totalDurationSeconds: 100,
+      lastWatchedAt: DateTime(2026),
+      addonName: addonName,
+      isTorrent: false,
+    );
+
+    test('a null filter matches everything', () {
+      expect(
+        ContinueWatchingService.matchesTypeFilter(item(), null),
+        isTrue,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(
+          item(id: 'anilist:1', type: 'anime'),
+          null,
+        ),
+        isTrue,
+      );
+    });
+
+    test('"main" excludes anime from all three of its sources', () {
+      expect(ContinueWatchingService.matchesTypeFilter(item(), 'main'), isTrue);
+      for (final anime in [
+        item(type: 'anime'),
+        item(id: 'anilist:1535'),
+        item(id: 'arabic_anime:99'),
+        item(addonName: 'ArabicAnime'),
+      ]) {
+        expect(
+          ContinueWatchingService.matchesTypeFilter(anime, 'main'),
+          isFalse,
+          reason: 'main must not show ${anime.id}/${anime.addonName}',
+        );
+      }
+    });
+
+    test('"anime" takes all three sources', () {
+      for (final anime in [
+        item(type: 'anime'),
+        item(id: 'anilist:1535'),
+        item(id: 'arabic_anime:99'),
+        item(addonName: 'ArabicAnime'),
+      ]) {
+        expect(
+          ContinueWatchingService.matchesTypeFilter(anime, 'anime'),
+          isTrue,
+        );
+      }
+      expect(
+        ContinueWatchingService.matchesTypeFilter(item(), 'anime'),
+        isFalse,
+      );
+    });
+
+    test('arabic and general anime partition the anime set', () {
+      final arabic = item(id: 'arabic_anime:99');
+      final general = item(id: 'anilist:1535');
+
+      expect(
+        ContinueWatchingService.matchesTypeFilter(arabic, 'arabic_anime'),
+        isTrue,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(general, 'arabic_anime'),
+        isFalse,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(general, 'general_anime'),
+        isTrue,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(arabic, 'general_anime'),
+        isFalse,
+      );
+    });
+
+    test('movie and series filter on type', () {
+      expect(
+        ContinueWatchingService.matchesTypeFilter(item(type: 'movie'), 'movie'),
+        isTrue,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(item(type: 'series'), 'movie'),
+        isFalse,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(
+          item(type: 'series'),
+          'series',
+        ),
+        isTrue,
+      );
     });
   });
 }
