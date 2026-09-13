@@ -8,6 +8,7 @@ import '../continue_watching/episode_tracker_snapshot_revision.dart';
 import '../../models/profiles/profile_async_authorization.dart';
 import '../storage/storage_service.dart';
 import 'simkl_calendar_service.dart';
+import 'simkl_settings.dart';
 import 'simkl_constants.dart';
 
 /// The user's Simkl relationship to a single title — mirrors
@@ -283,6 +284,19 @@ class SimklService {
   /// Request a PIN for the device-code-style OAuth flow.
   /// Returns the parsed JSON response on success, null on failure.
   Future<Map<String, dynamic>?> requestPin() async {
+    // Checked before the request, not after: without an id Simkl answers
+    // with an error that says nothing useful, and the UI used to surface
+    // that as "Failed to request Simkl PIN code" -- the same line it showed
+    // for a dead network. These are different problems with different
+    // fixes, so they get different messages.
+    if (!SimklSettings.isConfigured) {
+      SimklSettings.note(
+        'This build shipped without a Simkl client ID. Add your own below '
+        '-- registering an app at simkl.com/settings/developer is free.',
+      );
+      return null;
+    }
+
     try {
       final authorization = await ProfileAsyncAuthorization.capture(
         ProfileFeature.trackersAndDiscovery,
@@ -303,13 +317,16 @@ class SimklService {
             expiresAt: DateTime.now().add(Duration(seconds: seconds)),
           );
         }
+        SimklSettings.note('Waiting for you to enter the PIN at simkl.com/pin.');
         return data;
       }
 
       debugPrint('Simkl: PIN request failed (${response.statusCode})');
+      SimklSettings.note(SimklSettings.describeStatus(response.statusCode));
       return null;
     } catch (error) {
       debugPrint('Simkl: PIN request error (${error.runtimeType})');
+      SimklSettings.note('Could not reach Simkl: ${error.runtimeType}');
       return null;
     }
   }

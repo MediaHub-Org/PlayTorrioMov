@@ -25,6 +25,7 @@ import './services/iptv/iptv_settings.dart';
 import './services/media_session/media_session_service.dart';
 import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
+import 'services/simkl/simkl_settings.dart';
 import './services/tmdb/tmdb_settings.dart';
 import './services/stream/torrent_stream_service.dart';
 import './services/config/env_service.dart';
@@ -99,6 +100,7 @@ void main() async {
     IptvSettings.initialize(),
     MyListService.initialize(),
     TmdbSettings.initialize(),
+    SimklSettings.initialize(),
     P2pSettingsService.initialize(),
     // Loads which built-in scrapers the user switched off. Must land before
     // the first scrapeAll, which reads the result synchronously.
