@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
+import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/iptv_controller.dart';
 import '../../services/content_display_enums.dart';
 import '../../services/iptv/iptv_settings.dart';
@@ -48,6 +49,9 @@ class _IptvPageState extends State<IptvPage> {
     DiscordRpcService.instance.setWatchingLiveTv(channelName: 'Live TV');
     IptvSettings.changeNotifier.addListener(_onSettingsChanged);
     AppThemeService.currentPalette.addListener(_onSettingsChanged);
+    // Liking a channel has to reorder the row it appears in, and the sheet
+    // that does the liking sits over this page rather than replacing it.
+    FavoriteChannelsService.items.addListener(_onSettingsChanged);
     _ctrl.init();
     _loadSections();
   }
@@ -56,6 +60,7 @@ class _IptvPageState extends State<IptvPage> {
   void dispose() {
     IptvSettings.changeNotifier.removeListener(_onSettingsChanged);
     AppThemeService.currentPalette.removeListener(_onSettingsChanged);
+    FavoriteChannelsService.items.removeListener(_onSettingsChanged);
     DiscordRpcService.instance.clearToIdle();
     super.dispose();
   }
@@ -207,7 +212,19 @@ class _IptvPageState extends State<IptvPage> {
     // Its three hero settings survive the move: auto-rotate and its interval
     // map onto `heroInterval`, and the style-driven height goes through the
     // `heroHeightOf` hook added for exactly this.
+    // Liked channels lead, because someone opening Live TV is usually going
+    // back to a channel they already keep. They lived only in Library until
+    // now, which is the wrong place: you go to Library to manage what you
+    // saved, and to Live TV to actually watch.
+    final liked = FavoriteChannelsService.resolvedChannels;
+
     final rows = <BrowseRow<HardcodedChannel>>[
+      if (liked.isNotEmpty)
+        BrowseRow<HardcodedChannel>(
+          title: 'Liked',
+          subtitle: 'Channels you keep, most recent first',
+          items: liked,
+        ),
       for (final catName in visibleCategories)
         if (categoryMap.containsKey(catName) &&
             categoryMap[catName]!.$2.isNotEmpty)

@@ -5,6 +5,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Liked Live TV channels now have a **Liked** row at the top of the Live TV
+  page, newest first. They only ever appeared in Library before, which is
+  the wrong place for them: you open Library to manage what you saved, and
+  Live TV to actually watch something
+
+### Changed
+- The IPTV portal browser's ⭐ Favorites is now **Bookmarked**, with a
+  bookmark icon. Live TV was offering a heart in one place and a star in
+  another for what looked like the same intent. They are not the same: a
+  heart marks a channel, which is stable, while the portal browser pins one
+  provider's stream, which disappears when that provider rotates its list.
+  Naming them differently says so. Existing bookmarks are unaffected — the
+  stored data did not change
+
 ### Fixed
 - Cast and crew now actually load from TMDB. `MovieDetail.tmdbId` is read
   from a `moviedb_id` field that Cinemeta and most Stremio addons never

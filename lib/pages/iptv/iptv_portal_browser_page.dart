@@ -353,7 +353,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   String _selectedCategoryName() {
-    if (_selectedCategoryId == favoritesCategoryId) return '⭐ Favorites';
+    if (_selectedCategoryId == favoritesCategoryId) return 'Bookmarked';
     if (_selectedCategoryId.isEmpty) return 'All Categories';
     final found = _categories.firstWhere(
       (c) => c.id == _selectedCategoryId,
@@ -384,7 +384,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         setState(() {
           _categories = [
             const IptvCategory(id: '', name: 'All Categories'),
-            const IptvCategory(id: favoritesCategoryId, name: 'Favorites'),
+            const IptvCategory(id: favoritesCategoryId, name: 'Bookmarked'),
             ...cats,
           ];
           _selectedCategoryId = '';
@@ -421,7 +421,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         setState(() {
           _categories = [
             const IptvCategory(id: '', name: 'All Categories'),
-            const IptvCategory(id: favoritesCategoryId, name: 'Favorites'),
+            const IptvCategory(id: favoritesCategoryId, name: 'Bookmarked'),
             ...cats,
           ];
           _selectedCategoryId = '';
@@ -1335,19 +1335,19 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFC107).withValues(alpha: 0.1),
+                  color: Colors.white.withValues(alpha: 0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.star_outline_rounded, color: Color(0xFFFFC107), size: 48),
+                child: const Icon(Icons.bookmark_border_rounded, color: Colors.white54, size: 48),
               ),
               const SizedBox(height: 16),
               const Text(
-                'No Favorited Channels',
+                'No bookmarks yet',
                 style: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 6),
               const Text(
-                'Tap the star icon on any channel to save it to your Favorites.',
+                'Bookmark a stream here to find it again while browsing this portal.',
                 style: TextStyle(color: Colors.white54, fontSize: 13.5),
               ),
             ],
@@ -1575,12 +1575,12 @@ class _CategoryListRowState extends State<_CategoryListRow> {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: widget.isSelected
-                  ? (isFavCategory ? const Color(0xFFFFC107).withValues(alpha: 0.15) : palette.primaryColor.withValues(alpha: 0.15))
+                  ? (isFavCategory ? Colors.white.withValues(alpha: 0.15) : palette.primaryColor.withValues(alpha: 0.15))
                   : (_hovered ? const Color(0xFF141724) : Colors.transparent),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: widget.isSelected
-                    ? (isFavCategory ? const Color(0xFFFFC107).withValues(alpha: 0.6) : palette.primaryColor.withValues(alpha: 0.6))
+                    ? (isFavCategory ? Colors.white.withValues(alpha: 0.6) : palette.primaryColor.withValues(alpha: 0.6))
                     : Colors.transparent,
               ),
             ),
@@ -1591,14 +1591,14 @@ class _CategoryListRowState extends State<_CategoryListRow> {
                   height: 16,
                   decoration: BoxDecoration(
                     color: widget.isSelected
-                        ? (isFavCategory ? const Color(0xFFFFC107) : palette.primaryColor)
+                        ? (isFavCategory ? Colors.white : palette.primaryColor)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(width: 8),
                 if (isFavCategory) ...[
-                  const Icon(Icons.star_rounded, color: Color(0xFFFFC107), size: 16),
+                  const Icon(Icons.bookmark_rounded, color: Colors.white70, size: 16),
                   const SizedBox(width: 6),
                 ],
                 Expanded(
@@ -1609,7 +1609,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
                     style: TextStyle(
                       color: widget.isSelected
                           ? (isFavCategory ? const Color(0xFFFFD54F) : Colors.white)
-                          : (_hovered ? Colors.white : (isFavCategory ? const Color(0xFFFFC107) : Colors.white70)),
+                          : (_hovered ? Colors.white : (isFavCategory ? Colors.white : Colors.white70)),
                       fontSize: 12.5,
                       fontWeight: widget.isSelected ? FontWeight.w800 : (isFavCategory ? FontWeight.w700 : FontWeight.w600),
                     ),
@@ -1621,15 +1621,15 @@ class _CategoryListRowState extends State<_CategoryListRow> {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                     decoration: BoxDecoration(
                       color: widget.isSelected
-                          ? (isFavCategory ? const Color(0xFFFFC107).withValues(alpha: 0.3) : palette.primaryColor.withValues(alpha: 0.3))
-                          : (isFavCategory ? const Color(0xFFFFC107).withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.06)),
+                          ? (isFavCategory ? Colors.white.withValues(alpha: 0.3) : palette.primaryColor.withValues(alpha: 0.3))
+                          : (isFavCategory ? Colors.white.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.06)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       '${widget.count}',
                       style: TextStyle(
                         color: isFavCategory
-                            ? const Color(0xFFFFC107)
+                            ? Colors.white
                             : (widget.isSelected ? palette.primaryColor : Colors.white38),
                         fontSize: 10.5,
                         fontWeight: FontWeight.w700,
@@ -1865,11 +1865,18 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                 // Favorite Button
                 IconButton(
                   icon: Icon(
-                    widget.isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: widget.isFavorite ? const Color(0xFFFFC107) : Colors.white38,
+                    widget.isFavorite
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color: widget.isFavorite ? Colors.white : Colors.white38,
                     size: 21,
                   ),
-                  tooltip: widget.isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
+                  // A bookmark, not a favourite: this pins one portal's
+                  // stream while browsing it. Liking lives on the channel
+                  // tile and survives the portal; see roadmap #45.
+                  tooltip: widget.isFavorite
+                      ? 'Remove bookmark'
+                      : 'Bookmark in this portal',
                   onPressed: widget.onToggleFavorite,
                 ),
 
@@ -2015,8 +2022,10 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                     GestureDetector(
                       onTap: widget.onToggleFavorite,
                       child: Icon(
-                        widget.isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-                        color: widget.isFavorite ? const Color(0xFFFFC107) : Colors.white30,
+                        widget.isFavorite
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
+                        color: widget.isFavorite ? Colors.white : Colors.white30,
                         size: 19,
                       ),
                     ),
@@ -2179,8 +2188,10 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                 GestureDetector(
                   onTap: widget.onToggleFavorite,
                   child: Icon(
-                    widget.isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color: widget.isFavorite ? const Color(0xFFFFC107) : Colors.white30,
+                    widget.isFavorite
+                        ? Icons.bookmark_rounded
+                        : Icons.bookmark_border_rounded,
+                    color: widget.isFavorite ? Colors.white : Colors.white30,
                     size: 18,
                   ),
                 ),
@@ -2299,13 +2310,15 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                                     color: Colors.black.withValues(alpha: 0.75),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: widget.isFavorite ? const Color(0xFFFFC107) : Colors.white24,
+                                      color: widget.isFavorite ? Colors.white70 : Colors.white24,
                                       width: 1.2,
                                     ),
                                   ),
                                   child: Icon(
-                                    widget.isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
-                                    color: widget.isFavorite ? const Color(0xFFFFC107) : Colors.white70,
+                                    widget.isFavorite
+                                        ? Icons.bookmark_rounded
+                                        : Icons.bookmark_border_rounded,
+                                    color: widget.isFavorite ? Colors.white : Colors.white70,
                                     size: 16,
                                   ),
                                 ),
