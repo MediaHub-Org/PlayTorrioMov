@@ -370,19 +370,37 @@ quick +10s taps read "30 seconds"; turning around starts a new count.
 ### The CC button answers instead of asking (shipped)
 
 The subtitle button is a toggle, and a toggle should never open a menu — but
-with nothing selected yet it did exactly that, opening the picker. It now
-picks a track itself: the file's own `default` flag first (the closest thing
-to an authored answer about which track belongs to a release), then English,
-then simply the first — a subtitle in the wrong language still answers "turn
-subtitles on" better than nothing happening. With no embedded track it falls
-back to whatever a subtitle search has already turned up, and **never starts
-a new search**: a toggle should not leave the user waiting on the network to
-find out whether it worked. With genuinely nothing available it says so
-rather than leaving a button that looks broken.
+with nothing selected yet it did exactly that, opening the picker.
+
+**The answer is the audio language.** Subtitles exist to put in writing what
+is being said, so the track matching the selected audio track is the one that
+makes the words on screen the words in the room. Everything below that is a
+fallback for when no such track exists: the file's own `default` flag, then
+English, then simply the first — a subtitle in the wrong language still
+answers "turn subtitles on" better than nothing happening.
+
+Matching had to be **by language, not by string**. Audio and subtitle tracks
+in the same file are routinely labelled in different schemes — an `eng` audio
+track beside an `English` subtitle is the common case, not the exotic one —
+so `languageKey` reduces both to one comparable key across the spellings
+these actually arrive as (`en`, `eng`, `English`, `en-US`, `Español`,
+`ja (Japanese)`). Whole-word matching matters here: a naive `contains('en')`
+picks a **Slovenian** track for English audio.
+
+With no embedded track it falls back to whatever a subtitle search has
+already turned up, and **never starts a new search**: a toggle should not
+leave the user waiting on the network to find out whether it worked. With
+genuinely nothing available it says so rather than leaving a button that
+looks broken.
 
 The rules live in `SubtitleAutoPick`, in the model layer rather than the
 player, because they are a judgement call about what "best" means and worth
 reading on their own. The full picker is still one tap away behind the gear.
+
+**Note:** this app has no preferred-subtitle-language setting, and none was
+added — the audio track is a better signal than a preference set once and
+forgotten. If one is ever wanted it slots in above the `default` flag, not
+above the audio match.
 
 ### Swipe-to-adjust is gone (shipped)
 

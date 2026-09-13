@@ -907,6 +907,19 @@ class _PlayerScreenState extends State<PlayerScreen>
   // ── Gesture handlers: vertical swipe left = volume, right = brightness ──
 
 
+  /// The language of the audio track currently playing, which is what the
+  /// CC button matches a subtitle against: subtitles are there to put in
+  /// writing what is being said, so the written words should be the spoken
+  /// ones. Null before the media reports its tracks, or when the track
+  /// carries no language tag.
+  String? get _selectedAudioLanguage {
+    if (_audioTracks.isEmpty) return null;
+    final match = _audioTracks
+        .where((t) => t.index == _selectedAudioTrackIndex)
+        .firstOrNull;
+    return (match ?? _audioTracks.first).language;
+  }
+
   /// Name of the audio track currently playing, for the settings menu's
   /// audio row. Null before the media reports its tracks.
   String? get _selectedAudioTrackLabel {
@@ -1016,13 +1029,19 @@ class _PlayerScreenState extends State<PlayerScreen>
     // track it can find rather than opening the picker: this is a CC
     // toggle, and YouTube's never asks a question. The picker is still one
     // tap away behind the gear for anyone who wants a different track.
-    final auto = SubtitleAutoPick.embedded(_embeddedSubtitles);
+    final auto = SubtitleAutoPick.embedded(
+      _embeddedSubtitles,
+      audioLanguage: _selectedAudioLanguage,
+    );
     if (auto != null) {
       _selectEmbeddedSubtitle(auto);
       return;
     }
 
-    final variant = SubtitleAutoPick.variant(_subtitleGroups);
+    final variant = SubtitleAutoPick.variant(
+      _subtitleGroups,
+      audioLanguage: _selectedAudioLanguage,
+    );
     if (variant != null) {
       _loadSubtitle(variant);
       return;

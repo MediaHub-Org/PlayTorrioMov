@@ -49,26 +49,44 @@ class PlayerEmbeddedSubtitle {
 /// used to open the picker when nothing had been selected yet, which is the
 /// one thing a CC button should never do. These rules give it an answer.
 ///
+/// **The answer is the audio language.** Subtitles exist to put in writing
+/// what is being said, so the track that matches the selected audio is the
+/// one that makes the words on screen the words in the room. Everything
+/// below it is a fallback for when no such track exists.
+///
 /// Kept out of the player so the rules can be read and tested on their own;
 /// they are a judgement call about what "best" means, not player plumbing.
 abstract final class SubtitleAutoPick {
   /// The embedded track to use, or null if the stream carries none.
   ///
-  /// A file's own `default` flag wins: it is the closest thing to an
-  /// authored answer about which track belongs to this release. English
-  /// comes next as the most widely useful fallback, and failing both, the
-  /// first track -- a subtitle in the wrong language is still a better
-  /// answer to "turn subtitles on" than nothing happening.
+  /// In order: the track matching [audioLanguage], then the one the file
+  /// itself marks default, then English, then simply the first -- a
+  /// subtitle in the wrong language still answers "turn subtitles on"
+  /// better than nothing happening.
   static PlayerEmbeddedSubtitle? embedded(
-    List<PlayerEmbeddedSubtitle> tracks,
-  ) {
+    List<PlayerEmbeddedSubtitle> tracks, {
+    String? audioLanguage,
+  }) {
     if (tracks.isEmpty) return null;
+
+    final spoken = languageKey(audioLanguage);
+    if (spoken != null) {
+      for (final track in tracks) {
+        if (languageKey(track.language) == spoken ||
+            languageKey(track.title) == spoken) {
+          return track;
+        }
+      }
+    }
 
     for (final track in tracks) {
       if (track.isDefault) return track;
     }
     for (final track in tracks) {
-      if (_isEnglish(track.language) || _isEnglish(track.title)) return track;
+      if (languageKey(track.language) == 'en' ||
+          languageKey(track.title) == 'en') {
+        return track;
+      }
     }
     return tracks.first;
   }
@@ -77,9 +95,21 @@ abstract final class SubtitleAutoPick {
   /// track, taken from whatever a search has already turned up. Never
   /// starts a new search: a toggle should not leave the user waiting on the
   /// network to find out whether it worked.
-  static SubtitleVariant? variant(List<SubtitleLanguageGroup> groups) {
+  static SubtitleVariant? variant(
+    List<SubtitleLanguageGroup> groups, {
+    String? audioLanguage,
+  }) {
+    final spoken = languageKey(audioLanguage);
+    if (spoken != null) {
+      for (final group in groups) {
+        if (languageKey(group.language) == spoken && group.variants.isNotEmpty) {
+          return group.variants.first;
+        }
+      }
+    }
+
     for (final group in groups) {
-      if (_isEnglish(group.language) && group.variants.isNotEmpty) {
+      if (languageKey(group.language) == 'en' && group.variants.isNotEmpty) {
         return group.variants.first;
       }
     }
@@ -89,15 +119,69 @@ abstract final class SubtitleAutoPick {
     return null;
   }
 
-  /// Matches the spellings these actually arrive as -- "en", "eng",
-  /// "English", "en-US" -- without matching every language that merely
-  /// contains those letters.
-  static bool _isEnglish(String? value) {
-    if (value == null) return false;
+  /// Reduces a language as a stream might spell it -- "en", "eng",
+  /// "English", "en-US", "Español", "ja (Japanese)" -- to one comparable
+  /// key, or null when it says nothing useful.
+  ///
+  /// Audio and subtitle tracks in the same file are routinely labelled in
+  /// different schemes, so comparing the raw strings would miss most real
+  /// matches: an "eng" audio track beside an "English" subtitle is the
+  /// common case, not the exotic one.
+  static String? languageKey(String? value) {
+    if (value == null) return null;
     final lower = value.trim().toLowerCase();
-    if (lower.isEmpty) return false;
-    if (lower == 'en' || lower == 'eng') return true;
-    if (lower.startsWith('en-') || lower.startsWith('en_')) return true;
-    return lower.contains('english');
+    if (lower.isEmpty || lower == 'und' || lower == 'unknown') return null;
+
+    for (final entry in _aliases.entries) {
+      for (final alias in entry.value) {
+        if (lower == alias ||
+            lower.startsWith('$alias-') ||
+            lower.startsWith('${alias}_') ||
+            _containsWord(lower, alias)) {
+          return entry.key;
+        }
+      }
+    }
+
+    // Unknown language: its own first token still compares equal to itself,
+    // so two tracks labelled the same way match even off this table.
+    final token = lower.split(RegExp(r'[^a-z]+')).firstWhere(
+      (t) => t.isNotEmpty,
+      orElse: () => '',
+    );
+    return token.isEmpty ? null : token;
   }
+
+  /// Whole-word only: without this, "slovenian" matches "en" and a Slovenian
+  /// track wins the English fallback.
+  static bool _containsWord(String haystack, String needle) {
+    if (needle.length <= 3) return false;
+    return RegExp('(?:^|[^a-z])${RegExp.escape(needle)}(?:\$|[^a-z])')
+        .hasMatch(haystack);
+  }
+
+  /// Only the languages this app's catalogues actually surface, each keyed
+  /// by its ISO 639-1 code. Anything absent still matches itself through
+  /// the token fallback above.
+  static const Map<String, List<String>> _aliases = {
+    'en': ['en', 'eng', 'english'],
+    'es': ['es', 'spa', 'esp', 'spanish', 'espanol', 'español', 'castellano'],
+    'fr': ['fr', 'fre', 'fra', 'french', 'francais', 'français'],
+    'de': ['de', 'ger', 'deu', 'german', 'deutsch'],
+    'it': ['it', 'ita', 'italian', 'italiano'],
+    'pt': ['pt', 'por', 'portuguese', 'portugues', 'português'],
+    'ja': ['ja', 'jpn', 'jap', 'japanese'],
+    'ko': ['ko', 'kor', 'korean'],
+    'zh': ['zh', 'chi', 'zho', 'chinese', 'mandarin', 'cantonese'],
+    'ru': ['ru', 'rus', 'russian'],
+    'ar': ['ar', 'ara', 'arabic'],
+    'hi': ['hi', 'hin', 'hindi'],
+    'tr': ['tr', 'tur', 'turkish'],
+    'pl': ['pl', 'pol', 'polish'],
+    'nl': ['nl', 'dut', 'nld', 'dutch'],
+    'sv': ['sv', 'swe', 'swedish'],
+    'da': ['da', 'dan', 'danish'],
+    'no': ['no', 'nor', 'norwegian'],
+    'fi': ['fi', 'fin', 'finnish'],
+  };
 }

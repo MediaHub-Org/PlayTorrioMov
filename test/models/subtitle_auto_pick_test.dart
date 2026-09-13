@@ -27,13 +27,54 @@ void main() {
       expect(SubtitleAutoPick.embedded([]), isNull);
     });
 
-    test("the file's own default wins", () {
+    test('the track matching the audio language wins', () {
+      // Subtitles put in writing what is being said, so the written words
+      // should be the spoken ones. This beats even the file's own default.
+      final picked = SubtitleAutoPick.embedded(
+        [
+          track(0, language: 'eng', isDefault: true),
+          track(1, language: 'spa'),
+        ],
+        audioLanguage: 'spa',
+      );
+
+      expect(picked!.index, 1);
+    });
+
+    test('audio and subtitle labels need not be spelled alike', () {
+      // An "eng" audio track beside an "English" subtitle is the common
+      // case, not the exotic one -- comparing raw strings would miss it.
+      for (final pair in [
+        ('eng', 'English'),
+        ('en-US', 'en'),
+        ('Japanese', 'jpn'),
+        ('spa', 'Español'),
+      ]) {
+        final picked = SubtitleAutoPick.embedded(
+          [track(0, language: 'fre'), track(1, language: pair.$2)],
+          audioLanguage: pair.$1,
+        );
+        expect(picked!.index, 1, reason: '${pair.$1} should match ${pair.$2}');
+      }
+    });
+
+    test('an untagged audio language falls through to the other rules', () {
+      for (final unknown in [null, '', '   ', 'und', 'unknown']) {
+        final picked = SubtitleAutoPick.embedded(
+          [track(0, language: 'fre'), track(1, language: 'spa', isDefault: true)],
+          audioLanguage: unknown,
+        );
+        expect(picked!.index, 1, reason: 'should fall back on "$unknown"');
+      }
+    });
+
+    test("the file's own default wins when the audio has no match", () {
       // The closest thing to an authored answer about which track belongs
       // to this release.
-      final picked = SubtitleAutoPick.embedded([
-        track(0, language: 'eng'),
-        track(1, language: 'spa', isDefault: true),
-      ]);
+      final picked = SubtitleAutoPick.embedded(
+        [track(0, language: 'eng'), track(1, language: 'spa', isDefault: true)],
+        audioLanguage: 'kor',
+      );
 
       expect(picked!.index, 1);
     });
@@ -94,7 +135,19 @@ void main() {
       expect(SubtitleAutoPick.variant([]), isNull);
     });
 
-    test('English is preferred', () {
+    test('the audio language is preferred', () {
+      final picked = SubtitleAutoPick.variant(
+        [
+          SubtitleLanguageGroup(language: 'English', variants: [variant('en')]),
+          SubtitleLanguageGroup(language: 'Italian', variants: [variant('it')]),
+        ],
+        audioLanguage: 'ita',
+      );
+
+      expect(picked!.language, 'it');
+    });
+
+    test('English is preferred when the audio has no match', () {
       final picked = SubtitleAutoPick.variant([
         SubtitleLanguageGroup(language: 'Spanish', variants: [variant('es')]),
         SubtitleLanguageGroup(language: 'English', variants: [variant('en')]),
