@@ -1,0 +1,143 @@
+/// The one ISO-639 code -> display-name table the subtitle providers share.
+///
+/// It used to be a `_iso3ToLangName` constant copied into three providers.
+/// Two of those copies (OpenSubtitles and Wyzie) were byte-identical to each
+/// other and 51 entries shorter than the third, so a Croatian, Bulgarian,
+/// Tamil or Bengali subtitle from either of them rendered as a raw `hrv` /
+/// `bul` / `tam` code while the same language from Stremio rendered as a
+/// name. That is the kind of drift three copies of a lookup table produce,
+/// and it is why this is one table.
+///
+/// The surviving table is the superset: every key the short copies had is
+/// present here with the same value, so nothing that worked before changes.
+library;
+
+const Map<String, String> _iso639ToDisplayName = {
+    'ara': 'Arabic',
+    'ar': 'Arabic',
+    'eng': 'English',
+    'en': 'English',
+    'spa': 'Spanish',
+    'es': 'Spanish',
+    'fre': 'French',
+    'fra': 'French',
+    'fr': 'French',
+    'ger': 'German',
+    'deu': 'German',
+    'de': 'German',
+    'ita': 'Italian',
+    'it': 'Italian',
+    'jpn': 'Japanese',
+    'ja': 'Japanese',
+    'kor': 'Korean',
+    'ko': 'Korean',
+    'rus': 'Russian',
+    'ru': 'Russian',
+    'por': 'Portuguese',
+    'pt': 'Portuguese',
+    'pob': 'Portuguese (BR)',
+    'pb': 'Portuguese (BR)',
+    'chi': 'Chinese',
+    'zho': 'Chinese',
+    'zh': 'Chinese',
+    'hin': 'Hindi',
+    'hi': 'Hindi',
+    'tur': 'Turkish',
+    'tr': 'Turkish',
+    'ind': 'Indonesian',
+    'id': 'Indonesian',
+    'vie': 'Vietnamese',
+    'vi': 'Vietnamese',
+    'tha': 'Thai',
+    'th': 'Thai',
+    'pol': 'Polish',
+    'pl': 'Polish',
+    'dut': 'Dutch',
+    'nld': 'Dutch',
+    'nl': 'Dutch',
+    'swe': 'Swedish',
+    'sv': 'Swedish',
+    'nor': 'Norwegian',
+    'no': 'Norwegian',
+    'dan': 'Danish',
+    'da': 'Danish',
+    'fin': 'Finnish',
+    'fi': 'Finnish',
+    'heb': 'Hebrew',
+    'he': 'Hebrew',
+    'ces': 'Czech',
+    'cze': 'Czech',
+    'cs': 'Czech',
+    'ell': 'Greek',
+    'gre': 'Greek',
+    'el': 'Greek',
+    'hun': 'Hungarian',
+    'hu': 'Hungarian',
+    'ron': 'Romanian',
+    'rum': 'Romanian',
+    'ro': 'Romanian',
+    'ukr': 'Ukrainian',
+    'uk': 'Ukrainian',
+    'per': 'Persian',
+    'fas': 'Persian',
+    'fa': 'Persian',
+    'hrv': 'Croatian',
+    'scr': 'Croatian',
+    'hr': 'Croatian',
+    'bul': 'Bulgarian',
+    'bg': 'Bulgarian',
+    'est': 'Estonian',
+    'et': 'Estonian',
+    'mac': 'Macedonian',
+    'mkd': 'Macedonian',
+    'mk': 'Macedonian',
+    'slv': 'Slovenian',
+    'sl': 'Slovenian',
+    'srp': 'Serbian',
+    'scc': 'Serbian',
+    'sr': 'Serbian',
+    'bos': 'Bosnian',
+    'bs': 'Bosnian',
+    'alb': 'Albanian',
+    'sqi': 'Albanian',
+    'sq': 'Albanian',
+    'slk': 'Slovak',
+    'slo': 'Slovak',
+    'sk': 'Slovak',
+    'lit': 'Lithuanian',
+    'lt': 'Lithuanian',
+    'lav': 'Latvian',
+    'lv': 'Latvian',
+    'ice': 'Icelandic',
+    'isl': 'Icelandic',
+    'is': 'Icelandic',
+    'tam': 'Tamil',
+    'ta': 'Tamil',
+    'tel': 'Telugu',
+    'te': 'Telugu',
+    'mal': 'Malayalam',
+    'ml': 'Malayalam',
+    'ben': 'Bengali',
+    'bn': 'Bengali',
+    'fil': 'Tagalog',
+    'tgl': 'Tagalog',
+    'tl': 'Tagalog',
+    'msa': 'Malay',
+    'may': 'Malay',
+    'ms': 'Malay',
+    'cat': 'Catalan',
+    'ca': 'Catalan',
+};
+
+/// The display name for a subtitle language code, or a sensible rendering of
+/// the code itself when it is not one we know.
+///
+/// Short codes upper-case (`pt-br` stays as-is, `zzz` becomes `ZZZ`) because
+/// a three-letter code reads as an abbreviation; anything longer is already
+/// a word and is left alone.
+String subtitleLanguageName(String rawCode) {
+  final code = rawCode.toLowerCase();
+  final known = _iso639ToDisplayName[code];
+  if (known != null) return known;
+  return code.length <= 3 ? code.toUpperCase() : code;
+}
