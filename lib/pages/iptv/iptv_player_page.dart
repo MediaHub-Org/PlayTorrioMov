@@ -1040,12 +1040,16 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           child: PlayerCenterControls(
                             isPlaying: _isPlaying,
                             onPlayPause: _togglePlayPause,
-                            onSeekBack10: isLive
+                            // ±30s, matching Movies/Series/Anime: the
+                            // buttons are the bigger jump, the double-tap
+                            // zones the small nudge. Null on live, where
+                            // seeking has no meaning.
+                            onSeekBack30: isLive
                                 ? null
-                                : () => _seekRelative(-10),
-                            onSeekForward10: isLive
+                                : () => _seekRelative(-30),
+                            onSeekForward30: isLive
                                 ? null
-                                : () => _seekRelative(10),
+                                : () => _seekRelative(30),
                           ),
                         ),
 

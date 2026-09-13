@@ -186,15 +186,7 @@ class _PlayerScreenState extends State<PlayerScreen>
   final Map<String, List<StreamSource>> _cachedSourcesByEpisode = {};
 
   // ── Gesture state (volume / brightness swipes) ──
-  double _brightness = 1.0;
-  bool _showGestureIndicator = false;
-  String _gestureIndicatorLabel = '';
-  double _gestureIndicatorValue = 0.0;
-  IconData _gestureIndicatorIcon = Icons.volume_up_rounded;
-  Timer? _gestureIndicatorTimer;
-  Offset? _gestureStartPosition;
-  double _gestureStartVolume = 1.0;
-  double _gestureStartBrightness = 1.0;
+
 
   // ── Auto-next episode state ──
   bool _autoNextShown = false;
@@ -914,76 +906,6 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   // ── Gesture handlers: vertical swipe left = volume, right = brightness ──
 
-  void _onVerticalDragStart(DragStartDetails details) {
-    if (_isLoading) return;
-    _gestureStartPosition = details.globalPosition;
-    _gestureStartVolume = _volume;
-    _gestureStartBrightness = _brightness;
-    _hideTimer?.cancel();
-  }
-
-  void _onVerticalDragUpdate(DragUpdateDetails details) {
-    if (_isLoading || _gestureStartPosition == null) {
-      return;
-    }
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    if (screenHeight <= 0) return;
-
-    final delta = details.globalPosition.dy - _gestureStartPosition!.dy;
-    final normalized = (delta / screenHeight).clamp(-1.0, 1.0);
-
-    // Left half of screen = volume, right half = brightness
-    final isLeftSide =
-        details.globalPosition.dx < MediaQuery.sizeOf(context).width / 2;
-
-    if (isLeftSide) {
-      final newVolume = (_gestureStartVolume - normalized).clamp(
-        0.0,
-        PlayerVolumeControl.maxVolume,
-      );
-      _applyVolume(newVolume);
-      _updateGestureIndicator(
-        label: 'Volume',
-        value: newVolume / PlayerVolumeControl.maxVolume,
-        icon: newVolume == 0
-            ? Icons.volume_off_rounded
-            : Icons.volume_up_rounded,
-      );
-    } else {
-      final newBrightness = (_gestureStartBrightness - normalized).clamp(
-        0.0,
-        1.0,
-      );
-      _brightness = newBrightness;
-      _updateGestureIndicator(
-        label: 'Brightness',
-        value: newBrightness,
-        icon: Icons.brightness_6_rounded,
-      );
-    }
-  }
-
-  void _onVerticalDragEnd(DragEndDetails details) {
-    _gestureStartPosition = null;
-    _startHideControlsTimer();
-  }
-
-  void _updateGestureIndicator({
-    required String label,
-    required double value,
-    required IconData icon,
-  }) {
-    _gestureIndicatorTimer?.cancel();
-    setState(() {
-      _showGestureIndicator = true;
-      _gestureIndicatorLabel = label;
-      _gestureIndicatorValue = value.clamp(0.0, 1.0);
-      _gestureIndicatorIcon = icon;
-    });
-    _gestureIndicatorTimer = Timer(const Duration(milliseconds: 900), () {
-      if (mounted) setState(() => _showGestureIndicator = false);
-    });
-  }
 
   /// Name of the audio track currently playing, for the settings menu's
   /// audio row. Null before the media reports its tracks.
@@ -1090,9 +1012,32 @@ class _PlayerScreenState extends State<PlayerScreen>
       return;
     }
 
-    // Nothing was ever selected this session -- there's nothing to turn
-    // back on, so open the picker instead of doing nothing silently.
-    _toggleMenu('subtitle');
+    // Nothing was selected yet this session. The button picks the best
+    // track it can find rather than opening the picker: this is a CC
+    // toggle, and YouTube's never asks a question. The picker is still one
+    // tap away behind the gear for anyone who wants a different track.
+    final auto = SubtitleAutoPick.embedded(_embeddedSubtitles);
+    if (auto != null) {
+      _selectEmbeddedSubtitle(auto);
+      return;
+    }
+
+    final variant = SubtitleAutoPick.variant(_subtitleGroups);
+    if (variant != null) {
+      _loadSubtitle(variant);
+      return;
+    }
+
+    // Genuinely nothing to turn on. Say so, rather than leaving a button
+    // that looks broken.
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No subtitles available for this stream'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _loadSubtitle(SubtitleVariant variant) async {
@@ -1727,7 +1672,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     _savePlaybackProgress();
     WakelockPlus.disable();
     _hideTimer?.cancel();
-    _gestureIndicatorTimer?.cancel();
     _autoNextTimer?.cancel();
     _focusNode.dispose();
     PlaybackCoordinator.release(
@@ -1890,84 +1834,24 @@ class _PlayerScreenState extends State<PlayerScreen>
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTapDown: _handleScreenTap,
-                // Swipe-to-adjust volume/brightness is desktop only now --
-                // on mobile, hardware volume buttons and the OS's own
-                // brightness control already do this reliably, and an
-                // accidental swipe (repositioning the device, adjusting
-                // grip) silently changing volume or brightness mid-watch
-                // was worse than not having the gesture.
-                onVerticalDragStart: WindowService.instance.isDesktop
-                    ? _onVerticalDragStart
-                    : null,
-                onVerticalDragUpdate: WindowService.instance.isDesktop
-                    ? _onVerticalDragUpdate
-                    : null,
-                onVerticalDragEnd: WindowService.instance.isDesktop
-                    ? _onVerticalDragEnd
-                    : null,
+                // No swipe-to-adjust. It was desktop-only by the end --
+                // mobile had already lost it, because hardware volume keys
+                // and the OS brightness control do the same job reliably
+                // and an accidental swipe changed either one mid-watch. On
+                // desktop the same argument holds: there is a volume slider
+                // in the bar, and the screen's brightness is the display's
+                // business, not a video player's.
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
                     _buildPlayerBody(),
-                    // Brightness overlay (dim the screen)
-                    if (_brightness < 1.0)
-                      IgnorePointer(
-                        child: Container(
-                          color: Colors.black.withValues(
-                            alpha: (1.0 - _brightness) * 0.9,
-                          ),
-                        ),
-                      ),
-                    // Gesture indicator overlay
-                    if (_showGestureIndicator)
-                      IgnorePointer(
-                        child: Center(child: _buildGestureIndicator()),
-                      ),
+
                   ],
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildGestureIndicator() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(_gestureIndicatorIcon, color: Colors.white, size: 32),
-          const SizedBox(height: 10),
-          Text(
-            _gestureIndicatorLabel,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: 140,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: _gestureIndicatorValue,
-                minHeight: 6,
-                backgroundColor: Colors.white24,
-                valueColor: const AlwaysStoppedAnimation(Color(0xFF7C5CFF)),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -2175,10 +2059,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                   child: PlayerCenterControls(
                     isPlaying: _isPlaying,
                     onPlayPause: _togglePlayPause,
-                    onSeekBack10: () =>
-                        _seekRelative(const Duration(seconds: -10)),
-                    onSeekForward10: () =>
-                        _seekRelative(const Duration(seconds: 10)),
+                    onSeekBack30: () =>
+                        _seekRelative(const Duration(seconds: -30)),
+                    onSeekForward30: () =>
+                        _seekRelative(const Duration(seconds: 30)),
                   ),
                 ),
               ),
@@ -2228,10 +2112,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onToggleMute: () => _toggleMute(),
                     onToggleSubtitles: _toggleSubtitlesEnabled,
                     onToggleSettingsMenu: () => _toggleMenu('settings'),
-                    onSeekBack30: () =>
-                        _seekRelative(const Duration(seconds: -30)),
-                    onSeekForward30: () =>
-                        _seekRelative(const Duration(seconds: 30)),
                   ),
                 ),
               ),

@@ -15,8 +15,8 @@ void main() {
           PlayerCenterControls(
             isPlaying: false,
             onPlayPause: () {},
-            onSeekBack10: () {},
-            onSeekForward10: () {},
+            onSeekBack30: () {},
+            onSeekForward30: () {},
           ),
         ),
       );
@@ -28,8 +28,8 @@ void main() {
           PlayerCenterControls(
             isPlaying: true,
             onPlayPause: () {},
-            onSeekBack10: () {},
-            onSeekForward10: () {},
+            onSeekBack30: () {},
+            onSeekForward30: () {},
           ),
         ),
       );
@@ -41,33 +41,33 @@ void main() {
       tester,
     ) async {
       var playPauseTaps = 0;
-      var back10Taps = 0;
-      var forward10Taps = 0;
+      var back30Taps = 0;
+      var forward30Taps = 0;
 
       await tester.pumpWidget(
         wrap(
           PlayerCenterControls(
             isPlaying: false,
             onPlayPause: () => playPauseTaps++,
-            onSeekBack10: () => back10Taps++,
-            onSeekForward10: () => forward10Taps++,
+            onSeekBack30: () => back30Taps++,
+            onSeekForward30: () => forward30Taps++,
           ),
         ),
       );
 
       await tester.tap(find.byIcon(Icons.play_arrow_rounded));
-      await tester.tap(find.byIcon(Icons.replay_10_rounded));
-      await tester.tap(find.byIcon(Icons.forward_10_rounded));
+      await tester.tap(find.byIcon(Icons.replay_30_rounded));
+      await tester.tap(find.byIcon(Icons.forward_30_rounded));
 
       expect(playPauseTaps, 1);
-      expect(back10Taps, 1);
-      expect(forward10Taps, 1);
+      expect(back30Taps, 1);
+      expect(forward30Taps, 1);
     });
 
     testWidgets('a live stream gets play/pause alone, still centred', (
       tester,
     ) async {
-      // Seeking has no meaning without a duration, so the ±10s buttons take
+      // Seeking has no meaning without a duration, so the ±30s buttons take
       // no callbacks on a live stream. The button that remains has to stay
       // where it was, or Live TV reads as a different player -- which is
       // what sharing this widget is for.
@@ -76,8 +76,8 @@ void main() {
       );
 
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.replay_10_rounded), findsNothing);
-      expect(find.byIcon(Icons.forward_10_rounded), findsNothing);
+      expect(find.byIcon(Icons.replay_30_rounded), findsNothing);
+      expect(find.byIcon(Icons.forward_30_rounded), findsNothing);
 
       final screenCentre = tester.getCenter(find.byType(Scaffold)).dx;
       expect(
@@ -94,16 +94,16 @@ void main() {
           PlayerCenterControls(
             isPlaying: true,
             onPlayPause: () {},
-            onSeekBack10: () {},
-            onSeekForward10: () {},
+            onSeekBack30: () {},
+            onSeekForward30: () {},
           ),
         ),
       );
 
-      final back = tester.getCenter(find.byIcon(Icons.replay_10_rounded)).dx;
+      final back = tester.getCenter(find.byIcon(Icons.replay_30_rounded)).dx;
       final play = tester.getCenter(find.byIcon(Icons.pause_rounded)).dx;
       final forward =
-          tester.getCenter(find.byIcon(Icons.forward_10_rounded)).dx;
+          tester.getCenter(find.byIcon(Icons.forward_30_rounded)).dx;
 
       expect(back, lessThan(play));
       expect(forward, greaterThan(play));
@@ -117,13 +117,13 @@ void main() {
           PlayerCenterControls(
             isPlaying: true,
             onPlayPause: () {},
-            onSeekForward10: () {},
+            onSeekForward30: () {},
           ),
         ),
       );
 
-      expect(find.byIcon(Icons.replay_10_rounded), findsNothing);
-      expect(find.byIcon(Icons.forward_10_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.replay_30_rounded), findsNothing);
+      expect(find.byIcon(Icons.forward_30_rounded), findsOneWidget);
     });
   });
 }
