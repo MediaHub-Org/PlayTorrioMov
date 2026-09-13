@@ -11,9 +11,11 @@ re-argued from the one-line summary. Anything ruled out entirely goes to
 [Declined](#declined-so-they-do-not-get-re-litigated) with its reasoning
 rather than being deleted.
 
-Last reconciled against the tree: **2026-09-11** (v1.5.7+26), after the
-v1.5.7 Android build was tested on a real device. Everything below #38 came
-out of that session.
+Last reconciled against the tree: **2026-09-13**, after PR #16 merged
+(#39, #40, #44, #47, #48). Items #38-#48 came out of testing the v1.5.7
+Android build on a real device; the Bugs section that testing filled is now
+empty, and what is left is standardisation (#41, #42), one feature (#46),
+and three that need a person rather than a patch (#15, #21, #28).
 
 ## Navigation
 
@@ -78,8 +80,8 @@ pages, and the players.
 
 | #  | Task | Details |
 |----|------|---------|
+| 41 | Standardise what a details page shows across Movies, Series and Anime | **Decided: one spine, one section-specific block each.** The common spine, in order: hero, title/year/rating/genres, the library action row, synopsis, credits, then episodes or related. Each section may add **at most one** block of its own on top. Anime's Characters & Cast is the anime-native form of credits and *replaces* Cast & Crew rather than sitting alongside it — a character-to-voice-actor list answers the same question for anime that actor-to-character does for film. **Unblocked:** the gate on this was #38, so that today's unevenness could be told apart from merely missing data — #38 and #39 have both shipped, so what remains visible is genuinely layout.
 | 42 | Live TV player: the last of the divergence | **Partly shipped — see *The Live TV player, converged*.** Layout is done: centred play/pause through the shared widget, the shared volume control, a live-edge row where the seek bar sits. What is left is iconography and menu plumbing: the aspect-ratio trigger is a hand-rolled `InkWell` rather than the shared settings menu, the fullscreen and back buttons are bare `IconButton`s rather than `PlayerIconButton` pills, and the gesture zones have not been compared against `player_screen`'s. Small and separable; none of it changes where a control sits. |
-| 41 | Standardise what a details page shows across Movies, Series and Anime | **Decided: one spine, one section-specific block each.** The common spine, in order: hero, title/year/rating/genres, the library action row, synopsis, credits, then episodes or related. Each section may add **at most one** block of its own on top. Anime's Characters & Cast is the anime-native form of credits and *replaces* Cast & Crew rather than sitting alongside it — a character-to-voice-actor list answers the same question for anime that actor-to-character does for film. Do this **after** #38, because today's unevenness is partly just missing data rather than differing layout.
 
 ## Requested UI work
 
