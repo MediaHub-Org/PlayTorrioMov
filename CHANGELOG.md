@@ -5,6 +5,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **"See all" was pushed off the edge of the Continue Watching header on a
+  phone.** The header laid its accent bar, title, count and button out flat
+  with a `Spacer`, and the title was inflexible — so it took its natural width
+  and the button went past the right edge: 88px of overflow at 420px wide with
+  any watch history, and more for a longer title than the English one, which
+  the Arabic heading already is. The title and count now share what the button
+  leaves, and the title ellipsizes rather than shoving. Found by the test
+  written for the carousel change below — it was the first thing to render
+  that row at phone width with history present
+
 ### Changed
 - **The hero carousel now fills the screen down to Continue Watching.** It was
   sized as a fraction of the *screen* — 0.52 of it on desktop, capped at 560px —

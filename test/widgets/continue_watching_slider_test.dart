@@ -37,6 +37,7 @@ void main() {
       WidgetTester tester, {
       required double screenWidth,
       required bool withHistory,
+      String title = 'Continue Watching',
     }) async {
       tester.view.physicalSize = Size(screenWidth, 1400);
       tester.view.devicePixelRatio = 1.0;
@@ -58,8 +59,8 @@ void main() {
         // gives it -- under a bounded parent the Column would stretch and
         // measure the window instead of itself.
         wrap(
-          const SingleChildScrollView(
-            child: ContinueWatchingSlider(typeFilter: 'movie'),
+          SingleChildScrollView(
+            child: ContinueWatchingSlider(typeFilter: 'movie', title: title),
           ),
         ),
       );
@@ -71,7 +72,7 @@ void main() {
       );
     }
 
-    for (final width in <double>[420, 780, 1400]) {
+    for (final width in <double>[320, 420, 780, 1400]) {
       testWidgets('matches the rendered height at ${width}px wide', (
         tester,
       ) async {
@@ -92,6 +93,25 @@ void main() {
         );
       });
     }
+
+    testWidgets('a long title ellipsizes rather than overflowing', (
+      tester,
+    ) async {
+      // The Arabic heading is a different length from the English one, and
+      // the title is a parameter, so the row cannot assume any width for it.
+      // Laid out flat the title demanded its natural width and pushed "See
+      // all" off the edge -- 88px of overflow on a 420px phone with the
+      // English title, before a longer one.
+      await expectBandMatchesRender(
+        tester,
+        screenWidth: 360,
+        withHistory: true,
+        title: 'Continue Watching Something With A Very Long Name Indeed',
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('See all'), findsOneWidget);
+    });
 
     test('grows with the card size, one step per width tier', () {
       // Three tiers, each strictly taller than the last -- if the card

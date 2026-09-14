@@ -183,39 +183,62 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                          letterSpacing: -0.3,
+                      // Title and count take the space "See all" does not,
+                      // and the title gives way first. Laid out flat with a
+                      // Spacer, the title demanded its natural width and
+                      // pushed the button off the edge -- 88px of overflow on
+                      // a 420px-wide phone with any watch history, and more
+                      // for a longer title than the English one.
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.ink,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: palette.primaryColor.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: palette.primaryColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                '${items.length}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: palette.primaryColor,
+                                ),
+                              ),
+                            ),
+                            // Takes the slack the title did not need, so the
+                            // count stays beside the title rather than
+                            // drifting across to the button.
+                            const Spacer(),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 7,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: palette.primaryColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: palette.primaryColor.withValues(alpha: 0.3),
-                            width: 0.8,
-                          ),
-                        ),
-                        child: Text(
-                          '${items.length}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: palette.primaryColor,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
                       // The row shows one card per show and drops a title once
                       // it is finished; the full per-episode log lives behind
                       // this. It was being recorded all along with nothing to
