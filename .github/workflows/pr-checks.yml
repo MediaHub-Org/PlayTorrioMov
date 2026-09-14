@@ -180,11 +180,18 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # Gates on errors and warnings. Infos are not fatal: the tree carries
-      # pre-existing lint suggestions, and failing on those would make this
-      # check red on arrival and train people to ignore it.
+      # Gates on everything the analyzer reports, infos included. That is
+      # only a defensible setting because the count is zero and this is what
+      # keeps it there -- `--no-fatal-infos` was here while the tree carried
+      # 133 `prefer_const_*` suggestions, and a real `unused_local_variable`
+      # warning went unread in that list and put main red. A check whose
+      # normal output is a screen of ignored lines is not a check.
+      #
+      # So a new info fails the build. If one is genuinely not worth fixing,
+      # turn the rule off in analysis_options.yaml, where the decision is
+      # visible -- do not restore the flag and go back to scrolling past it.
       - name: Analyze
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --fatal-infos
 
       # Excludes the `network` tag (see dart_test.yaml) -- those tests hit live
       # third-party sites and fail on anything from a rate-limit to a markup

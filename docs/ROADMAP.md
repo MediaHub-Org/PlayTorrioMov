@@ -176,12 +176,16 @@ macOS runners cost several times as much per minute and stay release-only.
 The APK is an artifact of the check, not its purpose — it is uploaded
 because a built APK is free to keep once the job has produced it.
 
-**Infos are not fatal.** `--no-fatal-infos` is a deliberate setting, but it
-only works while the info count is near zero. It sat at 133 — all
-`prefer_const_*` — and one real `unused_local_variable` warning went
-unnoticed in that noise and put `main` red. The sweep that cleared them
-(#66) is what makes `--fatal-infos` a realistic next step; a check whose
-normal output is 133 ignored lines teaches people to ignore it.
+**Infos are fatal, and that is only defensible because the count is zero.**
+`--no-fatal-infos` was the setting while the tree carried 133 `prefer_const_*`
+suggestions — and one real `unused_local_variable` warning went unread in
+that list and put `main` red. A check whose normal output is a screen of
+ignored lines is not a check. The sweep (#66) took it to `No issues found!`
+and the flag went to `--fatal-infos` in the same PR, so it stays there.
+
+If a new info is genuinely not worth fixing, turn the rule off in
+`analysis_options.yaml`, where the decision is visible and reviewable. Do
+not put the flag back and go back to scrolling past the output.
 
 ### Declined, so they do not get re-litigated
 
