@@ -28,11 +28,15 @@ class ContinueWatchingSlider extends StatefulWidget {
   });
 
   /// Height of the section header line (accent bar, title, count, "See all").
+  ///
   /// Pinned rather than intrinsic so [bandHeight] can be exact: the tallest
-  /// child is the "See all" TextButton, which only exists once there is any
-  /// history, and a band that changed height when it appeared would move the
-  /// hero above it.
-  static const double headerHeight = 36;
+  /// child is the "See all" TextButton, which only exists once something has
+  /// been watched to the end, and a band that changed height when it appeared
+  /// would shift the hero above it. 48 because that is what the row already
+  /// measured whenever the button was there -- a Material tap target with the
+  /// default padded sizing -- so pinning it keeps the look the button case
+  /// already had rather than imposing a new one.
+  static const double headerHeight = 48;
 
   /// Gap between the header line and the cards.
   static const double headerGap = 12;
