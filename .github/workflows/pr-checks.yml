@@ -133,6 +133,14 @@ jobs:
   # suite need the SDK and the package cache, nothing else. Keep it that way
   # -- adding a toolchain step here taxes every run of the check people wait
   # on most.
+  # No .env step: this job runs `flutter analyze` and `flutter test`, neither
+  # of which takes --dart-define-from-file, so it wrote a file it never read.
+  # Worse, the file it wrote is one the tests can see -- EnvService reads
+  # `File('.env')` at runtime -- so a populated secret could have changed what
+  # a test observes. And it coupled the fast feedback loop for code to the
+  # format of a credentials secret: a malformed dotenv blocked analysis and
+  # tests that have nothing to do with it, which is how CI teaches people to
+  # stop reading it.
   analyze-test:
     name: Analyze & Test
     runs-on: ubuntu-latest
@@ -157,12 +165,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Write the build's .env
-        uses: ./.github/actions/dotenv
-        with:
-          contents: ${{ secrets.DOTENV_CONTENTS }}
-          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
-          warn-when-empty: 'false'
       - name: Install dependencies
         run: flutter pub get
 
