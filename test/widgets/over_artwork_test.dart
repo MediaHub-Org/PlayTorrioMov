@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/theme/app_colors.dart';
 import 'package:playtorriomov/services/theme/app_theme_service.dart';
 import 'package:playtorriomov/widgets/common/header_pill_style.dart';
+import 'package:playtorriomov/widgets/common/over_artwork.dart';
 
 Widget _wrap(Widget child) =>
     MaterialApp(home: Scaffold(body: Center(child: child)));
@@ -14,14 +15,13 @@ Icon _icon(WidgetTester tester) =>
 void main() {
   tearDown(() => AppThemeService.themeMode.value = ThemeMode.system);
 
-  group('HeaderPillSurface', () {
+  group('OverArtwork', () {
     testWidgets('pills over a hero stay white in light mode', (tester) async {
       // Live TV's header floats over the hero on a dark scrim. Following the
       // theme's ink there paints black glyphs onto a photograph.
       AppThemeService.themeMode.value = ThemeMode.light;
       await tester.pumpWidget(_wrap(
-        HeaderPillSurface(
-          overArtwork: true,
+        OverArtwork.yes(
           child: HeaderPillIconButton(
             icon: Icons.search_rounded,
             tooltip: 'Search',
@@ -45,7 +45,7 @@ void main() {
         ),
       ));
 
-      // No HeaderPillSurface ancestor: the default is "not over artwork",
+      // No OverArtwork ancestor: the default is "not over artwork",
       // which is right for every pill row outside a hero.
       expect(_icon(tester).color?.r, AppColors.ink.r);
     });
@@ -57,8 +57,8 @@ void main() {
       for (final overArtwork in [true, false]) {
         AppThemeService.themeMode.value = ThemeMode.light;
         await tester.pumpWidget(_wrap(
-          HeaderPillSurface(
-            overArtwork: overArtwork,
+          OverArtwork(
+            value: overArtwork,
             child: const HeaderPillLabel(
               label: 'LIVE TV',
               icon: Icons.live_tv_rounded,

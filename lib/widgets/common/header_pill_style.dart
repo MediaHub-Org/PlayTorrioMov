@@ -1,46 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../services/theme/app_colors.dart';
+import 'over_artwork.dart';
 
-/// Whether the header pills in this subtree are drawn over artwork.
-///
-/// A browse page's pill row is in one of two places depending on the page's
-/// state: in its own band above the content, where it sits on the app's
-/// background and follows the theme's ink; or floated over the hero
-/// carousel on a dark scrim, where it sits on a photograph. A photograph is
-/// a photograph in either theme, so the pills over one stay white --
-/// exactly the `ink` vs `onAccent` distinction [AppColors] draws.
-///
-/// [BrowseScaffold] is the only thing that knows which case applies (see its
-/// `headerOverlaysHero`), and it changes with the page's own loading and
-/// empty states. The pills cannot be told through a constructor because
-/// callers build and pass them in already-constructed, so the answer
-/// travels down the tree instead. Absent an ancestor the answer is "no",
-/// which is right for every pill row outside a hero.
-class HeaderPillSurface extends InheritedWidget {
-  final bool overArtwork;
-
-  const HeaderPillSurface({
-    super.key,
-    required this.overArtwork,
-    required super.child,
-  });
-
-  static bool of(BuildContext context) =>
-      context
-          .dependOnInheritedWidgetOfExactType<HeaderPillSurface>()
-          ?.overArtwork ??
-      false;
-
-  @override
-  bool updateShouldNotify(HeaderPillSurface oldWidget) =>
-      oldWidget.overArtwork != overArtwork;
-}
-
-/// The tint every header pill draws itself from: its border, its background
-/// wash and its icon are all this colour at different opacities, so a pill
-/// cannot end up with a light border and a dark glyph.
-Color headerPillTint(BuildContext context) =>
-    HeaderPillSurface.of(context) ? AppColors.onAccent : AppColors.ink;
+/// The tint every header pill draws itself from -- see [OverArtwork.tint],
+/// which is the same rule every other control over a hero follows.
+Color headerPillTint(BuildContext context) => OverArtwork.tint(context);
 
 /// The one background/border every header pill control shares --
 /// [FilterDropdown]'s genre/decade/sort pills, [PageSearchButton], and

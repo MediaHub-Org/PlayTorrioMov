@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
@@ -251,6 +252,7 @@ class _IptvPageState extends State<IptvPage> {
     ];
 
     final content = BrowseScaffold<HardcodedChannel>(
+      contentLabel: 'Live TV channels',
       // Spotlight off, or nothing featured, means no hero -- the scaffold
       // then falls back to a fixed header band, which is what this page did
       // unconditionally before.
@@ -283,9 +285,9 @@ class _IptvPageState extends State<IptvPage> {
     // left a second track driven by a controller no longer attached to any
     // scroll view.
     return Scaffold(
-      backgroundColor: palette.scaffoldBackgroundColor,
+      backgroundColor: AppColors.canvas,
       body: Container(
-        color: palette.scaffoldBackgroundColor,
+        color: AppColors.canvas,
         child: RepaintBoundary(child: content),
       ),
     );

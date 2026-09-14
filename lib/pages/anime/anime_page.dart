@@ -527,6 +527,7 @@ class _AnimePageState extends State<AnimePage> {
                 : _buildGenreGrid(),
           )
         : BrowseScaffold<AnimeMedia>(
+            contentLabel: 'anime',
             header: pillHeader,
             belowHero: ContinueWatchingSlider(
               typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',

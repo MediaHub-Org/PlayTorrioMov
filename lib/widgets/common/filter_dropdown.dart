@@ -27,7 +27,7 @@ class FilterDropdown<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
     // Over a hero this pill sits on a photo, so its glyphs stay white; in
-    // its own band they follow the theme. See [HeaderPillSurface].
+    // its own band they follow the theme. See the OverArtwork marker.
     final tint = headerPillTint(context);
     return PopupMenuButton<T>(
       itemBuilder: (context) => items,

@@ -24,6 +24,7 @@ BrowseScaffold<String> build({
   Widget? header,
 }) {
   return BrowseScaffold<String>(
+    contentLabel: 'items',
     heroItems: hero,
     rows: rows,
     isLoading: isLoading,
