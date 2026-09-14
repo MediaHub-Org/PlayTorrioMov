@@ -225,6 +225,22 @@ remaining dark literal in `lib/` is one of them and says so in a comment:
 So the rule for the next person: before tokenising a dark literal, ask which
 of the three it is. If it is none of them, it is a surface and wants a token.
 
+### macOS is Apple Silicon only
+
+`flutter build macos` emits a universal binary; the workflow thins it to
+arm64 with `lipo`. Measured on v1.6.2: the x86_64 slices were **50.2 MB of a
+102 MB bundle**, across 37 fat binaries — half the download, for an
+architecture this project's audience does not use.
+
+**An Intel Mac cannot run these builds.** Not slowly; at all. That is the
+decision, made deliberately, and the guard enforces it: the check that used
+to require both slices now requires that only arm64 survives.
+
+If it ever needs undoing, the shape is **two jobs, each thinned to its own
+architecture** — two genuinely different artifacts. It is explicitly *not*
+the pre-1.6.3 layout, where two jobs built the same universal app and shipped
+it twice under names promising a choice that did not exist.
+
 ### The PR checks are three parallel jobs, not one
 
 `pr-checks.yml` runs Analyze & Test, Android Build and Linux Desktop Build

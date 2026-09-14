@@ -5,7 +5,7 @@
 #    - Windows: Installer (Inno Setup) & Portable ZIP (x64)
 #    - Android: Split-per-ABI APKs (arm64-v8a, armeabi-v7a, x86_64) & Universal APK
 #    - Linux: AppImage & Tar.gz (x86_64)
-#    - macOS: Universal (arm64 + x86_64) DMG & ZIP -- one build serves both
+#    - macOS: Apple Silicon (arm64) DMG & ZIP -- Intel is not built
 #    - iOS: Sideloadable IPA (no-codesign)
 #  Trigger: Git tag push (v*) or Manual Workflow Dispatch
 #
@@ -656,21 +656,23 @@ jobs:
           path: PlayTorrioMov-*-Linux-x86_64.flatpak
           if-no-files-found: error
 
-  # ─── macOS Build (Universal: Apple Silicon + Intel) ──────────────────────
+  # ─── macOS Build (Apple Silicon) ─────────────────────────────────────────
   #
-  #  One job, not two. `flutter build macos` emits a universal binary -- the
-  #  .app's Mach-O carries both the arm64 and the x86_64 slice -- so a second
-  #  job under Rosetta produced an app with exactly the same two slices. The
-  #  two ZIPs it shipped in v1.6.2 were byte-for-byte the same size, differing
-  #  only in ad-hoc signature; the "Intel" download was not an Intel build,
-  #  it was the same universal app under a name that promised a choice which
-  #  did not exist. That job cost ~14 minutes and was the release's long pole.
+  #  arm64 only, by decision rather than by accident. `flutter build macos`
+  #  emits a universal binary and this thins it, because the x86_64 half is
+  #  half the download and none of the audience: measured on v1.6.2, the
+  #  x86_64 slices were 50.2 MB of a 102 MB bundle across 37 fat binaries.
   #
-  #  The `lipo` check below is what keeps the "universal" name honest: if a
-  #  future Flutter emits a single-slice binary, the build fails here rather
-  #  than publishing an arm64-only app to Intel Macs.
+  #  What this costs, stated plainly: an Intel Mac cannot run these builds at
+  #  all. Not slowly -- not at all. If that ever needs undoing, the honest
+  #  shape is two jobs each thinned to its own arch, which is genuinely two
+  #  different artifacts. It is NOT the pre-1.6.3 layout, where two jobs
+  #  built the same universal app and labelled them "arm64" and "intel".
+  #
+  #  The check below is the guard inverted: it used to require both slices,
+  #  and now requires that only arm64 survives.
   macos:
-    name: macOS (Universal)
+    name: macOS (Apple Silicon)
     needs: [version]
     runs-on: macos-latest
     steps:
@@ -712,17 +714,45 @@ jobs:
       - name: Build macOS Release
         run: flutter build macos --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
-      - name: Verify the binary is universal
+      - name: Thin the bundle to arm64
+        run: |
+          set -euo pipefail
+          APP=build/macos/Build/Products/Release/PlayTorrioMov.app
+          thinned=0
+
+          # Every Mach-O in the bundle, not just the main executable: the
+          # Flutter framework and each plugin dylib carry their own x86_64
+          # slice, and they are most of the weight.
+          while IFS= read -r f; do
+            archs=$(lipo -archs "$f" 2>/dev/null) || continue
+            case " $archs " in
+              *" x86_64 "*) ;;
+              *) continue ;;
+            esac
+            tmp=$(mktemp)
+            lipo -thin arm64 "$f" -output "$tmp"
+            # `cat >` rather than `mv`: it keeps the original file's mode and
+            # inode, so the executable bit and any hard links survive.
+            cat "$tmp" > "$f"
+            rm -f "$tmp"
+            thinned=$((thinned + 1))
+          done < <(find "$APP" -type f)
+
+          echo "Thinned $thinned binaries to arm64."
+          if [ "$thinned" -eq 0 ]; then
+            echo "::error title=Nothing to thin::No fat binary was found in the bundle. Either Flutter stopped emitting universal output -- in which case this step is obsolete and the verify below still protects us -- or the bundle is not where this expects it. Do not publish without looking."
+            exit 1
+          fi
+
+      - name: Verify the binary is arm64 only
         run: |
           BIN=build/macos/Build/Products/Release/PlayTorrioMov.app/Contents/MacOS/PlayTorrioMov
           ARCHS=$(lipo -archs "$BIN")
           echo "Architectures: $ARCHS"
-          for want in arm64 x86_64; do
-            case " $ARCHS " in
-              *" $want "*) ;;
-              *) echo "::error title=macOS build is not universal::Expected both arm64 and x86_64 in $BIN, got '$ARCHS'. The release calls this artifact 'universal', so publishing it now would ship a single-architecture app to every Mac. Either restore a second per-architecture job or rename the artifact." >&2; exit 1 ;;
-            esac
-          done
+          if [ "$ARCHS" != "arm64" ]; then
+            echo "::error title=macOS build is not arm64-only::Expected exactly 'arm64' in $BIN, got '$ARCHS'. The release calls this artifact arm64; publishing it now would either ship an Intel slice nobody asked for or ship the wrong architecture entirely." >&2
+            exit 1
+          fi
 
       - name: Package as DMG & ZIP
         env:
@@ -740,17 +770,17 @@ jobs:
           sleep 2
 
           for i in {1..3}; do
-            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO "../../../../../PlayTorrioMov-$APP_VERSION-macOS-universal.dmg" && break || sleep 3
+            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO "../../../../../PlayTorrioMov-$APP_VERSION-macOS-arm64.dmg" && break || sleep 3
           done
-          zip -ry "../../../../../PlayTorrioMov-$APP_VERSION-macOS-universal.zip" PlayTorrioMov.app
+          zip -ry "../../../../../PlayTorrioMov-$APP_VERSION-macOS-arm64.zip" PlayTorrioMov.app
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v6
         with:
           name: PlayTorrioMov-macOS
           path: |
-            PlayTorrioMov-*-macOS-universal.dmg
-            PlayTorrioMov-*-macOS-universal.zip
+            PlayTorrioMov-*-macOS-arm64.dmg
+            PlayTorrioMov-*-macOS-arm64.zip
 
   # ─── iOS Build (Sideloadable IPA — no-codesign) ───────────────────────────
   ios:
