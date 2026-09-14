@@ -1,6 +1,15 @@
 # ──────────────────────────────────────────────────────────────────────────────
 #  PlayTorrioMov — Pull Request Checks
-#  Static analysis, the deterministic test suite, and an Android release build.
+#  Static analysis, the deterministic test suite, and two release builds.
+#
+#  Three jobs, all on ubuntu-latest, all independent so they run in parallel.
+#  Analyze & Test is deliberately the one job with no Java, no Gradle and no
+#  platform toolchain: it is the check that fails most often and the one whose
+#  answer is wanted first, so it should not queue behind ~40s of Android
+#  setup it never uses. Splitting it out also means a red analyze no longer
+#  hides whether the APK builds -- those used to be steps in one job, so the
+#  first failure ended the run and the next failure only surfaced a push
+#  later.
 #
 #  build.yml only runs on tag pushes, published releases and manual dispatch,
 #  so nothing verified a pull request. That is how the Android build was able
@@ -101,8 +110,8 @@ jobs:
       - name: Setup .env from GitHub Secrets
         shell: bash
         run: |
-          # Same as the job above: an empty .env is enough to compile, and
-          # secrets are unavailable to pull requests from forks.
+          # Same as the other two jobs: an empty .env is enough to compile,
+          # and secrets are unavailable to pull requests from forks.
           if [ -n "${{ secrets.ENV_FILE }}" ]; then
             echo "${{ secrets.ENV_FILE }}" > .env
           elif [ -n "${{ secrets.DOTENV }}" ]; then
@@ -127,8 +136,71 @@ jobs:
       - name: Build Linux Release
         run: flutter build linux --release --dart-define-from-file=.env
 
-  verify:
-    name: Analyze, Test & Android Build
+  # The fast job. Everything here is pure Dart: the analyzer and the test
+  # suite need the SDK and the package cache, nothing else. Keep it that way
+  # -- adding a toolchain step here taxes every run of the check people wait
+  # on most.
+  analyze-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter pub dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ${{ env.PUB_CACHE }}
+            .dart_tool
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Setup .env from GitHub Secrets
+        shell: bash
+        run: |
+          # Secrets are unavailable to pull requests from forks; an empty .env
+          # is enough for --dart-define-from-file to succeed.
+          if [ -n "${{ secrets.ENV_FILE }}" ]; then
+            echo "${{ secrets.ENV_FILE }}" > .env
+          elif [ -n "${{ secrets.DOTENV }}" ]; then
+            echo "${{ secrets.DOTENV }}" > .env
+          else
+            touch .env
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Gates on everything the analyzer reports, infos included. That is
+      # only a defensible setting because the count is zero and this is what
+      # keeps it there -- `--no-fatal-infos` was here while the tree carried
+      # 133 `prefer_const_*` suggestions, and a real `unused_local_variable`
+      # warning went unread in that list and put main red. A check whose
+      # normal output is a screen of ignored lines is not a check.
+      #
+      # So a new info fails the build. If one is genuinely not worth fixing,
+      # turn the rule off in analysis_options.yaml, where the decision is
+      # visible -- do not restore the flag and go back to scrolling past it.
+      - name: Analyze
+        run: flutter analyze --fatal-infos
+
+      # Excludes the `network` tag (see dart_test.yaml) -- those tests hit live
+      # third-party sites and fail on anything from a rate-limit to a markup
+      # change, which is not a signal a merge should ever wait on.
+      - name: Test
+        run: flutter test --exclude-tags network
+
+  android:
+    name: Android Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -182,18 +254,6 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
-      # Gates on errors and warnings. Infos are not fatal: the tree carries
-      # pre-existing lint suggestions, and failing on those would make this
-      # check red on arrival and train people to ignore it.
-      - name: Analyze
-        run: flutter analyze --no-fatal-infos
-
-      # Excludes the `network` tag (see dart_test.yaml) -- those tests hit live
-      # third-party sites and fail on anything from a rate-limit to a markup
-      # change, which is not a signal a merge should ever wait on.
-      - name: Test
-        run: flutter test --exclude-tags network
 
       # Writes android/key.properties + the keystore from repository secrets so
       # the release APK is signed with a stable key. Without the secrets (a fork

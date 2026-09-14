@@ -462,7 +462,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                     movie.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.onAccent,
                       fontSize: 26,
                       fontWeight: FontWeight.w900,

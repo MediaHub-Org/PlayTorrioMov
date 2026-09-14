@@ -131,7 +131,7 @@ class IptvHeroSlide extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
@@ -194,7 +194,7 @@ class IptvHeroSlide extends StatelessWidget {
                     memCacheWidth: 512,
                     errorWidget: (_, __, ___) => Text(
                       channel.name,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.onAccent,
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
@@ -207,7 +207,7 @@ class IptvHeroSlide extends StatelessWidget {
               else
                 Text(
                   channel.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.onAccent,
                     fontSize: 34,
                     fontWeight: FontWeight.w900,
@@ -260,7 +260,7 @@ class IptvHeroSlide extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
@@ -311,8 +311,8 @@ class IptvHeroSlide extends StatelessWidget {
                               color: AppColors.onAccent.withValues(alpha: 0.70),
                               size: 18,
                             ),
-                            SizedBox(width: 8),
-                            Text(
+                            const SizedBox(width: 8),
+                            const Text(
                               'Stream Feeds',
                               style: TextStyle(
                                 color: AppColors.onAccent,

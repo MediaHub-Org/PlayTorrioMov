@@ -473,17 +473,17 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
                 icon: _ctrl.isScraping
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 14,
                         height: 14,
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
                       )
-                    : Icon(Icons.radar_rounded, size: 16, color: AppColors.onAccent),
+                    : const Icon(Icons.radar_rounded, size: 16, color: AppColors.onAccent),
                 label: Text(
                   _ctrl.isScraping
                       ? 'Finding ${_ctrl.scrapeSource == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit'}…'
                       : 'Generate Portals',
-                  style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.w700),
+                  style: const TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.w700),
                 ),
                 onPressed: _ctrl.isScraping ? null : _ctrl.scrape,
               ),
@@ -617,7 +617,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
+                        const Padding(
                           padding: EdgeInsets.only(top: 2),
                           child: Icon(
                             Icons.forum_rounded,
@@ -625,7 +625,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                             size: 18,
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -896,7 +896,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                       onPressed: _ctrl.isAdding ? null : _submitAddPortal,
                       child: _ctrl.isAdding
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: 14,
                               height: 14,
                               child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
@@ -982,7 +982,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       ),
                                     ),
                                     child: isSelected
-                                        ? Icon(Icons.check_rounded, color: AppColors.onAccent, size: 15)
+                                        ? const Icon(Icons.check_rounded, color: AppColors.onAccent, size: 15)
                                         : null,
                                   )
                                 else ...[
@@ -1131,8 +1131,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
-                icon: Icon(Icons.playlist_add_rounded, size: 18, color: AppColors.onAccent),
-                label: Text('Add M3U URL', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.w700)),
+                icon: const Icon(Icons.playlist_add_rounded, size: 18, color: AppColors.onAccent),
+                label: const Text('Add M3U URL', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.w700)),
                 onPressed: () => setState(() => _showM3uForm = !_showM3uForm),
               ),
 
@@ -1333,7 +1333,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                       onPressed: _ctrl.isM3uLoading ? null : _submitAddM3u,
                       child: _ctrl.isM3uLoading
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: 14,
                               height: 14,
                               child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
@@ -1410,7 +1410,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       ),
                                     ),
                                     child: isSelected
-                                        ? Icon(Icons.check_rounded, color: AppColors.onAccent, size: 15)
+                                        ? const Icon(Icons.check_rounded, color: AppColors.onAccent, size: 15)
                                         : null,
                                   )
                                 else ...[

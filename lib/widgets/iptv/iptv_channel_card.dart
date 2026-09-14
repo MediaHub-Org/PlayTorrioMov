@@ -297,7 +297,7 @@ class IptvChannelCard extends StatelessWidget {
           ),
           child: Text(
             ch.short,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.onAccent,
               fontSize: 22,
               fontWeight: FontWeight.w900,

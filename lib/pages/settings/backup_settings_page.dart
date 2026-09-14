@@ -73,7 +73,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: Colors.red.shade700,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('Restore', style: TextStyle(color: AppColors.onAccent)),
+            child: const Text('Restore', style: TextStyle(color: AppColors.onAccent)),
           ),
         ],
       ),
@@ -170,7 +170,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('Save', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
+            child: const Text('Save', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -237,7 +237,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: Colors.red.shade700,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('Restore', style: TextStyle(color: AppColors.onAccent)),
+            child: const Text('Restore', style: TextStyle(color: AppColors.onAccent)),
           ),
         ],
       ),
@@ -293,11 +293,11 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Backup & Restore',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
                       'Save your library, likes, playback history, settings and addon config to a JSON file anywhere on this device — or restore from one you saved earlier.',
                       style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),

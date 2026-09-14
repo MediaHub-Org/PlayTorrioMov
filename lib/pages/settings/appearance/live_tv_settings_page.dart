@@ -161,7 +161,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Featured championship matches and top broadcast channels at the top',
                           style: TextStyle(fontSize: 12, color: AppColors.inkSubtle),
@@ -252,7 +252,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                                   color: AppColors.ink,
                                 ),
                               ),
-                              SizedBox(height: 2),
+                              const SizedBox(height: 2),
                               Text(
                                 'Automatically cycle through featured live events',
                                 style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -464,7 +464,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Display radiant live broadcast badge on channel corners',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -504,7 +504,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Show category label below channel name',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -554,7 +554,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                           color: AppColors.ink,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         'Toggle visibility of Live TV rows',
                         style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -678,7 +678,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Display subscription expiration tag on portal cards',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -717,7 +717,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Display current and max concurrent streaming connections',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -986,7 +986,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Display channel poster and logos in stream rows',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -1025,7 +1025,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Display current television guide title below channel',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
@@ -1064,7 +1064,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             color: AppColors.ink,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
                           'Show number of available streams next to category names',
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),

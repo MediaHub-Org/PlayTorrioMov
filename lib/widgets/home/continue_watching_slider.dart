@@ -290,6 +290,7 @@ class ContinueWatchingCard extends StatefulWidget {
   final VoidCallback onRemove;
 
   const ContinueWatchingCard({
+    super.key,
     required this.item,
     required this.width,
     required this.palette,
@@ -463,7 +464,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   ),
                                 ],
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.play_arrow_rounded,
                                 color: AppColors.onAccent,
                                 size: 28,
@@ -502,7 +503,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                       width: 0.8,
                                     ),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.info_outline_rounded,
                                     size: 14,
                                     color: AppColors.onAccent,
@@ -528,7 +529,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                       width: 0.8,
                                     ),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.close_rounded,
                                     size: 14,
                                     color: AppColors.onAccent,
@@ -573,7 +574,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             Text(
                               item.addonName ??
                                   (item.isTorrent ? 'Torrent' : 'Stream'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.onAccent,
@@ -601,7 +602,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           item.remainingMinutes > 0
                               ? '${item.remainingMinutes}m left'
                               : '${(progress * 100).toInt()}%',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: AppColors.onAccent,

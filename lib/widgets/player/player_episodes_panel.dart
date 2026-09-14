@@ -800,7 +800,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                         height: 38,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [AppColors.accent, Color(0xFF9D84FF)],
+                            colors: [AppColors.accent, const Color(0xFF9D84FF)],
                           ),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [

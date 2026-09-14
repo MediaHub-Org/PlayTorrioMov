@@ -92,7 +92,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Text(
               'Calendar',
               style: TextStyle(

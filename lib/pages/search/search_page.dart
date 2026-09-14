@@ -280,7 +280,7 @@ class _SearchPageState extends State<SearchPage> {
                       size: 13,
                       color: AppColors.inkMuted,
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Text(
                       'Anime filters',
                       style: TextStyle(

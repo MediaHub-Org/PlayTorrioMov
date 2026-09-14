@@ -317,14 +317,14 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Use Debrid for Streams',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             'Route torrent links through cloud servers',
                             style: TextStyle(

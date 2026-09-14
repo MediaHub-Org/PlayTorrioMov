@@ -181,7 +181,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: Text(
+              child: const Text(
                 'Remove',
                 style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold),
               ),

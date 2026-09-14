@@ -559,7 +559,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         short: isLive ? 'LIVE' : (_activeSection == IptvSection.vod ? 'VOD' : 'SERIES'),
         category: currentCat.name,
         keywords: [stream.name],
-        gradient: [AppColors.accent, Color(0xFF00D2EF)],
+        gradient: [AppColors.accent, const Color(0xFF00D2EF)],
       );
 
       pushPage(
@@ -599,7 +599,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         short: isLive ? 'LIVE' : 'VOD',
         category: currentCat.name,
         keywords: [stream.name],
-        gradient: [AppColors.accent, Color(0xFF00D2EF)],
+        gradient: [AppColors.accent, const Color(0xFF00D2EF)],
       );
 
       pushPage(
@@ -654,7 +654,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               height: MediaQuery.sizeOf(context).height * 0.75,
               decoration: BoxDecoration(
                 color: AppColors.bar,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border(top: BorderSide(color: AppColors.raised, width: 1.2)),
               ),
               child: Column(
@@ -912,15 +912,15 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         icon: _isCheckingAlive
-                            ? SizedBox(
+                            ? const SizedBox(
                                 width: 14,
                                 height: 14,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
                               )
-                            : Icon(Icons.speed_rounded, size: 16, color: AppColors.onAccent),
+                            : const Icon(Icons.speed_rounded, size: 16, color: AppColors.onAccent),
                         label: Text(
                           _isCheckingAlive ? 'Stop ($_aliveChecked/$_aliveTotal)' : 'Check Health',
-                          style: TextStyle(color: AppColors.onAccent, fontSize: 12.5, fontWeight: FontWeight.w700),
+                          style: const TextStyle(color: AppColors.onAccent, fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),
                         onPressed: _isCheckingAlive ? () => setState(() => _cancelAlive = true) : _startAliveCheck,
                       ),
@@ -2429,7 +2429,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
       short: 'TV',
       category: widget.series.name,
       keywords: [widget.series.name],
-      gradient: [AppColors.accent, Color(0xFF00D2EF)],
+      gradient: [AppColors.accent, const Color(0xFF00D2EF)],
     );
 
     Navigator.pop(context);
@@ -2461,7 +2461,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
       ),
       decoration: BoxDecoration(
         color: AppColors.canvas,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [

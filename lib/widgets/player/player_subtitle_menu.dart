@@ -860,7 +860,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               child: Row(
                 children: [
                   Icon(Icons.search_rounded, size: 13, color: PlayerTheme.accent),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
                     'Search Online',
                     style: TextStyle(
@@ -1026,8 +1026,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               color: PlayerTheme.accent,
               strokeWidth: 2.5,
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Searching subtitles...',
               style: TextStyle(color: PlayerTheme.inkMuted, fontSize: 12),
             ),
@@ -1251,8 +1251,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               child: Row(
                 children: [
                   Icon(Icons.search_rounded, size: 13, color: PlayerTheme.accent),
-                  SizedBox(width: 5),
-                  Text(
+                  const SizedBox(width: 5),
+                  const Text(
                     'Find more subtitles',
                     style: TextStyle(
                       color: PlayerTheme.inkMuted,

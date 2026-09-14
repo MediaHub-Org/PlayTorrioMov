@@ -850,7 +850,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DetailsSectionHeader('Characters & Cast'),
+        const DetailsSectionHeader('Characters & Cast'),
         MouseRegion(
           onEnter: (_) => setState(() => _isHoveringCast = true),
           onExit: (_) => setState(() => _isHoveringCast = false),
@@ -961,7 +961,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DetailsSectionHeader('Staff'),
+        const DetailsSectionHeader('Staff'),
         SizedBox(
           height: 180,
           child: ListView.separated(
@@ -1291,7 +1291,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DetailsSectionHeader('Franchise & Relations'),
+        const DetailsSectionHeader('Franchise & Relations'),
         MouseRegion(
           onEnter: (_) => setState(() => _isHoveringRelations = true),
           onExit: (_) => setState(() => _isHoveringRelations = false),
@@ -1446,7 +1446,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DetailsSectionHeader('You May Also Like'),
+          const DetailsSectionHeader('You May Also Like'),
           MouseRegion(
             onEnter: (_) => setState(() => _isHoveringRecs = true),
             onExit: (_) => setState(() => _isHoveringRecs = false),
