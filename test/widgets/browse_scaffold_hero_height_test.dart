@@ -21,6 +21,7 @@ Future<void> pumpScaffold(
   await tester.pumpWidget(
     MaterialApp(
       home: BrowseScaffold<String>(
+        contentLabel: 'items',
         heroItems: const ['a', 'b'],
         rows: const [],
         heroBuilder: slide,
