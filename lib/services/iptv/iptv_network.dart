@@ -32,6 +32,19 @@ class IptvClient {
         '${p.url}/player_api.php?username=${_enc(p.username)}&password=${_enc(p.password)}';
     final text = await _httpGet(url, timeout: timeout);
     if (text == null) return null;
+    return parseLogin(text);
+  }
+
+  /// The account block out of a `player_api.php` login response, or null if
+  /// the panel did not accept the credentials.
+  ///
+  /// Two shapes are in the wild: most panels wrap the account in `user_info`,
+  /// some answer flat, and both are accepted. So are both ways of saying yes
+  /// -- `auth: "1"` and `status: "Active"` -- because panels disagree about
+  /// which they send, and a panel that sends only the other one would
+  /// otherwise read as a wrong password.
+  @visibleForTesting
+  static Map<String, dynamic>? parseLogin(String text) {
     try {
       final root = json.decode(text) as Map<String, dynamic>;
       final info = (root['user_info'] as Map<String, dynamic>?) ?? root;
@@ -41,6 +54,7 @@ class IptvClient {
       if (!ok) return null;
       return info;
     } catch (_) {
+      // Not JSON: a parked domain or an ISP block page answering 200.
       return null;
     }
   }
@@ -54,13 +68,18 @@ class IptvClient {
       name: (info['username']?.toString() ?? '').isNotEmpty
           ? info['username'].toString()
           : p.username,
-      expiry: _formatExpiry(info['exp_date']?.toString()),
+      expiry: formatExpiry(info['exp_date']?.toString()),
       maxConnections: info['max_connections']?.toString() ?? '1',
       activeConnections: info['active_cons']?.toString() ?? '0',
     );
   }
 
-  static String _formatExpiry(String? raw) {
+  /// Formats Xtream's `exp_date` -- Unix seconds as a string -- for display.
+  ///
+  /// A null or non-numeric value means the line does not expire, which is what
+  /// a panel sends for a lifetime account.
+  @visibleForTesting
+  static String formatExpiry(String? raw) {
     if (raw == null) return 'Unlimited';
     final ts = int.tryParse(raw);
     if (ts == null) return 'Unlimited';
@@ -87,6 +106,12 @@ class IptvClient {
         '&password=${_enc(p.password)}&action=$action';
     final text = await _httpGet(url, timeout: const Duration(seconds: 8));
     if (text == null) return [];
+    return parseCategories(text);
+  }
+
+  /// The category list out of any of the three `get_*_categories` actions.
+  @visibleForTesting
+  static List<IptvCategory> parseCategories(String text) {
     try {
       final arr = json.decode(text) as List;
       return arr
@@ -99,6 +124,8 @@ class IptvClient {
           })
           .toList();
     } catch (_) {
+      // A panel that answers an error object rather than an array, or that
+      // is not a panel at all. No categories is the same answer either way.
       return [];
     }
   }
@@ -115,6 +142,20 @@ class IptvClient {
     final url = categoryId.isEmpty ? base : '$base&category_id=${_enc(categoryId)}';
     final text = await _httpGet(url, timeout: const Duration(seconds: 15));
     if (text == null) return [];
+    return parseStreams(text, kind);
+  }
+
+  /// The stream list out of `get_live_streams`, `get_vod_streams` or
+  /// `get_series`.
+  ///
+  /// Every field here has two spellings in the wild, and a panel using the
+  /// second one is not broken -- it is just a different panel software. Hence
+  /// `stream_id` or `id`, `name` or `title`, `stream_icon` or `cover`. The
+  /// container extension is what the playback URL is built from, so live
+  /// falls back to `ts` and VOD to `mp4` rather than producing a URL ending
+  /// in a bare dot.
+  @visibleForTesting
+  static List<IptvStream> parseStreams(String text, IptvSection kind) {
     try {
       final arr = json.decode(text) as List;
       return arr.map((e) {
@@ -168,6 +209,18 @@ class IptvClient {
         '&password=${_enc(p.password)}&action=get_series_info&series_id=${_enc(seriesId)}';
     final text = await _httpGet(url, timeout: const Duration(seconds: 15));
     if (text == null) return [];
+    return parseSeriesEpisodes(text);
+  }
+
+  /// The episode list out of `get_series_info`.
+  ///
+  /// `episodes` is an object keyed by season *number as a string*, not an
+  /// array, so the season comes from the key rather than from any field on
+  /// the episode. `episode_num` arrives as a number from some panels and a
+  /// string from others. The result is sorted, because the object's key order
+  /// is whatever the panel's JSON encoder produced.
+  @visibleForTesting
+  static List<IptvEpisode> parseSeriesEpisodes(String text) {
     try {
       final root = json.decode(text) as Map<String, dynamic>;
       final episodesObj = root['episodes'] as Map<String, dynamic>?;
@@ -237,6 +290,20 @@ class IptvClient {
         '&action=get_short_epg&stream_id=${_enc(streamId)}&limit=$limit';
     final text = await _httpGet(url, timeout: timeout);
     if (text == null) return const [];
+    return parseShortEpg(text);
+  }
+
+  /// The programme list out of `get_short_epg`.
+  ///
+  /// Panels disagree on all three things this has to read. The root is either
+  /// an object with `epg_listings` or a bare array. Times come as Unix
+  /// seconds or as `YYYY-MM-DD HH:MM:SS`, under two different key names.
+  /// Titles and descriptions are base64, except on the panels that send them
+  /// in the clear -- hence decoding that falls back to the raw string. An
+  /// entry without a usable start and stop is dropped rather than shown with
+  /// a wrong time.
+  @visibleForTesting
+  static List<EpgEntry> parseShortEpg(String text) {
     try {
       final root = json.decode(text);
       final List arr = root is Map<String, dynamic>
