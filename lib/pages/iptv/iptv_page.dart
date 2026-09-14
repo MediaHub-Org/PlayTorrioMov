@@ -155,7 +155,6 @@ class _IptvPageState extends State<IptvPage> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = AppThemeService.currentPalette.value;
     final spotlightEnabled = IptvSettings.enableSpotlight.value;
     final visibleCategories = IptvSettings.visibleCategories.value;
 
