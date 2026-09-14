@@ -790,7 +790,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(Icons.close_rounded, size: 14, color: AppColors.inkMuted),
-                                      SizedBox(width: 4),
+                                      const SizedBox(width: 4),
                                       Text(
                                         'Reset',
                                         style: TextStyle(

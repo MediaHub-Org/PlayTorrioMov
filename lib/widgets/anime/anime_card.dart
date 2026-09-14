@@ -247,7 +247,7 @@ class _AnimePosterFrame extends StatelessWidget {
                 ),
                 child: Text(
                   anime.formattedFormat.toUpperCase(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w900,
                     color: AppColors.onAccent,
@@ -290,7 +290,7 @@ class _AnimePosterFrame extends StatelessWidget {
                     color: AppColors.accent,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.play_arrow_rounded,
                     color: AppColors.onAccent,
                     size: 16,

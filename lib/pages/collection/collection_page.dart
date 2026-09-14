@@ -131,7 +131,7 @@ class _CollectionPageState extends State<CollectionPage> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Remove',
               style: TextStyle(
                 color: AppColors.onAccent,

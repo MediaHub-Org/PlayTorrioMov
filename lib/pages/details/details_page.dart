@@ -747,7 +747,7 @@ class _DetailsPageState extends State<DetailsPage>
                           _buildSimilarRow(),
                           const SizedBox(height: _Space.xl),
                         ] else if (_isFetchingSimilar) ...[
-                          DetailsSectionHeader('Similar Content'),
+                          const DetailsSectionHeader('Similar Content'),
                           const Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 40),
@@ -1433,7 +1433,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DetailsSectionHeader('Cast & Crew'),
+          const DetailsSectionHeader('Cast & Crew'),
           SizedBox(
             height: 148,
             child: Stack(
@@ -1764,7 +1764,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DetailsSectionHeader('More Like This'),
+          const DetailsSectionHeader('More Like This'),
           SizedBox(
             height: cardWidth * 1.5 + 8,
             child: Stack(
@@ -1909,7 +1909,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DetailsSectionHeader('Similar Content'),
+          const DetailsSectionHeader('Similar Content'),
           SizedBox(
             height: cardHeight,
             child: Stack(

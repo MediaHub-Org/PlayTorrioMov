@@ -1191,8 +1191,8 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             title: Row(
               children: [
                 Icon(Icons.tune_rounded, color: AppColors.ink),
-                SizedBox(width: 10),
-                Text('Custom Decoder Chain', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                const SizedBox(width: 10),
+                const Text('Custom Decoder Chain', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
               ],
             ),
             content: SizedBox(
@@ -1254,7 +1254,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   backgroundColor: palette.primaryColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: Text('Save Chain', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
+                child: const Text('Save Chain', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
                 onPressed: () async {
                   if (!selected.contains('FFmpeg')) selected.add('FFmpeg');
                   await PlayerSettings.setCustomDecoders(selected);

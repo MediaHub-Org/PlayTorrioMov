@@ -600,8 +600,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
             backgroundColor: _surfaceColor,
             title: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 32),
-                SizedBox(width: 12),
+                const Icon(Icons.check_circle, color: Colors.green, size: 32),
+                const SizedBox(width: 12),
                 Text(
                   'Download Complete',
                   style: TextStyle(color: AppColors.ink),

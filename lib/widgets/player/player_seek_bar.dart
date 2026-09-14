@@ -225,7 +225,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                           width: trackWidth * activeFraction,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [AppColors.accent, Color(0xFF9D84FF)],
+                              colors: [AppColors.accent, const Color(0xFF9D84FF)],
                             ),
                             borderRadius: BorderRadius.circular(999),
                             boxShadow: [

@@ -285,7 +285,7 @@ class _PosterFrame extends StatelessWidget {
                   ),
                   child: Text(
                     contentType == 'series' ? 'SERIES' : (contentType == 'anime' ? 'ANIME' : 'MOVIE'),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
@@ -322,7 +322,7 @@ class _PosterFrame extends StatelessWidget {
                           const SizedBox(width: 3),
                           Text(
                             displayRating,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w800,
                               color: AppColors.onAccent,

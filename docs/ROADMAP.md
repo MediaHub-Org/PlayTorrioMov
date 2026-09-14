@@ -155,6 +155,34 @@ remaining dark literal in `lib/` is one of them and says so in a comment:
 So the rule for the next person: before tokenising a dark literal, ask which
 of the three it is. If it is none of them, it is a surface and wants a token.
 
+### The PR checks are three parallel jobs, not one
+
+`pr-checks.yml` runs Analyze & Test, Android Build and Linux Desktop Build
+side by side. Analyze & Test is the one job with no Java, no Gradle and no
+platform toolchain, because it is both the check that fails most often and
+the one whose answer is wanted first — it should not queue behind setup it
+never uses. It was also the reason a red analyze used to hide whether the
+APK builds: they were steps in one job, so the first failure ended the run
+and the second only surfaced a push later.
+
+**Why an Android build at all, rather than something lighter.** `flutter
+analyze` and `flutter test` never invoke a platform toolchain, so neither
+can catch a build-configuration break. That is not hypothetical here: the
+Android build sat broken on a Windows-only JDK path in `gradle.properties`
+long enough that its release job was deleted rather than fixed. Android and
+Linux are the two cheapest compilations that exercise a real toolchain
+(Gradle/NDK and CMake), and both run on the same ubuntu tier; Windows and
+macOS runners cost several times as much per minute and stay release-only.
+The APK is an artifact of the check, not its purpose — it is uploaded
+because a built APK is free to keep once the job has produced it.
+
+**Infos are not fatal.** `--no-fatal-infos` is a deliberate setting, but it
+only works while the info count is near zero. It sat at 133 — all
+`prefer_const_*` — and one real `unused_local_variable` warning went
+unnoticed in that noise and put `main` red. The sweep that cleared them
+(#66) is what makes `--fatal-infos` a realistic next step; a check whose
+normal output is 133 ignored lines teaches people to ignore it.
+
 ### Declined, so they do not get re-litigated
 
 - **Multiple hubs / a hub switcher of any shape.** There is one hub; a second
@@ -291,3 +319,5 @@ closed before this file was rewritten for maintenance mode and are not listed
 | #62 | `HeaderPillSurface`: header pills know when they float over a hero |
 | #63 | `AppColors.accent` — the palette picker reaches the whole app (was 156 hardcoded violets) |
 | #64 | Light mode finished: every remaining dark literal is either a token or annotated as artwork |
+| #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
+| #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |

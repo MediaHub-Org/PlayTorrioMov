@@ -62,7 +62,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppInfo.name} is up to date!'),
+            content: const Text('${AppInfo.name} is up to date!'),
             backgroundColor: _kAccent,
             behavior: SnackBarBehavior.floating,
           ),

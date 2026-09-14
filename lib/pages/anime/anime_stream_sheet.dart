@@ -244,12 +244,12 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
           Flexible(
             child: _allSources.isEmpty && _isScraping
                 ? Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
+                    padding: const EdgeInsets.symmetric(vertical: 40),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(color: AppColors.accent),
-                        SizedBox(height: 14),
+                        const SizedBox(height: 14),
                         Text(
                           'Extracting MegaPlay, VidWish, AllAnime & Miruro streams...',
                           style: TextStyle(color: AppColors.inkMuted, fontSize: 13),

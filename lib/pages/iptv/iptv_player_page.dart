@@ -1777,7 +1777,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                                 : 0,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [AppColors.accent, Color(0xFF00D2EF)],
+                                colors: [AppColors.accent, const Color(0xFF00D2EF)],
                               ),
                               borderRadius: BorderRadius.circular(3),
                             ),

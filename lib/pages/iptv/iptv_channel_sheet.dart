@@ -200,7 +200,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                   color: const Color(0xFFFF3B30),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: Text(
+                                child: const Text(
                                   'LIVE',
                                   style: TextStyle(
                                     color: AppColors.onAccent,
@@ -725,8 +725,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
-                          icon: Icon(Icons.play_arrow_rounded, color: AppColors.onAccent),
-                          label: Text(
+                          icon: const Icon(Icons.play_arrow_rounded, color: AppColors.onAccent),
+                          label: const Text(
                             'Watch Live',
                             style: TextStyle(color: AppColors.onAccent, fontSize: 15, fontWeight: FontWeight.bold),
                           ),

@@ -471,8 +471,8 @@ class _WatchScreenState extends State<WatchScreen>
                               color: _C.accent,
                               size: 20,
                             ),
-                            SizedBox(width: _S.xs),
-                            Text(
+                            const SizedBox(width: _S.xs),
+                            const Text(
                               'Watch Sources',
                               style: TextStyle(
                                 color: _C.textPrimary,
@@ -1028,8 +1028,8 @@ class _WatchScreenState extends State<WatchScreen>
             Row(
               children: [
                 Icon(Icons.stream_rounded, color: _C.accent, size: 20),
-                SizedBox(width: _S.xs),
-                Text(
+                const SizedBox(width: _S.xs),
+                const Text(
                   'Watch Sources',
                   style: TextStyle(
                     color: _C.textPrimary,

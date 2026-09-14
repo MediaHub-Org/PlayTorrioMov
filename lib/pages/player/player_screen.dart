@@ -674,8 +674,8 @@ class _PlayerScreenState extends State<PlayerScreen>
                     color: AppColors.accent,
                     size: 26,
                   ),
-                  SizedBox(width: 10),
-                  Text(
+                  const SizedBox(width: 10),
+                  const Text(
                     'Up Next',
                     style: TextStyle(
                       color: Colors.white,
