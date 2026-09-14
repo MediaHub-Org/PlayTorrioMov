@@ -101,14 +101,43 @@ immediate. Each of these is already built and tested as far as it can be.
 
 ### Cast, against a real receiver (#28)
 
-1. Does a **movie** reach the TV and play? (Known limit: the Cast SDK has no
-   sender-side way to attach Referer/User-Agent, so scraper sources needing
-   them fail on the TV while playing fine locally. Try direct/CDN sources.)
+**Two answers came back from a device on 2026-09-14, and neither is a bug.**
+
+**Android, torrent source → "this source streams from your device".** Working
+as designed. The stream is served by TorrServer on the phone itself, at a
+`127.0.0.1` address; a receiver asked to fetch that asks *itself*. `canCastUrl`
+rejects the whole 127/8 block rather than offering a button that always fails.
+Direct and debrid sources do cast — the snackbar now says so, instead of
+"pick a different source", which read as "try them all".
+
+**Windows → no Cast option at all.** Also by design, and not fixable here:
+`flutter_chrome_cast` implements Android and iOS only, because Google ships no
+Cast *sender* SDK for Windows. `CastService.isSupported` is false there and the
+button is absent. Casting from a Windows build would mean a different protocol
+(DLNA/UPnP), which is a feature, not a fix.
+
+**The open item this leaves** is worth stating precisely, because it is the
+one that would actually let a phone cast a torrent: bind the torrent server to
+the LAN and hand the receiver the device's LAN address instead of loopback.
+That needs two things confirmed first, neither checkable from CI:
+
+1. Whether `torrserver_flutter` binds `0.0.0.0` or loopback only, and whether
+   its `baseUrl` can be pointed at a LAN interface.
+2. Whether Android's cleartext-HTTP policy and the phone's own firewall let a
+   receiver reach that port.
+
+If (1) is loopback-only the idea stops there. Everything else — swapping the
+host for `NetworkInterface.list()`'s LAN address — is easy by comparison, and
+pointless until (1) is known.
+
+**Still unverified, and still needing a receiver:**
+
+1. Does a **movie** from a direct/CDN source reach the TV and play? (Known
+   limit: the Cast SDK has no sender-side way to attach Referer/User-Agent, so
+   scraper sources needing them fail on the TV while playing fine locally.)
 2. Does a **Live TV channel** reach the TV, and does the receiver show it as
    live — no seek bar, no phantom duration?
 3. Does **disconnect** return playback cleanly?
-4. On a stream a receiver *cannot* reach, does tapping Cast explain itself
-   rather than doing nothing?
 
 ### Series creators (#39)
 
