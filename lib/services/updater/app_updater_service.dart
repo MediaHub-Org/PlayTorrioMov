@@ -320,17 +320,38 @@ class AppUpdaterService {
     return flatpakAssets.first['browser_download_url'];
   }
 
-  /// macOS: match dmg or zip
+  /// macOS: prefer the disk image over the zip.
+  ///
+  /// There is deliberately no architecture branch here, unlike every other
+  /// platform: `flutter build macos` emits a universal binary, so the release
+  /// carries one DMG and one ZIP that both run on Apple Silicon and Intel.
+  /// `abi` stays in the signature to match the other finders.
+  ///
+  /// The order matters because this used to return whichever asset GitHub
+  /// happened to list first, across four mac assets that were two copies of
+  /// the same app. Naming them `universal` removed the duplicate pair; naming
+  /// the format we want removes the rest of the guess.
   String? _findMacOSAsset(List assets, Abi? abi) {
     final macAssets = assets.where((a) {
       final name = (a['name'] as String).toLowerCase();
       return name.contains('mac') || name.contains('darwin') || name.endsWith('.dmg') || name.endsWith('.pkg');
     }).toList();
 
-    if (macAssets.isNotEmpty) {
-      return macAssets.first['browser_download_url'];
+    if (macAssets.isEmpty) return null;
+
+    // A DMG mounts with a drag-to-Applications window; a ZIP leaves the user
+    // to move the .app themselves, so it is the fallback rather than the pick.
+    for (final ext in const ['.dmg', '.pkg']) {
+      final match = macAssets
+          .where((a) => (a['name'] as String).toLowerCase().endsWith(ext))
+          .firstOrNull;
+      if (match != null) {
+        debugPrint('Selected macOS $ext: ${match['name']}');
+        return match['browser_download_url'];
+      }
     }
-    return null;
+
+    return macAssets.first['browser_download_url'];
   }
 
   bool _isNewerVersion(String current, String latest) {
