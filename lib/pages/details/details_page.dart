@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
+import '../../widgets/common/over_artwork.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
