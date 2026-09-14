@@ -486,7 +486,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               DropdownButton<String>(
                 value: PlayerSettings.skipLoopFilter.value,
-                dropdownColor: const Color(0xFF1E2330),
+                dropdownColor: AppColors.raised,
                 underline: const SizedBox(),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
                 items: const [
@@ -535,7 +535,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               DropdownButton<int>(
                 value: PlayerSettings.lavcThreads.value,
-                dropdownColor: const Color(0xFF1E2330),
+                dropdownColor: AppColors.raised,
                 underline: const SizedBox(),
                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
                 items: const [

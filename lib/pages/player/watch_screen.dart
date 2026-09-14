@@ -22,7 +22,7 @@ import '../../services/stream/stream_service.dart';
 import '../../services/download/download_service.dart';
 import '../../utils/download/download_path_helper.dart';
 import '../../utils/fullscreen_navigator.dart';
-import '../../widgets/common/performance_liquid_lens.dart';
+import '../../widgets/player/performance_liquid_lens.dart';
 import '../../widgets/common/source_badges.dart';
 import '../settings/settings_page.dart';
 import '../details/details_page.dart';

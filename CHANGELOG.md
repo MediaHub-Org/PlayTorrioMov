@@ -3,6 +3,33 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.1+29] - 2026-09-14
+
+Light mode, finished. 1.6.0 shipped the colour system; this is the chrome it
+did not reach.
+
+### Fixed
+- **The bars were black-on-black in light mode.** The top bar, the section
+  switcher on desktop and the tab bar at the bottom of a phone each carried
+  their own dark colour, while the wordmark and icons on them had already
+  moved to the theme. Choosing Light turned the glyphs dark and left the bars
+  dark. They are light now, with dark icons and lettering, and take their
+  tint from whichever of the eight palettes you picked
+- **Live TV's header** sits on a shade over the channel artwork rather than
+  on the page, so the same change would have turned *its* text black on a
+  photograph. Those controls now know they are over artwork and stay white —
+  in both themes, which is what they were always meant to do
+- **Seven of the eight themes only half-applied.** The accent colour was
+  written out by hand in 156 places, so choosing anything other than the
+  default violet recoloured part of the app and left the rest violet —
+  including the selected section in the switcher, which is the one thing on
+  screen whose job is to show you where you are
+- Some screens kept whichever theme was active the first time you opened
+  them, and ignored later changes — About, the update dialog, the P2P
+  warning, and the player's accent
+- A few remaining surfaces in light mode: the sheet behind anime sources,
+  and the dropdowns in the video-player settings
+
 ## [1.6.0+28] - 2026-09-14
 
 Maintenance release. Light mode became real, the player's menus stopped

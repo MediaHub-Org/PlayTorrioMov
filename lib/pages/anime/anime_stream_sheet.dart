@@ -144,9 +144,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     final filtered = _filteredSources;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF0F121C),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

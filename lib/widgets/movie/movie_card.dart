@@ -308,6 +308,9 @@ class _PosterFrame extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
                       decoration: BoxDecoration(
+                        // A scrim over the poster, not a theme surface: it
+                        // stays dark so the onAccent-white rating on it reads
+                        // in either theme.
                         color: const Color(0xE6080A0F),
                         borderRadius: BorderRadius.circular(7),
                         border: Border.all(color: AppColors.onAccent.withValues(alpha: 0.15)),
@@ -376,6 +379,8 @@ class _PosterFrame extends StatelessWidget {
                       ],
                     ),
                     child: const Icon(
+                      // Dark glyph on the white circle above, which is itself
+                      // onAccent over the poster -- fixed in either theme.
                       Icons.play_arrow_rounded,
                       color: Color(0xFF11131B),
                       size: 29,
