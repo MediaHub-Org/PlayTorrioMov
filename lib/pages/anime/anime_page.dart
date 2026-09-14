@@ -534,6 +534,7 @@ class _AnimePageState extends State<AnimePage> {
               typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',
               title: _isArabicMode ? 'متابعة المشاهدة' : 'Continue Watching',
             ),
+            belowHeroExtent: ContinueWatchingSlider.bandHeight,
             isLoading: _loading,
             error: _error,
             onRetry: _loadAnimeData,
