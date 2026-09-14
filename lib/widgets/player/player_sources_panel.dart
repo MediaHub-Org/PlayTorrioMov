@@ -418,7 +418,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 32,
             height: 32,
             child: CircularProgressIndicator(
@@ -500,7 +500,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(

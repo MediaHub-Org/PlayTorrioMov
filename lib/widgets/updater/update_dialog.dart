@@ -94,7 +94,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       color: _accentColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.system_update_rounded,
                       color: _accentColor,
                       size: 32,
@@ -105,7 +105,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'UPDATE AVAILABLE',
                           style: TextStyle(
                             fontSize: 11,
@@ -171,7 +171,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             ),
                           ],
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_rounded,
                           color: _accentColor,
                         ),
@@ -189,7 +189,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             const SizedBox(height: 4),
                             Text(
                               widget.updateInfo.latestVersion,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: _accentColor,
@@ -312,7 +312,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Downloading...',
                               style: TextStyle(
                                 fontSize: 13,
@@ -338,7 +338,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             backgroundColor: AppColors.ink.withValues(
                               alpha: 0.1,
                             ),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
+                            valueColor: AlwaysStoppedAnimation<Color>(
                               _accentColor,
                             ),
                             minHeight: 8,
@@ -625,7 +625,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   ),
                   child: SelectableText(
                     filePath,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: _accentColor,
                       fontSize: 12,
                       fontFamily: 'monospace',
@@ -648,7 +648,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     ),
                     child: SelectableText(
                       'flatpak install --user --reinstall "$filePath"',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: _accentColor,
                         fontSize: 12,
                         fontFamily: 'monospace',

@@ -464,7 +464,7 @@ class _WatchScreenState extends State<WatchScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             Icon(
                               Icons.stream_rounded,
@@ -594,7 +594,7 @@ class _WatchScreenState extends State<WatchScreen>
               _isCollection
                   ? 'PART ${ep.episode ?? 1}'
                   : 'S${ep.season ?? '?' }E${ep.episode ?? '?' }',
-              style: const TextStyle(
+              style: TextStyle(
                 color: _C.accent,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -856,7 +856,7 @@ class _WatchScreenState extends State<WatchScreen>
                   setState(() => _synopsisExpanded = !_synopsisExpanded),
               child: Text(
                 _synopsisExpanded ? 'Show less' : 'Read more',
-                style: const TextStyle(
+                style: TextStyle(
                   color: _C.accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -1025,7 +1025,7 @@ class _WatchScreenState extends State<WatchScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Row(
+            Row(
               children: [
                 Icon(Icons.stream_rounded, color: _C.accent, size: 20),
                 SizedBox(width: _S.xs),
@@ -1960,7 +1960,7 @@ class _SourceCardState extends State<_SourceCard> {
                       color: _C.accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.extension_rounded,
                       color: _C.accent,
                       size: 20,

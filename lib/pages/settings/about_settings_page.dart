@@ -61,7 +61,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('${AppInfo.name} is up to date!'),
             backgroundColor: _kAccent,
             behavior: SnackBarBehavior.floating,
@@ -211,7 +211,7 @@ class _BrandHeader extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [_kAccent, _kAccentAlt],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -301,7 +301,7 @@ class _UpdatesRow extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10),
               ),
               icon: isChecking
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 14,
                       height: 14,
                       child: CircularProgressIndicator(

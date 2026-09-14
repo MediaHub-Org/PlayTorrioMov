@@ -22,7 +22,7 @@ void main() {
   test('the accent token follows the selected palette', () {
     // The whole point of the token. Eight palettes ship; before this the app
     // painted the first one's violet in 159 places regardless of choice.
-    final palettes = AppThemeService.palettes;
+    const palettes = AppThemeService.palettes;
     expect(palettes.length, greaterThan(1));
 
     final seen = <Color>{};

@@ -90,7 +90,7 @@ class PlayerAspectMenu extends StatelessWidget {
                           ),
                         ),
                         if (isSelected)
-                          const Icon(
+                          Icon(
                             Icons.check_rounded,
                             size: 16,
                             color: PlayerTheme.accent,

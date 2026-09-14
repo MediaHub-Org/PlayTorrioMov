@@ -56,7 +56,7 @@ class PlayerCastSheet extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
+                  Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
                   const SizedBox(width: 10),
                   const Text(
                     'CAST TO DEVICE',
