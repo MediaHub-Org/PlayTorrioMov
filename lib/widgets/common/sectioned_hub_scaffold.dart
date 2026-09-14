@@ -29,6 +29,7 @@ class SectionedHubScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return ListenableBuilder(
       listenable: HubController.instance,
       builder: (context, _) {

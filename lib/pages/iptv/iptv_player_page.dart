@@ -1663,6 +1663,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final duration = widget.duration;
 
     return ValueListenableBuilder<Duration>(

@@ -52,6 +52,7 @@ class MissingPoster extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       // Not a theme surface: a missing poster stands in for artwork, so it
       // stays dark and its glyph stays onAccent-white in either theme.

@@ -95,6 +95,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final ch = widget.channel;
     final primaryColor = ch.gradient.isNotEmpty ? ch.gradient.first : AppColors.accent;
     final secondaryColor = ch.gradient.length > 1 ? ch.gradient.last : const Color(0xFF00D2EF);

@@ -30,6 +30,7 @@ class GlassBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final tint = overArtwork ? AppColors.onAccent : AppColors.ink;
     return ClipOval(
       child: BackdropFilter(

@@ -222,6 +222,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     if (_error != null) {
       return ErrorView(
         title: 'Could not load ${widget.type == 'series' ? 'series' : 'movies'}',

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/theme/app_theme_service.dart';
@@ -93,4 +95,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(_barColour(tester), dark);
   });
+
+  test('every widget that paints from AppColors subscribes to the theme', () {
+    // The behavioural test above covers one bar. This covers the rule, which
+    // is what stops the next const-built widget reintroducing the bug: if a
+    // class reads these tokens and has a build(), it has to say so.
+    //
+    // Scoped to classes that read AppColors *in their own body* — a file can
+    // hold several widgets and only some of them paint.
+    final offenders = <String>[];
+
+    for (final file in Directory('lib').listSync(recursive: true)) {
+      if (file is! File || !file.path.endsWith('.dart')) continue;
+      final src = file.readAsStringSync();
+      if (!src.contains('AppColors.')) continue;
+
+      for (final match
+          in RegExp(r'^(?:abstract\s+)?class\s+(\w+)[^\n{]*\{', multiLine: true)
+              .allMatches(src)) {
+        final body = _classBody(src, match.start);
+        if (body == null || !body.contains('AppColors.')) continue;
+        if (!body.contains('Widget build(BuildContext context)')) continue;
+        if (body.contains('AppColors.dependOn(context)')) continue;
+        offenders.add('${file.path}: ${match.group(1)}');
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason: 'these paint from AppColors but never subscribe, so a const '
+          'parent will leave them on the theme they were first built under; '
+          'add AppColors.dependOn(context) at the top of build',
+    );
+  });
+}
+
+/// The `{...}` of the class starting at [start], by brace matching.
+String? _classBody(String src, int start) {
+  final open = src.indexOf('{', start);
+  if (open == -1) return null;
+  var depth = 0;
+  for (var i = open; i < src.length; i++) {
+    if (src[i] == '{') depth++;
+    if (src[i] == '}') {
+      depth--;
+      if (depth == 0) return src.substring(open, i);
+    }
+  }
+  return null;
 }

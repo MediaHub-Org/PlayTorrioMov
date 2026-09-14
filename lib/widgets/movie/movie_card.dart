@@ -85,6 +85,7 @@ class MovieCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return InteractiveCardShell(
       pressedScale: 0.97,
       onTap: onTap ??
@@ -178,6 +179,7 @@ class _PosterFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final hasPoster = posterUrl != null && posterUrl!.isNotEmpty;
     final palette = AppThemeService.currentPalette.value;
 

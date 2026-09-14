@@ -63,6 +63,7 @@ class PillFilterHeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final resolvedShowDivider = showDivider ?? !transparent;
     final inset = AppSpacing.pageInset(context);
 

@@ -217,6 +217,7 @@ class _CatalogPageState extends State<CatalogPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final topPadding = MediaQuery.of(context).padding.top;
     final sizing = MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width);
     final isDesktop = AppBreakpoints.of(context) == ScreenTier.desktop;
@@ -564,6 +565,7 @@ class _GenreChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(

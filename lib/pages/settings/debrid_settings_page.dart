@@ -242,6 +242,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     const services = [
       'None',
       'Real-Debrid',

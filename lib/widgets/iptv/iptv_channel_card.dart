@@ -24,6 +24,7 @@ class IptvChannelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final ch = channel;
     final palette = AppThemeService.currentPalette.value;
     final primaryColor = ch.gradient.isNotEmpty ? ch.gradient.first : palette.primaryColor;

@@ -83,6 +83,7 @@ class _CustomScrollTrackState extends State<CustomScrollTrack> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final thumbPosition = _thumbFraction * (widget.length - _thumbSize);
     final isVert = widget.axis == Axis.vertical;
 
@@ -223,6 +224,7 @@ class _HoverArrowState extends State<_HoverArrow> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),

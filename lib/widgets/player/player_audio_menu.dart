@@ -77,6 +77,7 @@ class PlayerAudioMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final hasTracks = audioTracks.isNotEmpty;
     final size = MediaQuery.sizeOf(context);
     final screenWidth = size.width;

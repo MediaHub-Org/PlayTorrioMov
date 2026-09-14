@@ -150,6 +150,7 @@ class _CollectionPageState extends State<CollectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return LibraryTabs(
       title: 'Library',
       titleIcon: Icons.video_library_rounded,

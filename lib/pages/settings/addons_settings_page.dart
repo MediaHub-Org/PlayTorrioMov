@@ -194,6 +194,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final addons = _manager.addons;
 
     return Scaffold(
@@ -348,6 +349,7 @@ class _AddonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final m = addon.manifest;
 
     final hasCatalogs = m.supportsCatalog || m.catalogs.isNotEmpty;
@@ -589,6 +591,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final activeColor = AppColors.accent;
     final isEnabled = widget.isEnabled;
 
@@ -679,6 +682,7 @@ class _AddAddonButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: AnimatedContainer(

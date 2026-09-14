@@ -27,6 +27,7 @@ class IptvHeroSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final primaryColor = channel.gradient.isNotEmpty
         ? channel.gradient.first

@@ -760,6 +760,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final title = widget.portal?.name.isNotEmpty == true
         ? widget.portal!.name
@@ -1560,6 +1561,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final isFavCategory = widget.category.id == _IptvPortalBrowserPageState.favoritesCategoryId;
     final showCount = IptvSettings.showCategoryCount.value;
@@ -1695,6 +1697,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final indexFormatted = widget.index.toString().padLeft(3, '0');
@@ -1937,6 +1940,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final showLogo = IptvSettings.showStreamLogos.value;
@@ -2121,6 +2125,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final showLogo = IptvSettings.showStreamLogos.value;
@@ -2237,6 +2242,7 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final s = widget.stream;
 
     return RepaintBoundary(
@@ -2455,6 +2461,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.8,
@@ -2552,6 +2559,7 @@ class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),

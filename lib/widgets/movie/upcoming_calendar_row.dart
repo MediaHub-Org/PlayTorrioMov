@@ -83,6 +83,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final entries = _entries;
     if (entries == null || entries.isEmpty) return const SizedBox.shrink();
 

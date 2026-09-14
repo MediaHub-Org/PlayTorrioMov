@@ -15,6 +15,7 @@ class P2pWarningDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final size = MediaQuery.sizeOf(context);
     final isSmallScreen = size.width < 500;
 

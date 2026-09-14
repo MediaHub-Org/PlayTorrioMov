@@ -448,6 +448,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(

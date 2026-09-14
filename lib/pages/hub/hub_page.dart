@@ -77,6 +77,7 @@ class _HubPageState extends State<HubPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final tier = AppBreakpoints.of(context);
 
     return KeyboardListener(
