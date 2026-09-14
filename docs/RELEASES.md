@@ -67,6 +67,15 @@ looks for:
 | `DISCORD_APP_ID` | Discord Rich Presence |
 | `TMDB_API_KEY` | Cast photos and character names, so a fresh install has them with no setup |
 
+Every line must read `KEY=VALUE`. Blank lines and `#` comments are fine and
+are stripped before the build; anything else fails the job by line number,
+because Flutter's own message for a malformed line is `Invalid property
+line: ***` — the content is a secret, so it names nothing you can act on.
+
+The secret reaches the job through the environment rather than being spliced
+into the shell script, so a value containing `"`, `` ` `` or `$` survives
+intact instead of being interpreted by bash.
+
 All are optional: each feature no-ops when its key is missing. A TMDB key
 is free and takes a minute to get — register at
 [themoviedb.org](https://www.themoviedb.org/settings/api), no billing

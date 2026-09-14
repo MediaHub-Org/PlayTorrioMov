@@ -143,11 +143,14 @@ jobs:
 
       - name: Setup .env from GitHub Secrets
         shell: bash
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
+          if [ -n "$ENV_FILE" ]; then
+            printf '%s\n' "$ENV_FILE" > .env
+          elif [ -n "$DOTENV" ]; then
+            printf '%s\n' "$DOTENV" > .env
           else
             # An empty .env still builds, which is why this went unnoticed:
             # every credential-backed feature simply no-ops in the artifact.
@@ -155,6 +158,21 @@ jobs:
             # cannot sign in to anything.
             touch .env
             echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
+          # one does not, Flutter says `Invalid property line: ***` -- the
+          # content is a secret, so the message names nothing anyone can act
+          # on. Name the line number instead, and normalise what is safely
+          # normalisable.
+          if [ -s .env ]; then
+            sed -i 's/\r$//' .env
+            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+            if [ -n "$bad" ]; then
+              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
+              exit 1
+            fi
+            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+            mv .env.tmp .env
           fi
 
       - name: Install dependencies
@@ -308,11 +326,14 @@ jobs:
 
       - name: Setup .env from GitHub Secrets
         shell: bash
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
+          if [ -n "$ENV_FILE" ]; then
+            printf '%s\n' "$ENV_FILE" > .env
+          elif [ -n "$DOTENV" ]; then
+            printf '%s\n' "$DOTENV" > .env
           else
             # An empty .env still builds, which is why this went unnoticed:
             # every credential-backed feature simply no-ops in the artifact.
@@ -320,6 +341,21 @@ jobs:
             # cannot sign in to anything.
             touch .env
             echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
+          # one does not, Flutter says `Invalid property line: ***` -- the
+          # content is a secret, so the message names nothing anyone can act
+          # on. Name the line number instead, and normalise what is safely
+          # normalisable.
+          if [ -s .env ]; then
+            sed -i 's/\r$//' .env
+            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+            if [ -n "$bad" ]; then
+              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
+              exit 1
+            fi
+            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+            mv .env.tmp .env
           fi
 
       - name: Install dependencies
@@ -435,11 +471,14 @@ jobs:
 
       - name: Setup .env from GitHub Secrets
         shell: bash
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
+          if [ -n "$ENV_FILE" ]; then
+            printf '%s\n' "$ENV_FILE" > .env
+          elif [ -n "$DOTENV" ]; then
+            printf '%s\n' "$DOTENV" > .env
           else
             # An empty .env still builds, which is why this went unnoticed:
             # every credential-backed feature simply no-ops in the artifact.
@@ -447,6 +486,21 @@ jobs:
             # cannot sign in to anything.
             touch .env
             echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
+          # one does not, Flutter says `Invalid property line: ***` -- the
+          # content is a secret, so the message names nothing anyone can act
+          # on. Name the line number instead, and normalise what is safely
+          # normalisable.
+          if [ -s .env ]; then
+            sed -i 's/\r$//' .env
+            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+            if [ -n "$bad" ]; then
+              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
+              exit 1
+            fi
+            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+            mv .env.tmp .env
           fi
 
       - name: Install dependencies
@@ -554,11 +608,14 @@ jobs:
 
       - name: Setup .env from GitHub Secrets
         shell: bash
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
+          if [ -n "$ENV_FILE" ]; then
+            printf '%s\n' "$ENV_FILE" > .env
+          elif [ -n "$DOTENV" ]; then
+            printf '%s\n' "$DOTENV" > .env
           else
             # An empty .env still builds, which is why this went unnoticed:
             # every credential-backed feature simply no-ops in the artifact.
@@ -566,6 +623,21 @@ jobs:
             # cannot sign in to anything.
             touch .env
             echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
+          # one does not, Flutter says `Invalid property line: ***` -- the
+          # content is a secret, so the message names nothing anyone can act
+          # on. Name the line number instead, and normalise what is safely
+          # normalisable.
+          if [ -s .env ]; then
+            sed -i 's/\r$//' .env
+            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+            if [ -n "$bad" ]; then
+              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
+              exit 1
+            fi
+            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+            mv .env.tmp .env
           fi
 
       - name: Generate Linux platform files if missing
@@ -736,11 +808,14 @@ jobs:
 
       - name: Setup .env from GitHub Secrets
         shell: bash
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
+          if [ -n "$ENV_FILE" ]; then
+            printf '%s\n' "$ENV_FILE" > .env
+          elif [ -n "$DOTENV" ]; then
+            printf '%s\n' "$DOTENV" > .env
           else
             # An empty .env still builds, which is why this went unnoticed:
             # every credential-backed feature simply no-ops in the artifact.
@@ -748,6 +823,21 @@ jobs:
             # cannot sign in to anything.
             touch .env
             echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
+          # one does not, Flutter says `Invalid property line: ***` -- the
+          # content is a secret, so the message names nothing anyone can act
+          # on. Name the line number instead, and normalise what is safely
+          # normalisable.
+          if [ -s .env ]; then
+            sed -i 's/\r$//' .env
+            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+            if [ -n "$bad" ]; then
+              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
+              exit 1
+            fi
+            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+            mv .env.tmp .env
           fi
 
       - name: Configure macOS platform files if missing
@@ -830,11 +920,14 @@ jobs:
 
       - name: Setup .env from GitHub Secrets
         shell: bash
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+          DOTENV: ${{ secrets.DOTENV }}
         run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
+          if [ -n "$ENV_FILE" ]; then
+            printf '%s\n' "$ENV_FILE" > .env
+          elif [ -n "$DOTENV" ]; then
+            printf '%s\n' "$DOTENV" > .env
           else
             # An empty .env still builds, which is why this went unnoticed:
             # every credential-backed feature simply no-ops in the artifact.
@@ -842,6 +935,21 @@ jobs:
             # cannot sign in to anything.
             touch .env
             echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
+          # one does not, Flutter says `Invalid property line: ***` -- the
+          # content is a secret, so the message names nothing anyone can act
+          # on. Name the line number instead, and normalise what is safely
+          # normalisable.
+          if [ -s .env ]; then
+            sed -i 's/\r$//' .env
+            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+            if [ -n "$bad" ]; then
+              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
+              exit 1
+            fi
+            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+            mv .env.tmp .env
           fi
 
       - name: Install dependencies
