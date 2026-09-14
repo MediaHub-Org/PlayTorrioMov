@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/widgets/common/setting_choice_chip.dart';
+import 'package:playtorriomov/widgets/iptv/default_portal_tab_picker.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
@@ -49,33 +50,36 @@ void main() {
       expect(picks, 0);
     });
 
-    testWidgets('renders at a phone width without overflowing', (tester) async {
+    testWidgets('a row of chips wraps rather than overflowing on a phone', (
+      tester,
+    ) async {
+      // 'Xtream Panels' and 'M3U Playlists' come to more than 320px side by
+      // side. Live TV's settings page had always wrapped its chip rows; the
+      // portals modal used a bare Row and overflowed there, and so did the
+      // picker extracted from it. Wrap is what makes the two agree.
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(
-        wrap(
-          Row(
-            children: [
-              SettingChoiceChip(
-                label: 'Xtream Panels',
-                selected: true,
-                onSelect: () {},
-              ),
-              const SizedBox(width: 8),
-              SettingChoiceChip(
-                label: 'M3U Playlists',
-                selected: false,
-                onSelect: () {},
-              ),
-            ],
-          ),
-        ),
-      );
+      await tester.pumpWidget(wrap(const DefaultPortalTabPicker()));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
+      expect(find.byType(SettingChoiceChip), findsNWidgets(2));
+    });
+
+    testWidgets('the same row stays on one line when it fits', (tester) async {
+      tester.view.physicalSize = const Size(900, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(wrap(const DefaultPortalTabPicker()));
+      await tester.pumpAndSettle();
+
+      final first = tester.getTopLeft(find.byType(SettingChoiceChip).first);
+      final second = tester.getTopLeft(find.byType(SettingChoiceChip).last);
+      expect(second.dy, first.dy);
+      expect(second.dx, greaterThan(first.dx));
     });
   });
 

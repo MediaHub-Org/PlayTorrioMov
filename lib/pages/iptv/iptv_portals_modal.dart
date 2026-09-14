@@ -233,16 +233,19 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   ValueListenableBuilder<PortalCardStyle>(
                     valueListenable: IptvSettings.portalCardStyle,
                     builder: (context, style, _) {
-                      return Row(
+                      // Wrap, not Row: three chips of user-facing labels do
+                      // not fit a narrow phone side by side, and this modal
+                      // is narrower than the window. Live TV's settings page
+                      // already wrapped every one of its chip rows; this copy
+                      // never picked that up.
+                      return Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: PortalCardStyle.values.map((s) {
-                          final isSelected = s == style;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: SettingChoiceChip(
-                              label: s.label,
-                              selected: isSelected,
-                              onSelect: () => IptvSettings.setPortalCardStyle(s),
-                            ),
+                          return SettingChoiceChip(
+                            label: s.label,
+                            selected: s == style,
+                            onSelect: () => IptvSettings.setPortalCardStyle(s),
                           );
                         }).toList(),
                       );

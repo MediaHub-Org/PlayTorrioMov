@@ -24,14 +24,18 @@ class DefaultPortalTabPicker extends StatelessWidget {
     return ValueListenableBuilder<int>(
       valueListenable: IptvSettings.defaultPortalTab,
       builder: (context, tabIdx, _) {
-        return Row(
+        // Wrap rather than Row: these two labels come to more than a 320px
+        // phone can give them side by side, and both copies this replaced
+        // used a bare Row, so both overflowed there.
+        return Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: [
             SettingChoiceChip(
               label: 'Xtream Panels',
               selected: tabIdx == 0,
               onSelect: () => IptvSettings.setDefaultPortalTab(0),
             ),
-            const SizedBox(width: 8),
             SettingChoiceChip(
               label: 'M3U Playlists',
               selected: tabIdx == 1,
