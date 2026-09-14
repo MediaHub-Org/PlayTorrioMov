@@ -38,7 +38,7 @@ class PremiumizeService {
     try {
       final res = await http.get(
         Uri.parse('https://www.premiumize.me/api/account/info?apikey=$trimmed'),
-      );
+      ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['status'] == 'success') {
@@ -58,7 +58,7 @@ class PremiumizeService {
     final res = await http.post(
       Uri.parse('https://www.premiumize.me/api/folder/list'),
       body: {'apikey': apiKey, 'id': folderId},
-    );
+    ).timeout(const Duration(seconds: 20));
     final body = json.decode(res.body) as Map<String, dynamic>;
     if (body['status'] != 'success') {
       throw Exception('Premiumize folder/list: ${body['message']}');
@@ -100,7 +100,7 @@ class PremiumizeService {
       final dlRes = await http.post(
         Uri.parse('https://www.premiumize.me/api/transfer/directdl'),
         body: {'apikey': apiKey, 'src': magnet},
-      );
+      ).timeout(const Duration(seconds: 20));
       final dlBody = json.decode(dlRes.body) as Map<String, dynamic>;
       if (dlBody['status'] == 'success') {
         final content = (dlBody['content'] as List?) ?? const [];
@@ -124,7 +124,7 @@ class PremiumizeService {
       final createRes = await http.post(
         Uri.parse('https://www.premiumize.me/api/transfer/create'),
         body: {'apikey': apiKey, 'src': magnet},
-      );
+      ).timeout(const Duration(seconds: 20));
       final createBody = json.decode(createRes.body) as Map<String, dynamic>;
       if (createBody['status'] != 'success') {
         throw Exception('Premiumize create: ${createBody['message']}');
@@ -141,7 +141,7 @@ class PremiumizeService {
         final listRes = await http.post(
           Uri.parse('https://www.premiumize.me/api/transfer/list'),
           body: {'apikey': apiKey},
-        );
+        ).timeout(const Duration(seconds: 20));
         final listBody = json.decode(listRes.body) as Map<String, dynamic>;
         if (listBody['status'] != 'success') {
           throw Exception('Premiumize list: ${listBody['message']}');

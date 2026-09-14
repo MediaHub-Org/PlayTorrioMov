@@ -247,7 +247,8 @@ class DownloadEverythingScraper extends StreamScraper {
       if (res1.isRedirect || res1.statusCode == 301 || res1.statusCode == 302) {
         final loc = res1.headers['location'];
         if (loc != null) {
-          final resRedirect = await http.get(Uri.parse(loc), headers: {'User-Agent': _ua});
+          final resRedirect = await http.get(Uri.parse(loc), headers: {'User-Agent': _ua})
+              .timeout(const Duration(seconds: 8));
           html = resRedirect.body;
         }
       }

@@ -80,7 +80,7 @@ class AniDbExtractor {
     final response = await _client.get(
       Uri.parse(url),
       headers: _defaultHeaders,
-    );
+    ).timeout(const Duration(seconds: 10));
     return response.body;
   }
 

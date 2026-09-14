@@ -85,7 +85,7 @@ class AppUpdaterService {
       final response = await http.get(
         Uri.parse(githubApiUrl),
         headers: {'Accept': 'application/vnd.github.v3+json'},
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

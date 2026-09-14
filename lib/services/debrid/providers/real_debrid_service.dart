@@ -39,7 +39,7 @@ class RealDebridService {
       final res = await http.get(
         Uri.parse('https://api.real-debrid.com/rest/1.0/user'),
         headers: {'Authorization': 'Bearer $trimmed'},
-      );
+      ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         return json.decode(res.body) as Map<String, dynamic>;
       }
@@ -68,7 +68,7 @@ class RealDebridService {
       Uri.parse('https://api.real-debrid.com/rest/1.0/torrents/addMagnet'),
       headers: headers,
       body: {'magnet': magnet},
-    );
+    ).timeout(const Duration(seconds: 20));
 
     if (addRes.statusCode != 201) {
       throw Exception('Real-Debrid rejected magnet (${addRes.statusCode}): ${addRes.body}');
@@ -86,7 +86,7 @@ class RealDebridService {
       final infoRes = await http.get(
         Uri.parse('https://api.real-debrid.com/rest/1.0/torrents/info/$torrentId'),
         headers: headers,
-      );
+      ).timeout(const Duration(seconds: 20));
       if (infoRes.statusCode == 200) {
         info = json.decode(infoRes.body) as Map<String, dynamic>;
         final status = info['status'] as String?;
@@ -130,14 +130,14 @@ class RealDebridService {
       Uri.parse('https://api.real-debrid.com/rest/1.0/torrents/selectFiles/$torrentId'),
       headers: headers,
       body: {'files': pickedId},
-    );
+    ).timeout(const Duration(seconds: 20));
 
     if (selRes.statusCode != 204 && selRes.statusCode != 202) {
       await http.post(
         Uri.parse('https://api.real-debrid.com/rest/1.0/torrents/selectFiles/$torrentId'),
         headers: headers,
         body: {'files': 'all'},
-      );
+      ).timeout(const Duration(seconds: 20));
     }
 
     // 4. Poll until downloaded / ready in cloud
@@ -146,7 +146,7 @@ class RealDebridService {
       final infoRes = await http.get(
         Uri.parse('https://api.real-debrid.com/rest/1.0/torrents/info/$torrentId'),
         headers: headers,
-      );
+      ).timeout(const Duration(seconds: 20));
       if (infoRes.statusCode == 200) {
         info = json.decode(infoRes.body) as Map<String, dynamic>;
         final status = info['status'] as String?;
@@ -186,7 +186,7 @@ class RealDebridService {
       Uri.parse('https://api.real-debrid.com/rest/1.0/unrestrict/link'),
       headers: headers,
       body: {'link': targetLink},
-    );
+    ).timeout(const Duration(seconds: 20));
 
     if (unRes.statusCode != 200) {
       throw Exception('Real-Debrid unrestrict failed (${unRes.statusCode}): ${unRes.body}');

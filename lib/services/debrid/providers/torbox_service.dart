@@ -38,7 +38,7 @@ class TorBoxService {
       final res = await http.get(
         Uri.parse('https://api.torbox.app/v1/api/user/me'),
         headers: {'Authorization': 'Bearer $trimmed'},
-      );
+      ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['success'] == true) {
@@ -68,7 +68,7 @@ class TorBoxService {
       Uri.parse('https://api.torbox.app/v1/api/torrents/createtorrent'),
       headers: headers,
       body: {'magnet': magnet},
-    );
+    ).timeout(const Duration(seconds: 20));
 
     final createData = json.decode(createRes.body);
     if (createData['success'] == false) {
@@ -84,7 +84,7 @@ class TorBoxService {
       final infoRes = await http.get(
         Uri.parse('https://api.torbox.app/v1/api/torrents/mylist?id=$torrentId&bypass_cache=true'),
         headers: headers,
-      );
+      ).timeout(const Duration(seconds: 20));
       if (infoRes.statusCode == 200) {
         final mylist = json.decode(infoRes.body)['data'];
         info = mylist is Map ? mylist.cast<String, dynamic>() : null;

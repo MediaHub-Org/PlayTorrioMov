@@ -219,7 +219,7 @@ abstract final class BackupService {
       uri,
       headers: {..._webDavAuthHeader(config), 'Content-Type': 'application/json'},
       body: await _buildEnvelopeJson(),
-    );
+    ).timeout(const Duration(seconds: 30));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('WebDAV upload failed (HTTP ${response.statusCode}).');
     }
@@ -229,7 +229,8 @@ abstract final class BackupService {
   static Future<int> downloadFromCloud(CloudBackupConfig config) async {
     final uri = Uri.parse(config.url);
     _assertSecureUri(uri);
-    final response = await http.get(uri, headers: _webDavAuthHeader(config));
+    final response = await http.get(uri, headers: _webDavAuthHeader(config))
+        .timeout(const Duration(seconds: 30));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('WebDAV download failed (HTTP ${response.statusCode}).');
     }

@@ -37,7 +37,7 @@ class AllDebridService {
     try {
       final res = await http.get(
         Uri.parse('https://api.alldebrid.com/v4/user?agent=PlayTorrio&apikey=$trimmed'),
-      );
+      ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['status'] == 'success') {
@@ -102,7 +102,7 @@ class AllDebridService {
       Uri.parse('https://api.alldebrid.com/v4/magnet/upload'),
       headers: headers,
       body: {'magnets[]': magnet},
-    );
+    ).timeout(const Duration(seconds: 20));
     final upData = _adDecode(upRes);
     final magnets = (upData['magnets'] as List?) ?? const [];
     if (magnets.isEmpty || magnets.first is! Map) {
@@ -123,7 +123,7 @@ class AllDebridService {
         Uri.parse('https://api.alldebrid.com/v4.1/magnet/status'),
         headers: headers,
         body: {'id': magnetId.toString()},
-      );
+      ).timeout(const Duration(seconds: 20));
       final stData = _adDecode(stRes);
       final mags = stData['magnets'];
       Map<String, dynamic>? magObj;
@@ -148,7 +148,7 @@ class AllDebridService {
       Uri.parse('https://api.alldebrid.com/v4/magnet/files'),
       headers: headers,
       body: {'id[]': magnetId.toString()},
-    );
+    ).timeout(const Duration(seconds: 20));
     final filesData = _adDecode(filesRes);
     final filesMagnets = (filesData['magnets'] as List?) ?? const [];
     if (filesMagnets.isEmpty || filesMagnets.first is! Map) {
@@ -191,7 +191,7 @@ class AllDebridService {
       Uri.parse('https://api.alldebrid.com/v4/link/unlock'),
       headers: headers,
       body: {'link': pickedLink},
-    );
+    ).timeout(const Duration(seconds: 20));
     final unData = _adDecode(unRes);
     final dlLink = unData['link'] as String?;
     if (dlLink == null || dlLink.isEmpty) {
