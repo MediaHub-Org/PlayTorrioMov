@@ -513,8 +513,8 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        palette.scaffoldBackgroundColor.withValues(alpha: 0.94),
-                        palette.scaffoldBackgroundColor.withValues(alpha: 0.70),
+                        AppColors.canvas.withValues(alpha: 0.94),
+                        AppColors.canvas.withValues(alpha: 0.70),
                       ],
                     ),
                     border: Border(

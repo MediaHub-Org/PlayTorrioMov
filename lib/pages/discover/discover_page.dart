@@ -468,6 +468,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(20, topOffset + 30, 20, 100),
           child: ErrorView(
+            title: 'Could not load this catalog',
             error: _error,
             onRetry: () => _loadItems(refresh: true),
           ),
@@ -1136,7 +1137,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
           if (_legacyLoading)
             Center(child: CircularProgressIndicator(color: AppColors.accent))
           else if (_legacyError != null)
-            ErrorView(error: _legacyError, onRetry: _fetchLegacyData)
+            ErrorView(
+              title: 'Could not load these results',
+              error: _legacyError,
+              onRetry: _fetchLegacyData,
+            )
           else if (_legacySections.isEmpty)
             Center(
               child: Text(

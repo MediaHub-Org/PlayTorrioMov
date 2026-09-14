@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 
 enum _AmbientLightPattern { dualOrbs, topAurora, fullMesh, centerPulse }
@@ -58,7 +59,7 @@ class _AnimatedAmbientBackgroundState extends State<AnimatedAmbientBackground>
           fit: StackFit.expand,
           children: [
             // 1. Base solid scaffold background color
-            Container(color: palette.scaffoldBackgroundColor),
+            Container(color: AppColors.canvas),
 
             // 2. Moving Ambient Lights & Glows (GPU Canvas)
             Positioned.fill(
@@ -108,7 +109,7 @@ class _AmbientBackgroundPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
 
-    final bgPaint = Paint()..color = palette.scaffoldBackgroundColor;
+    final bgPaint = Paint()..color = AppColors.canvas;
     canvas.drawRect(rect, bgPaint);
 
     final angle = t * 2 * math.pi;
@@ -213,7 +214,7 @@ class _AmbientBackgroundPainter extends CustomPainter {
         colors: [
           primary.withValues(alpha: intensity * 0.85),
           accent.withValues(alpha: intensity * 0.40),
-          palette.scaffoldBackgroundColor.withValues(alpha: 0.0),
+          AppColors.canvas.withValues(alpha: 0.0),
         ],
         stops: const [0.0, 0.40, 1.0],
       ).createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r));

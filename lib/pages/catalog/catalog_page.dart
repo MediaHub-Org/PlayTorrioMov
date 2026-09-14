@@ -237,6 +237,7 @@ class _CatalogPageState extends State<CatalogPage> {
             )
           else if (_items.isEmpty && _error != null)
             ErrorView(
+              title: 'Could not load this catalog',
               error: _error,
               onRetry: () => _loadItems(refresh: true),
             )

@@ -6,7 +6,7 @@ import '../movie/movie_card.dart';
 import 'browse_row_view.dart';
 import 'custom_scroll_track.dart';
 import 'error_view.dart';
-import 'header_pill_style.dart' show HeaderPillSurface;
+import 'over_artwork.dart';
 import 'hero_carousel_auto_rotate.dart';
 import 'pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import 'poster_skeleton.dart';
@@ -89,6 +89,12 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// to show anything) — unlike [belowHero], not gated on [heroItems].
   final Widget? afterRows;
 
+  /// What this page lists, as it should read in a sentence: "anime",
+  /// "movies", "Live TV channels". Only the error heading uses it, but that
+  /// heading used to be a default reading "movies" for every section, so
+  /// Anime failed with a message about films.
+  final String contentLabel;
+
   final bool isLoading;
 
   /// Non-null renders [ErrorView] in place of the content.
@@ -123,6 +129,7 @@ class BrowseScaffold<T> extends StatefulWidget {
     this.header,
     this.belowHero,
     this.afterRows,
+    required this.contentLabel,
     this.isLoading = false,
     this.error,
     this.onRetry,
@@ -211,6 +218,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     Widget content;
     if (widget.error != null) {
       content = ErrorView(
+        title: 'Could not load ${widget.contentLabel}',
         error: widget.error,
         onRetry: widget.onRetry ?? () {},
       );
@@ -224,7 +232,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
         // its pills keep their white glyphs in either theme. In its own
         // band below it is on the app's background and follows the ink.
         headerOverlay: headerOverlaysHero
-            ? HeaderPillSurface(overArtwork: true, child: widget.header!)
+            ? OverArtwork.yes(child: widget.header!)
             : null,
       );
     }
@@ -233,7 +241,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
         ? content
         : Column(
             children: [
-              HeaderPillSurface(overArtwork: false, child: widget.header!),
+              OverArtwork(value: false, child: widget.header!),
               const SizedBox(height: AppSpacing.sm),
               Expanded(child: content),
             ],
@@ -313,8 +321,11 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               controller: heroPageController,
               itemCount: widget.heroItems.length,
               onPageChanged: (i) => setState(() => currentHeroIndex = i),
-              itemBuilder: (context, i) =>
-                  widget.heroBuilder(context, widget.heroItems[i]),
+              // The slide is the artwork. Anything shared it builds -- a
+              // genre chip, a pill -- reads this rather than guessing.
+              itemBuilder: (context, i) => OverArtwork.yes(
+                child: widget.heroBuilder(context, widget.heroItems[i]),
+              ),
             ),
             if (headerOverlay != null) ...[
               // A per-slide hero image has no guaranteed top scrim of its
@@ -332,7 +343,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                       // Fixed dark, not a theme surface: this is the scrim
                       // that makes the header legible over the hero, and it is
                       // why the pills above it are onAccent-white in both
-                      // themes (see HeaderPillSurface).
+                      // themes (see OverArtwork).
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

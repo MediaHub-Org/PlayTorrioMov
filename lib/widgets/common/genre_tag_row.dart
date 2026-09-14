@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/theme/app_colors.dart';
+import 'over_artwork.dart';
 
 /// Icon for a genre/category tag, shared by every content-detail page so a
 /// given genre always reads the same way whether it's on a movie, a series,
@@ -97,6 +97,9 @@ class GenreTagRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (genres.isEmpty) return const SizedBox.shrink();
+    // Over a hero slide these chips sit on the backdrop photo, on a details
+    // page they sit on the page. See [OverArtwork].
+    final tint = OverArtwork.tint(context);
     return SizedBox(
       height: size,
       child: ListView.separated(
@@ -117,13 +120,13 @@ class GenreTagRow extends StatelessWidget {
                   width: size,
                   height: size,
                   decoration: BoxDecoration(
-                    color: AppColors.inkAlpha(0.06),
+                    color: tint.withValues(alpha: 0.06),
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.inkAlpha(0.12)),
+                    border: Border.all(color: tint.withValues(alpha: 0.12)),
                   ),
                   child: Icon(
                     genreTagIcon(g),
-                    color: AppColors.inkMuted,
+                    color: tint.withValues(alpha: 0.70),
                     size: size * 0.5,
                   ),
                 ),

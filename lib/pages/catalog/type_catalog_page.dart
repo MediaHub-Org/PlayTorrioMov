@@ -223,7 +223,11 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   @override
   Widget build(BuildContext context) {
     if (_error != null) {
-      return ErrorView(error: _error, onRetry: _load);
+      return ErrorView(
+        title: 'Could not load ${widget.type == 'series' ? 'series' : 'movies'}',
+        error: _error,
+        onRetry: _load,
+      );
     }
 
     // Browsing and filtering answer different questions. With no filter the
@@ -231,6 +235,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     // those rows stop being the right shape and it becomes one grid.
     if (!_isFiltered) {
       return BrowseScaffold<Movie>(
+        contentLabel: widget.type == 'series' ? 'series' : 'movies',
         header: _buildHeader(context),
         belowHero: ContinueWatchingSlider(typeFilter: widget.type),
         afterRows: widget.type == 'series' ? const UpcomingCalendarRow() : null,
