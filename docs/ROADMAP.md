@@ -9,7 +9,7 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-14**, on `v1.6.1+29`. Every count
+Last reconciled against the tree: **2026-09-14**, on `v1.6.2+30`. Every count
 below was measured there.
 
 ---
@@ -49,10 +49,10 @@ deliberately left:
 
 ### 3. The scrapers are effectively untested in CI
 
-**13 of 89 test files are `@Tags(['network'])`** and excluded by
+**14 of 97 test files are `@Tags(['network'])`** and excluded by
 `flutter test --exclude-tags network` — and they are exactly the files
 covering `lib/services/scraper` and `lib/services/anime`, the two
-least-covered areas. 143 of 370 public classes are named in any test.
+least-covered areas. 146 of 373 public classes are named in any test.
 
 That trade is reasonable: those tests hit live third-party sites and would
 make CI flaky and slow. The gap it leaves is that a scraper's *parsing* is
