@@ -78,6 +78,7 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     // The accent used to be a hardcoded violet, so the selected section
     // stayed the same colour whichever of the eight palettes was chosen --
     // the one control on screen that ignored the theme.

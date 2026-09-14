@@ -26,6 +26,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ValueListenableBuilder<int>(

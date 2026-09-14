@@ -2236,6 +2236,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final ep = widget.episode;
     final imgUrl = ep.thumbnail ?? widget.fallbackImageUrl;
 

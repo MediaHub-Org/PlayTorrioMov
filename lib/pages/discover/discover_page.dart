@@ -375,6 +375,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     if (_isLegacyMode) {
       return _buildLegacyScaffold();
     }

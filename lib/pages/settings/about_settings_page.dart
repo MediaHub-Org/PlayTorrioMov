@@ -85,6 +85,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Scaffold(
       backgroundColor: _kBackground,
       appBar: AppBar(
@@ -204,6 +205,7 @@ class _BrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Center(
       child: Column(
         children: [
@@ -284,6 +286,7 @@ class _UpdatesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
@@ -343,6 +346,7 @@ class _TestingNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -399,6 +403,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Text(
       text,
       style: TextStyle(
@@ -419,6 +424,7 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -460,6 +466,7 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -538,6 +545,7 @@ class _LinkTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(

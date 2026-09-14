@@ -25,6 +25,7 @@ class FilterDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
     // Over a hero this pill sits on a photo, so its glyphs stay white; in
     // its own band they follow the theme. See the OverArtwork marker.

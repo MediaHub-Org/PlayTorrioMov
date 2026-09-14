@@ -78,6 +78,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final addonCount = AddonManager.instance.addons.length;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final syncedCount = (_traktConnected ? 1 : 0) + (_simklConnected ? 1 : 0);
@@ -233,6 +234,7 @@ class _SettingsCategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(

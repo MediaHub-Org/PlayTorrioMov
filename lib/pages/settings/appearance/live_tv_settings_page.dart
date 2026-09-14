@@ -15,6 +15,7 @@ class LiveTvSettingsPage extends StatefulWidget {
 class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
 
     return Scaffold(

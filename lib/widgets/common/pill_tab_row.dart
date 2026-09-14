@@ -35,6 +35,7 @@ class PillTabRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     // Scrolls rather than overflows. Two short labels always fit, but a
     // three-way split with longer ones ("Audiobooks / Books / Manga")
     // runs past a 360px phone, and further still at a large text scale.
@@ -76,6 +77,7 @@ class _SubTabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadii.sm),

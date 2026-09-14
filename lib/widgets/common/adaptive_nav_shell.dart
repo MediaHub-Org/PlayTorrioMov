@@ -122,6 +122,7 @@ class _SectionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final color = selected ? AppColors.ink : AppColors.inkSubtle;
     return InkWell(
       onTap: () => HubController.instance.setCurrentSection(section.id),

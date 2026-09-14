@@ -323,6 +323,7 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(

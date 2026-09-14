@@ -162,6 +162,7 @@ class LibraryEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

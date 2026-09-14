@@ -53,6 +53,7 @@ class LibraryActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return ValueListenableBuilder<List<MyListItem>>(
       valueListenable: MyListService.items,
       builder: (context, items, _) {
@@ -123,6 +124,7 @@ class _StatusButtonState extends State<_StatusButton> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Tooltip(
       message: widget.label,
       child: MouseRegion(

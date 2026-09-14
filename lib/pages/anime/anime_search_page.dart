@@ -475,6 +475,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final topPadding = MediaQuery.of(context).padding.top;
     final isSearching = _searchController.text.trim().isNotEmpty || _hasActiveFilters;
 

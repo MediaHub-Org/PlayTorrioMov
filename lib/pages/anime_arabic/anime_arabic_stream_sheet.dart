@@ -128,6 +128,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,

@@ -28,6 +28,7 @@ class _AnimeCardState extends State<AnimeCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final anime = widget.anime;
 
     return MouseRegion(
@@ -137,6 +138,7 @@ class _AnimePosterFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final posterUrl = anime.coverUrl;
     final hasPoster = posterUrl.isNotEmpty;
 

@@ -507,6 +507,7 @@ class _AnimePageState extends State<AnimePage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     // Built once and placed above the content by _withHeader in every
     // branch -- the hero carousel used to swallow it into its own Stack,
     // which put the filters in a different place, and scrolled them away,
@@ -615,6 +616,7 @@ class _AnimeHeroSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final isCompact = screenWidth < 600;
 
     return Stack(

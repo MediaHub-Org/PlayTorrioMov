@@ -141,6 +141,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final filtered = _filteredSources;
 
     return Container(

@@ -18,6 +18,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
 
     return Padding(

@@ -50,6 +50,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final channels = _filteredChannels();
     final width = MediaQuery.sizeOf(context).width;
 

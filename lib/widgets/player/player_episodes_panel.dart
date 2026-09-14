@@ -243,6 +243,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
     final drawerWidth = isCompact ? screenWidth * 0.94 : 440.0;

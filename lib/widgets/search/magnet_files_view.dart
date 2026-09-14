@@ -262,6 +262,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return ValueListenableBuilder<AppThemePalette>(
       valueListenable: AppThemeService.currentPalette,
       builder: (context, palette, _) {

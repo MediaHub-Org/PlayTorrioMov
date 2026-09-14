@@ -21,6 +21,7 @@ class DetailsSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final heading = Text(
       title,
       style: TextStyle(

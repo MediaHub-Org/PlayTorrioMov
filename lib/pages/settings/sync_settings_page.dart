@@ -28,6 +28,7 @@ class SyncSettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -120,6 +121,7 @@ class _SyncCardChrome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -773,6 +775,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return ValueListenableBuilder<String?>(
       valueListenable: SimklSettings.clientId,
       builder: (context, _, __) => ValueListenableBuilder<String?>(
@@ -885,6 +888,7 @@ class _TmdbConnectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return ValueListenableBuilder<String?>(
       valueListenable: TmdbSettings.apiKey,
       builder: (context, apiKey, _) {
@@ -1022,6 +1026,7 @@ class _DiscordPresenceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return ValueListenableBuilder<bool>(
       valueListenable: DiscordRpcService.instance.isEnabled,
       builder: (context, isEnabled, _) {

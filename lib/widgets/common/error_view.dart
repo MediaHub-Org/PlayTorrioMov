@@ -22,6 +22,7 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(26),

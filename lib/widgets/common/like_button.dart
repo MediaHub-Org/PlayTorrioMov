@@ -69,6 +69,7 @@ class _LikeButtonState extends State<LikeButton> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final label = widget.isLiked ? 'Liked' : 'Like';
     final semantics = widget.isLiked ? 'Remove from liked' : 'Add to liked';
 

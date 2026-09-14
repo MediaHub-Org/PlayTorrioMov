@@ -29,9 +29,9 @@ The constant is gone. What replaces it is a choice, not a default:
 | Who | What to do |
 |:----|:-----------|
 | A user | **Settings → Sync → TMDB Cast Photos → Connect**, with a free key from themoviedb.org. The card asks for this when no key is set |
-| This project | Put `TMDB_API_KEY` in the `ENV_FILE` repository secret. Fresh installs then work with no setup, and the key rotates without a new release |
+| This project | Put `TMDB_API_KEY` in the `DOTENV_CONTENTS` repository secret. Fresh installs then work with no setup, and the key rotates without a new release |
 
-`ENV_FILE` is still unset (see *Release secrets* below), so published builds
+No dotenv secret was set (see *Release secrets* below), so published builds
 currently ship without a key.
 
 **What a device still has to confirm:** that enrichment works end to end
@@ -299,11 +299,11 @@ other and the in-app updater works (see
 signing, because none of them self-install — see
 [RELEASES.md](RELEASES.md#other-platforms).
 
-`ENV_FILE`/`DOTENV` is **not set**, and that is the one outstanding release
+The dotenv secret was **not set**, and that was the one outstanding release
 secret. Every published build ships an empty `.env`, so Trakt sign-in and
 Discord Rich Presence are inert in released binaries. **TMDB is affected too**,
 now that the dead source-committed fallback key is gone: without
-`TMDB_API_KEY` in `ENV_FILE` a fresh install has no key, and the settings
+`TMDB_API_KEY` in `DOTENV_CONTENTS` a fresh install has no key, and the settings
 card asks for one. **Simkl is no longer blocked by it** (#51): register a free app at
 simkl.com/settings/developer and paste the client ID — Simkl's PIN flow
 authenticates with the id alone, so there is no secret to ship.

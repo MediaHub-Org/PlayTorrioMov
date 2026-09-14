@@ -71,6 +71,7 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -162,6 +163,7 @@ class _ChannelPickTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final primary = channel.gradient.isNotEmpty ? channel.gradient.first : AppColors.accent;
     return InkWell(
       onTap: onTap,
@@ -266,6 +268,7 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final count = widget.channels.length;
     final crossAxisCount = count <= 1 ? 1 : 2;
 

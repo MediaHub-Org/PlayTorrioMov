@@ -141,22 +141,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            # An empty .env still builds, which is why this went unnoticed:
-            # every credential-backed feature simply no-ops in the artifact.
-            # Say so loudly rather than shipping a release that silently
-            # cannot sign in to anything.
-            touch .env
-            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'true'
       - name: Install dependencies
         run: flutter pub get
 
@@ -306,22 +296,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            # An empty .env still builds, which is why this went unnoticed:
-            # every credential-backed feature simply no-ops in the artifact.
-            # Say so loudly rather than shipping a release that silently
-            # cannot sign in to anything.
-            touch .env
-            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'true'
       - name: Install dependencies
         run: flutter pub get
 
@@ -433,22 +413,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            # An empty .env still builds, which is why this went unnoticed:
-            # every credential-backed feature simply no-ops in the artifact.
-            # Say so loudly rather than shipping a release that silently
-            # cannot sign in to anything.
-            touch .env
-            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'true'
       - name: Install dependencies
         run: flutter pub get
 
@@ -552,22 +522,12 @@ jobs:
             libboost-all-dev libssl-dev libgcrypt20-dev \
             libsecret-1-dev libjsoncpp-dev
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            # An empty .env still builds, which is why this went unnoticed:
-            # every credential-backed feature simply no-ops in the artifact.
-            # Say so loudly rather than shipping a release that silently
-            # cannot sign in to anything.
-            touch .env
-            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'true'
       - name: Generate Linux platform files if missing
         run: |
           if [ ! -d "linux" ]; then
@@ -734,22 +694,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            # An empty .env still builds, which is why this went unnoticed:
-            # every credential-backed feature simply no-ops in the artifact.
-            # Say so loudly rather than shipping a release that silently
-            # cannot sign in to anything.
-            touch .env
-            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'true'
       - name: Configure macOS platform files if missing
         run: |
           if [ ! -d "macos" ]; then
@@ -828,22 +778,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ios-pub-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            # An empty .env still builds, which is why this went unnoticed:
-            # every credential-backed feature simply no-ops in the artifact.
-            # Say so loudly rather than shipping a release that silently
-            # cannot sign in to anything.
-            touch .env
-            echo "::warning title=Building without credentials::No ENV_FILE or DOTENV secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build. TMDB cast photos are off too, now that the dead source-committed key is gone -- set TMDB_API_KEY in ENV_FILE, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'true'
       - name: Install dependencies
         run: flutter pub get
 

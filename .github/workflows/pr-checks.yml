@@ -107,19 +107,12 @@ jobs:
             libboost-all-dev libssl-dev libgcrypt20-dev \
             libsecret-1-dev libjsoncpp-dev
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          # Same as the other two jobs: an empty .env is enough to compile,
-          # and secrets are unavailable to pull requests from forks.
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            touch .env
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'false'
       - name: Generate Linux platform files if missing
         run: |
           if [ ! -d linux ]; then flutter create --platforms=linux .; fi
@@ -140,6 +133,14 @@ jobs:
   # suite need the SDK and the package cache, nothing else. Keep it that way
   # -- adding a toolchain step here taxes every run of the check people wait
   # on most.
+  # No .env step: this job runs `flutter analyze` and `flutter test`, neither
+  # of which takes --dart-define-from-file, so it wrote a file it never read.
+  # Worse, the file it wrote is one the tests can see -- EnvService reads
+  # `File('.env')` at runtime -- so a populated secret could have changed what
+  # a test observes. And it coupled the fast feedback loop for code to the
+  # format of a credentials secret: a malformed dotenv blocked analysis and
+  # tests that have nothing to do with it, which is how CI teaches people to
+  # stop reading it.
   analyze-test:
     name: Analyze & Test
     runs-on: ubuntu-latest
@@ -163,19 +164,6 @@ jobs:
           key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
           restore-keys: |
             ${{ runner.os }}-pub-
-
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          # Secrets are unavailable to pull requests from forks; an empty .env
-          # is enough for --dart-define-from-file to succeed.
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            touch .env
-          fi
 
       - name: Install dependencies
         run: flutter pub get
@@ -239,19 +227,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        run: |
-          # Secrets are unavailable to pull requests from forks; an empty .env
-          # is enough for --dart-define-from-file to succeed.
-          if [ -n "${{ secrets.ENV_FILE }}" ]; then
-            echo "${{ secrets.ENV_FILE }}" > .env
-          elif [ -n "${{ secrets.DOTENV }}" ]; then
-            echo "${{ secrets.DOTENV }}" > .env
-          else
-            touch .env
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'false'
       - name: Install dependencies
         run: flutter pub get
 

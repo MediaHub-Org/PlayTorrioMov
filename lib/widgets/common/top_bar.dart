@@ -89,6 +89,7 @@ class SettingsIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return IconButton(
       onPressed: onTap,
       tooltip: 'Settings',

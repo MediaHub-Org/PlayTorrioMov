@@ -42,6 +42,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return PopScope(
       canPop: !_isDownloading,
       onPopInvokedWithResult: (didPop, result) {

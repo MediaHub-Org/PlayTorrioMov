@@ -95,6 +95,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final isDesktop = _isDesktop();
 
@@ -363,6 +364,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final item = widget.item;
     final imgHeight = widget.width * 0.58;
     final progress = item.progressPercent;

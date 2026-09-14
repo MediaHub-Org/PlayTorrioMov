@@ -34,6 +34,7 @@ class WatchHistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     final inset = AppSpacing.pageInset(context);
 

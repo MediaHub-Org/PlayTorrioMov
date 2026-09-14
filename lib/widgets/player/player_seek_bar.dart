@@ -73,6 +73,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     if (widget.positionListenable != null) {
       return ValueListenableBuilder<Duration>(
         valueListenable: widget.positionListenable!,

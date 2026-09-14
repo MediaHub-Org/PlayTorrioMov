@@ -14,6 +14,7 @@ class SidebarLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
     final iconSize = isMobile ? 26.0 : 32.0;
     return Row(
