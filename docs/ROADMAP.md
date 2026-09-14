@@ -77,19 +77,33 @@ The fix is not to un-tag them but to split the pure logic out and test it
 offline, the way `glendale_master_url_test` and `subtitle_languages_test`
 do — both written during the audit, both of which found real bugs.
 
-**Done so far**, in the order this list named them:
+**All three candidates it named are done.**
 
 | What | How |
 |:-----|:----|
-| `SubtitleExtractor`'s archive and encoding handling | The part that decides what the downloaded bytes *are* — zip, gzip or bare, and in which encoding — moved into `SubtitlePayload.decode`, which touches neither the network nor the disk. `subtitle_payload_test` builds archives in memory: the largest subtitle wins over a short forced track, `__MACOSX/._x.srt` is not a subtitle, a truncated zip falls back instead of throwing, and UTF-16 and Latin-1 bodies survive. The old `subtitle_test` reimplemented the picking logic inside the test, so it proved the archive package worked rather than that we use it correctly |
-| The IPTV playlist parser | `M3uParser` was already pure and had no test at all. `m3u_parser_test` covers what strangers' playlists actually contain: CRLF, `#EXTGRP`, single-quoted and unquoted attributes, the non-HTTP stream schemes, an HTML error page from a dead portal, and the reset that stops one channel's logo leaking onto the next |
+| `SubtitleExtractor`'s archive and encoding handling | The part deciding what the downloaded bytes *are* — zip, gzip or bare, and in which encoding — moved into `SubtitlePayload.decode`, which touches neither network nor disk. Covered: the largest subtitle beats a short forced track, `__MACOSX/._x.srt` is not a subtitle, a truncated zip falls back instead of throwing, UTF-16 and Latin-1 survive. The old `subtitle_test` reimplemented the picking logic *inside the test*, so it proved the archive package works rather than that we use it correctly |
+| The IPTV playlist parser | `M3uParser` was already pure and had no test at all, despite reading every playlist the app loads — all written by strangers. Covered: CRLF, `#EXTGRP`, quoted and unquoted attributes, the seven non-HTTP stream schemes, an HTML error page from a dead portal, and the reset that stops one channel's logo leaking onto the next |
+| Movy's stream cipher | Five private statics in `MovyScraper`, reachable only by running the whole fetch-and-decrypt pipeline against the live site. Now `MovyCipher`, with the arithmetic verified identical to the original function by function before the move. Covered: the MurmurHash3 finalizer's known values, that `rotl` rotates rather than shifts (a plain `<<` loses the top bit and quietly drains entropy), lengths that are not a multiple of four, and that both the seed and the TMDB id change the stream |
 
-**Still open**, and the bigger half: the per-site HTML/JSON parsers. Each one
-needs its pure part lifted out of the fetch-and-parse method first, the way
-`EncDecEmbedScraper` and `glendale_master_url` already are. `movy`'s
-keystream (`_fnv1a`, `_initKeyState`, `_nextKeystreamWord`) is the clearest
-next candidate: it is deterministic, it is currently private, and its only
-cover is a tagged network test.
+Each extraction is a *move*, not a rewrite: the pure part leaves the
+fetch-and-parse method and the call site delegates. That is what makes them
+safe to do against code whose only other cover needs the network.
+
+### What is left here
+
+The per-site **HTML parsers** — the `sites/` files that read markup rather
+than arithmetic. These are harder than the three above and worth being honest
+about why: their input is a page that changes without notice, so a fixture
+captured today pins *that day's* markup. A test built on one proves the parser
+handles the shape it was given, and says nothing about the shape it will meet
+next week. That is still worth having — a parser that breaks on its own
+fixture is broken for certain — but it is a smaller claim than the three
+above, where the input is a format rather than a website.
+
+The candidates in order: `SubtitleExtractor`'s remaining providers,
+`iptv_portal_browser_page`'s Xtream/Stalker response shapes, and the anime
+extractors. None is urgent; all are mechanical once someone captures a
+fixture.
 
 ---
 
