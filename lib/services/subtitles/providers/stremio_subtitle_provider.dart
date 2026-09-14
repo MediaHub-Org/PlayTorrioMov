@@ -6,6 +6,7 @@ import '../../addon/addon_manager.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_extractor.dart';
 import '../subtitle_languages.dart';
+import '../subtitle_response.dart';
 import 'package:flutter/foundation.dart';
 
 class StremioSubtitleProvider extends SubtitleProvider {
@@ -57,55 +58,62 @@ class StremioSubtitleProvider extends SubtitleProvider {
             .timeout(const Duration(seconds: 6));
 
         if (res.statusCode == 200) {
-          final data = jsonDecode(utf8.decode(res.bodyBytes));
-          final subsList = data['subtitles'] as List?;
-          if (subsList == null || subsList.isEmpty) continue;
-
-          int idx = 0;
-          for (final item in subsList) {
-            if (item is! Map) continue;
-            final map = Map<String, dynamic>.from(item);
-            final subUrl = map['url']?.toString();
-            if (subUrl == null || subUrl.isEmpty) continue;
-
-            idx++;
-            final rawLang = (map['lang'] ?? 'en').toString().toLowerCase();
-            final language = subtitleLanguageName(rawLang);
-
-            final fileTitle = map['subtitleFileName']?.toString() ??
-                map['movieReleaseName']?.toString() ??
-                map['title']?.toString();
-            final title = fileTitle?.isNotEmpty == true
-                ? fileTitle!
-                : '${addon.manifest.name} #$idx';
-
-            final format = (map['SubFormat']?.toString() ??
-                    (title.toLowerCase().endsWith('.vtt') ? 'vtt' : 'srt'))
-                .toLowerCase();
-
-            results.add(
-              SubtitleVariant(
-                providerName: addon.manifest.name,
-                language: language,
-                title: title,
-                downloadUrl: subUrl,
-                format: format,
-                extraData: {
-                  'id': map['id'],
-                  'subEncoding': map['SubEncoding'],
-                  'fpsMilli': map['fpsMilli'],
-                  'releaseGroup': map['releaseGroup'],
-                },
-              ),
-            );
-          }
-          debugPrint('[StremioSubtitleProvider] ${addon.manifest.name} returned $idx subtitles');
+          final parsed = parseBody(
+            utf8.decode(res.bodyBytes),
+            addon.manifest.name,
+          );
+          results.addAll(parsed);
+          debugPrint('[StremioSubtitleProvider] ${addon.manifest.name} returned ${parsed.length} subtitles');
         }
       } catch (e) {
         debugPrint('[StremioSubtitleProvider] Error querying ${addon.manifest.name}: $e');
       }
     }
 
+    return results;
+  }
+
+  /// Reads one addon's response into variants.
+  ///
+  /// Unlike OpenSubtitles this keeps whatever name the addon gave the file --
+  /// addons are written by strangers and a real release name is more use than
+  /// a number. The numbered fallback is for the ones that send no name at all.
+  @visibleForTesting
+  static List<SubtitleVariant> parseBody(String body, String addonName) {
+    final results = <SubtitleVariant>[];
+    var idx = 0;
+    for (final map in StremioSubtitlesBody.entries(body)) {
+      idx++;
+      final rawLang = (map['lang'] ?? 'en').toString().toLowerCase();
+
+      final fileTitle = map['subtitleFileName']?.toString() ??
+          map['movieReleaseName']?.toString() ??
+          map['title']?.toString();
+      final title =
+          fileTitle?.isNotEmpty == true ? fileTitle! : '$addonName #$idx';
+
+      // An addon that does not declare SubFormat usually named the file, so
+      // the extension is the next best evidence of what it sent.
+      final format = (map['SubFormat']?.toString() ??
+              (title.toLowerCase().endsWith('.vtt') ? 'vtt' : 'srt'))
+          .toLowerCase();
+
+      results.add(
+        SubtitleVariant(
+          providerName: addonName,
+          language: subtitleLanguageName(rawLang),
+          title: title,
+          downloadUrl: map['url']!.toString(),
+          format: format,
+          extraData: {
+            'id': map['id'],
+            'subEncoding': map['SubEncoding'],
+            'fpsMilli': map['fpsMilli'],
+            'releaseGroup': map['releaseGroup'],
+          },
+        ),
+      );
+    }
     return results;
   }
 

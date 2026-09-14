@@ -52,50 +52,71 @@ class WyzieProvider extends SubtitleProvider {
 
       if (res.statusCode != 200) return [];
 
-      final dynamic data = jsonDecode(utf8.decode(res.bodyBytes));
-      final list = data is List ? data : [];
-
-      for (final item in list) {
-        if (item is! Map) continue;
-        final map = Map<String, dynamic>.from(item);
-
-        final url = map['url']?.toString();
-        if (url == null || url.isEmpty) continue;
-
-        final rawLang = (map['language'] ?? map['lang'] ?? 'en').toString().toLowerCase();
-        final display = map['display']?.toString();
-        final language = display?.isNotEmpty == true
-            ? display!
-            : subtitleLanguageName(rawLang);
-
-        final release = map['release']?.toString();
-        final format = (map['format']?.toString() ?? 'srt').toLowerCase();
-        final isHi = map['isHearingImpaired'] == true || map['hi'] == true;
-
-        String title = release?.isNotEmpty == true ? release! : 'Wyzie Subtitle';
-        if (isHi) {
-          title = '$title [CC]';
-        }
-
-        results.add(
-          SubtitleVariant(
-            providerName: name,
-            language: language,
-            title: title,
-            downloadUrl: url,
-            format: format,
-            extraData: {
-              'encoding': map['encoding'],
-              'fps': map['fps'],
-              'downloads': map['downloads'],
-            },
-          ),
-        );
-      }
+      results.addAll(parseBody(utf8.decode(res.bodyBytes)));
     } catch (e) {
       debugPrint('[WyzieProvider] search error: $e');
     }
 
+    return results;
+  }
+
+  /// Reads Wyzie's response into variants.
+  ///
+  /// Wyzie answers with a bare JSON array rather than the Stremio object, and
+  /// spells several fields two ways -- `language`/`lang`, and hearing-impaired
+  /// as either `isHearingImpaired` or `hi` -- so both are read. A `display`
+  /// string, when it sends one, is already a human-readable language name and
+  /// beats looking the code up.
+  @visibleForTesting
+  static List<SubtitleVariant> parseBody(String body) {
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(body);
+    } catch (_) {
+      // Not JSON at all; the caller reports an empty search rather than
+      // an error the user has to clear.
+      return const [];
+    }
+    if (decoded is! List) return const [];
+
+    final results = <SubtitleVariant>[];
+    for (final item in decoded) {
+      if (item is! Map) continue;
+      final map = Map<String, dynamic>.from(item);
+
+      final url = map['url']?.toString();
+      if (url == null || url.isEmpty) continue;
+
+      final rawLang =
+          (map['language'] ?? map['lang'] ?? 'en').toString().toLowerCase();
+      final display = map['display']?.toString();
+      final language = display?.isNotEmpty == true
+          ? display!
+          : subtitleLanguageName(rawLang);
+
+      final release = map['release']?.toString();
+      final isHi = map['isHearingImpaired'] == true || map['hi'] == true;
+
+      var title = release?.isNotEmpty == true ? release! : 'Wyzie Subtitle';
+      if (isHi) {
+        title = '$title [CC]';
+      }
+
+      results.add(
+        SubtitleVariant(
+          providerName: 'Wyzie',
+          language: language,
+          title: title,
+          downloadUrl: url,
+          format: (map['format']?.toString() ?? 'srt').toLowerCase(),
+          extraData: {
+            'encoding': map['encoding'],
+            'fps': map['fps'],
+            'downloads': map['downloads'],
+          },
+        ),
+      );
+    }
     return results;
   }
 
