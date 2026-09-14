@@ -40,7 +40,9 @@ class HexaScraper extends StreamScraper {
           return data['result']['token']?.toString();
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No token means this scraper contributes nothing.
+    }
     return null;
   }
 
@@ -115,7 +117,9 @@ class HexaScraper extends StreamScraper {
                 break;
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This key did not decrypt the payload; the loop tries the next.
+          }
         }
 
         if (decrypted == null || decrypted['sources'] is! List) return;

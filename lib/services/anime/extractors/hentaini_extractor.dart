@@ -204,7 +204,10 @@ class HentainiExtractor {
       if (rawPlayers is String) {
         try {
           players = jsonDecode(rawPlayers) as List? ?? const [];
-        } catch (_) {}
+        } catch (_) {
+          // The players field is sometimes a JSON string and sometimes already
+          // a list. An unparseable string leaves the empty list above.
+        }
       } else if (rawPlayers is List) {
         players = rawPlayers;
       }

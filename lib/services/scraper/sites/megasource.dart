@@ -62,7 +62,10 @@ class MegaSourceScraper extends StreamScraper {
                 resolvedImdbId = data['imdb_id'].toString();
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // Without an IMDb id the search falls back to title matching
+            // below.
+          }
         }
       }
 

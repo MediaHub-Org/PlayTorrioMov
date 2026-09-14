@@ -69,7 +69,9 @@ class LookMovieScraper extends StreamScraper {
             }
           }
         }
-      } catch (_) {}
+      } catch (_) {
+        // This mirror did not answer; the loop tries the next base.
+      }
     }
     return null;
   }
@@ -105,7 +107,10 @@ class LookMovieScraper extends StreamScraper {
               }
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // This response did not carry the episode list; the caller falls
+          // back.
+        }
       }
     }
 

@@ -42,7 +42,9 @@ class BcineScraper extends StreamScraper {
           return data['token'].toString();
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No token means this scraper contributes nothing; the others still run.
+    }
     return null;
   }
 
@@ -146,7 +148,10 @@ class BcineScraper extends StreamScraper {
                   }
                 }
               }
-            } catch (_) {}
+            } catch (_) {
+              // This entry did not yield a stream. The rest of the list is
+              // still walked.
+            }
           }
         }
       } finally {

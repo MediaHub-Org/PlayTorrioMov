@@ -842,7 +842,10 @@ class ContinueWatchingService {
         );
 
         await completer.future.timeout(const Duration(seconds: 5), onTimeout: () {});
-      } catch (_) {} finally {
+      } catch (_) {
+        // Best-effort probe of a remote list. The finally block below does the
+        // cleanup that matters.
+      } finally {
         sub?.cancel();
       }
 
@@ -948,7 +951,9 @@ class ContinueWatchingService {
       );
 
       await completer.future.timeout(const Duration(seconds: 5), onTimeout: () {});
-    } catch (_) {} finally {
+    } catch (_) {
+      // Same probe, other provider. The finally block below still runs.
+    } finally {
       sub?.cancel();
     }
 

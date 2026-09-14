@@ -74,7 +74,10 @@ class AniDbExtractor {
         if (result.exitCode == 0 && (result.stdout as String).isNotEmpty) {
           return result.stdout as String;
         }
-      } catch (_) {}
+      } catch (_) {
+        // The curl fallback is itself the fallback -- the http request above
+        // already failed. Returning null lets the caller do without titles.
+      }
     }
 
     final response = await _client.get(

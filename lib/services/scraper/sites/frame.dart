@@ -101,7 +101,10 @@ class FrameScraper extends StreamScraper {
                 return list;
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This response shape did not parse into streams; the caller tries
+            // the next.
+          }
           return <Map<String, dynamic>>[];
         });
 

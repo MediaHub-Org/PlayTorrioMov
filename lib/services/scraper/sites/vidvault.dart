@@ -38,7 +38,9 @@ class VidVaultScraper extends StreamScraper {
           return data['t'].toString();
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No token means this scraper contributes nothing.
+    }
     return null;
   }
 

@@ -78,7 +78,10 @@ class VidGodScraper extends StreamScraper {
           }
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // This endpoint did not carry streams; the other one below is still
+      // tried.
+    }
     return null;
   }
 
@@ -114,7 +117,9 @@ class VidGodScraper extends StreamScraper {
           return Map<String, dynamic>.from(data);
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // Neither endpoint answered, so this scraper contributes nothing.
+    }
     return null;
   }
 

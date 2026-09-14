@@ -163,7 +163,13 @@ class _WatchScreenState extends State<WatchScreen>
           _flushPendingSources,
         );
       }
-    } catch (_) {}
+    } catch (e) {
+      // Not a per-scraper failure -- fetchStreams already swallows those and
+      // keeps going. Reaching here means the aggregate stream itself died, so
+      // the list below stops at whatever had arrived. Silently, it looked
+      // identical to a title genuinely having no sources.
+      debugPrint('[WatchScreen] Source search failed: $e');
+    }
 
     _flushPendingSources();
     if (mounted && _isLoadingSources) {

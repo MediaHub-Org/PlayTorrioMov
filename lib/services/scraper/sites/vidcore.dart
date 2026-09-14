@@ -93,7 +93,9 @@ class VidCoreScraper extends StreamScraper {
       if (res.statusCode == 200) {
         return jsonDecode(res.body) as Map<String, dynamic>;
       }
-    } catch (_) {}
+    } catch (_) {
+      // No payload means this scraper contributes nothing.
+    }
     return null;
   }
 

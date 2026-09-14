@@ -92,7 +92,10 @@ class StreamHealthChecker {
           if (buf.length >= _maxBytes) break;
           if (buf.length >= _minBytes) break;
         }
-      } catch (_) {}
+      } catch (_) {
+        // A probe that dies mid-read still leaves what it got, which is what
+        // the caller measures.
+      }
 
       // M3U8 validation
       if (isM3U8 || ct.contains('mpegurl')) {

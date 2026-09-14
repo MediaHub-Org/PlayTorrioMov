@@ -49,7 +49,10 @@ class LunaExtractor {
           final jsonStr = line.substring(2);
           final parsed = jsonDecode(jsonStr);
           if (parsed is Map) return Map<String, dynamic>.from(parsed);
-        } catch (_) {}
+        } catch (_) {
+          // Not every line prefixed 1: is the payload. A line that will not
+          // parse is simply not the one.
+        }
       }
     }
     return null;

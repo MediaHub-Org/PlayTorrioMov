@@ -97,7 +97,10 @@ class AniHQExtractor {
         final streamUrl = (finalData['file'] ?? finalData['source']).toString();
         return {'url': streamUrl};
       }
-    } catch (_) {}
+    } catch (_) {
+      // The site changed its obfuscation, so there is no stream here.
+      // Returning null moves the search to the next extractor.
+    }
     return null;
   }
 

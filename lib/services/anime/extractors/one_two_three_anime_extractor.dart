@@ -74,7 +74,9 @@ class OneTwoThreeAnimeExtractor {
               }
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // One malformed candidate does not stop the others being collected.
+        }
 
         if (slugCandidates.isNotEmpty) break;
       }
@@ -107,7 +109,9 @@ class OneTwoThreeAnimeExtractor {
               break;
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // This embed did not resolve; the loop tries the next.
+        }
       }
 
       if (targetEmbed == null) return results;

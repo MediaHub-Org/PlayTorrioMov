@@ -453,7 +453,10 @@ class IptvAliveChecker {
             break;
           }
         }
-      } catch (_) {}
+      } catch (_) {
+        // A probe that stops early still leaves whatever was buffered, which
+        // is what the size check above reads.
+      }
 
       final isM3U8 = ct.contains('mpegurl') || url.toLowerCase().contains('.m3u8');
       if (isM3U8) {
@@ -606,7 +609,9 @@ class IptvScraper {
             bytes = res.bodyBytes;
             break;
           }
-        } catch (_) {}
+        } catch (_) {
+          // One mirror failed; the loop tries the next.
+        }
       }
 
       if (bytes == null || bytes.isEmpty) {
@@ -744,7 +749,10 @@ class IptvScraper {
       try {
         data = (json.decode(catalogJson) as Map<String, dynamic>)['data']
             as Map<String, dynamic>?;
-      } catch (_) {}
+      } catch (_) {
+        // A catalog page that is not the JSON shape expected leaves data null,
+        // handled below.
+      }
       if (data != null) {
         final posts = data['children'] as List? ?? [];
         final nextAfterRaw = data['after']?.toString();
@@ -853,7 +861,10 @@ class IptvScraper {
             _extractPortals(decoded, 'Catalog (decoded)')
                 .forEach((p) => _addPortal(out, p, maxResults));
           }
-        } catch (_) {}
+        } catch (_) {
+          // One encoded blob in a post did not decode. The rest of the post is
+          // still scanned.
+        }
       }
       for (final m in _rawPaste.allMatches(body)) {
         deepLinks.add(m.group(0)!);
@@ -1161,7 +1172,9 @@ class IptvScraper {
             return token;
           }
         }
-      } catch (_) {}
+      } catch (_) {
+        // This client id did not get a token; the loop tries the next.
+      }
     }
     _oauthClientIdx =
         (_oauthClientIdx + 1) % _oauthClientIds.length;
@@ -1194,7 +1207,10 @@ class IptvScraper {
         _oauthToken = null;
         _oauthTokenExpiry = null;
       }
-    } catch (_) {}
+    } catch (_) {
+      // The listing failed, so there are no portals from this source this
+      // time.
+    }
     return null;
   }
 
@@ -1214,7 +1230,9 @@ class IptvScraper {
       if (resp.statusCode == 200 && resp.body.contains('<entry>')) {
         return resp.body;
       }
-    } catch (_) {}
+    } catch (_) {
+      // The feed did not answer or was not XML; there are no entries from it.
+    }
     return null;
   }
 }

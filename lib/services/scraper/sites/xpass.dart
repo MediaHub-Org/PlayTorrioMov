@@ -73,7 +73,10 @@ class XPassScraper extends StreamScraper {
             if (match != null && match.group(1) != null) {
               try {
                 sources = jsonDecode(match.group(1)!);
-              } catch (_) {}
+              } catch (_) {
+                // The backups array did not parse; sources stays null and is
+                // handled below.
+              }
             }
           }
         } else {
@@ -85,7 +88,9 @@ class XPassScraper extends StreamScraper {
           if (res.statusCode == 200) {
             try {
               sources = jsonDecode(res.body);
-            } catch (_) {}
+            } catch (_) {
+              // The response was not the JSON expected; sources stays null.
+            }
           }
         }
 
@@ -147,7 +152,10 @@ class XPassScraper extends StreamScraper {
                 }
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This source entry did not yield a stream; the rest are still
+            // walked.
+          }
         }
       } finally {
         client.close();

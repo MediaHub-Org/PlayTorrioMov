@@ -263,7 +263,10 @@ class SubdlProvider extends SubtitleProvider {
           return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No results from this endpoint; the provider returns nothing rather
+      // than failing the search.
+    }
     return [];
   }
 
@@ -304,7 +307,9 @@ class SubdlProvider extends SubtitleProvider {
           });
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // The scrape fallback found nothing parseable.
+    }
     return results;
   }
 

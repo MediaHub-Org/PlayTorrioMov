@@ -74,7 +74,10 @@ class TmdbHelper {
                 }
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // A failed lookup leaves the id unresolved; the caller searches by
+            // title instead.
+          }
         }
 
         // Backup find query via Speedrace proxy
@@ -92,7 +95,9 @@ class TmdbHelper {
               }
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // Same lookup, other endpoint shape.
+        }
       }
     }
 
@@ -150,7 +155,9 @@ class TmdbHelper {
               }
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // The fallback search failed too, so there is no id for this title.
+        }
       }
 
       // Backup search via Speedrace Proxy
@@ -185,7 +192,10 @@ class TmdbHelper {
             }
           }
         }
-      } catch (_) {}
+      } catch (_) {
+        // Last fallback. Returning null means the scraper works from the title
+        // alone.
+      }
     }
 
     return null;

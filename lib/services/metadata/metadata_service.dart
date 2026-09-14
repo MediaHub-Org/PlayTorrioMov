@@ -43,7 +43,10 @@ class MetadataService {
         if (fallbackResp.statusCode == 200) {
           response = fallbackResp;
         }
-      } catch (_) {}
+      } catch (_) {
+        // The configured-addon URL shape is a fallback for the plain one that
+        // just failed. Leaving response null is handled below.
+      }
     }
 
     if (response.statusCode != 200) {
@@ -148,7 +151,9 @@ class MetadataService {
         if (fallbackResp.statusCode == 200) {
           response = fallbackResp;
         }
-      } catch (_) {}
+      } catch (_) {
+        // Fallback URL shape, same as above.
+      }
     }
 
     if (response.statusCode != 200) {
@@ -232,7 +237,9 @@ class MetadataService {
         if (fallbackResp.statusCode == 200) {
           response = fallbackResp;
         }
-      } catch (_) {}
+      } catch (_) {
+        // Fallback URL shape, same as above.
+      }
     }
 
     if (response.statusCode != 200) return [];
@@ -286,7 +293,10 @@ class MetadataService {
     http.Response? response;
     try {
       response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
-    } catch (_) {}
+    } catch (_) {
+      // The first shape failed; the configured-addon shapes below are tried
+      // next.
+    }
 
     // Fallback 1: If 404 and baseUrl lacks config prefix, retry with /%7B%7D
     if ((response == null || response.statusCode == 404) &&
@@ -299,7 +309,9 @@ class MetadataService {
         if (configResp.statusCode == 200) {
           response = configResp;
         }
-      } catch (_) {}
+      } catch (_) {
+        // Configured-addon shape for this id.
+      }
     }
 
     // Fallback 2: If 404 and type was 'collections' or 'collection', try 'movie'
@@ -318,7 +330,10 @@ class MetadataService {
         if (movieResp.statusCode == 200) {
           response = movieResp;
         }
-      } catch (_) {}
+      } catch (_) {
+        // Some addons file a series under movie. Not finding it there is not
+        // an error.
+      }
     }
 
     // Fallback 3: If 404 and type was 'movie' but id starts with 'ctmdb.', try 'collections'
@@ -337,7 +352,9 @@ class MetadataService {
         if (collResp.statusCode == 200) {
           response = collResp;
         }
-      } catch (_) {}
+      } catch (_) {
+        // Collections are only served by some addons.
+      }
     }
 
     if (response == null || response.statusCode != 200) return null;

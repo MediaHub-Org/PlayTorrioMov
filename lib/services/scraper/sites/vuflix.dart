@@ -98,7 +98,10 @@ class VuflixScraper extends StreamScraper {
           }
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // The provider list failed to refresh, so the cached one (or none) is
+      // used.
+    }
 
     return _fallbackProviders;
   }

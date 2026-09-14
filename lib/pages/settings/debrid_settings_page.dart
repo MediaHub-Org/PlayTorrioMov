@@ -116,7 +116,10 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           _statusMap[provider] = username;
         });
       }
-    } catch (_) {}
+    } catch (_) {
+      // The provider is connected either way -- this only decides whether the
+      // account name is shown beside it.
+    }
   }
 
   Future<void> _saveProviderKey(String provider, TextEditingController controller) async {

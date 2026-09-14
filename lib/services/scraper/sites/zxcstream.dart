@@ -164,7 +164,10 @@ class ZxcStreamScraper extends StreamScraper {
               if (dec != null) {
                 try {
                   sourcesData = jsonDecode(dec);
-                } catch (_) {}
+                } catch (_) {
+                  // The decrypted payload was not JSON, so the original value
+                  // is kept and handled below.
+                }
               }
             }
 

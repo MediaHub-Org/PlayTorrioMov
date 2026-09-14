@@ -47,7 +47,11 @@ class AppUpdaterService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyAutoCheckEnabled, enabled);
-    } catch (_) {}
+    } catch (e) {
+      // The switch in Settings has already moved. If this throws it will be
+      // back where it was next launch, which looks like the app ignoring it.
+      debugPrint('[Updater] Could not save the auto-check setting: $e');
+    }
   }
 
   static Future<void> dismissVersion(String version) async {
@@ -74,7 +78,11 @@ class AppUpdaterService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_keyDismissedVersion);
-    } catch (_) {}
+    } catch (e) {
+      // Leaves the version still dismissed, so the update prompt stays
+      // hidden when the user has asked to see it again.
+      debugPrint('[Updater] Could not clear the dismissed version: $e');
+    }
   }
 
   Future<UpdateInfo?> checkForUpdates({bool ignoreDismissed = false}) async {

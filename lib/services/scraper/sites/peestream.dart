@@ -116,12 +116,17 @@ class PeeStreamScraper extends StreamScraper {
                         foundStreams = true;
                       }
                     }
-                  } catch (_) {}
+                  } catch (_) {
+                    // This quality entry did not resolve; the others still
+                    // can.
+                  }
                 }
               }
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // This server did not resolve; the loop tries the next.
+        }
 
         // 2. Fallback search route if SSE didn't return streams
         if (!foundStreams) {
@@ -185,7 +190,9 @@ class PeeStreamScraper extends StreamScraper {
                 }
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This embed yielded nothing.
+          }
         }
       } finally {
         client.close();

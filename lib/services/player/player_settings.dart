@@ -344,7 +344,10 @@ abstract final class PlayerSettings {
           try {
             data = await rootBundle.load(candidate);
             if (data.lengthInBytes > 0) break;
-          } catch (_) {}
+          } catch (_) {
+            // Each font is a candidate; a missing asset just means trying the
+            // next.
+          }
         }
 
         if (data != null) {
@@ -532,7 +535,10 @@ abstract final class PlayerSettings {
         try {
           final tempDir = await getTemporaryDirectory();
           await platform.setProperty('demuxer-cache-dir', tempDir.path);
-        } catch (_) {}
+        } catch (_) {
+          // The demuxer cache directory is an optimisation. Without it mpv
+          // buffers in memory.
+        }
       }
 
       // 1. Audio Filter & Volume

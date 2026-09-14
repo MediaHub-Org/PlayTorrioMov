@@ -246,7 +246,10 @@ class _PlayerScreenState extends State<PlayerScreen>
               final np = _player.platform as dynamic;
               np.setProperty('video-sync', 'audio');
             }
-          } catch (_) {}
+          } catch (_) {
+            // Not every libmpv build exposes 'video-sync'; the resync below
+            // happens either way.
+          }
         }
         _wasBuffering = isBuffering;
       }),
@@ -1142,7 +1145,10 @@ class _PlayerScreenState extends State<PlayerScreen>
         final canonicalPath = file.resolveSymbolicLinksSync();
         return Uri.file(canonicalPath).toString();
       }
-    } catch (_) {}
+    } catch (_) {
+      // resolveSymbolicLinksSync throws for anything that is not a real file,
+      // which is how a URL falls through to being treated as one.
+    }
 
     final uri = Uri.tryParse(pathOrUrl);
     if (uri != null &&
@@ -2265,7 +2271,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                   _player.setAudioTrack(matching);
                   final np = _player.platform as dynamic;
                   np.setProperty('aid', idx.toString());
-                } catch (_) {}
+                } catch (_) {
+                  // Setting 'aid' through the platform handle repeats
+                  // setAudioTrack above for builds that ignore the Dart-side
+                  // call. Older ones reject the property instead.
+                }
                 final match = _audioTracks
                     .where((t) => t.index == idx)
                     .firstOrNull;
@@ -2276,7 +2286,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                 try {
                   final np = _player.platform as dynamic;
                   np.setProperty('audio-delay', sec.toString());
-                } catch (_) {}
+                } catch (_) {
+                  // 'audio-delay' is libmpv-only. The value stays in the UI
+                  // either way, so a desktop build without it just does not
+                  // shift the audio.
+                }
                 _showAudioHudToast(
                   'AUDIO SYNC: ${sec > 0 ? "+" : ""}${sec.toStringAsFixed(2)}s',
                 );

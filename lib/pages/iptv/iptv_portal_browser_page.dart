@@ -1679,7 +1679,10 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
         _IptvPortalBrowserPageState._sharedEpgCache[widget.stream.streamId] = entries;
         setState(() => _cachedEpg = entries);
       }
-    } catch (_) {}
+    } catch (_) {
+      // The now/next programme is decoration on the channel card. Without it
+      // the card still plays the channel.
+    }
   }
 
   @override

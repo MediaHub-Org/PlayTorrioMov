@@ -76,7 +76,10 @@ class HlsDownloadEngine {
         final metaJson = jsonDecode(await metaFile.readAsString());
         startSegmentIndex = metaJson['lastSegmentIndex'] as int? ?? 0;
         totalBytesWritten = await partFile.length();
-      } catch (_) {}
+      } catch (_) {
+        // Unreadable resume metadata means starting from segment 0 rather than
+        // refusing to resume at all.
+      }
     }
 
     final mode = (startSegmentIndex > 0 && await partFile.exists()) ? FileMode.append : FileMode.write;
@@ -164,7 +167,10 @@ class HlsDownloadEngine {
       if (await finalFile.exists()) {
         try {
           await finalFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // A stale target that will not delete is about to be overwritten by
+          // the rename below.
+        }
       }
       try {
         await partFile.rename(task.targetFilePath);
@@ -173,14 +179,19 @@ class HlsDownloadEngine {
         await partFile.copy(task.targetFilePath);
         try {
           await partFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // The copy above already succeeded, so this .part file is a
+          // leftover.
+        }
       }
 
       // Clean up metadata
       if (await metaFile.exists()) {
         try {
           await metaFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // Resume metadata for a download that has finished.
+        }
       }
 
       final completedBytes = await File(task.targetFilePath).length();
@@ -198,7 +209,9 @@ class HlsDownloadEngine {
       try {
         await sink.flush();
         await sink.close();
-      } catch (_) {}
+      } catch (_) {
+        // Already on the error path; closing the sink is tidy-up.
+      }
       rethrow;
     }
   }

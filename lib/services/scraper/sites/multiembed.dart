@@ -98,7 +98,10 @@ class MultiEmbedScraper extends StreamScraper {
                 try {
                   final dataObj = jsonDecode(dataMatch.group(1)!);
                   playlistPath = dataObj['playlist']?.toString();
-                } catch (_) {}
+                } catch (_) {
+                  // The inline data object did not parse, so there is no
+                  // playlist path.
+                }
               }
 
               playlistPath ??= RegExp(r'"playlist"\s*:\s*"([^"]+)"').firstMatch(xpsHtml)?.group(1);
@@ -149,7 +152,9 @@ class MultiEmbedScraper extends StreamScraper {
                 }
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This embed yielded nothing; the loop tries the next.
+          }
         }
       }
     } catch (e) {
