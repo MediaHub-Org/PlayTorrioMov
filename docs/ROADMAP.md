@@ -16,40 +16,7 @@ below was measured there.
 
 ## Open
 
-### 1. A TMDB key has to come from somewhere
-
-**Answered on device, 2026-09-14:** the status line read *TMDB rejected the
-API key (401)*. The key was the fallback constant committed in
-`tmdb_settings.dart`, and a TMDB key in a public repository gets found and
-revoked. Three causes on our side were already fixed (#38, #53 and the TMDB
-commits); the fourth was that the key itself was dead.
-
-The constant is gone. What replaces it is a choice, not a default:
-
-| Who | What to do |
-|:----|:-----------|
-| A user | **Settings → Sync → TMDB Cast Photos → Connect**, with a free key from themoviedb.org. The card asks for this when no key is set |
-| This project | Put `TMDB_API_KEY` in the `DOTENV_CONTENTS` repository secret. Fresh installs then work with no setup, and the key rotates without a new release |
-
-No dotenv secret was set (see *Release secrets* below), so published builds
-currently ship without a key.
-
-**What a device still has to confirm:** that enrichment works end to end
-*once a valid key is present* — cast photos and character names appearing on
-a details page. CI cannot check it because `api.themoviedb.org` is blocked
-from the runners. With a key set, the status line reads *Loaded N cast and M
-crew from TMDB*; if the row still looks wrong after that, the bug is in the
-page, not the service.
-
-| What the status line says | What it means |
-|:-------------|:--------------|
-| *Loaded N cast and M crew from TMDB* | TMDB is fine — a wrong-looking row is the page's bug |
-| *TMDB rejected the API key (401)* | That key is invalid or revoked |
-| *Could not reach TMDB* | Network, DNS or a captive portal |
-| *TMDB has no entry for this title (404)* | That one title only; try another |
-| nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
-
-### 2. Engineering debt, from the 2026-09-13 audit
+### 1. Engineering debt, from the 2026-09-13 audit
 
 What the audit fixed is in git — including the HTTP timeout gap it had
 deferred: all 54 `package:http` calls that lacked a deadline now carry one,
@@ -62,7 +29,7 @@ deliberately left:
 | **126 empty `catch` blocks** | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
 | `megasource` / `nova` share **50** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
 
-### 3. The scrapers are effectively untested in CI
+### 2. The scrapers are effectively untested in CI
 
 **14 of 103 test files are `@Tags(['network'])`** and excluded by
 `flutter test --exclude-tags network` — and they are exactly the files
@@ -224,6 +191,37 @@ remaining dark literal in `lib/` is one of them and says so in a comment:
 
 So the rule for the next person: before tokenising a dark literal, ask which
 of the three it is. If it is none of them, it is a surface and wants a token.
+
+### Where the TMDB key comes from
+
+**Answered on device, 2026-09-14:** the status line read *TMDB rejected the
+API key (401)*. The key was the fallback constant committed in
+`tmdb_settings.dart`, and a TMDB key in a public repository gets found and
+revoked. Three causes on our side were already fixed (#38, #53 and the TMDB
+commits); the fourth was that the key itself was dead.
+
+The constant is gone. What replaces it is a choice, not a default:
+
+| Who | What to do |
+|:----|:-----------|
+| A user | **Settings → Sync → TMDB Cast Photos → Connect**, with a free key from themoviedb.org. The card asks for this when no key is set |
+| This project | Put `TMDB_API_KEY` in the `DOTENV_CONTENTS` repository secret. Fresh installs then work with no setup, and the key rotates without a new release |
+
+**Closed on device, 2026-09-14.** `TMDB_API_KEY` is in the `DOTENV_CONTENTS`
+repository secret, and v1.6.3 is the first published build to carry it. A
+device confirmed the whole chain end to end: cast photos and character names
+appear on a details page, and a row that used to show three names now shows
+the full billing. That was the one thing CI could never check —
+`api.themoviedb.org` is blocked from the runners — so the table below is what
+is left of this item: a way to tell, from the status line, whose bug it is.
+
+| What the status line says | What it means |
+|:-------------|:--------------|
+| *Loaded N cast and M crew from TMDB* | TMDB is fine — a wrong-looking row is the page's bug |
+| *TMDB rejected the API key (401)* | That key is invalid or revoked |
+| *Could not reach TMDB* | Network, DNS or a captive portal |
+| *TMDB has no entry for this title (404)* | That one title only; try another |
+| nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
 
 ### macOS is Apple Silicon only
 
