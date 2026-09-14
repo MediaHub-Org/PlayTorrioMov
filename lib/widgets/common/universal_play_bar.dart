@@ -47,10 +47,10 @@ class UniversalPlayBar extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF131522).withValues(alpha: 0.96),
+              color: AppColors.surface.withValues(alpha: 0.96),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: const Color(0xFF7C5CFF).withValues(alpha: 0.35),
+                color: AppColors.accent.withValues(alpha: 0.35),
               ),
               boxShadow: [
                 BoxShadow(
@@ -157,7 +157,7 @@ class UniversalPlayBar extends StatelessWidget {
                   isPlaying
                       ? Icons.pause_circle_filled_rounded
                       : Icons.play_circle_fill_rounded,
-                  color: const Color(0xFF7C5CFF),
+                  color: AppColors.accent,
                   size: 34,
                 ),
                 onPressed: PlaybackCoordinator.togglePlayPause,
@@ -193,7 +193,7 @@ class UniversalPlayBar extends StatelessWidget {
                     value: durMs > 0 ? progress : null,
                     minHeight: 3,
                     backgroundColor: AppColors.inkAlpha(0.10),
-                    color: const Color(0xFF7C5CFF),
+                    color: AppColors.accent,
                   ),
                 ),
               ],
@@ -212,8 +212,8 @@ class UniversalPlayBar extends StatelessWidget {
     return Container(
       width: 40,
       height: 40,
-      color: const Color(0xFF7C5CFF).withValues(alpha: 0.25),
-      child: Icon(icon, color: const Color(0xFF7C5CFF), size: 22),
+      color: AppColors.accent.withValues(alpha: 0.25),
+      child: Icon(icon, color: AppColors.accent, size: 22),
     );
   }
 

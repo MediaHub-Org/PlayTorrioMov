@@ -631,12 +631,12 @@ class ContinueWatchingService {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(
+                SizedBox(
                   width: 24,
                   height: 24,
                   child: CircularProgressIndicator(
                     strokeWidth: 2.5,
-                    color: Color(0xFF7C5CFF),
+                    color: AppColors.accent,
                   ),
                 ),
                 const SizedBox(width: 16),

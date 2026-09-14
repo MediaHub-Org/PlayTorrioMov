@@ -21,7 +21,6 @@ import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
 import 'iptv_portals_modal.dart';
 import 'iptv_search_page.dart';
-import '../../services/theme/app_colors.dart';
 
 class IptvPage extends StatefulWidget {
   const IptvPage({super.key});
@@ -331,47 +330,13 @@ class _IptvGlassAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return PillFilterHeaderBar(
       transparent: true,
-      leading: [
-        DecoratedBox(
-          decoration: headerPillDecoration,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.live_tv_rounded,
-                  color: AppColors.inkMuted,
-                  size: headerPillIconSize,
-                ),
-                SizedBox(width: 6),
-                Text(
-                  'LIVE TV',
-                  style: TextStyle(
-                    color: AppColors.ink,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.6,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        DecoratedBox(
-          decoration: headerPillDecoration,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Text(
-              '60+ CHANNELS',
-              style: TextStyle(
-                color: AppColors.inkMuted,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.4,
-              ),
-            ),
-          ),
+      leading: const [
+        HeaderPillLabel(label: 'LIVE TV', icon: Icons.live_tv_rounded),
+        HeaderPillLabel(
+          label: '60+ CHANNELS',
+          emphasised: false,
+          fontSize: 10.5,
+          letterSpacing: 0.4,
         ),
       ],
       pills: [

@@ -5,8 +5,12 @@ import '../../services/theme/app_colors.dart';
 class P2pWarningDialog extends StatelessWidget {
   const P2pWarningDialog({super.key});
 
-  static const Color _surfaceColor = Color(0xFF131722);
-  static const Color _backgroundColor = Color(0xFF0A0D14);
+  // Getters, not variables: a static variable is initialised lazily, once,
+  // on its first read -- which would freeze whichever theme happened to be
+  // active when this dialog was first opened, and leave it there through
+  // every later theme change.
+  static Color get _surfaceColor => AppColors.surface;
+  static Color get _backgroundColor => AppColors.canvas;
   static const Color _warningColor = Color(0xFFF59E0B);
 
   @override

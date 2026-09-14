@@ -49,7 +49,7 @@ class ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Try again'),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF7C5CFF),
+                backgroundColor: AppColors.accent,
               ),
             ),
           ],

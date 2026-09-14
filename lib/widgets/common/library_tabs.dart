@@ -88,7 +88,7 @@ class _LibraryTabsState extends State<LibraryTabs>
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.titleIcon, color: const Color(0xFF7C5CFF), size: 22),
+              Icon(widget.titleIcon, color: AppColors.accent, size: 22),
               const SizedBox(width: 10),
               Text(
                 widget.title,

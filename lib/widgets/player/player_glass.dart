@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Design tokens and glass styling for the modern video player UI.
 class PlayerTheme {
@@ -14,7 +15,11 @@ class PlayerTheme {
   static const Color edgeSoft = Color(0x12FFFFFF); // 7% white
 
   // Accents
-  static const Color accent = Color(0xFF7C5CFF);
+  // Getters, not variables: a top-level or static variable is initialised
+  // lazily, once, on its first read -- which would freeze whichever theme
+  // happened to be active when this screen was first opened, and leave it
+  // there through every later theme change.
+  static Color get accent => AppColors.accent;
   static const Color accentSoft = Color(0x337C5CFF);
   static const Color accentGlow = Color(0x667C5CFF);
   static const Color danger = Color(0xFFEF4444);

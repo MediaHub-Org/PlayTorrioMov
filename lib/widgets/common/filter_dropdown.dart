@@ -26,6 +26,9 @@ class FilterDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
+    // Over a hero this pill sits on a photo, so its glyphs stay white; in
+    // its own band they follow the theme. See [HeaderPillSurface].
+    final tint = headerPillTint(context);
     return PopupMenuButton<T>(
       itemBuilder: (context) => items,
       onSelected: onSelected,
@@ -41,18 +44,22 @@ class FilterDropdown<T> extends StatelessWidget {
           horizontal: isMobile ? 8 : 12,
           vertical: 8,
         ),
-        decoration: headerPillDecoration,
+        decoration: headerPillDecoration(context),
         alignment: Alignment.center,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: headerPillIconSize, color: AppColors.inkMuted),
+            Icon(
+              icon,
+              size: headerPillIconSize,
+              color: tint.withValues(alpha: 0.70),
+            ),
             if (!isMobile) ...[
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: AppColors.ink,
+                  color: tint,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -60,7 +67,7 @@ class FilterDropdown<T> extends StatelessWidget {
             ],
             Icon(
               Icons.arrow_drop_down_rounded,
-              color: AppColors.inkSubtle,
+              color: tint.withValues(alpha: 0.54),
               size: 18,
             ),
           ],

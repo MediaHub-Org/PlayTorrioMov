@@ -9,9 +9,13 @@ import '../../widgets/updater/update_dialog.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 
-Color _kBackground = AppColors.canvas;
-Color _kSurface = AppColors.surface;
-const Color _kAccent = Color(0xFF7C5CFF);
+// Getters, not variables: a top-level or static variable is initialised
+// lazily, once, on its first read -- which would freeze whichever theme
+// happened to be active when this screen was first opened, and leave it
+// there through every later theme change.
+Color get _kBackground => AppColors.canvas;
+Color get _kSurface => AppColors.surface;
+Color get _kAccent => AppColors.accent;
 const Color _kAccentAlt = Color(0xFF00E5FF);
 
 const String _kRepoUrl = 'https://github.com/MediaHub-Org/PlayTorrioMov';

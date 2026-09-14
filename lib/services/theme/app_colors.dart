@@ -118,6 +118,20 @@ abstract final class AppColors {
     surface: which,
   );
 
+  // ── Accent ─────────────────────────────────────────────────────────────
+
+  /// The active palette's primary colour: selected states, spinners, focus
+  /// rings, primary buttons.
+  ///
+  /// Not a light/dark decision -- the palette carries one primary for both
+  /// -- but a token all the same, because the alternative is what the app
+  /// had: 159 copies of the default palette's violet spread across 34
+  /// files, so choosing any of the other seven palettes recoloured some of
+  /// the app and left the rest violet.
+  ///
+  /// Whatever sits *on* this is [onAccent], never [ink].
+  static Color get accent => AppThemeService.currentPalette.value.primaryColor;
+
   // ── Fixed colours ──────────────────────────────────────────────────────
 
   /// Text and icons that sit on the accent colour, or over artwork. Always

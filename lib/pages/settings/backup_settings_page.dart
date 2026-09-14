@@ -283,10 +283,10 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.14),
+                  color: AppColors.accent.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.save_alt_rounded, color: Color(0xFF7C5CFF)),
+                child: Icon(Icons.save_alt_rounded, color: AppColors.accent),
               ),
               const SizedBox(width: 14),
               Expanded(

@@ -4,9 +4,7 @@ import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
 import '../../services/theme/app_colors.dart';
-
-const Color _kBarBackground = Color(0xFF0C0E17);
-const Color _kAccent = Color(0xFF7C5CFF);
+import '../../services/theme/app_theme_service.dart';
 
 /// The section switcher shown at the top of each hub's content area on tablet
 /// and desktop, driven by [HubController.currentSections].
@@ -28,7 +26,7 @@ class SectionTopBar extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: _kBarBackground,
+        color: AppColors.bar,
         border: Border(bottom: BorderSide(color: AppColors.inkAlpha(0.10))),
       ),
       child: ListenableBuilder(
@@ -78,6 +76,10 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The accent used to be a hardcoded violet, so the selected section
+    // stayed the same colour whichever of the eight palettes was chosen --
+    // the one control on screen that ignored the theme.
+    final accent = AppThemeService.currentPalette.value.primaryColor;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadii.md),
@@ -85,12 +87,12 @@ class _Chip extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? _kAccent : Colors.transparent,
+          color: selected ? accent : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadii.md),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: _kAccent.withValues(alpha: 0.35),
+                    color: accent.withValues(alpha: 0.35),
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -102,14 +104,16 @@ class _Chip extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: selected ? AppColors.ink : AppColors.inkDisabled,
+              // Selected sits on the accent fill, so it is white in both
+              // themes; unselected sits on the bar and follows the ink.
+              color: selected ? AppColors.onAccent : AppColors.inkDisabled,
               size: 16,
             ),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: selected ? AppColors.ink : AppColors.inkSubtle,
+                color: selected ? AppColors.onAccent : AppColors.inkSubtle,
                 fontSize: 12,
                 fontWeight: selected ? FontWeight.bold : FontWeight.w500,
               ),

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart' as mk;
@@ -663,14 +664,14 @@ class _PlayerScreenState extends State<PlayerScreen>
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
                 side: BorderSide(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.3),
+                  color: AppColors.accent.withValues(alpha: 0.3),
                 ),
               ),
-              title: const Row(
+              title: Row(
                 children: [
                   Icon(
                     Icons.skip_next_rounded,
-                    color: Color(0xFF7C5CFF),
+                    color: AppColors.accent,
                     size: 26,
                   ),
                   SizedBox(width: 10),
@@ -694,8 +695,8 @@ class _PlayerScreenState extends State<PlayerScreen>
                   const SizedBox(height: 8),
                   Text(
                     'S${widget.episode?.season ?? '?'}E${(widget.episode?.episode ?? 0) + 1}',
-                    style: const TextStyle(
-                      color: Color(0xFF7C5CFF),
+                    style: TextStyle(
+                      color: AppColors.accent,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -716,7 +717,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7C5CFF),
+                    backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -2656,12 +2657,12 @@ class _PlayerScreenState extends State<PlayerScreen>
           color: const Color(0xFF0F1117).withValues(alpha: 0.90),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF7C5CFF).withValues(alpha: 0.5),
+            color: AppColors.accent.withValues(alpha: 0.5),
             width: 1.2,
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7C5CFF).withValues(alpha: 0.25),
+              color: AppColors.accent.withValues(alpha: 0.25),
               blurRadius: 24,
               spreadRadius: 2,
             ),

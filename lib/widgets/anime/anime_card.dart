@@ -165,6 +165,8 @@ class _AnimePosterFrame extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Stands in for artwork that has not loaded, so it keeps a fixed
+            // dark fill in either theme -- as does anything drawn on it.
             const ColoredBox(color: Color(0xFF171A23)),
 
             // Poster Image
@@ -284,8 +286,8 @@ class _AnimePosterFrame extends StatelessWidget {
                 right: 9,
                 child: Container(
                   padding: const EdgeInsets.all(7),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF7C5CFF),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

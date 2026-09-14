@@ -6,6 +6,7 @@ import '../movie/movie_card.dart';
 import 'browse_row_view.dart';
 import 'custom_scroll_track.dart';
 import 'error_view.dart';
+import 'header_pill_style.dart' show HeaderPillSurface;
 import 'hero_carousel_auto_rotate.dart';
 import 'pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import 'poster_skeleton.dart';
@@ -219,7 +220,12 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
       content = _buildScrollable(
         sizing,
         width,
-        headerOverlay: headerOverlaysHero ? widget.header : null,
+        // Floated over the hero, the header is drawn on a photograph, so
+        // its pills keep their white glyphs in either theme. In its own
+        // band below it is on the app's background and follows the ink.
+        headerOverlay: headerOverlaysHero
+            ? HeaderPillSurface(overArtwork: true, child: widget.header!)
+            : null,
       );
     }
 
@@ -227,7 +233,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
         ? content
         : Column(
             children: [
-              widget.header!,
+              HeaderPillSurface(overArtwork: false, child: widget.header!),
               const SizedBox(height: AppSpacing.sm),
               Expanded(child: content),
             ],

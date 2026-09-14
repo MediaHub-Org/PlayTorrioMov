@@ -119,7 +119,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                     width: 220,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF13151F).withValues(alpha: 0.75),
+                      color: AppColors.surface.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
                         color: AppColors.inkAlpha(0.08),

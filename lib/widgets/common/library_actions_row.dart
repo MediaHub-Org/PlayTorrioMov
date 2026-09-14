@@ -70,7 +70,7 @@ class LibraryActionsRow extends StatelessWidget {
                   : Icons.bookmark_add_outlined,
               label: isWatchlist ? 'Remove from watchlist' : 'Add to watchlist',
               active: isWatchlist,
-              color: const Color(0xFF7C5CFF),
+              color: AppColors.accent,
               onTap: () => _apply(MyListService.setWatchlist),
             ),
             const SizedBox(width: 10),

@@ -188,11 +188,11 @@ class _CustomScrollTrackState extends State<CustomScrollTrack> {
                   height: isVert ? _thumbSize : null,
                   width: isVert ? null : _thumbSize,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7C5CFF),
+                    color: AppColors.accent,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF7C5CFF).withValues(alpha: 0.6),
+                        color: AppColors.accent.withValues(alpha: 0.6),
                         blurRadius: 12,
                         spreadRadius: 2,
                       ),
@@ -239,7 +239,7 @@ class _HoverArrowState extends State<_HoverArrow> {
           ),
           child: Icon(
             widget.icon,
-            color: _isHovering ? const Color(0xFF7C5CFF) : AppColors.inkMuted,
+            color: _isHovering ? AppColors.accent : AppColors.inkMuted,
             size: 22,
           ),
         ),

@@ -38,13 +38,16 @@ class TopBar extends StatelessWidget {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFF0B0D15),
+        color: AppColors.bar,
         border: Border(
           bottom: BorderSide(color: AppColors.inkAlpha(0.14)),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            // Tied to the ink, not to black: a 35%-black drop shadow under a
+            // white bar reads as a smudge, where the same alpha under a dark
+            // one is the lift this bar was designed with.
+            color: AppColors.inkAlpha(0.35),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

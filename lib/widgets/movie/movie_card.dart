@@ -206,7 +206,8 @@ class _PosterFrame extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background fill
+            // Background fill. Fixed dark rather than a theme surface: it is
+            // what shows through until the poster loads, in either theme.
             const ColoredBox(
               color: Color(0xFF171A23),
             ),

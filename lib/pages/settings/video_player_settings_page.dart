@@ -905,10 +905,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             secondary: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFF7C5CFF).withValues(alpha: 0.15),
+                color: AppColors.accent.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.graphic_eq_rounded, color: Color(0xFF7C5CFF), size: 20),
+              child: Icon(Icons.graphic_eq_rounded, color: AppColors.accent, size: 20),
             ),
             title: Text(
               'Master Audio Clock Sync',
@@ -919,7 +919,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
             ),
             value: PlayerSettings.hardwareAudioClock.value,
-            activeColor: const Color(0xFF7C5CFF),
+            activeColor: AppColors.accent,
             onChanged: (val) => PlayerSettings.setHardwareAudioClock(val),
           ),
 
@@ -1067,7 +1067,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A0D14),
+              color: AppColors.canvas,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.inkAlpha(0.06)),
             ),
@@ -1124,7 +1124,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF13151F),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Reset Player Settings?'),
         content: Text(
@@ -1186,7 +1186,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlgState) {
           return AlertDialog(
-            backgroundColor: const Color(0xFF13151F),
+            backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
             title: Row(
               children: [

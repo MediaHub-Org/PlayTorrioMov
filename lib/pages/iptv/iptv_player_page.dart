@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -725,18 +726,18 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                         color: Colors.black.withValues(alpha: 0.75),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF7C5CFF).withValues(alpha: 0.5),
+                          color: AppColors.accent.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: Color(0xFF7C5CFF),
+                              color: AppColors.accent,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -766,16 +767,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           color: const Color(0xE60D101A),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(
-                              0xFF7C5CFF,
-                            ).withValues(alpha: 0.6),
+                            color: AppColors.accent.withValues(alpha: 0.6),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF7C5CFF,
-                              ).withValues(alpha: 0.3),
+                              color: AppColors.accent.withValues(alpha: 0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),
@@ -810,7 +807,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                     _isMuted
                                         ? Colors.redAccent
-                                        : const Color(0xFF7C5CFF),
+                                        : AppColors.accent,
                                   ),
                                   minHeight: 7,
                                 ),
@@ -849,16 +846,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           color: const Color(0xE60D101A),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: const Color(
-                              0xFF7C5CFF,
-                            ).withValues(alpha: 0.6),
+                            color: AppColors.accent.withValues(alpha: 0.6),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(
-                                0xFF7C5CFF,
-                              ).withValues(alpha: 0.3),
+                              color: AppColors.accent.withValues(alpha: 0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 4),
                             ),
@@ -958,7 +951,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                             decoration: BoxDecoration(
                                               color: isLive
                                                   ? const Color(0xFFFF3B30)
-                                                  : const Color(0xFF7C5CFF),
+                                                  : AppColors.accent,
                                               borderRadius:
                                                   BorderRadius.circular(4),
                                             ),
@@ -1339,7 +1332,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 isCategoryList
                                     ? Icons.format_list_bulleted_rounded
                                     : Icons.tune_rounded,
-                                color: const Color(0xFF7C5CFF),
+                                color: AppColors.accent,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -1364,9 +1357,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF7C5CFF,
-                                  ).withValues(alpha: 0.2),
+                                  color: AppColors.accent.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -1418,16 +1409,14 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       ),
                                       decoration: BoxDecoration(
                                         color: isSelected
-                                            ? const Color(
-                                                0xFF7C5CFF,
-                                              ).withValues(alpha: 0.25)
+                                            ? AppColors.accent.withValues(alpha: 0.25)
                                             : Colors.white.withValues(
                                                 alpha: 0.04,
                                               ),
                                         borderRadius: BorderRadius.circular(10),
                                         border: Border.all(
                                           color: isSelected
-                                              ? const Color(0xFF7C5CFF)
+                                              ? AppColors.accent
                                               : Colors.white.withValues(
                                                   alpha: 0.08,
                                                 ),
@@ -1550,9 +1539,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                             Container(
                                               padding: const EdgeInsets.all(4),
                                               decoration: BoxDecoration(
-                                                color: const Color(
-                                                  0xFF7C5CFF,
-                                                ).withValues(alpha: 0.3),
+                                                color: AppColors.accent.withValues(alpha: 0.3),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: const Icon(
@@ -1789,8 +1776,8 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                                       .clamp(0.0, width)
                                 : 0,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
+                              gradient: LinearGradient(
+                                colors: [AppColors.accent, Color(0xFF00D2EF)],
                               ),
                               borderRadius: BorderRadius.circular(3),
                             ),
@@ -1813,9 +1800,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(
-                                      0xFF7C5CFF,
-                                    ).withValues(alpha: 0.5),
+                                    color: AppColors.accent.withValues(alpha: 0.5),
                                     blurRadius: 6,
                                   ),
                                 ],

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import '../../models/movie/video.dart';
 import 'player_glass.dart';
 
@@ -798,13 +799,13 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                       child: Container(
                         height: 38,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF7C5CFF), Color(0xFF9D84FF)],
+                          gradient: LinearGradient(
+                            colors: [AppColors.accent, Color(0xFF9D84FF)],
                           ),
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF7C5CFF).withValues(alpha: 0.45),
+                              color: AppColors.accent.withValues(alpha: 0.45),
                               blurRadius: 10,
                               offset: const Offset(0, 2),
                             ),

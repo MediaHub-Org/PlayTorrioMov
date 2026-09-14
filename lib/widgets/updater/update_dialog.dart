@@ -26,9 +26,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
 
-  static Color _surfaceColor = AppColors.surface;
-  static Color _backgroundColor = AppColors.canvas;
-  static const Color _accentColor = Color(0xFF7C5CFF);
+  // Getters, not variables: a top-level or static variable is initialised
+  // lazily, once, on its first read -- which would freeze whichever theme
+  // happened to be active when this screen was first opened, and leave it
+  // there through every later theme change.
+  static Color get _surfaceColor => AppColors.surface;
+  static Color get _backgroundColor => AppColors.canvas;
+  static Color get _accentColor => AppColors.accent;
 
   @override
   void dispose() {
