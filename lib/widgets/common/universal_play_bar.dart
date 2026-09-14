@@ -14,6 +14,10 @@ class UniversalPlayBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Built as `const UniversalPlayBar()` by HubPage, and its own
+    // ValueListenableBuilder only re-runs on playback changes, so without
+    // this the bar keeps the theme it was first built under.
+    AppColors.dependOn(context);
     return ValueListenableBuilder<int>(
       valueListenable: PlaybackCoordinator.revision,
       builder: (context, _, __) {

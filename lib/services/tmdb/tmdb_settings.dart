@@ -15,22 +15,26 @@ import '../config/env_service.dart';
 ///     same path Trakt's and Simkl's credentials take, so cast photos work
 ///     on a fresh install with no setup.
 ///
-/// If no external key is present, we ship a non-empty fallback constant so
-/// the cast-enrichment path remains enabled without forcing every user to
-/// register their own key first.
+/// There is deliberately no third source. A hardcoded fallback key used to
+/// sit here, and it was dead: a TMDB key committed to a public repository
+/// gets found and revoked, which is what 401s on v1.6.2 were. Its cost was
+/// not the failure but the story the failure told -- the settings card said
+/// "Using this build's included key", so a user with no key was told they
+/// had a working one, and only the red status line underneath disagreed.
+/// With no key at all the card says to add one, which is both true and the
+/// thing to do. If a build should ship a key, put it in `ENV_FILE`, where
+/// rotating it does not mean shipping a new binary.
 abstract final class TmdbSettings {
-  static const String _fallbackBundledApiKey = '8e7f3533fd39d27a4f179aa0e8b4a305';
   static const _apiKeyKey = 'tmdb_api_key';
 
   /// The user's own key, or null if they have not set one. This is *not*
   /// necessarily the key requests use -- see [effectiveApiKey].
   static final ValueNotifier<String?> apiKey = ValueNotifier<String?>(null);
 
-  /// The key this build ships with, if any.
+  /// The key this build ships with, or null if it ships without one.
   static String? get bundledApiKey {
     final key = EnvService.tmdbApiKey;
-    if (key.isNotEmpty) return key;
-    return _fallbackBundledApiKey;
+    return key.isNotEmpty ? key : null;
   }
 
   /// The key requests actually send: the user's, else the build's, else
