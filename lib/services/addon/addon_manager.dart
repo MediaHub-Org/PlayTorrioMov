@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/addon/addon.dart';
@@ -18,6 +19,14 @@ class AddonManager {
   static final AddonManager instance = AddonManager._();
 
   static const String _storageKey = 'installed_addons_v4';
+
+  /// The addon a fresh install starts with.
+  ///
+  /// Overridable only so a test can point the bootstrap at an address that
+  /// refuses instantly: CI has a working network, so a test that needs the
+  /// *failure* path cannot get one by asking for the real URL.
+  @visibleForTesting
+  static String defaultAddonUrl = 'https://v3-cinemeta.strem.io';
 
   List<InstalledAddon> _addons = [];
   bool _initialized = false;
@@ -41,6 +50,14 @@ class AddonManager {
 
   // ── Initialization ────────────────────────────────────────────────────
 
+  /// Whether the first-launch default install still owes us an attempt.
+  ///
+  /// Distinct from [_initialized]: a stored empty list is legitimate, because
+  /// the user can remove every addon. This is only true when the app has
+  /// never successfully written a set.
+  bool _defaultsPending = false;
+  DateTime? _lastDefaultsAttempt;
+
   Future<void> initialize() async {
     if (_initialized) return;
 
@@ -58,16 +75,69 @@ class AddonManager {
       }
     }
 
-    // First launch → install Cinemeta
-    if (_addons.isEmpty) {
-      try {
-        await addAddon('https://v3-cinemeta.strem.io');
-      } catch (_) {
-        // Offline — will retry next time
-      }
+    // First launch → install Cinemeta. One attempt, because `main()` awaits
+    // this before `runApp`: retrying here would hold the app on a blank
+    // screen for as long as the ladder takes, which on a dead network is
+    // three 15-second timeouts.
+    if (stored == null) {
+      _defaultsPending = true;
+      await _tryInstallDefaults();
     }
 
     _initialized = true;
+  }
+
+  Future<void> _tryInstallDefaults() async {
+    _lastDefaultsAttempt = DateTime.now();
+    try {
+      await addAddon(defaultAddonUrl);
+      _defaultsPending = false;
+    } catch (_) {
+      // Stays pending. [ensureReady] retries when a page next asks for a
+      // catalog, so this costs a pull to refresh rather than a restart.
+    }
+  }
+
+  @visibleForTesting
+  bool get defaultsPendingForTest => _defaultsPending;
+
+  @visibleForTesting
+  DateTime? get lastDefaultsAttemptForTest => _lastDefaultsAttempt;
+
+  /// Return the singleton to its pre-initialise state, so each test starts
+  /// from a fresh install rather than from whatever the last one left.
+  @visibleForTesting
+  void resetForTest() {
+    _addons = [];
+    _initialized = false;
+    _defaultsPending = false;
+    _lastDefaultsAttempt = null;
+  }
+
+  /// Re-attempt what [initialize] could not finish, before reading catalogs.
+  ///
+  /// The first network call an app makes is the one most likely to fail: DNS
+  /// is cold, the connection pool is empty, and on mobile the radio may still
+  /// be waking. That one attempt at startup used to be the only one -- it
+  /// caught its own exception, marked itself initialised and left the session
+  /// with no addons, so every catalog page showed its error card until the
+  /// app was restarted. That is what "it fails the first time I open it and
+  /// works after a reload" was.
+  ///
+  /// Returns immediately once the defaults are in place, which is every call
+  /// but the first few.
+  Future<void> ensureReady() async {
+    if (!_initialized) await initialize();
+    if (!_defaultsPending) return;
+
+    // Throttled: a genuinely offline user should reach the page's error card
+    // and its retry button, not sit through a fresh timeout on every read.
+    final last = _lastDefaultsAttempt;
+    if (last != null &&
+        DateTime.now().difference(last) < const Duration(seconds: 5)) {
+      return;
+    }
+    await _tryInstallDefaults();
   }
 
   // ── Add / Remove / Toggle ─────────────────────────────────────────────
@@ -270,6 +340,7 @@ class AddonManager {
   /// from "this type genuinely has no content", and the caller can't offer
   /// a retry for something that was never really empty.
   Future<List<MovieSection>> fetchByType(String type) async {
+    await ensureReady();
     final active = activeAddons;
     final futures = <Future<MovieSection?>>[];
     Object? lastError;
@@ -421,6 +492,7 @@ class AddonManager {
 
   /// Fetch catalogs filtered by a specific genre across all active addons.
   Future<List<MovieSection>> fetchByGenre(String genre) async {
+    await ensureReady();
     final active = activeCatalogAddons;
     final futures = <Future<MovieSection?>>[];
 
