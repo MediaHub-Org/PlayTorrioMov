@@ -203,7 +203,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                 child: Text(
                                   'LIVE',
                                   style: TextStyle(
-                                    color: AppColors.ink,
+                                    color: AppColors.onAccent,
                                     fontSize: 9,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -398,7 +398,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
-                          foregroundColor: AppColors.ink,
+                          foregroundColor: AppColors.onAccent,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -725,10 +725,10 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
-                          icon: Icon(Icons.play_arrow_rounded, color: AppColors.ink),
+                          icon: Icon(Icons.play_arrow_rounded, color: AppColors.onAccent),
                           label: Text(
                             'Watch Live',
-                            style: TextStyle(color: AppColors.ink, fontSize: 15, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: AppColors.onAccent, fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                           onPressed: filteredResults.isNotEmpty
                               ? () => _playHit(filteredResults.first)

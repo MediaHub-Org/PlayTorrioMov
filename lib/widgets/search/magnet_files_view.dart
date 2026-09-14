@@ -353,7 +353,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                     onPressed: _loadMagnetFiles,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: palette.primaryColor,
-                      foregroundColor: AppColors.ink,
+                      foregroundColor: AppColors.onAccent,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -708,7 +708,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
               onPressed: () => _playFile(file),
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.primaryColor,
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.onAccent,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,

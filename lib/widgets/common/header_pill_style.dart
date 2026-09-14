@@ -7,12 +7,14 @@ import '../../services/theme/app_colors.dart';
 /// button) never reads as visually different from the dropdown pills it
 /// sits next to in the same row. Also used by Live TV's own header, which
 /// used to carry a completely different, bespoke "glass" look.
-BoxDecoration headerPillDecoration = BoxDecoration(
-  color: Color(0x0FFFFFFF), // AppColors.ink @ 6%
-  borderRadius: BorderRadius.all(Radius.circular(10)),
+/// Rebuilt per read rather than held as a `const`: its tints follow the
+/// active theme, which is not known at compile time.
+BoxDecoration get headerPillDecoration => BoxDecoration(
+  color: AppColors.inkAlpha(0.06),
+  borderRadius: const BorderRadius.all(Radius.circular(10)),
   border: Border.fromBorderSide(
-    BorderSide(color: Color(0x1AFFFFFF)),
-  ), // white @ 10%
+    BorderSide(color: AppColors.inkAlpha(0.10)),
+  ),
 );
 
 const double headerPillIconSize = 15;

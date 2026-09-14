@@ -124,7 +124,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               onPressed: () => Navigator.pop(context, controller.text),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF7C5CFF),
-                foregroundColor: AppColors.ink,
+                foregroundColor: AppColors.onAccent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -183,7 +183,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               ),
               child: Text(
                 'Remove',
-                style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold),
               ),
             ),
           ],

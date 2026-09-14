@@ -130,15 +130,18 @@ class _LikeButtonState extends State<LikeButton> {
             widget.isLiked
                 ? Icons.favorite_rounded
                 : Icons.favorite_border_rounded,
-            // White, not red: the fill behind it is already red.
-            color: widget.isLiked ? AppColors.ink : AppColors.inkMuted,
+            // Liked: white, not red -- the fill behind it is already red, and
+            // it stays red in both themes, so this white is fixed rather than
+            // the theme's ink. Unliked: the fill is theme-tinted, so the
+            // foreground follows the theme.
+            color: widget.isLiked ? AppColors.onAccent : AppColors.inkMuted,
             size: widget.size,
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              color: widget.isLiked ? AppColors.ink : AppColors.inkMuted,
+              color: widget.isLiked ? AppColors.onAccent : AppColors.inkMuted,
               fontSize: widget.size * 0.64,
               fontWeight: FontWeight.bold,
             ),

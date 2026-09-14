@@ -1051,7 +1051,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 label: const Text('Customize'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.onAccent,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -1254,7 +1254,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   backgroundColor: palette.primaryColor,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: Text('Save Chain', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold)),
+                child: Text('Save Chain', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
                 onPressed: () async {
                   if (!selected.contains('FFmpeg')) selected.add('FFmpeg');
                   await PlayerSettings.setCustomDecoders(selected);

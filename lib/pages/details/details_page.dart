@@ -20,7 +20,6 @@ import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
-import '../../services/theme/app_colors.dart';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -556,22 +555,22 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.broken_image_rounded,
             size: 64,
-            color: AppColors.inkFaint,
+            color: Colors.white24,
           ),
           const SizedBox(height: _Space.md),
-          Text(
+          const Text(
             'Details unavailable.',
-            style: TextStyle(color: AppColors.inkSubtle, fontSize: 18),
+            style: TextStyle(color: Colors.white54, fontSize: 18),
           ),
           const SizedBox(height: _Space.lg),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.inkAlpha(0.10),
-              foregroundColor: AppColors.ink,
+              backgroundColor: Colors.white10,
+              foregroundColor: Colors.white,
             ),
             child: const Text('Go Back'),
           ),
@@ -994,7 +993,7 @@ class _DetailsPageState extends State<DetailsPage>
         fontWeight: FontWeight.w800,
         height: 1.1,
         letterSpacing: -1.0,
-        color: AppColors.ink,
+        color: Colors.white,
         shadows: [
           Shadow(
             color: Colors.black.withOpacity(0.7),
@@ -1023,8 +1022,8 @@ class _DetailsPageState extends State<DetailsPage>
       items.add(
         Text(
           meta.year!,
-          style: TextStyle(
-            color: AppColors.ink,
+          style: const TextStyle(
+            color: Colors.white,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -1042,7 +1041,7 @@ class _DetailsPageState extends State<DetailsPage>
         items.add(
           Text(
             '$seasonCount Season${seasonCount > 1 ? "s" : ""}',
-            style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         );
       }
@@ -1050,7 +1049,7 @@ class _DetailsPageState extends State<DetailsPage>
       items.add(
         Text(
           meta.runtime!,
-          style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
         ),
       );
     }
@@ -1060,9 +1059,9 @@ class _DetailsPageState extends State<DetailsPage>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
           decoration: BoxDecoration(
-            color: AppColors.ink.withOpacity(0.12),
+            color: Colors.white.withOpacity(0.12),
             borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: AppColors.ink.withOpacity(0.25)),
+            border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1071,8 +1070,8 @@ class _DetailsPageState extends State<DetailsPage>
               const SizedBox(width: 4),
               Text(
                 meta.imdbRating!,
-                style: TextStyle(
-                  color: AppColors.ink,
+                style: const TextStyle(
+                  color: Colors.white,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1087,7 +1086,7 @@ class _DetailsPageState extends State<DetailsPage>
       items.add(
         Text(
           meta.genres.take(3).join(' · '),
-          style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
         ),
       );
     }
@@ -1097,11 +1096,11 @@ class _DetailsPageState extends State<DetailsPage>
       spaced.add(items[i]);
       if (i < items.length - 1) {
         spaced.add(
-          Padding(
+          const Padding(
             padding: EdgeInsets.symmetric(horizontal: _Space.sm),
             child: Text(
               '•',
-              style: TextStyle(color: AppColors.inkAlpha(0.30), fontSize: 16),
+              style: TextStyle(color: Colors.white30, fontSize: 16),
             ),
           ),
         );
@@ -1144,14 +1143,14 @@ class _DetailsPageState extends State<DetailsPage>
           mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.play_arrow_rounded, color: AppColors.ink, size: 24),
+            const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
             const SizedBox(width: 6),
             Text(
               _isCollection
                   ? 'Play First Movie'
                   : (_isSeries ? 'Play Episodes' : 'Play Movie'),
-              style: TextStyle(
-                color: AppColors.ink,
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
@@ -1206,7 +1205,7 @@ class _DetailsPageState extends State<DetailsPage>
               )
             : null,
         border: Border.all(
-          color: AppColors.ink.withOpacity(0.1),
+          color: Colors.white.withOpacity(0.1),
           width: 1.5,
         ),
       ),
@@ -1229,8 +1228,8 @@ class _DetailsPageState extends State<DetailsPage>
                 alignment: Alignment.center,
                 child: Text(
                   initials,
-                  style: TextStyle(
-                    color: AppColors.ink,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1247,8 +1246,8 @@ class _DetailsPageState extends State<DetailsPage>
                 alignment: Alignment.center,
                 child: Text(
                   initials,
-                  style: TextStyle(
-                    color: AppColors.ink,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1257,8 +1256,8 @@ class _DetailsPageState extends State<DetailsPage>
             )
           : Text(
               initials,
-              style: TextStyle(
-                color: AppColors.ink,
+              style: const TextStyle(
+                color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -1267,9 +1266,8 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildSynopsis(String text) {
-    // `final`, not `const`: the colour is resolved at build time now.
-    final style = TextStyle(
-      color: AppColors.inkMuted,
+    const style = TextStyle(
+      color: Colors.white70,
       fontSize: 15,
       height: 1.55,
       letterSpacing: 0.2,
@@ -1313,8 +1311,8 @@ class _DetailsPageState extends State<DetailsPage>
                     setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
                 child: Text(
                   _isSynopsisExpanded ? 'Show less' : 'Read more',
-                  style: TextStyle(
-                    color: AppColors.ink,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1445,8 +1443,8 @@ class _DetailsPageState extends State<DetailsPage>
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: AppColors.ink,
+            style: const TextStyle(
+              color: Colors.white,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               height: 1.2,
@@ -1464,8 +1462,8 @@ class _DetailsPageState extends State<DetailsPage>
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: AppColors.inkSubtle,
+              style: const TextStyle(
+                color: Colors.white54,
                 fontSize: 10.5,
                 height: 1.1,
               ),
@@ -1519,19 +1517,19 @@ class _DetailsPageState extends State<DetailsPage>
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.ink
-                          : AppColors.ink.withOpacity(0.07),
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(22),
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.ink
-                            : AppColors.ink.withOpacity(0.1),
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.1),
                       ),
                     ),
                     child: Text(
                       'Season $season',
                       style: TextStyle(
-                        color: isSelected ? Colors.black : AppColors.ink,
+                        color: isSelected ? Colors.black : Colors.white,
                         fontSize: 15,
                         fontWeight: isSelected
                             ? FontWeight.w800
@@ -1916,10 +1914,10 @@ class _DetailsPageState extends State<DetailsPage>
                                               errorWidget: (_, __, ___) =>
                                                   Container(
                                                     color: _Palette.surface,
-                                                    child: Center(
+                                                    child: const Center(
                                                       child: Icon(
                                                         Icons.movie_rounded,
-                                                        color: AppColors.inkFaint,
+                                                        color: Colors.white24,
                                                         size: 36,
                                                       ),
                                                     ),
@@ -1927,10 +1925,10 @@ class _DetailsPageState extends State<DetailsPage>
                                             )
                                           : Container(
                                               color: _Palette.surface,
-                                              child: Center(
+                                              child: const Center(
                                                 child: Icon(
                                                   Icons.movie_rounded,
-                                                  color: AppColors.inkFaint,
+                                                  color: Colors.white24,
                                                   size: 36,
                                                 ),
                                               ),
@@ -1960,8 +1958,8 @@ class _DetailsPageState extends State<DetailsPage>
                                         ),
                                         child: Text(
                                           '${item.similarityPercent}%',
-                                          style: TextStyle(
-                                            color: AppColors.ink,
+                                          style: const TextStyle(
+                                            color: Colors.white,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -1995,8 +1993,8 @@ class _DetailsPageState extends State<DetailsPage>
                                             const SizedBox(width: 3),
                                             Text(
                                               item.rating!.toStringAsFixed(1),
-                                              style: TextStyle(
-                                                color: AppColors.ink,
+                                              style: const TextStyle(
+                                                color: Colors.white,
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w700,
                                               ),
@@ -2013,8 +2011,8 @@ class _DetailsPageState extends State<DetailsPage>
                                 item.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: AppColors.ink,
+                                style: const TextStyle(
+                                  color: Colors.white,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -2029,8 +2027,8 @@ class _DetailsPageState extends State<DetailsPage>
                                 ].join(' · '),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: AppColors.inkDisabled,
+                                style: const TextStyle(
+                                  color: Colors.white38,
                                   fontSize: 12,
                                 ),
                               ),
@@ -2124,9 +2122,9 @@ class _DetailsPageState extends State<DetailsPage>
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.ink.withOpacity(0.2)),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
                   ),
-                  child: Icon(icon, color: AppColors.ink, size: 18),
+                  child: Icon(icon, color: Colors.white, size: 18),
                 ),
               ),
             ),
@@ -2198,8 +2196,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: _hovered
-                    ? AppColors.ink.withOpacity(0.22)
-                    : AppColors.ink.withOpacity(0.04),
+                    ? Colors.white.withOpacity(0.22)
+                    : Colors.white.withOpacity(0.04),
               ),
               boxShadow: _hovered
                   ? [
@@ -2250,7 +2248,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             child: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: AppColors.ink,
+                                color: Colors.white,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -2292,8 +2290,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                                 widget.isCollection
                                     ? ep.released!.substring(0, 4)
                                     : (ep.released!.length >= 10 ? ep.released!.substring(0, 10) : ep.released!),
-                                style: TextStyle(
-                                  color: AppColors.inkDisabled,
+                                style: const TextStyle(
+                                  color: Colors.white38,
                                   fontSize: 11,
                                 ),
                               ),
@@ -2304,8 +2302,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           ep.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: AppColors.ink,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontWeight: FontWeight.w600,
                             fontSize: 13.5,
                           ),
@@ -2316,8 +2314,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             ep.overview!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: AppColors.inkSubtle,
+                            style: const TextStyle(
+                              color: Colors.white54,
                               fontSize: 11.5,
                               height: 1.3,
                             ),

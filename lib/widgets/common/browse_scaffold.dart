@@ -387,8 +387,8 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                           height: 6,
                           decoration: BoxDecoration(
                             color: i == currentHeroIndex
-                                ? AppColors.ink
-                                : AppColors.inkDisabled,
+                                ? AppColors.onAccent
+                                : AppColors.onAccent.withValues(alpha: 0.38),
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),

@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/services/theme/app_colors.dart';
+import 'package:playtorriomov/services/theme/app_theme_service.dart';
 import 'package:playtorriomov/widgets/common/like_button.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
@@ -11,6 +13,8 @@ Icon _icon(WidgetTester tester) =>
     tester.widget<Icon>(find.byType(Icon).first);
 
 void main() {
+  tearDown(() => AppThemeService.themeMode.value = ThemeMode.system);
+
   group('LikeButton', () {
     testWidgets('the pill keeps its icon white against the red fill',
         (tester) async {
@@ -27,6 +31,20 @@ void main() {
       );
       final decoration = container.decoration as BoxDecoration;
       expect(decoration.color, kLikedColor);
+    });
+
+    testWidgets('the pill stays white in light mode too', (tester) async {
+      // The theme migration turned every `Colors.white` into theme ink,
+      // which flips to near-black in light mode. That is right for text on
+      // the page and wrong here: the fill behind this icon is [kLikedColor]
+      // in either theme, so the foreground on it is fixed white.
+      AppThemeService.themeMode.value = ThemeMode.light;
+      await tester.pumpWidget(wrap(
+        LikeButton(isLiked: true, onTap: () {}),
+      ));
+      expect(_icon(tester).color, AppColors.onAccent);
+      expect(AppColors.ink, isNot(AppColors.onAccent),
+          reason: 'light-mode ink must differ, or this test proves nothing');
     });
 
     testWidgets('the bare icon carries the colour itself', (tester) async {

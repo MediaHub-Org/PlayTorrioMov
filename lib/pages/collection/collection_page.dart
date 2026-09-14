@@ -134,7 +134,7 @@ class _CollectionPageState extends State<CollectionPage> {
             child: Text(
               'Remove',
               style: TextStyle(
-                color: AppColors.ink,
+                color: AppColors.onAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),

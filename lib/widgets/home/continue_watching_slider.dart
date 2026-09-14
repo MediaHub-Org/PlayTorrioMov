@@ -380,7 +380,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
               : Matrix4.identity(),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
-            color: const Color(0xFF13151F).withValues(alpha: 0.75),
+            color: AppColors.surface.withValues(alpha: 0.75),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _isHovered
@@ -462,7 +462,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                               ),
                               child: Icon(
                                 Icons.play_arrow_rounded,
-                                color: AppColors.ink,
+                                color: AppColors.onAccent,
                                 size: 28,
                               ),
                             ),
@@ -493,7 +493,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
                                     border: Border.all(
-                                      color: AppColors.ink.withValues(
+                                      color: AppColors.onAccent.withValues(
                                         alpha: 0.25,
                                       ),
                                       width: 0.8,
@@ -502,7 +502,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   child: Icon(
                                     Icons.info_outline_rounded,
                                     size: 14,
-                                    color: AppColors.ink,
+                                    color: AppColors.onAccent,
                                   ),
                                 ),
                               ),
@@ -519,7 +519,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
                                     border: Border.all(
-                                      color: AppColors.ink.withValues(
+                                      color: AppColors.onAccent.withValues(
                                         alpha: 0.25,
                                       ),
                                       width: 0.8,
@@ -528,7 +528,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   child: Icon(
                                     Icons.close_rounded,
                                     size: 14,
-                                    color: AppColors.ink,
+                                    color: AppColors.onAccent,
                                   ),
                                 ),
                               ),
@@ -550,7 +550,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           color: Colors.black.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: AppColors.inkAlpha(0.15),
+                            color: AppColors.onAccent.withValues(alpha: 0.15),
                             width: 0.6,
                           ),
                         ),
@@ -573,7 +573,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.ink,
+                                color: AppColors.onAccent,
                               ),
                             ),
                           ],
@@ -601,7 +601,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.ink,
+                            color: AppColors.onAccent,
                           ),
                         ),
                       ),
@@ -614,7 +614,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                       bottom: 0,
                       child: Container(
                         height: 3.5,
-                        color: AppColors.inkAlpha(0.15),
+                        color: AppColors.onAccent.withValues(alpha: 0.15),
                         alignment: Alignment.centerLeft,
                         child: FractionallySizedBox(
                           widthFactor: progress,
@@ -686,7 +686,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
     return Container(
       color: const Color(0xFF1A1D27),
       child: Center(
-        child: Icon(Icons.movie_rounded, color: AppColors.inkFaint, size: 36),
+        child: Icon(Icons.movie_rounded, color: AppColors.onAccent.withValues(alpha: 0.24), size: 36),
       ),
     );
   }

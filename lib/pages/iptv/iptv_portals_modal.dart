@@ -476,14 +476,14 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     ? SizedBox(
                         width: 14,
                         height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
                       )
-                    : Icon(Icons.radar_rounded, size: 16, color: AppColors.ink),
+                    : Icon(Icons.radar_rounded, size: 16, color: AppColors.onAccent),
                 label: Text(
                   _ctrl.isScraping
                       ? 'Finding ${_ctrl.scrapeSource == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit'}…'
                       : 'Generate Portals',
-                  style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.w700),
                 ),
                 onPressed: _ctrl.isScraping ? null : _ctrl.scrape,
               ),
@@ -770,7 +770,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
-                          foregroundColor: AppColors.ink,
+                          foregroundColor: AppColors.onAccent,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -899,7 +899,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                           ? SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
                             )
                           : const Text('Verify & Save'),
                     ),
@@ -982,7 +982,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       ),
                                     ),
                                     child: isSelected
-                                        ? Icon(Icons.check_rounded, color: AppColors.ink, size: 15)
+                                        ? Icon(Icons.check_rounded, color: AppColors.onAccent, size: 15)
                                         : null,
                                   )
                                 else ...[
@@ -1131,8 +1131,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 ),
-                icon: Icon(Icons.playlist_add_rounded, size: 18, color: AppColors.ink),
-                label: Text('Add M3U URL', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700)),
+                icon: Icon(Icons.playlist_add_rounded, size: 18, color: AppColors.onAccent),
+                label: Text('Add M3U URL', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.w700)),
                 onPressed: () => setState(() => _showM3uForm = !_showM3uForm),
               ),
 
@@ -1238,7 +1238,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
-                          foregroundColor: AppColors.ink,
+                          foregroundColor: AppColors.onAccent,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
@@ -1336,7 +1336,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                           ? SizedBox(
                               width: 14,
                               height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
+                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
                             )
                           : const Text('Fetch & Save'),
                     ),
@@ -1410,7 +1410,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       ),
                                     ),
                                     child: isSelected
-                                        ? Icon(Icons.check_rounded, color: AppColors.ink, size: 15)
+                                        ? Icon(Icons.check_rounded, color: AppColors.onAccent, size: 15)
                                         : null,
                                   )
                                 else ...[

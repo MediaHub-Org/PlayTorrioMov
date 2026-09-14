@@ -257,7 +257,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppThemeService.currentPalette.value.primaryColor,
-                      foregroundColor: AppColors.ink,
+                      foregroundColor: AppColors.onAccent,
                     ),
                     onPressed: _startScraping,
                     icon: const Icon(Icons.refresh_rounded, size: 18),

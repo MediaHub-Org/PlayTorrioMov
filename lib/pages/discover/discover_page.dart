@@ -648,7 +648,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       onPressed: () => _showCustomExtraDialog(extra.name),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7C5CFF),
-                        foregroundColor: AppColors.ink,
+                        foregroundColor: AppColors.onAccent,
                         padding: EdgeInsets.symmetric(
                           horizontal: isNarrow ? 14 : 18,
                           vertical: isNarrow ? 8 : 10,
@@ -717,7 +717,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7C5CFF),
-              foregroundColor: AppColors.ink,
+              foregroundColor: AppColors.onAccent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {

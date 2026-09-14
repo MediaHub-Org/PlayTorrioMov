@@ -293,12 +293,12 @@ class IptvChannelCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.inkAlpha(0.2)),
+            border: Border.all(color: AppColors.onAccent.withValues(alpha: 0.2)),
           ),
           child: Text(
             ch.short,
             style: TextStyle(
-              color: AppColors.ink,
+              color: AppColors.onAccent,
               fontSize: 22,
               fontWeight: FontWeight.w900,
               letterSpacing: 1.2,

@@ -915,12 +915,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             ? SizedBox(
                                 width: 14,
                                 height: 14,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.ink),
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.onAccent),
                               )
-                            : Icon(Icons.speed_rounded, size: 16, color: AppColors.ink),
+                            : Icon(Icons.speed_rounded, size: 16, color: AppColors.onAccent),
                         label: Text(
                           _isCheckingAlive ? 'Stop ($_aliveChecked/$_aliveTotal)' : 'Check Health',
-                          style: TextStyle(color: AppColors.ink, fontSize: 12.5, fontWeight: FontWeight.w700),
+                          style: TextStyle(color: AppColors.onAccent, fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),
                         onPressed: _isCheckingAlive ? () => setState(() => _cancelAlive = true) : _startAliveCheck,
                       ),
@@ -1306,14 +1306,14 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
             children: [
               Icon(
                 icon,
-                color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
+                color: isSelected ? AppColors.onAccent : AppColors.inkAlpha(0.60),
                 size: 16,
               ),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? AppColors.ink : AppColors.inkMuted,
+                  color: isSelected ? AppColors.onAccent : AppColors.inkMuted,
                   fontSize: 13,
                   fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 ),
@@ -2312,7 +2312,7 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                                     color: Colors.black.withValues(alpha: 0.75),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: widget.isFavorite ? AppColors.inkMuted : AppColors.inkFaint,
+                                      color: widget.isFavorite ? AppColors.onAccent.withValues(alpha: 0.70) : AppColors.onAccent.withValues(alpha: 0.24),
                                       width: 1.2,
                                     ),
                                   ),
@@ -2320,7 +2320,7 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                                     widget.isFavorite
                                         ? Icons.push_pin_rounded
                                         : Icons.push_pin_outlined,
-                                    color: widget.isFavorite ? AppColors.ink : AppColors.inkMuted,
+                                    color: widget.isFavorite ? AppColors.onAccent : AppColors.onAccent.withValues(alpha: 0.70),
                                     size: 16,
                                   ),
                                 ),
@@ -2566,7 +2566,7 @@ class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
             color: _hovered ? const Color(0xFF7C5CFF) : Colors.black87,
             shape: BoxShape.circle,
             border: Border.all(
-              color: _hovered ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.3),
+              color: _hovered ? const Color(0xFF7C5CFF) : AppColors.onAccent.withValues(alpha: 0.3),
               width: 1.2,
             ),
             boxShadow: [
@@ -2578,7 +2578,7 @@ class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
           ),
           child: Icon(
             widget.icon,
-            color: AppColors.ink,
+            color: AppColors.onAccent,
             size: 22,
           ),
         ),

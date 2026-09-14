@@ -230,7 +230,7 @@ class _SyncCardChrome extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
-                    foregroundColor: AppColors.ink,
+                    foregroundColor: AppColors.onAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -757,7 +757,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
             child: Text(
               'Save',
               style: TextStyle(
-                color: AppColors.ink,
+                color: AppColors.onAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -873,7 +873,7 @@ class _TmdbConnectCard extends StatelessWidget {
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: Text('Save', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold)),
+            child: Text('Save', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

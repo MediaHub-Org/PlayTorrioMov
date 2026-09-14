@@ -744,7 +744,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                           '${anime.seasonYear}',
                           style: TextStyle(
                             fontSize: 15,
-                            color: AppColors.inkAlpha(0.55),
+                            color: AppColors.onAccent.withValues(alpha: 0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -754,14 +754,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                           child: Icon(
                             Icons.circle,
                             size: 4,
-                            color: AppColors.inkAlpha(0.25),
+                            color: AppColors.onAccent.withValues(alpha: 0.25),
                           ),
                         ),
                         Text(
                           '${anime.totalEpisodes} Episodes',
                           style: TextStyle(
                             fontSize: 15,
-                            color: AppColors.inkAlpha(0.55),
+                            color: AppColors.onAccent.withValues(alpha: 0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -772,14 +772,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                           child: Icon(
                             Icons.circle,
                             size: 4,
-                            color: AppColors.inkAlpha(0.25),
+                            color: AppColors.onAccent.withValues(alpha: 0.25),
                           ),
                         ),
                         Text(
                           anime.studioName,
                           style: TextStyle(
                             fontSize: 15,
-                            color: AppColors.inkAlpha(0.55),
+                            color: AppColors.onAccent.withValues(alpha: 0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -797,7 +797,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1.2,
                       height: 1.05,
-                      color: AppColors.ink,
+                      color: AppColors.onAccent,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -816,7 +816,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: isCompact ? 14.5 : 15.5,
-                          color: AppColors.inkAlpha(0.65),
+                          color: AppColors.onAccent.withValues(alpha: 0.65),
                           height: 1.5,
                         ),
                       ),
@@ -846,7 +846,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               AppThemeService.currentPalette.value.primaryColor,
-                          foregroundColor: AppColors.ink,
+                          foregroundColor: AppColors.onAccent,
                           padding: EdgeInsets.symmetric(
                             horizontal: isCompact ? 18 : 28,
                             vertical: isCompact ? 12 : 16,
@@ -868,14 +868,14 @@ class _AnimeHeroSlide extends StatelessWidget {
                         icon: Icon(
                           Icons.info_outline_rounded,
                           size: isCompact ? 18 : 21,
-                          color: AppColors.inkAlpha(0.80),
+                          color: AppColors.onAccent.withValues(alpha: 0.80),
                         ),
                         label: Text(
                           'Details',
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: isCompact ? 14 : 15.5,
-                            color: AppColors.inkAlpha(0.80),
+                            color: AppColors.onAccent.withValues(alpha: 0.80),
                           ),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -887,7 +887,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           side: BorderSide(
-                            color: AppColors.inkAlpha(0.18),
+                            color: AppColors.onAccent.withValues(alpha: 0.18),
                             width: 1.2,
                           ),
                         ),

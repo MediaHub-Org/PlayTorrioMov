@@ -251,7 +251,7 @@ class _PosterFrame extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        AppColors.ink.withOpacity(0.11),
+                        AppColors.onAccent.withValues(alpha: 0.11),
                         Colors.transparent,
                         Colors.black.withOpacity(0.40),
                       ],
@@ -288,7 +288,7 @@ class _PosterFrame extends StatelessWidget {
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
-                      color: AppColors.ink,
+                      color: AppColors.onAccent,
                     ),
                   ),
                 ),
@@ -309,7 +309,7 @@ class _PosterFrame extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xE6080A0F),
                         borderRadius: BorderRadius.circular(7),
-                        border: Border.all(color: AppColors.ink.withOpacity(0.15)),
+                        border: Border.all(color: AppColors.onAccent.withValues(alpha: 0.15)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -321,7 +321,7 @@ class _PosterFrame extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.ink,
+                              color: AppColors.onAccent,
                             ),
                           ),
                         ],
@@ -340,8 +340,8 @@ class _PosterFrame extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
                       color: hovered
-                          ? AppColors.ink.withOpacity(0.28)
-                          : AppColors.ink.withOpacity(0.08),
+                          ? AppColors.onAccent.withValues(alpha: 0.28)
+                          : AppColors.onAccent.withValues(alpha: 0.08),
                       width: hovered ? 1.35 : 1,
                     ),
                   ),
@@ -365,7 +365,7 @@ class _PosterFrame extends StatelessWidget {
                     height: 39,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.ink.withOpacity(0.95),
+                      color: AppColors.onAccent.withValues(alpha: 0.95),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.40),

@@ -28,6 +28,20 @@ import 'app_theme_service.dart';
 /// If a per-subtree override is ever needed, this becomes an
 /// `InheritedWidget` and the call sites gain a context. Until then this is
 /// the smaller thing that works.
+///
+/// ## When a white is not ink
+///
+/// Not every `Colors.white` in the old code meant "primary text". A white
+/// on a red pill, on the accent fill of an `ElevatedButton`, or over a
+/// poster is white because of what is *behind* it, and what is behind it
+/// does not change with the theme. Those are [onAccent], not [ink] --
+/// making them [ink] paints them near-black over an unchanged dark
+/// background, which is exactly as unreadable as it sounds.
+///
+/// Two whole surfaces are excluded for the same reason, rather than
+/// token by token: the video player (chrome over video) and the three
+/// details pages (a full-height backdrop image behind every control).
+/// Both stay dark in either theme and so keep their literals.
 abstract final class AppColors {
   /// Whether the app is currently painting light.
   ///

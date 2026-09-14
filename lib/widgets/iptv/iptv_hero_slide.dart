@@ -136,14 +136,14 @@ class IptvHeroSlide extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.sensors_rounded,
-                          color: AppColors.ink,
+                          color: AppColors.onAccent,
                           size: 14,
                         ),
                         SizedBox(width: 5),
                         Text(
                           'LIVE BROADCAST',
                           style: TextStyle(
-                            color: AppColors.ink,
+                            color: AppColors.onAccent,
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.8,
@@ -159,16 +159,16 @@ class IptvHeroSlide extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.inkAlpha(0.12),
+                      color: AppColors.onAccent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: AppColors.inkAlpha(0.15),
+                        color: AppColors.onAccent.withValues(alpha: 0.15),
                       ),
                     ),
                     child: Text(
                       channel.category,
                       style: TextStyle(
-                        color: AppColors.inkMuted,
+                        color: AppColors.onAccent.withValues(alpha: 0.70),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.4,
@@ -195,7 +195,7 @@ class IptvHeroSlide extends StatelessWidget {
                     errorWidget: (_, __, ___) => Text(
                       channel.name,
                       style: TextStyle(
-                        color: AppColors.ink,
+                        color: AppColors.onAccent,
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
@@ -208,7 +208,7 @@ class IptvHeroSlide extends StatelessWidget {
                 Text(
                   channel.name,
                   style: TextStyle(
-                    color: AppColors.ink,
+                    color: AppColors.onAccent,
                     fontSize: 34,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
@@ -224,7 +224,7 @@ class IptvHeroSlide extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: AppColors.inkAlpha(0.65),
+                  color: AppColors.onAccent.withValues(alpha: 0.65),
                   fontSize: 14,
                   height: 1.3,
                 ),
@@ -265,14 +265,14 @@ class IptvHeroSlide extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.play_arrow_rounded,
-                              color: AppColors.ink,
+                              color: AppColors.onAccent,
                               size: 22,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'Watch Live',
                               style: TextStyle(
-                                color: AppColors.ink,
+                                color: AppColors.onAccent,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,
@@ -297,10 +297,10 @@ class IptvHeroSlide extends StatelessWidget {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.inkAlpha(0.1),
+                          color: AppColors.onAccent.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.inkAlpha(0.2),
+                            color: AppColors.onAccent.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Row(
@@ -308,14 +308,14 @@ class IptvHeroSlide extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.tune_rounded,
-                              color: AppColors.inkMuted,
+                              color: AppColors.onAccent.withValues(alpha: 0.70),
                               size: 18,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'Stream Feeds',
                               style: TextStyle(
-                                color: AppColors.ink,
+                                color: AppColors.onAccent,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),

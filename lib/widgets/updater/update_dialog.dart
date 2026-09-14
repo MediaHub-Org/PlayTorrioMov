@@ -385,7 +385,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         onPressed: _handleUpdate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _accentColor,
-                          foregroundColor: AppColors.ink,
+                          foregroundColor: AppColors.onAccent,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -700,7 +700,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _accentColor,
-                  foregroundColor: AppColors.ink,
+                  foregroundColor: AppColors.onAccent,
                 ),
                 child: const Text('OK'),
               ),

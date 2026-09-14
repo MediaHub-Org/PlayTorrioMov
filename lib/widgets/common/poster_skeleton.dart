@@ -58,7 +58,7 @@ class MissingPoster extends StatelessWidget {
         child: Icon(
           Icons.movie_rounded,
           size: 46,
-          color: AppColors.ink.withOpacity(0.22),
+          color: AppColors.onAccent.withValues(alpha: 0.22),
         ),
       ),
     );
