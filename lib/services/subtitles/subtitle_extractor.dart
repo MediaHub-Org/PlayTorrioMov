@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:archive/archive.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'subtitle_parser.dart';
+import 'subtitle_payload.dart';
 import 'package:flutter/foundation.dart';
 
 class SubtitleExtractor {
@@ -57,83 +56,13 @@ class SubtitleExtractor {
 
       final fileName = '${DateTime.now().millisecondsSinceEpoch}';
 
-      // 1. Check if response is a ZIP archive
-      // Magic bytes: PK\x03\x04 (0x50 0x4B 0x03 0x04) or PK\x05\x06 or PK\x07\x08
-      final isZip = bytes.length > 4 && bytes[0] == 0x50 && bytes[1] == 0x4B;
+      // What the bytes actually are -- zip, gzip or bare, and in which
+      // encoding -- is decided by SubtitlePayload, which needs neither the
+      // network nor the disk and is tested without them.
+      final payload = SubtitlePayload.decode(bytes, url: url);
+      final utf8Bytes = utf8.encode(payload.text);
 
-      // 2. Check if response is GZIP
-      // Magic bytes: 0x1F 0x8B
-      final isGzip = bytes.length > 2 && bytes[0] == 0x1F && bytes[1] == 0x8B;
-
-      List<int>? extractedRawBytes;
-      String targetExt = 'srt';
-
-      if (isZip) {
-        try {
-          final archive = ZipDecoder().decodeBytes(bytes);
-          ArchiveFile? bestFile;
-          int bestSize = -1;
-
-          for (final file in archive) {
-            if (!file.isFile) continue;
-            final lowerName = file.name.toLowerCase();
-
-            // Skip macOS metadata & junk files
-            if (lowerName.contains('__macosx') ||
-                lowerName.split('/').last.startsWith('._') ||
-                lowerName.endsWith('.ds_store')) {
-              continue;
-            }
-
-            final isSub = lowerName.endsWith('.srt') ||
-                lowerName.endsWith('.vtt') ||
-                lowerName.endsWith('.ass') ||
-                lowerName.endsWith('.sub');
-
-            if (isSub && file.size > bestSize) {
-              bestSize = file.size;
-              bestFile = file;
-            }
-          }
-
-          if (bestFile != null) {
-            final lowerName = bestFile.name.toLowerCase();
-            if (lowerName.endsWith('.vtt')) {
-              targetExt = 'vtt';
-            } else if (lowerName.endsWith('.ass')) {
-              targetExt = 'ass';
-            } else {
-              targetExt = 'srt';
-            }
-            extractedRawBytes = bestFile.content as List<int>;
-          }
-        } catch (e) {
-          debugPrint('[SubtitleExtractor] Zip decoding error: $e');
-        }
-      } else if (isGzip) {
-        try {
-          final decompressed = const GZipDecoder().decodeBytes(bytes);
-          extractedRawBytes = decompressed;
-          targetExt = url.toLowerCase().contains('.vtt') ? 'vtt' : 'srt';
-        } catch (e) {
-          debugPrint('[SubtitleExtractor] GZip decoding error: $e');
-        }
-      }
-
-      // If not zip/gzip or extraction didn't find candidate, use raw body bytes
-      extractedRawBytes ??= bytes;
-
-      if (url.toLowerCase().endsWith('.vtt')) {
-        targetExt = 'vtt';
-      } else if (url.toLowerCase().endsWith('.ass')) {
-        targetExt = 'ass';
-      }
-
-      // 3. Convert character encoding to clean UTF-8
-      final decodedString = SubtitleParser.decodeBytesWithFallback(extractedRawBytes);
-      final utf8Bytes = utf8.encode(decodedString);
-
-      final savePath = '${targetDir.path}/$fileName.$targetExt';
+      final savePath = '${targetDir.path}/$fileName.${payload.extension}';
       final localFile = File(savePath);
       await localFile.writeAsBytes(utf8Bytes, flush: true);
 

@@ -16,20 +16,35 @@ below was measured there.
 
 ## Open
 
-### 1. TMDB is quiet on device, and we do not know why
+### 1. A TMDB key has to come from somewhere
 
-Cast photos and character names do not appear. Three causes on our side are
-fixed (see #38, #53 and the TMDB commits); what remains is whether the
-bundled API key still works, and `api.themoviedb.org` is blocked from CI, so
-that is the one thing that could not be checked from here.
+**Answered on device, 2026-09-14:** the status line read *TMDB rejected the
+API key (401)*. The key was the fallback constant committed in
+`tmdb_settings.dart`, and a TMDB key in a public repository gets found and
+revoked. Three causes on our side were already fixed (#38, #53 and the TMDB
+commits); the fourth was that the key itself was dead.
 
-**The next step is one tap.** Open **Settings → Sync → TMDB Cast Photos**
-and read the status line under the card:
+The constant is gone. What replaces it is a choice, not a default:
 
-| What it says | What it means |
+| Who | What to do |
+|:----|:-----------|
+| A user | **Settings → Sync → TMDB Cast Photos → Connect**, with a free key from themoviedb.org. The card asks for this when no key is set |
+| This project | Put `TMDB_API_KEY` in the `ENV_FILE` repository secret. Fresh installs then work with no setup, and the key rotates without a new release |
+
+`ENV_FILE` is still unset (see *Release secrets* below), so published builds
+currently ship without a key.
+
+**What a device still has to confirm:** that enrichment works end to end
+*once a valid key is present* — cast photos and character names appearing on
+a details page. CI cannot check it because `api.themoviedb.org` is blocked
+from the runners. With a key set, the status line reads *Loaded N cast and M
+crew from TMDB*; if the row still looks wrong after that, the bug is in the
+page, not the service.
+
+| What the status line says | What it means |
 |:-------------|:--------------|
-| *Loaded N cast and M crew from TMDB* | TMDB is fine — if the row still looks wrong the bug is in the page, not the service |
-| *TMDB rejected the API key (401)* | The bundled key is dead. Add your own free key on that same card |
+| *Loaded N cast and M crew from TMDB* | TMDB is fine — a wrong-looking row is the page's bug |
+| *TMDB rejected the API key (401)* | That key is invalid or revoked |
 | *Could not reach TMDB* | Network, DNS or a captive portal |
 | *TMDB has no entry for this title (404)* | That one title only; try another |
 | nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
@@ -60,9 +75,21 @@ only ever exercised against whatever the site returned that day.
 
 The fix is not to un-tag them but to split the pure logic out and test it
 offline, the way `glendale_master_url_test` and `subtitle_languages_test`
-now do — both written during the audit, both of which found real bugs.
-Candidates in order: the per-site HTML/JSON parsers, `SubtitleExtractor`'s
-archive and encoding handling, the IPTV playlist parsers.
+do — both written during the audit, both of which found real bugs.
+
+**Done so far**, in the order this list named them:
+
+| What | How |
+|:-----|:----|
+| `SubtitleExtractor`'s archive and encoding handling | The part that decides what the downloaded bytes *are* — zip, gzip or bare, and in which encoding — moved into `SubtitlePayload.decode`, which touches neither the network nor the disk. `subtitle_payload_test` builds archives in memory: the largest subtitle wins over a short forced track, `__MACOSX/._x.srt` is not a subtitle, a truncated zip falls back instead of throwing, and UTF-16 and Latin-1 bodies survive. The old `subtitle_test` reimplemented the picking logic inside the test, so it proved the archive package worked rather than that we use it correctly |
+| The IPTV playlist parser | `M3uParser` was already pure and had no test at all. `m3u_parser_test` covers what strangers' playlists actually contain: CRLF, `#EXTGRP`, single-quoted and unquoted attributes, the non-HTTP stream schemes, an HTML error page from a dead portal, and the reset that stops one channel's logo leaking onto the next |
+
+**Still open**, and the bigger half: the per-site HTML/JSON parsers. Each one
+needs its pure part lifted out of the fetch-and-parse method first, the way
+`EncDecEmbedScraper` and `glendale_master_url` already are. `movy`'s
+keystream (`_fnv1a`, `_initKeyState`, `_nextKeystreamWord`) is the clearest
+next candidate: it is deterministic, it is currently private, and its only
+cover is a tagged network test.
 
 ---
 
@@ -274,9 +301,10 @@ signing, because none of them self-install — see
 
 `ENV_FILE`/`DOTENV` is **not set**, and that is the one outstanding release
 secret. Every published build ships an empty `.env`, so Trakt sign-in and
-Discord Rich Presence are inert in released binaries. TMDB is unaffected —
-`TmdbSettings` carries a bundled fallback key (whether it still works is open
-item 1). **Simkl is no longer blocked by it** (#51): register a free app at
+Discord Rich Presence are inert in released binaries. **TMDB is affected too**,
+now that the dead source-committed fallback key is gone: without
+`TMDB_API_KEY` in `ENV_FILE` a fresh install has no key, and the settings
+card asks for one. **Simkl is no longer blocked by it** (#51): register a free app at
 simkl.com/settings/developer and paste the client ID — Simkl's PIN flow
 authenticates with the id alone, so there is no secret to ship.
 

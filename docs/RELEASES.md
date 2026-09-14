@@ -82,9 +82,13 @@ which takes precedence over whatever the build ships with.
 > unnoticed — the build now emits a CI **warning** when it happens.
 > Setting `ENV_FILE` is what turns those features on.
 >
-> TMDB cast photos are **not** affected: `TmdbSettings` falls back to a key
-> bundled in the source, so cast and crew enrichment works with an empty
-> `.env`.
+> TMDB cast photos **are** affected, as of v1.6.3. `TmdbSettings` used to
+> fall back to a key committed in the source; that key was found and revoked,
+> which is what the `401` on v1.6.2 was, and it has been removed. With an
+> empty `.env` there is no TMDB key, and the settings card says so and offers
+> to take the user's own. Setting `TMDB_API_KEY` in `ENV_FILE` restores a
+> working fresh install — and can be rotated without shipping a new binary,
+> which a source constant cannot.
 >
 > Android signing, by contrast, **is** configured — the same run logs
 > `Release signing configured (alias: playtorriomov)`, so released APKs
