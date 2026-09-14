@@ -989,14 +989,17 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     final size = PlayerSettings.subFontSize.value;
     final scale = (PlayerSettings.subScale.value * 100).round();
 
-    Color parseColor(String hex, {Color fallback = AppColors.ink}) {
+    // Defaulted in the body rather than the signature: a default
+    // parameter value must be a compile-time constant, and the ink
+    // colour is resolved from the active theme at call time.
+    Color parseColor(String hex, {Color? fallback}) {
       var str = hex.replaceAll('#', '').trim();
       if (str.length == 6) str = 'FF$str';
       if (str.length == 8) {
         final val = int.tryParse(str, radix: 16);
         if (val != null) return Color(val);
       }
-      return fallback;
+      return fallback ?? AppColors.ink;
     }
 
     final textColor = parseColor(PlayerSettings.subColor.value);

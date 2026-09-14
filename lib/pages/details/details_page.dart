@@ -1267,13 +1267,14 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildSynopsis(String text) {
-    style = TextStyle(
+    // `final`, not `const`: the colour is resolved at build time now.
+    final style = TextStyle(
       color: AppColors.inkMuted,
       fontSize: 15,
       height: 1.55,
       letterSpacing: 0.2,
     );
-    maxLines = 3;
+    const maxLines = 3;
 
     return LayoutBuilder(
       builder: (context, constraints) {
