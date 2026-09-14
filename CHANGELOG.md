@@ -3,6 +3,60 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.0+28] - 2026-09-14
+
+Maintenance release. Light mode became real, the player's menus stopped
+running off the screen, and the audit that ran through this cycle is
+recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
+
+### Added
+- **Light mode, actually painted.** The System / Light / Dark switch in
+  **Appearance & Interface** was wired up in 1.5.8 with nothing behind it:
+  the app's roughly 1000 white text colours and 100 dark surface hexes
+  ignored the theme, so choosing Light gave you one correct settings page
+  and a dark everything else. They now resolve against the active theme, and
+  the eight accent palettes stay distinguishable in light the way they are in
+  dark. A dark build is unchanged — the dark values are the same colours
+  that were there before, to the byte
+- **A Google Cast button in the Movies, Series and Anime player.** Live TV
+  had one; the main player had lost it
+- **Audio track first** in the player's settings menu, ahead of subtitles and
+  speed — it is the row most often wanted
+- **Backups save through the system file picker.** Choosing a folder by
+  typing a path does not work on Android, where the path you can see is
+  usually not a path you can write to. Export and import now open the
+  platform's own picker
+- **Your own Simkl client ID.** Connect used to fail with no explanation when
+  the bundled ID was rate-limited or revoked; the card now takes an ID of
+  your own and says which of the four things went wrong when it cannot
+  connect
+- **Character names on the cast row.** Every actor was labelled "Cast"
+
+### Changed
+- **The Live TV player is now the main player with fewer parts**, rather than
+  a second player that resembled it. Same gear, same popover placement, same
+  menus; what it legitimately lacks — seeking, a seek bar, playback speed — a
+  live feed has no use for
+- **The player's menus fit the screen.** The speed menu could run off the top
+  on a short device in landscape. Popovers are now sized to the space
+  available and have no close button: tap away, or press back
+- **Settings scroll from anywhere in the window on desktop.** The scrollbar
+  sat beside the content column in the middle of the window rather than at
+  its edge, and the wheel only worked over that column
+- Every `package:http` request now carries a timeout. 54 of them had none, so
+  a debrid provider or metadata addon that accepted a connection and then
+  went quiet would hang whatever screen was waiting on it, with the spinner
+  up and no error
+
+### Fixed
+- One scraper that never finished no longer holds the whole source search
+  open — each gets 30 seconds, then the search moves on without it
+- Subtitle language names are no longer wrong on two of the three providers.
+  They each carried their own table; one had 63 languages, another the same
+  63, and the union was 114
+- Resuming from Continue Watching opens the player over the whole app rather
+  than inside the current tab, so leaving it returns you where you were
+
 ## [1.5.8+27] - 2026-09-13
 
 ### Added
