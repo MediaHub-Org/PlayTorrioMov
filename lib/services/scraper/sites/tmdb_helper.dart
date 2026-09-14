@@ -59,21 +59,23 @@ class TmdbHelper {
       // 2. Query TMDB Find API for tt IMDB IDs
       if (cleanId.startsWith('tt')) {
         final key = _apiKey;
-        if (key != null) try {
-          final uri = Uri.parse('$_tmdbDirect/find/$cleanId?api_key=$key&external_source=imdb_id');
-          final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 7));
-          if (res.statusCode == 200) {
-            final data = jsonDecode(res.body);
-            final results = isTv ? (data['tv_results'] as List?) : (data['movie_results'] as List?);
-            if (results != null && results.isNotEmpty) {
-              final id = results.first['id'] as int?;
-              if (id != null) {
-                _cache[cacheKey] = id;
-                return id;
+        if (key != null) {
+          try {
+            final uri = Uri.parse('$_tmdbDirect/find/$cleanId?api_key=$key&external_source=imdb_id');
+            final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 7));
+            if (res.statusCode == 200) {
+              final data = jsonDecode(res.body);
+              final results = isTv ? (data['tv_results'] as List?) : (data['movie_results'] as List?);
+              if (results != null && results.isNotEmpty) {
+                final id = results.first['id'] as int?;
+                if (id != null) {
+                  _cache[cacheKey] = id;
+                  return id;
+                }
               }
             }
-          }
-        } catch (_) {}
+          } catch (_) {}
+        }
 
         // Backup find query via Speedrace proxy
         try {
@@ -100,54 +102,56 @@ class TmdbHelper {
 
       // Search via official TMDB API with user's key, when there is one.
       final key = _apiKey;
-      if (key != null) try {
-        final uri = Uri.parse('$_tmdbDirect/search/$endpoint?api_key=$key&query=${Uri.encodeComponent(title)}');
-        final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 7));
-        if (res.statusCode == 200) {
-          final data = jsonDecode(res.body);
-          final results = data['results'] as List?;
-          if (results != null && results.isNotEmpty) {
-            int? bestMatchId;
+      if (key != null) {
+        try {
+          final uri = Uri.parse('$_tmdbDirect/search/$endpoint?api_key=$key&query=${Uri.encodeComponent(title)}');
+          final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 7));
+          if (res.statusCode == 200) {
+            final data = jsonDecode(res.body);
+            final results = data['results'] as List?;
+            if (results != null && results.isNotEmpty) {
+              int? bestMatchId;
 
-            for (final item in results) {
-              final itemTitle = (item['title'] ?? item['name'] ?? item['original_title'] ?? item['original_name'] ?? '').toString();
-              final itemCleanTitle = _cleanString(itemTitle);
-              final dateStr = (item['release_date'] ?? item['first_air_date'] ?? '').toString();
-              final itemYear = dateStr.length >= 4 ? int.tryParse(dateStr.substring(0, 4)) : null;
+              for (final item in results) {
+                final itemTitle = (item['title'] ?? item['name'] ?? item['original_title'] ?? item['original_name'] ?? '').toString();
+                final itemCleanTitle = _cleanString(itemTitle);
+                final dateStr = (item['release_date'] ?? item['first_air_date'] ?? '').toString();
+                final itemYear = dateStr.length >= 4 ? int.tryParse(dateStr.substring(0, 4)) : null;
 
-              final titleMatch = itemCleanTitle == targetCleanTitle ||
-                  itemCleanTitle.contains(targetCleanTitle) ||
-                  targetCleanTitle.contains(itemCleanTitle);
+                final titleMatch = itemCleanTitle == targetCleanTitle ||
+                    itemCleanTitle.contains(targetCleanTitle) ||
+                    targetCleanTitle.contains(itemCleanTitle);
 
-              if (titleMatch) {
-                if (year != null && itemYear != null) {
-                  if (itemYear == year || (itemYear - year).abs() <= 1) {
-                    final id = item['id'] as int?;
-                    if (id != null) {
-                      _cache[cacheKey] = id;
-                      return id;
+                if (titleMatch) {
+                  if (year != null && itemYear != null) {
+                    if (itemYear == year || (itemYear - year).abs() <= 1) {
+                      final id = item['id'] as int?;
+                      if (id != null) {
+                        _cache[cacheKey] = id;
+                        return id;
+                      }
                     }
+                  } else {
+                    bestMatchId ??= item['id'] as int?;
                   }
-                } else {
-                  bestMatchId ??= item['id'] as int?;
                 }
               }
-            }
 
-            if (bestMatchId != null) {
-              _cache[cacheKey] = bestMatchId;
-              return bestMatchId;
-            }
+              if (bestMatchId != null) {
+                _cache[cacheKey] = bestMatchId;
+                return bestMatchId;
+              }
 
-            // Fallback to first result if available
-            final fallbackId = results.first['id'] as int?;
-            if (fallbackId != null) {
-              _cache[cacheKey] = fallbackId;
-              return fallbackId;
+              // Fallback to first result if available
+              final fallbackId = results.first['id'] as int?;
+              if (fallbackId != null) {
+                _cache[cacheKey] = fallbackId;
+                return fallbackId;
+              }
             }
           }
-        }
-      } catch (_) {}
+        } catch (_) {}
+      }
 
       // Backup search via Speedrace Proxy
       try {

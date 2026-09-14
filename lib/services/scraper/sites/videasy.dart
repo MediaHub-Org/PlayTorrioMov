@@ -201,19 +201,21 @@ class VideasyScraper extends StreamScraper {
       // year the caller already passed in, which is what the providers below
       // are queried with either way.
       final tmdbKey = TmdbSettings.effectiveApiKey;
-      if (tmdbKey != null) try {
-        final metaPath = isTv
-            ? '/tv/$tmdbId?api_key=$tmdbKey'
-            : '/movie/$tmdbId?api_key=$tmdbKey';
-        final metaRes = await http.get(Uri.parse('$_tmdbDirect$metaPath'), headers: _defaultHeaders).timeout(const Duration(seconds: 6));
-        if (metaRes.statusCode == 200) {
-          final meta = jsonDecode(metaRes.body);
-          mediaTitle = (meta['title'] ?? meta['name'] ?? title).toString();
-          final yStr = (meta['release_date'] ?? meta['first_air_date'] ?? '').toString();
-          if (yStr.length >= 4) mediaYear = int.tryParse(yStr.substring(0, 4)) ?? year;
-          if (meta['imdb_id'] != null) targetImdb = meta['imdb_id'].toString();
-        }
-      } catch (_) {}
+      if (tmdbKey != null) {
+        try {
+          final metaPath = isTv
+              ? '/tv/$tmdbId?api_key=$tmdbKey'
+              : '/movie/$tmdbId?api_key=$tmdbKey';
+          final metaRes = await http.get(Uri.parse('$_tmdbDirect$metaPath'), headers: _defaultHeaders).timeout(const Duration(seconds: 6));
+          if (metaRes.statusCode == 200) {
+            final meta = jsonDecode(metaRes.body);
+            mediaTitle = (meta['title'] ?? meta['name'] ?? title).toString();
+            final yStr = (meta['release_date'] ?? meta['first_air_date'] ?? '').toString();
+            if (yStr.length >= 4) mediaYear = int.tryParse(yStr.substring(0, 4)) ?? year;
+            if (meta['imdb_id'] != null) targetImdb = meta['imdb_id'].toString();
+          }
+        } catch (_) {}
+      }
 
       final params = <String, String>{
         'title': mediaTitle,
