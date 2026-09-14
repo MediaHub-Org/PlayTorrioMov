@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
@@ -34,8 +35,12 @@ class _Space {
 }
 
 class _Palette {
-  static const bg = Color(0xFF0B0D12);
-  static const surface = Color(0xFF15171F);
+  // Getters, not constants: these follow the theme now that the backdrop is
+  // bounded to the hero and the rest of the page is the page. The accents
+  // below stay fixed -- they are this page's brand reds and its rating gold,
+  // not surfaces.
+  static Color get bg => AppColors.canvas;
+  static Color get surface => AppColors.surface;
   static const accent = Color(0xFFE50914);
   static const accentDim = Color(0xFF9A0710);
   static const gold = Color(0xFFFFC107);
@@ -555,22 +560,22 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
+          Icon(
             Icons.broken_image_rounded,
             size: 64,
-            color: Colors.white24,
+            color: AppColors.inkFaint,
           ),
           const SizedBox(height: _Space.md),
-          const Text(
+          Text(
             'Details unavailable.',
-            style: TextStyle(color: Colors.white54, fontSize: 18),
+            style: TextStyle(color: AppColors.inkSubtle, fontSize: 18),
           ),
           const SizedBox(height: _Space.lg),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white10,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.inkAlpha(0.10),
+              foregroundColor: AppColors.ink,
             ),
             child: const Text('Go Back'),
           ),
@@ -584,7 +589,6 @@ class _DetailsPageState extends State<DetailsPage>
     final bgUrl = meta.background ?? meta.poster ?? widget.movie.poster;
     final posterUrl = meta.poster ?? widget.movie.poster;
     final isDesktop = _isDesktop(context);
-    final screenSize = MediaQuery.sizeOf(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
@@ -598,154 +602,170 @@ class _DetailsPageState extends State<DetailsPage>
     // a little breathing room after it.
     final topGap = AppSpacing.floatingTopInset(context) + 44 + _Space.md;
 
+    // The backdrop is part of the scroll content and only as tall as the
+    // hero block, rather than a pinned layer filling the viewport forever.
+    //
+    // Pinned, it sat behind *everything*: scroll to the credits and the
+    // artwork was still there under them, which is why this page could only
+    // ever be dark -- ink over a photograph has to be white. Bounded, the
+    // hero is over artwork and everything below it is on the page, so the
+    // page can follow the theme and the shared controls on it (genre chips,
+    // section headings, the library buttons) are right in both.
     return Stack(
       children: [
-        if (bgUrl != null) _buildBackdrop(bgUrl, screenSize),
-        Positioned.fill(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: contentMaxWidth),
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        isDesktop ? _Space.xxl : _Space.lg,
-                        0,
-                        isDesktop ? _Space.xxl : _Space.lg,
-                        _Space.xxl + bottomInset,
+        SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Stack(
+                    children: [
+                      if (bgUrl != null)
+                        Positioned.fill(child: _buildBackdrop(bgUrl)),
+                      // Full-bleed art, inset content: the padding goes on
+                      // the column, not on the Stack.
+                      OverArtwork.yes(
+                        child: _contentColumn(
+                          isDesktop: isDesktop,
+                          maxWidth: contentMaxWidth,
+                          children: [
+                            SizedBox(height: topGap),
+                            isDesktop
+                                ? _buildDesktopLayout(meta, posterUrl)
+                                : _buildMobileLayout(meta, posterUrl),
+                            const SizedBox(height: _Space.xl),
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: topGap),
-                          isDesktop
-                              ? _buildDesktopLayout(meta, posterUrl)
-                              : _buildMobileLayout(meta, posterUrl),
+                    ],
+                  ),
+                  _contentColumn(
+                    isDesktop: isDesktop,
+                    maxWidth: contentMaxWidth,
+                    bottomPadding: _Space.xxl + bottomInset,
+                    children: [
+                        if (_credits(meta).isNotEmpty) ...[
+                          _buildCreditsRow(meta),
                           const SizedBox(height: _Space.xl),
-                          if (_credits(meta).isNotEmpty) ...[
-                            _buildCreditsRow(meta),
-                            const SizedBox(height: _Space.xl),
+                        ],
+                        if (meta.videos.isNotEmpty) ...[
+                          if (meta.videos
+                                  .map((v) => v.season)
+                                  .where((s) => s != null)
+                                  .toSet()
+                                  .length >
+                              1) ...[
+                            _buildSeasonSelector(meta),
+                            const SizedBox(height: _Space.lg),
+                          ] else ...[
+                            DetailsSectionHeader(_isCollection ? 'Movies in Collection' : 'Episodes'),
                           ],
-                          if (meta.videos.isNotEmpty) ...[
-                            if (meta.videos
-                                    .map((v) => v.season)
-                                    .where((s) => s != null)
-                                    .toSet()
-                                    .length >
-                                1) ...[
-                              _buildSeasonSelector(meta),
-                              const SizedBox(height: _Space.lg),
-                            ] else ...[
-                              DetailsSectionHeader(_isCollection ? 'Movies in Collection' : 'Episodes'),
-                            ],
-                            AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 550),
-                              switchInCurve: Curves.easeOutCubic,
-                              switchOutCurve: Curves.easeInCubic,
-                              layoutBuilder: (currentChild, previousChildren) {
-                                return Stack(
-                                  alignment: Alignment.topCenter,
-                                  children: <Widget>[
-                                    ...previousChildren,
-                                    if (currentChild != null) currentChild,
-                                  ],
-                                );
-                              },
-                              transitionBuilder:
-                                  (Widget child, Animation<double> animation) {
-                                    final isIncoming =
-                                        child.key == ValueKey(_selectedSeason);
-                                    final int incomingSeason =
-                                        _selectedSeason ?? 1;
-                                    final int previousSeason =
-                                        _previousSeason ?? 1;
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 550),
+                            switchInCurve: Curves.easeOutCubic,
+                            switchOutCurve: Curves.easeInCubic,
+                            layoutBuilder: (currentChild, previousChildren) {
+                              return Stack(
+                                alignment: Alignment.topCenter,
+                                children: <Widget>[
+                                  ...previousChildren,
+                                  if (currentChild != null) currentChild,
+                                ],
+                              );
+                            },
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
+                                  final isIncoming =
+                                      child.key == ValueKey(_selectedSeason);
+                                  final int incomingSeason =
+                                      _selectedSeason ?? 1;
+                                  final int previousSeason =
+                                      _previousSeason ?? 1;
 
-                                    final bool slidingRight =
-                                        incomingSeason > previousSeason;
+                                  final bool slidingRight =
+                                      incomingSeason > previousSeason;
 
-                                    // Incoming starts offset, Outgoing ends offset
-                                    final Offset beginOffset = isIncoming
-                                        ? (slidingRight
-                                              ? const Offset(0.12, 0.0)
-                                              : const Offset(-0.12, 0.0))
-                                        : (slidingRight
-                                              ? const Offset(-0.12, 0.0)
-                                              : const Offset(0.12, 0.0));
+                                  // Incoming starts offset, Outgoing ends offset
+                                  final Offset beginOffset = isIncoming
+                                      ? (slidingRight
+                                            ? const Offset(0.12, 0.0)
+                                            : const Offset(-0.12, 0.0))
+                                      : (slidingRight
+                                            ? const Offset(-0.12, 0.0)
+                                            : const Offset(0.12, 0.0));
 
-                                    final slideAnimation =
-                                        Tween<Offset>(
-                                          begin: beginOffset,
-                                          end: Offset.zero,
-                                        ).animate(
-                                          CurvedAnimation(
-                                            parent: animation,
-                                            curve: Curves.easeOutCubic,
-                                          ),
-                                        );
-
-                                    final scaleAnimation =
-                                        Tween<double>(
-                                          begin: 0.94,
-                                          end: 1.0,
-                                        ).animate(
-                                          CurvedAnimation(
-                                            parent: animation,
-                                            curve: Curves.easeOutCubic,
-                                          ),
-                                        );
-
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: SlideTransition(
-                                        position: slideAnimation,
-                                        child: ScaleTransition(
-                                          scale: scaleAnimation,
-                                          child: child,
+                                  final slideAnimation =
+                                      Tween<Offset>(
+                                        begin: beginOffset,
+                                        end: Offset.zero,
+                                      ).animate(
+                                        CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOutCubic,
                                         ),
+                                      );
+
+                                  final scaleAnimation =
+                                      Tween<double>(
+                                        begin: 0.94,
+                                        end: 1.0,
+                                      ).animate(
+                                        CurvedAnimation(
+                                          parent: animation,
+                                          curve: Curves.easeOutCubic,
+                                        ),
+                                      );
+
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: SlideTransition(
+                                      position: slideAnimation,
+                                      child: ScaleTransition(
+                                        scale: scaleAnimation,
+                                        child: child,
                                       ),
-                                    );
-                                  },
-                              child: _buildEpisodeSlider(
-                                key: ValueKey(_selectedSeason),
-                              ),
+                                    ),
+                                  );
+                                },
+                            child: _buildEpisodeSlider(
+                              key: ValueKey(_selectedSeason),
                             ),
-                            const SizedBox(height: _Space.xl),
-                          ],
-                          if (widget.relatedItems != null &&
-                              widget.relatedItems!.isNotEmpty) ...[
-                            _buildRelatedRow(widget.relatedItems!),
-                            const SizedBox(height: _Space.xl),
-                          ],
-                          if (_similarItems.isNotEmpty) ...[
-                            _buildSimilarRow(),
-                            const SizedBox(height: _Space.xl),
-                          ] else if (_isFetchingSimilar) ...[
-                            DetailsSectionHeader('Similar Content'),
-                            const Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 40),
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: _Palette.accent,
-                                  ),
+                          ),
+                          const SizedBox(height: _Space.xl),
+                        ],
+                        if (widget.relatedItems != null &&
+                            widget.relatedItems!.isNotEmpty) ...[
+                          _buildRelatedRow(widget.relatedItems!),
+                          const SizedBox(height: _Space.xl),
+                        ],
+                        if (_similarItems.isNotEmpty) ...[
+                          _buildSimilarRow(),
+                          const SizedBox(height: _Space.xl),
+                        ] else if (_isFetchingSimilar) ...[
+                          DetailsSectionHeader('Similar Content'),
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 40),
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: _Palette.accent,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: _Space.xl),
-                          ],
-                          const SizedBox(height: _Space.xxl),
+                          ),
+                          const SizedBox(height: _Space.xl),
                         ],
-                      ),
-                    ),
+                        const SizedBox(height: _Space.xxl),
+                    ],
                   ),
-                ),
+                ],
               ),
             ),
           ),
@@ -755,73 +775,109 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
+  /// One run of page content: centred, width-capped on desktop, and inset
+  /// from the screen edges by the page's own gutter. The hero and the rows
+  /// below it are two runs so the backdrop can sit behind the first one
+  /// without the second inheriting it.
+  Widget _contentColumn({
+    required bool isDesktop,
+    required double maxWidth,
+    required List<Widget> children,
+    double bottomPadding = 0,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            isDesktop ? _Space.xxl : _Space.lg,
+            0,
+            isDesktop ? _Space.xxl : _Space.lg,
+            bottomPadding,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
+
   // -------------------------------------------------------------------------
-  // Persistent, full-viewport cinematic backdrop.
+  // The hero's cinematic backdrop.
   //
-  // Unlike a hero strip that gets cropped to a fixed height and then hands
-  // off to flat background color, this sits behind the *entire* screen and
-  // stays there while the foreground scrolls over it — so the image never
-  // abruptly disappears, it just gradually recedes under layered scrims.
-  // Three separate gradients do different jobs so no single one has to be
-  // aggressive enough to look like a hard cutoff:
+  // This used to be pinned behind the *entire* viewport at every scroll
+  // offset, so the artwork was still under the credits and the similar-titles
+  // row. That read well in a dark-only app and made a light one impossible:
+  // ink over a photograph has to be white, so the whole page was stuck white.
+  //
+  // Now it is part of the scroll content and as tall as the hero block, and
+  // three gradients hand it off to the page rather than to a fixed dark, so
+  // no single one has to be aggressive enough to look like a hard cutoff:
   //   1. a soft cap at the very top (keeps the back button legible)
-  //   2. a slow bottom fade that only reaches solid bg near ~90% down
+  //   2. a bottom fade that settles into the page's own colour
   //   3. a gentle horizontal wash so text on the left never fights the image
   // -------------------------------------------------------------------------
-  Widget _buildBackdrop(String bgUrl, Size screenSize) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      height: screenSize.height,
-      child: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            CachedNetworkImage(
-              imageUrl: bgUrl,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-            // horizontal wash — darkens where the title/synopsis sit, leaves
-            // the rest of the image breathing room instead of blacking it all out
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [_Palette.bg, Color(0x991A1D26), Colors.transparent],
-                  stops: [0.0, 0.42, 0.82],
-                ),
+  Widget _buildBackdrop(String bgUrl) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CachedNetworkImage(
+            imageUrl: bgUrl,
+            fit: BoxFit.cover,
+            alignment: Alignment.topCenter,
+          ),
+          // Horizontal wash -- darkens where the title and synopsis sit,
+          // leaving the rest of the image breathing room instead of blacking
+          // it all out. Fades from the page's own colour so the art looks
+          // like it grows out of the page rather than sitting on it.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  AppColors.canvas,
+                  AppColors.scrim.withValues(alpha: 0.60),
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 0.42, 0.82],
               ),
             ),
-            // slow bottom fade — the whole point of the fix: this used to
-            // resolve to solid bg by ~70% of a 300-460px strip, now it takes
-            // nearly the full viewport height to settle
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Color(0x661A1D26), _Palette.bg],
-                  stops: [0.0, 0.62, 0.94],
-                ),
+          ),
+          // Bottom fade into the page. This is what joins the hero to the
+          // rows below it now that the backdrop ends with the hero instead
+          // of running the whole viewport.
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  AppColors.scrim.withValues(alpha: 0.40),
+                  AppColors.canvas,
+                ],
+                stops: const [0.0, 0.62, 0.98],
               ),
             ),
-            // top cap so the back button always has contrast
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black45, Colors.transparent],
-                  stops: [0.0, 0.22],
-                ),
+          ),
+          // Top cap so the back button always has contrast. Stays a fixed
+          // dark in either theme: it is over the photograph, not the page.
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.black45, Colors.transparent],
+                stops: [0.0, 0.22],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -870,7 +926,9 @@ class _DetailsPageState extends State<DetailsPage>
                         imageUrl: posterUrl,
                         fit: BoxFit.cover,
                         errorWidget: (_, __, ___) =>
-                            const ColoredBox(color: _Palette.surface),
+                            // Artwork stand-in while the poster loads, so it keeps a fixed
+            // dark fill in either theme -- it is standing in for a picture.
+            const ColoredBox(color: Color(0xFF15171F)),
                       ),
                     ),
                   ),
@@ -1205,7 +1263,7 @@ class _DetailsPageState extends State<DetailsPage>
               )
             : null,
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: AppColors.ink.withOpacity(0.1),
           width: 1.5,
         ),
       ),
@@ -1228,8 +1286,8 @@ class _DetailsPageState extends State<DetailsPage>
                 alignment: Alignment.center,
                 child: Text(
                   initials,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppColors.ink,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1246,8 +1304,8 @@ class _DetailsPageState extends State<DetailsPage>
                 alignment: Alignment.center,
                 child: Text(
                   initials,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppColors.ink,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1256,8 +1314,8 @@ class _DetailsPageState extends State<DetailsPage>
             )
           : Text(
               initials,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: AppColors.ink,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -1443,8 +1501,8 @@ class _DetailsPageState extends State<DetailsPage>
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: AppColors.ink,
               fontSize: 12,
               fontWeight: FontWeight.w600,
               height: 1.2,
@@ -1462,8 +1520,8 @@ class _DetailsPageState extends State<DetailsPage>
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white54,
+              style: TextStyle(
+                color: AppColors.inkSubtle,
                 fontSize: 10.5,
                 height: 1.1,
               ),
@@ -1517,19 +1575,19 @@ class _DetailsPageState extends State<DetailsPage>
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.07),
+                          ? AppColors.ink
+                          : AppColors.ink.withOpacity(0.07),
                       borderRadius: BorderRadius.circular(22),
                       border: Border.all(
                         color: isSelected
-                            ? Colors.white
-                            : Colors.white.withOpacity(0.1),
+                            ? AppColors.ink
+                            : AppColors.ink.withOpacity(0.1),
                       ),
                     ),
                     child: Text(
                       'Season $season',
                       style: TextStyle(
-                        color: isSelected ? Colors.black : Colors.white,
+                        color: isSelected ? Colors.black : AppColors.ink,
                         fontSize: 15,
                         fontWeight: isSelected
                             ? FontWeight.w800
@@ -1766,7 +1824,7 @@ class _DetailsPageState extends State<DetailsPage>
                                       imageUrl: item.poster!,
                                       fit: BoxFit.cover,
                                     )
-                                  : const ColoredBox(color: _Palette.surface),
+                                  : ColoredBox(color: _Palette.surface),
                             ),
                           ),
                         ),
@@ -1914,10 +1972,10 @@ class _DetailsPageState extends State<DetailsPage>
                                               errorWidget: (_, __, ___) =>
                                                   Container(
                                                     color: _Palette.surface,
-                                                    child: const Center(
+                                                    child: Center(
                                                       child: Icon(
                                                         Icons.movie_rounded,
-                                                        color: Colors.white24,
+                                                        color: AppColors.inkFaint,
                                                         size: 36,
                                                       ),
                                                     ),
@@ -1925,10 +1983,10 @@ class _DetailsPageState extends State<DetailsPage>
                                             )
                                           : Container(
                                               color: _Palette.surface,
-                                              child: const Center(
+                                              child: Center(
                                                 child: Icon(
                                                   Icons.movie_rounded,
-                                                  color: Colors.white24,
+                                                  color: AppColors.inkFaint,
                                                   size: 36,
                                                 ),
                                               ),
@@ -1958,8 +2016,8 @@ class _DetailsPageState extends State<DetailsPage>
                                         ),
                                         child: Text(
                                           '${item.similarityPercent}%',
-                                          style: const TextStyle(
-                                            color: Colors.white,
+                                          style: TextStyle(
+                                            color: AppColors.ink,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,
                                           ),
@@ -1993,8 +2051,8 @@ class _DetailsPageState extends State<DetailsPage>
                                             const SizedBox(width: 3),
                                             Text(
                                               item.rating!.toStringAsFixed(1),
-                                              style: const TextStyle(
-                                                color: Colors.white,
+                                              style: TextStyle(
+                                                color: AppColors.ink,
                                                 fontSize: 11,
                                                 fontWeight: FontWeight.w700,
                                               ),
@@ -2011,8 +2069,8 @@ class _DetailsPageState extends State<DetailsPage>
                                 item.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: AppColors.ink,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -2027,8 +2085,8 @@ class _DetailsPageState extends State<DetailsPage>
                                 ].join(' · '),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white38,
+                                style: TextStyle(
+                                  color: AppColors.inkDisabled,
                                   fontSize: 12,
                                 ),
                               ),
@@ -2122,9 +2180,9 @@ class _DetailsPageState extends State<DetailsPage>
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    border: Border.all(color: AppColors.ink.withOpacity(0.2)),
                   ),
-                  child: Icon(icon, color: Colors.white, size: 18),
+                  child: Icon(icon, color: AppColors.ink, size: 18),
                 ),
               ),
             ),
@@ -2196,8 +2254,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: _hovered
-                    ? Colors.white.withOpacity(0.22)
-                    : Colors.white.withOpacity(0.04),
+                    ? AppColors.ink.withOpacity(0.22)
+                    : AppColors.ink.withOpacity(0.04),
               ),
               boxShadow: _hovered
                   ? [
@@ -2248,7 +2306,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             child: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: AppColors.ink,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -2290,8 +2348,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                                 widget.isCollection
                                     ? ep.released!.substring(0, 4)
                                     : (ep.released!.length >= 10 ? ep.released!.substring(0, 10) : ep.released!),
-                                style: const TextStyle(
-                                  color: Colors.white38,
+                                style: TextStyle(
+                                  color: AppColors.inkDisabled,
                                   fontSize: 11,
                                 ),
                               ),
@@ -2302,8 +2360,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           ep.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppColors.ink,
                             fontWeight: FontWeight.w600,
                             fontSize: 13.5,
                           ),
@@ -2314,8 +2372,8 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             ep.overview!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.white54,
+                            style: TextStyle(
+                              color: AppColors.inkSubtle,
                               fontSize: 11.5,
                               height: 1.3,
                             ),
