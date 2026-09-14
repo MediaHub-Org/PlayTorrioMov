@@ -4,6 +4,15 @@ CI builds every platform. Pull requests run analysis, the test suite, an
 Android APK and a Linux desktop build; merges to `main` run the same checks
 and refresh the shared build cache.
 
+> **macOS is built for Apple Silicon only.** `flutter build macos` emits a
+> universal binary and the workflow thins it with `lipo`, because the x86_64
+> half is half the download and none of the audience — measured on v1.6.2,
+> 50.2 MB of a 102 MB bundle across 37 fat binaries. The cost, stated plainly:
+> an Intel Mac cannot run these builds at all. Undoing it means two jobs each
+> thinned to its own architecture, which is two genuinely different artifacts
+> — not the pre-1.6.3 layout, where two jobs built the same universal app and
+> labelled them "arm64" and "intel".
+
 There are two ways to cut a release, and **the dispatch is the one to
 reach for**:
 

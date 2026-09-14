@@ -36,23 +36,31 @@ void main() {
       );
     });
 
-    test('the macOS artifacts are named universal', () {
-      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-universal.dmg'));
-      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-universal.zip'));
+    test('the macOS artifacts are named arm64', () {
+      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-arm64.dmg'));
+      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-arm64.zip'));
 
-      // The names the old two-job layout used. Their absence is the point:
-      // an asset called "intel" that is a universal build is a promise of a
-      // choice that does not exist.
+      // `intel` must not come back as a *name*. It came back once already,
+      // labelling a universal build, which is how v1.6.2 shipped two
+      // identical downloads under names promising a choice. Intel is now not
+      // built at all, so the name has nothing left to describe.
       expect(workflow, isNot(contains('macOS-intel')));
-      expect(workflow, isNot(contains('macOS-arm64')));
+      expect(workflow, isNot(contains('macOS-universal')));
     });
 
-    test('the build proves the binary really is universal', () {
-      // Without this step "universal" is just a filename. With it, a Flutter
-      // that stopped emitting both slices fails the build instead of shipping
-      // an arm64-only app to Intel Macs under a name that says otherwise.
+    test('the build proves the binary really is arm64 only', () {
+      // Two halves, and both matter. Thinning without verifying would ship
+      // whatever lipo happened to leave; verifying without thinning would
+      // fail every build, since Flutter emits universal. The guard used to
+      // require BOTH slices and now requires only arm64 -- it is the same
+      // check inverted, which is the honest way to change this decision.
+      expect(workflow, contains('lipo -thin arm64'));
       expect(workflow, contains('lipo -archs'));
-      expect(workflow, contains('macOS build is not universal'));
+      expect(workflow, contains('macOS build is not arm64-only'));
+
+      // Thinning nothing means Flutter stopped emitting universal output, or
+      // the bundle moved. Either way it is not something to publish through.
+      expect(workflow, contains('Nothing to thin'));
     });
 
     test('the release waits on the macOS job', () {
