@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import '../../models/player/skip_segment_model.dart';
 import 'player_glass.dart';
 
@@ -223,13 +224,13 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                           height: (_isHovered || _isScrubbing) ? 8 : 6,
                           width: trackWidth * activeFraction,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF7C5CFF), Color(0xFF9D84FF)],
+                            gradient: LinearGradient(
+                              colors: [AppColors.accent, Color(0xFF9D84FF)],
                             ),
                             borderRadius: BorderRadius.circular(999),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF7C5CFF).withValues(alpha: 0.5),
+                                color: AppColors.accent.withValues(alpha: 0.5),
                                 blurRadius: 6,
                                 offset: const Offset(0, 1),
                               ),
@@ -255,7 +256,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                   offset: const Offset(0, 2),
                                 ),
                                 BoxShadow(
-                                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.8),
+                                  color: AppColors.accent.withValues(alpha: 0.8),
                                   blurRadius: 4,
                                   spreadRadius: 1,
                                 ),

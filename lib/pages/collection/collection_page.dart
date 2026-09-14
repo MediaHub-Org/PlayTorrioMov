@@ -371,8 +371,8 @@ class _CollectionPageState extends State<CollectionPage> {
                           LinearProgressIndicator(
                             value: progress > 0 ? progress : null,
                             backgroundColor: AppColors.inkAlpha(0.10),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              Color(0xFF7C5CFF),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.accent,
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -503,7 +503,7 @@ class _CollectionPageState extends State<CollectionPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7C5CFF) : AppColors.raised,
+          color: isSelected ? AppColors.accent : AppColors.raised,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(

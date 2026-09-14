@@ -113,7 +113,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
         SnackBar(
           content: Text('Removed $count portal${count == 1 ? "" : "s"}'),
           duration: const Duration(seconds: 2),
-          backgroundColor: const Color(0xFF1E2235),
+          backgroundColor: AppColors.raised,
         ),
       );
     }
@@ -131,7 +131,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
         SnackBar(
           content: Text('Removed all $count portals'),
           duration: const Duration(seconds: 2),
-          backgroundColor: const Color(0xFF1E2235),
+          backgroundColor: AppColors.raised,
         ),
       );
     }
@@ -153,7 +153,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
         SnackBar(
           content: Text('Removed $count playlist${count == 1 ? "" : "s"}'),
           duration: const Duration(seconds: 2),
-          backgroundColor: const Color(0xFF1E2235),
+          backgroundColor: AppColors.raised,
         ),
       );
     }
@@ -171,7 +171,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
         SnackBar(
           content: Text('Removed all $count playlists'),
           duration: const Duration(seconds: 2),
-          backgroundColor: const Color(0xFF1E2235),
+          backgroundColor: AppColors.raised,
         ),
       );
     }
@@ -183,7 +183,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
       context: context,
       builder: (ctx) {
         return Dialog(
-          backgroundColor: const Color(0xFF10131C),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(color: AppColors.inkAlpha(0.12)),
@@ -361,7 +361,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
       animation: _ctrl,
       builder: (context, _) {
         return Dialog(
-          backgroundColor: const Color(0xFF0C0E15),
+          backgroundColor: AppColors.canvas,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
             side: BorderSide(color: AppColors.inkAlpha(0.12)),
@@ -500,7 +500,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   borderRadius: BorderRadius.circular(14),
                   side: BorderSide(color: AppColors.inkAlpha(0.12)),
                 ),
-                color: const Color(0xFF161A26),
+                color: AppColors.raised,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9.5),
                   decoration: BoxDecoration(
@@ -698,9 +698,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF7C5CFF).withValues(alpha: 0.12),
+                color: AppColors.accent.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFF7C5CFF).withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
               ),
               // A Wrap of two groups rather than one Row with a Spacer
               // between them: on a phone the select-all control and the two
@@ -893,7 +893,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7C5CFF)),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                       onPressed: _ctrl.isAdding ? null : _submitAddPortal,
                       child: _ctrl.isAdding
                           ? SizedBox(
@@ -1083,7 +1083,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       SnackBar(
                                         content: Text('Copied: $text'),
                                         duration: const Duration(seconds: 2),
-                                        backgroundColor: const Color(0xFF1E2235),
+                                        backgroundColor: AppColors.raised,
                                       ),
                                     );
                                   },
@@ -1330,7 +1330,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7C5CFF)),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                       onPressed: _ctrl.isM3uLoading ? null : _submitAddM3u,
                       child: _ctrl.isM3uLoading
                           ? SizedBox(
@@ -1445,7 +1445,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                         SnackBar(
                                           content: Text('Copied: $text'),
                                           duration: const Duration(seconds: 2),
-                                          backgroundColor: const Color(0xFF1E2235),
+                                          backgroundColor: AppColors.raised,
                                         ),
                                       );
                                     }

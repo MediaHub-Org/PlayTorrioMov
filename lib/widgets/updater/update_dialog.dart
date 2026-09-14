@@ -26,9 +26,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
 
-  static Color _surfaceColor = AppColors.surface;
-  static Color _backgroundColor = AppColors.canvas;
-  static const Color _accentColor = Color(0xFF7C5CFF);
+  // Getters, not variables: a top-level or static variable is initialised
+  // lazily, once, on its first read -- which would freeze whichever theme
+  // happened to be active when this screen was first opened, and leave it
+  // there through every later theme change.
+  static Color get _surfaceColor => AppColors.surface;
+  static Color get _backgroundColor => AppColors.canvas;
+  static Color get _accentColor => AppColors.accent;
 
   @override
   void dispose() {
@@ -90,7 +94,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       color: _accentColor.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.system_update_rounded,
                       color: _accentColor,
                       size: 32,
@@ -101,7 +105,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'UPDATE AVAILABLE',
                           style: TextStyle(
                             fontSize: 11,
@@ -167,7 +171,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             ),
                           ],
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_rounded,
                           color: _accentColor,
                         ),
@@ -185,7 +189,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             const SizedBox(height: 4),
                             Text(
                               widget.updateInfo.latestVersion,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: _accentColor,
@@ -308,7 +312,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Downloading...',
                               style: TextStyle(
                                 fontSize: 13,
@@ -334,7 +338,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             backgroundColor: AppColors.ink.withValues(
                               alpha: 0.1,
                             ),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
+                            valueColor: AlwaysStoppedAnimation<Color>(
                               _accentColor,
                             ),
                             minHeight: 8,
@@ -621,7 +625,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   ),
                   child: SelectableText(
                     filePath,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: _accentColor,
                       fontSize: 12,
                       fontFamily: 'monospace',
@@ -644,7 +648,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     ),
                     child: SelectableText(
                       'flatpak install --user --reinstall "$filePath"',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: _accentColor,
                         fontSize: 12,
                         fontFamily: 'monospace',

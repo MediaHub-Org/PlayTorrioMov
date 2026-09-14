@@ -139,7 +139,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          backgroundColor: const Color(0xFF10131C),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: BorderSide(color: AppColors.inkAlpha(0.12)),
@@ -559,7 +559,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         short: isLive ? 'LIVE' : (_activeSection == IptvSection.vod ? 'VOD' : 'SERIES'),
         category: currentCat.name,
         keywords: [stream.name],
-        gradient: const [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
+        gradient: [AppColors.accent, Color(0xFF00D2EF)],
       );
 
       pushPage(
@@ -599,7 +599,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         short: isLive ? 'LIVE' : 'VOD',
         category: currentCat.name,
         keywords: [stream.name],
-        gradient: const [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
+        gradient: [AppColors.accent, Color(0xFF00D2EF)],
       );
 
       pushPage(
@@ -653,7 +653,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
             return Container(
               height: MediaQuery.sizeOf(context).height * 0.75,
               decoration: BoxDecoration(
-                color: Color(0xFF0C0F17),
+                color: AppColors.bar,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 border: Border(top: BorderSide(color: AppColors.raised, width: 1.2)),
               ),
@@ -674,7 +674,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        const Icon(Icons.folder_rounded, color: Color(0xFF7C5CFF), size: 20),
+                        Icon(Icons.folder_rounded, color: AppColors.accent, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           'Select Category',
@@ -726,7 +726,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Divider(color: Color(0xFF1B2030), height: 1),
+                  Divider(color: AppColors.edge, height: 1),
                   Expanded(
                     child: ListView.builder(
                       itemCount: cats.length,
@@ -768,7 +768,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     final isDesktop = _isDesktop(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF07090E),
+      backgroundColor: AppColors.canvas,
       body: SafeArea(
         child: Column(
           children: [
@@ -776,10 +776,10 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
             if (isDesktop)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF0C0F17),
+                decoration: BoxDecoration(
+                  color: AppColors.bar,
                   border: Border(
-                    bottom: BorderSide(color: Color(0xFF1B2030), width: 1.2),
+                    bottom: BorderSide(color: AppColors.edge, width: 1.2),
                   ),
                 ),
                 child: Row(
@@ -940,10 +940,10 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               // ── MOBILE RESPONSIVE HEADER ──
               Container(
                 padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF0C0F17),
+                decoration: BoxDecoration(
+                  color: AppColors.bar,
                   border: Border(
-                    bottom: BorderSide(color: Color(0xFF1B2030), width: 1.2),
+                    bottom: BorderSide(color: AppColors.edge, width: 1.2),
                   ),
                 ),
                 child: Column(
@@ -1025,12 +1025,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             decoration: BoxDecoration(
                               color: AppColors.raised,
                               borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: const Color(0xFF7C5CFF).withValues(alpha: 0.5)),
+                              border: Border.all(color: AppColors.accent.withValues(alpha: 0.5)),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.folder_rounded, color: Color(0xFF7C5CFF), size: 15),
+                                Icon(Icons.folder_rounded, color: AppColors.accent, size: 15),
                                 const SizedBox(width: 6),
                                 ConstrainedBox(
                                   constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.32),
@@ -1042,7 +1042,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                const Icon(Icons.arrow_drop_down_rounded, color: Color(0xFF7C5CFF), size: 18),
+                                Icon(Icons.arrow_drop_down_rounded, color: AppColors.accent, size: 18),
                               ],
                             ),
                           ),
@@ -1094,7 +1094,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         decoration: InputDecoration(
                           hintText: 'Search in this category…',
                           hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
-                          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7C5CFF), size: 18),
+                          prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 18),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
                                   icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
@@ -1117,7 +1117,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
             // ── MAIN CONTENT (SPLIT VIEW ON DESKTOP, FULL-WIDTH ON MOBILE) ──
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFF)))
+                  ? Center(child: CircularProgressIndicator(color: AppColors.accent))
                   : _errorMessage != null
                       ? Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent, fontSize: 15)))
                       : isDesktop
@@ -1127,10 +1127,10 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                 SizedBox(
                                   width: IptvSettings.sidebarWidth.value,
                                   child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF0A0D14),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.canvas,
                                       border: Border(
-                                        right: BorderSide(color: Color(0xFF1B2030), width: 1.2),
+                                        right: BorderSide(color: AppColors.edge, width: 1.2),
                                       ),
                                     ),
                                     child: Column(
@@ -1577,7 +1577,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
             decoration: BoxDecoration(
               color: widget.isSelected
                   ? (isFavCategory ? AppColors.inkAlpha(0.15) : palette.primaryColor.withValues(alpha: 0.15))
-                  : (_hovered ? const Color(0xFF141724) : Colors.transparent),
+                  : (_hovered ? AppColors.raised : Colors.transparent),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: widget.isSelected
@@ -1719,10 +1719,10 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
             duration: const Duration(milliseconds: 120),
             padding: EdgeInsets.symmetric(horizontal: isVerySmall ? 8 : 14, vertical: 8),
             decoration: BoxDecoration(
-              color: _hovered ? const Color(0xFF161A28) : const Color(0xFF0E111A),
+              color: _hovered ? AppColors.raised : AppColors.bar,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: _hovered ? palette.primaryColor.withValues(alpha: 0.7) : const Color(0xFF1B2030),
+                color: _hovered ? palette.primaryColor.withValues(alpha: 0.7) : AppColors.edge,
                 width: _hovered ? 1.4 : 1.0,
               ),
               boxShadow: _hovered
@@ -1761,9 +1761,9 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                     height: isVerySmall ? 40 : 46,
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF080A10),
+                      color: AppColors.canvas,
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF1E2336)),
+                      border: Border.all(color: AppColors.edgeStrong),
                     ),
                     child: s.icon.isNotEmpty
                         ? ClipRRect(
@@ -1952,10 +1952,10 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
             duration: const Duration(milliseconds: 140),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _hovered ? const Color(0xFF161A28) : const Color(0xFF0E111A),
+              color: _hovered ? AppColors.raised : AppColors.bar,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: _hovered ? palette.primaryColor.withValues(alpha: 0.8) : const Color(0xFF1B2030),
+                color: _hovered ? palette.primaryColor.withValues(alpha: 0.8) : AppColors.edge,
                 width: _hovered ? 1.5 : 1.0,
               ),
               boxShadow: _hovered
@@ -1980,9 +1980,9 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                         height: 32,
                         padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF080A10),
+                          color: AppColors.canvas,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFF1E2336)),
+                          border: Border.all(color: AppColors.edgeStrong),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(4),
@@ -2136,10 +2136,10 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
             duration: const Duration(milliseconds: 120),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _hovered ? const Color(0xFF161A28) : const Color(0xFF0E111A),
+              color: _hovered ? AppColors.raised : AppColors.bar,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: _hovered ? palette.primaryColor.withValues(alpha: 0.7) : const Color(0xFF1B2030),
+                color: _hovered ? palette.primaryColor.withValues(alpha: 0.7) : AppColors.edge,
               ),
             ),
             child: Row(
@@ -2258,13 +2258,13 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                       color: AppColors.raised,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: _hovered ? const Color(0xFF7C5CFF) : AppColors.raised,
+                        color: _hovered ? AppColors.accent : AppColors.raised,
                         width: _hovered ? 1.4 : 1.0,
                       ),
                       boxShadow: _hovered
                           ? [
                               BoxShadow(
-                                color: const Color(0xFF7C5CFF).withValues(alpha: 0.3),
+                                color: AppColors.accent.withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 3),
                               ),
@@ -2292,8 +2292,8 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                             Positioned.fill(
                               child: Container(
                                 color: Colors.black45,
-                                child: const Center(
-                                  child: Icon(Icons.play_circle_fill_rounded, color: Color(0xFF7C5CFF), size: 40),
+                                child: Center(
+                                  child: Icon(Icons.play_circle_fill_rounded, color: AppColors.accent, size: 40),
                                 ),
                               ),
                             ),
@@ -2429,7 +2429,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
       short: 'TV',
       category: widget.series.name,
       keywords: [widget.series.name],
-      gradient: const [Color(0xFF7C5CFF), Color(0xFF00D2EF)],
+      gradient: [AppColors.accent, Color(0xFF00D2EF)],
     );
 
     Navigator.pop(context);
@@ -2459,8 +2459,8 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.8,
       ),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0C0E15),
+      decoration: BoxDecoration(
+        color: AppColors.canvas,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
@@ -2498,7 +2498,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
 
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFF)))
+                ? Center(child: CircularProgressIndicator(color: AppColors.accent))
                 : _error != null
                     ? Center(child: Text(_error!, style: const TextStyle(color: Colors.redAccent)))
                     : ListView.separated(
@@ -2513,7 +2513,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
                             leading: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7C5CFF).withValues(alpha: 0.2),
+                                color: AppColors.accent.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -2525,7 +2525,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
                               ep.title.isNotEmpty ? ep.title : 'Episode ${ep.episode}',
                               style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                             ),
-                            trailing: const Icon(Icons.play_circle_fill_rounded, color: Color(0xFF7C5CFF)),
+                            trailing: Icon(Icons.play_circle_fill_rounded, color: AppColors.accent),
                             onTap: () => _playEpisode(ep),
                           );
                         },
@@ -2563,10 +2563,10 @@ class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: _hovered ? const Color(0xFF7C5CFF) : Colors.black87,
+            color: _hovered ? AppColors.accent : Colors.black87,
             shape: BoxShape.circle,
             border: Border.all(
-              color: _hovered ? const Color(0xFF7C5CFF) : AppColors.onAccent.withValues(alpha: 0.3),
+              color: _hovered ? AppColors.accent : AppColors.onAccent.withValues(alpha: 0.3),
               width: 1.2,
             ),
             boxShadow: [

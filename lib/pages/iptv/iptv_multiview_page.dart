@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../services/iptv/hardcoded_channels.dart';
@@ -71,9 +72,9 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF080A0F),
+        backgroundColor: AppColors.canvas,
         title: const Text('Multi-View'),
         actions: [
           if (_selected.isNotEmpty)
@@ -81,13 +82,13 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
               onPressed: _startGrid,
               child: Text(
                 'Watch (${_selected.length})',
-                style: const TextStyle(color: Color(0xFF7C5CFF), fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
               ),
             ),
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFF)))
+          ? Center(child: CircularProgressIndicator(color: AppColors.accent))
           : _available.isEmpty
               ? const Center(
                   child: Padding(
@@ -161,7 +162,7 @@ class _ChannelPickTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = channel.gradient.isNotEmpty ? channel.gradient.first : const Color(0xFF7C5CFF);
+    final primary = channel.gradient.isNotEmpty ? channel.gradient.first : AppColors.accent;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
@@ -294,7 +295,7 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: isFocused ? const Color(0xFF7C5CFF) : Colors.white24,
+                  color: isFocused ? AppColors.accent : Colors.white24,
                   width: isFocused ? 3 : 1,
                 ),
               ),
@@ -315,11 +316,11 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
                       ),
                     )
                   else
-                    const Center(
+                    Center(
                       child: SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF7C5CFF)),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
                       ),
                     ),
                   Positioned(

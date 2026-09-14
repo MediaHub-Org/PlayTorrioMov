@@ -232,8 +232,8 @@ class _CatalogPageState extends State<CatalogPage> {
         children: [
           // ── Main Content Grid ──
           if (_items.isEmpty && _isLoading)
-            const Center(
-              child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+            Center(
+              child: CircularProgressIndicator(color: AppColors.accent),
             )
           else if (_items.isEmpty && _error != null)
             ErrorView(
@@ -266,8 +266,8 @@ class _CatalogPageState extends State<CatalogPage> {
               itemCount: _items.length + (_hasMore ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == _items.length) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+                  return Center(
+                    child: CircularProgressIndicator(color: AppColors.accent),
                   );
                 }
                 return MovieCard(movie: _items[index]);
@@ -464,7 +464,7 @@ class _CatalogPageState extends State<CatalogPage> {
           final label = currentVal ?? (extra.isRequired ? 'Select ${extra.name}' : 'All ${extra.name}');
           return PopupMenuButton<String?>(
             tooltip: extra.name,
-            color: const Color(0xFF15171F),
+            color: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(color: AppColors.inkAlpha(0.1)),
@@ -482,7 +482,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   child: Text(
                     opt,
                     style: TextStyle(
-                      color: opt == currentVal ? const Color(0xFF7C5CFF) : AppColors.ink,
+                      color: opt == currentVal ? AppColors.accent : AppColors.ink,
                       fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
@@ -492,10 +492,10 @@ class _CatalogPageState extends State<CatalogPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: currentVal != null ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.08),
+                color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.08),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: currentVal != null ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.12),
+                  color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.12),
                 ),
               ),
               child: Row(
@@ -569,15 +569,15 @@ class _GenreChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7C5CFF) : AppColors.inkAlpha(0.08),
+          color: isSelected ? AppColors.accent : AppColors.inkAlpha(0.08),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected 
-              ? const Color(0xFF7C5CFF) 
+              ? AppColors.accent 
               : AppColors.inkAlpha(0.12),
           ),
           boxShadow: isSelected 
-            ? [BoxShadow(color: const Color(0xFF7C5CFF).withValues(alpha: 0.3), blurRadius: 8)] 
+            ? [BoxShadow(color: AppColors.accent.withValues(alpha: 0.3), blurRadius: 8)] 
             : null,
         ),
         alignment: Alignment.center,

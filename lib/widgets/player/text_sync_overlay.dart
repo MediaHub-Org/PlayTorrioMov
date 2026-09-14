@@ -364,7 +364,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           color: PlayerTheme.accent.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.sync_alt_rounded,
                           color: PlayerTheme.accent,
                           size: 16,
@@ -631,7 +631,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                                   width: 3,
                                                 )
                                               : isActive
-                                                  ? const BorderSide(
+                                                  ? BorderSide(
                                                       color: PlayerTheme.accent,
                                                       width: 3,
                                                     )
@@ -703,7 +703,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                               ),
                                             )
                                           else if (inSegment)
-                                            const Icon(
+                                            Icon(
                                               Icons.check_rounded,
                                               color: PlayerTheme.accent,
                                               size: 15,

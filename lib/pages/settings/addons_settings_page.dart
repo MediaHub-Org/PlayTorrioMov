@@ -101,7 +101,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF7C5CFF)),
+                    borderSide: BorderSide(color: AppColors.accent),
                   ),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -123,7 +123,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
             ElevatedButton(
               onPressed: () => Navigator.pop(context, controller.text),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF7C5CFF),
+                backgroundColor: AppColors.accent,
                 foregroundColor: AppColors.onAccent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -247,15 +247,15 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.15),
+                  color: AppColors.accent.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   '${addons.length} Total',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF7C5CFF),
+                    color: AppColors.accent,
                   ),
                 ),
               ),
@@ -364,7 +364,7 @@ class _AddonCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: addon.enabled
-              ? const Color(0xFF7C5CFF).withValues(alpha: 0.3)
+              ? AppColors.accent.withValues(alpha: 0.3)
               : AppColors.inkAlpha(0.06),
         ),
       ),
@@ -379,11 +379,11 @@ class _AddonCard extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFF7C5CFF).withValues(alpha: 0.14),
+                  color: AppColors.accent.withValues(alpha: 0.14),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.extension_rounded,
-                  color: Color(0xFF7C5CFF),
+                  color: AppColors.accent,
                   size: 22,
                 ),
               ),
@@ -417,7 +417,7 @@ class _AddonCard extends StatelessWidget {
               Switch.adaptive(
                 value: addon.enabled,
                 onChanged: onToggle,
-                activeColor: const Color(0xFF7C5CFF),
+                activeColor: AppColors.accent,
               ),
             ],
           ),
@@ -589,7 +589,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
 
   @override
   Widget build(BuildContext context) {
-    const activeColor = Color(0xFF7C5CFF);
+    final activeColor = AppColors.accent;
     final isEnabled = widget.isEnabled;
 
     return MouseRegion(
@@ -687,31 +687,31 @@ class _AddAddonButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF7C5CFF).withValues(alpha: 0.25),
+            color: AppColors.accent.withValues(alpha: 0.25),
           ),
-          color: const Color(0xFF7C5CFF).withValues(alpha: 0.05),
+          color: AppColors.accent.withValues(alpha: 0.05),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (isLoading)
-              const SizedBox(
+              SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Color(0xFF7C5CFF),
+                  color: AppColors.accent,
                 ),
               )
             else
-              const Icon(Icons.add_rounded, color: Color(0xFF7C5CFF), size: 22),
+              Icon(Icons.add_rounded, color: AppColors.accent, size: 22),
             const SizedBox(width: 10),
             Text(
               isLoading ? 'Installing...' : 'Add Addon',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF7C5CFF),
+                color: AppColors.accent,
               ),
             ),
           ],

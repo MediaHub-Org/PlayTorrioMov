@@ -306,7 +306,7 @@ class _SearchPageState extends State<SearchPage> {
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7C5CFF) : AppColors.raised,
+          color: isSelected ? AppColors.accent : AppColors.raised,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -440,8 +440,8 @@ class _SearchPageState extends State<SearchPage> {
       return MagnetFilesView(key: ValueKey(_magnetQuery), magnet: _magnetQuery);
     }
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.accent),
       );
     }
 

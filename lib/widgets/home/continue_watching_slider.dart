@@ -684,6 +684,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
 
   Widget _buildPlaceholder() {
     return Container(
+      // Artwork stand-in, not a theme surface: stays dark in either theme.
       color: const Color(0xFF1A1D27),
       child: Center(
         child: Icon(Icons.movie_rounded, color: AppColors.onAccent.withValues(alpha: 0.24), size: 36),

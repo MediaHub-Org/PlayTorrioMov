@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import 'player_glass.dart';
 
 class PlayerAudioTrack {
@@ -178,12 +179,12 @@ class PlayerAudioMenu extends StatelessWidget {
                             margin: const EdgeInsets.only(bottom: 4),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? const Color(0xFF7C5CFF).withValues(alpha: 0.18)
+                                  ? AppColors.accent.withValues(alpha: 0.18)
                                   : Colors.white.withValues(alpha: 0.03),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isSelected
-                                    ? const Color(0xFF7C5CFF).withValues(alpha: 0.6)
+                                    ? AppColors.accent.withValues(alpha: 0.6)
                                     : Colors.white.withValues(alpha: 0.06),
                                 width: isSelected ? 1.4 : 1.0,
                               ),
@@ -194,10 +195,10 @@ class PlayerAudioMenu extends StatelessWidget {
                                   width: 20,
                                   height: 20,
                                   decoration: BoxDecoration(
-                                    color: isSelected ? const Color(0xFF7C5CFF) : Colors.white.withValues(alpha: 0.08),
+                                    color: isSelected ? AppColors.accent : Colors.white.withValues(alpha: 0.08),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: isSelected ? const Color(0xFF7C5CFF) : Colors.white30,
+                                      color: isSelected ? AppColors.accent : Colors.white30,
                                       width: 1.5,
                                     ),
                                   ),
@@ -303,12 +304,12 @@ class PlayerAudioMenu extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: delaySec != 0
-                                ? const Color(0xFF7C5CFF).withValues(alpha: 0.25)
+                                ? AppColors.accent.withValues(alpha: 0.25)
                                 : Colors.white.withValues(alpha: 0.06),
                             borderRadius: BorderRadius.circular(5),
                             border: Border.all(
                               color: delaySec != 0
-                                  ? const Color(0xFF7C5CFF).withValues(alpha: 0.5)
+                                  ? AppColors.accent.withValues(alpha: 0.5)
                                   : Colors.transparent,
                             ),
                           ),

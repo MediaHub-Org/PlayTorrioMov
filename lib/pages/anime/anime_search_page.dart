@@ -260,7 +260,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   }) async {
     final picked = await showModalBottomSheet<_PickResult<T>>(
       context: context,
-      backgroundColor: const Color(0xFF10131E),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),

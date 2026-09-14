@@ -287,12 +287,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             onSelected: _selectGenreFilter,
           ),
           if (_loadingGenre)
-            const SizedBox(
+            SizedBox(
               width: 16,
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Color(0xFF7C5CFF),
+                color: AppColors.accent,
               ),
             ),
         ],
@@ -369,9 +369,9 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             fit: BoxFit.cover,
             alignment: const Alignment(0, -0.15),
             filterQuality: FilterQuality.medium,
-            placeholder: (_, __) => const ColoredBox(color: Color(0xFF12151F)),
+            placeholder: (_, __) => ColoredBox(color: AppColors.surface),
             errorWidget: (_, __, ___) =>
-                const ColoredBox(color: Color(0xFF12151F)),
+                ColoredBox(color: AppColors.surface),
           ),
         const DecoratedBox(
           decoration: BoxDecoration(

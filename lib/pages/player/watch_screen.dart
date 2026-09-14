@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -34,7 +35,10 @@ class _C {
   static const bg = Color(0xFF0A0C10);
   static const surface = Color(0xFF13151C);
   static const surfaceLight = Color(0xFF1A1D26);
-  static const accent = Color(0xFF7C5CFF);
+  // A getter, not a `static final`: a static final is initialised once on
+  // its first read and never again, which would pin the accent to
+  // whichever palette was active the first time a player opened.
+  static Color get accent => AppColors.accent;
   static const textPrimary = Color(0xFFF5F5F7);
   static const textSecondary = Color(0xFFAAAAAF);
   static const textTertiary = Color(0xFF66666B);
@@ -460,7 +464,7 @@ class _WatchScreenState extends State<WatchScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
                             Icon(
                               Icons.stream_rounded,
@@ -590,7 +594,7 @@ class _WatchScreenState extends State<WatchScreen>
               _isCollection
                   ? 'PART ${ep.episode ?? 1}'
                   : 'S${ep.season ?? '?' }E${ep.episode ?? '?' }',
-              style: const TextStyle(
+              style: TextStyle(
                 color: _C.accent,
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -852,7 +856,7 @@ class _WatchScreenState extends State<WatchScreen>
                   setState(() => _synopsisExpanded = !_synopsisExpanded),
               child: Text(
                 _synopsisExpanded ? 'Show less' : 'Read more',
-                style: const TextStyle(
+                style: TextStyle(
                   color: _C.accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -1021,7 +1025,7 @@ class _WatchScreenState extends State<WatchScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Row(
+            Row(
               children: [
                 Icon(Icons.stream_rounded, color: _C.accent, size: 20),
                 SizedBox(width: _S.xs),
@@ -1956,7 +1960,7 @@ class _SourceCardState extends State<_SourceCard> {
                       color: _C.accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.extension_rounded,
                       color: _C.accent,
                       size: 20,

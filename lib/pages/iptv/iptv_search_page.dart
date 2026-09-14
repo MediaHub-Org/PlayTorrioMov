@@ -93,7 +93,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
             decoration: InputDecoration(
               hintText: 'Search 60+ live channels, leagues, networks…',
               hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 13.5),
-              prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7C5CFF), size: 20),
+              prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 20),
               suffixIcon: _query.isNotEmpty
                   ? IconButton(
                       icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 18),
@@ -131,12 +131,12 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? const Color(0xFF7C5CFF)
+                          ? AppColors.accent
                           : AppColors.inkAlpha(0.06),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
-                            ? const Color(0xFF7C5CFF)
+                            ? AppColors.accent
                             : AppColors.inkAlpha(0.1),
                       ),
                     ),

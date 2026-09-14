@@ -248,7 +248,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+                        CircularProgressIndicator(color: AppColors.accent),
                         SizedBox(height: 14),
                         Text(
                           'Extracting MegaPlay, VidWish, AllAnime & Miruro streams...',
@@ -280,7 +280,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                             const SizedBox(height: 14),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF7C5CFF),
+                                backgroundColor: AppColors.accent,
                               ),
                               onPressed: _startScraping,
                               child: const Text('Retry Scraping'),
@@ -322,7 +322,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                       vertical: 12,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF191C28),
+                                      color: AppColors.raised,
                                       borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
                                         color:
@@ -334,14 +334,14 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                         Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFF7C5CFF)
+                                            color: AppColors.accent
                                                 .withValues(alpha: 0.2),
                                             borderRadius:
                                                 BorderRadius.circular(10),
                                           ),
-                                          child: const Icon(
+                                          child: Icon(
                                             Icons.play_circle_fill_rounded,
-                                            color: Color(0xFF7C5CFF),
+                                            color: AppColors.accent,
                                             size: 24,
                                           ),
                                         ),

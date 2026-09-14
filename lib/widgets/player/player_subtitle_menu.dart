@@ -309,7 +309,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           ? SizedBox(
                               width: iconSize,
                               height: iconSize,
-                              child: const CircularProgressIndicator(
+                              child: CircularProgressIndicator(
                                 color: PlayerTheme.accent,
                                 strokeWidth: 2,
                               ),
@@ -857,7 +857,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           if (compact)
             GestureDetector(
               onTap: _searchOnline,
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.search_rounded, size: 13, color: PlayerTheme.accent),
                   SizedBox(width: 4),
@@ -960,7 +960,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                                 color: PlayerTheme.accent.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'EMBEDDED',
                                 style: TextStyle(
                                   color: PlayerTheme.accent,
@@ -1018,7 +1018,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   Widget _buildVariantList(List<SubtitleVariant> filteredVariants, {required bool compact}) {
     if (_isLoadingSearch) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1246,7 +1246,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         children: [
           GestureDetector(
             onTap: _searchOnline,
-            child: const MouseRegion(
+            child: MouseRegion(
               cursor: SystemMouseCursors.click,
               child: Row(
                 children: [

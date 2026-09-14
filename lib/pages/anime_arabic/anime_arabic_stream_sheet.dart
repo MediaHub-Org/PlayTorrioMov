@@ -130,7 +130,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF11141E),
+        color: AppColors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(
           color: AppColors.inkAlpha(0.08),

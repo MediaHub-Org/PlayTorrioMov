@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/theme/app_theme_service.dart';
 
 /// One choice inside a [PillTabRow].
 class SubTab {
@@ -82,7 +83,9 @@ class _SubTabButton extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF7C5CFF) : Colors.transparent,
+          color: selected
+              ? AppThemeService.currentPalette.value.primaryColor
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(AppRadii.sm),
         ),
         child: Row(
@@ -91,13 +94,14 @@ class _SubTabButton extends StatelessWidget {
             Icon(
               tab.icon,
               size: 15,
-              color: selected ? AppColors.ink : AppColors.inkSubtle,
+              // White on the accent fill; theme ink when there is no fill.
+              color: selected ? AppColors.onAccent : AppColors.inkSubtle,
             ),
             const SizedBox(width: 6),
             Text(
               tab.label,
               style: TextStyle(
-                color: selected ? AppColors.ink : AppColors.inkAlpha(0.60),
+                color: selected ? AppColors.onAccent : AppColors.inkAlpha(0.60),
                 fontSize: 12.5,
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               ),

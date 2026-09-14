@@ -521,8 +521,8 @@ class _AnimePageState extends State<AnimePage> {
         ? _withHeader(
             pillHeader,
             _genreLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF7C5CFF)),
+                ? Center(
+                    child: CircularProgressIndicator(color: AppColors.accent),
                   )
                 : _buildGenreGrid(),
           )
@@ -572,7 +572,7 @@ class _AnimePageState extends State<AnimePage> {
                       height: 500,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFF7C5CFF).withValues(alpha: 0.08),
+                        color: AppColors.accent.withValues(alpha: 0.08),
                       ),
                     ),
                   ),

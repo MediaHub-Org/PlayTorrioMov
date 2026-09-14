@@ -9,8 +9,8 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-14**, on `v1.6.0+28`, at commit
-`cd2a289`. Every count below was measured at that commit.
+Last reconciled against the tree: **2026-09-14**, on `v1.6.0+28`, after the
+nav-chrome and accent pass (#61-#63). Every count below was measured there.
 
 ---
 
@@ -34,25 +34,33 @@ and read the status line under the card:
 | *TMDB has no entry for this title (404)* | That one title only; try another |
 | nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
 
-### 2. Light mode is painted, not finished (#59)
+### 2. Light mode: the chrome is done, a tail of one-off hexes is not
 
-The switch works and the app's colours now follow it: `AppColors` resolves
-ink and surfaces against the active theme, ~1500 sites across 60 files read
-it, and the dark values are byte-identical to the literals they replaced, so
-a dark build is unchanged.
+The switch works and the app's colours follow it. `AppColors` resolves ink,
+surfaces and the accent against the active theme; the dark values are
+byte-identical to the literals they replaced, so a dark build is unchanged.
 
-**What is deliberately excluded**, because artwork is artwork in either
-theme: the video player (chrome over video, 471 references across 23 files),
-the three details pages (a full-height backdrop behind every control), and
-anything on an accent fill or over a poster — those use `AppColors.onAccent`,
-fixed white in both themes.
+**Done since #59** (#61-#63): the global top bar, the desktop section
+switcher, the mobile bottom tab bar and the wordmark on them all take
+`AppColors.bar`, so a light build gets light chrome with dark glyphs instead
+of black-on-black. The header pills know whether they float over a hero
+(`HeaderPillSurface`) and stay white there — that was Live TV's bug, whose
+header sits on a scrim over the channel art. And `AppColors.accent` replaced
+**156 hardcoded copies of the default palette's violet across 33 files**, so
+the eight-palette picker now actually reaches the whole app.
 
-**What is left** are one-off dark surface hexes that no token maps —
-`0xFF15171F`, `0xFF13151F`, `0xFF0C0F17` and their neighbours, mostly card
-and sheet backgrounds in the IPTV and Discover pages. In light mode these
-stay dark and the ink on them stays readable, so the result is islands of
-dark rather than unreadable text. Each wants a judgement call about which
-token it is, which is why the mechanical pass stopped short of them.
+**What is left** is a tail of ~45 one-off dark hexes with no obvious token:
+per-page gradients, a few sheet backgrounds, the multi-view grid. In light
+mode these stay dark with readable ink on them, so the result is islands of
+dark rather than broken text. Each wants a judgement call about which token
+it is — or whether it is artwork, in which case it stays dark and what sits
+on it is `onAccent` (the poster placeholders in the card widgets are
+annotated as exactly that, so they do not get "fixed" later).
+
+**Deliberately excluded**, because artwork is artwork in either theme: the
+video player (chrome over video), the three details pages (a full-height
+backdrop behind every control), and anything on an accent fill or over a
+poster.
 
 ### 3. Engineering debt, from the 2026-09-13 audit
 
@@ -284,3 +292,6 @@ closed before this file was rewritten for maintenance mode and are not listed
 | #58 | A silent scraper no longer holds the stream search open forever |
 | #59 | The colour migration behind #52 — `AppColors`, and what it excludes (open item 2 is the remainder) |
 | #60 | Every `package:http` call carries a timeout, enforced by a test |
+| #61 | Nav chrome (top bar, section switcher, mobile tab bar) follows the theme |
+| #62 | `HeaderPillSurface`: header pills know when they float over a hero |
+| #63 | `AppColors.accent` — the palette picker reaches the whole app (was 156 hardcoded violets) |

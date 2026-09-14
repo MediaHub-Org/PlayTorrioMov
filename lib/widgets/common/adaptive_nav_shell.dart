@@ -83,7 +83,7 @@ class _MobileSectionTabBar extends StatelessWidget {
       key: const Key('adaptiveNavMobileBar'),
       height: AdaptiveNavShell.mobileBottomBarHeight,
       decoration: BoxDecoration(
-        color: Color(0xFF0B0D15),
+        color: AppColors.bar,
         border: Border(top: BorderSide(color: AppColors.inkAlpha(0.12))),
       ),
       child: ListenableBuilder(
