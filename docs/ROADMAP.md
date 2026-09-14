@@ -9,7 +9,7 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-14**, on `v1.6.2+30`. Every count
+Last reconciled against the tree: **2026-09-14**, on `v1.6.3+31`. Every count
 below was measured there.
 
 ---
@@ -60,14 +60,14 @@ deliberately left:
 |:-----|:----------------|
 | `iptv_portals_modal` ↔ `live_tv_settings_page` share **45** duplicated 12-line windows | UI duplication, lower stakes than the logic duplication that was fixed. Needs a look at whether the shared part is a widget or a coincidence. |
 | **126 empty `catch` blocks** | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
-| `megasource` / `nova` share **49** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
+| `megasource` / `nova` share **50** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
 
 ### 3. The scrapers are effectively untested in CI
 
-**14 of 97 test files are `@Tags(['network'])`** and excluded by
+**14 of 103 test files are `@Tags(['network'])`** and excluded by
 `flutter test --exclude-tags network` — and they are exactly the files
 covering `lib/services/scraper` and `lib/services/anime`, the two
-least-covered areas. 146 of 373 public classes are named in any test.
+least-covered areas. 151 of 376 public classes are named in any test.
 
 That trade is reasonable: those tests hit live third-party sites and would
 make CI flaky and slow. The gap it leaves is that a scraper's *parsing* is

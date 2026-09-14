@@ -3,6 +3,57 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.3+31] - 2026-09-14
+
+Two bugs you could see, one you could not, and the first build that ships a
+working TMDB key.
+
+### Fixed
+- **The bars kept the old theme until you navigated away.** Switching theme
+  recoloured the app but left the top bar, the section bar and the phone's
+  bottom tab bar on the previous one, until something unrelated made them
+  redraw. `main.dart` hands the app down as `const HubPage()`, and a const
+  widget with no arguments is a single shared instance — so on the next build
+  Flutter finds the identical widget in the same slot, reuses it, and never
+  calls `build`. These bars paint from `AppColors`, which reads globals rather
+  than an inherited widget, so nothing else marked them dirty either. They
+  subscribe to the theme now, along with every other widget that paints from
+  those tokens — 93 in all
+- **Movies and Anime showed an error card on a first run, and a reload fixed
+  it.** Installing the default addon on first launch was a single network
+  attempt whose failure was caught and discarded; the app then carried on with
+  no addons at all, so every catalogue had nothing to query for the rest of
+  the session. A cold start is exactly when that call is most likely to
+  fail — DNS cold, connection pool empty, the radio still waking. It is
+  retried now when a page next asks for a catalogue, so recovering costs a
+  pull to refresh rather than a restart
+- **Export and Import had each other's icons.** Export carried the upload
+  arrow and Import the download arrow
+- **Cast on a torrent source now says what does work.** It could never reach a
+  receiver — the stream is served from your own device, and a receiver told to
+  fetch `127.0.0.1` fetches itself — but "pick a different source" read as
+  "try them all". It names direct and debrid sources, and offers the picker
+
+### Added
+- **Cast photos and character names work out of the box.** This is the first
+  release whose binaries carry a TMDB key. Every published build until now
+  shipped without one, which is why cast rows have always been bare names. The
+  key that used to sit in the source had been found and revoked, as a key in a
+  public repository will be; it now comes from a repository secret, where
+  rotating it does not mean shipping a new binary
+
+### Internal
+- Five committed TMDB keys removed — the two named constants and three more
+  written into the middle of a URL, where a scan for a 32-character literal
+  never saw them. All read one setting, so a key you paste in Settings now
+  serves the scrapers too
+- Offline tests for three things previously reachable only over the network:
+  subtitle archive and encoding handling, the IPTV playlist parser, and Movy's
+  stream cipher
+- macOS ships one universal build instead of two identical ones labelled Intel
+  and Apple Silicon, with a check that fails the build if it stops being
+  universal. Releases are about six minutes shorter
+
 ## [1.6.2+30] - 2026-09-14
 
 The light-mode corners 1.6.1 could not reach, and the details page that was
