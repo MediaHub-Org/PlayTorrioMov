@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Full-screen error view with retry button.
 class ErrorView extends StatelessWidget {
@@ -39,7 +40,7 @@ class ErrorView extends StatelessWidget {
               error ?? 'Unknown error',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.58),
+                color: AppColors.ink.withOpacity(0.58),
               ),
             ),
             const SizedBox(height: 20),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/my_list/my_list_service.dart';
 import 'like_button.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The app's one set of library actions: **Watchlist**, **Watched**, **Like**.
 ///
@@ -138,17 +139,17 @@ class _StatusButtonState extends State<_StatusButton> {
               decoration: BoxDecoration(
                 color: widget.active
                     ? widget.color.withValues(alpha: 0.18)
-                    : Colors.white.withValues(alpha: 0.08),
+                    : AppColors.inkAlpha(0.08),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: widget.active
                       ? widget.color.withValues(alpha: 0.35)
-                      : Colors.white.withValues(alpha: 0.14),
+                      : AppColors.inkAlpha(0.14),
                 ),
               ),
               child: Icon(
                 widget.icon,
-                color: widget.active ? widget.color : Colors.white,
+                color: widget.active ? widget.color : AppColors.ink,
                 size: 22,
               ),
             ),

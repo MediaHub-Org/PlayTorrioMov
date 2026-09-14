@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../app_info.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The app's logo and wordmark, shown in the header.
 ///
@@ -35,7 +36,7 @@ class SidebarLogo extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.ink,
                   fontWeight: FontWeight.w900,
                   fontSize: isMobile ? 16 : 18,
                   letterSpacing: -0.5,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
 import 'sidebar_logo.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The slim global top bar shown above the hub's content, on every tier --
 /// mobile included, as of the fix described below. Holds the PlayTorrio
@@ -39,7 +40,7 @@ class TopBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF0B0D15),
         border: Border(
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.14)),
+          bottom: BorderSide(color: AppColors.inkAlpha(0.14)),
         ),
         boxShadow: [
           BoxShadow(
@@ -87,8 +88,8 @@ class SettingsIconButton extends StatelessWidget {
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       style: IconButton.styleFrom(
-        backgroundColor: Colors.white.withValues(alpha: 0.04),
-        foregroundColor: Colors.white70,
+        backgroundColor: AppColors.inkAlpha(0.04),
+        foregroundColor: AppColors.inkMuted,
       ),
       icon: const Icon(Icons.settings_rounded, size: 20),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../services/theme/app_colors.dart';
 
 /// One full-bleed Live TV hero slide: the channel's art, its name and
 /// category, and the Watch / Sources actions.
@@ -130,19 +131,19 @@ class IptvHeroSlide extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.sensors_rounded,
-                          color: Colors.white,
+                          color: AppColors.onAccent,
                           size: 14,
                         ),
                         SizedBox(width: 5),
                         Text(
                           'LIVE BROADCAST',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.onAccent,
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.8,
@@ -158,16 +159,16 @@ class IptvHeroSlide extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
+                      color: AppColors.onAccent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: AppColors.onAccent.withValues(alpha: 0.15),
                       ),
                     ),
                     child: Text(
                       channel.category,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: AppColors.onAccent.withValues(alpha: 0.70),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.4,
@@ -193,8 +194,8 @@ class IptvHeroSlide extends StatelessWidget {
                     memCacheWidth: 512,
                     errorWidget: (_, __, ___) => Text(
                       channel.name,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.onAccent,
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
@@ -206,8 +207,8 @@ class IptvHeroSlide extends StatelessWidget {
               else
                 Text(
                   channel.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: AppColors.onAccent,
                     fontSize: 34,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
@@ -223,7 +224,7 @@ class IptvHeroSlide extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.65),
+                  color: AppColors.onAccent.withValues(alpha: 0.65),
                   fontSize: 14,
                   height: 1.3,
                 ),
@@ -259,19 +260,19 @@ class IptvHeroSlide extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.play_arrow_rounded,
-                              color: Colors.white,
+                              color: AppColors.onAccent,
                               size: 22,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'Watch Live',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,
@@ -296,25 +297,25 @@ class IptvHeroSlide extends StatelessWidget {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
+                          color: AppColors.onAccent.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: AppColors.onAccent.withValues(alpha: 0.2),
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.tune_rounded,
-                              color: Colors.white70,
+                              color: AppColors.onAccent.withValues(alpha: 0.70),
                               size: 18,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'Stream Feeds',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),

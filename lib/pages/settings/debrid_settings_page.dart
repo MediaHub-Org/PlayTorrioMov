@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 class DebridSettingsPage extends StatefulWidget {
   const DebridSettingsPage({super.key});
@@ -251,9 +252,9 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -275,7 +276,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
               'Stream torrents and magnet links instantly through high-speed cloud debrid providers without local peer-to-peer downloading.',
               style: TextStyle(
                 fontSize: 13.5,
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppColors.inkAlpha(0.5),
                 height: 1.4,
               ),
             ),
@@ -285,12 +286,12 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: _useDebrid
                     ? const Color(0xFF00E5FF).withValues(alpha: 0.35)
-                    : Colors.white.withValues(alpha: 0.08),
+                    : AppColors.inkAlpha(0.08),
               ),
             ),
             child: Column(
@@ -312,7 +313,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                       ),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -327,7 +328,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                           Text(
                             'Route torrent links through cloud servers',
                             style: TextStyle(
-                              color: Colors.white54,
+                              color: AppColors.inkSubtle,
                               fontSize: 12.5,
                             ),
                           ),
@@ -370,7 +371,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 Text(
                   'When enabled, all torrents from PlayTorrio and Stremio addons are resolved exclusively through your active Debrid provider without touching the local torrent engine.',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.45),
+                    color: AppColors.inkAlpha(0.45),
                     fontSize: 12,
                     height: 1.35,
                   ),
@@ -387,7 +388,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: 0.35),
+              color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
@@ -396,19 +397,19 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF12151E),
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: AppColors.inkAlpha(0.08),
               ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Select Default Debrid Provider',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.ink,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                   ),
@@ -417,32 +418,32 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 Text(
                   'PlayTorrio will send requests to this provider when streaming.',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.45),
+                    color: AppColors.inkAlpha(0.45),
                     fontSize: 12,
                   ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: services.contains(_selectedService) ? _selectedService : 'None',
-                  dropdownColor: const Color(0xFF151822),
+                  dropdownColor: AppColors.raised,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF0D1017),
+                    fillColor: AppColors.bar,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                      borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                      borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: const BorderSide(color: Color(0xFF00E5FF)),
                     ),
                   ),
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.ink, fontSize: 14, fontWeight: FontWeight.w600),
                   items: services.map((s) {
                     return DropdownMenuItem<String>(
                       value: s,
@@ -451,7 +452,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                           Icon(
                             s == 'None' ? Icons.block_rounded : Icons.flash_on_rounded,
                             size: 16,
-                            color: s == 'None' ? Colors.white38 : const Color(0xFF00E5FF),
+                            color: s == 'None' ? AppColors.inkDisabled : const Color(0xFF00E5FF),
                           ),
                           const SizedBox(width: 8),
                           Text(s),
@@ -488,7 +489,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: 0.35),
+              color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
@@ -588,12 +589,12 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isActive
               ? const Color(0xFF00E5FF).withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.06),
+              : AppColors.inkAlpha(0.06),
         ),
       ),
       child: Column(
@@ -603,8 +604,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             children: [
               Text(
                 name,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: AppColors.ink,
                   fontSize: 14.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -651,7 +652,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           Text(
             subtitle,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.45),
+              color: AppColors.inkAlpha(0.45),
               fontSize: 11.5,
             ),
           ),
@@ -662,24 +663,24 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 child: TextField(
                   controller: controller,
                   obscureText: isObscured,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
+                  style: TextStyle(color: AppColors.ink, fontSize: 13),
                   decoration: InputDecoration(
                     hintText: 'Paste API Key / Token',
                     hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.25),
+                      color: AppColors.inkAlpha(0.25),
                       fontSize: 12,
                     ),
                     filled: true,
-                    fillColor: const Color(0xFF0D1017),
+                    fillColor: AppColors.bar,
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                      borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+                      borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -690,7 +691,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                       children: [
                         if (controller.text.isNotEmpty)
                           IconButton(
-                            icon: const Icon(Icons.clear_rounded, color: Colors.white38, size: 18),
+                            icon: Icon(Icons.clear_rounded, color: AppColors.inkDisabled, size: 18),
                             tooltip: 'Clear',
                             onPressed: () {
                               controller.clear();
@@ -700,7 +701,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                         IconButton(
                           icon: Icon(
                             isObscured ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                            color: Colors.white38,
+                            color: AppColors.inkDisabled,
                             size: 18,
                           ),
                           tooltip: isObscured ? 'Show Key' : 'Hide Key',

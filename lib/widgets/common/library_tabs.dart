@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'pill_tab_row.dart';
+import '../../services/theme/app_colors.dart';
 
 /// A reusable tabbed "Library" scaffold shared by the Media, Music, and Books
 /// hubs so they all present their library content with a consistent design.
@@ -80,9 +81,9 @@ class _LibraryTabsState extends State<LibraryTabs>
       context: context,
       removeTop: true,
       child: Scaffold(
-        backgroundColor: const Color(0xFF080A0F),
+        backgroundColor: AppColors.canvas,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0D1017),
+          backgroundColor: AppColors.bar,
           surfaceTintColor: Colors.transparent,
           title: Row(
             mainAxisSize: MainAxisSize.min,
@@ -165,14 +166,14 @@ class LibraryEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: Colors.white24),
+          Icon(icon, size: 48, color: AppColors.inkFaint),
           const SizedBox(height: 12),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 16,
-              color: Colors.white,
+              color: AppColors.ink,
             ),
           ),
           const SizedBox(height: 6),
@@ -181,7 +182,7 @@ class LibraryEmptyState extends StatelessWidget {
             child: Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Colors.white54),
+              style: TextStyle(fontSize: 13, color: AppColors.inkSubtle),
             ),
           ),
         ],

@@ -7,6 +7,7 @@ import '../../services/iptv/iptv_controller.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/like_button.dart';
 import 'iptv_player_page.dart';
+import '../../services/theme/app_colors.dart';
 
 class IptvChannelSheet extends StatefulWidget {
   final HardcodedChannel channel;
@@ -123,7 +124,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
           decoration: BoxDecoration(
             color: const Color(0xFF0C0E15),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+            border: Border.all(color: AppColors.inkAlpha(0.12)),
             boxShadow: const [
               BoxShadow(
                 color: Colors.black87,
@@ -143,7 +144,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                   width: 44,
                   height: 4.5,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
+                    color: AppColors.inkAlpha(0.2),
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -175,8 +176,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       child: Center(
                         child: Text(
                           ch.short,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppColors.ink,
                             fontSize: 16,
                             fontWeight: FontWeight.w900,
                           ),
@@ -199,10 +200,10 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                   color: const Color(0xFFFF3B30),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'LIVE',
                                   style: TextStyle(
-                                    color: Colors.white,
+                                    color: AppColors.onAccent,
                                     fontSize: 9,
                                     fontWeight: FontWeight.w900,
                                   ),
@@ -212,7 +213,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                               Text(
                                 ch.category,
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.5),
+                                  color: AppColors.inkAlpha(0.5),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -222,8 +223,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                           const SizedBox(height: 3),
                           Text(
                             ch.name,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: AppColors.ink,
                               fontSize: 20,
                               fontWeight: FontWeight.w900,
                               letterSpacing: -0.3,
@@ -253,9 +254,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                     // trap.
                     if (CustomChannelsService.isCustom(ch.id))
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.delete_outline_rounded,
-                          color: Colors.white70,
+                          color: AppColors.inkMuted,
                           size: 22,
                         ),
                         tooltip: 'Delete this channel',
@@ -270,7 +271,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       IconButton(
                         icon: Icon(
                           _isSelecting ? Icons.edit_off_rounded : Icons.edit_rounded,
-                          color: _isSelecting ? const Color(0xFF00D2EF) : Colors.white70,
+                          color: _isSelecting ? const Color(0xFF00D2EF) : AppColors.inkMuted,
                           size: 22,
                         ),
                         tooltip: _isSelecting ? 'Cancel Selection' : 'Manage / Delete Channels',
@@ -284,7 +285,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
                     // Close Button
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                      icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -298,35 +299,35 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                   child: Container(
                     height: 42,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: AppColors.inkAlpha(0.06),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: _searchQuery.isNotEmpty
                             ? const Color(0xFF7C5CFF).withValues(alpha: 0.6)
-                            : Colors.white.withValues(alpha: 0.1),
+                            : AppColors.inkAlpha(0.1),
                         width: 1,
                       ),
                     ),
                     child: TextField(
                       controller: _searchController,
-                      style: const TextStyle(color: Colors.white, fontSize: 13.5),
+                      style: TextStyle(color: AppColors.ink, fontSize: 13.5),
                       cursorColor: const Color(0xFF7C5CFF),
                       decoration: InputDecoration(
                         hintText: 'Search ${results.length} channels (e.g. 1080p, 4K, feed name)...',
                         hintStyle: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.4),
+                          color: AppColors.inkAlpha(0.4),
                           fontSize: 13,
                         ),
                         prefixIcon: Icon(
                           Icons.search_rounded,
                           color: _searchQuery.isNotEmpty
                               ? const Color(0xFF7C5CFF)
-                              : Colors.white.withValues(alpha: 0.4),
+                              : AppColors.inkAlpha(0.4),
                           size: 20,
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 18),
+                                icon: Icon(Icons.close_rounded, color: AppColors.inkMuted, size: 18),
                                 onPressed: () {
                                   _searchController.clear();
                                   setState(() => _searchQuery = '');
@@ -358,7 +359,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       // Select All / Deselect All
                       TextButton.icon(
                         style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.ink,
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -387,7 +388,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       Text(
                         '(${_selectedUrls.length}/${results.length})',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: AppColors.inkAlpha(0.7),
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -397,7 +398,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.onAccent,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -421,9 +422,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: AppColors.inkAlpha(0.05),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                    border: Border.all(color: AppColors.inkAlpha(0.08)),
                   ),
                   child: Row(
                     children: [
@@ -447,7 +448,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                   ? 'Found ${filteredResults.length} of ${results.length} feeds'
                                   : '${results.length} live stream feeds available'),
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.75),
+                            color: AppColors.inkAlpha(0.75),
                             fontSize: 12.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -484,21 +485,21 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                               if (isScanning) ...[
                                 const CircularProgressIndicator(color: Color(0xFF7C5CFF)),
                                 const SizedBox(height: 16),
-                                const Text(
+                                Text(
                                   'Scanning all verified portals in parallel…',
-                                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                                  style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
                                 ),
                               ] else ...[
-                                const Icon(Icons.tv_off_rounded, color: Colors.white38, size: 48),
+                                Icon(Icons.tv_off_rounded, color: AppColors.inkDisabled, size: 48),
                                 const SizedBox(height: 12),
-                                const Text(
+                                Text(
                                   'No alive streams discovered yet.',
-                                  style: TextStyle(color: Colors.white70, fontSize: 15, fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: AppColors.inkMuted, fontSize: 15, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 6),
-                                const Text(
+                                Text(
                                   'Tap "Scan More Portals" to discover fresh feeds.',
-                                  style: TextStyle(color: Colors.white38, fontSize: 13),
+                                  style: TextStyle(color: AppColors.inkDisabled, fontSize: 13),
                                 ),
                               ],
                             ],
@@ -512,12 +513,12 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.search_off_rounded, color: Colors.white38, size: 48),
+                                  Icon(Icons.search_off_rounded, color: AppColors.inkDisabled, size: 48),
                                   const SizedBox(height: 12),
                                   Text(
                                     'No feeds match "$_searchQuery"',
-                                    style: const TextStyle(
-                                      color: Colors.white70,
+                                    style: TextStyle(
+                                      color: AppColors.inkMuted,
                                       fontSize: 15,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -561,14 +562,14 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? const Color(0xFF7C5CFF).withValues(alpha: 0.15)
-                                          : Colors.white.withValues(alpha: 0.05),
+                                          : AppColors.inkAlpha(0.05),
                                       borderRadius: BorderRadius.circular(16),
                                       border: Border.all(
                                         color: isSelected
                                             ? const Color(0xFF7C5CFF)
                                             : (isFav
                                                 ? const Color(0xFF7C5CFF).withValues(alpha: 0.6)
-                                                : Colors.white.withValues(alpha: 0.08)),
+                                                : AppColors.inkAlpha(0.08)),
                                         width: isSelected || isFav ? 1.6 : 1.0,
                                       ),
                                     ),
@@ -582,17 +583,17 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                             decoration: BoxDecoration(
                                               color: isSelected
                                                   ? const Color(0xFF7C5CFF)
-                                                  : Colors.white.withValues(alpha: 0.06),
+                                                  : AppColors.inkAlpha(0.06),
                                               shape: BoxShape.circle,
                                               border: Border.all(
                                                 color: isSelected
                                                     ? const Color(0xFF7C5CFF)
-                                                    : Colors.white38,
+                                                    : AppColors.inkDisabled,
                                                 width: 2,
                                               ),
                                             ),
                                             child: isSelected
-                                                ? const Icon(Icons.check_rounded, color: Colors.white, size: 18)
+                                                ? Icon(Icons.check_rounded, color: AppColors.ink, size: 18)
                                                 : null,
                                           )
                                         else
@@ -639,8 +640,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                                       hit.stream.name,
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
+                                                      style: TextStyle(
+                                                        color: AppColors.ink,
                                                         fontSize: 14.5,
                                                         fontWeight: FontWeight.w800,
                                                       ),
@@ -660,7 +661,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: TextStyle(
-                                                    color: Colors.white.withValues(alpha: 0.5),
+                                                    color: AppColors.inkAlpha(0.5),
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w600,
                                                   ),
@@ -674,13 +675,13 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: Colors.white.withValues(alpha: 0.1),
+                                            color: AppColors.inkAlpha(0.1),
                                             borderRadius: BorderRadius.circular(4),
                                           ),
                                           child: Text(
                                             hit.stream.containerExt.toUpperCase(),
-                                            style: const TextStyle(
-                                              color: Colors.white70,
+                                            style: TextStyle(
+                                              color: AppColors.inkMuted,
                                               fontSize: 10,
                                               fontWeight: FontWeight.w800,
                                             ),
@@ -693,7 +694,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                         IconButton(
                                           icon: Icon(
                                             isFav ? Icons.star_rounded : Icons.star_outline_rounded,
-                                            color: isFav ? const Color(0xFFFFC107) : Colors.white38,
+                                            color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
                                             size: 22,
                                           ),
                                           onPressed: () => _ctrl.toggleFavoriteHit(hit),
@@ -711,7 +712,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
               Container(
                 padding: const EdgeInsets.fromLTRB(22, 12, 22, 24),
                 decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.06))),
+                  border: Border(top: BorderSide(color: AppColors.inkAlpha(0.06))),
                 ),
                 child: Row(
                   children: [
@@ -724,10 +725,10 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
-                          icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
-                          label: const Text(
+                          icon: Icon(Icons.play_arrow_rounded, color: AppColors.onAccent),
+                          label: Text(
                             'Watch Live',
-                            style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: AppColors.onAccent, fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                           onPressed: filteredResults.isNotEmpty
                               ? () => _playHit(filteredResults.first)
@@ -740,8 +741,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                     // Scan More
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+                        foregroundColor: AppColors.ink,
+                        side: BorderSide(color: AppColors.inkAlpha(0.2)),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),

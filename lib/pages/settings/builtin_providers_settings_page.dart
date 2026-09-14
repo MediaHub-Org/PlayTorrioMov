@@ -7,6 +7,7 @@ import '../../services/scraper/stream_scraper.dart';
 import '../../services/stream/stream_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../widgets/p2p/p2p_warning_dialog.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Per-provider control over the app's built-in scrapers.
 ///
@@ -63,9 +64,9 @@ class _BuiltinProvidersSettingsPageState
     final inset = AppSpacing.pageInset(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -138,7 +139,7 @@ class _BuiltinProvidersSettingsPageState
           'means a better chance something plays.',
           style: TextStyle(
             fontSize: 13.5,
-            color: Colors.white.withValues(alpha: 0.5),
+            color: AppColors.inkAlpha(0.5),
             height: 1.4,
           ),
         ),
@@ -153,12 +154,12 @@ class _BuiltinProvidersSettingsPageState
               margin: const EdgeInsets.only(bottom: 14),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF12151E),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadii.md),
                 border: Border.all(
                   color: isP2p
                       ? const Color(0xFFF59E0B).withValues(alpha: 0.25)
-                      : Colors.white.withValues(alpha: 0.06),
+                      : AppColors.inkAlpha(0.06),
                 ),
               ),
               child: Row(
@@ -168,7 +169,7 @@ class _BuiltinProvidersSettingsPageState
                     size: 20,
                     color: isP2p
                         ? const Color(0xFFF59E0B)
-                        : Colors.white.withValues(alpha: 0.35),
+                        : AppColors.inkAlpha(0.35),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -177,15 +178,15 @@ class _BuiltinProvidersSettingsPageState
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: AppColors.inkAlpha(0.85),
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.info_outline_rounded,
                       size: 16,
-                      color: Colors.white54,
+                      color: AppColors.inkSubtle,
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -244,7 +245,7 @@ class _BuiltinProvidersSettingsPageState
               hintText: 'Filter providers',
               prefixIcon: const Icon(Icons.search_rounded, size: 20),
               filled: true,
-              fillColor: const Color(0xFF12151E),
+              fillColor: AppColors.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -262,7 +263,7 @@ class _BuiltinProvidersSettingsPageState
       child: Text(
         'No built-in providers are registered in this build.',
         textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+        style: TextStyle(color: AppColors.inkAlpha(0.5)),
       ),
     ),
   );
@@ -279,7 +280,7 @@ class _BuiltinProvidersSettingsPageState
         final live = enabled && !mutedByP2p;
 
         return Material(
-          color: const Color(0xFF12151E),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadii.md),
           child: InkWell(
             borderRadius: BorderRadius.circular(AppRadii.md),
@@ -292,7 +293,7 @@ class _BuiltinProvidersSettingsPageState
                 border: Border.all(
                   color: live
                       ? const Color(0xFF10B981).withValues(alpha: 0.25)
-                      : Colors.white.withValues(alpha: 0.06),
+                      : AppColors.inkAlpha(0.06),
                 ),
               ),
               child: Row(
@@ -304,7 +305,7 @@ class _BuiltinProvidersSettingsPageState
                     size: 20,
                     color: live
                         ? const Color(0xFF10B981)
-                        : Colors.white.withValues(alpha: 0.35),
+                        : AppColors.inkAlpha(0.35),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -329,7 +330,7 @@ class _BuiltinProvidersSettingsPageState
                             fontSize: 12,
                             color: mutedByP2p
                                 ? const Color(0xFFF59E0B)
-                                : Colors.white.withValues(alpha: 0.45),
+                                : AppColors.inkAlpha(0.45),
                           ),
                         ),
                       ],
@@ -342,8 +343,8 @@ class _BuiltinProvidersSettingsPageState
                     activeTrackColor: const Color(
                       0xFF10B981,
                     ).withValues(alpha: 0.35),
-                    inactiveThumbColor: Colors.white60,
-                    inactiveTrackColor: Colors.white10,
+                    inactiveThumbColor: AppColors.inkAlpha(0.60),
+                    inactiveTrackColor: AppColors.inkAlpha(0.10),
                     onChanged: (v) =>
                         BuiltinProvidersService.setEnabled(provider.id, v),
                   ),

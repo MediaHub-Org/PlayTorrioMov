@@ -9,6 +9,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../player/player_screen.dart';
 
 import '../../services/anime/extractors/anidb_extractor.dart';
+import '../../services/theme/app_colors.dart';
 
 class AnimeStreamSheet extends StatefulWidget {
   final AnimeMedia anime;
@@ -156,7 +157,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white24,
+              color: AppColors.inkFaint,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -172,8 +173,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                     children: [
                       Text(
                         '${widget.anime.displayTitle} • Ep ${widget.episodeNumber}',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: AppColors.ink,
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -204,8 +205,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                           ] else
                             Text(
                               '${_allSources.length} sources found',
-                              style: const TextStyle(
-                                color: Colors.white54,
+                              style: TextStyle(
+                                color: AppColors.inkSubtle,
                                 fontSize: 12,
                               ),
                             ),
@@ -215,7 +216,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: Colors.white54),
+                  icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
@@ -237,12 +238,12 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
           ),
 
           const SizedBox(height: 6),
-          const Divider(color: Colors.white10, height: 1),
+          Divider(color: AppColors.inkAlpha(0.10), height: 1),
 
           // Stream list
           Flexible(
             child: _allSources.isEmpty && _isScraping
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.symmetric(vertical: 40),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -251,7 +252,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                         SizedBox(height: 14),
                         Text(
                           'Extracting MegaPlay, VidWish, AllAnime & Miruro streams...',
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
+                          style: TextStyle(color: AppColors.inkMuted, fontSize: 13),
                         ),
                       ],
                     ),
@@ -270,8 +271,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                             const SizedBox(height: 10),
                             Text(
                               _error!,
-                              style: const TextStyle(
-                                color: Colors.white70,
+                              style: TextStyle(
+                                color: AppColors.inkMuted,
                                 fontSize: 13,
                               ),
                               textAlign: TextAlign.center,
@@ -292,8 +293,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                             padding: const EdgeInsets.all(32),
                             child: Text(
                               'No ${_selectedCategory.toUpperCase()} sources found.',
-                              style: const TextStyle(
-                                  color: Colors.white54, fontSize: 13),
+                              style: TextStyle(
+                                  color: AppColors.inkSubtle, fontSize: 13),
                             ),
                           )
                         : ListView.separated(
@@ -325,7 +326,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                       borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
                                         color:
-                                            Colors.white.withValues(alpha: 0.08),
+                                            AppColors.inkAlpha(0.08),
                                       ),
                                     ),
                                     child: Row(
@@ -352,8 +353,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                             children: [
                                               Text(
                                                 s.name ?? 'Stream Source',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
+                                                style: TextStyle(
+                                                  color: AppColors.ink,
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -361,8 +362,8 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                               const SizedBox(height: 3),
                                               Text(
                                                 s.description ?? s.addonName,
-                                                style: const TextStyle(
-                                                  color: Colors.white54,
+                                                style: TextStyle(
+                                                  color: AppColors.inkSubtle,
                                                   fontSize: 11,
                                                 ),
                                               ),
@@ -429,18 +430,18 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
         decoration: BoxDecoration(
           color: isSelected
               ? primaryColor
-              : Colors.white.withValues(alpha: 0.08),
+              : AppColors.inkAlpha(0.08),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? primaryColor
-                : Colors.white.withValues(alpha: 0.12),
+                : AppColors.inkAlpha(0.12),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white70,
+            color: isSelected ? AppColors.ink : AppColors.inkMuted,
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
           ),

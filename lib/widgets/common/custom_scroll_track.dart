@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Custom Scroll Track
@@ -101,9 +102,9 @@ class _CustomScrollTrackState extends State<CustomScrollTrack> {
                 horizontal: isVert ? 8 : 16
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: AppColors.inkAlpha(0.05),
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.12), width: 1.5),
+                border: Border.all(color: AppColors.inkAlpha(0.12), width: 1.5),
               ),
               child: isVert ? _buildVerticalLayout(thumbPosition) : _buildHorizontalLayout(thumbPosition),
             ),
@@ -172,7 +173,7 @@ class _CustomScrollTrackState extends State<CustomScrollTrack> {
           height: isVert ? widget.length : 6, // Visual track
           width: isVert ? 6 : widget.length,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: AppColors.inkAlpha(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Stack(
@@ -233,12 +234,12 @@ class _HoverArrowState extends State<_HoverArrow> {
           height: 38,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: _isHovering ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
+            color: _isHovering ? AppColors.inkAlpha(0.15) : AppColors.inkAlpha(0.05),
+            border: Border.all(color: AppColors.inkAlpha(0.1), width: 1),
           ),
           child: Icon(
             widget.icon,
-            color: _isHovering ? const Color(0xFF7C5CFF) : Colors.white70,
+            color: _isHovering ? const Color(0xFF7C5CFF) : AppColors.inkMuted,
             size: 22,
           ),
         ),

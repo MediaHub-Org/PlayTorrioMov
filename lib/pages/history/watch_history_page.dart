@@ -7,6 +7,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_tabs.dart' show LibraryEmptyState;
 import '../../widgets/home/continue_watching_slider.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Everything watched, newest first — the full log behind the Continue
 /// Watching row.
@@ -37,9 +38,9 @@ class WatchHistoryPage extends StatelessWidget {
     final inset = AppSpacing.pageInset(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         // Same leading inset and shared button as every other pushed page
         // -- AppBar's own 56px slot would centre it somewhere else, and a

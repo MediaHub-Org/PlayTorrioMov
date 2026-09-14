@@ -10,6 +10,7 @@ import 'hero_carousel_auto_rotate.dart';
 import 'pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import 'poster_skeleton.dart';
 import 'slider_arrow.dart';
+import '../../services/theme/app_colors.dart';
 
 /// One horizontal row of a [BrowseScaffold].
 class BrowseRow<T> {
@@ -386,8 +387,8 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                           height: 6,
                           decoration: BoxDecoration(
                             color: i == currentHeroIndex
-                                ? Colors.white
-                                : Colors.white38,
+                                ? AppColors.onAccent
+                                : AppColors.onAccent.withValues(alpha: 0.38),
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -410,7 +411,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
         Container(
           height: _heroHeight(width, MediaQuery.sizeOf(context).height),
           margin: const EdgeInsets.only(bottom: AppSpacing.md),
-          color: Colors.white.withValues(alpha: 0.04),
+          color: AppColors.inkAlpha(0.04),
         ),
         for (var r = 0; r < 2; r++) ...[
           Padding(
@@ -424,7 +425,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               width: 140,
               height: 20,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
+                color: AppColors.inkAlpha(0.06),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

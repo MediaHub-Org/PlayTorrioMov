@@ -16,6 +16,7 @@ import '../../widgets/iptv/iptv_channel_card.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../details/details_page.dart';
 import '../iptv/iptv_channel_sheet.dart';
+import '../../services/theme/app_colors.dart';
 
 class CollectionPage extends StatefulWidget {
   final int initialTabIndex;
@@ -104,22 +105,22 @@ class _CollectionPageState extends State<CollectionPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF151822),
+        backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Remove from Library?',
-          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: Text(
           'Remove "${item.title}" from your library?',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+          style: TextStyle(color: AppColors.inkAlpha(0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+              style: TextStyle(color: AppColors.inkAlpha(0.6)),
             ),
           ),
           ElevatedButton(
@@ -130,10 +131,10 @@ class _CollectionPageState extends State<CollectionPage> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Remove',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.onAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -304,10 +305,10 @@ class _CollectionPageState extends State<CollectionPage> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF12151E),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.08),
+                    color: AppColors.inkAlpha(0.08),
                   ),
                 ),
                 child: Row(
@@ -323,20 +324,20 @@ class _CollectionPageState extends State<CollectionPage> {
                               errorWidget: (_, __, ___) => Container(
                                 width: 50,
                                 height: 75,
-                                color: Colors.white10,
-                                child: const Icon(
+                                color: AppColors.inkAlpha(0.10),
+                                child: Icon(
                                   Icons.movie_rounded,
-                                  color: Colors.white30,
+                                  color: AppColors.inkAlpha(0.30),
                                 ),
                               ),
                             )
                           : Container(
                               width: 50,
                               height: 75,
-                              color: Colors.white10,
-                              child: const Icon(
+                              color: AppColors.inkAlpha(0.10),
+                              child: Icon(
                                 Icons.movie_rounded,
-                                color: Colors.white30,
+                                color: AppColors.inkAlpha(0.30),
                               ),
                             ),
                     ),
@@ -358,8 +359,8 @@ class _CollectionPageState extends State<CollectionPage> {
                             const SizedBox(height: 2),
                             Text(
                               item.episodeTitle!,
-                              style: const TextStyle(
-                                color: Colors.white54,
+                              style: TextStyle(
+                                color: AppColors.inkSubtle,
                                 fontSize: 12,
                               ),
                               maxLines: 1,
@@ -369,7 +370,7 @@ class _CollectionPageState extends State<CollectionPage> {
                           const SizedBox(height: 8),
                           LinearProgressIndicator(
                             value: progress > 0 ? progress : null,
-                            backgroundColor: Colors.white10,
+                            backgroundColor: AppColors.inkAlpha(0.10),
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               Color(0xFF7C5CFF),
                             ),
@@ -378,8 +379,8 @@ class _CollectionPageState extends State<CollectionPage> {
                           const SizedBox(height: 4),
                           Text(
                             '${item.status.name.toUpperCase()} • ${(progress * 100).toStringAsFixed(0)}%',
-                            style: const TextStyle(
-                              color: Colors.white38,
+                            style: TextStyle(
+                              color: AppColors.inkDisabled,
                               fontSize: 11,
                             ),
                           ),
@@ -440,34 +441,34 @@ class _CollectionPageState extends State<CollectionPage> {
                 initialValue: _sortBy,
                 tooltip: 'Sort by',
                 onSelected: (val) => setState(() => _sortBy = val),
-                color: const Color(0xFF151822),
+                color: AppColors.raised,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF141824),
+                    color: AppColors.raised,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: AppColors.inkAlpha(0.08),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.sort_rounded,
                         size: 14,
-                        color: Colors.white70,
+                        color: AppColors.inkMuted,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         _sortBy.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white70,
+                          color: AppColors.inkMuted,
                         ),
                       ),
                     ],
@@ -502,7 +503,7 @@ class _CollectionPageState extends State<CollectionPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7C5CFF) : const Color(0xFF141824),
+          color: isSelected ? const Color(0xFF7C5CFF) : AppColors.raised,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -510,7 +511,7 @@ class _CollectionPageState extends State<CollectionPage> {
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.white60,
+            color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
+import '../../services/theme/app_colors.dart';
 
 /// The single back-navigation button design used across every page that
 /// pushes content on top of the hub (Details, Search, and so on). Used to
@@ -15,24 +16,35 @@ class GlassBackButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final double size;
 
-  const GlassBackButton({super.key, this.onPressed, this.size = 20});
+  /// Whether this button floats over a poster or backdrop rather than over
+  /// the page background. Artwork is artwork in either theme, so over it the
+  /// button stays white instead of following the theme's ink.
+  final bool overArtwork;
+
+  const GlassBackButton({
+    super.key,
+    this.onPressed,
+    this.size = 20,
+    this.overArtwork = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final tint = overArtwork ? AppColors.onAccent : AppColors.ink;
     return ClipOval(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: Colors.white,
+            color: tint,
             size: size,
           ),
           onPressed: onPressed ?? () => Navigator.pop(context),
           style: IconButton.styleFrom(
-            backgroundColor: Colors.white.withValues(alpha: 0.1),
+            backgroundColor: tint.withValues(alpha: 0.1),
             padding: const EdgeInsets.all(12),
-            side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
+            side: BorderSide(color: tint.withValues(alpha: 0.12)),
           ),
         ),
       ),
@@ -58,7 +70,7 @@ class FloatingBackButton extends StatelessWidget {
     return Positioned(
       top: AppSpacing.floatingTopInset(context),
       left: AppSpacing.pageInset(context),
-      child: GlassBackButton(onPressed: onPressed),
+      child: GlassBackButton(onPressed: onPressed, overArtwork: true),
     );
   }
 }

@@ -8,6 +8,7 @@ import '../../services/simkl/simkl_service.dart';
 import '../../services/trakt/trakt_calendar_service.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Upcoming episodes for the user's synced shows, next 14 days. Series-only:
 /// Trakt/Simkl calendars are episode-shaped, movies have no equivalent
@@ -90,14 +91,14 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 18),
             child: Text(
               'Calendar',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: AppColors.ink,
                 letterSpacing: -0.3,
               ),
             ),
@@ -121,7 +122,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                       color: const Color(0xFF13151F).withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: AppColors.inkAlpha(0.08),
                       ),
                     ),
                     child: Column(
@@ -132,10 +133,10 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                           entry.showTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: AppColors.ink,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -147,7 +148,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.55),
+                            color: AppColors.inkAlpha(0.55),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -156,7 +157,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.4),
+                            color: AppColors.inkAlpha(0.4),
                           ),
                         ),
                       ],

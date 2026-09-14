@@ -14,6 +14,7 @@ import 'anime_details_page.dart';
 
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../anime_arabic/anime_arabic_details_page.dart';
+import '../../services/theme/app_colors.dart';
 
 class AnimeSearchPage extends StatefulWidget {
   final bool initialArabicMode;
@@ -278,7 +279,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 width: 44,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.25),
+                  color: AppColors.inkAlpha(0.25),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -290,8 +291,8 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.ink,
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                       ),
@@ -312,7 +313,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                   ],
                 ),
               ),
-              const Divider(color: Colors.white10, height: 1),
+              Divider(color: AppColors.inkAlpha(0.10), height: 1),
 
               // Options list
               Expanded(
@@ -334,7 +335,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                 : Colors.transparent,
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.white.withValues(alpha: 0.04),
+                                color: AppColors.inkAlpha(0.04),
                               ),
                             ),
                           ),
@@ -344,7 +345,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                 child: Text(
                                   label(v),
                                   style: TextStyle(
-                                    color: selected ? AppThemeService.currentPalette.value.primaryColor : Colors.white,
+                                    color: selected ? AppThemeService.currentPalette.value.primaryColor : AppColors.ink,
                                     fontSize: 15,
                                     fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                                   ),
@@ -412,7 +413,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
       child: Material(
         color: active
             ? primaryColor.withValues(alpha: 0.22)
-            : Colors.white.withValues(alpha: 0.06),
+            : AppColors.inkAlpha(0.06),
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
@@ -424,7 +425,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
               border: Border.all(
                 color: active
                     ? primaryColor.withValues(alpha: 0.65)
-                    : Colors.white.withValues(alpha: 0.10),
+                    : AppColors.inkAlpha(0.10),
                 width: 1.1,
               ),
             ),
@@ -432,13 +433,13 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 14, color: Colors.white70),
+                  Icon(icon, size: 14, color: AppColors.inkMuted),
                   const SizedBox(width: 6),
                 ],
                 Text(
                   label,
                   style: TextStyle(
-                    color: active ? Colors.white : Colors.white70,
+                    color: active ? AppColors.ink : AppColors.inkMuted,
                     fontSize: 12.5,
                     fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                   ),
@@ -447,7 +448,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 Icon(
                   Icons.expand_more_rounded,
                   size: 15,
-                  color: active ? primaryColor : Colors.white38,
+                  color: active ? primaryColor : AppColors.inkDisabled,
                 ),
               ],
             ),
@@ -518,7 +519,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.06),
+                        color: AppColors.inkAlpha(0.06),
                       ),
                     ),
                   ),
@@ -540,18 +541,18 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                             child: Container(
                               height: 42,
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.06),
+                                color: AppColors.inkAlpha(0.06),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.1),
+                                  color: AppColors.inkAlpha(0.1),
                                 ),
                               ),
                               child: TextField(
                                 controller: _searchController,
                                 focusNode: _focusNode,
                                 autofocus: true,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: AppColors.ink,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -561,7 +562,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                 decoration: InputDecoration(
                                   hintText: 'Search anime, movies, OVAs...',
                                   hintStyle: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.35),
+                                    color: AppColors.inkAlpha(0.35),
                                     fontSize: 14,
                                   ),
                                   border: InputBorder.none,
@@ -572,16 +573,16 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                   suffixIcon: _searchController.text.isNotEmpty
                                       ? IconButton(
                                           icon: const Icon(Icons.close_rounded, size: 18),
-                                          color: Colors.white60,
+                                          color: AppColors.inkAlpha(0.60),
                                           onPressed: () {
                                             _searchController.clear();
                                             _onSearchChanged('');
                                           },
                                         )
-                                      : const Icon(
+                                      : Icon(
                                           Icons.search_rounded,
                                           size: 20,
-                                          color: Colors.white54,
+                                          color: AppColors.inkSubtle,
                                         ),
                                 ),
                               ),
@@ -610,12 +611,12 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                               decoration: BoxDecoration(
                                 color: _isArabicMode
                                     ? palette.primaryColor.withValues(alpha: 0.25)
-                                    : Colors.white.withValues(alpha: 0.06),
+                                    : AppColors.inkAlpha(0.06),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: _isArabicMode
                                       ? palette.primaryColor
-                                      : Colors.white.withValues(alpha: 0.12),
+                                      : AppColors.inkAlpha(0.12),
                                   width: 1.2,
                                 ),
                               ),
@@ -627,7 +628,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                     style: TextStyle(
                                       color: _isArabicMode
                                           ? palette.primaryColor
-                                          : Colors.white70,
+                                          : AppColors.inkMuted,
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -650,12 +651,12 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                 decoration: BoxDecoration(
                                   color: _allowAdult
                                       ? const Color(0xFFEF4444).withValues(alpha: 0.20)
-                                      : Colors.white.withValues(alpha: 0.06),
+                                      : AppColors.inkAlpha(0.06),
                                   borderRadius: BorderRadius.circular(10),
                                   border: Border.all(
                                     color: _allowAdult
                                         ? const Color(0xFFEF4444)
-                                        : Colors.white.withValues(alpha: 0.12),
+                                        : AppColors.inkAlpha(0.12),
                                     width: 1.2,
                                   ),
                                 ),
@@ -667,13 +668,13 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                           ? Icons.check_box_rounded
                                           : Icons.check_box_outline_blank_rounded,
                                       size: 16,
-                                      color: _allowAdult ? const Color(0xFFEF4444) : Colors.white54,
+                                      color: _allowAdult ? const Color(0xFFEF4444) : AppColors.inkSubtle,
                                     ),
                                     const SizedBox(width: 5),
                                     Text(
                                       '18+',
                                       style: TextStyle(
-                                        color: _allowAdult ? const Color(0xFFEF4444) : Colors.white70,
+                                        color: _allowAdult ? const Color(0xFFEF4444) : AppColors.inkMuted,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -774,7 +775,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                           Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: Material(
-                              color: Colors.white.withValues(alpha: 0.05),
+                              color: AppColors.inkAlpha(0.05),
                               borderRadius: BorderRadius.circular(20),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(20),
@@ -783,17 +784,17 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: Colors.white24),
+                                    border: Border.all(color: AppColors.inkFaint),
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.close_rounded, size: 14, color: Colors.white70),
+                                      Icon(Icons.close_rounded, size: 14, color: AppColors.inkMuted),
                                       SizedBox(width: 4),
                                       Text(
                                         'Reset',
                                         style: TextStyle(
-                                          color: Colors.white70,
+                                          color: AppColors.inkMuted,
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -829,13 +830,13 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     Icon(
                       Icons.search_off_rounded,
                       size: 64,
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: AppColors.inkAlpha(0.2),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       'No anime found matching your criteria',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: AppColors.inkMuted,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -844,7 +845,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     Text(
                       'Try different keywords or clearing filters',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
+                        color: AppColors.inkAlpha(0.4),
                         fontSize: 13,
                       ),
                     ),

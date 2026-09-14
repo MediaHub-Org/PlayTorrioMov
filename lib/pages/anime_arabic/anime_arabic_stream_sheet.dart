@@ -6,6 +6,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/source_badges.dart';
 import '../player/player_screen.dart';
+import '../../services/theme/app_colors.dart';
 
 class AnimeArabicStreamSheet extends StatefulWidget {
   final ArabicAnimeDetails details;
@@ -132,7 +133,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
         color: const Color(0xFF11141E),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: AppColors.inkAlpha(0.08),
           width: 1,
         ),
         boxShadow: [
@@ -159,7 +160,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
               width: 44,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: AppColors.inkAlpha(0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -179,8 +180,8 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                   errorBuilder: (_, __, ___) => Container(
                     width: 44,
                     height: 60,
-                    color: Colors.white10,
-                    child: const Icon(Icons.movie_rounded, color: Colors.white38),
+                    color: AppColors.inkAlpha(0.10),
+                    child: Icon(Icons.movie_rounded, color: AppColors.inkDisabled),
                   ),
                 ),
               ),
@@ -193,10 +194,10 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                       widget.details.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.ink,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -215,7 +216,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
               ),
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded, color: Colors.white60),
+                icon: Icon(Icons.close_rounded, color: AppColors.inkAlpha(0.60)),
               ),
             ],
           ),
@@ -233,7 +234,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                     _statusLine,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: AppColors.inkAlpha(0.7),
                       fontSize: 13,
                     ),
                   ),
@@ -250,13 +251,13 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                   Text(
                     _error!,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    style: TextStyle(color: AppColors.inkMuted, fontSize: 13),
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppThemeService.currentPalette.value.primaryColor,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.onAccent,
                     ),
                     onPressed: _startScraping,
                     icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -292,10 +293,10 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFF141824),
+            color: AppColors.raised,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: AppColors.inkAlpha(0.08),
             ),
           ),
           child: Row(
@@ -320,8 +321,8 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                   children: [
                     Text(
                       source.name ?? 'سيرفر تشغيل',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: AppColors.ink,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -330,7 +331,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                     Text(
                       source.description ?? 'تشغيل مباشر • جودة عالية',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: AppColors.inkAlpha(0.5),
                         fontSize: 11,
                       ),
                     ),
@@ -345,9 +346,9 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white30,
+                color: AppColors.inkAlpha(0.30),
                 size: 14,
               ),
             ],

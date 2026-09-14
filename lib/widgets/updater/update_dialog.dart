@@ -11,6 +11,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../services/updater/app_updater_service.dart';
 import '../../app_info.dart';
+import '../../services/theme/app_colors.dart';
 
 class UpdateDialog extends StatefulWidget {
   final UpdateInfo updateInfo;
@@ -25,8 +26,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
 
-  static const Color _surfaceColor = Color(0xFF12151E);
-  static const Color _backgroundColor = Color(0xFF080A0F);
+  static Color _surfaceColor = AppColors.surface;
+  static Color _backgroundColor = AppColors.canvas;
   static const Color _accentColor = Color(0xFF7C5CFF);
 
   @override
@@ -112,10 +113,10 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         const SizedBox(height: 4),
                         Text(
                           'Version ${widget.updateInfo.latestVersion}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppColors.ink,
                           ),
                         ),
                       ],
@@ -135,10 +136,10 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
+                      color: AppColors.inkAlpha(0.05),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: AppColors.inkAlpha(0.08),
                       ),
                     ),
                     child: Row(
@@ -147,21 +148,21 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Current',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white38,
+                                color: AppColors.inkDisabled,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               widget.updateInfo.currentVersion,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white70,
+                                color: AppColors.inkMuted,
                               ),
                             ),
                           ],
@@ -173,11 +174,11 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            const Text(
+                            Text(
                               'Latest',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.white38,
+                                color: AppColors.inkDisabled,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -199,13 +200,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   const SizedBox(height: 20),
 
                   // Release notes header & box
-                  const Text(
+                  Text(
                     "WHAT'S NEW",
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.5,
-                      color: Colors.white38,
+                      color: AppColors.inkDisabled,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -216,15 +217,15 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       color: _backgroundColor.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
+                        color: AppColors.inkAlpha(0.08),
                       ),
                     ),
                     child: SingleChildScrollView(
                       child: Text(
                         widget.updateInfo.releaseNotes,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white70,
+                          color: AppColors.inkMuted,
                           height: 1.5,
                         ),
                       ),
@@ -317,10 +318,10 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             ),
                             Text(
                               '${(_downloadProgress * 100).toStringAsFixed(0)}%',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white70,
+                                color: AppColors.inkMuted,
                               ),
                             ),
                           ],
@@ -330,7 +331,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           borderRadius: BorderRadius.circular(8),
                           child: LinearProgressIndicator(
                             value: _downloadProgress,
-                            backgroundColor: Colors.white.withValues(
+                            backgroundColor: AppColors.ink.withValues(
                               alpha: 0.1,
                             ),
                             valueColor: const AlwaysStoppedAnimation<Color>(
@@ -363,16 +364,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.15),
+                              color: AppColors.inkAlpha(0.15),
                             ),
                           ),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Later',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white70,
+                            color: AppColors.inkMuted,
                           ),
                         ),
                       ),
@@ -384,7 +385,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         onPressed: _handleUpdate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _accentColor,
-                          foregroundColor: Colors.white,
+                          foregroundColor: AppColors.onAccent,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -593,13 +594,13 @@ class _UpdateDialogState extends State<UpdateDialog> {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: _surfaceColor,
-            title: const Row(
+            title: Row(
               children: [
                 Icon(Icons.check_circle, color: Colors.green, size: 32),
                 SizedBox(width: 12),
                 Text(
                   'Download Complete',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: AppColors.ink),
                 ),
               ],
             ),
@@ -607,9 +608,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Update downloaded to:',
-                  style: TextStyle(color: Colors.white70),
+                  style: TextStyle(color: AppColors.inkMuted),
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -629,9 +630,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 ),
                 const SizedBox(height: 16),
                 if (widget.updateInfo.isFlatpak) ...[
-                  const Text(
+                  Text(
                     'Reinstall the bundle to update:',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppColors.inkMuted),
                   ),
                   const SizedBox(height: 8),
                   Container(
@@ -655,7 +656,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     Platform.isWindows
                         ? 'Close ${AppInfo.name} and run the installer to update.'
                         : 'Make the file executable and run it:\nchmod +x "$fileName"\n./$fileName',
-                    style: const TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppColors.inkMuted),
                   ),
               ],
             ),
@@ -676,9 +677,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       );
                     }
                   },
-                  child: const Text(
+                  child: Text(
                     'Copy Command',
-                    style: TextStyle(color: Colors.white70),
+                    style: TextStyle(color: AppColors.inkMuted),
                   ),
                 ),
               TextButton(
@@ -690,16 +691,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   }
                   if (context.mounted) Navigator.of(context).pop();
                 },
-                child: const Text(
+                child: Text(
                   'Open Folder',
-                  style: TextStyle(color: Colors.white70),
+                  style: TextStyle(color: AppColors.inkMuted),
                 ),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _accentColor,
-                  foregroundColor: Colors.white,
+                  foregroundColor: AppColors.onAccent,
                 ),
                 child: const Text('OK'),
               ),

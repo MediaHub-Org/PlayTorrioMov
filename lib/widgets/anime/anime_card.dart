@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
+import '../../services/theme/app_colors.dart';
 
 class AnimeCard extends StatefulWidget {
   final AnimeMedia anime;
@@ -66,12 +67,12 @@ class _AnimeCardState extends State<AnimeCard> {
                   anime.displayTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15.5,
                     height: 1.15,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.25,
-                    color: Colors.white,
+                    color: AppColors.ink,
                   ),
                 ),
 
@@ -84,7 +85,7 @@ class _AnimeCardState extends State<AnimeCard> {
                         '${anime.seasonYear}',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.52),
+                          color: AppColors.inkAlpha(0.52),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -94,7 +95,7 @@ class _AnimeCardState extends State<AnimeCard> {
                           width: 4,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.26),
+                            color: AppColors.inkAlpha(0.26),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -109,7 +110,7 @@ class _AnimeCardState extends State<AnimeCard> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.42),
+                          color: AppColors.inkAlpha(0.42),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -244,10 +245,10 @@ class _AnimePosterFrame extends StatelessWidget {
                 ),
                 child: Text(
                   anime.formattedFormat.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 9.5,
                     fontWeight: FontWeight.w900,
-                    color: Colors.white,
+                    color: AppColors.onAccent,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -267,10 +268,10 @@ class _AnimePosterFrame extends StatelessWidget {
                   ),
                   child: Text(
                     '${anime.totalEpisodes} EPS',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white70,
+                      color: AppColors.onAccent.withValues(alpha: 0.70),
                     ),
                   ),
                 ),
@@ -287,9 +288,9 @@ class _AnimePosterFrame extends StatelessWidget {
                     color: Color(0xFF7C5CFF),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.play_arrow_rounded,
-                    color: Colors.white,
+                    color: AppColors.onAccent,
                     size: 16,
                   ),
                 ),

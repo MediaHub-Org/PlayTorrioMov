@@ -13,6 +13,7 @@ import '../../services/discord/discord_rpc_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
 /// Simkl, TMDB and Discord Rich Presence. Trakt/Simkl used to be the whole
@@ -28,9 +29,9 @@ class SyncSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1017),
+        backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
@@ -122,12 +123,12 @@ class _SyncCardChrome extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF12151E),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isAuthed
               ? color.withValues(alpha: 0.35)
-              : Colors.white.withValues(alpha: 0.08),
+              : AppColors.inkAlpha(0.08),
         ),
       ),
       child: Column(
@@ -153,10 +154,10 @@ class _SyncCardChrome extends StatelessWidget {
                       children: [
                         Text(
                           name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: Colors.white,
+                            color: AppColors.ink,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -168,7 +169,7 @@ class _SyncCardChrome extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: (isAuthed
                                     ? const Color(0xFF10B981)
-                                    : Colors.white24)
+                                    : AppColors.inkFaint)
                                 .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -179,7 +180,7 @@ class _SyncCardChrome extends StatelessWidget {
                               fontWeight: FontWeight.w800,
                               color: isAuthed
                                   ? const Color(0xFF10B981)
-                                  : Colors.white54,
+                                  : AppColors.inkSubtle,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -192,7 +193,7 @@ class _SyncCardChrome extends StatelessWidget {
                         username!,
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: AppColors.inkAlpha(0.5),
                         ),
                       ),
                     ],
@@ -229,7 +230,7 @@ class _SyncCardChrome extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: color,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.onAccent,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -310,14 +311,14 @@ class _SyncCardChrome extends StatelessWidget {
                 Icon(
                   Icons.info_outline_rounded,
                   size: 15,
-                  color: Colors.white.withValues(alpha: 0.4),
+                  color: AppColors.inkAlpha(0.4),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     statusNote!,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.55),
+                      color: AppColors.inkAlpha(0.55),
                       fontSize: 12,
                       height: 1.35,
                     ),
@@ -328,14 +329,14 @@ class _SyncCardChrome extends StatelessWidget {
           ],
           if (pairing && userCode != null) ...[
             const SizedBox(height: 20),
-            const Divider(color: Colors.white10),
+            Divider(color: AppColors.inkAlpha(0.10)),
             const SizedBox(height: 16),
             Center(
               child: Column(
                 children: [
                   Text(
                     pairingHint,
-                    style: const TextStyle(fontSize: 13, color: Colors.white70),
+                    style: TextStyle(fontSize: 13, color: AppColors.inkMuted),
                   ),
                   const SizedBox(height: 12),
                   InkWell(
@@ -356,17 +357,17 @@ class _SyncCardChrome extends StatelessWidget {
                         children: [
                           Text(
                             userCode!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 4,
-                              color: Colors.white,
+                              color: AppColors.ink,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Icon(
+                          Icon(
                             Icons.copy_rounded,
-                            color: Colors.white70,
+                            color: AppColors.inkMuted,
                             size: 20,
                           ),
                         ],
@@ -376,8 +377,8 @@ class _SyncCardChrome extends StatelessWidget {
                   const SizedBox(height: 14),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.12),
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.inkAlpha(0.12),
+                      foregroundColor: AppColors.ink,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -414,7 +415,7 @@ class _SyncCardChrome extends StatelessWidget {
                         'Waiting for authorization...',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: AppColors.inkAlpha(0.6),
                         ),
                       ),
                     ],
@@ -697,11 +698,11 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
     final id = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF151822),
+        backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Simkl client ID',
-          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -712,7 +713,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
               'a minute) and paste its Client ID here. Any redirect URI will '
               'do -- this app signs in with a PIN code, not a redirect.',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: AppColors.inkAlpha(0.7),
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -721,14 +722,14 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
             TextField(
               controller: controller,
               autofocus: true,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Client ID',
                 hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.3),
+                  color: AppColors.inkAlpha(0.3),
                 ),
                 filled: true,
-                fillColor: const Color(0xFF0D1017),
+                fillColor: AppColors.bar,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -742,7 +743,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
             onPressed: () => Navigator.pop(ctx),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+              style: TextStyle(color: AppColors.inkAlpha(0.6)),
             ),
           ),
           ElevatedButton(
@@ -753,10 +754,10 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Save',
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.onAccent,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -829,11 +830,11 @@ class _TmdbConnectCard extends StatelessWidget {
     final key = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF151822),
+        backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
+        title: Text(
           'Connect TMDB',
-          style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -841,18 +842,18 @@ class _TmdbConnectCard extends StatelessWidget {
           children: [
             Text(
               'Paste your TMDB API key (free — sign up at themoviedb.org, no billing required).',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13),
+              style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: 13),
             ),
             const SizedBox(height: 14),
             TextField(
               controller: controller,
               autofocus: true,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'API Key',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+                hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
                 filled: true,
-                fillColor: const Color(0xFF0D1017),
+                fillColor: AppColors.bar,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -864,7 +865,7 @@ class _TmdbConnectCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
+            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
@@ -872,7 +873,7 @@ class _TmdbConnectCard extends StatelessWidget {
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text('Save', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -895,10 +896,10 @@ class _TmdbConnectCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF12151E),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: connected ? const Color(0xFF01B4E4).withValues(alpha: 0.3) : Colors.white.withValues(alpha: 0.08),
+              color: connected ? const Color(0xFF01B4E4).withValues(alpha: 0.3) : AppColors.inkAlpha(0.08),
             ),
           ),
           child: Column(
@@ -931,7 +932,7 @@ class _TmdbConnectCard extends StatelessWidget {
                               : bundled
                               ? 'Using this build\'s included key — cast photos and character names load when available. Add your own if you would rather not share it.'
                               : 'Add your own free TMDB API key to fill in cast photos and character names most addons don\'t provide.',
-                          style: const TextStyle(color: Colors.white54, fontSize: 12.5, height: 1.35),
+                          style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),
                         ),
                       ],
                     ),
@@ -943,7 +944,7 @@ class _TmdbConnectCard extends StatelessWidget {
                       onPressed: () => TmdbSettings.setApiKey(null),
                       child: Text(
                         'Disconnect',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 13),
+                        style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: 13),
                       ),
                     )
                   else
@@ -997,7 +998,7 @@ class _TmdbConnectCard extends StatelessWidget {
                             style: TextStyle(
                               color: bad
                                   ? const Color(0xFFEF4444)
-                                  : Colors.white54,
+                                  : AppColors.inkSubtle,
                               fontSize: 12,
                               height: 1.35,
                             ),
@@ -1027,12 +1028,12 @@ class _DiscordPresenceCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF12151E),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isEnabled
                   ? const Color(0xFF5865F2).withValues(alpha: 0.3)
-                  : Colors.white.withValues(alpha: 0.08),
+                  : AppColors.inkAlpha(0.08),
             ),
           ),
           child: Row(

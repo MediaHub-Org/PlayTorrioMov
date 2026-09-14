@@ -31,6 +31,11 @@ abstract class EncDecEmbedScraper extends StreamScraper {
   String get encDecSlug;
 
   /// How a resolved source names itself in the picker, e.g. `VidFast`.
+  ///
+  /// [StreamScraper] derives this from the class name, which for these two
+  /// would give the same answer -- but a user-visible string that changes
+  /// when someone renames a class is a trap, so each site states its own.
+  @override
   String get displayName;
 
   static const _apiBase = 'https://enc-dec.app/api';

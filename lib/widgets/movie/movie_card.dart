@@ -8,6 +8,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../common/interactive_card_shell.dart';
 import '../common/poster_skeleton.dart';
+import '../../services/theme/app_colors.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Card sizing — responsive breakpoints that mimic Stremio poster sizes.
@@ -126,7 +127,7 @@ class MovieCard extends StatelessWidget {
                   movie.year!,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.52),
+                    color: AppColors.ink.withOpacity(0.52),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -137,7 +138,7 @@ class MovieCard extends StatelessWidget {
                     width: 4,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.26),
+                      color: AppColors.ink.withOpacity(0.26),
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -146,7 +147,7 @@ class MovieCard extends StatelessWidget {
                 movie.type == 'series' ? 'Series' : (movie.type == 'anime' ? 'Anime' : 'Movie'),
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withOpacity(0.42),
+                  color: AppColors.ink.withOpacity(0.42),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -250,7 +251,7 @@ class _PosterFrame extends StatelessWidget {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.white.withOpacity(0.11),
+                        AppColors.onAccent.withValues(alpha: 0.11),
                         Colors.transparent,
                         Colors.black.withOpacity(0.40),
                       ],
@@ -283,11 +284,11 @@ class _PosterFrame extends StatelessWidget {
                   ),
                   child: Text(
                     contentType == 'series' ? 'SERIES' : (contentType == 'anime' ? 'ANIME' : 'MOVIE'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
-                      color: Colors.white,
+                      color: AppColors.onAccent,
                     ),
                   ),
                 ),
@@ -308,7 +309,7 @@ class _PosterFrame extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: const Color(0xE6080A0F),
                         borderRadius: BorderRadius.circular(7),
-                        border: Border.all(color: Colors.white.withOpacity(0.15)),
+                        border: Border.all(color: AppColors.onAccent.withValues(alpha: 0.15)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -317,10 +318,10 @@ class _PosterFrame extends StatelessWidget {
                           const SizedBox(width: 3),
                           Text(
                             displayRating,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w800,
-                              color: Colors.white,
+                              color: AppColors.onAccent,
                             ),
                           ),
                         ],
@@ -339,8 +340,8 @@ class _PosterFrame extends StatelessWidget {
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(
                       color: hovered
-                          ? Colors.white.withOpacity(0.28)
-                          : Colors.white.withOpacity(0.08),
+                          ? AppColors.onAccent.withValues(alpha: 0.28)
+                          : AppColors.onAccent.withValues(alpha: 0.08),
                       width: hovered ? 1.35 : 1,
                     ),
                   ),
@@ -364,7 +365,7 @@ class _PosterFrame extends StatelessWidget {
                     height: 39,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.95),
+                      color: AppColors.onAccent.withValues(alpha: 0.95),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.40),

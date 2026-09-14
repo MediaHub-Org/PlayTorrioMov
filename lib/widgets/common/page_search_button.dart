@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../pages/search/search_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 import 'header_pill_style.dart';
+import '../../services/theme/app_colors.dart';
 
 /// A search icon button meant for each catalog/section page's own header
 /// pill row. It opens the one search page everywhere, arriving with the
@@ -40,10 +41,10 @@ class PageSearchButton extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: headerPillDecoration,
             alignment: Alignment.center,
-            child: const Icon(
+            child: Icon(
               Icons.search_rounded,
               size: headerPillIconSize,
-              color: Colors.white70,
+              color: AppColors.inkMuted,
             ),
           ),
         ),

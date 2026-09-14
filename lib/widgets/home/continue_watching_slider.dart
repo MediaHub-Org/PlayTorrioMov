@@ -14,6 +14,7 @@ import '../../pages/history/watch_history_page.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../common/slider_arrow.dart';
+import '../../services/theme/app_colors.dart';
 
 class ContinueWatchingSlider extends StatefulWidget {
   final String?
@@ -144,10 +145,10 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                     const SizedBox(width: 10),
                     Text(
                       widget.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: AppColors.ink,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -379,12 +380,12 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
               : Matrix4.identity(),
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
-            color: const Color(0xFF13151F).withValues(alpha: 0.75),
+            color: AppColors.surface.withValues(alpha: 0.75),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: _isHovered
                   ? widget.palette.primaryColor.withValues(alpha: 0.5)
-                  : Colors.white.withValues(alpha: 0.08),
+                  : AppColors.inkAlpha(0.08),
               width: _isHovered ? 1.4 : 1.0,
             ),
             boxShadow: _isHovered
@@ -459,9 +460,9 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   ),
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.play_arrow_rounded,
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                                 size: 28,
                               ),
                             ),
@@ -492,16 +493,16 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
                                     border: Border.all(
-                                      color: Colors.white.withValues(
+                                      color: AppColors.onAccent.withValues(
                                         alpha: 0.25,
                                       ),
                                       width: 0.8,
                                     ),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.info_outline_rounded,
                                     size: 14,
-                                    color: Colors.white,
+                                    color: AppColors.onAccent,
                                   ),
                                 ),
                               ),
@@ -518,16 +519,16 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
                                     border: Border.all(
-                                      color: Colors.white.withValues(
+                                      color: AppColors.onAccent.withValues(
                                         alpha: 0.25,
                                       ),
                                       width: 0.8,
                                     ),
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.close_rounded,
                                     size: 14,
-                                    color: Colors.white,
+                                    color: AppColors.onAccent,
                                   ),
                                 ),
                               ),
@@ -549,7 +550,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           color: Colors.black.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: AppColors.onAccent.withValues(alpha: 0.15),
                             width: 0.6,
                           ),
                         ),
@@ -569,10 +570,10 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             Text(
                               item.addonName ??
                                   (item.isTorrent ? 'Torrent' : 'Stream'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                               ),
                             ),
                           ],
@@ -597,10 +598,10 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           item.remainingMinutes > 0
                               ? '${item.remainingMinutes}m left'
                               : '${(progress * 100).toInt()}%',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: AppColors.onAccent,
                           ),
                         ),
                       ),
@@ -613,7 +614,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                       bottom: 0,
                       child: Container(
                         height: 3.5,
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: AppColors.onAccent.withValues(alpha: 0.15),
                         alignment: Alignment.centerLeft,
                         child: FractionallySizedBox(
                           widthFactor: progress,
@@ -647,10 +648,10 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                         item.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: AppColors.ink,
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -667,7 +668,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.55),
+                          color: AppColors.inkAlpha(0.55),
                         ),
                       ),
                     ],
@@ -684,8 +685,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
   Widget _buildPlaceholder() {
     return Container(
       color: const Color(0xFF1A1D27),
-      child: const Center(
-        child: Icon(Icons.movie_rounded, color: Colors.white24, size: 36),
+      child: Center(
+        child: Icon(Icons.movie_rounded, color: AppColors.onAccent.withValues(alpha: 0.24), size: 36),
       ),
     );
   }

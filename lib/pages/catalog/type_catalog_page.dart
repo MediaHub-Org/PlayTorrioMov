@@ -21,6 +21,7 @@ import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
 import '../details/details_page.dart';
 import 'latest_releases.dart';
+import '../../services/theme/app_colors.dart';
 
 enum _CatalogSort { yearNewest, yearOldest }
 
@@ -251,10 +252,10 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         heroBuilder: _buildHeroSlide,
         itemBuilder: (context, movie) => MovieCard(movie: movie),
         onRefresh: _load,
-        emptyState: const Center(
+        emptyState: Center(
           child: Text(
             'No content found. Install more addons in Settings.',
-            style: TextStyle(color: Colors.white54, fontSize: 16),
+            style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
           ),
         ),
       );
@@ -440,7 +441,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                         movie.year!,
                         style: TextStyle(
                           fontSize: 15,
-                          color: Colors.white.withValues(alpha: 0.55),
+                          color: AppColors.onAccent.withValues(alpha: 0.55),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -453,8 +454,8 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                     movie.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: AppColors.onAccent,
                       fontSize: 26,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.5,
@@ -472,7 +473,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 13.5,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: AppColors.onAccent.withValues(alpha: 0.7),
                         height: 1.4,
                       ),
                     ),
@@ -498,7 +499,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
                             AppThemeService.currentPalette.value.primaryColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.onAccent,
                         padding: EdgeInsets.symmetric(
                           horizontal: isCompact ? 16 : 24,
                           vertical: isCompact ? 10 : 14,
@@ -520,14 +521,14 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                       icon: Icon(
                         Icons.info_outline_rounded,
                         size: isCompact ? 17 : 19,
-                        color: Colors.white.withValues(alpha: 0.80),
+                        color: AppColors.onAccent.withValues(alpha: 0.80),
                       ),
                       label: Text(
                         'Details',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: isCompact ? 13 : 14.5,
-                          color: Colors.white.withValues(alpha: 0.80),
+                          color: AppColors.onAccent.withValues(alpha: 0.80),
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -539,7 +540,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.18),
+                          color: AppColors.onAccent.withValues(alpha: 0.18),
                           width: 1.2,
                         ),
                       ),
@@ -587,7 +588,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                           : _genreFilter != null
                           ? 'No titles found for $_genreFilter.'
                           : 'No titles in the ${_decadeFilter}s.',
-                      style: const TextStyle(color: Colors.white54, fontSize: 16),
+                      style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
                     ),
                   ),
                 )

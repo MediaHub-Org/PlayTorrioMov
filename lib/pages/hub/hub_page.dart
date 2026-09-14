@@ -10,6 +10,7 @@ import '../../services/app_spacing.dart';
 import '../../widgets/common/adaptive_nav_shell.dart';
 import '../settings/settings_page.dart';
 import 'media_hub.dart';
+import '../../services/theme/app_colors.dart';
 
 /// HubPage: the top-level container hosting the app's single Media hub
 /// (Movies, Series, Anime, Live TV, Library).
@@ -82,7 +83,7 @@ class _HubPageState extends State<HubPage> {
       focusNode: _focusNode,
       onKeyEvent: _handleKeyEvent,
       child: Scaffold(
-        backgroundColor: const Color(0xFF080A0F),
+        backgroundColor: AppColors.canvas,
         body: Stack(
           children: [
             // Nav chrome + content: TopBar on tablet/desktop, a collapsed

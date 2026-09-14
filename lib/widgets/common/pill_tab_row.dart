@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
+import '../../services/theme/app_colors.dart';
 
 /// One choice inside a [PillTabRow].
 class SubTab {
@@ -41,9 +42,9 @@ class PillTabRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: AppColors.inkAlpha(0.05),
           borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: Colors.white12),
+          border: Border.all(color: AppColors.inkAlpha(0.12)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -90,13 +91,13 @@ class _SubTabButton extends StatelessWidget {
             Icon(
               tab.icon,
               size: 15,
-              color: selected ? Colors.white : Colors.white54,
+              color: selected ? AppColors.ink : AppColors.inkSubtle,
             ),
             const SizedBox(width: 6),
             Text(
               tab.label,
               style: TextStyle(
-                color: selected ? Colors.white : Colors.white60,
+                color: selected ? AppColors.ink : AppColors.inkAlpha(0.60),
                 fontSize: 12.5,
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               ),

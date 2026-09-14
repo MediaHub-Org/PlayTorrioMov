@@ -5,6 +5,7 @@ import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
 import 'section_top_bar.dart';
 import 'top_bar.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Tier-aware nav chrome wrapping the Media hub's content area.
 ///
@@ -81,9 +82,9 @@ class _MobileSectionTabBar extends StatelessWidget {
     return Container(
       key: const Key('adaptiveNavMobileBar'),
       height: AdaptiveNavShell.mobileBottomBarHeight,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Color(0xFF0B0D15),
-        border: Border(top: BorderSide(color: Colors.white12)),
+        border: Border(top: BorderSide(color: AppColors.inkAlpha(0.12))),
       ),
       child: ListenableBuilder(
         listenable: HubController.instance,
@@ -115,7 +116,7 @@ class _SectionTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? Colors.white : Colors.white54;
+    final color = selected ? AppColors.ink : AppColors.inkSubtle;
     return InkWell(
       onTap: () => HubController.instance.setCurrentSection(section.id),
       child: Column(

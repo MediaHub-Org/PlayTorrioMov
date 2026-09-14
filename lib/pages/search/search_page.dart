@@ -18,6 +18,7 @@ import '../anime/anime_details_page.dart';
 import '../anime/anime_search_page.dart';
 import '../../widgets/search/magnet_files_view.dart';
 import '../player/player_screen.dart';
+import '../../services/theme/app_colors.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -265,19 +266,19 @@ class _SearchPageState extends State<SearchPage> {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141824),
+                  color: AppColors.raised,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.12),
+                    color: AppColors.inkAlpha(0.12),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.tune_rounded,
                       size: 13,
-                      color: Colors.white70,
+                      color: AppColors.inkMuted,
                     ),
                     SizedBox(width: 4),
                     Text(
@@ -285,7 +286,7 @@ class _SearchPageState extends State<SearchPage> {
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white70,
+                        color: AppColors.inkMuted,
                       ),
                     ),
                   ],
@@ -305,7 +306,7 @@ class _SearchPageState extends State<SearchPage> {
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7C5CFF) : const Color(0xFF141824),
+          color: isSelected ? const Color(0xFF7C5CFF) : AppColors.raised,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -313,7 +314,7 @@ class _SearchPageState extends State<SearchPage> {
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? Colors.white : Colors.white60,
+            color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
           ),
         ),
       ),
@@ -325,7 +326,7 @@ class _SearchPageState extends State<SearchPage> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight + 10),
@@ -342,13 +343,13 @@ class _SearchPageState extends State<SearchPage> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    const Color(0xFF080A0F).withValues(alpha: 0.90),
-                    const Color(0xFF080A0F).withValues(alpha: 0.60),
+                    AppColors.canvas.withValues(alpha: 0.90),
+                    AppColors.canvas.withValues(alpha: 0.60),
                   ],
                 ),
                 border: Border(
                   bottom: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: AppColors.inkAlpha(0.06),
                   ),
                 ),
               ),
@@ -363,18 +364,18 @@ class _SearchPageState extends State<SearchPage> {
                       child: Container(
                         height: 42,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.06),
+                          color: AppColors.inkAlpha(0.06),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: AppColors.inkAlpha(0.1),
                           ),
                         ),
                         child: TextField(
                           controller: _searchController,
                           focusNode: _focusNode,
                           autofocus: true,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: AppColors.ink,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -385,7 +386,7 @@ class _SearchPageState extends State<SearchPage> {
                             hintText: 'Search ${_typeFilter.scopeLabel}, '
                                 'or paste a magnet or stream link',
                             hintStyle: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.35),
+                              color: AppColors.inkAlpha(0.35),
                               fontSize: 14,
                             ),
                             border: InputBorder.none,
@@ -396,16 +397,16 @@ class _SearchPageState extends State<SearchPage> {
                             suffixIcon: _searchController.text.isNotEmpty
                                 ? IconButton(
                                     icon: const Icon(Icons.close_rounded, size: 18),
-                                    color: Colors.white60,
+                                    color: AppColors.inkAlpha(0.60),
                                     onPressed: () {
                                       _searchController.clear();
                                       _onSearchChanged('');
                                     },
                                   )
-                                : const Icon(
+                                : Icon(
                                     Icons.search_rounded,
                                     size: 20,
-                                    color: Colors.white54,
+                                    color: AppColors.inkSubtle,
                                   ),
                           ),
                         ),
@@ -488,13 +489,13 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: size, color: Colors.white.withValues(alpha: iconAlpha)),
+            Icon(icon, size: size, color: AppColors.ink.withValues(alpha: iconAlpha)),
             const SizedBox(height: 16),
             Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: AppColors.inkAlpha(0.5),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),

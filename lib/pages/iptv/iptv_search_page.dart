@@ -4,6 +4,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
 import 'iptv_channel_sheet.dart';
+import '../../services/theme/app_colors.dart';
 
 class IptvSearchPage extends StatefulWidget {
   const IptvSearchPage({super.key});
@@ -65,7 +66,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF080A0F),
+      backgroundColor: AppColors.canvas,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -81,21 +82,21 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
         title: Container(
           height: 44,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
+            color: AppColors.inkAlpha(0.08),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            border: Border.all(color: AppColors.inkAlpha(0.15)),
           ),
           child: TextField(
             controller: _searchCtrl,
             autofocus: true,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: TextStyle(color: AppColors.ink, fontSize: 14),
             decoration: InputDecoration(
               hintText: 'Search 60+ live channels, leagues, networks…',
-              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 13.5),
+              hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 13.5),
               prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF7C5CFF), size: 20),
               suffixIcon: _query.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 18),
+                      icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 18),
                       onPressed: () {
                         _searchCtrl.clear();
                         setState(() => _query = '');
@@ -131,19 +132,19 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF7C5CFF)
-                          : Colors.white.withValues(alpha: 0.06),
+                          : AppColors.inkAlpha(0.06),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected
                             ? const Color(0xFF7C5CFF)
-                            : Colors.white.withValues(alpha: 0.1),
+                            : AppColors.inkAlpha(0.1),
                       ),
                     ),
                     child: Center(
                       child: Text(
                         cat,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.white70,
+                          color: isSelected ? AppColors.ink : AppColors.inkMuted,
                           fontSize: 12.5,
                           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                         ),
@@ -158,8 +159,8 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
           // Channel Grid
           Expanded(
             child: channels.isEmpty
-                ? const Center(
-                    child: Text('No channels match your search.', style: TextStyle(color: Colors.white54)),
+                ? Center(
+                    child: Text('No channels match your search.', style: TextStyle(color: AppColors.inkSubtle)),
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),

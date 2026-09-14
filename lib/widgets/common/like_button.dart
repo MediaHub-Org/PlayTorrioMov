@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/theme/app_colors.dart';
 
 /// Red used for every "liked" state in the app.
 const Color kLikedColor = Color(0xFFE50914);
@@ -114,12 +115,12 @@ class _LikeButtonState extends State<LikeButton> {
       decoration: BoxDecoration(
         color: widget.isLiked
             ? kLikedColor
-            : Colors.white.withValues(alpha: 0.12),
+            : AppColors.inkAlpha(0.12),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: widget.isLiked
               ? kLikedColor
-              : Colors.white.withValues(alpha: 0.2),
+              : AppColors.inkAlpha(0.2),
         ),
       ),
       child: Row(
@@ -129,15 +130,18 @@ class _LikeButtonState extends State<LikeButton> {
             widget.isLiked
                 ? Icons.favorite_rounded
                 : Icons.favorite_border_rounded,
-            // White, not red: the fill behind it is already red.
-            color: widget.isLiked ? Colors.white : Colors.white70,
+            // Liked: white, not red -- the fill behind it is already red, and
+            // it stays red in both themes, so this white is fixed rather than
+            // the theme's ink. Unliked: the fill is theme-tinted, so the
+            // foreground follows the theme.
+            color: widget.isLiked ? AppColors.onAccent : AppColors.inkMuted,
             size: widget.size,
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              color: widget.isLiked ? Colors.white : Colors.white70,
+              color: widget.isLiked ? AppColors.onAccent : AppColors.inkMuted,
               fontSize: widget.size * 0.64,
               fontWeight: FontWeight.bold,
             ),
@@ -153,7 +157,7 @@ class _LikeButtonState extends State<LikeButton> {
       child: Icon(
         widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
         // Red, not white: there is no fill to sit against.
-        color: widget.isLiked ? kLikedColor : Colors.white70,
+        color: widget.isLiked ? kLikedColor : AppColors.inkMuted,
         size: widget.size,
       ),
     );
@@ -168,17 +172,17 @@ class _LikeButtonState extends State<LikeButton> {
       decoration: BoxDecoration(
         color: widget.isLiked
             ? kLikedColor.withValues(alpha: 0.18)
-            : Colors.white.withValues(alpha: 0.08),
+            : AppColors.inkAlpha(0.08),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: widget.isLiked
               ? kLikedColor.withValues(alpha: 0.35)
-              : Colors.white.withValues(alpha: 0.14),
+              : AppColors.inkAlpha(0.14),
         ),
       ),
       child: Icon(
         widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-        color: widget.isLiked ? kLikedColor : Colors.white,
+        color: widget.isLiked ? kLikedColor : AppColors.ink,
         size: widget.size,
       ),
     );
