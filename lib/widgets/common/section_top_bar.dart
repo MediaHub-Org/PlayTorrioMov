@@ -18,6 +18,8 @@ class SectionTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Built as `const SectionTopBar()` by AdaptiveNavShell.
+    AppColors.dependOn(context);
     // Mobile shows these in the bottom tab bar instead.
     if (AppBreakpoints.of(context) == ScreenTier.mobile) {
       return const SizedBox.shrink();

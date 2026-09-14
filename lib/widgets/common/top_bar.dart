@@ -35,6 +35,10 @@ class TopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // AdaptiveNavShell passes `onSettingsTap`, so this one is not const --
+    // but its parent is reached through a const HubPage, so the chain above
+    // it does not rebuild either.
+    AppColors.dependOn(context);
     return Container(
       height: height,
       decoration: BoxDecoration(

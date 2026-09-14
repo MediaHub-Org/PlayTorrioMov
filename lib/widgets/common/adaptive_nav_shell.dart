@@ -40,6 +40,9 @@ class AdaptiveNavShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Both bars below are handed down const, so they will not rebuild on a
+    // theme change on their own -- see AppColors.dependOn.
+    AppColors.dependOn(context);
     final tier = AppBreakpoints.of(context);
     final topPadding = MediaQuery.paddingOf(context).top;
 
@@ -79,6 +82,9 @@ class _MobileSectionTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Built as `const _MobileSectionTabBar()`, so this is what makes the bar
+    // repaint when the theme changes rather than at the next navigation.
+    AppColors.dependOn(context);
     return Container(
       key: const Key('adaptiveNavMobileBar'),
       height: AdaptiveNavShell.mobileBottomBarHeight,

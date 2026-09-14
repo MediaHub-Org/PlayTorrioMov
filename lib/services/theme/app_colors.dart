@@ -54,6 +54,34 @@ abstract final class AppColors {
     return PlatformDispatcher.instance.platformBrightness == Brightness.light;
   }
 
+  /// Registers [context] as depending on the active theme, so a widget that
+  /// paints with these tokens rebuilds when the theme changes.
+  ///
+  /// ## Why a widget can need telling
+  ///
+  /// The tokens below read globals, and the class doc above argues that is
+  /// fine because `MaterialApp` rebuilds the tree when those globals change.
+  /// That is true of the tree it *builds*, and not of a child handed to it as
+  /// a `const` instance. A const widget with no arguments is canonicalised to
+  /// one object, so on the next build Flutter sees the identical instance in
+  /// the same slot, reuses the element and never calls `build` on it. Nothing
+  /// is wrong with the colour; the widget simply was not asked again.
+  ///
+  /// Widgets reading `Theme.of(context)` escape this, because an inherited
+  /// lookup marks the dependent element dirty directly and does not care what
+  /// its parent handed down. These tokens are not inherited, so a widget that
+  /// is const-constructed and paints from them has to opt in. That is this
+  /// call: it registers the same dependency `Theme.of` would, and the tokens
+  /// still resolve from the globals.
+  ///
+  /// Needed only where a widget is built `const` — everything reached through
+  /// a parent that rebuilds is already fine.
+  static void dependOn(BuildContext context) {
+    // The value is unused on purpose. The lookup is the point: it is what
+    // subscribes this element to theme changes.
+    Theme.of(context);
+  }
+
   // ── Ink: text and iconography ──────────────────────────────────────────
   //
   // The dark values are exactly what the literals they replace were, so a
