@@ -9,68 +9,68 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-14**, on `v1.6.3+31`. Every count
-below was measured there.
+Last reconciled against the tree: **2026-09-14**, after `v1.6.3+31`. Every
+count below was measured there.
+
+**Open is empty.** Everything left needs a device — a Cast receiver, a phone
+in the hand — not a commit. Where a device question could be narrowed by
+reading code instead, it has been: see the TorrServer answer under *Cast*.
 
 ---
 
 ## Open
 
-### 1. Engineering debt, from the 2026-09-13 audit
+**Nothing.** Every item the 2026-09-13 audit left, and every candidate it
+named, is done. What remains below needs a device, not a commit.
 
-What the audit fixed is in git — including the HTTP timeout gap it had
-deferred: all 54 `package:http` calls that lacked a deadline now carry one,
-enforced by `test/services/http_timeouts_test.dart` (#60). What it found and
-deliberately left:
+That is a claim worth being able to check rather than take on trust, so each
+one names the guard that keeps it closed:
 
-| What | Why it was left |
-|:-----|:----------------|
-| `iptv_portals_modal` ↔ `live_tv_settings_page` share **45** duplicated 12-line windows | UI duplication, lower stakes than the logic duplication that was fixed. Needs a look at whether the shared part is a widget or a coincidence. |
-| **126 empty `catch` blocks** | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
-| `megasource` / `nova` share **50** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
+| What the audit left | How it closed | What stops it coming back |
+|:--------------------|:--------------|:--------------------------|
+| `iptv_portals_modal` ↔ `live_tv_settings_page`, **45** duplicated 12-line windows | The shared part was a widget, twice: a `ChoiceChip` styled by hand at ten call sites across three files, all ten agreeing on the same six properties, and the *Default Starting Tab* row — one control written out in two places. Now `SettingChoiceChip` and `DefaultPortalTabPicker`. **45 → 0**, and the three pages lose 172 lines | `setting_choice_chip_test` fails on an eleventh hand-styled chip, or on either screen writing the tab setting itself |
+| **126 empty `catch` blocks** | Read one at a time. Five were losing something a user would notice and now say so through `debugPrint`; the other 121 carry the reason they swallow | `empty_catch_test` — `catch (_) {}` is still allowed, but not in silence |
+| `megasource` / `nova` share **50** windows | **Declined, and still declined.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction serving a duplication count rather than the code | — |
+| The per-site **HTML parsers** | All three named candidates done — see below | `flutter test --exclude-tags network` runs every one of them |
 
-### 2. The scrapers are effectively untested in CI
+### What the audit got wrong about itself
 
-**14 of 103 test files are `@Tags(['network'])`** and excluded by
-`flutter test --exclude-tags network` — and they are exactly the files
-covering `lib/services/scraper` and `lib/services/anime`, the two
-least-covered areas. 151 of 376 public classes are named in any test.
+Two of its own descriptions did not survive contact with the tree, and are
+corrected here rather than quietly fixed:
 
-That trade is reasonable: those tests hit live third-party sites and would
-make CI flaky and slow. The gap it leaves is that a scraper's *parsing* is
-only ever exercised against whatever the site returned that day.
+- It said of the empty catches that *"most carry a comment explaining why the
+  error is deliberately swallowed."* Thirteen did. The 126 were precisely the
+  ones that did not.
+- It named *"`iptv_portal_browser_page`'s Xtream/Stalker response shapes"*.
+  There is no Stalker support in this codebase — no portal type, no
+  handshake, nothing. Only Xtream exists, so only Xtream was tested.
 
-The fix is not to un-tag them but to split the pure logic out and test it
-offline, the way `glendale_master_url_test` and `subtitle_languages_test`
-do — both written during the audit, both of which found real bugs.
+### The scrapers in CI
 
-**All three candidates it named are done.**
+**14 of 103 test files were `@Tags(['network'])`** and excluded from CI,
+covering exactly `lib/services/scraper` and `lib/services/anime`. The fix was
+never to un-tag them — they hit live third-party sites — but to split the
+pure logic out and test it offline. Six extractions have now done that.
 
-| What | How |
-|:-----|:----|
-| `SubtitleExtractor`'s archive and encoding handling | The part deciding what the downloaded bytes *are* — zip, gzip or bare, and in which encoding — moved into `SubtitlePayload.decode`, which touches neither network nor disk. Covered: the largest subtitle beats a short forced track, `__MACOSX/._x.srt` is not a subtitle, a truncated zip falls back instead of throwing, UTF-16 and Latin-1 survive. The old `subtitle_test` reimplemented the picking logic *inside the test*, so it proved the archive package works rather than that we use it correctly |
-| The IPTV playlist parser | `M3uParser` was already pure and had no test at all, despite reading every playlist the app loads — all written by strangers. Covered: CRLF, `#EXTGRP`, quoted and unquoted attributes, the seven non-HTTP stream schemes, an HTML error page from a dead portal, and the reset that stops one channel's logo leaking onto the next |
-| Movy's stream cipher | Five private statics in `MovyScraper`, reachable only by running the whole fetch-and-decrypt pipeline against the live site. Now `MovyCipher`, with the arithmetic verified identical to the original function by function before the move. Covered: the MurmurHash3 finalizer's known values, that `rotl` rotates rather than shifts (a plain `<<` loses the top bit and quietly drains entropy), lengths that are not a multiple of four, and that both the seed and the TMDB id change the stream |
+The line that decides whether one is worth doing: is the input a **format** or
+a **website**? A format is defined by somebody and honoured by many
+implementations, so a fixture pins the contract. A website is one host's
+markup on one day, so a fixture pins that day.
 
-Each extraction is a *move*, not a rewrite: the pure part leaves the
-fetch-and-parse method and the call site delegates. That is what makes them
-safe to do against code whose only other cover needs the network.
+| What | Why it was worth it |
+|:-----|:--------------------|
+| `SubtitlePayload.decode` | Deciding what downloaded bytes *are* — zip, gzip or bare, and in which encoding. The old `subtitle_test` reimplemented the picking logic inside the test, so it proved the archive package works rather than that we use it correctly |
+| `M3uParser` | Pure already, and had no test at all despite reading every playlist the app loads — all written by strangers |
+| `MovyCipher` | Five private statics reachable only by running the whole fetch-and-decrypt pipeline against the live site. `rotl` rotating rather than shifting is the kind of thing a test catches and a reading does not |
+| The **subtitle providers** | The Stremio addon protocol defines the `{"subtitles": [...]}` body and OpenSubtitles speaks it too; Wyzie's bare array is its published API. Pinned: the cross-endpoint dedupe (three mirrors, one file, listed twice without it), format inferred from a file name when an addon omits `SubFormat`, and both spellings of the fields Wyzie sends two ways |
+| **Xtream `player_api.php`** | Hundreds of separate panel installations answer it and disagree constantly. Pinned: `user_info` wrapper or flat root, `auth: 1` or `status: Active`, `stream_id`/`id`, `name`/`title`, `stream_icon`/`cover`, episodes keyed by season-as-a-string, EPG times as epoch or datetime, EPG text base64 or in the clear |
+| **VOE's payload cipher** and Luna's RSC reader | VOE is six reversible steps, so the test builds a payload with the inverse and checks the round trip — every step pinned against its own inverse, no fixture to go stale. Luna's transport is a Next.js RSC stream, which is a framework's format rather than Luna's markup |
 
-### What is left here
-
-The per-site **HTML parsers** — the `sites/` files that read markup rather
-than arithmetic. These are harder than the three above and worth being honest
-about why: their input is a page that changes without notice, so a fixture
-captured today pins *that day's* markup. A test built on one proves the parser
-handles the shape it was given, and says nothing about the shape it will meet
-next week. That is still worth having — a parser that breaks on its own
-fixture is broken for certain — but it is a smaller claim than the three
-above, where the input is a format rather than a website.
-
-The candidates in order: `SubtitleExtractor`'s remaining providers,
-`iptv_portal_browser_page`'s Xtream/Stalker response shapes, and the anime
-extractors. None is urgent; all are mechanical once someone captures a
-fixture.
+**What is deliberately not covered:** the scraping itself — finding the script
+tag, matching the slug, reading a search page. That input is a website, and a
+fixture captured today proves the parser handles the shape it was given while
+saying nothing about the shape it will meet next week. Worth having eventually,
+a smaller claim than the six above, and not a reason to hold a release.
 
 ---
 
@@ -97,19 +97,40 @@ Cast *sender* SDK for Windows. `CastService.isSupported` is false there and the
 button is absent. Casting from a Windows build would mean a different protocol
 (DLNA/UPnP), which is a feature, not a fix.
 
-**The open item this leaves** is worth stating precisely, because it is the
-one that would actually let a phone cast a torrent: bind the torrent server to
-the LAN and hand the receiver the device's LAN address instead of loopback.
-That needs two things confirmed first, neither checkable from CI:
+**The open item this leaves** is the one that would actually let a phone cast
+a torrent: bind the torrent server to the LAN and hand the receiver the
+device's LAN address instead of loopback. Question (1) — *does the plugin
+even allow it* — has since been answered by reading the code, and it splits
+by platform.
 
-1. Whether `torrserver_flutter` binds `0.0.0.0` or loopback only, and whether
-   its `baseUrl` can be pointed at a LAN interface.
-2. Whether Android's cleartext-HTTP policy and the phone's own firewall let a
-   receiver reach that port.
+**iOS: dead, and not worth revisiting.** The plugin's own Go shim
+(`tool/go-shim/torrserverkit.go`) hardcodes
+`net.Listen("tcp", "127.0.0.1:"+portStr)`. Loopback only, with no flag.
 
-If (1) is loopback-only the idea stops there. Everything else — swapping the
-host for `NetworkInterface.list()`'s LAN address — is easy by comparison, and
-pointless until (1) is known.
+**Android and desktop: the plugin is not the obstacle.** It spawns the
+external TorrServer binary with only `-p` and `-d`, plus a caller-supplied
+`extraArgs` passthrough, so the bind address is the binary's own. `baseUrl`
+is a getter with no setter and cannot be repointed — which does not matter,
+because `port` is public and the LAN URL would be built here from
+`NetworkInterface.list()` rather than taken from the plugin.
+
+What the shipped binary does is the part still unproven. `libtorrserver.so`
+out of the v1.6.3 APK is a Gin server that hands Gin its own listener,
+carries a `0.0.0.0` literal and prints `Local IPs:` — all consistent with
+listening on every interface, and none of it proof, because strings in a
+64 MB binary are not a bind call.
+
+**So the device question is now one line.** With a torrent playing on the
+phone, from a laptop on the same Wi-Fi:
+
+```
+curl http://<phone-LAN-IP>:<port>/echo
+```
+
+An answer means it binds the LAN and the feature is possible; a refusal means
+the idea stops there. Only then does (2) — Android's cleartext-HTTP policy and
+the phone's firewall — matter, and swapping the host for the LAN address is
+easy by comparison.
 
 **Still unverified, and still needing a receiver:**
 
