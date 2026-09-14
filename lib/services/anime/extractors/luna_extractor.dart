@@ -42,7 +42,15 @@ class LunaExtractor {
     {'id': 'animepahe', 'name': 'Vega'},
   ];
 
-  Map<String, dynamic>? _parseRscResponse(String text) {
+  /// The payload object out of a Next.js React Server Components stream.
+  ///
+  /// An RSC response is not JSON: it is newline-separated `<id>:<payload>`
+  /// rows, and only the row keyed `1` carries what this extractor wants. The
+  /// others are React's own bookkeeping and are not always valid JSON at all,
+  /// so a row that will not parse is skipped rather than ending the search --
+  /// it simply was not the one.
+  @visibleForTesting
+  static Map<String, dynamic>? parseRscResponse(String text) {
     for (final line in text.split('\n')) {
       if (line.startsWith('1:')) {
         try {
@@ -58,7 +66,13 @@ class LunaExtractor {
     return null;
   }
 
-  String _cleanUrl(String rawUrl) {
+  /// Undoes a doubled origin in a URL the API sometimes returns.
+  ///
+  /// Luna occasionally concatenates its own base onto an already-absolute
+  /// URL, producing a host that does not resolve. Left alone the stream just
+  /// fails to load, with nothing to say why.
+  @visibleForTesting
+  static String cleanUrl(String rawUrl) {
     if (rawUrl.isEmpty) return '';
     return rawUrl.replaceFirst(
       'https://api.luna-stream.mehttps://api.luna-stream.me',
@@ -97,7 +111,7 @@ class LunaExtractor {
 
           if (res.statusCode != 200) return <LunaAnimeResult>[];
 
-          final parsed = _parseRscResponse(res.body);
+          final parsed = parseRscResponse(res.body);
           if (parsed == null || parsed['sources'] is! List) return <LunaAnimeResult>[];
 
           final sources = parsed['sources'] as List;
@@ -108,7 +122,7 @@ class LunaExtractor {
             final rawUrl = s['url']?.toString();
             if (rawUrl == null || rawUrl.isEmpty) continue;
 
-            final url = _cleanUrl(rawUrl);
+            final url = cleanUrl(rawUrl);
             final format = (s['type']?.toString() ?? '').toLowerCase();
             final isHls = format == 'hls' || format == 'm3u8' || url.contains('.m3u8') || url.contains('.txt');
 
