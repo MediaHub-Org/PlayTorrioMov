@@ -1,0 +1,83 @@
+name: Write the build's .env
+description: >
+  Writes .env from a repository secret and checks it is KEY=VALUE, so a
+  malformed secret fails naming a line number instead of Flutter's masked
+  `Invalid property line: ***`.
+
+# This existed nine times -- six jobs in build.yml, three in pr-checks.yml --
+# as a copy-pasted shell block. That was survivable while it was three lines.
+# It stopped being survivable the moment it grew a validator: editing the nine
+# copies by hand put two of them in the wrong step on the first attempt, which
+# is the argument for this file rather than a tenth copy.
+
+inputs:
+  contents:
+    description: >
+      The dotenv contents: the DOTENV_CONTENTS secret. Every line must read
+      KEY=VALUE. Blank lines and `#` comments are fine and are stripped
+      before the build sees them.
+    required: false
+    default: ''
+  legacy-contents:
+    description: >
+      Former names for the same secret (ENV_FILE, DOTENV), honoured while
+      they are migrated so a rename never lands as a broken build.
+    required: false
+    default: ''
+  warn-when-empty:
+    description: >
+      Whether an absent secret deserves a CI warning. True for release
+      builds, where shipping inert credentials is worth saying out loud.
+      False for PR checks, where a fork's pull request legitimately has no
+      access to secrets.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        # Through the environment, never spliced into the script: a value
+        # containing " ` or $ would otherwise be interpreted by bash rather
+        # than written, which is both a corruption and an injection.
+        CONTENTS: ${{ inputs.contents }}
+        LEGACY: ${{ inputs.legacy-contents }}
+        WARN_WHEN_EMPTY: ${{ inputs.warn-when-empty }}
+      run: |
+        set -euo pipefail
+
+        if [ -n "$CONTENTS" ]; then
+          printf '%s\n' "$CONTENTS" > .env
+        elif [ -n "$LEGACY" ]; then
+          printf '%s\n' "$LEGACY" > .env
+          echo "::warning title=Rename this secret::Using a legacy secret name (ENV_FILE or DOTENV). Copy its contents to a secret named DOTENV_CONTENTS and delete the old one -- the old names are read only so a rename never lands as a broken build."
+        else
+          : > .env
+          if [ "$WARN_WHEN_EMPTY" = "true" ]; then
+            echo "::warning title=Building without credentials::No DOTENV_CONTENTS secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build, and TMDB cast photos are off -- set TMDB_API_KEY in the secret, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+          fi
+        fi
+
+        # An empty .env is valid: --dart-define-from-file accepts it and every
+        # credential-backed feature simply no-ops.
+        if [ ! -s .env ]; then
+          exit 0
+        fi
+
+        # Windows line endings survive a copy-paste into the secret box.
+        sed -i 's/\r$//' .env
+
+        # Flutter names the offending line, the line is a secret, so its
+        # message is `Invalid property line: ***` and tells you nothing. Name
+        # the line number and keep the content masked.
+        bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
+        if [ -n "$bad" ]; then
+          echo "::error title=The dotenv secret is not KEY=VALUE::Line(s) ${bad}contain no '='. Every line must read KEY=VALUE -- no quotes around the line, no 'export', no spaces around the '='. Blank lines and # comments are fine. The content is masked in logs, so check the secret itself; see docs/RELEASES.md for the keys it is read for."
+          exit 1
+        fi
+
+        # Strip what Flutter's parser has no use for, so its own tolerance of
+        # blank and comment lines is not something we have to rely on.
+        awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
+        mv .env.tmp .env

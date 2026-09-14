@@ -107,37 +107,12 @@ jobs:
             libboost-all-dev libssl-dev libgcrypt20-dev \
             libsecret-1-dev libjsoncpp-dev
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-          DOTENV: ${{ secrets.DOTENV }}
-        run: |
-          # Same as the other two jobs: an empty .env is enough to compile,
-          # and secrets are unavailable to pull requests from forks.
-          if [ -n "$ENV_FILE" ]; then
-            printf '%s\n' "$ENV_FILE" > .env
-          elif [ -n "$DOTENV" ]; then
-            printf '%s\n' "$DOTENV" > .env
-          else
-            touch .env
-          fi
-          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
-          # one does not, Flutter says `Invalid property line: ***` -- the
-          # content is a secret, so the message names nothing anyone can act
-          # on. Name the line number instead, and normalise what is safely
-          # normalisable.
-          if [ -s .env ]; then
-            sed -i 's/\r$//' .env
-            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
-            if [ -n "$bad" ]; then
-              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
-              exit 1
-            fi
-            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
-            mv .env.tmp .env
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'false'
       - name: Generate Linux platform files if missing
         run: |
           if [ ! -d linux ]; then flutter create --platforms=linux .; fi
@@ -182,37 +157,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-          DOTENV: ${{ secrets.DOTENV }}
-        run: |
-          # Secrets are unavailable to pull requests from forks; an empty .env
-          # is enough for --dart-define-from-file to succeed.
-          if [ -n "$ENV_FILE" ]; then
-            printf '%s\n' "$ENV_FILE" > .env
-          elif [ -n "$DOTENV" ]; then
-            printf '%s\n' "$DOTENV" > .env
-          else
-            touch .env
-          fi
-          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
-          # one does not, Flutter says `Invalid property line: ***` -- the
-          # content is a secret, so the message names nothing anyone can act
-          # on. Name the line number instead, and normalise what is safely
-          # normalisable.
-          if [ -s .env ]; then
-            sed -i 's/\r$//' .env
-            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
-            if [ -n "$bad" ]; then
-              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
-              exit 1
-            fi
-            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
-            mv .env.tmp .env
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'false'
       - name: Install dependencies
         run: flutter pub get
 
@@ -275,37 +225,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Setup .env from GitHub Secrets
-        shell: bash
-        env:
-          ENV_FILE: ${{ secrets.ENV_FILE }}
-          DOTENV: ${{ secrets.DOTENV }}
-        run: |
-          # Secrets are unavailable to pull requests from forks; an empty .env
-          # is enough for --dart-define-from-file to succeed.
-          if [ -n "$ENV_FILE" ]; then
-            printf '%s\n' "$ENV_FILE" > .env
-          elif [ -n "$DOTENV" ]; then
-            printf '%s\n' "$DOTENV" > .env
-          else
-            touch .env
-          fi
-          # `--dart-define-from-file` needs every line to read KEY=VALUE. When
-          # one does not, Flutter says `Invalid property line: ***` -- the
-          # content is a secret, so the message names nothing anyone can act
-          # on. Name the line number instead, and normalise what is safely
-          # normalisable.
-          if [ -s .env ]; then
-            sed -i 's/\r$//' .env
-            bad=$(awk 'NF && $0 !~ /^[[:space:]]*#/ && $0 !~ /=/ { printf "%s ", NR }' .env)
-            if [ -n "$bad" ]; then
-              echo "::error title=ENV_FILE is not KEY=VALUE::Line(s) ${bad}of the secret contain no '='. Every line must read KEY=VALUE; blank lines and # comments are fine. The content is masked in logs, so check the secret itself -- see docs/RELEASES.md for the keys it is read for."
-              exit 1
-            fi
-            awk 'NF && $0 !~ /^[[:space:]]*#/' .env > .env.tmp
-            mv .env.tmp .env
-          fi
-
+      - name: Write the build's .env
+        uses: ./.github/actions/dotenv
+        with:
+          contents: ${{ secrets.DOTENV_CONTENTS }}
+          legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
+          warn-when-empty: 'false'
       - name: Install dependencies
         run: flutter pub get
 

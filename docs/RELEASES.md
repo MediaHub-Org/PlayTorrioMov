@@ -51,10 +51,10 @@ Every secret `build.yml` reads, across all platforms:
 | `ANDROID_KEYSTORE_PASSWORD` | Release signing, see above |
 | `ANDROID_KEY_ALIAS` | Release signing, see above |
 | `ANDROID_KEY_PASSWORD` | Release signing, see above |
-| `ENV_FILE` | Contents written to `.env` before every build (`--dart-define-from-file=.env`); checked first |
-| `DOTENV` | Same as `ENV_FILE`, used only if `ENV_FILE` is unset |
+| `DOTENV_CONTENTS` | The **contents** written to `.env` before every build (`--dart-define-from-file=.env`) |
+| `ENV_FILE`, `DOTENV` | The former names. Still read, so a rename never lands as a broken build, but each emits a CI warning asking you to migrate |
 
-### Keys inside `ENV_FILE`
+### Keys inside `DOTENV_CONTENTS`
 
 `.env` is a plain `KEY=value` file, read at build time via
 `--dart-define-from-file` and at runtime by `EnvService`. The keys the app
@@ -67,7 +67,9 @@ looks for:
 | `DISCORD_APP_ID` | Discord Rich Presence |
 | `TMDB_API_KEY` | Cast photos and character names, so a fresh install has them with no setup |
 
-Every line must read `KEY=VALUE`. Blank lines and `#` comments are fine and
+The name says *contents*, not a path, because that is the mistake the old
+name invited: `ENV_FILE` reads like somewhere to put a filename. Every line
+must read `KEY=VALUE`. Blank lines and `#` comments are fine and
 are stripped before the build; anything else fails the job by line number,
 because Flutter's own message for a malformed line is `Invalid property
 line: ***` — the content is a secret, so it names nothing you can act on.
@@ -82,20 +84,20 @@ is free and takes a minute to get — register at
 details. A user can always paste their own key under Settings → General,
 which takes precedence over whatever the build ships with.
 
-> **`ENV_FILE`/`DOTENV` is still unset on this repository.** The v1.5.6
+> **No dotenv secret was set on this repository.** The v1.5.6
 > build logs show the `.env` step falling through to `touch .env` (the
 > rendered command reads `if [ -n "" ]`, not `if [ -n "***" ]`), so every
 > published artifact ships with an empty `.env`: Trakt sign-in, Simkl
 > sign-in and Discord Rich Presence are inert in the released binaries.
 > Nothing fails and nothing is logged as an error, which is why it went
 > unnoticed — the build now emits a CI **warning** when it happens.
-> Setting `ENV_FILE` is what turns those features on.
+> Setting `DOTENV_CONTENTS` is what turns those features on.
 >
 > TMDB cast photos **are** affected, as of v1.6.3. `TmdbSettings` used to
 > fall back to a key committed in the source; that key was found and revoked,
 > which is what the `401` on v1.6.2 was, and it has been removed. With an
 > empty `.env` there is no TMDB key, and the settings card says so and offers
-> to take the user's own. Setting `TMDB_API_KEY` in `ENV_FILE` restores a
+> to take the user's own. Setting `TMDB_API_KEY` in `DOTENV_CONTENTS` restores a
 > working fresh install — and can be rotated without shipping a new binary,
 > which a source constant cannot.
 >
