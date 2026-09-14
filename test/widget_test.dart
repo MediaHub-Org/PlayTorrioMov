@@ -30,20 +30,43 @@ void main() {
     // This group used to assert the opposite: that a fallback key shipped in
     // the source. That key was found and revoked -- which is what the 401 on
     // v1.6.2 was -- so the contract it pinned was the bug.
-    test('the app ships no TMDB key of its own', () {
+    test('no TMDB key is committed anywhere in lib/', () {
       // A key committed to a public repository gets scraped and revoked, and
-      // rotating it means shipping a new binary. `ENV_FILE` is where a build's
-      // key belongs. This is the check that notices a constant creeping back.
+      // rotating it means shipping a new binary. DOTENV_CONTENTS is where a
+      // build's key belongs, read through TmdbSettings.effectiveApiKey.
+      //
+      // This check was once scoped to lib/services/tmdb and looked for a bare
+      // 32-hex literal. It missed five live keys: they were written into the
+      // middle of a URL -- `?api_key=b3556f...` -- across three scrapers,
+      // where no literal is 32 characters on its own.
+      //
+      // Widening it to any 32-hex run in lib/ then caught four things that are
+      // not keys at all: an R2 bucket subdomain, a CDN filename, and a site
+      // cookie in two places. So both halves are matched precisely instead:
+      // a key spelled into a URL, and a bare key literal in a file that talks
+      // to TMDB.
+      final inUrl = RegExp(r'api_key=[0-9a-fA-F]{32}');
+      final bareLiteral = RegExp(r"'[0-9a-fA-F]{32}'");
       final offenders = <String>[];
-      for (final file in Directory('lib/services/tmdb').listSync(recursive: true)) {
+
+      for (final file in Directory('lib').listSync(recursive: true)) {
         if (file is! File || !file.path.endsWith('.dart')) continue;
-        final match = RegExp("'[0-9a-fA-F]{32}'").firstMatch(file.readAsStringSync());
-        if (match != null) offenders.add('${file.path}: ${match.group(0)}');
+        final src = file.readAsStringSync();
+
+        final url = inUrl.firstMatch(src);
+        if (url != null) offenders.add('${file.path}: ${url.group(0)}');
+
+        if (src.contains('themoviedb.org')) {
+          final bare = bareLiteral.firstMatch(src);
+          if (bare != null) offenders.add('${file.path}: ${bare.group(0)}');
+        }
       }
+
       expect(
         offenders,
         isEmpty,
-        reason: 'a 32-hex literal here is a TMDB key; put it in ENV_FILE instead',
+        reason: 'read the key from TmdbSettings.effectiveApiKey and put its '
+            'value in the DOTENV_CONTENTS secret',
       );
     });
 

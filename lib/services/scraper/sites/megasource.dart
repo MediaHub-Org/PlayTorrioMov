@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../../tmdb/tmdb_settings.dart';
 import '../user_agent.dart';
 
 /// Pure-Dart MegaSource Stream Scraper for PlayTorrioHTTP.
@@ -43,12 +44,16 @@ class MegaSourceScraper extends StreamScraper {
           year: year,
         );
 
-        if (tmdbId != null) {
+        final tmdbKey = TmdbSettings.effectiveApiKey;
+        // Without a key this lookup is skipped rather than sent: it only
+        // enriches ids the scraper can do without, and a keyless request
+        // to TMDB is a guaranteed 401.
+        if (tmdbId != null && tmdbKey != null) {
           try {
             final uri = Uri.parse(
               isTv
-                  ? 'https://api.themoviedb.org/3/tv/$tmdbId/external_ids?api_key=b3556f3b206e16f82df4d1f6fd4545e6'
-                  : 'https://api.themoviedb.org/3/movie/$tmdbId?api_key=b3556f3b206e16f82df4d1f6fd4545e6',
+                  ? 'https://api.themoviedb.org/3/tv/$tmdbId/external_ids?api_key=$tmdbKey'
+                  : 'https://api.themoviedb.org/3/movie/$tmdbId?api_key=$tmdbKey',
             );
             final res = await http.get(uri).timeout(const Duration(seconds: 4));
             if (res.statusCode == 200) {

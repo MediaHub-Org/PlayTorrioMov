@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import '../../tmdb/tmdb_settings.dart';
 import '../user_agent.dart';
 import 'package:flutter/foundation.dart';
 
@@ -11,7 +12,6 @@ class VideasyScraper extends StreamScraper {
   @override
   String get name => 'PlayTorrioHTTP';
 
-  static const _apiKey = 'b3556f3b206e16f82df4d1f6fd4545e6';
   static const _apiBase = 'https://api.speedracelight.com';
   static const _tmdbDirect = 'https://api.themoviedb.org/3';
   static const _ua =
@@ -197,17 +197,25 @@ class VideasyScraper extends StreamScraper {
       int? mediaYear = year;
       String targetImdb = imdbId ?? '';
 
-      try {
-        final metaPath = isTv ? '/tv/$tmdbId?api_key=$_apiKey' : '/movie/$tmdbId?api_key=$_apiKey';
-        final metaRes = await http.get(Uri.parse('$_tmdbDirect$metaPath'), headers: _defaultHeaders).timeout(const Duration(seconds: 6));
-        if (metaRes.statusCode == 200) {
-          final meta = jsonDecode(metaRes.body);
-          mediaTitle = (meta['title'] ?? meta['name'] ?? title).toString();
-          final yStr = (meta['release_date'] ?? meta['first_air_date'] ?? '').toString();
-          if (yStr.length >= 4) mediaYear = int.tryParse(yStr.substring(0, 4)) ?? year;
-          if (meta['imdb_id'] != null) targetImdb = meta['imdb_id'].toString();
-        }
-      } catch (_) {}
+      // Enrichment, not a dependency: without a key this keeps the title and
+      // year the caller already passed in, which is what the providers below
+      // are queried with either way.
+      final tmdbKey = TmdbSettings.effectiveApiKey;
+      if (tmdbKey != null) {
+        try {
+          final metaPath = isTv
+              ? '/tv/$tmdbId?api_key=$tmdbKey'
+              : '/movie/$tmdbId?api_key=$tmdbKey';
+          final metaRes = await http.get(Uri.parse('$_tmdbDirect$metaPath'), headers: _defaultHeaders).timeout(const Duration(seconds: 6));
+          if (metaRes.statusCode == 200) {
+            final meta = jsonDecode(metaRes.body);
+            mediaTitle = (meta['title'] ?? meta['name'] ?? title).toString();
+            final yStr = (meta['release_date'] ?? meta['first_air_date'] ?? '').toString();
+            if (yStr.length >= 4) mediaYear = int.tryParse(yStr.substring(0, 4)) ?? year;
+            if (meta['imdb_id'] != null) targetImdb = meta['imdb_id'].toString();
+          }
+        } catch (_) {}
+      }
 
       final params = <String, String>{
         'title': mediaTitle,

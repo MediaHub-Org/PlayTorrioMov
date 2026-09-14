@@ -1955,6 +1955,13 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
+  /// Whether there is another source to switch to, so the Cast snackbar only
+  /// offers the picker when opening it would show something.
+  bool get _hasOtherSources =>
+      (_cachedSourcesByEpisode[_sourcesEpisode?.id ?? ''] ?? const [])
+          .length >
+      1;
+
   void _handleCast() {
     final url = _resolvedStreamUrl;
     // A null url is the offline path: a downloaded file played straight off
@@ -1962,13 +1969,23 @@ class _PlayerScreenState extends State<PlayerScreen>
     // Same answer as an unreachable one, so the button never just does
     // nothing.
     if (url == null || !_isCastableSource) {
+      // Naming the alternative matters: "pick a different source" reads as
+      // "try them all until one works", and roughly half of this app's
+      // sources are torrents served over loopback. The ones that do cast are
+      // the ones a receiver can fetch by itself.
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'This source plays from your device, so a Cast receiver on the '
-            'network cannot reach it. Pick a different source to cast.',
+        SnackBar(
+          content: const Text(
+            'This source streams from your device, so a Cast receiver cannot '
+            'reach it. Direct and debrid sources cast; torrent ones do not.',
           ),
-          duration: Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
+          action: _hasOtherSources
+              ? SnackBarAction(
+                  label: 'Sources',
+                  onPressed: () => setState(() => _showSourcesPanel = true),
+                )
+              : null,
         ),
       );
       return;

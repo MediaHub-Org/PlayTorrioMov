@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../stream_scraper.dart';
 import '../../../models/stream/stream_model.dart';
 import 'tmdb_helper.dart';
+import 'movy_cipher.dart';
 import '../user_agent.dart';
 
 /// Movy.bz Stream Scraper & Decryptor for PlayTorrioHTTP.
@@ -25,8 +26,6 @@ class MovyScraper extends StreamScraper {
     'Referer': _referer,
     'Origin': 'https://www.movy.bz',
   };
-
-  static const _magic = [109, 118, 109, 49]; // "mvm1"
 
   static const _servers = [
     {'endpoint': 'miami', 'name': 'Miami', 'note': 'Original audio (Up to 4K)'},
@@ -249,82 +248,9 @@ class MovyScraper extends StreamScraper {
   }
 
   // --- Decryption Cipher Implementation ---
-
-  static int _l(int e) {
-    var v = e & 0xFFFFFFFF;
-    v = (v ^ (v >>> 16)) & 0xFFFFFFFF;
-    v = (v * 0x85ebca6b) & 0xFFFFFFFF;
-    v = (v ^ (v >>> 13)) & 0xFFFFFFFF;
-    v = (v * 0xc2b2ae35) & 0xFFFFFFFF;
-    return (v ^ (v >>> 16)) & 0xFFFFFFFF;
-  }
-
-  static int _u(int e, int t) {
-    final shift = t & 31;
-    if (shift == 0) return e & 0xFFFFFFFF;
-    return (((e << shift) & 0xFFFFFFFF) | ((e & 0xFFFFFFFF) >>> (32 - shift))) & 0xFFFFFFFF;
-  }
-
-  static int _fnv1a(String str) {
-    var t = 0x811c9dc5;
-    for (var i = 0; i < str.length; i++) {
-      final code = str.codeUnitAt(i);
-      t = (((t ^ code) & 0xFFFFFFFF) * 0x1000193) & 0xFFFFFFFF;
-    }
-    return _l(t);
-  }
-
-  static _KeyState _initKeyState(String seed, int tmdbId) {
-    final s = List<int>.filled(61, 0);
-    final isSet = List<bool>.filled(61, false);
-    var r = _l(_fnv1a(seed) ^ _l((tmdbId & 0xFFFFFFFF) ^ 0x9e3779b9));
-
-    for (var e = 0; e < 8; e++) {
-      final t = r % 61;
-      r = _u((r + 0x9e3779b9) & 0xFFFFFFFF, 7 + (7 & e));
-      s[t] = (r ^ _l(r)) & 0xFFFFFFFF;
-      isSet[t] = true;
-      r = _l((r + t) & 0xFFFFFFFF);
-    }
-
-    final acc = _l(0xa5a5a5a5 ^ r);
-    return _KeyState(s, isSet, acc);
-  }
-
-  static int _nextKeystreamWord(_KeyState state, int t) {
-    final r = state.s;
-    var nState = state.acc;
-    final i = nState % 61;
-    final oVal = state.isSet[i] ? -1 : 0;
-    final d = state.isSet[i] ? r[i] : 0;
-    final c = ((t + 1) * 0x9e3779b9) & 0xFFFFFFFF;
-    final a = nState;
-    final sVal = d ^ c;
-    final h = ((a ^ sVal) | (a & sVal & oVal)) & 0xFFFFFFFF;
-    final term1 = _u((h + nState) & 0xFFFFFFFF, 31 & i);
-    final term2 = _u(nState, 31 & (i * 7));
-    nState = _l(((term1 ^ term2) + 0x9e3779b9) & 0xFFFFFFFF);
-    r[i] = nState;
-    state.isSet[i] = true;
-    state.acc = nState;
-    return nState & 0xFFFFFFFF;
-  }
-
-  static Uint8List _generateKeyStream(String seed, int tmdbId, int len) {
-    final state = _initKeyState(seed, tmdbId);
-    final out = Uint8List(len);
-    var wordIdx = 0;
-    var byteIdx = 0;
-
-    while (byteIdx < len) {
-      final word = _nextKeystreamWord(state, wordIdx++);
-      out[byteIdx++] = word & 0xFF;
-      if (byteIdx < len) out[byteIdx++] = (word >>> 8) & 0xFF;
-      if (byteIdx < len) out[byteIdx++] = (word >>> 16) & 0xFF;
-      if (byteIdx < len) out[byteIdx++] = (word >>> 24) & 0xFF;
-    }
-    return out;
-  }
+  //
+  // The arithmetic lives in `movy_cipher.dart`, where it is reachable without
+  // the network. What stays here is the part that needs one.
 
   static String? _decrypt(String cipherB64, String seed, int tmdbId) {
     try {
@@ -333,20 +259,20 @@ class MovyScraper extends StreamScraper {
         normalized += '=';
       }
       final cipherBytes = base64.decode(normalized);
-      if (cipherBytes.length <= _magic.length) return null;
+      if (cipherBytes.length <= MovyCipher.magic.length) return null;
 
-      final ks = _generateKeyStream(seed, tmdbId, cipherBytes.length);
+      final ks = MovyCipher.keyStream(seed, tmdbId, cipherBytes.length);
       for (var i = 0; i < cipherBytes.length; i++) {
         cipherBytes[i] = cipherBytes[i] ^ ks[i];
       }
 
-      for (var k = 0; k < _magic.length; k++) {
-        if (cipherBytes[k] != _magic[k]) {
+      for (var k = 0; k < MovyCipher.magic.length; k++) {
+        if (cipherBytes[k] != MovyCipher.magic[k]) {
           return null;
         }
       }
 
-      final payload = cipherBytes.sublist(_magic.length);
+      final payload = cipherBytes.sublist(MovyCipher.magic.length);
       return utf8.decode(payload);
     } catch (e) {
       return null;
@@ -360,9 +286,3 @@ class _SeedEntry {
   final int expiresAt;
 }
 
-class _KeyState {
-  _KeyState(this.s, this.isSet, this.acc);
-  final List<int> s;
-  final List<bool> isSet;
-  int acc;
-}
