@@ -66,7 +66,13 @@ runs:
         fi
 
         # Windows line endings survive a copy-paste into the secret box.
-        sed -i 's/\r$//' .env
+        #
+        # `tr`, not `sed -i`: BSD sed on the macOS runners requires a backup
+        # suffix after -i and GNU sed does not, so `sed -i 's/...' file` reads
+        # the script as the suffix and the filename as the script. That is
+        # what took the v1.6.3 release down -- Linux, Windows and Android all
+        # passed, and both macOS runners died before building anything.
+        tr -d '\r' < .env > .env.tmp && mv .env.tmp .env
 
         # Flutter names the offending line, the line is a secret, so its
         # message is `Invalid property line: ***` and tells you nothing. Name

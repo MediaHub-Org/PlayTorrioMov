@@ -16,6 +16,17 @@ reach for**:
    branch pushes and refused tag pushes with a `403`, so this route is not
    always available. The dispatch always is.
 
+> **Changing anything in the shared build path? Dispatch with `release_tag`
+> empty first.** PR checks build Linux and Android only; the Windows, macOS
+> and iOS jobs exist solely in this workflow and run solely on a dispatch. So
+> a change to a step every platform shares — the `.env` action, a cache key,
+> a setup step — is first *executed* on macOS during a release, which is the
+> worst moment to discover it. v1.6.3's first attempt died exactly there:
+> `sed -i` needs a backup suffix on BSD sed and not on GNU's, so both macOS
+> runners failed before building anything while Linux, Windows and Android
+> went green. An empty `release_tag` builds all seven and publishes nothing,
+> which is the ten minutes that buys.
+
 Dispatched builds default to `dev_build`, which titles the release `(dev)`
 and publishes it as a GitHub prerelease; the app shows the same marker next
 to its version. Untick it once a build has been verified on a device. Tags
