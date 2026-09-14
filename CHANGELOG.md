@@ -3,6 +3,38 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.6.2+30] - 2026-09-14
+
+The light-mode corners 1.6.1 could not reach, and the details page that was
+blocking most of them.
+
+### Fixed
+- **"Could not load movies" on the Anime page.** The error card defaulted to
+  that heading and no page ever replaced it, so Anime and Live TV both told
+  you your *films* had failed while the line underneath correctly named the
+  anime catalogue. Each page now says what it was actually loading
+- **Live TV and Settings stayed black in light mode.** Both read the
+  palette's dark surface directly instead of resolving it against the active
+  brightness — along with Live TV's hero gradients, the ambient background
+  behind Settings and the video-player settings, and Anime search
+- **Genre chips came out black on a photograph.** The same chip appears on a
+  hero's artwork and on a details page's background, so neither fixed white
+  nor theme ink is right for both. They now know which one they are in
+- **"Cast & Crew", "Similar Content" and the like / watchlist / watched
+  buttons read black on a dark photo.** The details page's backdrop was a
+  pinned layer filling the screen at every scroll position, so everything on
+  the page sat on artwork no matter how far down you were. The backdrop is
+  now as tall as the hero: the hero and its buttons stay white over the
+  photograph, and the page below it follows the theme
+
+### Internal
+- The analyzer's info list went from 133 to zero and infos are now fatal.
+  One real warning had already gone unread inside that list of 133 and put
+  `main` red
+- The PR checks run as three parallel jobs, so analyze and test no longer
+  wait behind the Android toolchain they never use, and one round reports
+  every failure rather than stopping at the first
+
 ## [1.6.1+29] - 2026-09-14
 
 Light mode, finished. 1.6.0 shipped the colour system; this is the chrome it
