@@ -411,6 +411,9 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                     Container(
                       width: widget.width,
                       height: imgHeight,
+                      // What shows through until the thumbnail loads, so it
+                      // stays a fixed dark in either theme -- same reason as
+                      // _buildPlaceholder below.
                       color: const Color(0xFF1E212E),
                       child: imageUrl != null && imageUrl.isNotEmpty
                           ? CachedNetworkImage(

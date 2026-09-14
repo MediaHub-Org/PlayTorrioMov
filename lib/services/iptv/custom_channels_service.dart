@@ -72,6 +72,9 @@ abstract final class CustomChannelsService {
       short: _short(name),
       category: category.trim().isEmpty ? 'Custom' : category.trim(),
       keywords: [name.toLowerCase()],
+      // A tile gradient stored on the channel, alongside the built-in
+      // channels' own broadcaster brand colours -- data, not app chrome,
+      // so it does not move when the theme or the palette does.
       gradient: const [Color(0xFF7C5CFF), Color(0xFF1A1A2E)],
     );
 
@@ -141,6 +144,9 @@ abstract final class CustomChannelsService {
           ? [name.toLowerCase()]
           : keywords,
       exclude: (j['exclude'] as List?)?.whereType<String>().toList() ?? const [],
+      // A tile gradient stored on the channel, alongside the built-in
+      // channels' own broadcaster brand colours -- data, not app chrome,
+      // so it does not move when the theme or the palette does.
       gradient: const [Color(0xFF7C5CFF), Color(0xFF1A1A2E)],
       iconUrl: j['iconUrl'] as String?,
     );

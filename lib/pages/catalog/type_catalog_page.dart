@@ -373,6 +373,9 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             errorWidget: (_, __, ___) =>
                 ColoredBox(color: AppColors.surface),
           ),
+        // The hero's own wash over the backdrop, fixed dark in either theme:
+        // it is what the slide's onAccent-white title and buttons read
+        // against, so it cannot follow the surface tokens.
         const DecoratedBox(
           decoration: BoxDecoration(
             gradient: LinearGradient(

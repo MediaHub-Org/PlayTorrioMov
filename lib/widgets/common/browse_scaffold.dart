@@ -329,6 +329,10 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                 child: IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
+                      // Fixed dark, not a theme surface: this is the scrim
+                      // that makes the header legible over the hero, and it is
+                      // why the pills above it are onAccent-white in both
+                      // themes (see HeaderPillSurface).
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,

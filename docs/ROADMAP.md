@@ -9,8 +9,8 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-14**, on `v1.6.0+28`, after the
-nav-chrome and accent pass (#61-#63). Every count below was measured there.
+Last reconciled against the tree: **2026-09-14**, on `v1.6.1+29`. Every count
+below was measured there.
 
 ---
 
@@ -34,35 +34,7 @@ and read the status line under the card:
 | *TMDB has no entry for this title (404)* | That one title only; try another |
 | nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
 
-### 2. Light mode: the chrome is done, a tail of one-off hexes is not
-
-The switch works and the app's colours follow it. `AppColors` resolves ink,
-surfaces and the accent against the active theme; the dark values are
-byte-identical to the literals they replaced, so a dark build is unchanged.
-
-**Done since #59** (#61-#63): the global top bar, the desktop section
-switcher, the mobile bottom tab bar and the wordmark on them all take
-`AppColors.bar`, so a light build gets light chrome with dark glyphs instead
-of black-on-black. The header pills know whether they float over a hero
-(`HeaderPillSurface`) and stay white there — that was Live TV's bug, whose
-header sits on a scrim over the channel art. And `AppColors.accent` replaced
-**156 hardcoded copies of the default palette's violet across 33 files**, so
-the eight-palette picker now actually reaches the whole app.
-
-**What is left** is a tail of ~45 one-off dark hexes with no obvious token:
-per-page gradients, a few sheet backgrounds, the multi-view grid. In light
-mode these stay dark with readable ink on them, so the result is islands of
-dark rather than broken text. Each wants a judgement call about which token
-it is — or whether it is artwork, in which case it stays dark and what sits
-on it is `onAccent` (the poster placeholders in the card widgets are
-annotated as exactly that, so they do not get "fixed" later).
-
-**Deliberately excluded**, because artwork is artwork in either theme: the
-video player (chrome over video), the three details pages (a full-height
-backdrop behind every control), and anything on an accent fill or over a
-poster.
-
-### 3. Engineering debt, from the 2026-09-13 audit
+### 2. Engineering debt, from the 2026-09-13 audit
 
 What the audit fixed is in git — including the HTTP timeout gap it had
 deferred: all 54 `package:http` calls that lacked a deadline now carry one,
@@ -75,7 +47,7 @@ deliberately left:
 | **126 empty `catch` blocks** | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
 | `megasource` / `nova` share **49** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
 
-### 4. The scrapers are effectively untested in CI
+### 3. The scrapers are effectively untested in CI
 
 **13 of 89 test files are `@Tags(['network'])`** and excluded by
 `flutter test --exclude-tags network` — and they are exactly the files
@@ -159,6 +131,29 @@ Live TV aspect-ratio pill as a deliberate divergence: one setting behind a
 gear costs a click rather than saving one. Sound in isolation, wrong against
 the larger goal — it was the last control on the page with no counterpart in
 the other player, and "same panel, fewer rows" is worth more than the tap.
+
+### What stays dark, in either theme
+
+Light mode is finished (#52, #59, #61-#64), and "finished" needed a
+definition, because a colour that does not follow the theme is not
+automatically a bug. Three things legitimately stay dark, and every
+remaining dark literal in `lib/` is one of them and says so in a comment:
+
+- **Chrome over video.** The player, and the `PerformanceLiquidLens` behind
+  its menus — moved out of `widgets/common/` into `widgets/player/`, since a
+  file in `common/` whose only caller is the player looks like a shared
+  widget somebody should migrate.
+- **Artwork, and scrims over it.** Poster and thumbnail placeholders, the
+  hero washes, the header scrim. What sits on these is `AppColors.onAccent`,
+  fixed white, for the same reason: a poster is a poster in either theme.
+  The three details pages are this case at page scale — a full-height
+  backdrop behind every control.
+- **Colours that are data.** Broadcasters' brand gradients in
+  `hardcoded_channels.dart`, the saved gradient on a user's own channel, and
+  the palette definitions themselves.
+
+So the rule for the next person: before tokenising a dark literal, ask which
+of the three it is. If it is none of them, it is a surface and wants a token.
 
 ### Declined, so they do not get re-litigated
 
@@ -290,8 +285,9 @@ closed before this file was rewritten for maintenance mode and are not listed
 | #56 | One pipeline for vidfast/vidup (was two ~200-line near-clones) |
 | #57 | `print()` out of `lib/`, `avoid_print` enforced as a warning |
 | #58 | A silent scraper no longer holds the stream search open forever |
-| #59 | The colour migration behind #52 — `AppColors`, and what it excludes (open item 2 is the remainder) |
+| #59 | The colour migration behind #52 — `AppColors`, and what it excludes |
 | #60 | Every `package:http` call carries a timeout, enforced by a test |
 | #61 | Nav chrome (top bar, section switcher, mobile tab bar) follows the theme |
 | #62 | `HeaderPillSurface`: header pills know when they float over a hero |
 | #63 | `AppColors.accent` — the palette picker reaches the whole app (was 156 hardcoded violets) |
+| #64 | Light mode finished: every remaining dark literal is either a token or annotated as artwork |
