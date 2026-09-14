@@ -9,8 +9,8 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-13**, on `v1.5.8+27`, at commit
-`d1c8965`. Every count below was measured at that commit.
+Last reconciled against the tree: **2026-09-14**, on `v1.6.0+28`, at commit
+`cd2a289`. Every count below was measured at that commit.
 
 ---
 
@@ -34,30 +34,35 @@ and read the status line under the card:
 | *TMDB has no entry for this title (404)* | That one title only; try another |
 | nothing at all | No request was made — the addon supplied everything, or the IMDb id never resolved |
 
-### 2. Light mode is wired up but not painted (#52)
+### 2. Light mode is painted, not finished (#59)
 
-The switch works: System / Light / Dark in **Appearance & Interface**,
-persisted, defaulting to the system setting, with a real `theme`/`darkTheme`
-pair and per-palette light surfaces.
+The switch works and the app's colours now follow it: `AppColors` resolves
+ink and surfaces against the active theme, ~1500 sites across 60 files read
+it, and the dark values are byte-identical to the literals they replaced, so
+a dark build is unchanged.
 
-**The app's own colours ignore it.** 1300 `Colors.white` references and 978
-hardcoded hex values across 79 files — 22 pages paint their own dark
-`Scaffold`, 12 their own dark `AppBar`. Selecting Light gives a correct
-Appearance & Interface page (migrated in full, to prove the mechanism) and a
-still-dark everything else.
+**What is deliberately excluded**, because artwork is artwork in either
+theme: the video player (chrome over video, 471 references across 23 files),
+the three details pages (a full-height backdrop behind every control), and
+anything on an accent fill or over a poster — those use `AppColors.onAccent`,
+fixed white in both themes.
 
-Finishing it means replacing hardcoded colours with
-`Theme.of(context).colorScheme` / `cardTheme` tokens. It wants doing as one
-systematic pass: half-migrated is the state that looks broken rather than
-merely inconsistent.
+**What is left** are one-off dark surface hexes that no token maps —
+`0xFF15171F`, `0xFF13151F`, `0xFF0C0F17` and their neighbours, mostly card
+and sheet backgrounds in the IPTV and Discover pages. In light mode these
+stay dark and the ink on them stays readable, so the result is islands of
+dark rather than unreadable text. Each wants a judgement call about which
+token it is, which is why the mechanical pass stopped short of them.
 
 ### 3. Engineering debt, from the 2026-09-13 audit
 
-What the audit fixed is in git. What it found and deliberately left:
+What the audit fixed is in git — including the HTTP timeout gap it had
+deferred: all 54 `package:http` calls that lacked a deadline now carry one,
+enforced by `test/services/http_timeouts_test.dart` (#60). What it found and
+deliberately left:
 
 | What | Why it was left |
 |:-----|:----------------|
-| **90 of 183 HTTP call sites have no timeout** | No longer a hang — a 30s per-scraper deadline in `ScraperManager` bounds the search (#58). Fixing each site is still right, but it is 90 edits that each want re-testing against a live host. |
 | `iptv_portals_modal` ↔ `live_tv_settings_page` share **45** duplicated 12-line windows | UI duplication, lower stakes than the logic duplication that was fixed. Needs a look at whether the shared part is a widget or a coincidence. |
 | **126 empty `catch` blocks** | Most carry a comment explaining why the error is deliberately swallowed. Separating those from genuinely lost errors needs case-by-case reading, not a sweep. |
 | `megasource` / `nova` share **49** windows | **Deliberately not merged.** They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction added to satisfy a duplication count rather than to remove duplication. |
@@ -270,10 +275,12 @@ closed before this file was rewritten for maintenance mode and are not listed
 | #49 | Settings scroll from anywhere in the window, not just the centre column |
 | #50 | Backup export/import through the system file picker |
 | #51 | User-supplied Simkl client ID, and a reason when Connect fails |
-| #52 | System / Light / Dark switch (the colour migration is open item 2) |
+| #52 | System / Light / Dark switch (the colour migration is #59) |
 | #53 | One ISO-639 table for subtitle providers (two were 51 languages short) |
 | #54 | Wyzie subtitle downloads go through `SubtitleExtractor` like the rest |
 | #55 | One master-URL builder for cinesrc/cine.su/bcine (was triplicated) |
 | #56 | One pipeline for vidfast/vidup (was two ~200-line near-clones) |
 | #57 | `print()` out of `lib/`, `avoid_print` enforced as a warning |
 | #58 | A silent scraper no longer holds the stream search open forever |
+| #59 | The colour migration behind #52 — `AppColors`, and what it excludes (open item 2 is the remainder) |
+| #60 | Every `package:http` call carries a timeout, enforced by a test |

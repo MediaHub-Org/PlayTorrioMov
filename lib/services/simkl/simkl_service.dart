@@ -401,7 +401,7 @@ class SimklService {
       final response = await http.get(
         Uri.parse('$kSimklApiBaseUrl/users/settings'),
         headers: _apiHeaders(accessToken: accessToken),
-      );
+      ).timeout(const Duration(seconds: 15));
       if (response.statusCode != 200) return;
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;

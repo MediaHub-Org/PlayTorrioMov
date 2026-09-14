@@ -85,7 +85,8 @@ class SubdlProvider extends SubtitleProvider {
 
       // 4. For TV Shows, find the correct season page
       if (isTvShow) {
-        final showHtmlRes = await http.get(Uri.parse(targetUrl), headers: _headers);
+        final showHtmlRes = await http.get(Uri.parse(targetUrl), headers: _headers)
+            .timeout(const Duration(seconds: 5));
         if (showHtmlRes.statusCode == 200) {
           final doc = html_parser.parse(showHtmlRes.body);
           final links = doc.querySelectorAll('a[href*="/subtitle/"]');
@@ -113,7 +114,8 @@ class SubdlProvider extends SubtitleProvider {
       }
 
       // 5. Scrape the final page (movie or season)
-      final htmlRes = await http.get(Uri.parse(targetUrl), headers: _headers);
+      final htmlRes = await http.get(Uri.parse(targetUrl), headers: _headers)
+          .timeout(const Duration(seconds: 5));
       if (htmlRes.statusCode != 200) return [];
 
       final doc = html_parser.parse(htmlRes.body);

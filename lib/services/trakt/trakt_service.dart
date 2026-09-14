@@ -365,7 +365,7 @@ class TraktService {
             'client_id': kTraktClientId,
             'client_secret': kTraktClientSecret,
           }),
-        );
+        ).timeout(const Duration(seconds: 15));
       }
     } catch (error) {
       debugPrint('Trakt: Revoke token error (${error.runtimeType})');
@@ -417,7 +417,7 @@ class TraktService {
         Uri.parse(kTraktDeviceCodeUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'client_id': kTraktClientId}),
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -1244,7 +1244,7 @@ class TraktService {
       final response = await http.get(
         Uri.parse('$kTraktApiBaseUrl/users/settings'),
         headers: _apiHeaders(accessToken: accessToken),
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;

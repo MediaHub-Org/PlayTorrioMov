@@ -29,7 +29,7 @@ class MetadataService {
     var response = await http.get(
       Uri.parse(url),
       headers: {'Accept': 'application/json'},
-    );
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200 &&
         !baseUrl.contains('/%7B') &&
@@ -39,7 +39,7 @@ class MetadataService {
         final fallbackResp = await http.get(
           Uri.parse(configFallback),
           headers: {'Accept': 'application/json'},
-        );
+        ).timeout(const Duration(seconds: 15));
         if (fallbackResp.statusCode == 200) {
           response = fallbackResp;
         }
@@ -129,7 +129,7 @@ class MetadataService {
     var response = await http.get(
       Uri.parse(url),
       headers: {'Accept': 'application/json'},
-    );
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 404 &&
         !effectiveBaseUrl.contains('/%7B') &&
@@ -144,7 +144,7 @@ class MetadataService {
         final fallbackResp = await http.get(
           Uri.parse(configFallbackUrl),
           headers: {'Accept': 'application/json'},
-        );
+        ).timeout(const Duration(seconds: 15));
         if (fallbackResp.statusCode == 200) {
           response = fallbackResp;
         }
@@ -213,7 +213,7 @@ class MetadataService {
     var response = await http.get(
       Uri.parse(url),
       headers: {'Accept': 'application/json'},
-    );
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 404 &&
         !effectiveBaseUrl.contains('/%7B') &&
@@ -228,7 +228,7 @@ class MetadataService {
         final fallbackResp = await http.get(
           Uri.parse(configFallbackUrl),
           headers: {'Accept': 'application/json'},
-        );
+        ).timeout(const Duration(seconds: 15));
         if (fallbackResp.statusCode == 200) {
           response = fallbackResp;
         }
@@ -285,7 +285,7 @@ class MetadataService {
 
     http.Response? response;
     try {
-      response = await http.get(Uri.parse(url));
+      response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
     } catch (_) {}
 
     // Fallback 1: If 404 and baseUrl lacks config prefix, retry with /%7B%7D
@@ -294,7 +294,8 @@ class MetadataService {
         !effectiveBaseUrl.contains('/{}')) {
       try {
         final configUrl = '$effectiveBaseUrl/%7B%7D/meta/$type/$encodedId.json';
-        final configResp = await http.get(Uri.parse(configUrl));
+        final configResp = await http.get(Uri.parse(configUrl))
+            .timeout(const Duration(seconds: 15));
         if (configResp.statusCode == 200) {
           response = configResp;
         }
@@ -306,12 +307,13 @@ class MetadataService {
         (type == 'collections' || type == 'collection')) {
       try {
         final movieUrl = '$effectiveBaseUrl/meta/movie/$encodedId.json';
-        var movieResp = await http.get(Uri.parse(movieUrl));
+        var movieResp = await http.get(Uri.parse(movieUrl)).timeout(const Duration(seconds: 15));
         if (movieResp.statusCode == 404 &&
             !effectiveBaseUrl.contains('/%7B') &&
             !effectiveBaseUrl.contains('/{}')) {
           final configMovieUrl = '$effectiveBaseUrl/%7B%7D/meta/movie/$encodedId.json';
-          movieResp = await http.get(Uri.parse(configMovieUrl));
+          movieResp = await http.get(Uri.parse(configMovieUrl))
+              .timeout(const Duration(seconds: 15));
         }
         if (movieResp.statusCode == 200) {
           response = movieResp;
@@ -325,12 +327,12 @@ class MetadataService {
         imdbId.startsWith('ctmdb.')) {
       try {
         final collUrl = '$effectiveBaseUrl/meta/collections/$encodedId.json';
-        var collResp = await http.get(Uri.parse(collUrl));
+        var collResp = await http.get(Uri.parse(collUrl)).timeout(const Duration(seconds: 15));
         if (collResp.statusCode == 404 &&
             !effectiveBaseUrl.contains('/%7B') &&
             !effectiveBaseUrl.contains('/{}')) {
           final configCollUrl = '$effectiveBaseUrl/%7B%7D/meta/collections/$encodedId.json';
-          collResp = await http.get(Uri.parse(configCollUrl));
+          collResp = await http.get(Uri.parse(configCollUrl)).timeout(const Duration(seconds: 15));
         }
         if (collResp.statusCode == 200) {
           response = collResp;

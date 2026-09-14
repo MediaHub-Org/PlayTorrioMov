@@ -92,7 +92,7 @@ class MegaPlayExtractor {
       final playerResponse = await _client.get(
         Uri.parse(playerUrl),
         headers: playerHeaders,
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (playerResponse.statusCode != 200) {
         if (kDebugMode) {
@@ -135,7 +135,8 @@ class MegaPlayExtractor {
             'upgrade-insecure-requests': '1',
           };
 
-          final iframeRes = await _client.get(iframeUri, headers: iframeHeaders);
+          final iframeRes = await _client.get(iframeUri, headers: iframeHeaders)
+              .timeout(const Duration(seconds: 10));
           if (iframeRes.statusCode == 200) {
             html = iframeRes.body;
             doc = html_parser.parse(html);
@@ -169,7 +170,7 @@ class MegaPlayExtractor {
       final sourcesRes = await _client.get(
         Uri.parse(sourcesUrl),
         headers: sourcesHeaders,
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (sourcesRes.statusCode != 200) {
         if (kDebugMode) {

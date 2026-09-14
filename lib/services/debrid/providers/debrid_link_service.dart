@@ -38,7 +38,7 @@ class DebridLinkService {
       final res = await http.get(
         Uri.parse('https://debrid-link.com/api/v2/account/infos'),
         headers: {'Authorization': 'Bearer $trimmed'},
-      );
+      ).timeout(const Duration(seconds: 20));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['success'] == true) {
@@ -94,7 +94,7 @@ class DebridLinkService {
       Uri.parse('https://debrid-link.com/api/v2/seedbox/add'),
       headers: headers,
       body: json.encode({'url': magnet, 'async': true}),
-    );
+    ).timeout(const Duration(seconds: 20));
     final addBody = _dlDecode(addRes);
     final torrent = addBody['value'];
     if (torrent is! Map || torrent['id'] == null) {
@@ -112,7 +112,7 @@ class DebridLinkService {
       final stRes = await http.get(
         Uri.parse('https://debrid-link.com/api/v2/seedbox/list?ids=$torrentId'),
         headers: {'Authorization': 'Bearer $apiKey'},
-      );
+      ).timeout(const Duration(seconds: 20));
       final stBody = _dlDecode(stRes);
       final list = stBody['value'];
       if (list is List && list.isNotEmpty) {

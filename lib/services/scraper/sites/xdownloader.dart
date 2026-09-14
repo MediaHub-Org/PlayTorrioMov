@@ -34,7 +34,7 @@ class XDownloaderScraper extends StreamScraper {
         searchUri,
         headers: _headers,
         body: jsonEncode({'query': title}),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (searchResponse.statusCode != 200) return sources;
 
@@ -78,7 +78,8 @@ class XDownloaderScraper extends StreamScraper {
 
       // 2. Fetch Media Details by ID
       final detailsUri = Uri.parse('$_baseUrl/api/mobile/details?id=$itemId&type=$targetType');
-      final detailsResponse = await http.get(detailsUri, headers: _headers);
+      final detailsResponse = await http.get(detailsUri, headers: _headers)
+          .timeout(const Duration(seconds: 10));
 
       if (detailsResponse.statusCode != 200) return sources;
 

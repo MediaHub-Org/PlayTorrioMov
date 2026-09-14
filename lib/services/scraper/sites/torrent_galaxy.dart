@@ -38,7 +38,7 @@ class TorrentGalaxyScraper extends StreamScraper {
     try {
       final response = await http.get(Uri.parse(searchUrl), headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-      });
+      }).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) return sources;
 
@@ -129,7 +129,7 @@ class TorrentGalaxyScraper extends StreamScraper {
     try {
       final response = await http.get(Uri.parse(postUrl), headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      });
+      }).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) return null;
 
