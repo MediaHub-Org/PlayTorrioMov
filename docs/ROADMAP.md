@@ -14,8 +14,8 @@ Last reconciled: **2026-09-15**, on `v1.8.0+33`.
 
 ## Pending
 
-**Nothing here is started.** The first two need writing; the rest need a
-person with hardware.
+**#70 and #71 are coded, not verified.** Translation and text scale (#68,
+#69) still need writing. The rest need a person with hardware.
 
 ### Translation (#68)
 
@@ -31,10 +31,10 @@ unrelated.
 
 > **A title is two fields, and they must never merge.**
 >
-> | | Used for | Localizable |
-> |:--|:--|:--|
-> | `displayTitle` | What the user reads | Yes |
-> | `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never** |
+> |                  | Used for                                                             | Localizable |
+> |:-----------------|:---------------------------------------------------------------------|:------------|
+> | `displayTitle`   | What the user reads                                                  | Yes         |
+> | `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never**   |
 
 Three things in this codebase depend on a stable title, and each breaks
 differently:
@@ -88,6 +88,41 @@ way the width test did.
 Also worth a pass while in here: semantics labels on icon-only controls.
 `Tooltip` supplies one for free, which the library action row already gets,
 but nothing has checked the rest.
+
+### Audio silent under Flatpak (#70)
+
+Reported across multiple devices, not one machine — which points at packaging,
+not a driver. `flatpak/io.github.MediaHubOrg.PlayTorrioMov.json`'s
+`finish-args` only grants `--socket=wayland`, `--socket=fallback-x11` and
+`--device=dri`. There is no `--socket=pulseaudio`, so the sandbox has no path
+to the host audio server at all.
+
+Video still plays because it only needs Wayland/X11 and DRI, which are
+granted — audio needs the PulseAudio socket, which is not, and every distro's
+default audio stack (PipeWire included) speaks that protocol through its
+`pulse` compatibility layer. That is consistent with "every device", since a
+missing sandbox permission does not vary by hardware.
+
+**Fixed in code:** `--socket=pulseaudio` added to `finish-args`. **Still
+needs a device to confirm** — the reasoning explains the symptom, but no
+Flatpak build with this manifest has been run against real speakers yet.
+
+### Subtitle appearance settings open as a pop-up (#71)
+
+Was: `video_player_settings_page.dart`'s `_openSubtitleCustomizer()` showed
+`PlayerSubStyleModal` via `showDialog(...)` — a modal overlay dropped on top
+of the Settings page, rather than the subtitle section on that page expanding
+in place.
+
+**Fixed.** `player_sub_style_modal.dart` now splits the controls (preview,
+presets, the five tabs) into `SubtitleStyleEditor`, sized by `LayoutBuilder`
+so it works both floating and embedded. `PlayerSubStyleModal` is a thin
+wrapper that puts it in the floating glass card for the in-player overlay
+(`player_screen.dart`, unchanged there); Settings now toggles the same
+`SubtitleStyleEditor` open inline via a "Customize"/"Done" button and an
+`AnimatedCrossFade`, inside a fixed dark card so it stays readable in light
+theme. Verified with `flutter analyze` (clean) and `flutter test` (no new
+failures) — not yet checked visually on a running build.
 
 ### Collections, on a phone (#67)
 
@@ -150,12 +185,12 @@ An answer means the feature is possible. A refusal closes it for good.
 
 ### Not doing, so it stays decided
 
-| What | Why not |
-|:-----|:--------|
-| Merge `megasource` / `nova` (50 shared windows) | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction serving a duplication count rather than the code |
-| Offline tests for the page **scraping** (script tags, slug matching) | Its input is one host's markup on one day, so a fixture pins that day rather than a contract. The payload ciphers and response *formats* are covered; this is a smaller claim and not a reason to hold a release |
-| Cast from Windows | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. Would mean a different protocol (DLNA/UPnP) — a feature, not a fix |
-| Sponsor/monetization, keyboard aspect-cycle HUD (upstream) | Out of scope; and Mov already has an aspect control in the player settings |
+| What                                                                 | Why not                                                                                                                                                                                                                                                     |
+|:---------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Merge `megasource` / `nova` (50 shared windows)                      | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction serving a duplication count rather than the code |
+| Offline tests for the page **scraping** (script tags, slug matching) | Its input is one host's markup on one day, so a fixture pins that day rather than a contract. The payload ciphers and response *formats* are covered; this is a smaller claim and not a reason to hold a release                                            |
+| Cast from Windows                                                    | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. Would mean a different protocol (DLNA/UPnP) — a feature, not a fix                                                                                        |
+| Sponsor/monetization, keyboard aspect-cycle HUD (upstream)           | Out of scope; and Mov already has an aspect control in the player settings                                                                                                                                                                                  |
 
 ---
 
@@ -190,8 +225,8 @@ Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
 
 Not taken, so they are not re-reviewed:
 
-| Commit | Why not |
-|:-------|:--------|
-| `9616808` | Blurred dual-layer hero backdrop to kill black bars. Every hero in this fork already uses `BoxFit.cover`, which fills and crops. It fixes a problem we do not have |
-| `29a4127`, `1da1940` | IPTV channels, search and storage — the area this fork has diverged furthest in (#45, #46 and the portal browser are ours). Read as ideas, not ported as patches |
-| `d2f8074` | IPTV portal manager responsiveness. A near-total rewrite of `iptv_portals_modal.dart`; our copy carries Cloud Vault, the modal customizer and the M3U tab, so a straight port would drop them. The reported overflows were hand-fixed in #40 instead — all four, not the two reported |
+| Commit               | Why not                                                                                                                                                                                                                                                                               |
+|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `9616808`            | Blurred dual-layer hero backdrop to kill black bars. Every hero in this fork already uses `BoxFit.cover`, which fills and crops. It fixes a problem we do not have                                                                                                                    |
+| `29a4127`, `1da1940` | IPTV channels, search and storage — the area this fork has diverged furthest in (#45, #46 and the portal browser are ours). Read as ideas, not ported as patches                                                                                                                      |
+| `d2f8074`            | IPTV portal manager responsiveness. A near-total rewrite of `iptv_portals_modal.dart`; our copy carries Cloud Vault, the modal customizer and the M3U tab, so a straight port would drop them. The reported overflows were hand-fixed in #40 instead — all four, not the two reported |

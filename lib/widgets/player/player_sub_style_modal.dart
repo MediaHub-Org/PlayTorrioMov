@@ -3,9 +3,11 @@ import 'package:media_kit/media_kit.dart';
 import '../../services/player/player_settings.dart';
 import 'player_glass.dart';
 
-/// Responsive, rich Subtitle Customization Modal with live preview,
-/// presets, typography, colors, background boxes, outlines, shadows, and libass options.
-class PlayerSubStyleModal extends StatefulWidget {
+/// Floating card used to present [SubtitleStyleEditor] as an overlay above
+/// the video during playback (`player_screen.dart`). Settings → Video
+/// Player embeds [SubtitleStyleEditor] directly instead of this wrapper, so
+/// the customizer reads as part of the page rather than a pop-up (#71).
+class PlayerSubStyleModal extends StatelessWidget {
   final Player? player;
   final VoidCallback onClose;
 
@@ -16,10 +18,67 @@ class PlayerSubStyleModal extends StatefulWidget {
   });
 
   @override
-  State<PlayerSubStyleModal> createState() => _PlayerSubStyleModalState();
+  Widget build(BuildContext context) {
+    final screen = MediaQuery.sizeOf(context);
+    final isCompact = screen.width < 600;
+    final isLandscapeMobile = screen.height < 500;
+
+    final double cardWidth;
+    if (isCompact) {
+      cardWidth = (screen.width - 24).clamp(320.0, 560.0);
+    } else if (isLandscapeMobile) {
+      cardWidth = (screen.width - 32).clamp(440.0, 680.0);
+    } else {
+      cardWidth = (640.0).clamp(460.0, screen.width - 48);
+    }
+
+    final double cardHeight;
+    if (isLandscapeMobile) {
+      cardHeight = (screen.height - 32).clamp(240.0, screen.height - 20);
+    } else if (isCompact) {
+      cardHeight = (screen.height * 0.85).clamp(420.0, 660.0);
+    } else {
+      cardHeight = (screen.height * 0.76).clamp(520.0, 720.0);
+    }
+
+    return Center(
+      child: Material(
+        color: Colors.transparent,
+        child: PlayerGlassCard(
+          width: cardWidth,
+          height: cardHeight,
+          borderRadius: 22,
+          padding: EdgeInsets.zero,
+          child: SubtitleStyleEditor(player: player, onClose: onClose),
+        ),
+      ),
+    );
+  }
 }
 
-class _PlayerSubStyleModalState extends State<PlayerSubStyleModal>
+/// The subtitle style controls themselves: live preview, presets, and the
+/// typography/colors/outline/position/advanced tabs. Reused both floating
+/// (via [PlayerSubStyleModal], mid-playback) and embedded inline (Settings →
+/// Video Player, where [onClose] is left null and no floating chrome is
+/// drawn around it).
+///
+/// Needs a bounded height from its parent — the tab content scrolls inside
+/// whatever height it is given, rather than sizing itself to content.
+class SubtitleStyleEditor extends StatefulWidget {
+  final Player? player;
+  final VoidCallback? onClose;
+
+  const SubtitleStyleEditor({
+    super.key,
+    this.player,
+    this.onClose,
+  });
+
+  @override
+  State<SubtitleStyleEditor> createState() => _SubtitleStyleEditorState();
+}
+
+class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -78,70 +137,48 @@ class _PlayerSubStyleModalState extends State<PlayerSubStyleModal>
 
   @override
   Widget build(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-    final isCompact = screen.width < 600;
-    final isLandscapeMobile = screen.height < 500;
+    // Sized from the constraints this widget is actually given, not the
+    // screen: the floating dialog and the inline settings panel hand it
+    // different heights, and both need the same compact-layout behaviour
+    // once space gets tight.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 460;
+        final isShort = constraints.maxHeight < 420;
 
-    final double cardWidth;
-    if (isCompact) {
-      cardWidth = (screen.width - 24).clamp(320.0, 560.0);
-    } else if (isLandscapeMobile) {
-      cardWidth = (screen.width - 32).clamp(440.0, 680.0);
-    } else {
-      cardWidth = (640.0).clamp(460.0, screen.width - 48);
-    }
+        return ValueListenableBuilder<int>(
+          valueListenable: PlayerSettings.changeNotifier,
+          builder: (context, _, __) {
+            return Column(
+              children: [
+                // 1. Header Bar
+                _buildHeader(context, isCompact || isShort),
 
-    final double cardHeight;
-    if (isLandscapeMobile) {
-      cardHeight = (screen.height - 32).clamp(240.0, screen.height - 20);
-    } else if (isCompact) {
-      cardHeight = (screen.height * 0.85).clamp(420.0, 660.0);
-    } else {
-      cardHeight = (screen.height * 0.76).clamp(520.0, 720.0);
-    }
+                // 2. Interactive Live Preview
+                if (!isShort) _buildLivePreview(),
 
-    return ValueListenableBuilder<int>(
-      valueListenable: PlayerSettings.changeNotifier,
-      builder: (context, _, __) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: PlayerGlassCard(
-              width: cardWidth,
-              height: cardHeight,
-              borderRadius: 22,
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  // 1. Header Bar
-                  _buildHeader(context, isCompact || isLandscapeMobile),
+                // 3. Quick Presets Carousel
+                _buildPresetsBar(),
 
-                  // 2. Interactive Live Preview
-                  _buildLivePreview(isLandscapeMobile),
+                // 4. Tab Bar Navigation
+                _buildTabBar(),
 
-                  // 3. Quick Presets Carousel
-                  _buildPresetsBar(),
-
-                  // 4. Tab Bar Navigation
-                  _buildTabBar(),
-
-                  // 5. Scrollable Tab View Content
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildTypographyTab(),
-                        _buildColorsAndBoxTab(),
-                        _buildOutlinesAndShadowsTab(),
-                        _buildPositionAndLayoutTab(),
-                        _buildAdvancedTab(),
-                      ],
-                    ),
+                // 5. Scrollable Tab View Content
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildTypographyTab(),
+                      _buildColorsAndBoxTab(),
+                      _buildOutlinesAndShadowsTab(),
+                      _buildPositionAndLayoutTab(),
+                      _buildAdvancedTab(),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -207,12 +244,14 @@ class _PlayerSubStyleModalState extends State<PlayerSubStyleModal>
                 tooltip: 'Reset Subtitle Defaults',
                 onPressed: () => PlayerSettings.resetSubtitleDefaults(player: widget.player),
               ),
-              // Close Button
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white),
-                tooltip: 'Close',
-                onPressed: widget.onClose,
-              ),
+              // Close Button — only when floating above the player; the
+              // settings-page embedding has no dialog to dismiss.
+              if (widget.onClose != null)
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white),
+                  tooltip: 'Close',
+                  onPressed: widget.onClose,
+                ),
             ],
           ),
         ],
@@ -224,9 +263,7 @@ class _PlayerSubStyleModalState extends State<PlayerSubStyleModal>
   // Live Subtitle Preview Area
   // ───────────────────────────────────────────────────────────────────────────
 
-  Widget _buildLivePreview(bool isLandscapeMobile) {
-    if (isLandscapeMobile) return const SizedBox.shrink();
-
+  Widget _buildLivePreview() {
     final textColor = _parseColorFromHex(PlayerSettings.subColor.value);
     final boxColor = _parseColorFromHex(PlayerSettings.subBackColor.value, fallback: Colors.transparent);
     final borderColor = _parseColorFromHex(PlayerSettings.subBorderColor.value, fallback: Colors.black);

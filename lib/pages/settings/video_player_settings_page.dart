@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/player/player_settings.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/animated_ambient_background.dart';
+import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_sub_style_modal.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
@@ -15,6 +16,8 @@ class VideoPlayerSettingsPage extends StatefulWidget {
 }
 
 class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
+  bool _subtitleEditorExpanded = false;
+
   String get _platformName {
     if (Platform.isAndroid) return 'Android';
     if (Platform.isWindows) return 'Windows';
@@ -1048,15 +1051,15 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 ],
               ),
               ElevatedButton.icon(
-                icon: const Icon(Icons.tune_rounded, size: 16),
-                label: const Text('Customize'),
+                icon: Icon(_subtitleEditorExpanded ? Icons.expand_less_rounded : Icons.tune_rounded, size: 16),
+                label: Text(_subtitleEditorExpanded ? 'Done' : 'Customize'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
                   foregroundColor: AppColors.onAccent,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                onPressed: _openSubtitleCustomizer,
+                onPressed: () => setState(() => _subtitleEditorExpanded = !_subtitleEditorExpanded),
               ),
             ],
           ),
@@ -1106,17 +1109,38 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
 
-  void _openSubtitleCustomizer() {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black54,
-      builder: (ctx) => PlayerSubStyleModal(
-        onClose: () => Navigator.pop(ctx),
+          // Full customizer, expanded in place — not a pop-up (#71): it
+          // reads as part of this settings page instead of a dialog dropped
+          // on top of it. The editor's own dark styling stands in for a
+          // video frame, which is also why the mini preview above uses the
+          // same fixed canvas colour regardless of the app's light/dark theme.
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: _subtitleEditorExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: SizedBox(
+                height: 560,
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    // Fixed dark tokens, not theme-adaptive AppColors: the
+                    // editor's own text/icons assume the same always-dark
+                    // chrome it uses as a floating overlay above video, and
+                    // would go unreadable (white-on-white) in light mode
+                    // against a theme-adaptive background.
+                    color: PlayerTheme.elevated,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: PlayerTheme.edge),
+                  ),
+                  child: const SubtitleStyleEditor(),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
