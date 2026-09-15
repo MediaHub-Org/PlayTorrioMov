@@ -1004,13 +1004,13 @@ class _DetailsPageState extends State<DetailsPage>
         const SizedBox(height: _Space.lg),
         _buildMetadataRow(meta),
         const SizedBox(height: _Space.lg),
-        Row(
-          children: [
-            Expanded(child: _buildPlayButton(fullWidth: true)),
-            const SizedBox(width: _Space.sm),
-            _buildLibraryButton(),
-          ],
-        ),
+        // Play on its own line, the library actions under it. They used to
+        // share one Row, which shrank the primary action to make room for the
+        // secondary ones and left nothing for a fourth. Stacked, Play gets the
+        // full width and the four actions split it between them.
+        _buildPlayButton(fullWidth: true),
+        const SizedBox(height: _Space.sm),
+        _buildLibraryButton(),
         if (meta.description != null && meta.description!.isNotEmpty) ...[
           const SizedBox(height: _Space.lg),
           _buildSynopsis(meta.description!),
@@ -1235,7 +1235,10 @@ class _DetailsPageState extends State<DetailsPage>
   /// The shared Watchlist / Watched / Like row, so this page, Anime and
   /// anything else offering library actions stay spelled the same way.
   Widget _buildLibraryButton() {
-    return LibraryActionsRow(itemBuilder: _buildMyListItem);
+    // `expanded` in both layouts: mobile gives it a full-width line under
+    // Play, desktop the 280px poster column. Either way the four buttons
+    // share the line rather than clustering at one end of it.
+    return LibraryActionsRow(itemBuilder: _buildMyListItem, expanded: true);
   }
 
   Widget _buildPersonAvatar(String? profileUrl, {required String name}) {
