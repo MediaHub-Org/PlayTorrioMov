@@ -3,34 +3,83 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.7.0+32] - 2026-09-15
+
+The release where the roadmap's **Open** section became empty. Four bugs
+turned up while clearing it that were nobody's assignment — three of them
+found by tests written for something else.
 
 ### Fixed
-- **"See all" was pushed off the edge of the Continue Watching header on a
-  phone.** The header laid its accent bar, title, count and button out flat
-  with a `Spacer`, and the title was inflexible — so it took its natural width
-  and the button went past the right edge: 88px of overflow at 420px wide with
-  any watch history, and more for a longer title than the English one, which
-  the Arabic heading already is. The title and count now share what the button
-  leaves, and the title ellipsizes rather than shoving. Found by the test
-  written for the carousel change below — it was the first thing to render
-  that row at phone width with history present
+- **Cast never searched for devices.** The picker subscribed to the plugin's
+  device stream, but nothing ever asked the plugin to *scan*, so the stream
+  had no producer and the sheet sat on "Looking for Cast devices on your
+  network..." forever. The plugin's README says discovery starts automatically
+  once initialised; its source says otherwise on both platforms. On Android
+  the native `onAttachedToEngine` only wires up the method channel — the
+  `MediaRouter.addCallback` that actually scans lives solely inside the native
+  `startDiscovery`, reachable only from Dart. iOS is the same through
+  `GCKDiscoveryManager`, and adds a second trap: the SDK option
+  `startDiscoveryAfterFirstTapOnCastButton` defaults to true, so it waits for
+  a tap on its *own* native Cast button, and this app draws its own. Discovery
+  now starts when the picker opens and stops when it closes, since scanning
+  holds the radio awake
+- **A failed keychain delete left the credential behind.**
+  `SecureValueStore.delete` removed the plaintext copy whether or not the
+  secure delete succeeded, so a failure left the credential in the keychain
+  while the app behaved as though it were gone — and `read` would hand it back
+- **"See all" was pushed off the edge of the Continue Watching header.** The
+  header laid its accent bar, title, count and button out flat with a
+  `Spacer`, and the title was inflexible, so it took its natural width and the
+  button went past the right edge: 88px of overflow at 420px wide with any
+  watch history, and more for a longer title than the English one, which the
+  Arabic heading already is. The title and count now share what the button
+  leaves, and the title ellipsizes rather than shoving
+- **Live TV's portal chips overflowed on a narrow phone.** Two chips do not
+  fit a 320px screen side by side. The settings page had wrapped its chip rows
+  all along; the portals modal used a bare `Row` — so the duplication below
+  meant one copy was correct and the wrong one was the one people open from
+  the Live TV screen itself
+- **Four more errors that were being lost in silence** now say so: a failed
+  anime-watchlist save (the app kept showing a list that would be gone at
+  restart), a source search that died wholesale (indistinguishable from a
+  title with no sources), and two updater preferences that sprang back at next
+  launch
 
 ### Changed
 - **The hero carousel now fills the screen down to Continue Watching.** It was
-  sized as a fraction of the *screen* — 0.52 of it on desktop, capped at 560px —
-  which left the row below it sharing the fold with the start of two more, and
-  on a phone was measured against a height the page never had: the top bar, the
-  section chips and the bottom tab bar all come off it first. The hero is sized
-  from the viewport it was actually given, minus the exact height of the band
-  beneath it, so the hero and the Continue Watching row come to one screen and
-  that row is the last thing above the fold. No breakpoint table: the size is
-  arithmetic on the window, clamped only at the ends so a half-height window
-  still shows real artwork and a very tall one does not get a poster the height
-  of a door. The band's height is now a single formula
-  (`ContinueWatchingSlider.bandHeight`) used both to lay the row out and to size
-  the hero, with a test that measures the rendered row against it, so the two
-  cannot drift
+  sized as a fraction of the *screen* — 0.52 of it on desktop, capped at 560px
+  — which left the row below it sharing the fold with the start of two more,
+  and on a phone was measured against a height the page never had: the top
+  bar, the section chips and the bottom tab bar all come off it first. The
+  hero is sized from the viewport it was actually given, minus the exact
+  height of the band beneath it, so the hero and the Continue Watching row
+  come to one screen. No breakpoint table: the size is arithmetic on the
+  window, clamped only at the ends so a half-height window still shows real
+  artwork and a very tall one does not get a poster the height of a door
+- **Live TV's chip styling lives in one place.** A `ChoiceChip` had been
+  styled by hand at ten call sites across three files, every copy agreeing on
+  the same six properties, plus the *Default Starting Tab* row written out
+  twice. Now `SettingChoiceChip` and `DefaultPortalTabPicker` — the 45
+  duplicated windows the audit measured are 0, and the three pages lose 172
+  lines
+- **Every empty `catch` block now says why it is empty.** All 126 read one at
+  a time: five were losing something a user would notice and now report it,
+  and the other 121 carry the reason they swallow — a scraper whose site
+  changed while 47 others still run, a metadata fallback that was always a
+  second guess, tidy-up of a file being deleted anyway
+
+### Internal
+- **The scrapers are no longer untested in CI.** Six parse extractions, all
+  following one rule: cover it offline when the input is a *format* somebody
+  defined and many implementations honour, not when it is one website's markup
+  on one day. Subtitle providers (the Stremio addon body, Wyzie's array),
+  Xtream's `player_api.php`, VOE's payload cipher and Luna's RSC reader. VOE's
+  is reversible, so its test builds a payload with the inverse and checks the
+  round trip rather than pinning a capture that goes stale
+- **Test count 602 → 680.** New guards stop the fixed things coming back: a
+  bare `catch (_) {}` with no reason, an eleventh hand-styled chip, a Cast
+  picker that forgets to start discovery
+- Roadmap rewritten. **Open is empty**; what remains needs a Cast receiver
 
 ## [1.6.3+31] - 2026-09-14
 
@@ -695,7 +744,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 - 30 new torrent/stream scraper sites and 7 new anime extractors, ported
   from upstream `ayman708-UX/PlayTorrioV3` (commit `b0aecf5`) side by side
   with Mov's own existing, non-overlapping set — see
-  [ROADMAP.md](docs/ROADMAP.md#upstream-tracking) for the full list and
+  [ROADMAP.md](docs/ROADMAP.md#upstream-sync) for the full list and
   what was deliberately left out
 - `stream_model.dart` getters (`quality`, `isHDR`, `codec`, `fileSize`,
   `sizeBytes`, `qualityRank`) now memoized instead of recomputing regexes
@@ -772,3 +821,46 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 [1.1.5+13]: https://github.com/MediaHub-Org/PlayTorrioMov/releases
 [1.0.0]: https://github.com/MediaHub-Org/PlayTorrioMov/commit/cc3a1b3
+
+---
+
+## Item index
+
+What each `#N` refers to, for reading old commits and pull requests. #1–#14
+closed before the roadmap was rewritten for maintenance mode and live in git
+history only.
+
+| # | Item |
+|:--|:-----|
+| #15 | Mobile-first, made checkable (`test/mobile_first_test.dart`) |
+| #21 | The logo's film-strip rule |
+| #28 | Google Cast — sender path fixed; receiver test still pending |
+| #38 | Cast and crew actually load |
+| #39 | Series creators |
+| #40 | IPTV portal modal overflows (four, not two) |
+| #41 | One details spine and one section heading |
+| #42 | The Live TV player converged on the shared controls |
+| #43 | Library tabs became the three states |
+| #44 | One amount per seek control (±10s double-tap, ±30s buttons) |
+| #45 | Live TV Liked row and portal pin |
+| #46 | Channels you make yourself |
+| #47 | Watch history |
+| #48 | One search across Movies, Series and Anime |
+| #49 | Settings scroll from anywhere in the window, not just the centre column |
+| #50 | Backup export/import through the system file picker |
+| #51 | User-supplied Simkl client ID, and a reason when Connect fails |
+| #52 | System / Light / Dark switch (the colour migration is #59) |
+| #53 | One ISO-639 table for subtitle providers (two were 51 languages short) |
+| #54 | Wyzie subtitle downloads go through `SubtitleExtractor` like the rest |
+| #55 | One master-URL builder for cinesrc/cine.su/bcine (was triplicated) |
+| #56 | One pipeline for vidfast/vidup (was two ~200-line near-clones) |
+| #57 | `print()` out of `lib/`, `avoid_print` enforced as a warning |
+| #58 | A silent scraper no longer holds the stream search open forever |
+| #59 | The colour migration behind #52 — `AppColors`, and what it excludes |
+| #60 | Every `package:http` call carries a timeout, enforced by a test |
+| #61 | Nav chrome (top bar, section switcher, mobile tab bar) follows the theme |
+| #62 | `HeaderPillSurface`: header pills know when they float over a hero |
+| #63 | `AppColors.accent` — the palette picker reaches the whole app (was 156 hardcoded violets) |
+| #64 | Light mode finished: every remaining dark literal is either a token or annotated as artwork |
+| #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
+| #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |

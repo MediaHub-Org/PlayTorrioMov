@@ -22,6 +22,21 @@ name: PR Checks
 
 on:
   pull_request:
+    # A documentation-only change cannot fail any of these jobs, and running
+    # all three costs ~15 minutes of runner time to prove it. No test reads
+    # anything under docs/ or any .md file -- the ones that do read repo files
+    # read lib/ sources and .github/workflows/build.yml, neither of which is
+    # ignored here, so a workflow edit still runs its own checks.
+    #
+    # Safe as a `paths-ignore` (rather than a skip inside the jobs) only
+    # because main has no required status checks: with one configured, a
+    # check that never reports leaves the PR waiting forever instead of
+    # merging.
+    paths-ignore: &docs-only
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
   # Also on merges to main (this repo's default branch), for two reasons:
   #
   #  1. Cache scope. A run can only restore caches created on its own branch or
@@ -33,11 +48,21 @@ on:
   #     currently lands unverified.
   push:
     branches: [main]
+    # Same reasoning. The cache rationale above still holds: a docs-only
+    # merge changes nothing the cache keys on, so the existing main cache
+    # stays valid and restorable without being rewritten.
+    paths-ignore: *docs-only
   workflow_dispatch:
 
 # A new push to the same PR makes the in-flight run redundant.
 concurrency:
-  group: pr-checks-${{ github.workflow }}-${{ github.ref }}
+  # `head_ref || ref_name`, not `ref`. A pull_request run's `github.ref` is
+  # `refs/pull/N/merge` while a workflow_dispatch on the same branch gets
+  # `refs/heads/<branch>` -- different groups, so a manual dispatch used to
+  # run a second concurrent copy of a commit the PR was already checking
+  # instead of superseding it. Both events resolve to the bare branch name
+  # here, so they share one group and the newer run wins.
+  group: pr-checks-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   # Superseded PR runs are wasted work, but a main run is populating the
   # shared cache -- cancelling it leaves every later PR cold again.
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
