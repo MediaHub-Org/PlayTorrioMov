@@ -1,23 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/collection/media_collection.dart';
+import '../../models/continue_watching/continue_watching_item.dart';
 import '../../models/download/download_task_model.dart';
 import '../../models/movie/movie.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
+import '../../services/collections/media_collections_service.dart';
+import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/download/download_service.dart';
-import '../../services/iptv/favorite_channels_service.dart';
-import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/my_list/my_list_service.dart';
+import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/collection/collection_card.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
-import '../../widgets/iptv/iptv_channel_card.dart';
-import '../../widgets/movie/movie_card.dart';
+import '../../widgets/home/continue_watching_slider.dart';
 import '../details/details_page.dart';
-import '../iptv/iptv_channel_sheet.dart';
+import 'library_shelf_page.dart';
 import '../../services/theme/app_colors.dart';
 
+/// The Library: everything you saved, everything you started, everything on
+/// the device.
+///
+/// The three library states used to be three of its four tabs. They are cards
+/// in [LibrarySection.collections] now, beside the user's own collections --
+/// see [LibrarySection] for why. This page is the shelf of shelves; opening
+/// any card lands in [LibraryShelfPage], which is where titles are actually
+/// listed, filtered and sorted.
 class CollectionPage extends StatefulWidget {
   final int initialTabIndex;
 
@@ -28,124 +39,10 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-  String _filterType = 'all'; // 'all', 'movie', 'series', 'anime', 'livetv'
-  String _sortBy = 'recent'; // 'recent', 'title', 'year'
-
   @override
   void initState() {
     super.initState();
     AnimeLibraryService.instance.init();
-  }
-
-  List<MyListItem> _getFilteredAndSortedItems(
-    List<MyListItem> allItems,
-    LibrarySection section,
-  ) {
-    final type = _typeFor(section);
-    var filtered = allItems.where((item) {
-      switch (section) {
-        case LibrarySection.liked:
-          if (!item.isLiked) return false;
-        case LibrarySection.watchlist:
-          if (!item.isWatchlist) return false;
-        case LibrarySection.watched:
-          if (!item.isWatched) return false;
-        case LibrarySection.downloads:
-          break; // Not a My List view; see _buildDownloadsTab.
-      }
-      if (type == 'movie' && item.type != 'movie') return false;
-      if (type == 'series' &&
-          item.type != 'series' &&
-          item.type != 'anime') {
-        return false;
-      }
-      if (type == 'anime' && item.type != 'anime') return false;
-
-      return true;
-    }).toList();
-
-    switch (_sortBy) {
-      case 'recent':
-        filtered.sort((a, b) => b.addedAt.compareTo(a.addedAt));
-        break;
-      case 'title':
-        filtered.sort(
-          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
-        );
-        break;
-      case 'year':
-        filtered.sort((a, b) => (b.year ?? 0).compareTo(a.year ?? 0));
-        break;
-    }
-    return filtered;
-  }
-
-  Movie _toMovie(MyListItem item) {
-    final effectiveId =
-        item.imdbId ??
-        (item.tmdbId != null ? 'tmdb:${item.tmdbId}' : null) ??
-        item.traktId?.toString() ??
-        '';
-
-    return Movie(
-      id: effectiveId,
-      name: item.title,
-      poster: item.poster,
-      year: item.year?.toString(),
-      type: item.type,
-      addonBaseUrl: 'https://v3-cinemeta.strem.io',
-    );
-  }
-
-  void _navigateToDetail(MyListItem item) {
-    pushPage(context, DetailsPage(movie: _toMovie(item)));
-  }
-
-  Future<void> _confirmRemove(MyListItem item) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'Remove from Library?',
-          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
-        ),
-        content: Text(
-          'Remove "${item.title}" from your library?',
-          style: TextStyle(color: AppColors.inkAlpha(0.7)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.inkAlpha(0.6)),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFE50914),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: const Text(
-              'Remove',
-              style: TextStyle(
-                color: AppColors.onAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      MyListService.remove(item);
-    }
   }
 
   @override
@@ -160,104 +57,230 @@ class _CollectionPageState extends State<CollectionPage> {
           LibraryTab(
             label: section.label,
             icon: section.icon,
-            builder: (context) => section == LibrarySection.downloads
-                ? _buildDownloadsTab()
-                : _buildStateTab(section),
+            builder: (context) => switch (section) {
+              LibrarySection.collections => _buildCollectionsTab(),
+              LibrarySection.continueWatching => _buildContinueTab(),
+              LibrarySection.downloads => _buildDownloadsTab(),
+            },
           ),
       ],
     );
   }
 
-  /// One of the three library-state tabs. Live TV appears under Liked only:
-  /// a channel cannot be on a watchlist or marked watched, and its likes live
-  /// in [FavoriteChannelsService] rather than [MyListService].
-  /// The type filter as it applies to [section]. Live TV is only selectable
-  /// under Liked, so elsewhere a leftover 'livetv' reads as "everything"
-  /// rather than leaving the chip row with nothing highlighted.
-  String _typeFor(LibrarySection section) =>
-      (_filterType == 'livetv' && section != LibrarySection.liked)
-      ? 'all'
-      : _filterType;
+  // ── Collections ───────────────────────────────────────────────────────────
 
-  Widget _buildStateTab(LibrarySection section) {
-    // The type filter is shared across tabs, so a Live TV selection made
-    // under Liked would otherwise follow the user into Watchlist and show
-    // channels in a tab that does not offer the chip at all.
-    if (_filterType == 'livetv' && section == LibrarySection.liked) {
-      return ValueListenableBuilder<List<FavoriteChannel>>(
-        valueListenable: FavoriteChannelsService.items,
-        builder: (context, favorites, _) {
-          final channels = _sortedFavoriteChannels(favorites);
-          return Column(
-            children: [
-              _buildFilterBar(favorites.length, section),
-              Expanded(
-                child: channels.isEmpty
-                    ? const LibraryEmptyState(
-                        icon: Icons.live_tv_rounded,
-                        title: 'No liked channels yet',
-                        subtitle:
-                            'Tap the heart on a channel in Live TV to save it here.',
-                      )
-                    : _buildChannelsGrid(channels),
-              ),
-            ],
-          );
-        },
-      );
-    }
+  /// Built-in shelves first, then the user's collections, then the card that
+  /// makes a new one.
+  ///
+  /// The three built-ins are always drawn, empty or not. They are where
+  /// anything saved from a details page goes, so hiding an empty one would
+  /// hide the answer to "where did my watchlist go?" from exactly the person
+  /// who has not used it yet. A user collection is only empty because they
+  /// just made it, and it has a name they chose, so the same argument applies.
+  Widget _buildCollectionsTab() {
+    return ValueListenableBuilder<List<MediaCollection>>(
+      valueListenable: MediaCollectionsService.collections,
+      builder: (context, collections, _) {
+        // Counts come from MyListService, so the cards restate whatever the
+        // details-page buttons last wrote without this page tracking it.
+        return ValueListenableBuilder<List<MyListItem>>(
+          valueListenable: MyListService.items,
+          builder: (context, items, __) {
+            final cards = <Widget>[
+              for (final shelf in LibraryShelf.values)
+                CollectionCard(
+                  title: shelf.label,
+                  subtitle: _countLabel(
+                    items.where((i) => switch (shelf) {
+                      LibraryShelf.liked => i.isLiked,
+                      LibraryShelf.watchlist => i.isWatchlist,
+                      LibraryShelf.watched => i.isWatched,
+                    }).length,
+                  ),
+                  icon: shelf.icon,
+                  accent: shelf.color,
+                  alwaysUseIcon: true,
+                  onTap: () => pushPage(
+                    context,
+                    LibraryShelfPage.builtIn(shelf),
+                  ),
+                ),
+              for (final collection in collections)
+                CollectionCard(
+                  title: collection.name,
+                  subtitle: _countLabel(collection.count),
+                  posters: collection.mosaicPosters,
+                  icon: Icons.playlist_play_rounded,
+                  accent: AppColors.accent,
+                  onTap: () => pushPage(
+                    context,
+                    LibraryShelfPage.collection(collection.id),
+                  ),
+                ),
+              _NewCollectionCard(onTap: _createCollection),
+            ];
 
-    return ValueListenableBuilder<List<MyListItem>>(
-      valueListenable: MyListService.items,
-      builder: (context, allItems, _) {
-        final items = _getFilteredAndSortedItems(allItems, section);
-        final anyInSection = allItems.any(
-          (i) => switch (section) {
-            LibrarySection.liked => i.isLiked,
-            LibrarySection.watchlist => i.isWatchlist,
-            LibrarySection.watched => i.isWatched,
-            LibrarySection.downloads => false,
+            return _buildCardGrid(cards);
           },
-        );
-
-        return Column(
-          children: [
-            _buildFilterBar(allItems.length, section),
-            Expanded(
-              child: items.isEmpty
-                  ? LibraryEmptyState(
-                      icon: section.icon,
-                      // Distinguishes "this tab is empty" from "your filter
-                      // hid everything", which otherwise read the same.
-                      title: anyInSection
-                          ? 'No matching items'
-                          : switch (section) {
-                              LibrarySection.liked => 'Nothing liked yet',
-                              LibrarySection.watchlist =>
-                                'Nothing on your watchlist',
-                              LibrarySection.watched =>
-                                'Nothing marked watched yet',
-                              LibrarySection.downloads => '',
-                            },
-                      subtitle: anyInSection
-                          ? 'Try adjusting your filters.'
-                          : switch (section) {
-                              LibrarySection.liked =>
-                                'Tap the heart on anything and it lands here.',
-                              LibrarySection.watchlist =>
-                                'Add something to watch later and it lands here.',
-                              LibrarySection.watched =>
-                                'Mark something watched and it lands here.',
-                              LibrarySection.downloads => '',
-                            },
-                    )
-                  : _buildGrid(items),
-            ),
-          ],
         );
       },
     );
   }
+
+  String _countLabel(int count) => count == 1 ? '1 title' : '$count titles';
+
+  /// Sized from the width it actually gets rather than the screen's, so the
+  /// grid is right inside a desktop side panel too. `mainAxisExtent` rather
+  /// than an aspect ratio because the label under a square is a fixed height,
+  /// not a fixed fraction -- with a ratio the text would grow with the card
+  /// on a wide window and clip on a narrow one.
+  Widget _buildCardGrid(List<Widget> cards) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 14.0;
+        const padding = 16.0;
+        // Two single lines and the gap above them, scaled the way they will
+        // actually be drawn: at 200% system text a fixed 46 would overflow
+        // the cell, and a grid cell has no slack to absorb it.
+        final labelHeight = 8 + MediaQuery.textScalerOf(context).scale(38.0);
+        final width = constraints.maxWidth;
+        final crossAxisCount = width < 420
+            ? 2
+            : width < 700
+            ? 3
+            : width < 1000
+            ? 4
+            : width < 1400
+            ? 5
+            : 6;
+        final tile =
+            (width - padding * 2 - spacing * (crossAxisCount - 1)) /
+            crossAxisCount;
+
+        return GridView.builder(
+          padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: spacing,
+            mainAxisSpacing: 18,
+            mainAxisExtent: tile + labelHeight,
+          ),
+          itemCount: cards.length,
+          itemBuilder: (context, index) => cards[index],
+        );
+      },
+    );
+  }
+
+  Future<void> _createCollection() async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.raised,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'New collection',
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (value) => Navigator.pop(ctx, value),
+          style: TextStyle(color: AppColors.ink),
+          decoration: const InputDecoration(hintText: 'Collection name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: AppColors.inkAlpha(0.6)),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            child: const Text('Create'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null) return;
+    final created = MediaCollectionsService.create(name);
+    if (created == null) return; // Blank name.
+    if (!mounted) return;
+    // Straight into the new collection: it is empty, and the next thing
+    // anyone wants is to see where titles will land.
+    pushPage(context, LibraryShelfPage.collection(created.id));
+  }
+
+  // ── Continue ──────────────────────────────────────────────────────────────
+
+  /// The same cards the home row shows, off one shelf instead of a strip.
+  /// Dropped as a tab on 2026-09-13 for duplicating that row; back because
+  /// the home row only holds what fits on screen, and this is where you look
+  /// for the thing that has scrolled off it.
+  Widget _buildContinueTab() {
+    return ValueListenableBuilder<List<ContinueWatchingItem>>(
+      valueListenable: ContinueWatchingService.activeItems,
+      builder: (context, items, _) {
+        if (items.isEmpty) {
+          return const LibraryEmptyState(
+            icon: Icons.play_circle_outline_rounded,
+            title: 'Nothing in progress',
+            subtitle: 'Start something and it will wait for you here.',
+          );
+        }
+
+        final palette = AppThemeService.currentPalette.value;
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            const spacing = 14.0;
+            const padding = 16.0;
+            final width = constraints.maxWidth;
+            final crossAxisCount = width < 520
+                ? 1
+                : width < 820
+                ? 2
+                : width < 1200
+                ? 3
+                : 4;
+            final cardWidth =
+                (width - padding * 2 - spacing * (crossAxisCount - 1)) /
+                crossAxisCount;
+
+            return GridView.builder(
+              padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: 16,
+                // The card's own art ratio plus its text block, straight off
+                // the slider, so a card is the same shape in both places.
+                mainAxisExtent: cardWidth * 0.62 + 60,
+              ),
+              itemCount: items.length,
+              itemBuilder: (context, index) {
+                final item = items[index];
+                return ContinueWatchingCard(
+                  item: item,
+                  width: cardWidth,
+                  palette: palette,
+                  onTap: () =>
+                      ContinueWatchingService.resumePlayback(context, item),
+                  onRemove: () => ContinueWatchingService.removeItem(item),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ── Downloads ─────────────────────────────────────────────────────────────
 
   Widget _buildDownloadsTab() {
     return ValueListenableBuilder<List<DownloadTask>>(
@@ -405,212 +428,55 @@ class _CollectionPageState extends State<CollectionPage> {
       },
     );
   }
+}
 
-  Widget _buildFilterBar(int totalCount, LibrarySection section) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+/// The last card in the grid. A card rather than a floating action button so
+/// it sits in the flow after the collections it will join, which is where
+/// someone scrolling to the end of their collections is already looking.
+class _NewCollectionCard extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _NewCollectionCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  child: Row(
-                    children: [
-                      _buildChoiceChip('All', 'all', section),
-                      const SizedBox(width: 6),
-                      _buildChoiceChip('Movies', 'movie', section),
-                      const SizedBox(width: 6),
-                      _buildChoiceChip('Series', 'series', section),
-                      const SizedBox(width: 6),
-                      _buildChoiceChip('Anime', 'anime', section),
-                      // Only under Liked: a channel cannot be watchlisted or
-                      // marked watched, so offering the chip in those tabs
-                      // would promise a filter with nothing behind it.
-                      if (section == LibrarySection.liked) ...[
-                        const SizedBox(width: 6),
-                        _buildChoiceChip('Live TV', 'livetv', section),
-                      ],
-                    ],
-                  ),
+          AspectRatio(
+            aspectRatio: 1,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.inkAlpha(0.20)),
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.add_rounded,
+                  size: 32,
+                  color: AppColors.inkMuted,
                 ),
               ),
-              const SizedBox(width: 8),
-              PopupMenuButton<String>(
-                initialValue: _sortBy,
-                tooltip: 'Sort by',
-                onSelected: (val) => setState(() => _sortBy = val),
-                color: AppColors.raised,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.raised,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: AppColors.inkAlpha(0.08),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.sort_rounded,
-                        size: 14,
-                        color: AppColors.inkMuted,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _sortBy.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.inkMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'recent',
-                    child: Text('Recently Added'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'title',
-                    child: Text('Title (A-Z)'),
-                  ),
-                  const PopupMenuItem(
-                    value: 'year',
-                    child: Text('Release Year'),
-                  ),
-                ],
-              ),
-            ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'New collection',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: AppColors.inkMuted,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
     );
   }
-
-  Widget _buildChoiceChip(String label, String value, LibrarySection section) {
-    final isSelected = _typeFor(section) == value;
-    return GestureDetector(
-      onTap: () => setState(() => _filterType = value),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.raised,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11.5,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Same crossAxisCount/childAspectRatio scheme as Movies & Series' own
-  // filtered grid (type_catalog_page.dart) and MovieCard itself -- Saved
-  // used to hand-roll its own bigger cards via a percentage-of-screen
-  // column count instead of MovieCardSizing's fixed pixel widths, so
-  // posters here were visibly larger than everywhere else in the app.
-  Widget _buildGrid(List<MyListItem> items) {
-    final width = MediaQuery.sizeOf(context).width;
-    final crossAxisCount = width < 600
-        ? 3
-        : width < 900
-        ? 4
-        : width < 1200
-        ? 5
-        : width < 1600
-        ? 6
-        : 7;
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.62,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return GestureDetector(
-          onLongPress: () => _confirmRemove(item),
-          child: MovieCard(
-            movie: _toMovie(item),
-            onTap: () => _navigateToDetail(item),
-          ),
-        );
-      },
-    );
-  }
-
-  /// Favorited channels newest-first ("recent") or alphabetically ("title");
-  /// "year" doesn't apply to a channel, so it falls back to recent.
-  List<HardcodedChannel> _sortedFavoriteChannels(List<FavoriteChannel> favorites) {
-    final sorted = List<FavoriteChannel>.from(favorites);
-    if (_sortBy == 'title') {
-      final byId = {for (final f in sorted) f.channelId: f};
-      final resolved = byId.values
-          .map((f) => HardcodedChannels.byId(f.channelId))
-          .whereType<HardcodedChannel>()
-          .toList()
-        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-      return resolved;
-    }
-    sorted.sort((a, b) => b.addedAt.compareTo(a.addedAt));
-    return sorted
-        .map((f) => HardcodedChannels.byId(f.channelId))
-        .whereType<HardcodedChannel>()
-        .toList();
-  }
-
-  Widget _buildChannelsGrid(List<HardcodedChannel> channels) {
-    final width = MediaQuery.sizeOf(context).width;
-    final crossAxisCount = width < 600
-        ? 2
-        : width < 900
-        ? 3
-        : width < 1200
-        ? 4
-        : width < 1600
-        ? 5
-        : 6;
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
-        // favorited channel looks the same size and shape here as it does
-        // in Live TV's own rows.
-        childAspectRatio: 0.58,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: channels.length,
-      itemBuilder: (context, index) {
-        final channel = channels[index];
-        return IptvChannelCard(
-          channel: channel,
-          onTap: () => IptvChannelSheet.show(context, channel),
-        );
-      },
-    );
-  }
 }
-
-/// A toggle chip for a boolean filter on the Saved tab (Watchlist, Watched)
-/// -- same shape as the type chips but its own on/off state instead of a
-/// mutually-exclusive selection.

@@ -11,29 +11,17 @@ const _libraryPages = [
 
 void main() {
   group('LibrarySection', () {
-    test('is the three library states, then Downloads', () {
-      // History was dropped 2026-09-02, and Continue on 2026-09-13: Continue
-      // rendered ContinueWatchingService.activeItems, the identical deduped
-      // list the Continue Watching row already shows.
-      //
-      // The first three are the states LibraryActionsRow writes on every
-      // details page, so a tab here means what the button there meant. The
-      // generic "Saved" bucket is gone: it needed a generic icon precisely
-      // because it held two unlike things at once.
+    test('is Collections, Continue, Downloads', () {
+      // The three library states used to be three of four tabs. They are
+      // cards inside Collections now: with user collections added, one tab
+      // each would have meant a scrolling pill row nobody reads to the end
+      // of. What is left is the three genuinely different questions a
+      // Library answers -- what I saved, what I was part-way through, what
+      // is on the device.
       expect(
         LibrarySection.values.map((s) => s.label).toList(),
-        ['Liked', 'Watchlist', 'Watched', 'Downloads'],
+        ['Collections', 'Continue', 'Downloads'],
       );
-    });
-
-    test('only Downloads is not a My List state', () {
-      // Downloads reads DownloadService, not MyListService, and is kept
-      // because it is the only place an in-app download can be managed.
-      expect(
-        LibrarySection.values.where((s) => s.isLibraryState).map((s) => s.name),
-        ['liked', 'watchlist', 'watched'],
-      );
-      expect(LibrarySection.downloads.isLibraryState, isFalse);
     });
 
     test('every label and icon is distinct', () {
@@ -48,12 +36,47 @@ void main() {
     });
   });
 
-  group('every hub builds its Library from the shared spec', () {
-    // A source check rather than a widget test: two of the three pages need
-    // half the app's services initialised before they will pump, and what
-    // matters here is only that none of them hand-rolls its own tab list
-    // again -- which is exactly how the three drifted to 4/5/5 tabs with
-    // different names in the first place.
+  group('LibraryShelf', () {
+    test('is the three states LibraryActionsRow writes', () {
+      // A card here has to mean exactly what the button on a details page
+      // meant, or the Library stops being where saved things went.
+      expect(
+        LibraryShelf.values.map((s) => s.name).toList(),
+        ['liked', 'watchlist', 'watched'],
+      );
+    });
+
+    test('every label, icon and colour is distinct', () {
+      // The colour is what tells them apart in a grid of same-shaped cards,
+      // so two sharing one would undo the point of tinting them at all.
+      for (final read in [
+        LibraryShelf.values.map((s) => s.label),
+        LibraryShelf.values.map((s) => s.icon),
+        LibraryShelf.values.map((s) => s.color),
+      ]) {
+        expect(read.toSet().length, LibraryShelf.values.length);
+      }
+    });
+
+    test('each carries its own empty-state wording', () {
+      // "Nothing here" three times over would leave the user unable to tell
+      // which shelf they are looking at.
+      for (final shelf in LibraryShelf.values) {
+        expect(shelf.emptyTitle, isNotEmpty);
+        expect(shelf.emptySubtitle, isNotEmpty);
+      }
+      expect(
+        LibraryShelf.values.map((s) => s.emptyTitle).toSet().length,
+        LibraryShelf.values.length,
+      );
+    });
+  });
+
+  group('the Library builds its tabs from the shared spec', () {
+    // A source check rather than a widget test: the page needs half the
+    // app's services initialised before it will pump, and what matters here
+    // is only that it does not hand-roll its own tab list again -- which is
+    // exactly how three hubs drifted to 4/5/5 tabs with different names.
     for (final path in _libraryPages) {
       test(path, () {
         final source = File(path).readAsStringSync();
@@ -72,5 +95,15 @@ void main() {
         }
       });
     }
+
+    test('and draws a card for every built-in shelf', () {
+      final source = File(_libraryPages.first).readAsStringSync();
+      expect(
+        source.contains('for (final shelf in LibraryShelf.values)'),
+        isTrue,
+        reason: 'a shelf added to the enum must appear in the grid without '
+            'the page needing to be edited',
+      );
+    });
   });
 }
