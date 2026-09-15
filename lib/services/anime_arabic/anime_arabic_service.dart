@@ -469,7 +469,9 @@ class AnimeArabicService {
     for (final raw in list) {
       try {
         out.add(jsonDecode(raw) as Map<String, dynamic>);
-      } catch (_) {}
+      } catch (_) {
+        // A corrupt history entry is skipped rather than emptying the list.
+      }
     }
     return out;
   }

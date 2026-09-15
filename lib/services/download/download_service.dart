@@ -487,7 +487,10 @@ class DownloadService {
           try {
             await sink.flush();
             await sink.close();
-          } catch (_) {}
+          } catch (_) {
+            // The stream has ended and the bytes are on disk; a sink that will
+            // not flush has usually already been closed.
+          }
           _httpFileSinks.remove(task.id);
           _httpSubscriptions.remove(task.id);
           _httpRequests.remove(task.id);
@@ -524,7 +527,10 @@ class DownloadService {
           try {
             await sink.flush();
             await sink.close();
-          } catch (_) {}
+          } catch (_) {
+            // Already on the error path. Closing the sink is tidy-up, not
+            // recovery.
+          }
           _httpFileSinks.remove(task.id);
           _httpSubscriptions.remove(task.id);
           _httpRequests.remove(task.id);
@@ -593,7 +599,10 @@ class DownloadService {
       if (await finalFile.exists()) {
         try {
           await finalFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // A stale target that will not delete is about to be overwritten by
+          // the rename below, which reports its own failure.
+        }
       }
 
       // Try atomic rename first, fallback to copy + delete if locked or cross-device
@@ -604,7 +613,10 @@ class DownloadService {
         await partFile.copy(task.targetFilePath);
         try {
           await partFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // The copy above already succeeded, so the .part file is a leftover
+          // rather than data.
+        }
       }
 
       final completedBytes = await File(task.targetFilePath).length();
@@ -634,7 +646,9 @@ class DownloadService {
     _httpRequests.remove(taskId);
     try {
       _httpFileSinks[taskId]?.close();
-    } catch (_) {}
+    } catch (_) {
+      // Cancelling a download whose sink is already closed.
+    }
     _httpFileSinks.remove(taskId);
   }
 
@@ -678,19 +692,27 @@ class DownloadService {
     if (task.sourceType == DownloadSourceType.p2p && task.infoHash != null) {
       try {
         await TorrentStreamService().removeTorrent(task.infoHash!);
-      } catch (_) {}
+      } catch (_) {
+        // The torrent may already be gone from the engine; the task is being
+        // removed either way.
+      }
     } else {
       final partFile = File('${task.targetFilePath}.part');
       if (await partFile.exists()) {
         try {
           await partFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // Leftover .part file. The download is cancelled whether or not the
+          // file goes.
+        }
       }
       final metaFile = File('${task.targetFilePath}.hls_meta.json');
       if (await metaFile.exists()) {
         try {
           await metaFile.delete();
-        } catch (_) {}
+        } catch (_) {
+          // Leftover metadata file, same as the .part above.
+        }
       }
     }
 
@@ -708,7 +730,10 @@ class DownloadService {
     if (await targetFile.exists()) {
       try {
         await targetFile.delete();
-      } catch (_) {}
+      } catch (_) {
+        // The user asked to delete this download. A file locked by another
+        // process stays, and the task is removed from the list regardless.
+      }
     }
 
     final current = List<DownloadTask>.from(tasksNotifier.value)..removeWhere((t) => t.id == taskId);

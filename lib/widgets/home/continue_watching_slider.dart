@@ -27,6 +27,45 @@ class ContinueWatchingSlider extends StatefulWidget {
     this.title = 'Continue Watching',
   });
 
+  /// Height of the section header line (accent bar, title, count, "See all").
+  ///
+  /// Pinned rather than intrinsic so [bandHeight] can be exact: the tallest
+  /// child is the "See all" TextButton, which only exists once something has
+  /// been watched to the end, and a band that changed height when it appeared
+  /// would shift the hero above it. 48 because that is what the row already
+  /// measured whenever the button was there -- a Material tap target with the
+  /// default padded sizing -- so pinning it keeps the look the button case
+  /// already had rather than imposing a new one.
+  static const double headerHeight = 48;
+
+  /// Gap between the header line and the cards.
+  static const double headerGap = 12;
+
+  /// Space below the cards, before whatever row comes next.
+  static const double bottomGap = 28;
+
+  /// Width of one card at [screenWidth]. The row's card size is a step
+  /// function of the window, not of the card count.
+  static double cardWidthFor(double screenWidth) => screenWidth > 900
+      ? 280.0
+      : screenWidth > 600
+      ? 240.0
+      : 200.0;
+
+  /// Height of one card: artwork at 0.62 of its width, plus the fixed
+  /// title/progress block beneath it.
+  static double cardHeightFor(double screenWidth) =>
+      cardWidthFor(screenWidth) * 0.62 + 60.0;
+
+  /// Total vertical space this widget occupies when it has anything to show.
+  ///
+  /// [BrowseScaffold] sizes its hero to `viewport - bandHeight` so that the
+  /// hero and this one row fill the screen exactly, which is why the number
+  /// has to be derivable without building the widget. Every term is used by
+  /// [build] too, so the two cannot drift.
+  static double bandHeight(double screenWidth) =>
+      headerHeight + headerGap + cardHeightFor(screenWidth) + bottomGap;
+
   @override
   State<ContinueWatchingSlider> createState() => _ContinueWatchingSliderState();
 }
@@ -112,96 +151,120 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
         if (items.isEmpty) return const SizedBox.shrink();
 
         final screenWidth = MediaQuery.sizeOf(context).width;
-        final cardWidth = screenWidth > 900
-            ? 280.0
-            : screenWidth > 600
-            ? 240.0
-            : 200.0;
-        final cardHeight = cardWidth * 0.62 + 60.0;
+        final cardWidth = ContinueWatchingSlider.cardWidthFor(screenWidth);
+        final cardHeight = ContinueWatchingSlider.cardHeightFor(screenWidth);
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 28),
+          padding: const EdgeInsets.only(
+            bottom: ContinueWatchingSlider.bottomGap,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 4,
-                      height: 18,
-                      decoration: BoxDecoration(
-                        color: palette.primaryColor,
-                        borderRadius: BorderRadius.circular(2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: palette.primaryColor.withValues(alpha: 0.5),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      widget.title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
-                        letterSpacing: -0.3,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: palette.primaryColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: palette.primaryColor.withValues(alpha: 0.3),
-                          width: 0.8,
-                        ),
-                      ),
-                      child: Text(
-                        '${items.length}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+              SizedBox(
+                height: ContinueWatchingSlider.headerHeight,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 18,
+                        decoration: BoxDecoration(
                           color: palette.primaryColor,
+                          borderRadius: BorderRadius.circular(2),
+                          boxShadow: [
+                            BoxShadow(
+                              color: palette.primaryColor.withValues(alpha: 0.5),
+                              blurRadius: 8,
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    // The row shows one card per show and drops a title once
-                    // it is finished; the full per-episode log lives behind
-                    // this. It was being recorded all along with nothing to
-                    // render it.
-                    if (ContinueWatchingService.historyItems.value.any(
-                      (i) => ContinueWatchingService.matchesTypeFilter(
-                        i,
-                        widget.typeFilter,
+                      const SizedBox(width: 10),
+                      // Title and count take the space "See all" does not,
+                      // and the title gives way first. Laid out flat with a
+                      // Spacer, the title demanded its natural width and
+                      // pushed the button off the edge -- 88px of overflow on
+                      // a 420px-wide phone with any watch history, and more
+                      // for a longer title than the English one.
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.ink,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: palette.primaryColor.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: palette.primaryColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Text(
+                                '${items.length}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: palette.primaryColor,
+                                ),
+                              ),
+                            ),
+                            // Takes the slack the title did not need, so the
+                            // count stays beside the title rather than
+                            // drifting across to the button.
+                            const Spacer(),
+                          ],
+                        ),
                       ),
-                    ))
-                      TextButton(
-                        onPressed: () => pushPage(
-                          context,
-                          WatchHistoryPage(
-                            typeFilter: widget.typeFilter,
-                            title: 'History',
+                      // The row shows one card per show and drops a title once
+                      // it is finished; the full per-episode log lives behind
+                      // this. It was being recorded all along with nothing to
+                      // render it.
+                      if (ContinueWatchingService.historyItems.value.any(
+                        (i) => ContinueWatchingService.matchesTypeFilter(
+                          i,
+                          widget.typeFilter,
+                        ),
+                      ))
+                        TextButton(
+                          onPressed: () => pushPage(
+                            context,
+                            WatchHistoryPage(
+                              typeFilter: widget.typeFilter,
+                              title: 'History',
+                            ),
                           ),
+                          child: const Text('See all'),
                         ),
-                        child: const Text('See all'),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: ContinueWatchingSlider.headerGap),
 
               // Horizontal Card Slider with Desktop Floating Arrows
               MouseRegion(

@@ -24,20 +24,29 @@ class EnvService {
         _parseLines(lines);
         return;
       }
-    } catch (_) {}
+    } catch (_) {
+      // No .env on disk is the normal case for a release build -- the bundled
+      // asset below is where it usually lives.
+    }
 
     // 2. Try reading from rootBundle asset if bundled
     try {
       final content = await rootBundle.loadString('.env');
       _parseLines(content.split('\n'));
       return;
-    } catch (_) {}
+    } catch (_) {
+      // Not bundled at the root either; the assets/ path below is the other
+      // convention.
+    }
 
     try {
       final content = await rootBundle.loadString('assets/.env');
       _parseLines(content.split('\n'));
       return;
-    } catch (_) {}
+    } catch (_) {
+      // No dotenv anywhere. The app runs on whatever the platform environment
+      // provides, and Settings asks for a key if it needs one.
+    }
   }
 
   static void _parseLines(List<String> lines) {
@@ -66,7 +75,10 @@ class EnvService {
     try {
       final platVal = Platform.environment[key];
       if (platVal != null && platVal.isNotEmpty) return platVal;
-    } catch (_) {}
+    } catch (_) {
+      // Platform.environment throws on web and some sandboxes. An absent value
+      // is the same answer as a missing key.
+    }
 
     return defaultValue;
   }

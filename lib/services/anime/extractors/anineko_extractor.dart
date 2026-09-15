@@ -73,7 +73,10 @@ class AniNekoExtractor {
           }
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // A search page that no longer parses yields no results rather than
+      // failing the whole search.
+    }
     return results;
   }
 
@@ -95,7 +98,10 @@ class AniNekoExtractor {
           return _decodeEntities(m.group(1)!);
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No playable URL in this page shape. The caller tries the next
+      // candidate.
+    }
     return null;
   }
 
@@ -128,7 +134,10 @@ class AniNekoExtractor {
             seriesSlug = potentialSlug;
             break;
           }
-        } catch (_) {}
+        } catch (_) {
+          // This slug guess was wrong or unreachable; the loop tries the next
+          // one.
+        }
       }
 
       // 2. Search fallback

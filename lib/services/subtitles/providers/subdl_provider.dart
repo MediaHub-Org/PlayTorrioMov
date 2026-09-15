@@ -32,7 +32,7 @@ class SubdlProvider extends SubtitleProvider {
     final bool isTvShow = season != null && episode != null;
 
     try {
-      final parsed = _cleanTitleAndExtractYear(movieName, explicitYear: year);
+      final parsed = cleanTitleAndExtractYear(movieName, explicitYear: year);
       final String cleanTitle = parsed['cleanTitle'] as String;
       final int? targetYear = parsed['year'] as int?;
 
@@ -205,7 +205,15 @@ class SubdlProvider extends SubtitleProvider {
   // Helper Methods
   // ---------------------------------------------------------------------------
 
-  static Map<String, dynamic> _cleanTitleAndExtractYear(String input, {int? explicitYear}) {
+  /// Reduces a filename or display title to something worth searching for,
+  /// and pulls the year out of it when it is there.
+  ///
+  /// Pure, and the only thing standing between a release name off a scraper
+  /// ("Some.Movie.2019.1080p.WEB-DL.x264-GROUP") and the query SubDL actually
+  /// receives. An explicit [explicitYear] always wins over one found in the
+  /// text.
+  @visibleForTesting
+  static Map<String, dynamic> cleanTitleAndExtractYear(String input, {int? explicitYear}) {
     final raw = input.trim();
     int? year = explicitYear;
 
@@ -263,7 +271,10 @@ class SubdlProvider extends SubtitleProvider {
           return list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No results from this endpoint; the provider returns nothing rather
+      // than failing the search.
+    }
     return [];
   }
 
@@ -304,7 +315,9 @@ class SubdlProvider extends SubtitleProvider {
           });
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // The scrape fallback found nothing parseable.
+    }
     return results;
   }
 

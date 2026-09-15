@@ -131,7 +131,10 @@ class FSOnlineScraper extends StreamScraper {
                   );
                 }
               }
-            } catch (_) {}
+            } catch (_) {
+              // This entry did not yield a stream; the rest of the list is
+              // still walked.
+            }
           }
           idx = spanEnd != -1 ? spanEnd : embedEnd;
         }

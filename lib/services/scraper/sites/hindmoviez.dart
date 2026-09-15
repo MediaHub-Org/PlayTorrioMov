@@ -761,7 +761,10 @@ class HindMoviezScraper extends StreamScraper {
             if (nestedDecoded.contains('.workers.dev') || nestedDecoded.contains('.powerly.dev')) {
               return _appendTimestamp(nestedDecoded);
             }
-          } catch (_) {}
+          } catch (_) {
+            // The nested parameter was not base64 after all, so it is not a
+            // worker link.
+          }
         }
 
         // Fetch redirect/embed page

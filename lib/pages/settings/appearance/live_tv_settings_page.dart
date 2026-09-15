@@ -4,6 +4,8 @@ import '../../../services/content_display_enums.dart';
 import '../../../services/iptv/iptv_settings.dart';
 import '../../../widgets/settings/settings_scroll_view.dart';
 import '../../../services/theme/app_colors.dart';
+import '../../../widgets/common/setting_choice_chip.dart';
+import '../../../widgets/iptv/default_portal_tab_picker.dart';
 
 class LiveTvSettingsPage extends StatefulWidget {
   const LiveTvSettingsPage({super.key});
@@ -204,26 +206,12 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       runSpacing: 8,
                       children: HeroStyle.values.map((style) {
                         final isSelected = style == currentStyle;
-                        return ChoiceChip(
-                          label: Text(style.label),
+                        return SettingChoiceChip(
+                          label: style.label,
                           selected: isSelected,
-                          selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                          backgroundColor: AppColors.bar,
-                          labelStyle: TextStyle(
-                            color: isSelected ? palette.primaryColor : AppColors.inkMuted,
-                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                          side: BorderSide(
-                            color: isSelected
-                                ? palette.primaryColor.withValues(alpha: 0.6)
-                                : AppColors.inkAlpha(0.08),
-                          ),
-                          onSelected: (selected) {
-                            if (selected) {
-                              IptvSettings.setHeroStyle(style);
-                              setState(() {});
-                            }
+                          onSelect: () {
+                            IptvSettings.setHeroStyle(style);
+                            setState(() {});
                           },
                         );
                       }).toList(),
@@ -362,26 +350,12 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 runSpacing: 8,
                 children: CardDensity.values.map((density) {
                   final isSelected = density == currentDensity;
-                  return ChoiceChip(
-                    label: Text(density.label),
+                  return SettingChoiceChip(
+                    label: density.label,
                     selected: isSelected,
-                    selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                    backgroundColor: AppColors.bar,
-                    labelStyle: TextStyle(
-                      color: isSelected ? palette.primaryColor : AppColors.inkMuted,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: isSelected
-                          ? palette.primaryColor.withValues(alpha: 0.6)
-                          : AppColors.inkAlpha(0.08),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        IptvSettings.setCardDensity(density);
-                        setState(() {});
-                      }
+                    onSelect: () {
+                      IptvSettings.setCardDensity(density);
+                      setState(() {});
                     },
                   );
                 }).toList(),
@@ -631,26 +605,12 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 runSpacing: 8,
                 children: PortalCardStyle.values.map((s) {
                   final isSelected = s == style;
-                  return ChoiceChip(
-                    label: Text(s.label),
+                  return SettingChoiceChip(
+                    label: s.label,
                     selected: isSelected,
-                    selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                    backgroundColor: AppColors.bar,
-                    labelStyle: TextStyle(
-                      color: isSelected ? palette.primaryColor : AppColors.inkMuted,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: isSelected
-                          ? palette.primaryColor.withValues(alpha: 0.6)
-                          : AppColors.inkAlpha(0.08),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        IptvSettings.setPortalCardStyle(s);
-                        setState(() {});
-                      }
+                    onSelect: () {
+                      IptvSettings.setPortalCardStyle(s);
+                      setState(() {});
                     },
                   );
                 }).toList(),
@@ -749,54 +709,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          ValueListenableBuilder<int>(
-            valueListenable: IptvSettings.defaultPortalTab,
-            builder: (context, tabIdx, _) {
-              return Row(
-                children: [
-                  ChoiceChip(
-                    label: const Text('Xtream Panels'),
-                    selected: tabIdx == 0,
-                    selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                    backgroundColor: AppColors.bar,
-                    labelStyle: TextStyle(
-                      color: tabIdx == 0 ? palette.primaryColor : AppColors.inkMuted,
-                      fontWeight: tabIdx == 0 ? FontWeight.w800 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: tabIdx == 0
-                          ? palette.primaryColor.withValues(alpha: 0.6)
-                          : AppColors.inkAlpha(0.08),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) IptvSettings.setDefaultPortalTab(0);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: const Text('M3U Playlists'),
-                    selected: tabIdx == 1,
-                    selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                    backgroundColor: AppColors.bar,
-                    labelStyle: TextStyle(
-                      color: tabIdx == 1 ? palette.primaryColor : AppColors.inkMuted,
-                      fontWeight: tabIdx == 1 ? FontWeight.w800 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: tabIdx == 1
-                          ? palette.primaryColor.withValues(alpha: 0.6)
-                          : AppColors.inkAlpha(0.08),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) IptvSettings.setDefaultPortalTab(1);
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
+          const DefaultPortalTabPicker(),
         ],
       ),
     );
@@ -830,26 +743,12 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 runSpacing: 8,
                 children: PortalBrowserLayout.values.map((l) {
                   final isSelected = l == layout;
-                  return ChoiceChip(
-                    label: Text(l.label),
+                  return SettingChoiceChip(
+                    label: l.label,
                     selected: isSelected,
-                    selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                    backgroundColor: AppColors.bar,
-                    labelStyle: TextStyle(
-                      color: isSelected ? palette.primaryColor : AppColors.inkMuted,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: isSelected
-                          ? palette.primaryColor.withValues(alpha: 0.6)
-                          : AppColors.inkAlpha(0.08),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        IptvSettings.setBrowserLayout(l);
-                        setState(() {});
-                      }
+                    onSelect: () {
+                      IptvSettings.setBrowserLayout(l);
+                      setState(() {});
                     },
                   );
                 }).toList(),

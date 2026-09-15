@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../models/subtitle/subtitle_model.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_extractor.dart';
 import '../subtitle_languages.dart';
+import '../subtitle_response.dart';
 
 class OpenSubtitlesProvider extends SubtitleProvider {
   @override
@@ -49,38 +51,7 @@ class OpenSubtitlesProvider extends SubtitleProvider {
         final res = await http.get(Uri.parse(url), headers: _headers).timeout(const Duration(seconds: 4));
 
         if (res.statusCode == 200) {
-          final data = jsonDecode(utf8.decode(res.bodyBytes));
-          final subsList = data['subtitles'] as List?;
-          if (subsList == null || subsList.isEmpty) continue;
-
-          int idx = 0;
-          for (final item in subsList) {
-            if (item is! Map) continue;
-            final map = Map<String, dynamic>.from(item);
-            final subUrl = map['url']?.toString();
-            if (subUrl == null || subUrl.isEmpty || seenUrls.contains(subUrl)) continue;
-
-            seenUrls.add(subUrl);
-            idx++;
-
-            final rawLang = (map['lang'] ?? 'en').toString().toLowerCase();
-            final language = subtitleLanguageName(rawLang);
-            final format = (map['SubFormat']?.toString() ?? 'srt').toLowerCase();
-
-            results.add(
-              SubtitleVariant(
-                providerName: name,
-                language: language,
-                title: 'OpenSubtitles #$idx',
-                downloadUrl: subUrl,
-                format: format,
-                extraData: {
-                  'id': map['id'],
-                  'fps': map['fps'],
-                },
-              ),
-            );
-          }
+          results.addAll(parseBody(utf8.decode(res.bodyBytes), seenUrls));
 
           if (results.isNotEmpty) {
             break; // First responding endpoint with subs is enough
@@ -91,6 +62,38 @@ class OpenSubtitlesProvider extends SubtitleProvider {
       }
     }
 
+    return results;
+  }
+
+  /// Reads one endpoint's response into variants.
+  ///
+  /// [seenUrls] carries across endpoints: the three hosts below are mirrors of
+  /// each other, so the same subtitle can come back twice, and the numbering
+  /// in the titles should not count it twice either.
+  @visibleForTesting
+  static List<SubtitleVariant> parseBody(String body, Set<String> seenUrls) {
+    final results = <SubtitleVariant>[];
+    var idx = 0;
+    for (final map in StremioSubtitlesBody.entries(body)) {
+      final subUrl = map['url']!.toString();
+      if (!seenUrls.add(subUrl)) continue;
+      idx++;
+
+      final rawLang = (map['lang'] ?? 'en').toString().toLowerCase();
+      results.add(
+        SubtitleVariant(
+          providerName: 'OpenSubtitles',
+          language: subtitleLanguageName(rawLang),
+          title: 'OpenSubtitles #$idx',
+          downloadUrl: subUrl,
+          format: (map['SubFormat']?.toString() ?? 'srt').toLowerCase(),
+          extraData: {
+            'id': map['id'],
+            'fps': map['fps'],
+          },
+        ),
+      );
+    }
     return results;
   }
 

@@ -117,6 +117,20 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// get [_defaultHeroHeight].
   final double Function(double width, double screenHeight)? heroHeightOf;
 
+  /// Vertical space [belowHero] will occupy, given the window width.
+  ///
+  /// Supplying it changes how the hero is sized: instead of a fraction of
+  /// the screen it takes the whole viewport minus this band, so the hero and
+  /// the one row beneath it fill the screen and nothing else shows above the
+  /// fold. Reserved unconditionally -- when [belowHero] has nothing to show
+  /// (an empty Continue Watching list) the first content row moves up into
+  /// the same space, which is the same promise for a viewer who has not
+  /// watched anything yet.
+  ///
+  /// Sections that size their hero themselves use [heroHeightOf], which
+  /// still wins over this.
+  final double Function(double width)? belowHeroExtent;
+
   final Future<void> Function()? onRefresh;
 
   const BrowseScaffold({
@@ -136,6 +150,7 @@ class BrowseScaffold<T> extends StatefulWidget {
     this.emptyState,
     this.heroInterval = const Duration(seconds: 7),
     this.heroHeightOf,
+    this.belowHeroExtent,
     this.onRefresh,
   });
 
@@ -179,10 +194,31 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     startHeroAutoRotate(itemCount: widget.heroItems.length, interval: interval);
   }
 
-  /// The caller's formula when it has one, else [_defaultHeroHeight].
-  double _heroHeight(double width, double screenHeight) =>
-      widget.heroHeightOf?.call(width, screenHeight) ??
-      _defaultHeroHeight(width, screenHeight);
+  /// The caller's own formula first; then the viewport-filling size when the
+  /// caller declared a below-hero band; else [_defaultHeroHeight].
+  double _heroHeight(double width, double screenHeight, double viewportHeight) {
+    final custom = widget.heroHeightOf?.call(width, screenHeight);
+    if (custom != null) return custom;
+    final extent = widget.belowHeroExtent;
+    if (extent != null && viewportHeight.isFinite && viewportHeight > 0) {
+      return _fillHeroHeight(width, viewportHeight - extent(width));
+    }
+    return _defaultHeroHeight(width, screenHeight);
+  }
+
+  /// The hero takes everything the below-hero band leaves, so the fold lands
+  /// at the bottom of that one row.
+  ///
+  /// The clamps are the guard rails on that arithmetic rather than the rule:
+  /// a short window (a half-height desktop window, a phone in landscape)
+  /// would otherwise leave a sliver of artwork, and a very tall one a hero
+  /// taller than any poster is worth. Between those the size is exact, which
+  /// is what makes it adapt to the window instead of to a breakpoint.
+  double _fillHeroHeight(double width, double remaining) {
+    if (width < 600) return remaining.clamp(340.0, 560.0);
+    if (width < 1100) return remaining.clamp(360.0, 700.0);
+    return remaining.clamp(380.0, 900.0);
+  }
 
   // Height-relative like Anime's and Live TV's hero carousels, not the flat
   // 240/320/420 width tiers this used to have -- those capped out well under
@@ -268,6 +304,24 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     double width, {
     Widget? headerOverlay,
   }) {
+    // LayoutBuilder rather than MediaQuery: the hero is sized to the space
+    // this scroll view actually got, which is the screen minus the top bar,
+    // the section chip row and (on a phone) the bottom tab bar and its safe
+    // area. Measuring the screen instead would overshoot by all of that and
+    // push the row below the hero off the fold on exactly the small screens
+    // where it matters most.
+    return LayoutBuilder(
+      builder: (context, constraints) =>
+          _buildViewport(sizing, width, constraints.maxHeight, headerOverlay),
+    );
+  }
+
+  Widget _buildViewport(
+    MovieCardSizing sizing,
+    double width,
+    double viewportHeight,
+    Widget? headerOverlay,
+  ) {
     // When there's no header to overlay, build() puts it in its own band
     // above this viewport instead, so it stays put and nothing scrolls
     // under it.
@@ -275,11 +329,17 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
       controller: _scrollController,
       slivers: [
         if (widget.isLoading)
-          SliverToBoxAdapter(child: _buildLoading(sizing, width))
+          SliverToBoxAdapter(
+            child: _buildLoading(sizing, width, viewportHeight),
+          )
         else ...[
           if (widget.heroItems.isNotEmpty) ...[
             SliverToBoxAdapter(
-              child: _buildHero(width, headerOverlay: headerOverlay),
+              child: _buildHero(
+                width,
+                viewportHeight,
+                headerOverlay: headerOverlay,
+              ),
             ),
             if (widget.belowHero != null)
               SliverToBoxAdapter(child: widget.belowHero!),
@@ -307,8 +367,16 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     return RefreshIndicator(onRefresh: widget.onRefresh!, child: content);
   }
 
-  Widget _buildHero(double width, {Widget? headerOverlay}) {
-    final height = _heroHeight(width, MediaQuery.sizeOf(context).height);
+  Widget _buildHero(
+    double width,
+    double viewportHeight, {
+    Widget? headerOverlay,
+  }) {
+    final height = _heroHeight(
+      width,
+      MediaQuery.sizeOf(context).height,
+      viewportHeight,
+    );
     return MouseRegion(
       onEnter: (_) => setState(() => isHoveringCarousel = true),
       onExit: (_) => setState(() => isHoveringCarousel = false),
@@ -425,12 +493,20 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
 
   /// A hero block and two rows of shimmering posters, so the page settles into
   /// its real shape instead of jumping from a spinner to a full layout.
-  Widget _buildLoading(MovieCardSizing sizing, double width) {
+  Widget _buildLoading(
+    MovieCardSizing sizing,
+    double width,
+    double viewportHeight,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: _heroHeight(width, MediaQuery.sizeOf(context).height),
+          height: _heroHeight(
+            width,
+            MediaQuery.sizeOf(context).height,
+            viewportHeight,
+          ),
           margin: const EdgeInsets.only(bottom: AppSpacing.md),
           color: AppColors.inkAlpha(0.04),
         ),

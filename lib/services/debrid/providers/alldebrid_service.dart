@@ -44,7 +44,10 @@ class AllDebridService {
           return data['data']?['user'] as Map<String, dynamic>?;
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // A failed probe means the account cannot be confirmed right now; null
+      // reads as "not connected" rather than as an error the user must clear.
+    }
     return null;
   }
 

@@ -44,7 +44,9 @@ class MeowTvScraper extends StreamScraper {
           return r is String ? jsonDecode(r) : r;
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No payload means this scraper contributes nothing.
+    }
     return null;
   }
 

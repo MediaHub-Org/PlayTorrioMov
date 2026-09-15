@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,7 +49,13 @@ abstract final class SecureValueStore {
   static Future<void> delete(String key) async {
     try {
       await _storage.delete(key: key);
-    } catch (_) {}
+    } catch (e) {
+      // The plaintext copy below is removed either way, so the app will
+      // behave as though the credential is gone while it is still in the
+      // keychain -- and `read` would hand it back. Nothing here can force
+      // the delete, but it should not pass in silence.
+      debugPrint('[SecureValueStore] Secure delete of $key failed: $e');
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
   }

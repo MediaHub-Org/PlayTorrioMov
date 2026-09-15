@@ -193,7 +193,10 @@ class MegaProxy {
       try {
         req.response.statusCode = HttpStatus.internalServerError;
         await req.response.close();
-      } catch (_) {}
+      } catch (_) {
+        // Already handling an error, and the client has usually gone. Nothing
+        // useful is left to do with a second failure.
+      }
     } finally {
       client.close(force: true);
     }

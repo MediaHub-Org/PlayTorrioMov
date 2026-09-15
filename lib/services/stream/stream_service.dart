@@ -244,7 +244,10 @@ class StreamService {
               if (!controller.isClosed) controller.add(s);
             }
           }
-        } catch (_) {}
+        } catch (_) {
+          // One provider failing does not close the merged stream -- the
+          // others have already contributed to it.
+        }
         if (!controller.isClosed) controller.close();
       }();
       return controller.stream;

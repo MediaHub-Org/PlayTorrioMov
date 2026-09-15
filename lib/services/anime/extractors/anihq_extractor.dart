@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
+import 'voe_cipher.dart';
 import '../../scraper/user_agent.dart';
 
 class AniHQAnimeResult {
@@ -38,21 +39,6 @@ class AniHQExtractor {
         .replaceAll(RegExp(r'^-+|-+$'), '');
   }
 
-  String _rot13(String s) {
-    final out = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      final code = s.codeUnitAt(i);
-      if (code >= 65 && code <= 90) {
-        out.writeCharCode(((code - 65 + 13) % 26) + 65);
-      } else if (code >= 97 && code <= 122) {
-        out.writeCharCode(((code - 97 + 13) % 26) + 97);
-      } else {
-        out.writeCharCode(code);
-      }
-    }
-    return out.toString();
-  }
-
   Future<Map<String, String>?> _extractVoe(http.Client client, String voeUrl) async {
     try {
       var res = await client.get(
@@ -74,30 +60,16 @@ class AniHQExtractor {
       final scriptMatch = RegExp(r'''<script type="application/json">\["(.*?)"\]</script>''').firstMatch(html);
       if (scriptMatch == null || scriptMatch.group(1) == null) return null;
 
-      var str = scriptMatch.group(1)!;
-      str = _rot13(str);
-
-      const junk = ['@\$', '^^', '~@', '%?', '*~', '!!', '#&'];
-      for (final j in junk) {
-        str = str.replaceAll(j, '');
-      }
-
-      final decoded1 = utf8.decode(base64.decode(base64.normalize(str)));
-
-      final shifted = StringBuffer();
-      for (var i = 0; i < decoded1.length; i++) {
-        shifted.writeCharCode(decoded1.codeUnitAt(i) - 3);
-      }
-
-      final reversed = shifted.toString().split('').reversed.join('');
-      final finalJsonStr = utf8.decode(base64.decode(base64.normalize(reversed)));
-
-      final finalData = jsonDecode(finalJsonStr);
-      if (finalData is Map && (finalData['file'] != null || finalData['source'] != null)) {
-        final streamUrl = (finalData['file'] ?? finalData['source']).toString();
+      final streamUrl = VoeCipher.streamUrl(
+        VoeCipher.decode(scriptMatch.group(1)!),
+      );
+      if (streamUrl != null) {
         return {'url': streamUrl};
       }
-    } catch (_) {}
+    } catch (_) {
+      // The site changed its obfuscation, so there is no stream here.
+      // Returning null moves the search to the next extractor.
+    }
     return null;
   }
 

@@ -14,6 +14,7 @@ import '../../utils/navigation/route_transitions.dart';
 import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
+import '../../widgets/common/setting_choice_chip.dart';
 
 class IptvPortalBrowserPage extends StatefulWidget {
   final VerifiedPortal? portal;
@@ -188,24 +189,10 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         runSpacing: 8,
                         children: PortalBrowserLayout.values.map((l) {
                           final isSelected = l == layout;
-                          return ChoiceChip(
-                            label: Text(l.label),
+                          return SettingChoiceChip(
+                            label: l.label,
                             selected: isSelected,
-                            selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                            backgroundColor: AppColors.bar,
-                            labelStyle: TextStyle(
-                              color: isSelected ? palette.primaryColor : AppColors.inkMuted,
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? palette.primaryColor.withValues(alpha: 0.6)
-                                  : AppColors.inkAlpha(0.08),
-                            ),
-                            onSelected: (selected) {
-                              if (selected) IptvSettings.setBrowserLayout(l);
-                            },
+                            onSelect: () => IptvSettings.setBrowserLayout(l),
                           );
                         }).toList(),
                       );
@@ -1692,7 +1679,10 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
         _IptvPortalBrowserPageState._sharedEpgCache[widget.stream.streamId] = entries;
         setState(() => _cachedEpg = entries);
       }
-    } catch (_) {}
+    } catch (_) {
+      // The now/next programme is decoration on the channel card. Without it
+      // the card still plays the channel.
+    }
   }
 
   @override

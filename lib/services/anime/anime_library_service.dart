@@ -35,7 +35,10 @@ class AnimeLibraryService extends ChangeNotifier {
         try {
           final json = jsonDecode(str) as Map<String, dynamic>;
           _watchlist.add(AnimeWatchlistItem.fromJson(json));
-        } catch (_) {}
+        } catch (_) {
+          // One corrupt entry is skipped rather than throwing away the whole
+          // stored watchlist.
+        }
       }
 
       _isInitialized = true;
@@ -147,6 +150,10 @@ class AnimeLibraryService extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final list = _watchlist.map((i) => jsonEncode(i.toJson())).toList();
       await prefs.setStringList(_watchlistKey, list);
-    } catch (_) {}
+    } catch (e) {
+      // The in-memory list has already been updated, so the app goes on
+      // showing a watchlist that will be gone at next launch. Worth saying so.
+      debugPrint('[AnimeLibrary] Could not save the watchlist: $e');
+    }
   }
 }

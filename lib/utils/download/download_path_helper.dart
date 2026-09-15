@@ -65,7 +65,10 @@ class DownloadPathHelper {
             return target.path;
           }
         }
-      } catch (_) {}
+      } catch (_) {
+        // This storage location is unavailable on this device; the next
+        // candidate is tried.
+      }
     }
 
     if (!kIsWeb && (Platform.isWindows || Platform.isMacOS || Platform.isLinux)) {
@@ -77,7 +80,9 @@ class DownloadPathHelper {
             return target.path;
           }
         }
-      } catch (_) {}
+      } catch (_) {
+        // Same, for the desktop downloads directory.
+      }
     }
 
     final appDocDir = await getApplicationDocumentsDirectory();

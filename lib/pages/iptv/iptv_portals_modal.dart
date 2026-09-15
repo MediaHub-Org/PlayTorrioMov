@@ -7,6 +7,8 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import 'iptv_portal_browser_page.dart';
 import '../../services/theme/app_colors.dart';
+import '../../widgets/common/setting_choice_chip.dart';
+import '../../widgets/iptv/default_portal_tab_picker.dart';
 
 class IptvPortalsModal extends StatefulWidget {
   const IptvPortalsModal({super.key});
@@ -231,30 +233,19 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   ValueListenableBuilder<PortalCardStyle>(
                     valueListenable: IptvSettings.portalCardStyle,
                     builder: (context, style, _) {
-                      return Row(
+                      // Wrap, not Row: three chips of user-facing labels do
+                      // not fit a narrow phone side by side, and this modal
+                      // is narrower than the window. Live TV's settings page
+                      // already wrapped every one of its chip rows; this copy
+                      // never picked that up.
+                      return Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: PortalCardStyle.values.map((s) {
-                          final isSelected = s == style;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: ChoiceChip(
-                              label: Text(s.label),
-                              selected: isSelected,
-                              selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                              backgroundColor: AppColors.bar,
-                              labelStyle: TextStyle(
-                                color: isSelected ? palette.primaryColor : AppColors.inkMuted,
-                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
-                                fontSize: 12,
-                              ),
-                              side: BorderSide(
-                                color: isSelected
-                                    ? palette.primaryColor.withValues(alpha: 0.6)
-                                    : AppColors.inkAlpha(0.08),
-                              ),
-                              onSelected: (selected) {
-                                if (selected) IptvSettings.setPortalCardStyle(s);
-                              },
-                            ),
+                          return SettingChoiceChip(
+                            label: s.label,
+                            selected: s == style,
+                            onSelect: () => IptvSettings.setPortalCardStyle(s),
                           );
                         }).toList(),
                       );
@@ -296,54 +287,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                     style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
-                  ValueListenableBuilder<int>(
-                    valueListenable: IptvSettings.defaultPortalTab,
-                    builder: (context, tabIdx, _) {
-                      return Row(
-                        children: [
-                          ChoiceChip(
-                            label: const Text('Xtream Panels'),
-                            selected: tabIdx == 0,
-                            selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                            backgroundColor: AppColors.bar,
-                            labelStyle: TextStyle(
-                              color: tabIdx == 0 ? palette.primaryColor : AppColors.inkMuted,
-                              fontWeight: tabIdx == 0 ? FontWeight.w800 : FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                            side: BorderSide(
-                              color: tabIdx == 0
-                                  ? palette.primaryColor.withValues(alpha: 0.6)
-                                  : AppColors.inkAlpha(0.08),
-                            ),
-                            onSelected: (selected) {
-                              if (selected) IptvSettings.setDefaultPortalTab(0);
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          ChoiceChip(
-                            label: const Text('M3U Playlists'),
-                            selected: tabIdx == 1,
-                            selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-                            backgroundColor: AppColors.bar,
-                            labelStyle: TextStyle(
-                              color: tabIdx == 1 ? palette.primaryColor : AppColors.inkMuted,
-                              fontWeight: tabIdx == 1 ? FontWeight.w800 : FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                            side: BorderSide(
-                              color: tabIdx == 1
-                                  ? palette.primaryColor.withValues(alpha: 0.6)
-                                  : AppColors.inkAlpha(0.08),
-                            ),
-                            onSelected: (selected) {
-                              if (selected) IptvSettings.setDefaultPortalTab(1);
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                  const DefaultPortalTabPicker(),
                 ],
               ),
             ),

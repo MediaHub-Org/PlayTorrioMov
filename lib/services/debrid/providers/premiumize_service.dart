@@ -45,7 +45,10 @@ class PremiumizeService {
           return data as Map<String, dynamic>?;
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // A failed probe means the account cannot be confirmed right now; null
+      // reads as "not connected".
+    }
     return null;
   }
 

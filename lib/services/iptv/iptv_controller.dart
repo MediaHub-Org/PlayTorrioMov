@@ -800,7 +800,10 @@ class IptvController extends ChangeNotifier {
             }
             return;
           }
-        } catch (_) {}
+        } catch (_) {
+          // This portal did not answer. The loop moves to the next one, and
+          // the message above covers running out.
+        }
       }
 
       if (pendingQueue.isNotEmpty) {

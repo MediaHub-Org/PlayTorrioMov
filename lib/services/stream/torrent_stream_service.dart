@@ -428,7 +428,9 @@ class TorrentStreamService {
           if (stats != null && !streamController.isClosed) {
             streamController.add(stats);
           }
-        } catch (_) {}
+        } catch (_) {
+          // A stats poll that fails is skipped; the next tick tries again.
+        }
       });
     };
 
@@ -466,7 +468,9 @@ class TorrentStreamService {
         if (_controller.isRunning) {
           await _controller.dropTorrent(hash);
         }
-      } catch (_) {}
+      } catch (_) {
+        // Dropping a torrent the engine has already forgotten.
+      }
     }
     _activeTorrents.removeWhere(
       (h) => !downloadingHashes.contains(h.toLowerCase()),
@@ -506,7 +510,10 @@ class TorrentStreamService {
       if (match != null && match.group(1) != null) {
         return Uri.decodeComponent(match.group(1)!.replaceAll('+', ' '));
       }
-    } catch (_) {}
+    } catch (_) {
+      // A magnet with no parseable display name falls back to the caller
+      // default.
+    }
     return '';
   }
 

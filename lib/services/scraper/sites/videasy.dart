@@ -168,7 +168,10 @@ class VideasyScraper extends StreamScraper {
         final data = jsonDecode(res.body);
         return data['seed']?.toString();
       }
-    } catch (_) {}
+    } catch (_) {
+      // No seed means the stream URLs cannot be signed, so this scraper
+      // contributes nothing.
+    }
     return null;
   }
 
@@ -214,7 +217,10 @@ class VideasyScraper extends StreamScraper {
             if (yStr.length >= 4) mediaYear = int.tryParse(yStr.substring(0, 4)) ?? year;
             if (meta['imdb_id'] != null) targetImdb = meta['imdb_id'].toString();
           }
-        } catch (_) {}
+        } catch (_) {
+          // Metadata is used to sharpen the match; without it the title and
+          // year passed in are used as they are.
+        }
       }
 
       final params = <String, String>{
@@ -261,7 +267,10 @@ class VideasyScraper extends StreamScraper {
               },
             ));
           }
-        } catch (_) {}
+        } catch (_) {
+          // This stream entry did not parse; the rest of the list is still
+          // read.
+        }
       }
     } catch (e) {
       debugPrint('VideasyScraper error: $e');

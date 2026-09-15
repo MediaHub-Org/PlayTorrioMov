@@ -49,13 +49,18 @@ class SubtitleParser {
     if (bytes.length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
       try {
         return utf8.decode(bytes.sublist(3));
-      } catch (_) {}
+      } catch (_) {
+        // A BOM does not guarantee the rest is valid UTF-8. The fallbacks
+        // below take over.
+      }
     }
 
     // 2. Try standard UTF-8
     try {
       return utf8.decode(bytes);
-    } catch (_) {}
+    } catch (_) {
+      // Not UTF-8. The encodings below are tried in turn.
+    }
 
     // 3. Check for UTF-16 BOM
     if (bytes.length >= 2) {

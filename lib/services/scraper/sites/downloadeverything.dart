@@ -97,7 +97,10 @@ class DownloadEverythingScraper extends StreamScraper {
                 }
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // One search result that will not parse does not stop the others
+            // resolving.
+          }
         }
 
         if (activeResolutions.isNotEmpty) {
@@ -210,9 +213,14 @@ class DownloadEverythingScraper extends StreamScraper {
             provider = item['site']?.toString() ?? 'DirectStream';
             streamHeaders = {'User-Agent': _ua};
           }
-        } catch (_) {}
+        } catch (_) {
+          // The HEAD check failed, so this link is not offered as a direct
+          // stream.
+        }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No usable link from this item.
+    }
 
     if (directStreamUrl == null || directStreamUrl.isEmpty) return null;
 
@@ -275,7 +283,9 @@ class DownloadEverythingScraper extends StreamScraper {
           return pixelMatch.group(0)!;
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // The mirror page did not contain the link; the caller falls back.
+    }
     return null;
   }
 
@@ -350,7 +360,9 @@ class DownloadEverythingScraper extends StreamScraper {
         }
         return found;
       }
-    } catch (_) {}
+    } catch (_) {
+      // No direct link in this page shape.
+    }
     return null;
   }
 }

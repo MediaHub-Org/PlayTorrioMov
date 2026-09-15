@@ -89,10 +89,15 @@ class FlaxMoviesScraper extends StreamScraper {
                 if (!foundUrls.contains(wUrl)) foundUrls.add(wUrl);
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // One server entry failed to yield a worker URL; the others are
+            // still collected.
+          }
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // The server list itself failed; nothing is collected from it.
+    }
 
     for (final d in _defaultWorkers) {
       if (!foundUrls.contains(d)) foundUrls.add(d);
@@ -186,7 +191,9 @@ class FlaxMoviesScraper extends StreamScraper {
             }
 
             if (foundStreams) break;
-          } catch (_) {}
+          } catch (_) {
+            // This embed yielded nothing. The loop tries the next one.
+          }
         }
       } finally {
         client.close();

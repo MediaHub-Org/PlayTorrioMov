@@ -157,7 +157,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           setState(() => _aniDbEpisodes = episodes);
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // AniDB titles are enrichment. The episode list is already on screen
+      // from the metadata addon, so failing here leaves the page as it was.
+    }
   }
 
   int get _computedTotalEpisodes {

@@ -114,7 +114,10 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
       if (match != null && match.group(1) != null) {
         return Uri.decodeComponent(match.group(1)!.replaceAll('+', ' '));
       }
-    } catch (_) {}
+    } catch (_) {
+      // A magnet with no parseable display name falls back to the caller
+      // default.
+    }
     return '';
   }
 

@@ -254,7 +254,9 @@ class MappleScraper extends StreamScraper {
                 );
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This entry did not yield a stream; the rest are still walked.
+          }
           return null;
         });
 

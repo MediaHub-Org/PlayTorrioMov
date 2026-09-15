@@ -239,6 +239,10 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         contentLabel: widget.type == 'series' ? 'series' : 'movies',
         header: _buildHeader(context),
         belowHero: ContinueWatchingSlider(typeFilter: widget.type),
+        // Sizes the hero to the rest of the viewport, so Continue Watching
+        // is the one row on screen with it rather than a strip under a
+        // hero that left room for the start of two more.
+        belowHeroExtent: ContinueWatchingSlider.bandHeight,
         afterRows: widget.type == 'series' ? const UpcomingCalendarRow() : null,
         isLoading: _loading,
         heroItems: _heroItems,

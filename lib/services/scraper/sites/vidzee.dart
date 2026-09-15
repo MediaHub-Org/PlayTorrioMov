@@ -81,7 +81,9 @@ class VidZeeScraper extends StreamScraper {
                 }
               }
             }
-          } catch (_) {}
+          } catch (_) {
+            // This provider did not answer; the loop tries the next.
+          }
           return null;
         });
 

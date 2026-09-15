@@ -41,7 +41,9 @@ class KissKhScraper extends StreamScraper {
           return data['result']?.toString();
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // No key means this scraper contributes nothing.
+    }
     return null;
   }
 

@@ -107,7 +107,11 @@ class DiscordRpcService {
       if (_rpc != null) {
         try {
           await _rpc!.clearPresence();
-        } catch (_) {}
+        } catch (_) {
+          // Discord has usually already gone -- that is why we are
+          // disconnecting. Clearing presence on a dead pipe is expected to
+          // fail.
+        }
         await _disposeRpc();
       }
     } catch (e) {
@@ -121,7 +125,10 @@ class DiscordRpcService {
     if (_rpc != null) {
       try {
         await _rpc!.dispose();
-      } catch (_) {}
+      } catch (_) {
+        // Disposing a pipe that is already closed. The reference is dropped
+        // regardless.
+      }
       _rpc = null;
     }
   }
@@ -349,7 +356,10 @@ class DiscordRpcService {
     if (_rpc != null && _isInitialized) {
       try {
         await _rpc!.clearPresence();
-      } catch (_) {}
+      } catch (_) {
+        // The client is gone, which is the state clearPresence was trying to
+        // reach anyway.
+      }
     }
   }
 }
