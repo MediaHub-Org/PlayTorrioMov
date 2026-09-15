@@ -61,6 +61,13 @@ Two repository secrets are required:
 | `ANDROID_KEY_ALIAS` | no | Defaults to `playtorriomov` |
 | `ANDROID_KEY_PASSWORD` | no | Defaults to the store password |
 
+## What the release build does not check
+
+**`build.yml` has no analyze or test step.** Only `pr-checks.yml` runs them,
+and only on a pull request, so a PR merged before its checks finish ships
+unverified — that is how v1.5.8 went out. Either wait for `pr-checks` before
+merging, or accept that the release build proves only that it compiles.
+
 ## All repository secrets
 
 Every secret `build.yml` reads, across all platforms:
