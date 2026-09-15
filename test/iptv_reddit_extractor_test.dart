@@ -1,4 +1,7 @@
 // ignore_for_file: avoid_print
+@Tags(['network'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/iptv/hardcoded_channels.dart';
 import 'package:playtorriomov/services/iptv/iptv_network.dart';
@@ -20,8 +23,16 @@ void main() {
       expect(p.url, startsWith('http'));
       expect(p.username.isNotEmpty, isTrue);
       expect(p.password.isNotEmpty, isTrue);
-      expect(p.username.contains('http'), isFalse);
-      expect(p.password.contains('http'), isFalse);
+      // These guard against the parser capturing a URL into a credential
+      // field, which is a real failure it has had. They must test *that*,
+      // not the presence of four characters: `xct58http2` is a legitimate
+      // password, correctly parsed, and it failed the old `contains('http')`
+      // form on 2026-09-15. A credential that IS a URL starts with the
+      // scheme or carries `://`; one that merely contains "http" does not.
+      expect(p.username, isNot(startsWith('http')));
+      expect(p.username, isNot(contains('://')));
+      expect(p.password, isNot(startsWith('http')));
+      expect(p.password, isNot(contains('://')));
       expect(p.password.endsWith('.php'), isFalse);
     }
 

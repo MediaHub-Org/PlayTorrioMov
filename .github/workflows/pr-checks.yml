@@ -32,7 +32,7 @@ on:
     # because main has no required status checks: with one configured, a
     # check that never reports leaves the PR waiting forever instead of
     # merging.
-    paths-ignore: &docs-only
+    paths-ignore:
       - '**.md'
       - 'docs/**'
       - 'LICENSE'
@@ -48,10 +48,19 @@ on:
   #     currently lands unverified.
   push:
     branches: [main]
-    # Same reasoning. The cache rationale above still holds: a docs-only
-    # merge changes nothing the cache keys on, so the existing main cache
-    # stays valid and restorable without being rewritten.
-    paths-ignore: *docs-only
+    # Same reasoning, and spelled out again rather than shared with a YAML
+    # anchor: Actions' workflow parser has historically rejected anchors, and
+    # the filter gating every PR check is the wrong place to depend on a
+    # construct whose support is inconsistent.
+    #
+    # The cache rationale above still holds: a docs-only merge changes nothing
+    # the cache keys on, so the existing main cache stays valid and
+    # restorable without being rewritten.
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.gitignore'
   workflow_dispatch:
 
 # A new push to the same PR makes the in-flight run redundant.
