@@ -7,6 +7,7 @@ import '../../models/download/download_task_model.dart';
 import '../../models/movie/movie.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
+import '../../services/app_breakpoints.dart';
 import '../../services/collections/media_collections_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/download/download_service.dart';
@@ -144,13 +145,17 @@ class _CollectionPageState extends State<CollectionPage> {
         // the cell, and a grid cell has no slack to absorb it.
         final labelHeight = 8 + MediaQuery.textScalerOf(context).scale(38.0);
         final width = constraints.maxWidth;
+        // Ramps on AppBreakpoints' own cutoffs where it can. A grid
+        // legitimately wants more steps than the three nav tiers, but the
+        // ones it shares with them have to be the same numbers -- 700/750/800
+        // are exactly how the app's breakpoints drifted apart before.
         final crossAxisCount = width < 420
             ? 2
-            : width < 700
+            : width < AppBreakpoints.tablet
             ? 3
-            : width < 1000
+            : width < AppBreakpoints.desktop
             ? 4
-            : width < 1400
+            : width < 1300
             ? 5
             : 6;
         final tile =
@@ -240,11 +245,11 @@ class _CollectionPageState extends State<CollectionPage> {
             const spacing = 14.0;
             const padding = 16.0;
             final width = constraints.maxWidth;
-            final crossAxisCount = width < 520
+            final crossAxisCount = width < AppBreakpoints.tablet
                 ? 1
-                : width < 820
+                : width < AppBreakpoints.desktop
                 ? 2
-                : width < 1200
+                : width < 1300
                 ? 3
                 : 4;
             final cardWidth =
