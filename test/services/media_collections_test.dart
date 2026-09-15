@@ -1,6 +1,5 @@
 // test/services/media_collections_test.dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorriomov/models/collection/media_collection.dart';
 import 'package:playtorriomov/models/my_list/my_list_item.dart';
 import 'package:playtorriomov/services/collections/media_collections_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
