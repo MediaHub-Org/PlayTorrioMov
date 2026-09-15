@@ -9,8 +9,8 @@ carries a changelog stops being readable as either.
 Items are numbered and never renumbered or reused, so `#43` means the same
 thing in a commit message, a pull request and this file.
 
-Last reconciled against the tree: **2026-09-14**, after `v1.6.3+31`. Every
-count below was measured there.
+Last reconciled against the tree: **2026-09-15**, on `v1.7.0+32`. Every count
+below was measured there.
 
 **Open is empty.** Everything left needs a device — a Cast receiver, a phone
 in the hand — not a commit. Where a device question could be narrowed by
