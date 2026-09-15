@@ -1,6 +1,5 @@
 // lib/pages/collection/library_shelf_page.dart
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../models/collection/media_collection.dart';
