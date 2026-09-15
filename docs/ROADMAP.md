@@ -2,7 +2,7 @@
 
 **What is left to do.** Nothing else lives here: shipped work is in
 [CHANGELOG.md](../CHANGELOG.md), the release process is in
-[RELEASES.md](RELEASES.md), and item numbers (`#15`–`#66`) are indexed at the
+[RELEASES.md](RELEASES.md), and item numbers (`#15`–`#69`) are indexed at the
 end of the changelog.
 
 Item numbers are never renumbered or reused, so `#43` means the same thing in
@@ -14,7 +14,80 @@ Last reconciled: **2026-09-15**, on `v1.8.0+33`.
 
 ## Pending
 
-**No outstanding code work.** Everything below needs hardware.
+**Nothing here is started.** The first two need writing; the rest need a
+person with hardware.
+
+### Translation (#68)
+
+No `intl`, no `flutter_localizations`, no `.arb` — every string in `lib/` is
+hardcoded English, except `anime_arabic_details_page.dart`, which hardcodes
+seven Arabic ones. So the app already has a second language, just an
+unmanaged one. Roughly 500-800 user-facing strings to extract: mechanical,
+large, and low-risk.
+
+**The risk is not the UI. It is the titles**, and the rule below is settled
+before anyone starts, because getting it wrong breaks things that look
+unrelated.
+
+> **A title is two fields, and they must never merge.**
+>
+> | | Used for | Localizable |
+> |:--|:--|:--|
+> | `displayTitle` | What the user reads | Yes |
+> | `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never** |
+
+Three things in this codebase depend on a stable title, and each breaks
+differently:
+
+1. **Identity falls back to the title.** `MyListItem.uniqueKey` returns
+   `title:$type:$clean:$year` when there is no IMDb, TMDB, Trakt or Simkl id
+   — and anime saved from AniList hits that branch *by design*, because
+   AniList ids are their own namespace. Localize `title` and the same show
+   saved under a Spanish UI is a different object from the one saved under
+   English. That takes collections membership, Continue Watching dedupe and
+   Trakt/Simkl matching with it.
+2. **All 48 scrapers search by title string** (`scrape({required String
+   title, ...})`). They index release names, which are English or original
+   language. "El Caballero Oscuro" returns nothing, and it fails silently —
+   the user sees no sources, not an error.
+3. **AniList already returns four titles** — `titleUserPreferred`,
+   `titleRomaji`, `titleEnglish`, `titleNative`. The app picks the first and
+   discards the rest. The "which title do we show" decision already exists
+   here; it is simply not a setting yet.
+
+**Default: show original/English titles even when the UI is translated**,
+with an opt-in toggle that affects display only. A translated title is not a
+stable identifier — Spain and Latin America give the same film different
+Spanish titles — while the original is the one string every provider agrees
+on. It is also what Stremio, Plex and Jellyfin default to, and titles are how
+people search and recognise things.
+
+**Free win, no identity risk:** TMDB is never called with `language=` at all
+today, so every synopsis and genre name arrives en-US. Passing a locale
+translates the *descriptions*, which is most of the felt benefit, as long as
+the title field is excluded from it.
+
+### Text scale and accessibility (#69)
+
+Flutter already applies the system text scale to every `Text`, so the app
+scales today — and *overflows*, because its layouts are fixed-height. This is
+not hypothetical: the collections card shipped in 1.8.0 needs
+`MediaQuery.textScalerOf(context).scale(38.0)` to reserve its label space, or
+it bursts its grid cell.
+
+So an in-app zoom is about 10% wiring — one `MediaQuery(textScaler: ...)`
+above `MaterialApp` — and 90% making layouts survive it. **Do the audit
+first, the setting second**: shipping the control before the layouts hold
+just hands users a faster way to break their own screen.
+
+`mobile_first_test` already asserts no widget declares a width a phone cannot
+give it. A companion that pumps the main screens at 2.0 text scale and fails
+on overflow turns this from an open-ended hunt into a finite list, the same
+way the width test did.
+
+Also worth a pass while in here: semantics labels on icon-only controls.
+`Tooltip` supplies one for free, which the library action row already gets,
+but nothing has checked the rest.
 
 ### Collections, on a phone (#67)
 
