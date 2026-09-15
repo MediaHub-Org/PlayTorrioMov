@@ -7,7 +7,7 @@ import 'player_glass.dart';
 /// Device picker for Cast -- shown from the player's Cast button. Only ever
 /// opened when [CastService.isSupported] is true (mobile only); callers must
 /// guard that before showing this.
-class PlayerCastSheet extends StatelessWidget {
+class PlayerCastSheet extends StatefulWidget {
   final String title;
   final String? posterUrl;
   final String streamUrl;
@@ -41,6 +41,28 @@ class PlayerCastSheet extends StatelessWidget {
         posterUrl: posterUrl,
       ),
     );
+  }
+
+  @override
+  State<PlayerCastSheet> createState() => _PlayerCastSheetState();
+}
+
+class _PlayerCastSheetState extends State<PlayerCastSheet> {
+  @override
+  void initState() {
+    super.initState();
+    // The device list is empty until something asks the plugin to scan, and
+    // nothing else does: this sheet showing "Looking for Cast devices..."
+    // forever was that call never being made.
+    CastService.startDiscovery();
+  }
+
+  @override
+  void dispose() {
+    // Scanning holds the radio awake. The session, once started, does not
+    // depend on discovery still running.
+    CastService.stopDiscovery();
+    super.dispose();
   }
 
   @override
@@ -87,17 +109,42 @@ class PlayerCastSheet extends StatelessWidget {
                     builder: (context, snapshot) {
                       final devices = snapshot.data ?? const [];
                       if (devices.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
-                          child: Center(
-                            child: Text(
-                              'Looking for Cast devices on your network...',
-                              style: TextStyle(
-                                color: PlayerTheme.inkSubtle,
-                                fontSize: 13,
+                        // A real scan is running behind this now, so it gets
+                        // a spinner. Before, the same words sat there
+                        // motionless forever because nothing was searching.
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: PlayerTheme.accent,
+                                ),
                               ),
-                              textAlign: TextAlign.center,
-                            ),
+                              const SizedBox(height: 14),
+                              const Text(
+                                'Looking for Cast devices on your network...',
+                                style: TextStyle(
+                                  color: PlayerTheme.inkSubtle,
+                                  fontSize: 13,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'The phone and the receiver have to be on the '
+                                'same Wi-Fi.',
+                                style: TextStyle(
+                                  color: PlayerTheme.inkSubtle,
+                                  fontSize: 11,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         );
                       }
@@ -112,10 +159,10 @@ class PlayerCastSheet extends StatelessWidget {
                                 Navigator.pop(context);
                                 await CastService.connect(device);
                                 await CastService.loadMedia(
-                                  url: streamUrl,
-                                  isLive: isLive,
-                                  title: title,
-                                  posterUrl: posterUrl,
+                                  url: widget.streamUrl,
+                                  isLive: widget.isLive,
+                                  title: widget.title,
+                                  posterUrl: widget.posterUrl,
                                 );
                               },
                               child: Container(

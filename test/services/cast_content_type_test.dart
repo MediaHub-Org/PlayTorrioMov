@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/cast/cast_service.dart';
 
@@ -101,6 +103,47 @@ void main() {
     test('a non-http scheme is not castable', () {
       expect(CastService.canCastUrl('magnet:?xt=urn:btih:abc'), isFalse);
       expect(CastService.canCastUrl('rtsp://example.com/live'), isFalse);
+    });
+  });
+
+  group('the device picker starts discovery', () {
+    // The bug this pins: `devicesStream` is a stream the plugin never feeds
+    // until something calls `startDiscovery`. Nothing did. On Android the
+    // native `onAttachedToEngine` only wires the method channel -- the
+    // `MediaRouter.addCallback` that actually scans lives solely inside the
+    // native `startDiscovery`, reachable only from Dart -- and iOS is the
+    // same through `GCKDiscoveryManager`. So the sheet sat on "Looking for
+    // Cast devices..." forever and Cast appeared to be broken.
+    //
+    // A source scan rather than a widget test because the widget cannot be
+    // pumped here: touching `CastService` on a desktop host instantiates a
+    // platform channel that does not exist. What matters is that the call is
+    // present and paired.
+    final sheet = File('lib/widgets/player/player_cast_sheet.dart')
+        .readAsStringSync();
+
+    test('the sheet asks the plugin to scan when it opens', () {
+      expect(
+        sheet.contains('CastService.startDiscovery()'),
+        isTrue,
+        reason: 'Without this the device list is empty forever.',
+      );
+    });
+
+    test('and stops scanning when it closes', () {
+      // Scanning holds the radio awake; a session already started does not
+      // need discovery still running.
+      expect(
+        sheet.contains('CastService.stopDiscovery()'),
+        isTrue,
+        reason: 'Discovery left running drains the battery.',
+      );
+    });
+
+    test('both are wired to the sheet lifecycle, not a build method', () {
+      // In build() they would re-fire on every rebuild of the stream.
+      expect(sheet.contains('void initState()'), isTrue);
+      expect(sheet.contains('void dispose()'), isTrue);
     });
   });
 }

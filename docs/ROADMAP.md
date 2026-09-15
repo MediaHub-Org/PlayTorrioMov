@@ -132,6 +132,35 @@ the idea stops there. Only then does (2) — Android's cleartext-HTTP policy and
 the phone's firewall — matter, and swapping the host for the LAN address is
 easy by comparison.
 
+### Why it did not work: discovery was never started (fixed 2026-09-15)
+
+A device reported Cast still not working, and the cause was in our code, not
+the network. `CastService` exposed `devicesStream` and the picker subscribed
+to it — but **nothing ever asked the plugin to scan**, so the stream had no
+producer and the sheet sat on *"Looking for Cast devices on your network..."*
+indefinitely.
+
+That is not obvious from the plugin's README, which says discovery is
+automatic once initialised. Its own source says otherwise, on both platforms:
+
+- **Android** — `onAttachedToEngine` only wires up the method channel. The
+  `MediaRouter.addCallback(selector, callback, CALLBACK_FLAG_REQUEST_DISCOVERY)`
+  that actually scans lives *solely* inside the native `startDiscovery`, which
+  is reachable only from Dart.
+- **iOS** — the same through `GCKDiscoveryManager`, and worse: the SDK option
+  `startDiscoveryAfterFirstTapOnCastButton` defaults to **true**, meaning it
+  waits for a tap on its *own* native Cast button. This app draws its own
+  button, so that tap never came.
+
+The fix is `CastService.startDiscovery()` when the picker opens and
+`stopDiscovery()` when it closes (scanning holds the radio awake), plus
+setting that iOS option to false. `cast_content_type_test` pins that the
+calls exist and are on the sheet's lifecycle rather than in `build`.
+
+**This has not been confirmed against a receiver yet** — it is a fix for a
+cause found by reading, and the next device test is what decides whether it
+was the only one.
+
 **Still unverified, and still needing a receiver:**
 
 1. Does a **movie** from a direct/CDN source reach the TV and play? (Known
@@ -141,33 +170,19 @@ easy by comparison.
    live — no seek bar, no phantom duration?
 3. Does **disconnect** return playback cleanly?
 
-### Series creators (#39)
+### Series creators (#39) — confirmed on device, 2026-09-15
 
-`created_by` on `/tv/{id}` is fetched only for a series whose `/credits` had
-no directing crew. The parser is covered for absent, empty and malformed
-fields; what tests cannot confirm is whether the field is **populated in
-practice**.
+`created_by` is populated in practice. A device reports the Creator card
+showing correctly, so the `/tv/{id}/aggregate_credits` fallback — a larger
+payload whose entries carry a `jobs` array instead of a single `job`, needing
+a TV-shaped branch in the parser — is **not needed** and is not being built.
 
-**To answer:** open a series whose director was missing and look for a
-*Creator* card. If `created_by` proves thin, the fallback is
-`/tv/{id}/aggregate_credits` — a larger payload whose entries carry a `jobs`
-array instead of a single `job`, needing a TV-shaped branch in the parser.
+### The player, in your hand — confirmed on device, 2026-09-15
 
-### The player, in your hand
-
-Laid out and guarded by tests, but "does it fit" and "does it feel right"
-are different questions.
-
-- **Menus in landscape** on the shortest device you have — the speed menu is
-  the one that used to run off the top of the screen.
-- **Dismissing a panel** never feels stuck, now that there are no close
-  buttons (tap off, or the back arrow).
-- **Seek amounts:** double-tap the sides for ±10s, centre buttons for ±30s.
-- **The CC button** turns on the track matching the audio language — no
-  picker, no dialog.
-- **Live TV's single tap** reveals the controls immediately.
-- **Backup export** (#50) actually lands where you pick it on Android.
-- **Simkl** (#51) connects once you paste your own client ID.
+Reported as feeling good. The list this section carried (menus in landscape,
+panel dismissal, seek amounts, the CC button, Live TV's single tap, backup
+export #50, Simkl #51) was a checklist for one pass on real hardware, and that
+pass has happened. Nothing here is outstanding.
 
 ---
 

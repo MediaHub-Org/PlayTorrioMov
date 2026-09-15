@@ -27,6 +27,11 @@ abstract final class CastService {
                 appId,
               ),
               stopCastingOnAppTerminated: true,
+              // The SDK default waits for a first tap on *its own* native
+              // Cast button before it will discover anything. This app draws
+              // its own button and opens `PlayerCastSheet`, so that tap never
+              // happens and the wait would never end.
+              startDiscoveryAfterFirstTapOnCastButton: false,
             )
           : GoogleCastOptionsAndroid(
               appId: appId,
@@ -41,6 +46,37 @@ abstract final class CastService {
 
   static Stream<List<GoogleCastDevice>> get devicesStream =>
       GoogleCastDiscoveryManager.instance.devicesStream;
+
+  /// Begins scanning the local network for receivers.
+  ///
+  /// **[devicesStream] stays empty until this is called.** Nothing in the
+  /// plugin starts discovery on its own: on Android `onAttachedToEngine` only
+  /// wires up the method channel, and the `MediaRouter.addCallback` that
+  /// actually scans lives solely inside the native `startDiscovery`, which is
+  /// reachable only from here. iOS is the same through `GCKDiscoveryManager`.
+  ///
+  /// Scanning costs battery and radio, so this is called when the device
+  /// picker opens rather than at startup, and stopped again when it closes.
+  static Future<void> startDiscovery() async {
+    if (!isSupported || !_initialized) return;
+    try {
+      await GoogleCastDiscoveryManager.instance.startDiscovery();
+    } catch (e) {
+      // A device without Play Services, or a Cast context that failed to
+      // initialise. The picker then shows its empty state, which is honest.
+      debugPrint('[CastService] startDiscovery error: $e');
+    }
+  }
+
+  /// Stops scanning. Safe to call whether or not discovery was running.
+  static Future<void> stopDiscovery() async {
+    if (!isSupported || !_initialized) return;
+    try {
+      await GoogleCastDiscoveryManager.instance.stopDiscovery();
+    } catch (e) {
+      debugPrint('[CastService] stopDiscovery error: $e');
+    }
+  }
 
   static Stream<GoogleCastSession?> get sessionStream =>
       GoogleCastSessionManager.instance.currentSessionStream;
