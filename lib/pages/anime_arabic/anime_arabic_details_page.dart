@@ -567,6 +567,10 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                   );
                 },
               ),
+            // Not `expanded` here, unlike the other details pages: this one
+            // lays Play and the actions out in a Wrap, which sizes children to
+            // their content, and an Expanded inside a Wrap throws. At phone
+            // width the Wrap already drops the row onto its own line.
             LibraryActionsRow(itemBuilder: _buildMyListItem),
           ],
         ),

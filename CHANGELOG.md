@@ -3,6 +3,72 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Collections.** A user-named list of titles, with create, read, rename,
+  delete and reorder, and a stored shape that survives a corrupt blob. Movies,
+  series and anime share one collection — the split by section would have made
+  "a list of things I want to watch this weekend" impossible to express, which
+  is the main thing anyone wants a list for.
+
+  Deliberately *not* another library state. Liked / Watchlist / Watched live on
+  `MyListService`: one flat list, one state per title, Watchlist and Watched
+  mutually exclusive, all three synced to Trakt and Simkl — where "watched" is
+  scrobble history rather than a list, so removing from it means "mark
+  un-watched". A collection has none of those constraints: any number of them,
+  a title can be in many at once, the order is the user's, and nothing syncs
+  upstream. Called *collection* rather than *playlist* because Live TV already
+  has playlists — `M3uPlaylist` is a source of channels, and the portals screen
+  has an "M3U Playlists" tab.
+
+  Entries reuse `MyListItem` rather than a parallel type. It already resolves
+  identity across four providers — `uniqueKey` prefers IMDb, then TMDB, then
+  Trakt, then Simkl, then a cleaned title+year — so the same film added from a
+  Trakt payload and from a TMDB catalogue lands once, not twice. Storage is one
+  SharedPreferences key, which `BackupService` already exports and restores
+  without needing to know collections exist.
+
+- **A fourth library action on every details page.** It opens a picker rather
+  than toggling, because a title can be in any number of collections at once;
+  it still lights up when the title is filed somewhere, so the row answers "is
+  this saved anywhere?" without being tapped. Creating is offered in the picker
+  as well as the Library: the moment you most want a new collection is while
+  holding a title that fits none of the existing ones, and "+ New collection"
+  there creates and files in one step. Renaming and deleting are not, and
+  belong where the collection is the subject of the screen.
+
+### Changed
+- **The Library is Collections / Continue / Downloads.** It was four tabs, one
+  per library state, which stopped scaling the moment collections arrived — six
+  collections would have meant ten tabs. Liked, Watchlist and Watched are now
+  square cards beside the user's own collections, the arrangement Spotify and
+  YouTube Music use, and the tab bar holds the three genuinely different things
+  you can want from a Library. Square rather than poster-shaped on purpose: a
+  2:3 tile is a *title* everywhere else in the app, so the square is what says
+  "this opens a list".
+
+  Opening any card lands on one shared shelf screen, because from the user's
+  side both kinds are the same thing: a grid of titles with a name on it. Two
+  things differ underneath. A built-in state has no inherent order, so it keeps
+  the type filter and sort the tabs always had; a collection's order *is* the
+  user's, so it gets a reorder mode instead of a sort that would throw that
+  away. And removing from a state is a library edit that syncs upstream, while
+  removing from a collection only leaves that one list.
+
+- **Continue is a Library tab again**, after being dropped on 2026-09-13 for
+  duplicating the home row. With the states gone from the tab bar there is
+  room, and the home row only holds what fits on screen — the Library is where
+  you look for the thing that has scrolled off it.
+
+- **Play and the library actions are stacked on phones.** The details pages put
+  them on one row, which squeezed the primary action to make room for the
+  secondary ones and left nothing for a fourth. Play now takes its own
+  full-width line and the four actions share the one below it: roughly 72px
+  each on a 360px phone, past the 48px tap target and *larger* than the
+  clustered icons they replace. It also converges the two layouts — desktop
+  already stacked them in its poster column.
+
 ## [1.7.0+32] - 2026-09-15
 
 The release where the roadmap's **Open** section became empty. Four bugs

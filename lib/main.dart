@@ -23,6 +23,7 @@ import './services/iptv/favorite_channels_service.dart';
 import './services/iptv/iptv_controller.dart';
 import './services/iptv/iptv_settings.dart';
 import './services/media_session/media_session_service.dart';
+import './services/collections/media_collections_service.dart';
 import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
 import 'services/simkl/simkl_settings.dart';
@@ -98,6 +99,7 @@ void main() async {
     FavoriteChannelsService.initialize(),
     IptvController.instance.init(),
     IptvSettings.initialize(),
+    MediaCollectionsService.initialize(),
     MyListService.initialize(),
     TmdbSettings.initialize(),
     SimklSettings.initialize(),

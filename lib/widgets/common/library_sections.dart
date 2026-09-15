@@ -1,54 +1,103 @@
 import 'package:flutter/material.dart';
 
-/// The tabs every hub's Library has, in this order.
+/// The Library's three tabs, in this order.
 ///
-/// Before this existed each hub picked its own: Watch had My List / Watchlist /
-/// History / Downloads, Read had Audiobooks / Books / Manga / History /
+/// Before this existed each hub picked its own: Watch had My List / Watchlist
+/// / History / Downloads, Read had Audiobooks / Books / Manga / History /
 /// Downloads, and Listen had Songs / Podcasts / Playlists / Recent /
 /// Downloads. Three different shapes, three different tab counts, and the same
-/// concept ("what I saved") sitting under three different names — so moving
-/// between hubs meant relearning the Library each time.
+/// concept ("what I saved") under three different names.
 ///
-/// The first three are the app's three library states, the same ones
-/// `LibraryActionsRow` writes on every details page, so a tab here means
-/// exactly what the button there meant. That is why there is no longer a
-/// generic "Saved" bucket: it needed a generic icon (`inventory_2`) precisely
-/// because it held two unlike things, and its own doc comment admitted the
-/// heart it wanted "overclaims". Splitting them lets each carry its real name
-/// and its real icon.
+/// It then spent a while as the app's four library *states* -- Liked,
+/// Watchlist, Watched, Downloads -- one tab each. That stopped scaling the
+/// moment collections arrived: a user with six collections would have had ten
+/// tabs, and a pill row that scrolls is a pill row nobody reads to the end of.
 ///
-/// Nothing can fall between them: `MyListService` deletes an item once all
-/// three flags are false, so everything it stores carries at least one.
-///
-/// History was dropped 2026-09-02, and Continue on 2026-09-13: Continue
-/// rendered `ContinueWatchingService.activeItems`, the identical deduped list
-/// the Continue Watching row already shows, so the tab was a second window
-/// onto the same thing.
-///
-/// [downloads] stays despite not being a library *state*. It is the only
-/// place an in-app download can be seen or managed — `DownloadService` tracks
-/// live progress/pause/resume, and app-private storage is not browsable — so
-/// dropping it would strand downloads with no UI at all.
+/// So the states moved down a level. [collections] holds them as cards next to
+/// the user's own collections -- the arrangement Spotify and YouTube Music use,
+/// where "Liked Songs" is pinned first and looks like the playlists beside it
+/// -- and the tab bar is left holding the three genuinely different things you
+/// can want from a Library: what you saved, what you were in the middle of,
+/// and what is on the device.
 enum LibrarySection {
-  /// Favourited. Independent of watch progress, so something can be both
-  /// Watched and Liked. The only state Live TV channels can be in.
-  liked('Liked', Icons.favorite_rounded),
+  /// Everything saved, as square cards: the three built-in shelves first,
+  /// then the user's collections. See [LibraryShelf].
+  collections('Collections', Icons.grid_view_rounded),
 
-  /// Kept to watch later. Mutually exclusive with [watched].
-  watchlist('Watchlist', Icons.bookmark_added_rounded),
+  /// What is part-watched. Back as a tab after being dropped on 2026-09-13
+  /// for duplicating the home row: with the states gone from the tab bar
+  /// there is room for it, and the Library is where someone looks for
+  /// "what was I watching?" when the home row has already scrolled past it.
+  continueWatching('Continue', Icons.play_circle_outline_rounded),
 
-  /// Already seen. Mutually exclusive with [watchlist].
-  watched('Watched', Icons.check_circle_rounded),
-
-  /// Available offline.
+  /// Available offline. Not a library *state*: it reads `DownloadService`,
+  /// and it is the only place an in-app download can be seen or managed --
+  /// app-private storage is not browsable -- so dropping it would strand
+  /// downloads with no UI at all.
   downloads('Downloads', Icons.download_rounded);
 
   final String label;
   final IconData icon;
 
   const LibrarySection(this.label, this.icon);
+}
 
-  /// Whether this tab filters [MyListService] by a flag, as opposed to
-  /// [downloads], which reads a different store entirely.
-  bool get isLibraryState => this != LibrarySection.downloads;
+/// The built-in shelves, pinned as cards before the user's own collections.
+///
+/// These are the three states `LibraryActionsRow` writes on every details
+/// page, so a card here means exactly what the button there meant. Nothing can
+/// fall between them: `MyListService` deletes an item once all three flags are
+/// false, so everything it stores carries at least one.
+///
+/// They are *states*, not collections -- one flat list, one state per title,
+/// [watchlist] and [watched] mutually exclusive, all three synced to Trakt and
+/// Simkl. A collection has none of those constraints. They share a card shape
+/// because they are both "a list you can open", and nothing more.
+enum LibraryShelf {
+  /// Favourited. Independent of watch progress, so something can be both
+  /// watched and liked. The only state a Live TV channel can be in.
+  liked(
+    'Liked',
+    Icons.favorite_rounded,
+    Color(0xFFE5395A),
+    'Nothing liked yet',
+    'Tap the heart on anything and it lands here.',
+  ),
+
+  /// Kept to watch later. Mutually exclusive with [watched].
+  watchlist(
+    'Watchlist',
+    Icons.bookmark_added_rounded,
+    Color(0xFF4E8CFF),
+    'Nothing on your watchlist',
+    'Add something to watch later and it lands here.',
+  ),
+
+  /// Already seen. Mutually exclusive with [watchlist].
+  watched(
+    'Watched',
+    Icons.check_circle_rounded,
+    Color(0xFF00D294),
+    'Nothing marked watched yet',
+    'Mark something watched and it lands here.',
+  );
+
+  final String label;
+  final IconData icon;
+
+  /// Tints the card. Fixed rather than themed so the three stay told apart at
+  /// a glance in a grid -- and [watched] is the same green the details page's
+  /// own Watched button uses.
+  final Color color;
+
+  final String emptyTitle;
+  final String emptySubtitle;
+
+  const LibraryShelf(
+    this.label,
+    this.icon,
+    this.color,
+    this.emptyTitle,
+    this.emptySubtitle,
+  );
 }

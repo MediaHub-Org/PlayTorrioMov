@@ -474,7 +474,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               const SizedBox(height: _Space.lg),
               _buildPlayButton(fullWidth: true),
               const SizedBox(height: _Space.sm),
-              _buildLibraryButton(fullWidth: true),
+              _buildLibraryButton(),
             ],
           ),
         ),
@@ -542,13 +542,12 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
         const SizedBox(height: _Space.lg),
         _buildMetadataRow(),
         const SizedBox(height: _Space.lg),
-        Row(
-          children: [
-            Expanded(child: _buildPlayButton(fullWidth: true)),
-            const SizedBox(width: _Space.sm),
-            _buildLibraryButton(fullWidth: false),
-          ],
-        ),
+        // Stacked, matching Movies and Series: Play takes the line, the four
+        // library actions split the one under it. Sharing a Row with Play left
+        // no width for a fourth action.
+        _buildPlayButton(fullWidth: true),
+        const SizedBox(height: _Space.sm),
+        _buildLibraryButton(),
         if (_anime.description.isNotEmpty) ...[
           const SizedBox(height: _Space.lg),
           _buildSynopsis(_anime.description),
@@ -760,14 +759,15 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   /// so its AniList-shaped list stays in step; playback progress comes from
   /// [ContinueWatchingService], which is where the player actually saves
   /// it.
-  Widget _buildLibraryButton({required bool fullWidth}) {
-    final row = LibraryActionsRow(
+  Widget _buildLibraryButton() {
+    // Both layouts now give the row a line to itself -- the poster column on
+    // desktop, under Play on mobile -- so it spreads across the width rather
+    // than clustering and needing to be centred.
+    return LibraryActionsRow(
       itemBuilder: _buildMyListItem,
       onChanged: _mirrorToAnimeLibrary,
+      expanded: true,
     );
-    // The wide slot under the poster centres the row; the narrow one sits
-    // beside Play and sizes to its content.
-    return fullWidth ? Center(child: row) : row;
   }
 
   MyListItem _buildMyListItem() {

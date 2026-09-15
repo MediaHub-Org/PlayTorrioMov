@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../models/collection/media_collection.dart';
 import '../../models/my_list/my_list_item.dart';
+import '../../services/collections/media_collections_service.dart';
 import '../../services/my_list/my_list_service.dart';
+import '../collection/collection_picker_sheet.dart';
 import 'like_button.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -30,10 +33,21 @@ class LibraryActionsRow extends StatelessWidget {
   /// two stores cannot drift apart.
   final void Function(MyListItem? entry)? onChanged;
 
+  /// Spread the buttons evenly across the full width instead of clustering
+  /// them at their natural size.
+  ///
+  /// The phone layout wants this: it used to put Play and these buttons on one
+  /// line, which squeezed the primary action to fit three secondary ones and
+  /// left no room for a fourth. Stacked on their own line they share the width
+  /// -- roughly 72px each on a 360px screen, comfortably past the 48px tap
+  /// target, and larger than the clustered version they replace.
+  final bool expanded;
+
   const LibraryActionsRow({
     super.key,
     required this.itemBuilder,
     this.onChanged,
+    this.expanded = false,
   });
 
   /// The entry in My List matching [itemBuilder]'s item, or null if it has
@@ -62,34 +76,72 @@ class LibraryActionsRow extends StatelessWidget {
         final isWatched = entry?.isWatched ?? false;
         final isLiked = entry?.isLiked ?? false;
 
+        final buttons = <Widget>[
+          _StatusButton(
+            icon: isWatchlist
+                ? Icons.bookmark_added_rounded
+                : Icons.bookmark_add_outlined,
+            label: isWatchlist ? 'Remove from watchlist' : 'Add to watchlist',
+            active: isWatchlist,
+            color: AppColors.accent,
+            onTap: () => _apply(MyListService.setWatchlist),
+          ),
+          _StatusButton(
+            icon: isWatched
+                ? Icons.check_circle_rounded
+                : Icons.check_circle_outline_rounded,
+            label: isWatched ? 'Mark as unwatched' : 'Mark as watched',
+            active: isWatched,
+            color: const Color(0xFF00D294),
+            onTap: () => _apply(MyListService.setWatched),
+          ),
+          LikeButton(
+            isLiked: isLiked,
+            onTap: () => _apply(MyListService.toggleLiked),
+            style: LikeButtonStyle.boxedIcon,
+          ),
+          // The fourth is not a toggle. The other three flip one state; this
+          // opens a picker, because a title can be in any number of
+          // collections at once. It still shows as active when the title is in
+          // at least one, so the row answers "is this filed anywhere?" at a
+          // glance without being tapped.
+          ValueListenableBuilder<List<MediaCollection>>(
+            valueListenable: MediaCollectionsService.collections,
+            builder: (context, _, __) {
+              final inAny =
+                  MediaCollectionsService.containing(itemBuilder()).isNotEmpty;
+              return _StatusButton(
+                icon: inAny
+                    ? Icons.playlist_add_check_rounded
+                    : Icons.playlist_add_rounded,
+                label: inAny ? 'In a collection' : 'Add to collection',
+                active: inAny,
+                color: AppColors.accent,
+                onTap: () =>
+                    CollectionPickerSheet.show(context, itemBuilder()),
+              );
+            },
+          ),
+        ];
+
+        if (!expanded) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < buttons.length; i++) ...[
+                if (i > 0) const SizedBox(width: 10),
+                buttons[i],
+              ],
+            ],
+          );
+        }
+
         return Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            _StatusButton(
-              icon: isWatchlist
-                  ? Icons.bookmark_added_rounded
-                  : Icons.bookmark_add_outlined,
-              label: isWatchlist ? 'Remove from watchlist' : 'Add to watchlist',
-              active: isWatchlist,
-              color: AppColors.accent,
-              onTap: () => _apply(MyListService.setWatchlist),
-            ),
-            const SizedBox(width: 10),
-            _StatusButton(
-              icon: isWatched
-                  ? Icons.check_circle_rounded
-                  : Icons.check_circle_outline_rounded,
-              label: isWatched ? 'Mark as unwatched' : 'Mark as watched',
-              active: isWatched,
-              color: const Color(0xFF00D294),
-              onTap: () => _apply(MyListService.setWatched),
-            ),
-            const SizedBox(width: 10),
-            LikeButton(
-              isLiked: isLiked,
-              onTap: () => _apply(MyListService.toggleLiked),
-              style: LikeButtonStyle.boxedIcon,
-            ),
+            for (var i = 0; i < buttons.length; i++) ...[
+              if (i > 0) const SizedBox(width: 10),
+              Expanded(child: buttons[i]),
+            ],
           ],
         );
       },
