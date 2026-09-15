@@ -3,7 +3,11 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.0+33] - 2026-09-15
+
+The collections release. Everything here is covered by the test suite and
+nothing in it has been used on a phone yet — see **Not yet verified** at the
+end of this entry before treating it as done.
 
 ### Added
 - **Collections.** A user-named list of titles, with create, read, rename,
@@ -68,6 +72,30 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   each on a 360px phone, past the 48px tap target and *larger* than the
   clustered icons they replace. It also converges the two layouts — desktop
   already stacked them in its poster column.
+
+### Not yet verified
+
+743 tests pass, and they are the reason to believe the logic is right. They
+are not a device. Nothing below has been exercised on real hardware, and each
+is a thing a widget test cannot answer:
+
+- **Does a collection survive a restart?** The round trip is unit-tested
+  against a mocked `SharedPreferences`; the real plugin writing to real
+  storage is not.
+- **Does backup and restore carry collections?** Believed yes, and for free:
+  `BackupService` dumps every preferences key, so it needs no knowledge of
+  this feature. Believed is not the same as seen.
+- **Drag-to-reorder**, under a real finger rather than a synthesised index.
+  The off-by-one in `ReorderableListView`'s destination index is tested
+  directly, which is the part most likely to be wrong — but not the gesture.
+- **The four action buttons on a real phone.** Tested at 320px and at the
+  default text scale. A device with large system text is a different sum.
+- **The picker sheet with the keyboard open.** It offsets by
+  `MediaQuery.viewInsetsOf`, which no test raises a keyboard against.
+
+Also still outstanding from 1.7.0: the **Cast fix has never been confirmed
+against a receiver** (#28). It explains the reported symptom exactly, and
+that is all anyone can say about it so far.
 
 ## [1.7.0+32] - 2026-09-15
 
@@ -930,3 +958,4 @@ history only.
 | #64 | Light mode finished: every remaining dark literal is either a token or annotated as artwork |
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
+| #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them |
