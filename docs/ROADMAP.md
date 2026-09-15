@@ -8,13 +8,33 @@ end of the changelog.
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-15**, on `v1.7.0+32`.
+Last reconciled: **2026-09-15**, on `v1.8.0+33`.
 
 ---
 
 ## Pending
 
 **No outstanding code work.** Everything below needs hardware.
+
+### Collections, on a phone (#67)
+
+Shipped in 1.8.0 with 743 tests behind it and no device time at all. The
+tests are why the logic is believed right; they are not a device. Each of
+these is something a widget test cannot answer:
+
+1. Does a collection **survive a restart**? The round trip is tested against
+   a mocked `SharedPreferences`, not the real plugin writing real storage.
+2. Does **backup and restore** carry collections? It should, for free —
+   `BackupService` dumps every preferences key, so it needs no knowledge of
+   the feature. Believed is not seen.
+3. Does **drag-to-reorder** work under a finger? The off-by-one in
+   `ReorderableListView`'s destination index is tested directly, being the
+   part most likely to be wrong, but the gesture is not.
+4. Do the **four action buttons** fit a real phone, including one with large
+   system text? Tested at 320px at the default text scale; a device with
+   accessibility text is a different sum.
+5. Does the **picker sheet** clear the keyboard? It offsets by
+   `MediaQuery.viewInsetsOf`, which no test raises a keyboard against.
 
 ### Cast, against a real receiver (#28)
 
