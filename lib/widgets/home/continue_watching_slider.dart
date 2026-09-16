@@ -164,104 +164,117 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
               // Section Header
               SizedBox(
                 height: ContinueWatchingSlider.headerHeight,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 4,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: palette.primaryColor,
-                          borderRadius: BorderRadius.circular(2),
-                          boxShadow: [
-                            BoxShadow(
-                              color: palette.primaryColor.withValues(alpha: 0.5),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      // Title and count take the space "See all" does not,
-                      // and the title gives way first. Laid out flat with a
-                      // Spacer, the title demanded its natural width and
-                      // pushed the button off the edge -- 88px of overflow on
-                      // a 420px-wide phone with any watch history, and more
-                      // for a longer title than the English one.
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                widget.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.ink,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: palette.primaryColor.withValues(
-                                  alpha: 0.15,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: palette.primaryColor.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Text(
-                                '${items.length}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: palette.primaryColor,
-                                ),
-                              ),
-                            ),
-                            // Takes the slack the title did not need, so the
-                            // count stays beside the title rather than
-                            // drifting across to the button.
-                            const Spacer(),
-                          ],
-                        ),
-                      ),
-                      // The row shows one card per show and drops a title once
-                      // it is finished; the full per-episode log lives behind
-                      // this. It was being recorded all along with nothing to
-                      // render it.
-                      if (ContinueWatchingService.historyItems.value.any(
-                        (i) => ContinueWatchingService.matchesTypeFilter(
-                          i,
-                          widget.typeFilter,
-                        ),
-                      ))
-                        TextButton(
-                          onPressed: () => pushPage(
-                            context,
-                            WatchHistoryPage(
-                              typeFilter: widget.typeFilter,
-                              title: 'History',
-                            ),
-                          ),
-                          child: const Text('See all'),
-                        ),
-                    ],
+                // headerHeight is pinned so bandHeight stays exact whether
+                // or not "See all" is showing -- see its doc. Pinned means
+                // the 18px title, the count pill and the button have
+                // nowhere to go when the system text scale grows, so the
+                // scale is capped here instead: the header still responds
+                // to a larger setting, just not past the box it lives in.
+                // Same 1.3 ceiling the nav bar and the pill rows use.
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: MediaQuery.textScalerOf(
+                      context,
+                    ).clamp(maxScaleFactor: 1.3),
                   ),
-                ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: palette.primaryColor,
+                            borderRadius: BorderRadius.circular(2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: palette.primaryColor.withValues(alpha: 0.5),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        // Title and count take the space "See all" does not,
+                        // and the title gives way first. Laid out flat with a
+                        // Spacer, the title demanded its natural width and
+                        // pushed the button off the edge -- 88px of overflow on
+                        // a 420px-wide phone with any watch history, and more
+                        // for a longer title than the English one.
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  widget.title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.ink,
+                                    letterSpacing: -0.3,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 7,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: palette.primaryColor.withValues(
+                                    alpha: 0.15,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: palette.primaryColor.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                    width: 0.8,
+                                  ),
+                                ),
+                                child: Text(
+                                  '${items.length}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: palette.primaryColor,
+                                  ),
+                                ),
+                              ),
+                              // Takes the slack the title did not need, so the
+                              // count stays beside the title rather than
+                              // drifting across to the button.
+                              const Spacer(),
+                            ],
+                          ),
+                        ),
+                        // The row shows one card per show and drops a title once
+                        // it is finished; the full per-episode log lives behind
+                        // this. It was being recorded all along with nothing to
+                        // render it.
+                        if (ContinueWatchingService.historyItems.value.any(
+                          (i) => ContinueWatchingService.matchesTypeFilter(
+                            i,
+                            widget.typeFilter,
+                          ),
+                        ))
+                          TextButton(
+                            onPressed: () => pushPage(
+                              context,
+                              WatchHistoryPage(
+                                typeFilter: widget.typeFilter,
+                                title: 'History',
+                              ),
+                            ),
+                            child: const Text('See all'),
+                          ),
+                      ],
+                    ),
+                  )),
               ),
 
               const SizedBox(height: ContinueWatchingSlider.headerGap),
@@ -707,42 +720,57 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                 ),
 
                 // Title and Episode Metadata
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item.type == 'series' &&
-                                item.season != null &&
-                                item.episode != null
-                            ? 'S${item.season!.toString().padLeft(2, '0')}:E${item.episode!.toString().padLeft(2, '0')}${item.episodeTitle != null ? ' • ${item.episodeTitle}' : ''}'
-                            : (item.year != null
-                                  ? '${item.year} • Movie'
-                                  : 'Movie'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.inkAlpha(0.55),
-                        ),
-                      ),
-                    ],
+                //
+                // cardHeightFor reserves a flat 60px for this block, and
+                // bandHeight is deliberately a pure function of width --
+                // BrowseScaffold has to derive it without building the
+                // widget -- so the reservation cannot grow with the text.
+                // The block is capped to match, at the same 1.3 the rest of
+                // the app's fixed-height chrome uses. Measured: the two
+                // lines plus their 8px padding fit 60px up to about 1.75x,
+                // so 1.3 keeps real slack rather than sitting on the edge.
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: MediaQuery.textScalerOf(
+                      context,
+                    ).clamp(maxScaleFactor: 1.3),
                   ),
-                ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          item.type == 'series' &&
+                                  item.season != null &&
+                                  item.episode != null
+                              ? 'S${item.season!.toString().padLeft(2, '0')}:E${item.episode!.toString().padLeft(2, '0')}${item.episodeTitle != null ? ' • ${item.episodeTitle}' : ''}'
+                              : (item.year != null
+                                    ? '${item.year} • Movie'
+                                    : 'Movie'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.inkAlpha(0.55),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
               ],
             ),
           ),
