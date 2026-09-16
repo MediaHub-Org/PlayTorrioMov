@@ -3,6 +3,20 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Internal
+- **The release workflow is off the retired Node 20 runtime.**
+  `softprops/action-gh-release` was on `v2`, which targets Node 20; GitHub
+  is retiring that runtime and forces such actions onto Node 24 with a
+  warning. Nothing failed and nothing went red — the warning was the only
+  signal, and it scrolled past in a green build, which is how it survived
+  the v1.8.2 release. Now on `v3`, a runtime bump with no input or output
+  changes. A test fails if any action in either workflow drops below the
+  first major that moved to Node 24, and fails again if a *new* action is
+  added that the list does not cover — so the guard cannot pass by not
+  looking.
+
 ## [1.8.2+35] - 2026-09-16
 
 The release that finished what 1.8.1 started on text scale, took the

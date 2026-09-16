@@ -872,7 +872,13 @@ jobs:
           cat SHA256SUMS
 
       - name: Publish Release with Assets
-        uses: softprops/action-gh-release@v2
+        # v3 is a runtime bump only -- Node 20 to Node 24, no input or output
+        # changes -- so this is a drop-in. v2 still works today but GitHub
+        # forces Node 20 actions onto Node 24 and warns on every run; the
+        # warning is the only thing that would have told us, and it is easy to
+        # read past in a green build. `test/release_artifacts_test.dart` now
+        # fails if any action here goes back to a Node 20 line.
+        uses: softprops/action-gh-release@v3
         with:
           # On a dispatch the tag comes from the input and is created at the
           # dispatched ref; on a tag push it is the pushed tag.

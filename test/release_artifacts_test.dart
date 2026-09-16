@@ -78,4 +78,83 @@ void main() {
       );
     });
   });
+
+  group('the workflows do not use a retired action runtime', () {
+    // GitHub is retiring the Node 20 Actions runtime. An action still on it
+    // keeps working -- GitHub forces it onto Node 24 and prints a warning --
+    // so nothing fails and nothing is red. The warning is the only signal,
+    // and it scrolls past in a green build: that is exactly how
+    // `action-gh-release@v2` sat here after v3 shipped.
+    //
+    // This is a source check rather than a live one because resolving an
+    // action's `runs.using` needs the network, and a test that reaches
+    // GitHub would fail on a fork, offline, or when the API rate-limits.
+    // The list below is the actions this repo actually uses, pinned to the
+    // first major that moved to Node 24.
+    const node24Floor = {
+      'actions/checkout': 5,
+      'actions/cache': 5,
+      'actions/upload-artifact': 6,
+      'actions/download-artifact': 7,
+      'actions/setup-java': 5,
+      'softprops/action-gh-release': 3,
+      'flatpak/flatpak-github-actions/flatpak-builder': 6,
+    };
+
+    /// Actions with no Node runtime at all, so there is no floor to check.
+    /// `subosito/flutter-action` is a composite action -- it runs shell steps
+    /// and never loads `dist/index.js`, so it is unaffected by the runtime
+    /// retirement however old the tag is.
+    const composite = {'subosito/flutter-action'};
+
+    for (final file in [
+      '.github/workflows/build.yml',
+      '.github/workflows/pr-checks.yml',
+    ]) {
+      test('$file', () {
+        final source = File(file).readAsStringSync();
+        final uses = RegExp(r'uses:\s*([\w.-]+/[\w.-]+(?:/[\w.-]+)?)@v(\d+)')
+            .allMatches(source);
+
+        for (final m in uses) {
+          final action = m.group(1)!;
+          final major = int.parse(m.group(2)!);
+          final floor = node24Floor[action];
+          if (floor == null) continue; // composite or local action
+          expect(
+            major,
+            greaterThanOrEqualTo(floor),
+            reason: '$action@v$major in $file is below v$floor, which is the '
+                'first line on the Node 24 runtime. It still runs, but GitHub '
+                'forces it and warns on every build.',
+          );
+        }
+      });
+    }
+
+    test('every action the workflows use is in the list above', () {
+      // Otherwise a new action could be added on a Node 20 line and this
+      // whole group would silently skip it -- the check would pass by not
+      // looking, which is worse than not having it.
+      final seen = <String>{};
+      for (final file in [
+        '.github/workflows/build.yml',
+        '.github/workflows/pr-checks.yml',
+      ]) {
+        final source = File(file).readAsStringSync();
+        for (final m in RegExp(r'uses:\s*([\w.-]+/[\w.-]+(?:/[\w.-]+)?)@')
+            .allMatches(source)) {
+          seen.add(m.group(1)!);
+        }
+      }
+
+      expect(
+        seen.difference(node24Floor.keys.toSet()).difference(composite),
+        isEmpty,
+        reason: 'a new action was added to a workflow. Check which Node '
+            'runtime it targets and add it to node24Floor (or to composite, '
+            'if it has no Node runtime), or this guard will not cover it.',
+      );
+    });
+  });
 }
