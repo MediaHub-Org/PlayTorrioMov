@@ -1,9 +1,9 @@
 # Roadmap — PlayTorrioMov
 
 **What is left to do.** Shipped work is in [CHANGELOG.md](../CHANGELOG.md)
-(1.8.1+34 covers #67's device confirmation and the partial progress on #68
-and #69 below), the release process is in [RELEASES.md](RELEASES.md), and
-item numbers (`#15`–`#71`) are indexed at the end of the changelog.
+(1.8.1+34 covers #67's device confirmation, #70's, and the partial progress
+on #68 and #69 below), the release process is in [RELEASES.md](RELEASES.md),
+and item numbers (`#15`–`#71`) are indexed at the end of the changelog.
 
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
@@ -86,13 +86,13 @@ people search and recognise things.
 ### Text scale and accessibility (#69)
 
 **Most of the ~68 files in `lib/` with a fixed `height:` are still
-unaudited.** Six high-traffic boxes are fixed so far — four in 1.8.1, then
-the Continue Watching card and its section header, both measured at 56px
-past their box at 3x. Every one is a clamp rather than a layout rewrite:
-the element still grows with text scale, just capped short of overflowing.
-1.3 is the established ceiling (nav bar, sidebar logo, pill rows, and now
-the home row). System-level accessibility scale, which the in-app zoom
-setting does not bound, can still overflow the rest.
+unaudited.** Ten high-traffic boxes are fixed so far — four in 1.8.1, then
+the Continue Watching card and its section header, then the three catalogue
+cards and the details page action rows. Most are a clamp rather than a
+layout rewrite: the element still grows with text scale, just capped short
+of overflowing. 1.3 is the established ceiling (nav bar, sidebar logo, pill
+rows, and the home row). System-level accessibility scale, which the in-app
+zoom setting does not bound, can still overflow the rest.
 
 **Do not audit this by grepping `height:`.** It was tried and it does not
 survive contact: a span-based scan pairing each fixed height with the
@@ -105,20 +105,30 @@ built on it would be unactionable.
 What works is pumping the real widget: `test/text_scale_overflow_test.dart`
 renders at 3.0 scale on a 360px-wide view and asserts nothing reached the
 binding. Flutter reports an overflow as an exception with an exact pixel
-count, so a failure names the widget and the amount. Add a case per
-widget; the ones worth doing next are the surfaces every user meets —
-`MovieCard` in its catalogue grid, `AnimeCard`, `IptvChannelCard`, and the
-details page action rows.
+count, so a failure names the widget and the amount. Add a case per widget.
+
+**The four surfaces the roadmap named as next are done** — `MovieCard`,
+`AnimeCard`, `IptvChannelCard` and the details page action rows, the last
+three of which turned up seven overflows between them that nobody had
+predicted. What is left is the long tail: the player's chrome, the settings
+pages, and the browse rows. The method is the same, and the probe file is
+where a new case goes.
+
+Two things learned doing them, worth not rediscovering:
+
+- **A clamp is not always enough.** The Episodes control strip still wanted
+  179px at 1.3, because the jump input and the batch dropdown are
+  fixed-width boxes with text inside them. It sits in a `Wrap`, so the box
+  could genuinely grow — and wrapping is the better answer where it can.
+  Clamp only what has nowhere to go.
+- **A page with a looping animation never settles.** `pumpAndSettle` times
+  out on the details pages' ambient background rather than reporting
+  anything about layout. Overflow is raised during layout on the first
+  frame, so `pumpAtScale(settle: false)` is what those cases need.
 
 Semantics labels on icon-only controls, mentioned here previously, is
 still untouched — `Tooltip` supplies one for free, which the library
 action row already gets, but nothing has checked the rest.
-
-### Audio silent under Flatpak, needs a device to confirm (#70)
-
-`--socket=pulseaudio` was added to `finish-args` in 1.8.1 (see changelog
-for the reasoning) — a Flatpak build with the fixed manifest has not yet
-been run against real speakers.
 
 ### Cast, against a real receiver (#28)
 
