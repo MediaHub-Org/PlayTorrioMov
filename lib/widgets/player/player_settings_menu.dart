@@ -131,8 +131,13 @@ class _SettingsRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         onTap: onTap,
         child: Container(
-          height: 44,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          // A minimum rather than a fixed height. At 44 it was a hard box:
+          // the label and the value both grow with text scale, and the row
+          // had nowhere to put them -- 436px past the card at 3x on the
+          // longest row. The card is bounded by PlayerMenuAnchor, which
+          // scrolls when the rows no longer fit, so growing here is safe.
+          constraints: const BoxConstraints(minHeight: 44),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: Row(
             children: [
               Icon(icon, size: 18, color: PlayerTheme.inkMuted),
@@ -147,12 +152,21 @@ class _SettingsRow extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: PlayerTheme.inkSubtle,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
+              const SizedBox(width: 8),
+              // The value was the un-flexed half of this row: the label
+              // shrank to its share and the value beside it did not, so a
+              // long track name ("English (Dubbed)") painted out the side.
+              Flexible(
+                child: Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                  style: const TextStyle(
+                    color: PlayerTheme.inkSubtle,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(width: 4),

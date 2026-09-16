@@ -15,6 +15,9 @@ import 'package:playtorriomov/services/theme/app_theme_service.dart';
 import 'package:playtorriomov/widgets/common/adaptive_nav_shell.dart';
 import 'package:playtorriomov/widgets/common/pill_tab_row.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
+import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
+import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
 
 /// #69's own text: "the app scales today -- and overflows, because its
 /// layouts are fixed-height." This is the checkable part of the audit that
@@ -338,6 +341,77 @@ void main() {
             'label, so at a large scale the text takes the line and paints '
             'past the button',
       );
+    },
+  );
+
+  testWidgets(
+    'the player settings menu does not overflow at 3x text scale',
+    (tester) async {
+      // The roadmap's next #69 target after the details pages: the player's
+      // chrome, which every user meets every session. This is the gear menu
+      // -- four rows in a fixed-width card, each a fixed 44px Container.
+      //
+      // Pumped inside the real PlayerMenuAnchor, not bare. The anchor is
+      // what bounds the card and scrolls it when the rows no longer fit, so
+      // a bare pump reports a vertical overflow that production cannot
+      // have -- the card is allowed to be taller than the screen there.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              PlayerMenuAnchor(
+                child: PlayerSettingsMenu(
+                  currentRate: 1.5,
+                  aspectLabel: 'Fit to screen',
+                  audioLabel: 'English (Dubbed)',
+                  subtitleLabel: 'English',
+                  onTapAudio: () {},
+                  onTapSubtitles: () {},
+                  onTapSpeed: () {},
+                  onTapAspect: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'each row is a fixed 44px Container whose label and value both '
+            'grow with the scale, and only the label is Expanded',
+      );
+    },
+  );
+
+  testWidgets(
+    'the player aspect menu does not overflow at 3x text scale',
+    (tester) async {
+      // Same shape as the settings rows above: a fixed-height Container with
+      // a bare Row inside it, so the label takes its natural width and the
+      // check icon beside it goes past the edge.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              PlayerMenuAnchor(
+                child: PlayerAspectMenu(
+                  currentFit: BoxFit.contain,
+                  subtitleScale: 1.0,
+                  onFitSelected: (_) {},
+                  onSubtitleScaleChanged: (_) {},
+                  onClose: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
     },
   );
 }

@@ -68,8 +68,15 @@ class PlayerAspectMenu extends StatelessWidget {
                     onClose();
                   },
                   child: Container(
-                    height: 38,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    // A minimum, not a fixed height: the label grows with
+                    // text scale and the row had nowhere to put it -- 685px
+                    // past the card at 3x. PlayerMenuAnchor bounds and
+                    // scrolls the card, so growing here is safe.
+                    constraints: const BoxConstraints(minHeight: 38),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? PlayerTheme.raised : Colors.transparent,
                       borderRadius: BorderRadius.circular(10),
@@ -81,12 +88,18 @@ class PlayerAspectMenu extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          opt.label,
-                          style: TextStyle(
-                            color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                            fontSize: 13.5,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        // Flexible so the label yields to the check icon
+                        // rather than pushing it off the edge.
+                        Flexible(
+                          child: Text(
+                            opt.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                              fontSize: 13.5,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            ),
                           ),
                         ),
                         if (isSelected)
@@ -113,21 +126,34 @@ class PlayerAspectMenu extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Subtitle Size Scale',
-                  style: TextStyle(
-                    color: PlayerTheme.inkMuted,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
+                // Both halves flex: the label and the value both grow with
+                // the scale, and neither yielded -- 590px past the card at
+                // 3x, on the row that names the control and reads its value.
+                const Flexible(
+                  child: Text(
+                    'Subtitle Size Scale',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: PlayerTheme.inkMuted,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                Text(
-                  '${subtitleScale.toStringAsFixed(1)}×',
-                  style: const TextStyle(
-                    color: PlayerTheme.ink,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                    fontFeatures: [FontFeature.tabularFigures()],
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    '${subtitleScale.toStringAsFixed(1)}×',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      color: PlayerTheme.ink,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w700,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
               ],
