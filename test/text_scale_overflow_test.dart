@@ -6,6 +6,7 @@ import 'package:playtorriomov/models/anime/anime_media.dart';
 import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 import 'package:playtorriomov/models/movie/movie.dart';
 import 'package:playtorriomov/pages/anime/anime_details_page.dart';
+import 'package:playtorriomov/pages/settings/settings_page.dart';
 import 'package:playtorriomov/services/iptv/hardcoded_channels.dart';
 import 'package:playtorriomov/widgets/anime/anime_card.dart';
 import 'package:playtorriomov/widgets/iptv/iptv_channel_card.dart';
@@ -444,6 +445,29 @@ void main() {
       );
 
       expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the settings hub does not overflow at 3x text scale',
+    (tester) async {
+      // The screen a user who needs large text is most likely to be on. Its
+      // category tiles are fixed 76px boxes with a title and a badge, and
+      // the real page is pumped rather than a tile in isolation because the
+      // tile is private -- and because the page is what a user actually
+      // meets.
+      await pumpAtScale(
+        tester,
+        settle: false,
+        child: const SettingsPage(),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'a fixed 76px tile whose title and badge both grow with the '
+            'scale has to flex or clamp',
+      );
     },
   );
 }

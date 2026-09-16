@@ -245,8 +245,12 @@ class _SettingsCategoryTile extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          height: 76,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          // A minimum, not a fixed 76. The title and the badge both grow
+          // with text scale and the box had nowhere to put them -- 286px
+          // past the tile at 3x on the longest title. The page scrolls, so
+          // growing here is safe.
+          constraints: const BoxConstraints(minHeight: 76),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
@@ -280,19 +284,26 @@ class _SettingsCategoryTile extends StatelessWidget {
               ),
               if (badgeText != null) ...[
                 const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
-                  decoration: BoxDecoration(
-                    color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    badgeText!,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: badgeColor ?? iconColor,
+                // Flexible, and the badge itself is the widest thing in the
+                // row after the title: "Built-in Providers" plus "Connected"
+                // asked for 64px more than the tile had at 3x.
+                Flexible(
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                    decoration: BoxDecoration(
+                      color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      badgeText!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w700,
+                        color: badgeColor ?? iconColor,
+                      ),
                     ),
                   ),
                 ),
