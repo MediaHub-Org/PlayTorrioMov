@@ -1,3 +1,4 @@
+import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -86,77 +87,92 @@ class MovieCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return InteractiveCardShell(
-      pressedScale: 0.97,
-      onTap: onTap ??
-          () {
-            pushPage(context, DetailsPage(movie: movie));
-          },
-      builder: (context, hovered, pressed) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Poster ──────────────────────────────────────────────
-          Expanded(
-            child: _PosterFrame(
-              posterUrl: movie.poster,
-              hovered: hovered,
-              contentType: movie.type,
-              imdbRating: movie.imdbRating,
+    // A grid cell is a fixed box; its text is not. Capped so a
+    // large system scale cannot paint outside the cell.
+    return ClampedTextScale(
+      child: InteractiveCardShell(
+        pressedScale: 0.97,
+        onTap: onTap ??
+            () {
+              pushPage(context, DetailsPage(movie: movie));
+            },
+        builder: (context, hovered, pressed) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Poster ──────────────────────────────────────────────
+            Expanded(
+              child: _PosterFrame(
+                posterUrl: movie.poster,
+                hovered: hovered,
+                contentType: movie.type,
+                imdbRating: movie.imdbRating,
+              ),
             ),
-          ),
 
-          // ── Title ───────────────────────────────────────────────
-          const SizedBox(height: 9),
-          Text(
-            movie.name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 15.5,
-              height: 1.15,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.25,
+            // ── Title ───────────────────────────────────────────────
+            const SizedBox(height: 9),
+            Text(
+              movie.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 15.5,
+                height: 1.15,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -0.25,
+              ),
             ),
-          ),
 
-          // ── Year / type ─────────────────────────────────────────
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              if (movie.year != null && movie.year!.isNotEmpty)
-                Text(
-                  movie.year!,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.ink.withOpacity(0.52),
-                    fontWeight: FontWeight.w600,
+            // ── Year / type ─────────────────────────────────────────
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                if (movie.year != null && movie.year!.isNotEmpty)
+                  // Flexible as well as clamped: the clamp keeps this legible
+                  // at ordinary settings, this stops it painting outside the
+                  // cell whatever scale it is handed.
+                  Flexible(
+                    child: Text(
+                      movie.year!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.ink.withOpacity(0.52),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-                ),
-              if (movie.year != null && movie.year!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 7),
-                  child: Container(
-                    width: 4,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppColors.ink.withOpacity(0.26),
-                      shape: BoxShape.circle,
+                if (movie.year != null && movie.year!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    child: Container(
+                      width: 4,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.ink.withOpacity(0.26),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                Flexible(
+                  child: Text(
+                    movie.type == 'series' ? 'Series' : (movie.type == 'anime' ? 'Anime' : 'Movie'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.ink.withOpacity(0.42),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-              Text(
-                movie.type == 'series' ? 'Series' : (movie.type == 'anime' ? 'Anime' : 'Movie'),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.ink.withOpacity(0.42),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
-    );
+    );;
   }
 }
 
