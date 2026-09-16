@@ -238,11 +238,34 @@ PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod`; that repo is
 **archived**, so Mov is the only active app in the family and the direct
 downstream of `ayman708-UX/PlayTorrioV3`.
 
-**Reviewed through `f69617b` (2026-09-13). Nothing outstanding.**
+**Reviewed through `39b736f` (2026-09-16). Nothing outstanding.**
 
 Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
 `dl.google.com` apt source the runner image ships that periodically breaks
 `apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`.
+
+`39b736f` ("v1.1.6") is the largest upstream commit since the fork and was
+read in full. Its headline feature — a CloudStream extension system with a
+native Android bridge — is **not taken**: it is a whole plugin ecosystem
+(477 lines of Kotlin, a marketplace, repo management, extension loading)
+and a feature, not a fix. What was taken from it is one bug, below.
+
+| From `39b736f` | Taken? |
+|:--|:--|
+| CloudStream bridge, marketplace, repo management | **No** — a feature, and a large one. Would need its own roadmap entry and a device |
+| Scraper lifecycle: `stopAllScrapers`, session IDs, `cancelOngoingRequests` | **Partly.** `ScraperManager` already had the teardown; the missing link was in `StreamService`, and that is fixed. See below |
+| Player coroutine collision (`videoStreamJob` → `activeJobs` set) | **No** — Kotlin-side, and this fork's player is Dart-side |
+| Responsive addons page, player and subtitle fixes | **No** — our addons page and player have diverged too far for a patch to apply |
+
+**The one real bug found in it.** Upstream's commit message says "watch
+screen properly cancels all scrapers on dispose". Ours did not, and the
+reason is worth recording because it looked like it did: `ScraperManager.
+scrapeAll` has had `controller.onCancel` cancelling every subscription and
+deadline since the per-scraper deadline work. But `StreamService.fetchStreams`
+wrapped that stream in a *second* controller with no `onCancel` of its own,
+so cancelling the outer consumer never reached the manager. Leaving a watch
+screen mid-search left all forty-odd scrapers issuing HTTP requests into a
+controller nobody was reading. Fixed, with a test that fails without it.
 
 Not taken, so they are not re-reviewed:
 

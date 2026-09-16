@@ -153,7 +153,7 @@ class StreamService {
     final isImdb = id.startsWith('tt');
     final cleanImdbId = isImdb ? id.split(':')[0] : null;
 
-    ScraperManager.instance.scrapeAll(
+    final scraperSub = ScraperManager.instance.scrapeAll(
       type: type,
       title: title,
       year: year,
@@ -166,6 +166,17 @@ class StreamService {
       pending--;
       if (pending == 0 && !controller.isClosed) controller.close();
     });
+
+    // Nothing downstream is listening any more -- the user left the watch
+    // screen, or picked a source and closed the sheet. Without this the
+    // inner subscription stayed open and ScraperManager's own `onCancel`
+    // never fired, so all forty-odd scrapers kept issuing HTTP requests
+    // into a controller nobody was reading. ScraperManager has had that
+    // teardown all along; this is the link that was missing, and it is why
+    // leaving a watch screen mid-search left the network busy.
+    controller.onCancel = () {
+      scraperSub.cancel();
+    };
 
     for (final addon in addons) {
       _fetchFromAddon(addon, type, id).then((sources) {
@@ -288,7 +299,7 @@ class StreamService {
       final isImdb = id.startsWith('tt');
       final cleanImdbId = isImdb ? id.split(':')[0] : null;
 
-      ScraperManager.instance.scrapeAll(
+      final scraperSub = ScraperManager.instance.scrapeAll(
         type: type,
         title: title,
         year: year,
@@ -316,6 +327,12 @@ class StreamService {
           if (!controller.isClosed) controller.close();
         },
       );
+
+      // Same link as fetchStreams: without it the inner subscription stays
+      // open and ScraperManager's own teardown never fires.
+      controller.onCancel = () {
+        scraperSub.cancel();
+      };
 
       return controller.stream;
     }

@@ -6,6 +6,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Leaving a watch screen mid-search left every scraper running.** The
+  source search kept issuing HTTP requests into a controller nobody was
+  reading — forty-odd of them, for a screen the user had already left.
+  `ScraperManager.scrapeAll` has had the teardown all along: its
+  `controller.onCancel` cancels every subscription and deadline. What was
+  missing was the link above it — `StreamService.fetchStreams` wrapped that
+  stream in a *second* controller with no `onCancel` of its own, so
+  cancelling the outer consumer never reached the manager. Both
+  `fetchStreams` and `fetchStreamsForTargetAddon` now forward the cancel.
+  Found by reading upstream `39b736f`, whose commit message claims to fix
+  exactly this; the fix is ours, because the cause was in code upstream
+  does not share.
 - **Five more text-scale overflows (#69)**, on the player's chrome and the
   browse row header. All five are the same shape: a fixed-height `Container`
   with a bare `Row` inside it, where one half grows with text scale and the
@@ -13,10 +25,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   value beside it was not), the aspect menu (685px), its subtitle-scale row
   (590px), and `SectionHeader`'s "See All" (8.7px — small, and the heading
   above every row on every browse page).
+- **Three more on the settings hub (#69)** — 286px, 64px and 32px, on the
+  category tiles. The screen a user who needs large text is most likely to
+  be on.
 
   The fixed heights became minimums rather than being clamped. `PlayerMenuAnchor`
-  already bounds and scrolls its card, so the box can genuinely grow; clamping
-  would only make the text smaller for no reason.
+  already bounds and scrolls its card, and the settings page scrolls, so the
+  box can genuinely grow; clamping would only make the text smaller for no
+  reason.
 
 ### Added
 - **The details pages and the player's gear menu are translated (#68).** 26
@@ -43,6 +59,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   translation and vice versa. A missing key does not crash — `gen-l10n`
   silently emits the English string — so the failure mode it prevents is a
   screen that is quietly untranslated while everything looks fine.
+- **Upstream reviewed through `39b736f`** (2026-09-16), the largest commit
+  since the fork. Its CloudStream extension system is not taken — a whole
+  plugin ecosystem, and a feature rather than a fix. The scraper-lifecycle
+  bug above is what came out of reading it.
 
 ## [1.8.2+35] - 2026-09-16
 
