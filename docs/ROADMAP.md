@@ -1,69 +1,49 @@
 # Roadmap — PlayTorrioMov
 
-**What is left to do.** Nothing else lives here: shipped work is in
-[CHANGELOG.md](../CHANGELOG.md), the release process is in
-[RELEASES.md](RELEASES.md), and item numbers (`#15`–`#69`) are indexed at the
-end of the changelog.
+**What is left to do.** Shipped work is in [CHANGELOG.md](../CHANGELOG.md)
+(1.8.1+34 covers #67's device confirmation and the partial progress on #68
+and #69 below), the release process is in [RELEASES.md](RELEASES.md), and
+item numbers (`#15`–`#71`) are indexed at the end of the changelog.
 
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-15**, on `v1.8.0+33`.
+Last reconciled: **2026-09-16**, on `v1.8.1+34`.
 
 ---
 
 ## Pending
 
-**#70 and #71 are coded, not verified. #68 and #69 are both scoped and
-partly done**: #68 has working infrastructure and three real languages
-(Spanish, Arabic, Portuguese-BR) but only ~30 of an estimated 500-800
-strings migrated; #69 has four high-traffic overflow fixes shipped and an
-in-app zoom, but ~64 files still unaudited. The rest need a person with
-hardware.
+#68 and #69 are started and shipped in part (see CHANGELOG 1.8.1+34 for
+what) but far from finished; what's left of each is below. The rest need a
+person with hardware.
 
 ### Translation (#68)
 
-**Infrastructure shipped 2026-09-16, most strings not yet migrated.**
-`flutter_localizations` + `intl` + `l10n.yaml` (`nullable-getter: false`) +
-`lib/l10n/*.arb` generate `AppLocalizations` at build time
-(`lib/l10n/app_localizations*.dart` is gitignored, not checked in). Three
-languages have real translated content — Spanish, Arabic, Portuguese
-(Brazil) — picked in Appearance & Interface → App Language
-(`AppThemeService.locale`, persisted, null = follow the device's language
-among the supported ones). The in-app text zoom (#69) composes correctly
-with this: `main.dart`'s `MediaQuery` builder multiplies both onto the
-system's scaler.
+**~470-770 of an estimated 500-800 user-facing strings are still
+hardcoded English.** Infrastructure and three languages (Spanish, Arabic,
+Portuguese-BR) shipped in 1.8.1 — see the changelog for what that covers.
+To continue: add a key to `lib/l10n/app_en.arb` (+ the three translated
+ARB files), run `flutter gen-l10n`, replace the literal with
+`AppLocalizations.of(context).yourKey`. `HubSection.localizedLabel` (in
+`lib/utils/hub_controller.dart`) shows the pattern for a widget reached by
+tests that don't wire localization delegates: use
+`Localizations.of<AppLocalizations>(context, AppLocalizations)` directly
+and fall back to English, since the generated `.of()` throws (not returns
+null) when no delegate is found, given `nullable-getter: false` in
+`l10n.yaml`.
 
-Migrated so far — hub navigation (`HubSection.localizedLabel`, used by both
-`AdaptiveNavShell`'s bottom tab bar and `SectionTopBar`'s desktop chips),
-the Settings hub page, and the Appearance & Interface page itself (~30
-keys across `lib/l10n/app_en.arb`). Originally ~500-800 user-facing strings
-were estimated across `lib/` (still hardcoded English almost everywhere
-else, plus `anime_arabic_details_page.dart`'s seven hardcoded Arabic ones,
-unrelated to this new system) — so roughly 470-770 remain. Mechanical,
-large, and low-risk per string, the same as before this pass — just not
-finished. Whoever continues: add a key to `app_en.arb` (+ the three
-translated ones), run `flutter gen-l10n`, replace the literal with
-`AppLocalizations.of(context).yourKey`. `HubSection.localizedLabel` shows
-the pattern for a widget reached by tests that don't wire localization
-delegates: use `Localizations.of<AppLocalizations>(context,
-AppLocalizations)` directly and fall back to English, since the generated
-`.of()` throws (not returns null) when no delegate is found, given
-`nullable-getter: false`.
+**No RTL layout audit has been done for Arabic.** Flutter's
+`Directionality` follows the locale automatically for standard Material
+widgets, but no custom `Row`/icon-direction assumptions elsewhere in the
+app have been checked against it.
 
-No RTL layout audit was done for Arabic — Flutter's `Directionality`
-follows the locale automatically for standard Material widgets, but no
-custom `Row`/icon-direction assumptions elsewhere in the app have been
-checked against it.
-
-**Correction to the note below, found while wiring this up:** catalog
-synopsis and genre text does not come from TMDB in this codebase — it
-comes from the Stremio addon (Cinemeta by default), read generically as
-`json['overview'] ?? json['description']` in `models/movie/video.dart`.
-`TmdbService`/`tmdb_helper.dart` only fetch cast/crew and resolve IMDb→TMDB
-ids for scrapers' own matching — neither touches text a user reads. The
-"free win" below assumed a TMDB-sourced catalog and does not apply as
-written; translating catalog descriptions would mean checking whether
+**Catalog descriptions are not a TMDB free win, if anyone reaches for
+that next.** Synopsis and genre text comes from the Stremio addon
+(Cinemeta by default), read generically as `json['overview'] ??
+json['description']` in `models/movie/video.dart` — not from TMDB, which
+this codebase only uses for cast/crew and scrapers' own IMDb→TMDB id
+matching. Translating catalog descriptions would mean checking whether
 Cinemeta's own API takes a locale, a separate and unstarted question.
 
 **The risk is not the UI. It is the titles**, and the rule below is settled
@@ -105,80 +85,24 @@ people search and recognise things.
 
 ### Text scale and accessibility (#69)
 
-Flutter already applies the system text scale to every `Text`, so the app
-scaled before this entry too — and *overflowed*, because its layouts are
-fixed-height. Not hypothetical: the collections card shipped in 1.8.0 needed
-`MediaQuery.textScalerOf(context).scale(38.0)` to reserve its label space, or
-it burst its grid cell.
+**~64 of the ~68 files in `lib/` with a fixed `height:` are still
+unaudited.** Four high-traffic ones shipped fixed in 1.8.1 (see changelog),
+each a clamp rather than a layout rewrite — the element still grows with
+text scale, just capped short of overflowing the fixed box it sits in.
+System-level accessibility text scale (true regardless of the new in-app
+zoom setting) can still overflow any of the remaining ~64. To continue:
+grep for `height:\s*[0-9]` the way `mobile_first_test` greps for
+`SizedBox(width: ...)`, then check whether each hit wraps scalable text.
 
-**Scoped and partly done, 2026-09-16** — 68 files in `lib/` declare a fixed
-`height:`, too many to exhaustively audit in one pass, so this was scoped to
-the highest-traffic chrome rather than all of them:
+Semantics labels on icon-only controls, mentioned here previously, is
+still untouched — `Tooltip` supplies one for free, which the library
+action row already gets, but nothing has checked the rest.
 
-- Fixed and regression-tested (`test/text_scale_overflow_test.dart`, which
-  pumps at 3x — the top of Android's accessibility slider — and asserts no
-  overflow): `AdaptiveNavShell`'s mobile bottom tab bar labels, and
-  `PillTabRow` (hosted inside `LibraryTabs`' `AppBar.bottom`, a
-  `PreferredSize` fixed at 52).
-- Fixed by inspection, not yet covered by an automated test:
-  `SidebarLogo`'s wordmark (inside `TopBar`'s fixed `sharedHeight`, 56 —
-  the regression test above caught this one by accident, pumping `TopBar`
-  while chasing the tab-bar fix, which is exactly the kind of thing a
-  grep-based audit misses) and the details page's per-credit role label
-  (`SizedBox(height: 12)` in `_buildCreditCard`).
-- Each fix is a clamp (`textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: ...)`),
-  not a layout rewrite: the element still grows with text scale, just capped
-  short of overflowing the fixed box it sits in.
-- **The in-app zoom setting is shipped** (Appearance & Interface → App Text
-  Size, `AppThemeService.textScale`), deliberately capped at 1.3x
-  (`AppThemeService.maxTextScale`) — the same ceiling every fix above was
-  clamped to, so the control can never ask them to render past what was
-  actually verified. It multiplies on top of the system's own accessibility
-  text size rather than replacing it.
-- **Not done:** the other ~64 files with a fixed `height:` were not audited.
-  System-level accessibility text scale (already true before this entry,
-  independent of the new in-app control) can still overflow any of them.
-  Whoever continues this: grep for `height:\s*[0-9]` the way
-  `mobile_first_test` greps for `SizedBox(width: ...)`, then check whether
-  each hit wraps scalable text.
-- Semantics labels on icon-only controls, mentioned here previously, is
-  still untouched — `Tooltip` supplies one for free, which the library
-  action row already gets, but nothing has checked the rest.
+### Audio silent under Flatpak, needs a device to confirm (#70)
 
-### Audio silent under Flatpak (#70)
-
-Reported across multiple devices, not one machine — which points at packaging,
-not a driver. `flatpak/io.github.MediaHubOrg.PlayTorrioMov.json`'s
-`finish-args` only grants `--socket=wayland`, `--socket=fallback-x11` and
-`--device=dri`. There is no `--socket=pulseaudio`, so the sandbox has no path
-to the host audio server at all.
-
-Video still plays because it only needs Wayland/X11 and DRI, which are
-granted — audio needs the PulseAudio socket, which is not, and every distro's
-default audio stack (PipeWire included) speaks that protocol through its
-`pulse` compatibility layer. That is consistent with "every device", since a
-missing sandbox permission does not vary by hardware.
-
-**Fixed in code:** `--socket=pulseaudio` added to `finish-args`. **Still
-needs a device to confirm** — the reasoning explains the symptom, but no
-Flatpak build with this manifest has been run against real speakers yet.
-
-### Subtitle appearance settings open as a pop-up (#71)
-
-Was: `video_player_settings_page.dart`'s `_openSubtitleCustomizer()` showed
-`PlayerSubStyleModal` via `showDialog(...)` — a modal overlay dropped on top
-of the Settings page, rather than the subtitle section on that page expanding
-in place.
-
-**Fixed.** `player_sub_style_modal.dart` now splits the controls (preview,
-presets, the five tabs) into `SubtitleStyleEditor`, sized by `LayoutBuilder`
-so it works both floating and embedded. `PlayerSubStyleModal` is a thin
-wrapper that puts it in the floating glass card for the in-player overlay
-(`player_screen.dart`, unchanged there); Settings now toggles the same
-`SubtitleStyleEditor` open inline via a "Customize"/"Done" button and an
-`AnimatedCrossFade`, inside a fixed dark card so it stays readable in light
-theme. Verified with `flutter analyze` (clean) and `flutter test` (no new
-failures) — not yet checked visually on a running build.
+`--socket=pulseaudio` was added to `finish-args` in 1.8.1 (see changelog
+for the reasoning) — a Flatpak build with the fixed manifest has not yet
+been run against real speakers.
 
 ### Cast, against a real receiver (#28)
 

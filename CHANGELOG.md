@@ -3,6 +3,65 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.8.1+34] - 2026-09-16
+
+A packaging fix, a settings-page cleanup, and the first real steps on two
+roadmap items — text-scale accessibility and translation — that turned out
+much larger once started. Both ship here in a real, working, *partial*
+form, scoped down on purpose rather than held back for a future release
+that would have kept them at zero. See **Not yet verified** for exactly
+where each stops.
+
+Collections (#67), shipped device-untested in 1.8.0, has since been
+confirmed working on a phone.
+
+### Fixed
+- **Audio was silent under Flatpak (#70).** The sandbox's `finish-args`
+  granted `--socket=wayland`, `--socket=fallback-x11` and `--device=dri`,
+  but never `--socket=pulseaudio` — so media_kit's libmpv backend had no
+  path to the host audio server, while video played fine through the
+  sockets that were granted. Consistent across every reported device,
+  since a missing sandbox permission doesn't vary by hardware.
+- **Subtitle appearance settings opened as a pop-up (#71).** Settings →
+  Video Player's "Customize" button showed the subtitle style editor via
+  `showDialog`, a modal dropped on top of the page rather than part of it.
+  It now expands inline in place; the same editor still floats as an
+  overlay when opened mid-playback, where that's the right call.
+- **Four high-traffic text-scale overflows (#69).** `AdaptiveNavShell`'s
+  mobile bottom tab bar, `PillTabRow` (hosted in `LibraryTabs`'
+  `AppBar.bottom`, fixed at 52), `SidebarLogo`'s wordmark (inside `TopBar`'s
+  fixed 56), and the details page's per-credit role label all clamp their
+  text scale now instead of overflowing the fixed box they sit in.
+
+### Added
+- **An in-app text zoom** (Appearance & Interface → App Text Size, #69),
+  capped at 1.3x — the same ceiling every fix above was individually
+  verified against — and multiplying on top of the system's own
+  accessibility text size rather than replacing it.
+- **Translation infrastructure, with Spanish, Arabic and Portuguese
+  (Brazil)** (#68): `flutter_localizations` + `intl` + `lib/l10n/*.arb`,
+  picked in Appearance & Interface → App Language. English is offered
+  there too, explicitly, not just as the implicit default. Hub navigation,
+  the Settings hub page, and the Appearance & Interface page itself are
+  translated — roughly 30 of an estimated 500-800 user-facing strings.
+
+### Not yet verified
+
+- **#70** explains the symptom exactly, but no Flatpak build with the
+  fixed manifest has been run against real speakers yet.
+- **#71** is verified by `flutter analyze` and `flutter test` only — not
+  yet checked visually in a running window.
+- **#69** covers 4 of the ~68 files in `lib/` with a fixed `height:`. A
+  large system accessibility text size can still overflow any of the
+  other ~64 — unrelated to, and unchanged by, the new in-app control.
+- **#68** covers roughly 30 of an estimated 500-800 strings. No RTL layout
+  audit was done for Arabic beyond Flutter's automatic `Directionality`.
+  The display/canonical title split the roadmap says must come before
+  translating catalog content is still only decided, not built.
+
+Also still outstanding from 1.7.0: the **Cast fix has never been confirmed
+against a receiver** (#28).
+
 ## [1.8.0+33] - 2026-09-15
 
 The collections release. Everything here is covered by the test suite and
