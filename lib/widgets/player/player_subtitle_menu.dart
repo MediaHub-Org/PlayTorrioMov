@@ -25,6 +25,13 @@ class PlayerSubtitleMenu extends StatefulWidget {
   final VoidCallback onOpenStyleBar;
   final VoidCallback onClose;
 
+  /// Picks the best subtitle automatically -- the audio language first, then
+  /// the file's default, then English, then anything. The transport bar's
+  /// subtitle button used to do this on every press as a CC toggle; the
+  /// button opens this panel now, and "Auto" is here so that one-tap
+  /// behaviour survived the move.
+  final VoidCallback onAutoPick;
+
   /// Back to the settings root, when this menu was stepped into from
   /// there rather than opened directly from the transport bar.
   final VoidCallback? onBack;
@@ -47,6 +54,7 @@ class PlayerSubtitleMenu extends StatefulWidget {
     required this.onToggleOff,
     required this.onOpenSyncBar,
     required this.onOpenStyleBar,
+    required this.onAutoPick,
     required this.onClose,
     this.onBack,
   });
@@ -405,6 +413,24 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         physics: const BouncingScrollPhysics(),
         child: Row(
           children: [
+            // Auto: one tap, best track. The transport bar's subtitle button
+            // used to do this on every press; the button opens this panel
+            // now, so the behaviour lives here rather than being lost.
+            _buildLanguagePill(
+              label: 'Auto',
+              isSelected: false,
+              icon: const Icon(
+                Icons.auto_awesome_rounded,
+                size: 13,
+                color: PlayerTheme.inkSubtle,
+              ),
+              onTap: () {
+                widget.onAutoPick();
+                widget.onClose();
+              },
+            ),
+            const SizedBox(width: 6),
+
             // Off Button
             _buildLanguagePill(
               label: 'Off',

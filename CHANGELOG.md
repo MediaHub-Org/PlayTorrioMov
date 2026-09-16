@@ -6,6 +6,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- **The settings button is gone; the sleep timer is a button of its own.**
+  After the controls grew their own buttons, the gear held only the subtitle
+  entry and the sleep timer -- and a menu for one control is worse than a
+  button for it. The transport bar now reads speed, audio, subtitles, sleep
+  timer, aspect ratio. The subtitle button opens the full panel, whose first
+  pill is Off, so the toggle it used to be is still there one tap further;
+  an Auto pill joins it, keeping the one-tap best-track behaviour the old
+  toggle had. The moon button's badge counts down while the timer runs.
+- **The sleep timer actually works now.** The chips existed for several
+  releases -- in the speed menu, then in the settings menu -- and choosing
+  one changed a highlight and nothing else: there was no timer behind them.
+  `SleepTimerService` is the timer, pausing playback when the countdown ends;
+  the last choice replaces a running one, and Off cancels.
 - **The transport bar has a button per control: speed, audio, subtitles,
   settings, aspect ratio -- in that order.** They used to be two buttons
   (subtitles and a gear that held everything else), which made the gear a

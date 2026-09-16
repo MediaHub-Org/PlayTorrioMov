@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
-import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
+import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 
@@ -40,6 +40,7 @@ void main() {
               onToggleOff: () {},
               onOpenSyncBar: () {},
               onOpenStyleBar: () {},
+              onAutoPick: () {},
               onClose: () {},
             ),
           ),
@@ -133,15 +134,13 @@ void main() {
 
       await tester.pumpWidget(
         wrap(
-          PlayerMenuAnchor(
-            child: PlayerSettingsMenu(
-              onTapSubtitles: () {},
-            ),
+          const PlayerMenuAnchor(
+            child: SleepTimerMenu(),
           ),
         ),
       );
 
-      final card = tester.getRect(find.byType(PlayerSettingsMenu));
+      final card = tester.getRect(find.byType(SleepTimerMenu));
       // Clear of the transport bar, but not floating in the middle of the
       // frame either.
       expect(card.bottom, lessThanOrEqualTo(720 - 96));
@@ -157,15 +156,13 @@ void main() {
 
       await tester.pumpWidget(
         wrap(
-          PlayerMenuAnchor(
-            child: PlayerSettingsMenu(
-              onTapSubtitles: () {},
-            ),
+          const PlayerMenuAnchor(
+            child: SleepTimerMenu(),
           ),
         ),
       );
 
-      final card = tester.getRect(find.byType(PlayerSettingsMenu));
+      final card = tester.getRect(find.byType(SleepTimerMenu));
       expect(card.left, greaterThanOrEqualTo(0));
       expect(card.right, lessThanOrEqualTo(360));
       expect(tester.takeException(), isNull);

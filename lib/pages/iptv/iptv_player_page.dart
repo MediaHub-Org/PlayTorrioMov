@@ -19,7 +19,7 @@ import '../../services/discord/discord_rpc_service.dart';
 import '../../widgets/player/player_cast_sheet.dart';
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_aspect_menu.dart';
-import '../../widgets/player/player_settings_menu.dart';
+import '../../widgets/player/sleep_timer_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
 
@@ -1212,8 +1212,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     PlayerIconButton(
                                       size: 40,
                                       iconSize: 20,
-                                      icon: const Icon(Icons.settings_rounded),
-                                      tooltip: 'Settings',
+                                      icon: const Icon(Icons.bedtime_rounded),
+                                      tooltip: 'Sleep timer',
                                       active: _activeMenu != null,
                                       backgroundColor: const Color(0x22080C12),
                                       onPressed: _toggleSettingsMenu,
@@ -1270,7 +1270,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                 // so the gear holds only the sleep timer.
                 if (_activeMenu == 'settings')
                   const PlayerMenuAnchor(
-                    child: PlayerSettingsMenu(),
+                    child: SleepTimerMenu(),
                   ),
 
                 // Floating Aspect Ratio Popover

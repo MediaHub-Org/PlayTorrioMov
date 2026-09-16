@@ -29,7 +29,8 @@ import '../../widgets/player/player_top_bar.dart';
 import '../../widgets/player/player_transport.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_seek_feedback.dart';
-import '../../widgets/player/player_settings_menu.dart';
+import '../../widgets/player/sleep_timer_menu.dart';
+import '../../services/player/sleep_timer_service.dart';
 import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
@@ -208,6 +209,13 @@ class _PlayerScreenState extends State<PlayerScreen>
   void initState() {
     super.initState();
     _wasFullscreenBeforeEntering = WindowService.instance.isFullscreen;
+    // The sleep timer pauses playback when its countdown ends. The service
+    // outlives this screen -- it is a singleton the transport bar's button
+    // also reads -- so the callback is cleared on dispose rather than left
+    // pointing at a dead player.
+    SleepTimerService.instance.onExpired = () {
+      if (mounted) _player.pause();
+    };
     _currentSource = widget.source;
     _currentEpisode = widget.episode;
     _currentTitle = widget.title;
@@ -1690,6 +1698,10 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   @override
   void dispose() {
+    // The timer keeps running across screens by design -- a viewer who sets
+    // it and backs out of the player still wants the pause -- but its pause
+    // callback pointed at this screen's player, so it is detached here.
+    SleepTimerService.instance.onExpired = null;
     for (final s in _subscriptions) {
       s.cancel();
     }
@@ -2182,11 +2194,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onSeek: (pos) => _player.seek(pos),
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
-                    onToggleSubtitles: _toggleSubtitlesEnabled,
-                    onToggleSettingsMenu: () => _toggleMenu('settings'),
+                    onOpenSubtitleMenu: () => _toggleMenu('subtitle'),
                     onOpenSpeedMenu: () => _toggleMenu('speed'),
                     onOpenAudioMenu: () => _toggleMenu('audio'),
                     onOpenAspectMenu: () => _toggleMenu('aspect'),
+                    onOpenSleepTimerMenu: () => _toggleMenu('sleep'),
                   ),
                 ),
               ),
@@ -2237,6 +2249,7 @@ class _PlayerScreenState extends State<PlayerScreen>
               onOpenStyleBar: () {
                 setState(() => _activeMenu = 'style');
               },
+              onAutoPick: _toggleSubtitlesEnabled,
               onClose: () => setState(() {
                 _activeMenu = null;
                 _menuParent = null;
@@ -2289,18 +2302,10 @@ class _PlayerScreenState extends State<PlayerScreen>
             ),
           ),
 
-        // Floating Settings Menu Popover (subtitle entry + sleep timer)
-        if (_activeMenu == 'settings' && !_isLoading)
-          PlayerMenuAnchor(
-            child: PlayerSettingsMenu(
-              subtitleLabel: _isSubtitleEnabled
-                  ? (_currentSubtitleVariant?.language ?? 'On')
-                  : 'Off',
-              onTapSubtitles: () => setState(() {
-                _activeMenu = 'subtitle';
-                _menuParent = 'settings';
-              }),
-            ),
+        // Floating Sleep Timer Popover
+        if (_activeMenu == 'sleep' && !_isLoading)
+          const PlayerMenuAnchor(
+            child: SleepTimerMenu(),
           ),
 
         // Floating Speed Menu Popover

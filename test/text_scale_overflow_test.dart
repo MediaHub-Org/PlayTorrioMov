@@ -19,7 +19,7 @@ import 'package:playtorriomov/widgets/common/section_header.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
-import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
+import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
 /// #69's own text: "the app scales today -- and overflows, because its
 /// layouts are fixed-height." This is the checkable part of the audit that
@@ -359,14 +359,11 @@ void main() {
       // have -- the card is allowed to be taller than the screen there.
       await pumpAtScale(
         tester,
-        child: Scaffold(
+        child: const Scaffold(
           body: Stack(
             children: [
               PlayerMenuAnchor(
-                child: PlayerSettingsMenu(
-                  subtitleLabel: 'English',
-                  onTapSubtitles: () {},
-                ),
+                child: SleepTimerMenu(),
               ),
             ],
           ),
@@ -376,8 +373,8 @@ void main() {
       expect(
         tester.takeException(),
         isNull,
-        reason: 'each row is a fixed 44px Container whose label and value both '
-            'grow with the scale, and only the label is Expanded',
+        reason: 'the sleep timer chips are sized by their labels, which grow '
+            'with the scale and can want more than the card has',
       );
     },
   );

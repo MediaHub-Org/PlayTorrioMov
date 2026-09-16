@@ -20,7 +20,7 @@ void main() {
         'PlayerIconButton', // buttons
         'PlayerCenterControls', // play/pause and seek
         'PlayerVolumeControl', // volume, including the boost range
-        'PlayerSettingsMenu', // the gear's root list
+        'SleepTimerMenu', // the moon button's popover
         'PlayerAspectMenu', // the panel it steps into
         'PlayerMenuAnchor', // where popovers sit
       ]) {
@@ -76,10 +76,13 @@ void main() {
 
     test('Live TV keeps no bespoke aspect-ratio control', () {
       // It was a bordered pill reading FIT / ZOOM / STRETCH -- the last
-      // control on the page with no counterpart in the other player.
+      // control on the page with no counterpart in the other player. The
+      // pill became the shared aspect menu, reached from a transport-bar
+      // button; the gear it used to sit behind became the sleep timer, the
+      // one thing the shared settings menu still held.
       final source = _read(livePlayer);
       expect(source, isNot(contains("'ZOOM'")));
-      expect(source, contains('Icons.settings_rounded'));
+      expect(source, contains('Icons.bedtime_rounded'));
     });
   });
 }
