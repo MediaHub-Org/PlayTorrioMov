@@ -109,6 +109,10 @@ class WyzieProvider extends SubtitleProvider {
           title: title,
           downloadUrl: url,
           format: (map['format']?.toString() ?? 'srt').toLowerCase(),
+          // The provider's own flag, not a word in the title -- Wyzie is the
+          // one provider that says this directly, so it is the one whose
+          // answer is trusted over title sniffing.
+          isHearingImpaired: isHi,
           extraData: {
             'encoding': map['encoding'],
             'fps': map['fps'],

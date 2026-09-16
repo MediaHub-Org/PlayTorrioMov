@@ -163,10 +163,12 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     }
 
     return all.where((v) {
-      if (_filterHI && !(v.title.contains('[CC]') || v.title.contains('SDH') || v.title.contains('HI'))) {
+      // The variant's own classification, not a title sniff -- same source
+      // the row badges use, so the filter and the badges can never disagree.
+      if (_filterHI && !v.isHearingImpaired) {
         return false;
       }
-      if (_filterForced && !v.title.toLowerCase().contains('forced')) {
+      if (_filterForced && !v.isForced) {
         return false;
       }
       return true;
@@ -1061,8 +1063,12 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         final variant = filteredVariants[i];
         final isSelected = widget.isSubtitleEnabled && widget.selectedVariant?.downloadUrl == variant.downloadUrl;
 
-        final isHI = variant.title.contains('[CC]') || variant.title.contains('SDH') || variant.title.contains('HI');
-        final isForced = variant.title.toLowerCase().contains('forced');
+        // The variant carries its own classification now -- from the
+        // provider's flag where it sends one, from the title where it does
+        // not -- so the menu no longer re-derives it by sniffing the title
+        // at render time.
+        final isHI = variant.isHearingImpaired;
+        final isForced = variant.isForced;
 
         return Material(
           color: Colors.transparent,
@@ -1109,6 +1115,23 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                               Text(
                                 _flag(variant.language),
                                 style: const TextStyle(fontSize: 12),
+                              ),
+                              const SizedBox(width: 5),
+                              // The language as words, not just a flag: the
+                              // flags are small and several are easy to
+                              // confuse at a glance, and "which of these is
+                              // the English one" is the question this list
+                              // exists to answer. The group header already
+                              // says the language, but a row repeated out of
+                              // context -- or a screenshot of one -- should
+                              // still say it.
+                              Text(
+                                variant.language,
+                                style: TextStyle(
+                                  color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                               const SizedBox(width: 5),
                             ],

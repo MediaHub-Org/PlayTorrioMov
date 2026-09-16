@@ -2,52 +2,25 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
-/// Settings entry point -- one gear icon opens this instead of separate
-/// playback-speed, aspect-ratio and audio-track buttons cluttering the
-/// transport bar. Picking a row opens that row's own existing popover
-/// (PlayerSpeedMenu / PlayerAspectMenu / PlayerAudioMenu); this widget only
-/// lists them, YouTube-gear-menu style.
+/// Settings entry point -- the gear icon opens this. It used to be an index
+/// of every player control (audio, subtitles, speed, aspect), which made it
+/// a menu of menus: three taps to reach a speed that was one tap away on
+/// YouTube. Those four are transport-bar buttons now, in the order a viewer
+/// reaches for them.
 ///
-/// Rows run audio, subtitles, speed, aspect: the two that change what you
-/// hear and read first, then the two that change how it plays.
+/// What is left here is the two things that have no button of their own:
+/// the subtitle's appearance editor -- a five-tab surface too large for the
+/// track list it belongs to -- and the sleep timer.
 class PlayerSettingsMenu extends StatelessWidget {
-  final double currentRate;
-  final String aspectLabel;
-
-  /// The playing track's name, or null while the media has not reported
-  /// its tracks yet.
-  final String? audioLabel;
-
-  /// Null hides the playback-speed row. Live TV passes null: a live feed
-  /// plays at the rate it arrives, and a row that opens a picker with no
-  /// effect is worse than no row.
-  final VoidCallback? onTapSpeed;
-
-  final VoidCallback onTapAspect;
-
-  /// Null hides the audio row. Callers should normally supply it even for
-  /// single-track media: the menu it opens also carries the Audio Sync
-  /// Offset control, and this row is its only entry point.
-  final VoidCallback? onTapAudio;
-
   /// Current subtitle state, e.g. a language name or "Off". Null hides the
   /// row (nothing to configure -- no subtitles available at all).
   final String? subtitleLabel;
 
-  /// Opens subtitle track/style picking. The transport bar's own subtitle
-  /// button stays a plain on/off toggle (YouTube's CC button); this row is
-  /// where track and appearance selection actually lives, same split as
-  /// YouTube's gear-menu "Subtitles/CC" entry.
+  /// Opens subtitle track/style picking.
   final VoidCallback? onTapSubtitles;
 
   const PlayerSettingsMenu({
     super.key,
-    required this.currentRate,
-    required this.aspectLabel,
-    required this.onTapAspect,
-    this.onTapSpeed,
-    this.audioLabel,
-    this.onTapAudio,
     this.subtitleLabel,
     this.onTapSubtitles,
   });
@@ -58,10 +31,7 @@ class PlayerSettingsMenu extends StatelessWidget {
 
     // No height cap and no scroll view of its own: PlayerMenuAnchor bounds
     // the popover to the space above the transport bar and scrolls it when
-    // the rows do not fit. This used to carry its own `screenHeight - 120`
-    // clamp, which each sibling menu either duplicated or -- in the speed
-    // menu's case -- did not, and that inconsistency is what put the speed
-    // card off the top of a landscape phone.
+    // the rows do not fit.
     return PlayerGlassCard(
       width: (260.0).clamp(220.0, screenWidth - 32),
       padding: const EdgeInsets.all(12),
@@ -71,18 +41,6 @@ class PlayerSettingsMenu extends StatelessWidget {
         children: [
           const PlayerMenuHeader(title: 'SETTINGS'),
           const SizedBox(height: 6),
-
-          // Audio first. It is the choice a viewer makes before anything
-          // else -- picking the dub you can follow comes before deciding
-          // how fast to play it -- and on a dubbed title it is the only row
-          // here that has to be found in a hurry.
-          if (onTapAudio != null)
-            _SettingsRow(
-              icon: Icons.audiotrack_rounded,
-              label: context.l10n.detailsAudioTrack,
-              value: audioLabel ?? context.l10n.detailsDefaultValue,
-              onTap: onTapAudio!,
-            ),
           if (onTapSubtitles != null)
             _SettingsRow(
               icon: Icons.subtitles_rounded,
@@ -90,23 +48,59 @@ class PlayerSettingsMenu extends StatelessWidget {
               value: subtitleLabel ?? context.l10n.detailsOff,
               onTap: onTapSubtitles!,
             ),
-          if (onTapSpeed != null)
-            _SettingsRow(
-              icon: Icons.speed_rounded,
-              label: context.l10n.detailsPlaybackSpeed,
-              value: currentRate == 1.0
-                  ? context.l10n.detailsNormal
-                  : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
-              onTap: onTapSpeed!,
-            ),
-          _SettingsRow(
-            icon: Icons.aspect_ratio_rounded,
-            label: context.l10n.detailsAspectRatio,
-            value: aspectLabel,
-            onTap: onTapAspect,
-          ),
+          const _SleepTimerRow(),
         ],
       ),
+    );
+  }
+}
+
+/// The sleep timer, as a row of preset chips. It lived at the bottom of the
+/// speed menu before, which was the one place a viewer winding down for the
+/// night would not look for it.
+class _SleepTimerRow extends StatefulWidget {
+  const _SleepTimerRow();
+
+  @override
+  State<_SleepTimerRow> createState() => _SleepTimerRowState();
+}
+
+class _SleepTimerRowState extends State<_SleepTimerRow> {
+  int? _selectedMinutes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          child: Text(
+            'SLEEP TIMER',
+            style: TextStyle(
+              color: PlayerTheme.inkSubtle,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [15, 30, 45, 60].map((min) {
+              final active = _selectedMinutes == min;
+              return PlayerToggleChip(
+                active: active,
+                label: '$min min',
+                onClick: () => setState(() => _selectedMinutes = active ? null : min),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 }

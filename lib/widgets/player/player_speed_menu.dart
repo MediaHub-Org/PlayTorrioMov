@@ -25,7 +25,6 @@ class PlayerSpeedMenu extends StatefulWidget {
 
 class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
   static const List<double> _presets = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
-  int? _selectedSleepMinutes;
 
   @override
   Widget build(BuildContext context) {
@@ -91,41 +90,6 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
                     ),
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: 10),
-          const Divider(color: PlayerTheme.edgeSoft, height: 1),
-          const SizedBox(height: 10),
-
-          // Sleep Timer Section
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: Text(
-              'SLEEP TIMER',
-              style: TextStyle(
-                color: PlayerTheme.inkSubtle,
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [15, 30, 45, 60].map((min) {
-              final active = _selectedSleepMinutes == min;
-              return PlayerToggleChip(
-                active: active,
-                label: '$min min',
-                onClick: () {
-                  setState(() {
-                    _selectedSleepMinutes = active ? null : min;
-                  });
-                },
               );
             }).toList(),
           ),

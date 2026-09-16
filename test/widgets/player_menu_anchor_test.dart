@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
+import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 
 /// The anchor builds a Positioned, so it only makes sense inside a Stack --
 /// which is exactly where player_screen.dart puts it.
@@ -14,11 +15,71 @@ Widget wrap(Widget child) => MaterialApp(
 
 void main() {
   group('PlayerMenuAnchor', () {
-    testWidgets('a tall menu fits a short landscape phone', (tester) async {
-      // The regression this exists for: the speed menu is seven presets, a
-      // divider and a sleep-timer row -- around 440px of card. Bottom-
-      // anchored with no top bound, height it did not have went upward, out
-      // of the viewport, with nothing to clip or scroll it.
+    testWidgets('a menu taller than a short landscape phone scrolls', (
+      tester,
+    ) async {
+      // The regression this exists for: a bottom-anchored menu with no top
+      // bound sent whatever height it did not have upward, out of the
+      // viewport, with nothing to clip or scroll it. The subtitle panel is
+      // the fixture now -- the speed menu shrank when its sleep timer moved
+      // to settings, and no longer overflows a 400px screen on its own.
+      tester.view.physicalSize = const Size(880, 400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        wrap(
+          PlayerMenuAnchor(
+            child: PlayerSubtitleMenu(
+              groups: const [],
+              isSubtitleEnabled: false,
+              movieTitle: 'A Movie',
+              delaySec: 0,
+              onSelectVariant: (_) {},
+              onSelectEmbedded: (_) {},
+              onToggleOff: () {},
+              onOpenSyncBar: () {},
+              onOpenStyleBar: () {},
+              onClose: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+
+      // The panel carries inner scroll views of its own, so the anchor's is
+      // identified by its element: each candidate is measured through its
+      // own render object, which needs no finder and cannot be ambiguous.
+      final candidates = tester
+          .widgetList<SingleChildScrollView>(find.byType(SingleChildScrollView))
+          .toList();
+      expect(candidates, isNotEmpty);
+
+      var sawFullHeightViewport = false;
+      for (final element in find
+          .byType(SingleChildScrollView)
+          .evaluate()) {
+        final renderObject = element.renderObject!;
+        final box = renderObject as RenderBox;
+        final topLeft = box.localToGlobal(Offset.zero);
+        final bottomRight =
+            box.localToGlobal(box.size.bottomRight(Offset.zero));
+        final rect = Rect.fromPoints(topLeft, bottomRight);
+        expect(rect.top, greaterThanOrEqualTo(0));
+        expect(rect.bottom, lessThanOrEqualTo(400));
+        if (rect.height > 200) sawFullHeightViewport = true;
+      }
+      // And the fixture is genuinely tall enough that something had to be
+      // bounded, so the test is not passing on a card that happened to fit.
+      expect(sawFullHeightViewport, isTrue);
+    });
+
+    testWidgets('a shorter menu than the space does not scroll', (tester) async {
+      // The speed menu lost its sleep timer to the settings menu, and at
+      // seven presets it now fits a 400px landscape phone whole. The anchor
+      // must not hand it a scroll view that eats drag gestures the rows
+      // could have had.
       tester.view.physicalSize = const Size(880, 400);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
@@ -37,51 +98,9 @@ void main() {
 
       expect(tester.takeException(), isNull);
 
-      // What has to fit is the scroll viewport, not the card. The card is
-      // allowed -- expected -- to be taller than the screen here; the whole
-      // point is that the overflow became something to scroll instead of
-      // something painted past the edge. Asserting the card's own layout
-      // rect measures the scrolled content, which is not what the viewer
-      // sees.
-      final viewport = tester.getRect(find.byType(SingleChildScrollView));
-      expect(viewport.top, greaterThanOrEqualTo(0));
-      expect(viewport.bottom, lessThanOrEqualTo(400));
-
       final card = tester.getRect(find.byType(PlayerSpeedMenu));
-      // The header is on screen. Under the old hand-placed Positioned this
-      // was negative: the top of the card sat above the top of the window.
       expect(card.top, greaterThanOrEqualTo(0));
-      // And the fixture is genuinely taller than the space, so the scroll
-      // view is doing real work rather than the test passing by accident on
-      // a card that happened to fit.
-      expect(card.height, greaterThan(viewport.height));
-    });
-
-    testWidgets('what overflows can be scrolled to', (tester) async {
-      // The sleep timer is the last thing in the speed menu, so it is what
-      // the old layout put furthest out of reach.
-      tester.view.physicalSize = const Size(880, 400);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(
-        wrap(
-          PlayerMenuAnchor(
-            child: PlayerSpeedMenu(
-              currentRate: 1.0,
-              onRateSelected: (_) {},
-              onClose: () {},
-            ),
-          ),
-        ),
-      );
-
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
-      await tester.pumpAndSettle();
-
-      final chip = tester.getRect(find.text('60 min'));
-      expect(chip.top, greaterThanOrEqualTo(0));
-      expect(chip.bottom, lessThanOrEqualTo(400));
+      expect(card.bottom, lessThanOrEqualTo(400));
     });
 
     testWidgets('a tall menu on a short screen stays scrollable', (
@@ -116,10 +135,7 @@ void main() {
         wrap(
           PlayerMenuAnchor(
             child: PlayerSettingsMenu(
-              currentRate: 1.0,
-              aspectLabel: 'Fit',
-              onTapSpeed: () {},
-              onTapAspect: () {},
+              onTapSubtitles: () {},
             ),
           ),
         ),
@@ -143,10 +159,7 @@ void main() {
         wrap(
           PlayerMenuAnchor(
             child: PlayerSettingsMenu(
-              currentRate: 1.0,
-              aspectLabel: 'Fit',
-              onTapSpeed: () {},
-              onTapAspect: () {},
+              onTapSubtitles: () {},
             ),
           ),
         ),

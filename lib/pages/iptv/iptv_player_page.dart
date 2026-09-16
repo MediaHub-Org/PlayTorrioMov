@@ -1266,18 +1266,11 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                 // no playback speed on a live feed, and no subtitle rows
                 // until a portal stream carries subtitles -- which is the
                 // intended relationship between the two: same panel, fewer
-                // rows.
+                // rows. Speed and aspect are transport-bar buttons here too,
+                // so the gear holds only the sleep timer.
                 if (_activeMenu == 'settings')
-                  PlayerMenuAnchor(
-                    child: PlayerSettingsMenu(
-                      currentRate: 1.0,
-                      aspectLabel: switch (_videoFit) {
-                        BoxFit.cover => 'Fill',
-                        BoxFit.fill => 'Stretch',
-                        _ => 'Fit',
-                      },
-                      onTapAspect: () => setState(() => _activeMenu = 'aspect'),
-                    ),
+                  const PlayerMenuAnchor(
+                    child: PlayerSettingsMenu(),
                   ),
 
                 // Floating Aspect Ratio Popover

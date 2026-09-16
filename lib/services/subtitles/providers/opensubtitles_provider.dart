@@ -80,11 +80,17 @@ class OpenSubtitlesProvider extends SubtitleProvider {
       idx++;
 
       final rawLang = (map['lang'] ?? 'en').toString().toLowerCase();
+      // `title` is what the picker's rows show. A counter ("OpenSubtitles
+      // #3") gave the user nothing to choose between five rows by -- the
+      // addon's own id, when it sends one, at least refers to something.
+      // The provider name is already on the row as its own badge, so
+      // repeating it in the title told the user the same thing twice.
+      final id = map['id']?.toString();
       results.add(
         SubtitleVariant(
           providerName: 'OpenSubtitles',
           language: subtitleLanguageName(rawLang),
-          title: 'OpenSubtitles #$idx',
+          title: (id == null || id.isEmpty) ? 'Subtitle $idx' : id,
           downloadUrl: subUrl,
           format: (map['SubFormat']?.toString() ?? 'srt').toLowerCase(),
           extraData: {

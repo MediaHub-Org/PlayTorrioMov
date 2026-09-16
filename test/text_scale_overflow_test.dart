@@ -364,14 +364,8 @@ void main() {
             children: [
               PlayerMenuAnchor(
                 child: PlayerSettingsMenu(
-                  currentRate: 1.5,
-                  aspectLabel: 'Fit to screen',
-                  audioLabel: 'English (Dubbed)',
                   subtitleLabel: 'English',
-                  onTapAudio: () {},
                   onTapSubtitles: () {},
-                  onTapSpeed: () {},
-                  onTapAspect: () {},
                 ),
               ),
             ],

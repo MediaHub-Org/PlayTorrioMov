@@ -6,6 +6,17 @@ class SubtitleVariant {
   final String format; // 'srt', 'vtt', 'zip'
   final Map<String, dynamic> extraData; // For provider specific tokens if needed
 
+  /// The provider says this track is for the hearing impaired — its own
+  /// flag, not a word found in the title. Wyzie sends `isHearingImpaired`;
+  /// the others do not, so their tracks are classified from the title.
+  final bool isHearingImpaired;
+
+  /// The provider says this is a forced-narrative track — subtitles for the
+  /// bits of dialogue not in the audio's language, not a translation.
+  /// Stremio addons mark it in the file name or a `forced` field; detection
+  /// falls back to the title.
+  final bool isForced;
+
   SubtitleVariant({
     required this.providerName,
     required this.language,
@@ -13,7 +24,31 @@ class SubtitleVariant {
     required this.downloadUrl,
     required this.format,
     this.extraData = const {},
-  });
+    bool? isHearingImpaired,
+    bool? isForced,
+  })  : // Fall back to the title when the provider has no flag of its own.
+        // Title sniffing is weak -- a release named "White.House" matches
+        // "HI" -- but a word-boundary match on the known markers is the only
+        // evidence the title-only providers offer, and it is what the menu
+        // was doing before, only now it happens once at the source instead
+        // of being re-derived at every render.
+        isHearingImpaired =
+            isHearingImpaired ?? _titleSaysHearingImpaired(title),
+        isForced = isForced ?? _titleSaysForced(title);
+
+  static bool _titleSaysHearingImpaired(String title) {
+    final t = title.toLowerCase();
+    return t.contains('[cc]') ||
+        t.contains('(cc)') ||
+        t.contains(' sdh') ||
+        t.startsWith('sdh') ||
+        t.contains(' hearing impaired') ||
+        RegExp(r'\bhi\b').hasMatch(t);
+  }
+
+  static bool _titleSaysForced(String title) {
+    return RegExp(r'\bforced\b', caseSensitive: false).hasMatch(title);
+  }
 }
 
 class SubtitleLanguageGroup {

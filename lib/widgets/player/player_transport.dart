@@ -36,6 +36,9 @@ class PlayerTransport extends StatelessWidget {
   /// live in the settings menu instead (see PlayerSettingsMenu).
   final VoidCallback onToggleSubtitles;
   final VoidCallback onToggleSettingsMenu;
+  final VoidCallback onOpenSpeedMenu;
+  final VoidCallback onOpenAudioMenu;
+  final VoidCallback onOpenAspectMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
   const PlayerTransport({
@@ -55,6 +58,9 @@ class PlayerTransport extends StatelessWidget {
     required this.onToggleMute,
     required this.onToggleSubtitles,
     required this.onToggleSettingsMenu,
+    required this.onOpenSpeedMenu,
+    required this.onOpenAudioMenu,
+    required this.onOpenAspectMenu,
     this.onScrubbingChanged,
   });
 
@@ -129,12 +135,38 @@ class PlayerTransport extends StatelessWidget {
                   onPressed: onToggleMute,
                 ),
 
-              // Right Group: Subtitles, Settings (speed, aspect, audio track).
-              // Audio moved behind the gear -- picking a dub is a set-once
-              // choice, unlike subtitles, which get toggled mid-scene.
+              // Right Group: speed, audio, subtitles, settings, aspect --
+              // one button each, in that order. They used to be two buttons
+              // (subtitles and a gear that held everything else), which made
+              // the gear a menu of menus: three taps to reach a speed that
+              // was one tap away on YouTube. Each of these is a set-once
+              // choice a viewer makes mid-scene, so each gets its own button.
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Playback Speed
+                  PlayerIconButton(
+                    size: btnSize,
+                    iconSize: btnIconSize,
+                    icon: const Icon(Icons.speed_rounded),
+                    tooltip: 'Playback speed',
+                    showActiveBadge: playbackRate != 1.0,
+                    onPressed: onOpenSpeedMenu,
+                  ),
+
+                  SizedBox(width: gap),
+
+                  // Audio Track
+                  PlayerIconButton(
+                    size: btnSize,
+                    iconSize: btnIconSize,
+                    icon: const Icon(Icons.audiotrack_rounded),
+                    tooltip: 'Audio track',
+                    onPressed: onOpenAudioMenu,
+                  ),
+
+                  SizedBox(width: gap),
+
                   // Subtitles On/Off Toggle
                   PlayerIconButton(
                     size: btnSize,
@@ -150,14 +182,24 @@ class PlayerTransport extends StatelessWidget {
 
                   SizedBox(width: gap),
 
-                  // Settings Menu Trigger (playback speed + aspect ratio)
+                  // Settings Menu Trigger (subtitle appearance + sleep timer)
                   PlayerIconButton(
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: const Icon(Icons.settings_rounded),
                     tooltip: 'Settings',
-                    showActiveBadge: playbackRate != 1.0,
                     onPressed: onToggleSettingsMenu,
+                  ),
+
+                  SizedBox(width: gap),
+
+                  // Aspect Ratio
+                  PlayerIconButton(
+                    size: btnSize,
+                    iconSize: btnIconSize,
+                    icon: const Icon(Icons.aspect_ratio_rounded),
+                    tooltip: 'Aspect ratio',
+                    onPressed: onOpenAspectMenu,
                   ),
                 ],
               ),

@@ -5,75 +5,24 @@ import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: Center(child: child)));
 
-void _noop() {}
-
 PlayerSettingsMenu menu({
-  String? audioLabel,
-  VoidCallback? onTapAudio,
-  VoidCallback? onTapSpeed,
   String? subtitleLabel,
   VoidCallback? onTapSubtitles,
-}) {
-  return PlayerSettingsMenu(
-    currentRate: 1.0,
-    aspectLabel: 'Fit',
-    audioLabel: audioLabel,
-    onTapAudio: onTapAudio,
-    onTapSpeed: onTapSpeed ?? () {},
-    onTapAspect: () {},
-    subtitleLabel: subtitleLabel,
-    onTapSubtitles: onTapSubtitles,
-  );
-}
+}) => PlayerSettingsMenu(
+  subtitleLabel: subtitleLabel,
+  onTapSubtitles: onTapSubtitles,
+);
 
 void main() {
   group('PlayerSettingsMenu', () {
-    testWidgets('lists audio track alongside speed and aspect', (tester) async {
-      // Audio used to be its own button in the transport bar, next to the
-      // gear that had already absorbed speed and aspect.
-      await tester.pumpWidget(
-        wrap(menu(audioLabel: 'English', onTapAudio: () {})),
-      );
-
-      expect(find.text('Playback speed'), findsOneWidget);
-      expect(find.text('Aspect ratio'), findsOneWidget);
-      expect(find.text('Audio track'), findsOneWidget);
-      expect(find.text('English'), findsOneWidget);
-    });
-
-    testWidgets('opens the audio menu when the row is tapped', (tester) async {
-      var opened = 0;
-      await tester.pumpWidget(
-        wrap(menu(audioLabel: 'English', onTapAudio: () => opened++)),
-      );
-
-      await tester.tap(find.text('Audio track'));
-      expect(opened, 1);
-    });
-
-    testWidgets('hides the audio row when there is nothing to choose', (
-      tester,
-    ) async {
-      // A single-track file: a row that opens an empty menu is worse than
-      // no row.
-      await tester.pumpWidget(wrap(menu()));
-
-      expect(find.text('Audio track'), findsNothing);
-      expect(find.text('Playback speed'), findsOneWidget);
-    });
-
-    testWidgets('falls back to Default before tracks are known', (
-      tester,
-    ) async {
-      await tester.pumpWidget(wrap(menu(onTapAudio: () {})));
-
-      expect(find.text('Audio track'), findsOneWidget);
-      expect(find.text('Default'), findsOneWidget);
-    });
+    // The gear used to be an index of every player control -- audio,
+    // subtitles, speed, aspect -- which made it a menu of menus: three taps
+    // to reach a speed that was one tap away on YouTube. Those four are
+    // transport-bar buttons now, and what is left here is the two things
+    // that have no button of their own: the subtitle entry and the sleep
+    // timer.
 
     testWidgets('lists Subtitles when a handler is supplied', (tester) async {
-      // Track/style picking moved here from the transport bar's own
-      // subtitle button, which is now a plain on/off toggle.
       await tester.pumpWidget(
         wrap(menu(subtitleLabel: 'English', onTapSubtitles: () {})),
       );
@@ -109,70 +58,40 @@ void main() {
       expect(find.text('Off'), findsOneWidget);
     });
 
-    testWidgets('audio track leads the list', (tester) async {
-      // It is the choice a viewer makes before any of the others -- picking
-      // the dub you can follow comes before deciding how fast to play it --
-      // and on a dubbed title it is the row that has to be found fast.
-      await tester.pumpWidget(
-        wrap(
-          menu(
-            audioLabel: 'English',
-            onTapAudio: () {},
-            subtitleLabel: 'Off',
-            onTapSubtitles: () {},
-          ),
-        ),
-      );
+    testWidgets('carries a sleep timer', (tester) async {
+      // It lived at the bottom of the speed menu before, which was the one
+      // place a viewer winding down for the night would not look for it.
+      await tester.pumpWidget(wrap(menu()));
 
-      double y(String label) => tester.getCenter(find.text(label)).dy;
-
-      expect(y('Audio track'), lessThan(y('Subtitles')));
-      expect(y('Subtitles'), lessThan(y('Playback speed')));
-      expect(y('Playback speed'), lessThan(y('Aspect ratio')));
+      expect(find.text('SLEEP TIMER'), findsOneWidget);
+      expect(find.text('30 min'), findsOneWidget);
     });
 
-    testWidgets('audio still leads when subtitles are unavailable', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(menu(audioLabel: 'Japanese', onTapAudio: () {})),
-      );
+    testWidgets('the sleep timer presets are offered', (tester) async {
+      await tester.pumpWidget(wrap(menu()));
 
-      expect(
-        tester.getCenter(find.text('Audio track')).dy,
-        lessThan(tester.getCenter(find.text('Playback speed')).dy),
-      );
-    });
-
-    testWidgets('hides playback speed when there is no rate to set', (
-      tester,
-    ) async {
-      // Live TV: a live feed plays at the rate it arrives, so a row that
-      // opens a picker with no effect is worse than no row. This is what
-      // lets the Live TV player reuse this exact panel with fewer rows
-      // rather than growing a bespoke control of its own.
-      await tester.pumpWidget(
-        wrap(
-          const PlayerSettingsMenu(
-            currentRate: 1.0,
-            aspectLabel: 'Fit',
-            onTapAspect: _noop,
-          ),
-        ),
-      );
-
-      expect(find.text('Playback speed'), findsNothing);
-      expect(find.text('Aspect ratio'), findsOneWidget);
+      for (final min in ['15 min', '30 min', '45 min', '60 min']) {
+        expect(find.text(min), findsOneWidget);
+      }
     });
 
     testWidgets('carries no close button', (tester) async {
       // Tapping off the panel dismisses it; the X was a third way to do
       // what the barrier behind the menu already did.
-      await tester.pumpWidget(
-        wrap(menu(audioLabel: 'English', onTapAudio: () {})),
-      );
+      await tester.pumpWidget(wrap(menu()));
 
       expect(find.byIcon(Icons.close_rounded), findsNothing);
+    });
+
+    testWidgets('carries no speed, audio or aspect rows', (tester) async {
+      // They are transport-bar buttons now. A row here as well would be the
+      // same control reachable two ways, and the menu-of-menus this panel
+      // existed to be.
+      await tester.pumpWidget(wrap(menu()));
+
+      expect(find.text('Playback speed'), findsNothing);
+      expect(find.text('Audio track'), findsNothing);
+      expect(find.text('Aspect ratio'), findsNothing);
     });
   });
 }

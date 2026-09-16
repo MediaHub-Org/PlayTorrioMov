@@ -61,14 +61,16 @@ void main() {
   });
 
   group('OpenSubtitlesProvider.parseBody', () {
-    test('numbers the subtitles and resolves the language code', () {
+    test('uses the addon id as the title, and resolves the language code', () {
       final subs = OpenSubtitlesProvider.parseBody(
-        '{"subtitles":[{"url":"https://x/1.srt","lang":"eng"},'
+        '{"subtitles":[{"url":"https://x/1.srt","lang":"eng","id":"abc123"},'
         '{"url":"https://x/2.srt","lang":"spa"}]}',
         <String>{},
       );
 
-      expect(subs.map((s) => s.title), ['OpenSubtitles #1', 'OpenSubtitles #2']);
+      // The id is what the picker's rows show -- a counter gave the user
+      // nothing to choose between five rows by.
+      expect(subs.map((s) => s.title), ['abc123', 'Subtitle 2']);
       expect(subs.first.language, isNot('eng'));
       expect(subs.first.providerName, 'OpenSubtitles');
     });
@@ -91,7 +93,7 @@ void main() {
       expect(first, hasLength(1));
       expect(second, hasLength(1));
       expect(second.single.downloadUrl, 'https://x/new.srt');
-      expect(second.single.title, 'OpenSubtitles #1', reason: 'numbered per body');
+      expect(second.single.title, 'Subtitle 1', reason: 'numbered per body');
     });
 
     test('defaults to srt when the entry does not say', () {

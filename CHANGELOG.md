@@ -6,6 +6,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- **The transport bar has a button per control: speed, audio, subtitles,
+  settings, aspect ratio -- in that order.** They used to be two buttons
+  (subtitles and a gear that held everything else), which made the gear a
+  menu of menus: three taps to reach a speed that was one tap away on
+  YouTube. Each of these is a choice a viewer makes mid-scene, so each gets
+  its own button.
+- **The gear menu holds only what has no button: the subtitle entry and the
+  sleep timer.** The sleep timer moved here from the bottom of the speed
+  menu, which was the one place a viewer winding down for the night would
+  not look for it.
 - **The player's subtitle and picture controls are reorganised.** Six things
   were wrong with them, and all six came from the same cause: controls
   grouped by where there was space rather than by what they belong to.
@@ -46,6 +56,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     subtitle panel's own header, which is where it was.
 
 ### Fixed
+- **Subtitle rows said the provider instead of the language, and the HI/CC
+  and Forced filters never matched anything.** Two bugs with one root.
+  OpenSubtitles titled every track "OpenSubtitles #3" -- the provider name
+  was already on the row as its own badge, so the title repeated it and
+  gave the user nothing to choose between five rows by. It uses the addon's
+  own id now, or a plain number when the addon sends none. And the HI/CC
+  and Forced badges were derived by sniffing the title for words like "SDH"
+  and "forced" at render time, while the one provider that marks
+  hearing-impaired tracks directly (Wyzie) put its flag in a separate field
+  the model never carried -- so the badges were blank for exactly the
+  tracks that were marked. `SubtitleVariant` now carries `isHearingImpaired`
+  and `isForced`, set from the provider's flag where it sends one and from
+  a word-boundary match on the title where it does not. The word boundary
+  matters: the old substring match read "White.House" and "Childhood" as
+  hearing-impaired, because both contain "hi". The language also shows as
+  words on each row now, not only as a small flag -- "which of these is
+  the English one" is the question the list exists to answer.
 - **Two `return` statements that skipped their own `catch`.** Both were
   `return <Future>` inside a `try` without `await`, which completes the try
   block before the future settles — so the `catch` below could never see

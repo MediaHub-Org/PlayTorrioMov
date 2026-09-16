@@ -439,12 +439,21 @@ class PlayerToggleChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: active ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                  fontSize: 11.5,
-                  fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+              // Flexible, not bare: a chip is sized by its label, and at a
+              // large text scale the label can want more than the row it
+              // sits in has -- 13px past the settings card on the sleep
+              // timer presets. Ellipsizing a chip label beats painting it
+              // over the neighbouring one.
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: active ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                    fontSize: 11.5,
+                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
               ),
               if (count != null) ...[

@@ -34,8 +34,7 @@ import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/skip_segments_service.dart';
-import '../../widgets/player/player_aspect_menu.dart'
-    show PlayerAspectMenu, aspectLabelFor;
+import '../../widgets/player/player_aspect_menu.dart' show PlayerAspectMenu;
 import '../../widgets/player/player_audio_menu.dart';
 import '../../widgets/player/player_subtitle_menu.dart';
 import '../../widgets/player/player_sub_style_modal.dart';
@@ -934,16 +933,6 @@ class _PlayerScreenState extends State<PlayerScreen>
         .where((t) => t.index == _selectedAudioTrackIndex)
         .firstOrNull;
     return (match ?? _audioTracks.first).language;
-  }
-
-  /// Name of the audio track currently playing, for the settings menu's
-  /// audio row. Null before the media reports its tracks.
-  String? get _selectedAudioTrackLabel {
-    if (_audioTracks.isEmpty) return null;
-    final match = _audioTracks
-        .where((t) => t.index == _selectedAudioTrackIndex)
-        .firstOrNull;
-    return (match ?? _audioTracks.first).title;
   }
 
   void _toggleMenu(String menuName) {
@@ -2195,6 +2184,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onToggleMute: () => _toggleMute(),
                     onToggleSubtitles: _toggleSubtitlesEnabled,
                     onToggleSettingsMenu: () => _toggleMenu('settings'),
+                    onOpenSpeedMenu: () => _toggleMenu('speed'),
+                    onOpenAudioMenu: () => _toggleMenu('audio'),
+                    onOpenAspectMenu: () => _toggleMenu('aspect'),
                   ),
                 ),
               ),
@@ -2297,30 +2289,10 @@ class _PlayerScreenState extends State<PlayerScreen>
             ),
           ),
 
-        // Floating Settings Menu Popover (playback speed + aspect ratio index)
+        // Floating Settings Menu Popover (subtitle entry + sleep timer)
         if (_activeMenu == 'settings' && !_isLoading)
           PlayerMenuAnchor(
             child: PlayerSettingsMenu(
-              currentRate: _playbackRate,
-              aspectLabel: aspectLabelFor(_videoFit, _forcedAspectRatio),
-              audioLabel: _selectedAudioTrackLabel,
-              // Always offered: the menu is not just a track list, it also
-              // holds the Audio Sync Offset control, and with the transport
-              // bar's audio button gone this row is its only way in. Gating
-              // it on a track count stranded sync on single-track media,
-              // which is most media.
-              onTapAudio: () => setState(() {
-                _activeMenu = 'audio';
-                _menuParent = 'settings';
-              }),
-              onTapSpeed: () => setState(() {
-                _activeMenu = 'speed';
-                _menuParent = 'settings';
-              }),
-              onTapAspect: () => setState(() {
-                _activeMenu = 'aspect';
-                _menuParent = 'settings';
-              }),
               subtitleLabel: _isSubtitleEnabled
                   ? (_currentSubtitleVariant?.language ?? 'On')
                   : 'Off',
