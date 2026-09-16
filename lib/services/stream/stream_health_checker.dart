@@ -65,7 +65,12 @@ class StreamHealthChecker {
           final redirectedUri = Uri.parse(url).resolve(location).toString();
           final redirectHeaders = PlayerSettings.resolveStreamHeaders(redirectedUri, headers);
           client.close();
-          return _probeUrl(redirectedUri, redirectHeaders, redirectCount + 1);
+          // `await`, so this frame's `finally` runs after the recursive call
+          // rather than before it, and so a throw from the redirect chain is
+          // caught by the `catch` below instead of escaping past it. Without
+          // it the `return` completed the try block first, which meant the
+          // outer catch could never see anything the recursion raised.
+          return await _probeUrl(redirectedUri, redirectHeaders, redirectCount + 1);
         }
         return false;
       }

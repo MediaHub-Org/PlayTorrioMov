@@ -6,6 +6,20 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- **Two `return` statements that skipped their own `catch`.** Both were
+  `return <Future>` inside a `try` without `await`, which completes the try
+  block before the future settles — so the `catch` below could never see
+  anything the call raised. In `StreamHealthChecker._probeUrl` that is the
+  redirect chain: a throw from a redirect escaped past the handler that
+  exists to turn a failed probe into `false`. In `TraktService.
+  refreshAccessToken` it is the `on StateError`, which was unreachable for
+  exactly the case it was written for.
+
+  Neither was live — `_probeUrl`'s recursion and `_refreshAccessTokenScoped`
+  both handle their own errors, so nothing escaped today. They were one edit
+  away from mattering, and the analyzer had been reporting both since the
+  local SDK moved ahead of CI's pinned 3.44.0. `flutter analyze
+  --fatal-infos` is now genuinely zero rather than zero-except-these-two.
 - **Leaving a watch screen mid-search left every scraper running.** The
   source search kept issuing HTTP requests into a controller nobody was
   reading — forty-odd of them, for a screen the user had already left.
