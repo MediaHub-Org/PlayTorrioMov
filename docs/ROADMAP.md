@@ -118,17 +118,17 @@ people search and recognise things.
 
 ### Text scale and accessibility (#69)
 
-**~57 of the ~68 files in `lib/` with a fixed `height:` are still unaudited.**
-Eleven high-traffic boxes are fixed so far — four in 1.8.1, then the Continue
+**~56 of the ~68 files in `lib/` with a fixed `height:` are still unaudited.**
+Twelve high-traffic boxes are fixed so far — four in 1.8.1, then the Continue
 Watching card and its section header, then the three catalogue cards and the
-details page action rows, then the player's two menus and the browse row
-header. What is left is the long tail, in rough order of how many people meet
-it:
+details page action rows, then the player's two menus, the browse row header
+and the settings hub. What is left is the long tail, in rough order of how
+many people meet it:
 
-1. **The settings pages** — long, text-heavy, and the place a user who needs
-   large text is most likely to be.
-2. **The transport bar and source sheet** — the player chrome the two menus
+1. **The transport bar and source sheet** — the player chrome the two menus
    above do not cover.
+2. **The remaining settings pages** — the hub is done; the ten pages behind
+   it are not, and they are the most text-heavy screens in the app.
 3. **The remaining details-page rails** — cast, related, similar.
 4. **Live TV's portal browser** — a modal with its own toolbars.
 
