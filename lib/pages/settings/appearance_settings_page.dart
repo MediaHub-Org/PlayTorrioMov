@@ -408,6 +408,7 @@ class _LanguageSelector extends StatelessWidget {
   const _LanguageSelector();
 
   static const _nativeNames = <String, String>{
+    'en': 'English',
     'es': 'Español',
     'ar': 'العربية',
     'pt': 'Português',

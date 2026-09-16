@@ -32,7 +32,15 @@ abstract final class AppThemeService {
   /// every language `AppLocalizations.supportedLocales` lists, if that ever
   /// grows ahead of this menu. Language-only (no country subtag): each ARB
   /// file is `app_<code>.arb` under `lib/l10n/`.
+  ///
+  /// English is listed explicitly, not left implicit as "whatever you get
+  /// when nothing else matches": a user whose system language is none of
+  /// these still needs a way to *choose* English on purpose, rather than
+  /// only ever falling into it by default. It is first here as the base/
+  /// template locale, but [locale] still defaults to null (system) --
+  /// picking a locale, English included, is always an explicit action.
   static const List<Locale> supportedAppLocales = [
+    Locale('en'),
     Locale('es'),
     Locale('ar'),
     Locale('pt'),
