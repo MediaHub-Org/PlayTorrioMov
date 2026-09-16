@@ -25,17 +25,27 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~440-740 of an estimated 500-800 user-facing strings are still hardcoded
+**~410-710 of an estimated 500-800 user-facing strings are still hardcoded
 English.** Infrastructure and three languages (Spanish, Arabic, Portuguese-BR)
 shipped in 1.8.1, covering the hub navigation, the Settings hub page and the
-Appearance page — 46 keys. The Library followed in 1.8.2 — 34 more, for its
-tabs, shelf cards, empty states, filter chips, sort menu and dialogs.
+Appearance page — 46 keys. The Library followed in 1.8.2 (34 more), then the
+details pages and the player's gear menu (26 more). 120 keys in all.
 
 The method, per string:
 
 1. Add a key to `lib/l10n/app_en.arb`, plus the three translated ARB files.
 2. Run `flutter gen-l10n`.
 3. Replace the literal with `context.l10n.yourKey`.
+
+A key that needs a value inside the sentence uses a placeholder —
+`detailsPlayEp` is `"Play Ep {number}"`, because word order differs in the
+other three languages and the number cannot be concatenated outside the
+translation.
+
+**A test compares every ARB file to English in both directions.** A missing
+key does not crash: `gen-l10n` silently emits the English string, so the
+app looks fine and one screen is quietly untranslated. Add the key to all
+four files or the test fails.
 
 **Use `context.l10n`, not `AppLocalizations.of(context)`.** The generated
 getter is `nullable-getter: false`, so it force-unwraps and *throws* when no
@@ -51,9 +61,10 @@ earlier, hand-rolled version of the same idea, for a `const` enum that cannot
 hold a context-dependent string. `LibrarySection.localizedLabel` and
 `LibraryShelf.localizedLabel` follow it.
 
-**The next slice is the details pages** — Play, the library action tooltips,
-the section headings, the episode controls. They are the most-visited screens
-after the hub itself.
+**The next slice is the settings pages.** They are long, text-heavy, and the
+place a user who needs large text is most likely to be — which makes them
+both the biggest remaining translation target and the one that most rewards
+doing.
 
 **No RTL layout audit has been done for Arabic.** Flutter's `Directionality`
 follows the locale automatically for standard Material widgets, but no custom
@@ -107,19 +118,19 @@ people search and recognise things.
 
 ### Text scale and accessibility (#69)
 
-**~58 of the ~68 files in `lib/` with a fixed `height:` are still
-unaudited.** Ten high-traffic boxes are fixed so far — four in 1.8.1, then
-the Continue Watching card and its section header, then the three catalogue
-cards and the details page action rows. What is left is the long tail, in
-rough order of how many people meet it:
+**~57 of the ~68 files in `lib/` with a fixed `height:` are still unaudited.**
+Eleven high-traffic boxes are fixed so far — four in 1.8.1, then the Continue
+Watching card and its section header, then the three catalogue cards and the
+details page action rows, then the player's two menus and the browse row
+header. What is left is the long tail, in rough order of how many people meet
+it:
 
-1. **The player's chrome** — the transport bar, the settings popovers, the
-   source sheet. Every user, every session.
-2. **The browse rows and their headers** — `BrowseRowView`, the section
-   titles, the filter pills.
-3. **The settings pages** — long, text-heavy, and the place a user who needs
+1. **The settings pages** — long, text-heavy, and the place a user who needs
    large text is most likely to be.
-4. **The remaining details-page rails** — cast, related, similar.
+2. **The transport bar and source sheet** — the player chrome the two menus
+   above do not cover.
+3. **The remaining details-page rails** — cast, related, similar.
+4. **Live TV's portal browser** — a modal with its own toolbars.
 
 The method is settled and does not need rediscovering:
 
@@ -142,6 +153,13 @@ The method is settled and does not need rediscovering:
   out on the details pages' ambient background rather than reporting anything
   about layout. Overflow is raised during layout on the first frame, so
   `pumpAtScale(settle: false)` is what those cases need.
+- **Pump it where it actually lives.** A bare pump of the player menu reported
+  a 1891px vertical overflow, and of `SectionHeader` a 790px one. Neither can
+  happen in production: `PlayerMenuAnchor` bounds and scrolls the card, and a
+  browse page is a scrollable. Both probes now wrap the widget in the
+  arrangement it really sits in. A probe that reports an overflow production
+  cannot have is not finding a bug — it is finding the test's own scaffolding,
+  and it wastes exactly the time it takes to work that out.
 
 Semantics labels on icon-only controls, mentioned here previously, is still
 untouched — `Tooltip` supplies one for free, which the library action row

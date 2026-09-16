@@ -5,6 +5,27 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Five more text-scale overflows (#69)**, on the player's chrome and the
+  browse row header. All five are the same shape: a fixed-height `Container`
+  with a bare `Row` inside it, where one half grows with text scale and the
+  other does not. The settings menu (436px — the label was `Expanded` and the
+  value beside it was not), the aspect menu (685px), its subtitle-scale row
+  (590px), and `SectionHeader`'s "See All" (8.7px — small, and the heading
+  above every row on every browse page).
+
+  The fixed heights became minimums rather than being clamped. `PlayerMenuAnchor`
+  already bounds and scrolls its card, so the box can genuinely grow; clamping
+  would only make the text smaller for no reason.
+
+### Added
+- **The details pages and the player's gear menu are translated (#68).** 26
+  keys — the Play button in all four of its forms, the section headings, Read
+  more / Show less, the anime SUB/DUB toggle, and the player's four menu rows
+  — in Spanish, Arabic and Portuguese-BR. Two carry placeholders, the first in
+  this app: `"Play Ep {number}"` is a sentence whose word order differs per
+  language, so the number cannot be concatenated outside the translation.
+
 ### Internal
 - **The release workflow is off the retired Node 20 runtime.**
   `softprops/action-gh-release` was on `v2`, which targets Node 20; GitHub
@@ -16,6 +37,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   first major that moved to Node 24, and fails again if a *new* action is
   added that the list does not cover — so the guard cannot pass by not
   looking.
+- **The l10n guard now compares whole files.** The Library's own check named
+  six keys by hand, which was right when there were six and does not scale to
+  120. The new one asserts every key in `app_en.arb` exists in each
+  translation and vice versa. A missing key does not crash — `gen-l10n`
+  silently emits the English string — so the failure mode it prevents is a
+  screen that is quietly untranslated while everything looks fine.
 
 ## [1.8.2+35] - 2026-09-16
 
