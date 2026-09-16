@@ -85,14 +85,30 @@ people search and recognise things.
 
 ### Text scale and accessibility (#69)
 
-**~64 of the ~68 files in `lib/` with a fixed `height:` are still
-unaudited.** Four high-traffic ones shipped fixed in 1.8.1 (see changelog),
-each a clamp rather than a layout rewrite — the element still grows with
-text scale, just capped short of overflowing the fixed box it sits in.
-System-level accessibility text scale (true regardless of the new in-app
-zoom setting) can still overflow any of the remaining ~64. To continue:
-grep for `height:\s*[0-9]` the way `mobile_first_test` greps for
-`SizedBox(width: ...)`, then check whether each hit wraps scalable text.
+**Most of the ~68 files in `lib/` with a fixed `height:` are still
+unaudited.** Six high-traffic boxes are fixed so far — four in 1.8.1, then
+the Continue Watching card and its section header, both measured at 56px
+past their box at 3x. Every one is a clamp rather than a layout rewrite:
+the element still grows with text scale, just capped short of overflowing.
+1.3 is the established ceiling (nav bar, sidebar logo, pill rows, and now
+the home row). System-level accessibility scale, which the in-app zoom
+setting does not bound, can still overflow the rest.
+
+**Do not audit this by grepping `height:`.** It was tried and it does not
+survive contact: a span-based scan pairing each fixed height with the
+largest `fontSize` inside it returns 165 hits, and the loudest are
+`height: 4` spacers that merely sit in the same widget subtree as a
+`fontSize: 22` title. A static scan cannot tell "box that wraps this text"
+from "box that happens to be near it", so the ranking is noise and a test
+built on it would be unactionable.
+
+What works is pumping the real widget: `test/text_scale_overflow_test.dart`
+renders at 3.0 scale on a 360px-wide view and asserts nothing reached the
+binding. Flutter reports an overflow as an exception with an exact pixel
+count, so a failure names the widget and the amount. Add a case per
+widget; the ones worth doing next are the surfaces every user meets —
+`MovieCard` in its catalogue grid, `AnimeCard`, `IptvChannelCard`, and the
+details page action rows.
 
 Semantics labels on icon-only controls, mentioned here previously, is
 still untouched — `Tooltip` supplies one for free, which the library
