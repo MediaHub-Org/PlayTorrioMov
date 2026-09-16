@@ -105,5 +105,54 @@
   "libraryCollectionGoneTitle": "Collection gone",
   "libraryEmptyCollectionTitle": "Nothing in here yet",
   "libraryNoLikedChannelsTitle": "No liked channels yet",
-  "libraryNoMatchingItems": "No matching items"
+  "libraryNoMatchingItems": "No matching items",
+
+  "detailsPlayMovie": "Play Movie",
+  "@detailsPlayMovie": {"description": "Primary action on a movie's details page"},
+  "detailsPlayEpisodes": "Play Episodes",
+  "@detailsPlayEpisodes": {"description": "Primary action on a series' details page"},
+  "detailsPlayFirstMovie": "Play First Movie",
+  "@detailsPlayFirstMovie": {"description": "Primary action on a collection's details page"},
+  "detailsPlayEp": "Play Ep {number}",
+  "@detailsPlayEp": {
+    "description": "Primary action on an anime's details page when nothing has been watched yet",
+    "placeholders": {"number": {"type": "int"}}
+  },
+  "detailsResumeEp": "Resume Ep {number}",
+  "@detailsResumeEp": {
+    "description": "Primary action on an anime's details page, resuming the last watched episode",
+    "placeholders": {"number": {"type": "int"}}
+  },
+  "detailsGoBack": "Go Back",
+  "detailsEpisodes": "Episodes",
+  "@detailsEpisodes": {"description": "Section heading listing a series' or anime's episodes"},
+  "detailsCast": "Cast",
+  "detailsDirector": "Director",
+  "detailsStaff": "Staff",
+  "@detailsStaff": {"description": "Section heading for an anime's production staff"},
+  "detailsMoreLikeThis": "More Like This",
+  "detailsSimilarContent": "Similar Content",
+  "detailsMoviesInCollection": "Movies in Collection",
+  "detailsYouMayAlsoLike": "You May Also Like",
+  "detailsReadMore": "Read more",
+  "detailsShowLess": "Show less",
+  "detailsTotalEpisodes": "({count} total)",
+  "@detailsTotalEpisodes": {
+    "description": "Episode count beside the Episodes heading",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "detailsSub": "SUB",
+  "@detailsSub": {"description": "Subbed audio toggle on an anime's details page; kept short as it is a compact control"},
+  "detailsDub": "DUB",
+  "@detailsDub": {"description": "Dubbed audio toggle on an anime's details page; kept short as it is a compact control"},
+  "detailsSubtitleSizeScale": "Subtitle Size Scale",
+  "detailsJumpToEpisode": "Jump to ep #",
+  "detailsAudioTrack": "Audio track",
+  "detailsSubtitles": "Subtitles",
+  "detailsPlaybackSpeed": "Playback speed",
+  "detailsAspectRatio": "Aspect ratio",
+  "detailsSettings": "SETTINGS",
+  "detailsDefaultValue": "Default",
+  "detailsOff": "Off",
+  "detailsNormal": "Normal"
 }

@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
 import '../../widgets/common/over_artwork.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
@@ -578,7 +579,7 @@ class _DetailsPageState extends State<DetailsPage>
               backgroundColor: AppColors.inkAlpha(0.10),
               foregroundColor: AppColors.ink,
             ),
-            child: const Text('Go Back'),
+            child: Text(context.l10n.detailsGoBack),
           ),
         ],
       ),
@@ -663,7 +664,11 @@ class _DetailsPageState extends State<DetailsPage>
                             _buildSeasonSelector(meta),
                             const SizedBox(height: _Space.lg),
                           ] else ...[
-                            DetailsSectionHeader(_isCollection ? 'Movies in Collection' : 'Episodes'),
+                            DetailsSectionHeader(
+                              _isCollection
+                                  ? context.l10n.detailsMoviesInCollection
+                                  : context.l10n.detailsEpisodes,
+                            ),
                           ],
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 550),
@@ -747,8 +752,7 @@ class _DetailsPageState extends State<DetailsPage>
                           _buildSimilarRow(),
                           const SizedBox(height: _Space.xl),
                         ] else if (_isFetchingSimilar) ...[
-                          const DetailsSectionHeader('Similar Content'),
-                          const Center(
+                          const DetailsSectionHeader('Similar Content'),                          const Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 40),
                               child: SizedBox(
@@ -1210,8 +1214,10 @@ class _DetailsPageState extends State<DetailsPage>
             Flexible(
               child: Text(
                 _isCollection
-                    ? 'Play First Movie'
-                    : (_isSeries ? 'Play Episodes' : 'Play Movie'),
+                    ? context.l10n.detailsPlayFirstMovie
+                    : (_isSeries
+                          ? context.l10n.detailsPlayEpisodes
+                          : context.l10n.detailsPlayMovie),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -1379,7 +1385,9 @@ class _DetailsPageState extends State<DetailsPage>
                 onTap: () =>
                     setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
                 child: Text(
-                  _isSynopsisExpanded ? 'Show less' : 'Read more',
+                  _isSynopsisExpanded
+                      ? context.l10n.detailsShowLess
+                      : context.l10n.detailsReadMore,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -1409,7 +1417,14 @@ class _DetailsPageState extends State<DetailsPage>
     final crew = _enrichedCrew ??
         (meta.directorsList.isNotEmpty
             ? meta.directorsList
-            : meta.director.map((d) => CrewMember(name: d, job: 'Director')).toList());
+            : meta.director
+                  .map(
+                    (d) => CrewMember(
+                      name: d,
+                      job: context.l10n.detailsDirector,
+                    ),
+                  )
+                  .toList());
 
     final cast = _enrichedCast ??
         (meta.castMembers.isNotEmpty
@@ -1777,7 +1792,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const DetailsSectionHeader('More Like This'),
+          DetailsSectionHeader(context.l10n.detailsMoreLikeThis),
           SizedBox(
             height: cardWidth * 1.5 + 8,
             child: Stack(
@@ -1922,7 +1937,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const DetailsSectionHeader('Similar Content'),
+          DetailsSectionHeader(context.l10n.detailsSimilarContent),
           SizedBox(
             height: cardHeight,
             child: Stack(

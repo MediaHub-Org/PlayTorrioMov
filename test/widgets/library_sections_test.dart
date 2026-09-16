@@ -157,4 +157,42 @@ void main() {
       });
     }
   });
+
+  group('every locale covers every key (#68)', () {
+    // The check above names its keys by hand, which is right for the Library
+    // but does not scale: the details pages added 26 more, and a hand-written
+    // list would have to be extended for each. This one compares the whole
+    // file, so a key added to English and forgotten in a translation fails
+    // without anyone remembering to update a list.
+    //
+    // It is the failure mode that matters. A missing key does not crash --
+    // `flutter gen-l10n` emits the English string for it -- so the app looks
+    // fine and one screen is quietly untranslated.
+    final en = jsonDecode(File('lib/l10n/app_en.arb').readAsStringSync())
+        as Map<String, dynamic>;
+    final enKeys = en.keys.where((k) => !k.startsWith('@')).toSet();
+
+    for (final locale in ['es', 'ar', 'pt']) {
+      test('app_$locale.arb has every key app_en.arb has', () {
+        final arb = jsonDecode(
+          File('lib/l10n/app_$locale.arb').readAsStringSync(),
+        ) as Map<String, dynamic>;
+        final arbKeys = arb.keys.where((k) => !k.startsWith('@')).toSet();
+
+        expect(
+          enKeys.difference(arbKeys),
+          isEmpty,
+          reason: 'these keys are in app_en.arb but not app_$locale.arb, so '
+              'they would silently render in English',
+        );
+        expect(
+          arbKeys.difference(enKeys),
+          isEmpty,
+          reason: 'these keys are in app_$locale.arb but not app_en.arb -- '
+              'either a typo, or a key that was removed from English and '
+              'left behind',
+        );
+      });
+    }
+  });
 }

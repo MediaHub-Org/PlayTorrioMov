@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 /// Settings entry point -- one gear icon opens this instead of separate
@@ -78,29 +79,29 @@ class PlayerSettingsMenu extends StatelessWidget {
           if (onTapAudio != null)
             _SettingsRow(
               icon: Icons.audiotrack_rounded,
-              label: 'Audio track',
-              value: audioLabel ?? 'Default',
+              label: context.l10n.detailsAudioTrack,
+              value: audioLabel ?? context.l10n.detailsDefaultValue,
               onTap: onTapAudio!,
             ),
           if (onTapSubtitles != null)
             _SettingsRow(
               icon: Icons.subtitles_rounded,
-              label: 'Subtitles',
-              value: subtitleLabel ?? 'Off',
+              label: context.l10n.detailsSubtitles,
+              value: subtitleLabel ?? context.l10n.detailsOff,
               onTap: onTapSubtitles!,
             ),
           if (onTapSpeed != null)
             _SettingsRow(
               icon: Icons.speed_rounded,
-              label: 'Playback speed',
+              label: context.l10n.detailsPlaybackSpeed,
               value: currentRate == 1.0
-                  ? 'Normal'
+                  ? context.l10n.detailsNormal
                   : '${currentRate.toStringAsFixed(currentRate == currentRate.roundToDouble() ? 0 : 2)}×',
               onTap: onTapSpeed!,
             ),
           _SettingsRow(
             icon: Icons.aspect_ratio_rounded,
-            label: 'Aspect ratio',
+            label: context.l10n.detailsAspectRatio,
             value: aspectLabel,
             onTap: onTapAspect,
           ),

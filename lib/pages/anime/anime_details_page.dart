@@ -15,6 +15,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/clamped_text_scale.dart';
+import '../../l10n/l10n.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_actions_row.dart';
@@ -736,8 +737,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             Flexible(
               child: Text(
                 lastWatched != null && lastWatched > 0
-                    ? 'Resume Ep $resumeEp'
-                    : 'Play Ep 1',
+                    ? context.l10n.detailsResumeEp(resumeEp)
+                    : context.l10n.detailsPlayEp(1),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -972,7 +973,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const DetailsSectionHeader('Staff'),
+        DetailsSectionHeader(context.l10n.detailsStaff),
         SizedBox(
           height: 180,
           child: ListView.separated(
@@ -1053,9 +1054,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           alignment: WrapAlignment.spaceBetween,
           children: [
             DetailsSectionHeader(
-              'Episodes',
+              context.l10n.detailsEpisodes,
               trailing: Text(
-                '($totalEps total)',
+                context.l10n.detailsTotalEpisodes(totalEps),
                 style: const TextStyle(color: Colors.white54, fontSize: 14),
               ),
             ),
@@ -1092,9 +1093,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                               color: !_isDub ? _Palette.accent : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'SUB',
-                              style: TextStyle(
+                            child: Text(
+                              context.l10n.detailsSub,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
@@ -1113,9 +1114,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                               color: _isDub ? _Palette.accent : Colors.transparent,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
-                              'DUB',
-                              style: TextStyle(
+                            child: Text(
+                              context.l10n.detailsDub,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
@@ -1143,7 +1144,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                       onSubmitted: _jumpToEpisode,
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                       decoration: InputDecoration(
-                        hintText: 'Jump to ep #',
+                        hintText: context.l10n.detailsJumpToEpisode,
                         hintStyle: const TextStyle(color: Colors.white38, fontSize: 11),
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
@@ -1467,7 +1468,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const DetailsSectionHeader('You May Also Like'),
+          DetailsSectionHeader(context.l10n.detailsYouMayAlsoLike),
           MouseRegion(
             onEnter: (_) => setState(() => _isHoveringRecs = true),
             onExit: (_) => setState(() => _isHoveringRecs = false),
