@@ -3,7 +3,12 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.2+35] - 2026-09-16
+
+The release that finished what 1.8.1 started on text scale, took the
+translation work one screen further, and confirmed the Flatpak audio fix on
+real hardware. No new features; three of the four items here are things that
+were already shipped and are now either finished or verified.
 
 ### Fixed
 - **Three catalogue cards overflowed their grid cell at a large text scale
@@ -16,6 +21,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   short-code badge whose text wrapped past its fixed box. Each card now
   clamps its text scale and flexes the row, so the clamp keeps it legible
   at ordinary settings and the flex holds at any scale.
+- **Three more on the details pages (#69)**, found by probing them the same
+  way: the Play button (174px — a bare `Row` of icon and label, the same
+  shape as the cards above), the section heading (195px — `Flexible` was on
+  the heading but not on the count beside it), and the Episodes control
+  strip (516px — SUB/DUB, the jump input and the batch dropdown, all
+  fixed-height boxes whose labels grow). The strip wraps now rather than
+  clamping: it already sat in a `Wrap`, so the box could genuinely grow, and
+  clamping it to 1.3 still left 179px.
 
 ### Added
 - **`ClampedTextScale`**, naming the `MediaQuery` incantation that had been
@@ -42,6 +55,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   a test — it is a property of the manifest, not the code. A Flatpak build
   with the fixed manifest has now been run and plays sound, which is the
   only thing that could have settled it.
+
+### Not yet verified
+
+- **#69** covers 10 of the ~68 files in `lib/` with a fixed `height:`. A
+  large system accessibility text size can still overflow any of the
+  other ~58 — unrelated to, and unchanged by, the new in-app control.
+- **#68** covers roughly 64 of an estimated 500-800 strings. No RTL layout
+  audit was done for Arabic beyond Flutter's automatic `Directionality`.
+  The display/canonical title split the roadmap says must come before
+  translating catalog content is still only decided, not built.
+- **#71** is verified by `flutter analyze` and `flutter test` only — not
+  yet checked visually in a running window.
+
+Also still outstanding from 1.7.0: the **Cast fix has never been confirmed
+against a receiver** (#28).
 
 ## [1.8.1+34] - 2026-09-16
 
@@ -87,12 +115,15 @@ confirmed working on a phone.
 
 ### Not yet verified
 
+- **#70** explains the symptom exactly, but no Flatpak build with the
+  fixed manifest has been run against real speakers yet. *(Confirmed in
+  1.8.2.)*
 - **#71** is verified by `flutter analyze` and `flutter test` only — not
   yet checked visually in a running window.
-- **#69** covers 10 of the ~68 files in `lib/` with a fixed `height:`. A
+- **#69** covers 4 of the ~68 files in `lib/` with a fixed `height:`. A
   large system accessibility text size can still overflow any of the
-  other ~58 — unrelated to, and unchanged by, the new in-app control.
-- **#68** covers roughly 64 of an estimated 500-800 strings. No RTL layout
+  other ~64 — unrelated to, and unchanged by, the new in-app control.
+- **#68** covers roughly 30 of an estimated 500-800 strings. No RTL layout
   audit was done for Arabic beyond Flutter's automatic `Directionality`.
   The display/canonical title split the roadmap says must come before
   translating catalog content is still only decided, not built.
