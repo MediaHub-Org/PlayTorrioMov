@@ -1,3 +1,4 @@
+import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -30,256 +31,279 @@ class IptvChannelCard extends StatelessWidget {
     final primaryColor = ch.gradient.isNotEmpty ? ch.gradient.first : palette.primaryColor;
     final secondaryColor = ch.gradient.length > 1 ? ch.gradient.last : palette.accentColor;
 
-    return InteractiveCardShell(
-      pressedScale: 0.96,
-      onTap: onTap,
-      builder: (context, hovered, pressed) => RepaintBoundary(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-                  // Poster / Gradient Box
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            primaryColor.withValues(alpha: 0.85),
-                            secondaryColor.withValues(alpha: 0.70),
-                            AppColors.bar,
-                          ],
-                          stops: const [0.0, 0.55, 1.0],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: hovered
-                                ? primaryColor.withValues(alpha: 0.45)
-                                : Colors.black.withValues(alpha: 0.35),
-                            blurRadius: hovered ? 20 : 10,
-                            offset: Offset(0, hovered ? 8 : 4),
+    // A grid cell is a fixed box; its text is not. Capped so a
+    // large system scale cannot paint outside the cell.
+    return ClampedTextScale(
+      child: InteractiveCardShell(
+        pressedScale: 0.96,
+        onTap: onTap,
+        builder: (context, hovered, pressed) => RepaintBoundary(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                    // Poster / Gradient Box
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              primaryColor.withValues(alpha: 0.85),
+                              secondaryColor.withValues(alpha: 0.70),
+                              AppColors.bar,
+                            ],
+                            stops: const [0.0, 0.55, 1.0],
                           ),
-                        ],
-                        border: Border.all(
-                          color: hovered
-                              ? primaryColor.withValues(alpha: 0.8)
-                              : AppColors.inkAlpha(0.12),
-                          width: hovered ? 1.5 : 1.0,
+                          boxShadow: [
+                            BoxShadow(
+                              color: hovered
+                                  ? primaryColor.withValues(alpha: 0.45)
+                                  : Colors.black.withValues(alpha: 0.35),
+                              blurRadius: hovered ? 20 : 10,
+                              offset: Offset(0, hovered ? 8 : 4),
+                            ),
+                          ],
+                          border: Border.all(
+                            color: hovered
+                                ? primaryColor.withValues(alpha: 0.8)
+                                : AppColors.inkAlpha(0.12),
+                            width: hovered ? 1.5 : 1.0,
+                          ),
                         ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            // Ambient Pattern Lines / Glow
-                            Positioned(
-                              top: -20,
-                              right: -20,
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.inkAlpha(0.1),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // Ambient Pattern Lines / Glow
+                              Positioned(
+                                top: -20,
+                                right: -20,
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.inkAlpha(0.1),
+                                  ),
                                 ),
                               ),
-                            ),
 
-                            // Channel Icon / Logo / Short text
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(14, 28, 14, 16),
-                                child: SizedBox(
-                                  width: 130,
-                                  height: 100,
-                                  child: ch.iconUrl != null && ch.iconUrl!.isNotEmpty
-                                      ? CachedNetworkImage(
-                                          imageUrl: ch.iconUrl!,
-                                          fit: BoxFit.contain,
-                                          placeholder: (_, _) => Center(
-                                            child: SizedBox(
-                                              width: 24,
-                                              height: 24,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: AppColors.inkAlpha(0.3),
+                              // Channel Icon / Logo / Short text
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(14, 28, 14, 16),
+                                  child: SizedBox(
+                                    width: 130,
+                                    height: 100,
+                                    child: ch.iconUrl != null && ch.iconUrl!.isNotEmpty
+                                        ? CachedNetworkImage(
+                                            imageUrl: ch.iconUrl!,
+                                            fit: BoxFit.contain,
+                                            placeholder: (_, _) => Center(
+                                              child: SizedBox(
+                                                width: 24,
+                                                height: 24,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: AppColors.inkAlpha(0.3),
+                                                ),
                                               ),
                                             ),
+                                            errorWidget: (_, _, _) => _buildShortBadge(ch),
+                                          )
+                                        // The badge is a fixed-size box inside a
+                                        // poster that shrinks with the cell. At a
+                                        // large scale its text wraps and paints
+                                        // past the box, so it scales down to fit
+                                        // instead of overflowing.
+                                        : FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: _buildShortBadge(ch),
                                           ),
-                                          errorWidget: (_, _, _) => _buildShortBadge(ch),
-                                        )
-                                      : _buildShortBadge(ch),
-                                ),
-                              ),
-                            ),
-
-                            // Live Indicator Top-Left
-                            if (IptvSettings.showHdBadge.value)
-                              Positioned(
-                                top: 10,
-                                left: 10,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.65),
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: const Color(0xFFFF3B30).withValues(alpha: 0.6),
-                                      width: 0.8,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFFF3B30),
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Color(0xFFFF3B30),
-                                              blurRadius: 4,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        'LIVE',
-                                        style: TextStyle(
-                                          color: AppColors.ink,
-                                          fontSize: 9.5,
-                                          fontWeight: FontWeight.w900,
-                                          letterSpacing: 0.6,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                 ),
                               ),
 
-                            // Category Tag Top-Right
-                            if (IptvSettings.showCategoryTag.value)
-                              Positioned(
-                                top: 10,
-                                right: 10,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.inkAlpha(0.15),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    ch.category,
-                                    style: TextStyle(
-                                      color: AppColors.inkMuted,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                            // Favorite toggle, bottom-right
-                            Positioned(
-                              bottom: 4,
-                              right: 4,
-                              child: ValueListenableBuilder<List<FavoriteChannel>>(
-                                valueListenable: FavoriteChannelsService.items,
-                                builder: (context, _, _) {
-                                  final isFav = FavoriteChannelsService.isFavorite(ch.id);
-                                  return DecoratedBox(
+                              // Live Indicator Top-Left
+                              if (IptvSettings.showHdBadge.value)
+                                Positioned(
+                                  top: 10,
+                                  left: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.5),
-                                      shape: BoxShape.circle,
+                                      color: Colors.black.withValues(alpha: 0.65),
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: const Color(0xFFFF3B30).withValues(alpha: 0.6),
+                                        width: 0.8,
+                                      ),
                                     ),
-                                    child: LikeButton(
-                                      isLiked: isFav,
-                                      onTap: () => FavoriteChannelsService.toggle(ch.id),
-                                      style: LikeButtonStyle.icon,
-                                      size: 15,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-
-                            // Gloss overlay on hover
-                            if (hovered)
-                              Positioned.fill(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        AppColors.inkAlpha(0.12),
-                                        Colors.transparent,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Container(
+                                          width: 6,
+                                          height: 6,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFFF3B30),
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Color(0xFFFF3B30),
+                                                blurRadius: 4,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'LIVE',
+                                          style: TextStyle(
+                                            color: AppColors.ink,
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 0.6,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ),
+
+                              // Category Tag Top-Right
+                              if (IptvSettings.showCategoryTag.value)
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.inkAlpha(0.15),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      ch.category,
+                                      style: TextStyle(
+                                        color: AppColors.inkMuted,
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                              // Favorite toggle, bottom-right
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: ValueListenableBuilder<List<FavoriteChannel>>(
+                                  valueListenable: FavoriteChannelsService.items,
+                                  builder: (context, _, _) {
+                                    final isFav = FavoriteChannelsService.isFavorite(ch.id);
+                                    return DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.5),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: LikeButton(
+                                        isLiked: isFav,
+                                        onTap: () => FavoriteChannelsService.toggle(ch.id),
+                                        style: LikeButtonStyle.icon,
+                                        size: 15,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                          ],
+
+                              // Gloss overlay on hover
+                              if (hovered)
+                                Positioned.fill(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [
+                                          AppColors.inkAlpha(0.12),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // Title
-                  const SizedBox(height: 8),
-                  Text(
-                    ch.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.2,
-                      color: AppColors.ink,
+                    // Title
+                    const SizedBox(height: 8),
+                    Text(
+                      ch.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.2,
+                        color: AppColors.ink,
+                      ),
                     ),
-                  ),
 
-                  // Category & Stream tag
-                  const SizedBox(height: 3),
-                  Row(
-                    children: [
-                      if (IptvSettings.showCategoryTag.value) ...[
-                        Text(
-                          ch.category,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.inkAlpha(0.52),
-                            fontWeight: FontWeight.w600,
+                    // Category & Stream tag
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        if (IptvSettings.showCategoryTag.value) ...[
+                          // Both legs flex: the clamp keeps them legible at
+                          // ordinary settings, this stops them painting
+                          // outside the cell whatever scale they are handed.
+                          Flexible(
+                            child: Text(
+                              ch.category,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.inkAlpha(0.52),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          child: Container(
-                            width: 3.5,
-                            height: 3.5,
-                            decoration: BoxDecoration(
-                              color: AppColors.inkAlpha(0.3),
-                              shape: BoxShape.circle,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 6),
+                            child: Container(
+                              width: 3.5,
+                              height: 3.5,
+                              decoration: BoxDecoration(
+                                color: AppColors.inkAlpha(0.3),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        ],
+                        Flexible(
+                          child: Text(
+                            'HD Live',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: primaryColor,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ],
-                      Text(
-                        'HD Live',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: primaryColor,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+          ),
         ),
       ),
     );

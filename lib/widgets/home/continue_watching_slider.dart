@@ -1,3 +1,4 @@
+import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -171,12 +172,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                 // scale is capped here instead: the header still responds
                 // to a larger setting, just not past the box it lives in.
                 // Same 1.3 ceiling the nav bar and the pill rows use.
-                child: MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: MediaQuery.textScalerOf(
-                      context,
-                    ).clamp(maxScaleFactor: 1.3),
-                  ),
+                child: ClampedTextScale(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 18),
                     child: Row(
@@ -729,12 +725,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                 // the app's fixed-height chrome uses. Measured: the two
                 // lines plus their 8px padding fit 60px up to about 1.75x,
                 // so 1.3 keeps real slack rather than sitting on the edge.
-                MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: MediaQuery.textScalerOf(
-                      context,
-                    ).clamp(maxScaleFactor: 1.3),
-                  ),
+                ClampedTextScale(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                     child: Column(
