@@ -34,7 +34,8 @@ import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/skip_segments_service.dart';
-import '../../widgets/player/player_aspect_menu.dart';
+import '../../widgets/player/player_aspect_menu.dart'
+    show PlayerAspectMenu, aspectLabelFor;
 import '../../widgets/player/player_audio_menu.dart';
 import '../../widgets/player/player_subtitle_menu.dart';
 import '../../widgets/player/player_sub_style_modal.dart';
@@ -128,6 +129,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   Timer? _volumeHudTimer;
   double _playbackRate = 1.0;
   BoxFit _videoFit = BoxFit.contain;
+
+  /// The aspect ratio forced onto the picture, or null when it keeps its own
+  /// shape (`_videoFit == BoxFit.contain`, the "Original" option). Forcing a
+  /// ratio and picking a fit are mutually exclusive states: choosing one
+  /// clears the other.
+  double? _forcedAspectRatio;
   List<PlayerAudioTrack> _audioTracks = [];
   int _selectedAudioTrackIndex = 0;
   double _audioDelaySec = 0.0;
@@ -1946,12 +1953,24 @@ class _PlayerScreenState extends State<PlayerScreen>
                   child: ValueListenableBuilder<int>(
                     valueListenable: PlayerSettings.changeNotifier,
                     builder: (context, _, __) {
-                      return mk.Video(
+                      final video = mk.Video(
                         controller: _videoController,
                         fit: _videoFit,
                         controls: mk.NoVideoControls,
                         subtitleViewConfiguration:
                             PlayerSettings.getSubtitleViewConfiguration(),
+                      );
+                      // A forced ratio wraps the video in an AspectRatio:
+                      // the picture is letterboxed into the chosen shape and
+                      // BoxFit.contain inside it keeps the pixels whole.
+                      // Null ratio means the video fills the box on its own
+                      // terms -- that is the "Original" option.
+                      if (_forcedAspectRatio == null) return video;
+                      return Center(
+                        child: AspectRatio(
+                          aspectRatio: _forcedAspectRatio!,
+                          child: video,
+                        ),
                       );
                     },
                   ),
@@ -2226,26 +2245,6 @@ class _PlayerScreenState extends State<PlayerScreen>
               onOpenStyleBar: () {
                 setState(() => _activeMenu = 'style');
               },
-              onOpenTextSync: () {
-                if (_selectedEmbeddedSubtitleIndex != null ||
-                    _currentSubtitlePath == null ||
-                    _currentCues.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Speech sync requires an external subtitle file.',
-                      ),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  return;
-                }
-                setState(() {
-                  _activeMenu = null;
-                  _menuParent = null;
-                  _showTextSyncOverlay = true;
-                });
-              },
               onClose: () => setState(() {
                 _activeMenu = null;
                 _menuParent = null;
@@ -2303,11 +2302,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           PlayerMenuAnchor(
             child: PlayerSettingsMenu(
               currentRate: _playbackRate,
-              aspectLabel: switch (_videoFit) {
-                BoxFit.cover => 'Fill',
-                BoxFit.fill => 'Stretch',
-                _ => 'Fit',
-              },
+              aspectLabel: aspectLabelFor(_videoFit, _forcedAspectRatio),
               audioLabel: _selectedAudioTrackLabel,
               // Always offered: the menu is not just a track list, it also
               // holds the Audio Sync Offset control, and with the transport
@@ -2359,9 +2354,20 @@ class _PlayerScreenState extends State<PlayerScreen>
             child: PlayerAspectMenu(
               onBack: _backToSettings,
               currentFit: _videoFit,
-              subtitleScale: _subtitleScale,
-              onFitSelected: (fit) => setState(() => _videoFit = fit),
-              onSubtitleScaleChanged: _setSubtitleScale,
+              currentForcedRatio: _forcedAspectRatio,
+              onFitSelected: (fit) => setState(() {
+                _videoFit = fit;
+                // A fit and a forced ratio are two answers to the same
+                // question, so picking one clears the other.
+                _forcedAspectRatio = null;
+              }),
+              onRatioSelected: (ratio) => setState(() {
+                _forcedAspectRatio = ratio;
+                // Contain is the fit that respects a forced ratio: cover
+                // would crop the reshaped frame and fill would distort it,
+                // either of which defeats the point of forcing the shape.
+                _videoFit = BoxFit.contain;
+              }),
               onClose: () => setState(() {
                 _activeMenu = null;
                 _menuParent = null;

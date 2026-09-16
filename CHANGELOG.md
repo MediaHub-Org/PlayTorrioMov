@@ -5,6 +5,46 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **The player's subtitle and picture controls are reorganised.** Six things
+  were wrong with them, and all six came from the same cause: controls
+  grouped by where there was space rather than by what they belong to.
+  - **Subtitle size was in the Aspect Ratio menu.** A "Subtitle Size Scale"
+    slider sat under the aspect list, where nobody looking for subtitle
+    settings would find it. It is gone from there; the same control already
+    existed in Subtitle Appearance as "Scale Multiplier", so the aspect menu
+    was a second copy of it, not a missing one.
+  - **The language flags were wrong.** Both the subtitle and audio menus
+    matched ISO code substrings against what is actually a display name, so
+    "Spanish" drew the globe (no `es`/`spa` substring in it) and "Chinese"
+    drew the Indian flag (`hi` is inside `Chinese`). The two menus also
+    disagreed with each other on the same language. One shared
+    `languageFlag` keyed on the exact name replaces both.
+  - **"Speech Text Sync" is gone.** It adjusted subtitle timing by following
+    the spoken dialogue, which the name did not say and almost nobody
+    understood. The plain delay control beside it already answers "the
+    subtitles are out of sync", which is the only thing a viewer is trying
+    to fix. The overlay it opened is still in the code, unwired, in case it
+    comes back under a name that explains itself.
+  - **Aspect Ratio now has an Original option, and says so.** The first
+    entry was "Fit to screen (Contain)", which read as a mode rather than an
+    answer to "show it the way it was shot". It is now "Original (keeps the
+    source shape)" -- which is what `BoxFit.contain` does. Two forced ratios
+    join it, 16:9 and 4:3, for the shapes old content is most often trapped
+    in; a 4:3 film mis-tagged as 16:9 shows squeezed in Original and
+    forcing the ratio re-squares it.
+  - **Menus no longer cover the transport bar's buttons on a phone.** The
+    popover's bottom clearance was 76px against a bar that measures about
+    126px, so the subtitle and settings icons were hidden behind the open
+    menu and the first tap "missed" what the user could see. It is sized
+    from the bar now.
+  - **Subtitle Appearance stays a pop-up, deliberately.** Inlining it into
+    the subtitle panel was considered and rejected: the editor is a
+    five-tab, live-preview surface that needs most of the screen, and
+    shrinking it into a corner of the track list would have made it worse
+    to use in order to make it one tap closer. It is one tap from the
+    subtitle panel's own header, which is where it was.
+
 ### Fixed
 - **Two `return` statements that skipped their own `catch`.** Both were
   `return <Future>` inside a `try` without `await`, which completes the try

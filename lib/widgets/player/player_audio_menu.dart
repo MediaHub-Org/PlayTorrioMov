@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
+import 'language_flag.dart';
 import 'player_glass.dart';
 
 class PlayerAudioTrack {
@@ -42,24 +43,11 @@ class PlayerAudioMenu extends StatelessWidget {
     this.onBack,
   });
 
-  String _getLanguageEmoji(String? lang) {
-    if (lang == null || lang.isEmpty) return '🔊';
-    final l = lang.toLowerCase();
-    if (l.contains('en') || l.contains('eng')) return '🇺🇸';
-    if (l.contains('ar') || l.contains('ara')) return '🇸🇦';
-    if (l.contains('es') || l.contains('spa')) return '🇪🇸';
-    if (l.contains('fr') || l.contains('fre') || l.contains('fra')) return '🇫🇷';
-    if (l.contains('de') || l.contains('ger') || l.contains('deu')) return '🇩🇪';
-    if (l.contains('it') || l.contains('ita')) return '🇮🇹';
-    if (l.contains('ja') || l.contains('jpn')) return '🇯🇵';
-    if (l.contains('ko') || l.contains('kor')) return '🇰🇷';
-    if (l.contains('zh') || l.contains('chi') || l.contains('zho')) return '🇨🇳';
-    if (l.contains('ru') || l.contains('rus')) return '🇷🇺';
-    if (l.contains('pt') || l.contains('por')) return '🇧🇷';
-    if (l.contains('hi') || l.contains('hin')) return '🇮🇳';
-    if (l.contains('tr') || l.contains('tur')) return '🇹🇷';
-    return '🌐';
-  }
+  // Replaces the per-menu `_getLanguageEmoji` that matched ISO code
+  // substrings against a display name -- which rendered "Spanish" as the
+  // globe and "Chinese" as the Indian flag. See language_flag.dart.
+  String _flag(String? lang) =>
+      (lang == null || lang.isEmpty) ? '🔊' : languageFlag(lang);
 
   String? _getTrackSubtitle(PlayerAudioTrack track) {
     final parts = <String>[];
@@ -210,7 +198,7 @@ class PlayerAudioMenu extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
-                                  _getLanguageEmoji(track.language),
+                                  _flag(track.language),
                                   style: const TextStyle(fontSize: 15),
                                 ),
                                 const SizedBox(width: 8),

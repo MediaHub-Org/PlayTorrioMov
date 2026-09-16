@@ -4,23 +4,71 @@ import 'player_glass.dart';
 class AspectOption {
   final String id;
   final String label;
-  final BoxFit fit;
 
-  const AspectOption({required this.id, required this.label, required this.fit});
+  /// The [BoxFit] handed to the video widget. Null when this option forces a
+  /// ratio instead — see [forcedRatio].
+  final BoxFit? fit;
+
+  /// The aspect ratio (width / height) the picture is forced into, when this
+  /// option is a ratio override rather than a fit mode. Null for the fit
+  /// modes, which keep whatever shape the source has.
+  final double? forcedRatio;
+
+  const AspectOption.fit(this.id, this.label, this.fit) : forcedRatio = null;
+
+  const AspectOption.ratio(this.id, this.label, this.forcedRatio) : fit = null;
 }
 
 const List<AspectOption> aspectOptions = [
-  AspectOption(id: 'fit', label: 'Fit to screen (Contain)', fit: BoxFit.contain),
-  AspectOption(id: 'cover', label: 'Fill screen (Crop/Zoom)', fit: BoxFit.cover),
-  AspectOption(id: 'fill', label: 'Stretch to fill', fit: BoxFit.fill),
+  // BoxFit.contain *is* the original shape: it scales the picture to the
+  // largest size that fits whole, preserving the source's own aspect ratio
+  // and letterboxing the rest. It was labelled "Fit to screen (Contain)"
+  // before, which read as a mode rather than an answer to "show it the way
+  // it was shot" -- the label now says that.
+  AspectOption.fit('original', 'Original (keeps the source shape)', BoxFit.contain),
+  AspectOption.fit('cover', 'Fill screen (crops the edges)', BoxFit.cover),
+  AspectOption.fit('fill', 'Stretch to fill (distorts)', BoxFit.fill),
+  // Ratio overrides, for the two shapes old content is most often trapped
+  // in. A 4:3 film mis-tagged as 16:9 shows squeezed in Original; forcing
+  // the ratio re-squares it. Done by wrapping the video in an AspectRatio,
+  // not by a BoxFit -- BoxFit has no "force this shape" mode.
+  AspectOption.ratio('16:9', 'Force 16:9 (widescreen)', 16 / 9),
+  AspectOption.ratio('4:3', 'Force 4:3 (classic TV)', 4 / 3),
 ];
 
+/// The human label for the current picture mode, for the settings row.
+String aspectLabelFor(BoxFit fit, double? forcedRatio) {
+  if (forcedRatio != null) {
+    for (final opt in aspectOptions) {
+      if (opt.forcedRatio != null &&
+          (opt.forcedRatio! - forcedRatio).abs() < 0.001) {
+        return opt.label
+            .replaceAll('Force ', '')
+            .replaceAll(' (widescreen)', '')
+            .replaceAll(' (classic TV)', '');
+      }
+    }
+  }
+  return switch (fit) {
+    BoxFit.cover => 'Fill',
+    BoxFit.fill => 'Stretch',
+    _ => 'Original',
+  };
+}
+
 /// Aspect ratio and picture popover menu.
+///
+/// Owns only the picture's shape. Subtitle size used to live here too, a
+/// slider under the aspect list, which is where nobody looking for subtitle
+/// settings would find it -- it moved into the subtitle appearance panel.
 class PlayerAspectMenu extends StatelessWidget {
   final BoxFit currentFit;
-  final double subtitleScale;
+
+  /// The ratio currently forced, or null when the picture keeps its own
+  /// shape. Used both to tick the right row and to untick the fit rows.
+  final double? currentForcedRatio;
   final ValueChanged<BoxFit> onFitSelected;
-  final ValueChanged<double> onSubtitleScaleChanged;
+  final ValueChanged<double> onRatioSelected;
   final VoidCallback onClose;
 
   /// Back to the settings root, when this menu was stepped into from
@@ -30,9 +78,9 @@ class PlayerAspectMenu extends StatelessWidget {
   const PlayerAspectMenu({
     super.key,
     required this.currentFit,
-    required this.subtitleScale,
+    this.currentForcedRatio,
     required this.onFitSelected,
-    required this.onSubtitleScaleChanged,
+    required this.onRatioSelected,
     required this.onClose,
     this.onBack,
   });
@@ -58,13 +106,20 @@ class PlayerAspectMenu extends StatelessWidget {
           // Aspect Options List
           Column(
             children: aspectOptions.map((opt) {
-              final isSelected = currentFit == opt.fit;
+              final isSelected = opt.fit != null
+                  ? (currentForcedRatio == null && currentFit == opt.fit)
+                  : ((currentForcedRatio ?? 0) - (opt.forcedRatio ?? 0)).abs() <
+                      0.001;
               return Material(
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(10),
                   onTap: () {
-                    onFitSelected(opt.fit);
+                    if (opt.fit != null) {
+                      onFitSelected(opt.fit!);
+                    } else {
+                      onRatioSelected(opt.forcedRatio!);
+                    }
                     onClose();
                   },
                   child: Container(
@@ -114,67 +169,6 @@ class PlayerAspectMenu extends StatelessWidget {
                 ),
               );
             }).toList(),
-          ),
-
-          const SizedBox(height: 12),
-          const Divider(color: PlayerTheme.edgeSoft, height: 1),
-          const SizedBox(height: 12),
-
-          // Subtitle Size Scaling Slider
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Both halves flex: the label and the value both grow with
-                // the scale, and neither yielded -- 590px past the card at
-                // 3x, on the row that names the control and reads its value.
-                const Flexible(
-                  child: Text(
-                    'Subtitle Size Scale',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: PlayerTheme.inkMuted,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    '${subtitleScale.toStringAsFixed(1)}×',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: const TextStyle(
-                      color: PlayerTheme.ink,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SliderTheme(
-            data: SliderThemeData(
-              activeTrackColor: PlayerTheme.accent,
-              inactiveTrackColor: Colors.white.withValues(alpha: 0.15),
-              thumbColor: Colors.white,
-              overlayColor: PlayerTheme.accent.withValues(alpha: 0.2),
-              trackHeight: 4,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-            ),
-            child: Slider(
-              value: subtitleScale,
-              min: 0.5,
-              max: 2.5,
-              divisions: 20,
-              onChanged: onSubtitleScaleChanged,
-            ),
           ),
         ],
       ),

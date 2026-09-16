@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
+import 'language_flag.dart';
 import 'player_glass.dart';
 
 /// Full-featured subtitle selection, search, and timing menu.
@@ -22,7 +23,6 @@ class PlayerSubtitleMenu extends StatefulWidget {
   final VoidCallback onToggleOff;
   final VoidCallback onOpenSyncBar;
   final VoidCallback onOpenStyleBar;
-  final VoidCallback onOpenTextSync;
   final VoidCallback onClose;
 
   /// Back to the settings root, when this menu was stepped into from
@@ -47,7 +47,6 @@ class PlayerSubtitleMenu extends StatefulWidget {
     required this.onToggleOff,
     required this.onOpenSyncBar,
     required this.onOpenStyleBar,
-    required this.onOpenTextSync,
     required this.onClose,
     this.onBack,
   });
@@ -146,23 +145,10 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     }
   }
 
-  String _getLanguageEmoji(String lang) {
-    final l = lang.toLowerCase();
-    if (l.contains('en') || l.contains('eng')) return '🇺🇸';
-    if (l.contains('ar') || l.contains('ara')) return '🇸🇦';
-    if (l.contains('es') || l.contains('spa')) return '🇪🇸';
-    if (l.contains('fr') || l.contains('fre')) return '🇫🇷';
-    if (l.contains('de') || l.contains('ger')) return '🇩🇪';
-    if (l.contains('it') || l.contains('ita')) return '🇮🇹';
-    if (l.contains('pt') || l.contains('por')) return '🇧🇷';
-    if (l.contains('ru') || l.contains('rus')) return '🇷🇺';
-    if (l.contains('ja') || l.contains('jpn')) return '🇯🇵';
-    if (l.contains('ko') || l.contains('kor')) return '🇰🇷';
-    if (l.contains('zh') || l.contains('chi')) return '🇨🇳';
-    if (l.contains('hi') || l.contains('hin')) return '🇮🇳';
-    if (l.contains('tr') || l.contains('tur')) return '🇹🇷';
-    return '🌐';
-  }
+  // Replaces the per-menu `_getLanguageEmoji` that matched ISO code
+  // substrings against a display name -- which is why "Spanish" drew the
+  // globe and "Chinese" drew the Indian flag. See language_flag.dart.
+  String _flag(String lang) => languageFlag(lang);
 
   List<SubtitleVariant> _getFilteredVariants() {
     List<SubtitleVariant> all = [];
@@ -347,25 +333,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         widget.onOpenStyleBar();
                       },
                     ),
-                    const SizedBox(width: 3),
-
-                    // Text Sync to Speech (Actor Dialogue Listening Sync - external subtitles only)
-                    if (widget.selectedEmbeddedIndex == null) ...[
-                      PlayerIconButton(
-                        size: buttonSize,
-                        iconSize: iconSize,
-                        icon: const Icon(Icons.text_fields_rounded),
-                        tooltip: 'Speech Text Sync',
-                        onPressed: () {
-                          widget.onClose();
-                          widget.onOpenTextSync();
-                        },
-                      ),
-                      const SizedBox(width: 4),
-                    ],
                     // No close button: the full-screen barrier behind every
                     // open menu dismisses on a tap anywhere off the panel,
                     // and the back arrow returns to the settings root.
+                    //
+                    // "Speech Text Sync" was here too, and is gone. It
+                    // adjusted subtitle timing by following the spoken
+                    // dialogue, which almost nobody understood from the name
+                    // -- and the plain delay control next to it already
+                    // answers "the subtitles are out of sync", which is the
+                    // only thing a viewer is actually trying to fix.
                   ],
                 ),
               ],
@@ -472,7 +449,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                   padding: const EdgeInsets.only(right: 6),
                   child: _buildLanguagePill(
                     label: g.language,
-                    emoji: _getLanguageEmoji(g.language),
+                    emoji: _flag(g.language),
                     count: g.variants.length,
                     isSelected: isSelected,
                     onTap: () => setState(() => _selectedLanguage = g.language),
@@ -776,7 +753,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         ),
                         child: Row(
                           children: [
-                            Text(_getLanguageEmoji(g.language), style: const TextStyle(fontSize: 11.5)),
+                            Text(_flag(g.language), style: const TextStyle(fontSize: 11.5)),
                             const SizedBox(width: 7),
                             Expanded(
                               child: Text(
@@ -932,7 +909,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           children: [
                             if (track.language != null && track.language!.isNotEmpty) ...[
                               Text(
-                                _getLanguageEmoji(track.language!),
+                                _flag(track.language!),
                                 style: const TextStyle(fontSize: 12),
                               ),
                               const SizedBox(width: 6),
@@ -1130,7 +1107,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           children: [
                             if (variant.language.isNotEmpty) ...[
                               Text(
-                                _getLanguageEmoji(variant.language),
+                                _flag(variant.language),
                                 style: const TextStyle(fontSize: 12),
                               ),
                               const SizedBox(width: 5),

@@ -128,11 +128,19 @@ class PlayerMenuAnchor extends StatelessWidget {
 
   /// Clearance for the transport bar the popover sits above, plus whatever
   /// the system puts below it (gesture bar, home indicator).
+  ///
+  /// Measured against the bar itself rather than guessed: on a compact
+  /// (phone) screen the bar is 32px top padding + 36px seek row + 8px gap +
+  /// 36px buttons + 14px bottom padding -- about 126px. The old 76 left the
+  /// bottom of a menu card sitting on top of the subtitle and settings
+  /// buttons, so the icons were hidden while the menu was open and the
+  /// first tap "missed" what the user could see. The wide-screen figure is
+  /// the same bar at its larger sizes.
   static double bottomInset(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final isShort = size.height < 500;
     final isCompact = size.width < 680;
-    return (isShort ? 46.0 : (isCompact ? 76.0 : 96.0)) +
+    return (isShort ? 46.0 : (isCompact ? 132.0 : 150.0)) +
         MediaQuery.paddingOf(context).bottom;
   }
 

@@ -76,47 +76,6 @@ class _SubSyncBarState extends State<SubSyncBar> {
             child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Left: Speech Text Sync button
-            if (widget.onEnterTextSync != null) ...[
-              Material(
-                color: widget.isTextSyncAvailable
-                    ? PlayerTheme.accent.withValues(alpha: 0.18)
-                    : Colors.white.withValues(alpha: 0.04),
-                borderRadius: BorderRadius.circular(10),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: widget.isTextSyncAvailable ? widget.onEnterTextSync : null,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.text_fields_rounded,
-                          size: 15,
-                          color: widget.isTextSyncAvailable
-                              ? PlayerTheme.accent
-                              : PlayerTheme.inkSubtle,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Text Sync',
-                          style: TextStyle(
-                            color: widget.isTextSyncAvailable
-                                ? PlayerTheme.ink
-                                : PlayerTheme.inkSubtle,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-            ],
-
             // Center: Stepper Buttons & Display Pill
             Container(
               padding: const EdgeInsets.all(3),

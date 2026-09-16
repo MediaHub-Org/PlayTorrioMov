@@ -1286,11 +1286,14 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                     child: PlayerAspectMenu(
                       onBack: () => setState(() => _activeMenu = 'settings'),
                       currentFit: _videoFit,
-                      subtitleScale: PlayerSettings.subScale.value,
                       onFitSelected: (fit) => _setVideoFit(fit),
-                      onSubtitleScaleChanged: (scale) {
-                        PlayerSettings.setSubScale(scale, player: _player);
-                      },
+                      onRatioSelected: (ratio) => setState(() {
+                        // Live TV keeps the picture whole: a forced ratio
+                        // would letterbox a feed that is already the shape
+                        // it is, and there is no "Original" to return to
+                        // that the fit modes do not already cover.
+                        _setVideoFit(BoxFit.contain);
+                      }),
                       onClose: () => setState(() => _activeMenu = null),
                     ),
                   ),

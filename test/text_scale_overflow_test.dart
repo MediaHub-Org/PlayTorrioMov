@@ -402,9 +402,9 @@ void main() {
               PlayerMenuAnchor(
                 child: PlayerAspectMenu(
                   currentFit: BoxFit.contain,
-                  subtitleScale: 1.0,
+                  currentForcedRatio: null,
                   onFitSelected: (_) {},
-                  onSubtitleScaleChanged: (_) {},
+                  onRatioSelected: (_) {},
                   onClose: () {},
                 ),
               ),
