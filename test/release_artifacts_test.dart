@@ -111,7 +111,7 @@ void main() {
       '.github/workflows/build.yml',
       '.github/workflows/pr-checks.yml',
     ]) {
-      test('$file', () {
+      test(file, () {
         final source = File(file).readAsStringSync();
         final uses = RegExp(r'uses:\s*([\w.-]+/[\w.-]+(?:/[\w.-]+)?)@v(\d+)')
             .allMatches(source);
