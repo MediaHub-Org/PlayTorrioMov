@@ -56,7 +56,7 @@ class _CollectionPageState extends State<CollectionPage> {
       tabs: [
         for (final section in LibrarySection.values)
           LibraryTab(
-            label: section.label,
+            label: section.localizedLabel(context),
             icon: section.icon,
             builder: (context) => switch (section) {
               LibrarySection.collections => _buildCollectionsTab(),
@@ -90,7 +90,7 @@ class _CollectionPageState extends State<CollectionPage> {
             final cards = <Widget>[
               for (final shelf in LibraryShelf.values)
                 CollectionCard(
-                  title: shelf.label,
+                  title: shelf.localizedLabel(context),
                   subtitle: _countLabel(
                     items.where((i) => switch (shelf) {
                       LibraryShelf.liked => i.isLiked,

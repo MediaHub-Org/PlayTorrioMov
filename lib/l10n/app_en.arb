@@ -50,5 +50,60 @@
   },
   "appearanceLanguageTitle": "App Language",
   "appearanceLanguageSubtitle": "Translates the app's own menus and buttons. Movie and show titles are a separate setting.",
-  "appearanceLanguageSystem": "System default"
+  "appearanceLanguageSystem": "System default",
+
+  "libraryTabCollections": "Collections",
+  "@libraryTabCollections": {"description": "Library tab: saved titles and the user's own collections"},
+  "libraryTabContinue": "Continue",
+  "@libraryTabContinue": {"description": "Library tab: part-watched titles"},
+  "libraryTabDownloads": "Downloads",
+  "@libraryTabDownloads": {"description": "Library tab: titles available offline"},
+
+  "libraryShelfLiked": "Liked",
+  "@libraryShelfLiked": {"description": "Built-in shelf card: favourited titles"},
+  "libraryShelfWatchlist": "Watchlist",
+  "@libraryShelfWatchlist": {"description": "Built-in shelf card: kept to watch later"},
+  "libraryShelfWatched": "Watched",
+  "@libraryShelfWatched": {"description": "Built-in shelf card: already seen"},
+
+  "libraryEmptyLikedTitle": "Nothing liked yet",
+  "libraryEmptyLikedSubtitle": "Tap the heart on anything and it lands here.",
+  "libraryEmptyWatchlistTitle": "Nothing on your watchlist",
+  "libraryEmptyWatchlistSubtitle": "Add something to watch later and it lands here.",
+  "libraryEmptyWatchedTitle": "Nothing marked watched yet",
+  "libraryEmptyWatchedSubtitle": "Mark something watched and it lands here.",
+
+  "libraryFilterMovies": "Movies",
+  "@libraryFilterMovies": {"description": "Library type filter chip"},
+  "libraryFilterSeries": "Series",
+  "@libraryFilterSeries": {"description": "Library type filter chip"},
+  "libraryFilterAnime": "Anime",
+  "@libraryFilterAnime": {"description": "Library type filter chip"},
+  "libraryFilterLiveTv": "Live TV",
+  "@libraryFilterLiveTv": {"description": "Library type filter chip"},
+
+  "librarySortBy": "Sort by",
+  "librarySortRecent": "Recently Added",
+  "librarySortTitle": "Title (A-Z)",
+  "librarySortYear": "Release Year",
+
+  "libraryReorder": "Reorder",
+  "libraryReorderDone": "Done",
+  "libraryCollectionOptions": "Collection options",
+  "libraryRename": "Rename",
+  "libraryDelete": "Delete",
+  "libraryCancel": "Cancel",
+  "librarySave": "Save",
+  "libraryRemove": "Remove",
+  "libraryRenameCollection": "Rename collection",
+  "libraryCollectionNameHint": "Collection name",
+  "libraryDeleteCollectionConfirm": "Delete {name}?",
+  "@libraryDeleteCollectionConfirm": {
+    "description": "Confirmation title when deleting a collection",
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "libraryCollectionGoneTitle": "Collection gone",
+  "libraryEmptyCollectionTitle": "Nothing in here yet",
+  "libraryNoLikedChannelsTitle": "No liked channels yet",
+  "libraryNoMatchingItems": "No matching items"
 }

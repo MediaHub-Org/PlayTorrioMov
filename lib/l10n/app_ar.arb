@@ -36,5 +36,46 @@
   "appearanceTextSizePercent": "{percent}% من الحجم الافتراضي، إضافةً إلى إعداد جهازك",
   "appearanceLanguageTitle": "لغة التطبيق",
   "appearanceLanguageSubtitle": "يترجم قوائم التطبيق وأزراره. عناوين الأفلام والمسلسلات إعداد منفصل.",
-  "appearanceLanguageSystem": "افتراضي النظام"
+  "appearanceLanguageSystem": "افتراضي النظام",
+
+  "libraryTabCollections": "المجموعات",
+  "libraryTabContinue": "متابعة",
+  "libraryTabDownloads": "التنزيلات",
+
+  "libraryShelfLiked": "المفضلة",
+  "libraryShelfWatchlist": "قائمة المشاهدة",
+  "libraryShelfWatched": "المشاهدة",
+
+  "libraryEmptyLikedTitle": "لا توجد مفضلات بعد",
+  "libraryEmptyLikedSubtitle": "اضغط على القلب في أي عنوان وسيظهر هنا.",
+  "libraryEmptyWatchlistTitle": "قائمة المشاهدة فارغة",
+  "libraryEmptyWatchlistSubtitle": "أضف شيئًا لمشاهدته لاحقًا وسيظهر هنا.",
+  "libraryEmptyWatchedTitle": "لم تُعلّم أي شيء كمشاهد بعد",
+  "libraryEmptyWatchedSubtitle": "علّم أي شيء كمشاهد وسيظهر هنا.",
+
+  "libraryFilterMovies": "أفلام",
+  "libraryFilterSeries": "مسلسلات",
+  "libraryFilterAnime": "أنمي",
+  "libraryFilterLiveTv": "بث مباشر",
+
+  "librarySortBy": "ترتيب حسب",
+  "librarySortRecent": "أُضيف حديثًا",
+  "librarySortTitle": "العنوان (أ-ي)",
+  "librarySortYear": "سنة الإصدار",
+
+  "libraryReorder": "إعادة الترتيب",
+  "libraryReorderDone": "تم",
+  "libraryCollectionOptions": "خيارات المجموعة",
+  "libraryRename": "إعادة تسمية",
+  "libraryDelete": "حذف",
+  "libraryCancel": "إلغاء",
+  "librarySave": "حفظ",
+  "libraryRemove": "إزالة",
+  "libraryRenameCollection": "إعادة تسمية المجموعة",
+  "libraryCollectionNameHint": "اسم المجموعة",
+  "libraryDeleteCollectionConfirm": "حذف {name}؟",
+  "libraryCollectionGoneTitle": "المجموعة لم تعد موجودة",
+  "libraryEmptyCollectionTitle": "لا يوجد شيء هنا بعد",
+  "libraryNoLikedChannelsTitle": "لا توجد قنوات مفضلة بعد",
+  "libraryNoMatchingItems": "لا توجد نتائج"
 }

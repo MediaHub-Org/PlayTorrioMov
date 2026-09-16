@@ -1,50 +1,72 @@
 # Roadmap — PlayTorrioMov
 
-**What is left to do.** Shipped work is in [CHANGELOG.md](../CHANGELOG.md)
-(1.8.1+34 covers #67's device confirmation, #70's, and the partial progress
-on #68 and #69 below), the release process is in [RELEASES.md](RELEASES.md),
-and item numbers (`#15`–`#71`) are indexed at the end of the changelog.
+**What is left to do.** Shipped work is in [CHANGELOG.md](../CHANGELOG.md),
+the release process is in [RELEASES.md](RELEASES.md), and item numbers
+(`#15`–`#71`) are indexed at the end of the changelog.
 
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-16**, on `v1.8.1+34`.
+Last reconciled: **2026-09-16**, on `v1.8.2+35`.
 
 ---
 
 ## Pending
 
-#68 and #69 are started and shipped in part (see CHANGELOG 1.8.1+34 for
-what) but far from finished; what's left of each is below. The rest need a
-person with hardware.
+Two kinds of work are left, and they need different things from you.
+
+**Actionable now, no hardware** — #68 and #69, both started and shipped in
+part. Each has a method below that has already been used successfully, so
+neither is a research problem; they are a long tail of small, verifiable
+pieces.
+
+**Needs a device** — #28 and the torrent-cast question. Nothing here can be
+advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~470-770 of an estimated 500-800 user-facing strings are still
-hardcoded English.** Infrastructure and three languages (Spanish, Arabic,
-Portuguese-BR) shipped in 1.8.1 — see the changelog for what that covers.
-To continue: add a key to `lib/l10n/app_en.arb` (+ the three translated
-ARB files), run `flutter gen-l10n`, replace the literal with
-`AppLocalizations.of(context).yourKey`. `HubSection.localizedLabel` (in
-`lib/utils/hub_controller.dart`) shows the pattern for a widget reached by
-tests that don't wire localization delegates: use
-`Localizations.of<AppLocalizations>(context, AppLocalizations)` directly
-and fall back to English, since the generated `.of()` throws (not returns
-null) when no delegate is found, given `nullable-getter: false` in
-`l10n.yaml`.
+**~440-740 of an estimated 500-800 user-facing strings are still hardcoded
+English.** Infrastructure and three languages (Spanish, Arabic, Portuguese-BR)
+shipped in 1.8.1, covering the hub navigation, the Settings hub page and the
+Appearance page — 46 keys. The Library followed in 1.8.2 — 34 more, for its
+tabs, shelf cards, empty states, filter chips, sort menu and dialogs.
 
-**No RTL layout audit has been done for Arabic.** Flutter's
-`Directionality` follows the locale automatically for standard Material
-widgets, but no custom `Row`/icon-direction assumptions elsewhere in the
-app have been checked against it.
+The method, per string:
 
-**Catalog descriptions are not a TMDB free win, if anyone reaches for
-that next.** Synopsis and genre text comes from the Stremio addon
-(Cinemeta by default), read generically as `json['overview'] ??
-json['description']` in `models/movie/video.dart` — not from TMDB, which
-this codebase only uses for cast/crew and scrapers' own IMDb→TMDB id
-matching. Translating catalog descriptions would mean checking whether
-Cinemeta's own API takes a locale, a separate and unstarted question.
+1. Add a key to `lib/l10n/app_en.arb`, plus the three translated ARB files.
+2. Run `flutter gen-l10n`.
+3. Replace the literal with `context.l10n.yourKey`.
+
+**Use `context.l10n`, not `AppLocalizations.of(context)`.** The generated
+getter is `nullable-getter: false`, so it force-unwraps and *throws* when no
+delegate is registered — which is most existing widget tests, since they pump
+a bare `MaterialApp`. `lib/l10n/l10n.dart` wraps it with an English fallback,
+so a bare-pumped test sees exactly the string it saw before the widget was
+translated. Translating a widget without this breaks every test that renders
+it, and the failure looks like a null-check crash rather than a missing
+delegate.
+
+`HubSection.localizedLabel` (in `lib/utils/hub_controller.dart`) is the
+earlier, hand-rolled version of the same idea, for a `const` enum that cannot
+hold a context-dependent string. `LibrarySection.localizedLabel` and
+`LibraryShelf.localizedLabel` follow it.
+
+**The next slice is the details pages** — Play, the library action tooltips,
+the section headings, the episode controls. They are the most-visited screens
+after the hub itself.
+
+**No RTL layout audit has been done for Arabic.** Flutter's `Directionality`
+follows the locale automatically for standard Material widgets, but no custom
+`Row`/icon-direction assumptions elsewhere in the app have been checked
+against it.
+
+**Catalog descriptions are not a TMDB free win, if anyone reaches for that
+next.** Synopsis and genre text comes from the Stremio addon (Cinemeta by
+default), read generically as `json['overview'] ?? json['description']` in
+`models/movie/video.dart` — not from TMDB, which this codebase only uses for
+cast/crew and scrapers' own IMDb→TMDB id matching. Translating catalog
+descriptions would mean checking whether Cinemeta's own API takes a locale, a
+separate and unstarted question.
 
 **The risk is not the UI. It is the titles**, and the rule below is settled
 before anyone starts, because getting it wrong breaks things that look
@@ -85,50 +107,45 @@ people search and recognise things.
 
 ### Text scale and accessibility (#69)
 
-**Most of the ~68 files in `lib/` with a fixed `height:` are still
+**~58 of the ~68 files in `lib/` with a fixed `height:` are still
 unaudited.** Ten high-traffic boxes are fixed so far — four in 1.8.1, then
 the Continue Watching card and its section header, then the three catalogue
-cards and the details page action rows. Most are a clamp rather than a
-layout rewrite: the element still grows with text scale, just capped short
-of overflowing. 1.3 is the established ceiling (nav bar, sidebar logo, pill
-rows, and the home row). System-level accessibility scale, which the in-app
-zoom setting does not bound, can still overflow the rest.
+cards and the details page action rows. What is left is the long tail, in
+rough order of how many people meet it:
 
-**Do not audit this by grepping `height:`.** It was tried and it does not
-survive contact: a span-based scan pairing each fixed height with the
-largest `fontSize` inside it returns 165 hits, and the loudest are
-`height: 4` spacers that merely sit in the same widget subtree as a
-`fontSize: 22` title. A static scan cannot tell "box that wraps this text"
-from "box that happens to be near it", so the ranking is noise and a test
-built on it would be unactionable.
+1. **The player's chrome** — the transport bar, the settings popovers, the
+   source sheet. Every user, every session.
+2. **The browse rows and their headers** — `BrowseRowView`, the section
+   titles, the filter pills.
+3. **The settings pages** — long, text-heavy, and the place a user who needs
+   large text is most likely to be.
+4. **The remaining details-page rails** — cast, related, similar.
 
-What works is pumping the real widget: `test/text_scale_overflow_test.dart`
-renders at 3.0 scale on a 360px-wide view and asserts nothing reached the
-binding. Flutter reports an overflow as an exception with an exact pixel
-count, so a failure names the widget and the amount. Add a case per widget.
+The method is settled and does not need rediscovering:
 
-**The four surfaces the roadmap named as next are done** — `MovieCard`,
-`AnimeCard`, `IptvChannelCard` and the details page action rows, the last
-three of which turned up seven overflows between them that nobody had
-predicted. What is left is the long tail: the player's chrome, the settings
-pages, and the browse rows. The method is the same, and the probe file is
-where a new case goes.
-
-Two things learned doing them, worth not rediscovering:
-
+- **Probe, don't grep.** `test/text_scale_overflow_test.dart` renders at 3.0
+  scale on a 360px-wide view and asserts nothing reached the binding. Flutter
+  reports an overflow as an exception with an exact pixel count, so a failure
+  names the widget and the amount. Add a case per widget.
+- **Do not audit by grepping `height:`.** It was tried and it does not
+  survive contact: a span-based scan pairing each fixed height with the
+  largest `fontSize` inside it returns 165 hits, and the loudest are
+  `height: 4` spacers that merely sit in the same widget subtree as a
+  `fontSize: 22` title. A static scan cannot tell "box that wraps this text"
+  from "box that happens to be near it", so the ranking is noise.
 - **A clamp is not always enough.** The Episodes control strip still wanted
   179px at 1.3, because the jump input and the batch dropdown are
   fixed-width boxes with text inside them. It sits in a `Wrap`, so the box
   could genuinely grow — and wrapping is the better answer where it can.
-  Clamp only what has nowhere to go.
+  Clamp only what has nowhere to go. 1.3 is the established ceiling.
 - **A page with a looping animation never settles.** `pumpAndSettle` times
-  out on the details pages' ambient background rather than reporting
-  anything about layout. Overflow is raised during layout on the first
-  frame, so `pumpAtScale(settle: false)` is what those cases need.
+  out on the details pages' ambient background rather than reporting anything
+  about layout. Overflow is raised during layout on the first frame, so
+  `pumpAtScale(settle: false)` is what those cases need.
 
-Semantics labels on icon-only controls, mentioned here previously, is
-still untouched — `Tooltip` supplies one for free, which the library
-action row already gets, but nothing has checked the rest.
+Semantics labels on icon-only controls, mentioned here previously, is still
+untouched — `Tooltip` supplies one for free, which the library action row
+already gets, but nothing has checked the rest.
 
 ### Cast, against a real receiver (#28)
 

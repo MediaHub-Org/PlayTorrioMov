@@ -24,6 +24,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   which reserves label space from `MediaQuery.textScalerOf` instead, as the
   better answer where the box can genuinely grow. Defaults to 1.3, the
   ceiling the app had already settled on.
+- **The Library is translated (#68).** Its three tabs, the three built-in
+  shelf cards, their empty states, the type filter chips, the sort menu and
+  the collection dialogs — 34 keys, in Spanish, Arabic and Portuguese-BR.
+  That takes #68 from ~30 to ~64 of an estimated 500-800 strings.
+- **`context.l10n`**, a one-line extension that falls back to English when no
+  localization delegate is in scope. The generated `AppLocalizations.of`
+  force-unwraps and *throws* instead of returning null (`nullable-getter:
+  false` in `l10n.yaml`), which is right for a real screen and wrong for the
+  many existing widget tests that pump a bare `MaterialApp`. Without this,
+  translating a widget broke every test that rendered it.
 
 ### Confirmed
 - **Flatpak audio (#70) works on real speakers.** 1.8.1 added
@@ -82,7 +92,7 @@ confirmed working on a phone.
 - **#69** covers 10 of the ~68 files in `lib/` with a fixed `height:`. A
   large system accessibility text size can still overflow any of the
   other ~58 — unrelated to, and unchanged by, the new in-app control.
-- **#68** covers roughly 30 of an estimated 500-800 strings. No RTL layout
+- **#68** covers roughly 64 of an estimated 500-800 strings. No RTL layout
   audit was done for Arabic beyond Flutter's automatic `Directionality`.
   The display/canonical title split the roadmap says must come before
   translating catalog content is still only decided, not built.
@@ -1046,7 +1056,7 @@ history only.
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
 | #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them. Device-confirmed on a phone 2026-09-16 |
-| #68 | Translation (i18n) — infra + Spanish/Arabic/Portuguese-BR shipped for nav & settings chrome (~30 of ~500-800 strings); the display/canonical title split is still just decided, not built |
+| #68 | Translation (i18n) — infra + Spanish/Arabic/Portuguese-BR shipped for nav, settings and the Library (~64 of ~500-800 strings); the display/canonical title split is still just decided, not built |
 | #69 | Text scale and accessibility — ten high-traffic overflow fixes + in-app zoom shipped, capped at 1.3x; ~58 files still unaudited |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; confirmed on real speakers 2026-09-16 |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |

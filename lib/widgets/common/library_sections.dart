@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
+
 /// The Library's three tabs, in this order.
 ///
 /// Before this existed each hub picked its own: Watch had My List / Watchlist
@@ -40,6 +42,23 @@ enum LibrarySection {
   final IconData icon;
 
   const LibrarySection(this.label, this.icon);
+
+  /// The label to render, translated (#68). The enum is `const`, so it cannot
+  /// hold a context-dependent string itself -- this resolves it at the point
+  /// of display instead.
+  ///
+  /// Goes through `context.l10n`, which falls back to English when no
+  /// [AppLocalizations] delegate is in scope -- several existing widget tests
+  /// pump these in a bare `MaterialApp` with no delegates registered. See
+  /// `lib/l10n/l10n.dart` for why that fallback exists.
+  String localizedLabel(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (this) {
+      LibrarySection.collections => l10n.libraryTabCollections,
+      LibrarySection.continueWatching => l10n.libraryTabContinue,
+      LibrarySection.downloads => l10n.libraryTabDownloads,
+    };
+  }
 }
 
 /// The built-in shelves, pinned as cards before the user's own collections.
@@ -100,4 +119,35 @@ enum LibraryShelf {
     this.emptyTitle,
     this.emptySubtitle,
   );
+
+  /// The card's label, translated (#68). Same fallback contract as
+  /// [LibrarySection.localizedLabel].
+  String localizedLabel(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (this) {
+      LibraryShelf.liked => l10n.libraryShelfLiked,
+      LibraryShelf.watchlist => l10n.libraryShelfWatchlist,
+      LibraryShelf.watched => l10n.libraryShelfWatched,
+    };
+  }
+
+  /// The empty-state heading, translated (#68).
+  String localizedEmptyTitle(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (this) {
+      LibraryShelf.liked => l10n.libraryEmptyLikedTitle,
+      LibraryShelf.watchlist => l10n.libraryEmptyWatchlistTitle,
+      LibraryShelf.watched => l10n.libraryEmptyWatchedTitle,
+    };
+  }
+
+  /// The empty-state line beneath the heading, translated (#68).
+  String localizedEmptySubtitle(BuildContext context) {
+    final l10n = context.l10n;
+    return switch (this) {
+      LibraryShelf.liked => l10n.libraryEmptyLikedSubtitle,
+      LibraryShelf.watchlist => l10n.libraryEmptyWatchlistSubtitle,
+      LibraryShelf.watched => l10n.libraryEmptyWatchedSubtitle,
+    };
+  }
 }

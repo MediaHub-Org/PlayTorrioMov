@@ -36,5 +36,46 @@
   "appearanceTextSizePercent": "{percent}% del tamaño predeterminado, sobre el ajuste de tu dispositivo",
   "appearanceLanguageTitle": "Idioma de la app",
   "appearanceLanguageSubtitle": "Traduce los menús y botones de la app. Los títulos de películas y series son un ajuste aparte.",
-  "appearanceLanguageSystem": "Predeterminado del sistema"
+  "appearanceLanguageSystem": "Predeterminado del sistema",
+
+  "libraryTabCollections": "Colecciones",
+  "libraryTabContinue": "Continuar",
+  "libraryTabDownloads": "Descargas",
+
+  "libraryShelfLiked": "Favoritos",
+  "libraryShelfWatchlist": "Por ver",
+  "libraryShelfWatched": "Vistos",
+
+  "libraryEmptyLikedTitle": "Aún no hay favoritos",
+  "libraryEmptyLikedSubtitle": "Toca el corazón en cualquier título y aparecerá aquí.",
+  "libraryEmptyWatchlistTitle": "Tu lista de pendientes está vacía",
+  "libraryEmptyWatchlistSubtitle": "Añade algo para ver más tarde y aparecerá aquí.",
+  "libraryEmptyWatchedTitle": "Aún no has marcado nada como visto",
+  "libraryEmptyWatchedSubtitle": "Marca algo como visto y aparecerá aquí.",
+
+  "libraryFilterMovies": "Películas",
+  "libraryFilterSeries": "Series",
+  "libraryFilterAnime": "Anime",
+  "libraryFilterLiveTv": "TV en vivo",
+
+  "librarySortBy": "Ordenar por",
+  "librarySortRecent": "Añadidos recientemente",
+  "librarySortTitle": "Título (A-Z)",
+  "librarySortYear": "Año de estreno",
+
+  "libraryReorder": "Reordenar",
+  "libraryReorderDone": "Listo",
+  "libraryCollectionOptions": "Opciones de la colección",
+  "libraryRename": "Renombrar",
+  "libraryDelete": "Eliminar",
+  "libraryCancel": "Cancelar",
+  "librarySave": "Guardar",
+  "libraryRemove": "Quitar",
+  "libraryRenameCollection": "Renombrar colección",
+  "libraryCollectionNameHint": "Nombre de la colección",
+  "libraryDeleteCollectionConfirm": "¿Eliminar {name}?",
+  "libraryCollectionGoneTitle": "La colección ya no existe",
+  "libraryEmptyCollectionTitle": "Aquí todavía no hay nada",
+  "libraryNoLikedChannelsTitle": "Aún no hay canales favoritos",
+  "libraryNoMatchingItems": "No hay resultados"
 }

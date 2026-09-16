@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../models/collection/media_collection.dart';
 import '../../models/movie/movie.dart';
 import '../../models/my_list/my_list_item.dart';
+import '../../l10n/l10n.dart';
 import '../../services/collections/media_collections_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
@@ -155,7 +156,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(
-              'Cancel',
+              context.l10n.libraryCancel,
               style: TextStyle(color: AppColors.inkAlpha(0.6)),
             ),
           ),
@@ -182,6 +183,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   }
 
   Future<void> _removeTitle(MyListItem item, MediaCollection? collection) async {
+    final l10n = context.l10n;
     if (collection != null) {
       // Leaving one list, not the library: no upstream sync, and every other
       // state the title carries is untouched. Still confirmed, because the
@@ -191,7 +193,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         'Remove from ${collection.name}?',
         '"${item.title}" stays in your library and in any other collection '
             'holding it.',
-        'Remove',
+        l10n.libraryRemove,
       )) {
         MediaCollectionsService.removeItem(collection.id, item);
       }
@@ -201,13 +203,14 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     if (await _confirm(
       'Remove from Library?',
       'Remove "${item.title}" from your library?',
-      'Remove',
+      l10n.libraryRemove,
     )) {
       MyListService.remove(item);
     }
   }
 
   Future<void> _rename(MediaCollection collection) async {
+    final l10n = context.l10n;
     final controller = TextEditingController(text: collection.name);
     final name = await showDialog<String>(
       context: context,
@@ -215,7 +218,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Rename collection',
+          l10n.libraryRenameCollection,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: TextField(
@@ -224,19 +227,19 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           textInputAction: TextInputAction.done,
           onSubmitted: (value) => Navigator.pop(ctx, value),
           style: TextStyle(color: AppColors.ink),
-          decoration: const InputDecoration(hintText: 'Collection name'),
+          decoration: InputDecoration(hintText: l10n.libraryCollectionNameHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Cancel',
+              l10n.libraryCancel,
               style: TextStyle(color: AppColors.inkAlpha(0.6)),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Save'),
+            child: Text(l10n.librarySave),
           ),
         ],
       ),
@@ -249,7 +252,11 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     final message = collection.isEmpty
         ? 'This collection is empty.'
         : 'The ${collection.count} titles in it stay in your library.';
-    if (!await _confirm('Delete ${collection.name}?', message, 'Delete')) {
+    if (!await _confirm(
+      context.l10n.libraryDeleteCollectionConfirm(collection.name),
+      message,
+      context.l10n.libraryDelete,
+    )) {
       return;
     }
     MediaCollectionsService.delete(collection.id);
@@ -275,9 +282,9 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           return Scaffold(
             backgroundColor: AppColors.canvas,
             appBar: AppBar(backgroundColor: AppColors.bar),
-            body: const LibraryEmptyState(
+            body: LibraryEmptyState(
               icon: Icons.playlist_remove_rounded,
-              title: 'Collection gone',
+              title: context.l10n.libraryCollectionGoneTitle,
               subtitle: 'It was deleted.',
             ),
           );
@@ -305,27 +312,35 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
                         ? Icons.done_rounded
                         : Icons.swap_vert_rounded,
                   ),
-                  tooltip: _reordering ? 'Done' : 'Reorder',
+                  tooltip: _reordering
+                      ? context.l10n.libraryReorderDone
+                      : context.l10n.libraryReorder,
                   onPressed: () => setState(() => _reordering = !_reordering),
                 ),
               PopupMenuButton<String>(
-                tooltip: 'Collection options',
+                tooltip: context.l10n.libraryCollectionOptions,
                 color: AppColors.raised,
                 onSelected: (value) {
                   if (value == 'rename') _rename(collection);
                   if (value == 'delete') _delete(collection);
                 },
-                itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'rename', child: Text('Rename')),
-                  PopupMenuItem(value: 'delete', child: Text('Delete')),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'rename',
+                    child: Text(context.l10n.libraryRename),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Text(context.l10n.libraryDelete),
+                  ),
                 ],
               ),
             ],
           ),
           body: collection.isEmpty
-              ? const LibraryEmptyState(
+              ? LibraryEmptyState(
                   icon: Icons.playlist_add_rounded,
-                  title: 'Nothing in here yet',
+                  title: context.l10n.libraryEmptyCollectionTitle,
                   subtitle:
                       'Open anything and tap Add to collection to file it here.',
                 )
@@ -350,7 +365,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
             Icon(shelf.icon, color: shelf.color, size: 20),
             const SizedBox(width: 10),
             Text(
-              shelf.label,
+              shelf.localizedLabel(context),
               style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
             ),
           ],
@@ -375,9 +390,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
               _buildFilterBar(shelf),
               Expanded(
                 child: channels.isEmpty
-                    ? const LibraryEmptyState(
+                    ? LibraryEmptyState(
                         icon: Icons.live_tv_rounded,
-                        title: 'No liked channels yet',
+                        title: context.l10n
+                            .libraryNoLikedChannelsTitle,
                         subtitle:
                             'Tap the heart on a channel in Live TV to save it here.',
                       )
@@ -411,11 +427,11 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
                       // Distinguishes "this shelf is empty" from "your filter
                       // hid everything", which otherwise read the same.
                       title: anyInShelf
-                          ? 'No matching items'
-                          : shelf.emptyTitle,
+                          ? context.l10n.libraryNoMatchingItems
+                          : shelf.localizedEmptyTitle(context),
                       subtitle: anyInShelf
                           ? 'Try adjusting your filters.'
-                          : shelf.emptySubtitle,
+                          : shelf.localizedEmptySubtitle(context),
                     )
                   : _buildGrid(items, null),
             ),
@@ -534,6 +550,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   // ── Filter and sort, built-in shelves only ────────────────────────────────
 
   Widget _buildFilterBar(LibraryShelf shelf) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: SingleChildScrollView(
@@ -543,17 +560,17 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           children: [
             _buildChoiceChip('All', 'all', shelf),
             const SizedBox(width: 6),
-            _buildChoiceChip('Movies', 'movie', shelf),
+            _buildChoiceChip(l10n.libraryFilterMovies, 'movie', shelf),
             const SizedBox(width: 6),
-            _buildChoiceChip('Series', 'series', shelf),
+            _buildChoiceChip(l10n.libraryFilterSeries, 'series', shelf),
             const SizedBox(width: 6),
-            _buildChoiceChip('Anime', 'anime', shelf),
+            _buildChoiceChip(l10n.libraryFilterAnime, 'anime', shelf),
             // Only under Liked: a channel cannot be watchlisted or marked
             // watched, so offering the chip elsewhere would promise a filter
             // with nothing behind it.
             if (shelf == LibraryShelf.liked) ...[
               const SizedBox(width: 6),
-              _buildChoiceChip('Live TV', 'livetv', shelf),
+              _buildChoiceChip(l10n.libraryFilterLiveTv, 'livetv', shelf),
             ],
           ],
         ),
@@ -584,9 +601,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   }
 
   Widget _buildSortButton() {
+    final l10n = context.l10n;
     return PopupMenuButton<String>(
       initialValue: _sortBy,
-      tooltip: 'Sort by',
+      tooltip: l10n.librarySortBy,
       onSelected: (val) => setState(() => _sortBy = val),
       color: AppColors.raised,
       child: Container(
@@ -612,10 +630,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           ],
         ),
       ),
-      itemBuilder: (context) => const [
-        PopupMenuItem(value: 'recent', child: Text('Recently Added')),
-        PopupMenuItem(value: 'title', child: Text('Title (A-Z)')),
-        PopupMenuItem(value: 'year', child: Text('Release Year')),
+      itemBuilder: (context) => [
+        PopupMenuItem(value: 'recent', child: Text(l10n.librarySortRecent)),
+        PopupMenuItem(value: 'title', child: Text(l10n.librarySortTitle)),
+        PopupMenuItem(value: 'year', child: Text(l10n.librarySortYear)),
       ],
     );
   }

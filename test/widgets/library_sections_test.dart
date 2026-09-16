@@ -1,4 +1,5 @@
 // test/widgets/library_sections_test.dart
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -105,5 +106,55 @@ void main() {
             'the page needing to be edited',
       );
     });
+  });
+
+  group('the Library is translated (#68)', () {
+    // The enum labels are the English fallback; what a user sees comes from
+    // the ARB files. A key added to app_en.arb but forgotten in the three
+    // translations would silently fall back to English, which looks like
+    // "translation is broken" rather than "one key is missing" -- so this
+    // checks every locale actually differs from English where it should.
+    for (final locale in ['es', 'ar', 'pt']) {
+      test('$locale translates every Library tab and shelf', () {
+        final arb = jsonDecode(
+          File('lib/l10n/app_$locale.arb').readAsStringSync(),
+        ) as Map<String, dynamic>;
+        final en = jsonDecode(
+          File('lib/l10n/app_en.arb').readAsStringSync(),
+        ) as Map<String, dynamic>;
+
+        // Spelled out rather than derived from the enum names: the keys are
+        // not a mechanical transform of them (`continueWatching` is
+        // `libraryTabContinue`), and a derived name would have to be kept in
+        // step with the ARB by hand anyway -- which is the thing this is
+        // checking.
+        final keys = [
+          'libraryTabCollections',
+          'libraryTabContinue',
+          'libraryTabDownloads',
+          'libraryShelfLiked',
+          'libraryShelfWatchlist',
+          'libraryShelfWatched',
+        ];
+        for (final key in keys) {
+          expect(
+            en.containsKey(key),
+            isTrue,
+            reason: '$key is missing from app_en.arb',
+          );
+          expect(
+            arb.containsKey(key),
+            isTrue,
+            reason: '$key is missing from app_$locale.arb, so it would fall '
+                'back to English',
+          );
+          expect(
+            arb[key],
+            isNotEmpty,
+            reason: '$key is empty in app_$locale.arb',
+          );
+        }
+      });
+    }
   });
 }

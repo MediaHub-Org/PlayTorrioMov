@@ -36,5 +36,46 @@
   "appearanceTextSizePercent": "{percent}% do padrão, além da configuração do seu dispositivo",
   "appearanceLanguageTitle": "Idioma do App",
   "appearanceLanguageSubtitle": "Traduz os menus e botões do app. Títulos de filmes e séries são uma configuração separada.",
-  "appearanceLanguageSystem": "Padrão do sistema"
+  "appearanceLanguageSystem": "Padrão do sistema",
+
+  "libraryTabCollections": "Coleções",
+  "libraryTabContinue": "Continuar",
+  "libraryTabDownloads": "Downloads",
+
+  "libraryShelfLiked": "Favoritos",
+  "libraryShelfWatchlist": "Assistir depois",
+  "libraryShelfWatched": "Assistidos",
+
+  "libraryEmptyLikedTitle": "Nada favoritado ainda",
+  "libraryEmptyLikedSubtitle": "Toque no coração de qualquer título e ele aparece aqui.",
+  "libraryEmptyWatchlistTitle": "Nada na sua lista",
+  "libraryEmptyWatchlistSubtitle": "Adicione algo para assistir depois e ele aparece aqui.",
+  "libraryEmptyWatchedTitle": "Nada marcado como assistido ainda",
+  "libraryEmptyWatchedSubtitle": "Marque algo como assistido e ele aparece aqui.",
+
+  "libraryFilterMovies": "Filmes",
+  "libraryFilterSeries": "Séries",
+  "libraryFilterAnime": "Anime",
+  "libraryFilterLiveTv": "TV ao vivo",
+
+  "librarySortBy": "Ordenar por",
+  "librarySortRecent": "Adicionados recentemente",
+  "librarySortTitle": "Título (A-Z)",
+  "librarySortYear": "Ano de lançamento",
+
+  "libraryReorder": "Reordenar",
+  "libraryReorderDone": "Concluir",
+  "libraryCollectionOptions": "Opções da coleção",
+  "libraryRename": "Renomear",
+  "libraryDelete": "Excluir",
+  "libraryCancel": "Cancelar",
+  "librarySave": "Salvar",
+  "libraryRemove": "Remover",
+  "libraryRenameCollection": "Renomear coleção",
+  "libraryCollectionNameHint": "Nome da coleção",
+  "libraryDeleteCollectionConfirm": "Excluir {name}?",
+  "libraryCollectionGoneTitle": "A coleção não existe mais",
+  "libraryEmptyCollectionTitle": "Ainda não há nada aqui",
+  "libraryNoLikedChannelsTitle": "Nenhum canal favoritado ainda",
+  "libraryNoMatchingItems": "Nenhum resultado"
 }
