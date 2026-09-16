@@ -172,7 +172,7 @@ class MovieCard extends StatelessWidget {
           ],
         ),
       ),
-    );;
+    );
   }
 }
 

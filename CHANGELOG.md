@@ -3,6 +3,28 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- **Three catalogue cards overflowed their grid cell at a large text scale
+  (#69).** `MovieCard`, `AnimeCard` and `IptvChannelCard` are hosted in a
+  `SliverGridDelegateWithFixedCrossAxisCount` cell — a hard box whose size
+  comes from `childAspectRatio`, not from its own text — so at 3x the
+  metadata row painted out the side of the cell: 273px for `MovieCard`,
+  76px for `AnimeCard`, 91px for `IptvChannelCard`. The first two were a
+  bare `Row` with no flex on any child; the third was the same, plus a
+  short-code badge whose text wrapped past its fixed box. Each card now
+  clamps its text scale and flexes the row, so the clamp keeps it legible
+  at ordinary settings and the flex holds at any scale.
+
+### Added
+- **`ClampedTextScale`**, naming the `MediaQuery` incantation that had been
+  hand-rolled in six places. It documents that capping is a compromise — a
+  viewer who asked for 3x does not get 3x — and points at `CollectionCard`,
+  which reserves label space from `MediaQuery.textScalerOf` instead, as the
+  better answer where the box can genuinely grow. Defaults to 1.3, the
+  ceiling the app had already settled on.
+
 ## [1.8.1+34] - 2026-09-16
 
 A packaging fix, a settings-page cleanup, and the first real steps on two

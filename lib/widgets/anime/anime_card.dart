@@ -33,11 +33,8 @@ class _AnimeCardState extends State<AnimeCard> {
     final anime = widget.anime;
 
     // A grid cell is a fixed box; its text is not. Capped so a
-
     // large system scale cannot paint outside the cell.
-
     return ClampedTextScale(
-
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
@@ -138,8 +135,7 @@ class _AnimeCardState extends State<AnimeCard> {
           ),
         ),
       ),
-
-    );;
+    );
   }
 }
 

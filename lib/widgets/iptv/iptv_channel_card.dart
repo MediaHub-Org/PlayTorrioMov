@@ -32,11 +32,8 @@ class IptvChannelCard extends StatelessWidget {
     final secondaryColor = ch.gradient.length > 1 ? ch.gradient.last : palette.accentColor;
 
     // A grid cell is a fixed box; its text is not. Capped so a
-
     // large system scale cannot paint outside the cell.
-
     return ClampedTextScale(
-
       child: InteractiveCardShell(
         pressedScale: 0.96,
         onTap: onTap,
@@ -117,7 +114,15 @@ class IptvChannelCard extends StatelessWidget {
                                             ),
                                             errorWidget: (_, _, _) => _buildShortBadge(ch),
                                           )
-                                        : _buildShortBadge(ch),
+                                        // The badge is a fixed-size box inside a
+                                        // poster that shrinks with the cell. At a
+                                        // large scale its text wraps and paints
+                                        // past the box, so it scales down to fit
+                                        // instead of overflowing.
+                                        : FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: _buildShortBadge(ch),
+                                          ),
                                   ),
                                 ),
                               ),
@@ -256,12 +261,19 @@ class IptvChannelCard extends StatelessWidget {
                     Row(
                       children: [
                         if (IptvSettings.showCategoryTag.value) ...[
-                          Text(
-                            ch.category,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.inkAlpha(0.52),
-                              fontWeight: FontWeight.w600,
+                          // Both legs flex: the clamp keeps them legible at
+                          // ordinary settings, this stops them painting
+                          // outside the cell whatever scale they are handed.
+                          Flexible(
+                            child: Text(
+                              ch.category,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.inkAlpha(0.52),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                           Padding(
@@ -276,12 +288,16 @@ class IptvChannelCard extends StatelessWidget {
                             ),
                           ),
                         ],
-                        Text(
-                          'HD Live',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700,
+                        Flexible(
+                          child: Text(
+                            'HD Live',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: primaryColor,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ],
@@ -290,8 +306,7 @@ class IptvChannelCard extends StatelessWidget {
           ),
         ),
       ),
-
-    );;
+    );
   }
 
   Widget _buildShortBadge(HardcodedChannel ch) {
