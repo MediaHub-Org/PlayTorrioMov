@@ -5,6 +5,7 @@ import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
 import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 import 'package:playtorriomov/models/movie/movie.dart';
+import 'package:playtorriomov/pages/anime/anime_details_page.dart';
 import 'package:playtorriomov/services/iptv/hardcoded_channels.dart';
 import 'package:playtorriomov/widgets/anime/anime_card.dart';
 import 'package:playtorriomov/widgets/iptv/iptv_channel_card.dart';
@@ -31,6 +32,7 @@ void main() {
     required Widget child,
     double scale = 3.0,
     Size size = const Size(360, 720),
+    bool settle = true,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
@@ -56,7 +58,16 @@ void main() {
         home: child,
       ),
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      // A page carrying a looping animation -- the details pages' ambient
+      // background -- never settles, so pumpAndSettle times out rather than
+      // reporting anything about layout. Overflow is raised during layout on
+      // the first frame, so a couple of pumps is all this needs.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+    }
   }
 
   ContinueWatchingItem watching({String title = 'A Show With A Long Name'}) =>
@@ -292,6 +303,40 @@ void main() {
         isNull,
         reason: 'a label that grows with text scale has to clamp, not push past the '
             'fixed 52px AppBar.bottom PreferredSize it is hosted in',
+      );
+    },
+  );
+
+  testWidgets(
+    'the anime details page action rows do not overflow at 3x text scale',
+    (tester) async {
+      // The roadmap's own next target for #69: the details page action rows.
+      // Anime is the one that can be pumped offline -- it takes its data as a
+      // constructor argument, where DetailsPage fetches its own over the
+      // network. Its Play button is a bare Row of icon + label with no flex
+      // on either, the same shape that broke the three catalogue cards.
+      await pumpAtScale(
+        tester,
+        settle: false,
+        child: const AnimeDetailsPage(
+          anime: AnimeMedia(
+            id: 21,
+            titleEnglish: 'One Piece',
+            titleRomaji: 'ONE PIECE',
+            totalEpisodes: 1120,
+            format: 'TV',
+            status: 'RELEASING',
+            genres: ['Action', 'Adventure', 'Fantasy'],
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'Play is a full-width Row of icon + label with no flex on the '
+            'label, so at a large scale the text takes the line and paints '
+            'past the button',
       );
     },
   );

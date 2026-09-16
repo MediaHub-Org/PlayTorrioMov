@@ -14,6 +14,7 @@ import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
+import '../../widgets/common/clamped_text_scale.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_actions_row.dart';
@@ -729,15 +730,22 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           children: [
             const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
             const SizedBox(width: 6),
-            Text(
-              lastWatched != null && lastWatched > 0
-                  ? 'Resume Ep $resumeEp'
-                  : 'Play Ep 1',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.3,
+            // Flexible as well as the icon's fixed size: the label is the
+            // only part that grows with text scale, and without this it takes
+            // the line and paints past the button -- 174px at 3x.
+            Flexible(
+              child: Text(
+                lastWatched != null && lastWatched > 0
+                    ? 'Resume Ep $resumeEp'
+                    : 'Play Ep 1',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.3,
+                ),
               ),
             ),
           ],
@@ -1052,150 +1060,160 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               ),
             ),
 
-            Row(
-              mainAxisSize: MainAxisSize.min,
+            // The controls flow onto their own lines rather than clamping.
+            // They sit in a Wrap already, so the box can genuinely grow --
+            // which the roadmap says is the better answer than a cap. At 3x
+            // the strip wanted 516px more than the 312 it had; capped to 1.3
+            // it still wanted 179, because the jump input and the batch
+            // dropdown are fixed-width boxes whose labels grow inside them.
+            Wrap(
+              spacing: 12,
+              runSpacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 // SUB / DUB Switcher
                 Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF141724),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => _isDub = false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: !_isDub ? _Palette.accent : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'SUB',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF141724),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() => _isDub = false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: !_isDub ? _Palette.accent : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'SUB',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () => setState(() => _isDub = true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _isDub ? _Palette.accent : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'DUB',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
+                        GestureDetector(
+                          onTap: () => setState(() => _isDub = true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _isDub ? _Palette.accent : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'DUB',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 12),
-
-                // Jump to Ep Input
-                Container(
-                  width: 130,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF141724),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: TextField(
-                    controller: _jumpEpController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.go,
-                    onSubmitted: _jumpToEpisode,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                    decoration: InputDecoration(
-                      hintText: 'Jump to ep #',
-                      hintStyle: const TextStyle(color: Colors.white38, fontSize: 11),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 10,
-                      ),
-                      suffixIcon: IconButton(
-                        padding: EdgeInsets.zero,
-                        icon: Icon(
-                          Icons.arrow_forward_rounded,
-                          color: _Palette.accent,
-                          size: 16,
-                        ),
-                        onPressed: () =>
-                            _jumpToEpisode(_jumpEpController.text),
-                      ),
+                      ],
                     ),
                   ),
-                ),
 
-                const SizedBox(width: 8),
-
-                // 50-Chunk Dropdown
-                if (totalBatches > 1)
+                  // Jump to Ep Input
                   Container(
+                    width: 130,
                     height: 34,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
                     decoration: BoxDecoration(
                       color: const Color(0xFF141724),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: _Palette.accent.withValues(alpha: 0.4),
-                      ),
+                      border: Border.all(color: Colors.white12),
                     ),
-                    child: DropdownButton<int>(
-                      value: currentBatchSafe,
-                      underline: const SizedBox.shrink(),
-                      dropdownColor: const Color(0xFF141724),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                    child: TextField(
+                      controller: _jumpEpController,
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.go,
+                      onSubmitted: _jumpToEpisode,
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      decoration: InputDecoration(
+                        hintText: 'Jump to ep #',
+                        hintStyle: const TextStyle(color: Colors.white38, fontSize: 11),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 10,
+                        ),
+                        suffixIcon: IconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            Icons.arrow_forward_rounded,
+                            color: _Palette.accent,
+                            size: 16,
+                          ),
+                          onPressed: () =>
+                              _jumpToEpisode(_jumpEpController.text),
+                        ),
                       ),
-                      icon: Icon(
-                        Icons.expand_more_rounded,
-                        color: _Palette.accent,
-                        size: 16,
-                      ),
-                      items: List.generate(
-                        totalBatches,
-                        (idx) {
-                          final start = idx * _chunkSize + 1;
-                          final end = math.min((idx + 1) * _chunkSize, totalEps);
-                          return DropdownMenuItem(
-                            value: idx,
-                            child: Text('$start – $end'),
-                          );
-                        },
-                      ),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _selectedEpisodeBatch = val);
-                        }
-                      },
                     ),
                   ),
+
+                  // 50-Chunk Dropdown
+                  if (totalBatches > 1)
+                    // A fixed 34px control: the batch label grows with the
+                    // scale but the box cannot, so it clamps. Wrapping the
+                    // strip above fixed the row; this is the one box inside
+                    // it that still had nowhere to go.
+                    ClampedTextScale(
+                      child: Container(
+                        height: 34,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF141724),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: _Palette.accent.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: DropdownButton<int>(
+                          value: currentBatchSafe,
+                          underline: const SizedBox.shrink(),
+                          dropdownColor: const Color(0xFF141724),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          icon: Icon(
+                            Icons.expand_more_rounded,
+                            color: _Palette.accent,
+                            size: 16,
+                          ),
+                          items: List.generate(
+                            totalBatches,
+                            (idx) {
+                              final start = idx * _chunkSize + 1;
+                              final end = math.min((idx + 1) * _chunkSize, totalEps);
+                              return DropdownMenuItem(
+                                value: idx,
+                                child: Text('$start – $end'),
+                              );
+                            },
+                          ),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() => _selectedEpisodeBatch = val);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
               ],
             ),
           ],

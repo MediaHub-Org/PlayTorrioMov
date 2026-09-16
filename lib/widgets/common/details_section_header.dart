@@ -39,7 +39,15 @@ class DetailsSectionHeader extends StatelessWidget {
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: [Flexible(child: heading), trailing!],
+              children: [
+                Flexible(child: heading),
+                // The trailing widget is a count or a "See all" -- text that
+                // grows with the scale like the heading does. Flexible on the
+                // heading alone let the pair still exceed the row: 195px at
+                // 3x, because the heading shrank to its share and the count
+                // beside it did not.
+                Flexible(child: trailing!),
+              ],
             ),
     );
   }

@@ -1204,14 +1204,21 @@ class _DetailsPageState extends State<DetailsPage>
           children: [
             const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
             const SizedBox(width: 6),
-            Text(
-              _isCollection
-                  ? 'Play First Movie'
-                  : (_isSeries ? 'Play Episodes' : 'Play Movie'),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+            // Flexible as well as the icon's fixed size: the label is the
+            // only part that grows with text scale, and without this it takes
+            // the line and paints past the button.
+            Flexible(
+              child: Text(
+                _isCollection
+                    ? 'Play First Movie'
+                    : (_isSeries ? 'Play Episodes' : 'Play Movie'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
