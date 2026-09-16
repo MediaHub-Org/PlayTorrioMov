@@ -4,6 +4,7 @@ import '../../services/iptv/iptv_settings.dart';
 import 'appearance/live_tv_settings_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../l10n/app_localizations.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
   const AppearanceSettingsPage({super.key});
@@ -20,6 +21,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
     // be readable in whichever mode the switch just selected.
     final theme = Theme.of(context);
     final onSurface = theme.colorScheme.onSurface;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -30,9 +32,9 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Appearance & Interface',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+        title: Text(
+          l10n.appearanceTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
       body: SettingsScrollView(
@@ -43,7 +45,7 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Text(
-              'Fine-tune the visual atmosphere, color palettes, and interface layouts.',
+              l10n.appearanceSubtitle,
               style: TextStyle(
                 fontSize: 13.5,
                 color: onSurface.withValues(alpha: 0.5),
@@ -60,6 +62,10 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           const SizedBox(height: 20),
 
           const _TextScaleSelector(),
+
+          const SizedBox(height: 20),
+
+          const _LanguageSelector(),
 
           const SizedBox(height: 20),
 
@@ -198,12 +204,6 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
 class _ThemeModeSelector extends StatelessWidget {
   const _ThemeModeSelector();
 
-  static const _options = <(ThemeMode, String, IconData)>[
-    (ThemeMode.system, 'System', Icons.brightness_auto_rounded),
-    (ThemeMode.light, 'Light', Icons.light_mode_rounded),
-    (ThemeMode.dark, 'Dark', Icons.dark_mode_rounded),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AppThemePalette>(
@@ -214,6 +214,12 @@ class _ThemeModeSelector extends StatelessWidget {
           builder: (context, mode, _) {
             final theme = Theme.of(context);
             final onSurface = theme.colorScheme.onSurface;
+            final l10n = AppLocalizations.of(context);
+            final options = <(ThemeMode, String, IconData)>[
+              (ThemeMode.system, l10n.appearanceThemeSystem, Icons.brightness_auto_rounded),
+              (ThemeMode.light, l10n.appearanceThemeLight, Icons.light_mode_rounded),
+              (ThemeMode.dark, l10n.appearanceThemeDark, Icons.dark_mode_rounded),
+            ];
 
             return Container(
               padding: const EdgeInsets.all(18),
@@ -238,7 +244,7 @@ class _ThemeModeSelector extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Theme',
+                              l10n.appearanceThemeTitle,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
@@ -248,8 +254,10 @@ class _ThemeModeSelector extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               mode == ThemeMode.system
-                                  ? 'Following your device setting'
-                                  : 'Always ${mode == ThemeMode.light ? 'light' : 'dark'}',
+                                  ? l10n.appearanceThemeFollowingDevice
+                                  : (mode == ThemeMode.light
+                                      ? l10n.appearanceThemeAlwaysLight
+                                      : l10n.appearanceThemeAlwaysDark),
                               style: TextStyle(
                                 fontSize: 12.5,
                                 height: 1.35,
@@ -264,7 +272,7 @@ class _ThemeModeSelector extends StatelessWidget {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      for (final (value, label, icon) in _options) ...[
+                      for (final (value, label, icon) in options) ...[
                         Expanded(
                           child: _ThemeModeSegment(
                             label: label,
@@ -274,7 +282,7 @@ class _ThemeModeSelector extends StatelessWidget {
                             onTap: () => AppThemeService.setThemeMode(value),
                           ),
                         ),
-                        if (value != _options.last.$1)
+                        if (value != options.last.$1)
                           const SizedBox(width: 8),
                       ],
                     ],
@@ -311,6 +319,7 @@ class _TextScaleSelector extends StatelessWidget {
           builder: (context, scale, _) {
             final theme = Theme.of(context);
             final onSurface = theme.colorScheme.onSurface;
+            final l10n = AppLocalizations.of(context);
 
             return Container(
               padding: const EdgeInsets.all(18),
@@ -335,7 +344,7 @@ class _TextScaleSelector extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'App Text Size',
+                              l10n.appearanceTextSizeTitle,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
@@ -345,8 +354,8 @@ class _TextScaleSelector extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               scale == 1.0
-                                  ? 'Default — follows your device\'s own text size setting'
-                                  : '${(scale * 100).round()}% of default, on top of your device\'s own setting',
+                                  ? l10n.appearanceTextSizeDefault
+                                  : l10n.appearanceTextSizePercent((scale * 100).round()),
                               style: TextStyle(
                                 fontSize: 12.5,
                                 height: 1.35,
@@ -382,6 +391,145 @@ class _TextScaleSelector extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// App-only language override (#68): translates this app's own chrome,
+/// independent of the device's system language and of which language
+/// scraped/catalog titles show in (that display-vs-canonical title
+/// question is a separate, larger decision -- see docs/ROADMAP.md's
+/// Translation entry).
+///
+/// Shown in each language's own name, not translated into the currently
+/// active one -- someone who can't read the active language still needs to
+/// find their own in this list.
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector();
+
+  static const _nativeNames = <String, String>{
+    'es': 'Español',
+    'ar': 'العربية',
+    'pt': 'Português',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AppThemePalette>(
+      valueListenable: AppThemeService.currentPalette,
+      builder: (context, palette, _) {
+        return ValueListenableBuilder<Locale?>(
+          valueListenable: AppThemeService.locale,
+          builder: (context, activeLocale, _) {
+            final theme = Theme.of(context);
+            final onSurface = theme.colorScheme.onSurface;
+            final l10n = AppLocalizations.of(context);
+
+            return Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: theme.cardTheme.color,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: onSurface.withValues(alpha: 0.08)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.translate_rounded, color: palette.primaryColor, size: 22),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.appearanceLanguageTitle,
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: onSurface),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.appearanceLanguageSubtitle,
+                              style: TextStyle(fontSize: 12.5, height: 1.35, color: onSurface.withValues(alpha: 0.55)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _LanguageChip(
+                        label: l10n.appearanceLanguageSystem,
+                        selected: activeLocale == null,
+                        color: palette.primaryColor,
+                        onTap: () => AppThemeService.setLocale(null),
+                      ),
+                      for (final locale in AppThemeService.supportedAppLocales)
+                        _LanguageChip(
+                          label: _nativeNames[locale.languageCode] ?? locale.languageCode,
+                          selected: activeLocale == locale,
+                          color: palette.primaryColor,
+                          onTap: () => AppThemeService.setLocale(locale),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _LanguageChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _LanguageChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          decoration: BoxDecoration(
+            color: selected ? color.withValues(alpha: 0.18) : onSurface.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: selected ? color.withValues(alpha: 0.7) : onSurface.withValues(alpha: 0.10),
+              width: 1.2,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

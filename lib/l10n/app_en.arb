@@ -1,0 +1,54 @@
+{
+  "@@locale": "en",
+
+  "navMovies": "Movies",
+  "@navMovies": {"description": "Hub bottom tab / section label"},
+  "navSeries": "Series",
+  "@navSeries": {"description": "Hub bottom tab / section label"},
+  "navAnime": "Anime",
+  "@navAnime": {"description": "Hub bottom tab / section label"},
+  "navLiveTv": "Live TV",
+  "@navLiveTv": {"description": "Hub bottom tab / section label"},
+  "navLibrary": "Library",
+  "@navLibrary": {"description": "Hub bottom tab / section label"},
+
+  "settingsTitle": "Settings",
+  "settingsCategoryAddons": "Addons",
+  "settingsCategoryAppearance": "Appearance & Interface",
+  "settingsCategoryBuiltinProviders": "Built-in Providers",
+  "settingsCategoryDebrid": "Debrid & Cloud Streaming",
+  "settingsCategoryBackup": "Backup & Data",
+  "settingsCategoryConnect": "Connect",
+  "settingsCategoryKeyboardShortcuts": "Keyboard Shortcuts",
+  "settingsCategoryVideoPlayback": "Video Playback",
+  "settingsCategoryAbout": "About {appName}",
+  "@settingsCategoryAbout": {
+    "placeholders": {"appName": {"type": "String"}}
+  },
+  "settingsBadgeDisabled": "Disabled",
+  "settingsBadgeActive": "Active",
+  "settingsBadgeOffline": "Offline",
+  "settingsBadgeConnectedCount": "{count}/2 Connected",
+  "@settingsBadgeConnectedCount": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+
+  "appearanceTitle": "Appearance & Interface",
+  "appearanceSubtitle": "Fine-tune the visual atmosphere, color palettes, and interface layouts.",
+  "appearanceThemeTitle": "Theme",
+  "appearanceThemeFollowingDevice": "Following your device setting",
+  "appearanceThemeAlwaysLight": "Always light",
+  "appearanceThemeAlwaysDark": "Always dark",
+  "appearanceThemeSystem": "System",
+  "appearanceThemeLight": "Light",
+  "appearanceThemeDark": "Dark",
+  "appearanceTextSizeTitle": "App Text Size",
+  "appearanceTextSizeDefault": "Default — follows your device's own text size setting",
+  "appearanceTextSizePercent": "{percent}% of default, on top of your device's own setting",
+  "@appearanceTextSizePercent": {
+    "placeholders": {"percent": {"type": "int"}}
+  },
+  "appearanceLanguageTitle": "App Language",
+  "appearanceLanguageSubtitle": "Translates the app's own menus and buttons. Movie and show titles are a separate setting.",
+  "appearanceLanguageSystem": "System default"
+}

@@ -959,7 +959,7 @@ history only.
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
 | #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them. Device-confirmed on a phone 2026-09-16 |
-| #68 | Translation (i18n) — not started; the display/canonical title split is decided in the roadmap |
+| #68 | Translation (i18n) — infra + Spanish/Arabic/Portuguese-BR shipped for nav & settings chrome (~30 of ~500-800 strings); the display/canonical title split is still just decided, not built |
 | #69 | Text scale and accessibility — four high-traffic overflow fixes + in-app zoom shipped, capped at 1.3x; ~64 files still unaudited |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; unverified on real hardware |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |

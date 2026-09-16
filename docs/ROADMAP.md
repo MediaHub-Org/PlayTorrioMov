@@ -14,17 +14,57 @@ Last reconciled: **2026-09-15**, on `v1.8.0+33`.
 
 ## Pending
 
-**#70 and #71 are coded, not verified. #69 is scoped and partly done** (four
-high-traffic fixes shipped, ~64 files still unaudited). #68 still needs
-writing. The rest need a person with hardware.
+**#70 and #71 are coded, not verified. #68 and #69 are both scoped and
+partly done**: #68 has working infrastructure and three real languages
+(Spanish, Arabic, Portuguese-BR) but only ~30 of an estimated 500-800
+strings migrated; #69 has four high-traffic overflow fixes shipped and an
+in-app zoom, but ~64 files still unaudited. The rest need a person with
+hardware.
 
 ### Translation (#68)
 
-No `intl`, no `flutter_localizations`, no `.arb` — every string in `lib/` is
-hardcoded English, except `anime_arabic_details_page.dart`, which hardcodes
-seven Arabic ones. So the app already has a second language, just an
-unmanaged one. Roughly 500-800 user-facing strings to extract: mechanical,
-large, and low-risk.
+**Infrastructure shipped 2026-09-16, most strings not yet migrated.**
+`flutter_localizations` + `intl` + `l10n.yaml` (`nullable-getter: false`) +
+`lib/l10n/*.arb` generate `AppLocalizations` at build time
+(`lib/l10n/app_localizations*.dart` is gitignored, not checked in). Three
+languages have real translated content — Spanish, Arabic, Portuguese
+(Brazil) — picked in Appearance & Interface → App Language
+(`AppThemeService.locale`, persisted, null = follow the device's language
+among the supported ones). The in-app text zoom (#69) composes correctly
+with this: `main.dart`'s `MediaQuery` builder multiplies both onto the
+system's scaler.
+
+Migrated so far — hub navigation (`HubSection.localizedLabel`, used by both
+`AdaptiveNavShell`'s bottom tab bar and `SectionTopBar`'s desktop chips),
+the Settings hub page, and the Appearance & Interface page itself (~30
+keys across `lib/l10n/app_en.arb`). Originally ~500-800 user-facing strings
+were estimated across `lib/` (still hardcoded English almost everywhere
+else, plus `anime_arabic_details_page.dart`'s seven hardcoded Arabic ones,
+unrelated to this new system) — so roughly 470-770 remain. Mechanical,
+large, and low-risk per string, the same as before this pass — just not
+finished. Whoever continues: add a key to `app_en.arb` (+ the three
+translated ones), run `flutter gen-l10n`, replace the literal with
+`AppLocalizations.of(context).yourKey`. `HubSection.localizedLabel` shows
+the pattern for a widget reached by tests that don't wire localization
+delegates: use `Localizations.of<AppLocalizations>(context,
+AppLocalizations)` directly and fall back to English, since the generated
+`.of()` throws (not returns null) when no delegate is found, given
+`nullable-getter: false`.
+
+No RTL layout audit was done for Arabic — Flutter's `Directionality`
+follows the locale automatically for standard Material widgets, but no
+custom `Row`/icon-direction assumptions elsewhere in the app have been
+checked against it.
+
+**Correction to the note below, found while wiring this up:** catalog
+synopsis and genre text does not come from TMDB in this codebase — it
+comes from the Stremio addon (Cinemeta by default), read generically as
+`json['overview'] ?? json['description']` in `models/movie/video.dart`.
+`TmdbService`/`tmdb_helper.dart` only fetch cast/crew and resolve IMDb→TMDB
+ids for scrapers' own matching — neither touches text a user reads. The
+"free win" below assumed a TMDB-sourced catalog and does not apply as
+written; translating catalog descriptions would mean checking whether
+Cinemeta's own API takes a locale, a separate and unstarted question.
 
 **The risk is not the UI. It is the titles**, and the rule below is settled
 before anyone starts, because getting it wrong breaks things that look
@@ -62,11 +102,6 @@ stable identifier — Spain and Latin America give the same film different
 Spanish titles — while the original is the one string every provider agrees
 on. It is also what Stremio, Plex and Jellyfin default to, and titles are how
 people search and recognise things.
-
-**Free win, no identity risk:** TMDB is never called with `language=` at all
-today, so every synopsis and genre name arrives en-US. Passing a locale
-translates the *descriptions*, which is most of the felt benefit, as long as
-the title field is excluded from it.
 
 ### Text scale and accessibility (#69)
 

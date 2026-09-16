@@ -25,6 +25,7 @@ import '../../app_info.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -79,6 +80,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = AppLocalizations.of(context);
     final addonCount = AddonManager.instance.addons.length;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final syncedCount = (_traktConnected ? 1 : 0) + (_simklConnected ? 1 : 0);
@@ -89,7 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _SettingsCategoryTile(
         icon: Icons.extension_rounded,
         iconColor: const Color(0xFF10B981),
-        title: 'Addons',
+        title: l10n.settingsCategoryAddons,
         badgeText: '$addonCount',
         badgeColor: const Color(0xFF10B981),
         onTap: () => _navigateTo(const AddonsSettingsPage()),
@@ -97,7 +99,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _SettingsCategoryTile(
         icon: Icons.palette_rounded,
         iconColor: AppThemeService.currentPalette.value.primaryColor,
-        title: 'Appearance & Interface',
+        title: l10n.settingsCategoryAppearance,
         badgeText: AppThemeService.currentPalette.value.name,
         badgeColor: AppThemeService.currentPalette.value.primaryColor,
         onTap: () => _navigateTo(const AppearanceSettingsPage()),
@@ -106,24 +108,26 @@ class _SettingsPageState extends State<SettingsPage> {
       _SettingsCategoryTile(
         icon: Icons.cloud_download_rounded,
         iconColor: const Color(0xFF00E5FF),
-        title: 'Debrid & Cloud Streaming',
+        title: l10n.settingsCategoryDebrid,
         badgeText: _useDebrid
-            ? (_debridProvider != 'None' ? _debridProvider : 'Active')
-            : 'Disabled',
+            ? (_debridProvider != 'None' ? _debridProvider : l10n.settingsBadgeActive)
+            : l10n.settingsBadgeDisabled,
         badgeColor: _useDebrid ? const Color(0xFF00E5FF) : AppColors.inkDisabled,
         onTap: () => _navigateTo(const DebridSettingsPage()),
       ),
       _SettingsCategoryTile(
         icon: Icons.save_alt_rounded,
         iconColor: AppColors.inkMuted,
-        title: 'Backup & Data',
+        title: l10n.settingsCategoryBackup,
         onTap: () => _navigateTo(const BackupSettingsPage()),
       ),
       _SettingsCategoryTile(
         icon: Icons.link_rounded,
         iconColor: const Color(0xFFED1C24),
-        title: 'Connect',
-        badgeText: syncedCount == 0 ? 'Offline' : '$syncedCount/2 Connected',
+        title: l10n.settingsCategoryConnect,
+        badgeText: syncedCount == 0
+            ? l10n.settingsBadgeOffline
+            : l10n.settingsBadgeConnectedCount(syncedCount),
         badgeColor:
             syncedCount == 0 ? AppColors.inkDisabled : const Color(0xFF10B981),
         onTap: () => _navigateTo(const SyncSettingsPage()),
@@ -131,13 +135,13 @@ class _SettingsPageState extends State<SettingsPage> {
       _SettingsCategoryTile(
         icon: Icons.keyboard_rounded,
         iconColor: AppColors.inkMuted,
-        title: 'Keyboard Shortcuts',
+        title: l10n.settingsCategoryKeyboardShortcuts,
         onTap: () => _navigateTo(const KeyboardShortcutsPage()),
       ),
       _SettingsCategoryTile(
         icon: Icons.play_circle_outline_rounded,
         iconColor: const Color(0xFF8B5CF6),
-        title: 'Video Playback',
+        title: l10n.settingsCategoryVideoPlayback,
         onTap: () => _navigateTo(const VideoPlayerSettingsPage()),
       ),
     ];
@@ -151,9 +155,9 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Settings',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+        title: Text(
+          l10n.settingsTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
         ),
       ),
       body: AnimatedAmbientBackground(
@@ -162,7 +166,7 @@ class _SettingsPageState extends State<SettingsPage> {
           itemCount: tiles.length + 1,
           separatorBuilder: (_, __) => const SizedBox(height: 10),
           itemBuilder: (context, i) =>
-              i < tiles.length ? tiles[i] : _aboutTile(),
+              i < tiles.length ? tiles[i] : _aboutTile(context),
         ),
       ),
     );
@@ -182,7 +186,7 @@ class _SettingsPageState extends State<SettingsPage> {
         return _SettingsCategoryTile(
           icon: Icons.travel_explore_rounded,
           iconColor: const Color(0xFF38BDF8),
-          title: 'Built-in Providers',
+          title: AppLocalizations.of(context).settingsCategoryBuiltinProviders,
           badgeText: '$on/${providers.length}',
           badgeColor:
               off == 0 ? const Color(0xFF38BDF8) : const Color(0xFFF59E0B),
@@ -192,11 +196,11 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _aboutTile() {
+  Widget _aboutTile(BuildContext context) {
     return _SettingsCategoryTile(
       icon: Icons.info_outline_rounded,
       iconColor: AppColors.inkMuted,
-      title: 'About ${AppInfo.name}',
+      title: AppLocalizations.of(context).settingsCategoryAbout(AppInfo.name),
       badgeText: _appVersion,
       badgeColor: AppColors.inkDisabled,
       onTap: () => _navigateTo(const AboutSettingsPage()),

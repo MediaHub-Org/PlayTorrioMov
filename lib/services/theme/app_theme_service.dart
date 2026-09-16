@@ -26,6 +26,17 @@ abstract final class AppThemeService {
   static const _storageKey = 'app_theme_id';
   static const _modeStorageKey = 'app_theme_mode';
   static const _textScaleStorageKey = 'app_text_scale';
+  static const _localeStorageKey = 'app_locale';
+
+  /// UI languages with real translated content (#68) — not necessarily
+  /// every language `AppLocalizations.supportedLocales` lists, if that ever
+  /// grows ahead of this menu. Language-only (no country subtag): each ARB
+  /// file is `app_<code>.arb` under `lib/l10n/`.
+  static const List<Locale> supportedAppLocales = [
+    Locale('es'),
+    Locale('ar'),
+    Locale('pt'),
+  ];
 
   /// The in-app text zoom's allowed range (#69).
   ///
@@ -135,6 +146,12 @@ abstract final class AppThemeService {
   /// with the system size alone, same as before this setting existed.
   static final ValueNotifier<double> textScale = ValueNotifier<double>(1.0);
 
+  /// Override for the app's own UI language. Null (the default) means
+  /// follow the device's language when it's one of [supportedAppLocales],
+  /// falling back to English otherwise -- ordinary
+  /// [MaterialApp.localeResolutionCallback] behaviour with no override set.
+  static final ValueNotifier<Locale?> locale = ValueNotifier<Locale?>(null);
+
   static Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString(_storageKey);
@@ -150,6 +167,15 @@ abstract final class AppThemeService {
     if (storedScale != null) {
       textScale.value = storedScale.clamp(minTextScale, maxTextScale);
     }
+    final storedLocale = prefs.getString(_localeStorageKey);
+    if (storedLocale != null) {
+      for (final candidate in supportedAppLocales) {
+        if (candidate.languageCode == storedLocale) {
+          locale.value = candidate;
+          break;
+        }
+      }
+    }
   }
 
   static Future<void> setTextScale(double scale) async {
@@ -158,6 +184,18 @@ abstract final class AppThemeService {
     textScale.value = clamped;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_textScaleStorageKey, clamped);
+  }
+
+  /// Pass null to go back to following the device's language.
+  static Future<void> setLocale(Locale? newLocale) async {
+    if (locale.value == newLocale) return;
+    locale.value = newLocale;
+    final prefs = await SharedPreferences.getInstance();
+    if (newLocale == null) {
+      await prefs.remove(_localeStorageKey);
+    } else {
+      await prefs.setString(_localeStorageKey, newLocale.languageCode);
+    }
   }
 
   static Future<void> setPalette(AppThemePalette palette) async {

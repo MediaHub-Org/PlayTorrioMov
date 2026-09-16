@@ -142,7 +142,7 @@ class _SectionTab extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2),
             child: Text(
-              section.label,
+              section.localizedLabel(context),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

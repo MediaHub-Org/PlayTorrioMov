@@ -49,7 +49,7 @@ class SectionTopBar extends StatelessWidget {
             itemBuilder: (context, index) {
               final section = sections[index];
               return _Chip(
-                label: section.label,
+                label: section.localizedLabel(context),
                 icon: section.icon,
                 selected: section.id == activeId,
                 onTap: () =>

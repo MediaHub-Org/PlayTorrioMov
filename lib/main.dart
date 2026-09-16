@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'l10n/app_localizations.dart';
 
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider_linux/path_provider_linux.dart';
@@ -191,38 +194,57 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
             return ValueListenableBuilder<double>(
               valueListenable: AppThemeService.textScale,
               builder: (context, textScale, _) {
-                return MaterialApp(
-                  navigatorKey: navigatorKey,
-                  title: AppInfo.name,
-                  debugShowCheckedModeBanner: false,
-                  // Both are always built; `themeMode` picks between them, and
-                  // ThemeMode.system defers to the platform brightness, which
-                  // Flutter re-reads and rebuilds on when the OS toggles.
-                  theme: AppThemeService.createThemeData(palette, Brightness.light),
-                  darkTheme: AppThemeService.createThemeData(
-                    palette,
-                    Brightness.dark,
-                  ),
-                  themeMode: mode,
-                  scrollBehavior: const MaterialScrollBehavior().copyWith(
-                    overscroll: false,
-                  ),
-                  // Multiplies whatever the system's own accessibility text
-                  // size already contributes, rather than replacing it: at
-                  // the 1.0 default this changes nothing, and a visually
-                  // impaired user's system-wide large-text setting still
-                  // applies underneath it. `textScaleFactor` collapses the
-                  // ambient (possibly non-linear, e.g. iOS's) scaler to an
-                  // equivalent linear factor so the two can multiply.
-                  builder: (context, child) => MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                      textScaler: TextScaler.linear(
-                        MediaQuery.textScalerOf(context).textScaleFactor * textScale,
+                return ValueListenableBuilder<Locale?>(
+                  valueListenable: AppThemeService.locale,
+                  builder: (context, locale, _) {
+                    return MaterialApp(
+                      navigatorKey: navigatorKey,
+                      title: AppInfo.name,
+                      debugShowCheckedModeBanner: false,
+                      // Both are always built; `themeMode` picks between them, and
+                      // ThemeMode.system defers to the platform brightness, which
+                      // Flutter re-reads and rebuilds on when the OS toggles.
+                      theme: AppThemeService.createThemeData(palette, Brightness.light),
+                      darkTheme: AppThemeService.createThemeData(
+                        palette,
+                        Brightness.dark,
                       ),
-                    ),
-                    child: child!,
-                  ),
-                  home: const HubPage(),
+                      themeMode: mode,
+                      scrollBehavior: const MaterialScrollBehavior().copyWith(
+                        overscroll: false,
+                      ),
+                      // Null (the default) means: no override, follow the
+                      // device's language when it's one AppLocalizations
+                      // ships (see AppThemeService.supportedAppLocales), and
+                      // fall back to English (the ARB template's locale,
+                      // first in the list) otherwise -- MaterialApp's
+                      // ordinary locale resolution.
+                      locale: locale,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      localizationsDelegates: const [
+                        AppLocalizations.delegate,
+                        GlobalMaterialLocalizations.delegate,
+                        GlobalWidgetsLocalizations.delegate,
+                        GlobalCupertinoLocalizations.delegate,
+                      ],
+                      // Multiplies whatever the system's own accessibility text
+                      // size already contributes, rather than replacing it: at
+                      // the 1.0 default this changes nothing, and a visually
+                      // impaired user's system-wide large-text setting still
+                      // applies underneath it. `textScaleFactor` collapses the
+                      // ambient (possibly non-linear, e.g. iOS's) scaler to an
+                      // equivalent linear factor so the two can multiply.
+                      builder: (context, child) => MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          textScaler: TextScaler.linear(
+                            MediaQuery.textScalerOf(context).textScaleFactor * textScale,
+                          ),
+                        ),
+                        child: child!,
+                      ),
+                      home: const HubPage(),
+                    );
+                  },
                 );
               },
             );

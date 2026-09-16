@@ -34,6 +34,11 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Generated from lib/l10n/*.arb by `flutter gen-l10n` (runs automatically
+# before build/run/test/analyze because pubspec.yaml sets flutter.generate:
+# true) -- the .arb sources are tracked, this output is not.
+/lib/l10n/app_localizations*.dart
+
 # Symbolication related
 app.*.symbols
 

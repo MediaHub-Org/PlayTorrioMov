@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/widgets/common/adaptive_nav_shell.dart';
 import 'package:playtorriomov/widgets/common/pill_tab_row.dart';
 
@@ -26,6 +28,17 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        // AdaptiveNavShell resolves its section labels through
+        // AppLocalizations (#68); wired here so this exercises the real
+        // localized path rather than HubSection.localizedLabel's
+        // no-delegate English fallback.
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
         builder: (context, widget) => MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
           child: widget!,

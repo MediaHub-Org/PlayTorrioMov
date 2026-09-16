@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+
 /// A single section within the Media hub (Movies & Series, Anime, Live TV,
 /// Library).
 class HubSection {
   final String id;
+
+  /// English fallback -- used if a [BuildContext] isn't available. Prefer
+  /// [localizedLabel] wherever one is (every actual render site has one).
   final String label;
+
   final IconData icon;
 
   const HubSection({
@@ -12,6 +18,30 @@ class HubSection {
     required this.label,
     required this.icon,
   });
+
+  /// The label to render, translated (#68). [HubController.currentSections]
+  /// is `const`, so it cannot hold a context-dependent string itself --
+  /// this resolves it at the point of display instead.
+  ///
+  /// Falls back to [label] when no [AppLocalizations] delegate is in scope
+  /// -- deliberately `Localizations.of` directly rather than the generated
+  /// `AppLocalizations.of`, which (via this app's `nullable-getter: false`
+  /// in l10n.yaml) force-unwraps and throws instead of returning null.
+  /// Several existing widget tests pump this widget in a bare `MaterialApp`
+  /// with no localization delegates registered, same as any real screen
+  /// this widget hasn't been retrofitted into yet.
+  String localizedLabel(BuildContext context) {
+    final l10n = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    if (l10n == null) return label;
+    return switch (id) {
+      'movies' => l10n.navMovies,
+      'series' => l10n.navSeries,
+      'anime' => l10n.navAnime,
+      'iptv' => l10n.navLiveTv,
+      'collection' => l10n.navLibrary,
+      _ => label,
+    };
+  }
 }
 
 /// Global controller for the top-level navigation: which section is active.
