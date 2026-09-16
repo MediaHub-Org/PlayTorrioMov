@@ -36,6 +36,12 @@ class SidebarLogo extends StatelessWidget {
                 AppInfo.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                // Clamped: this sits inside TopBar's fixed
+                // height (TopBar.sharedHeight, 56) — a constant every
+                // caller uses to inset content below the bar. Unclamped, a
+                // large accessibility text size grows the wordmark past
+                // that fixed height and overflows it (#69).
+                textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                 style: TextStyle(
                   color: AppColors.ink,
                   fontWeight: FontWeight.w900,

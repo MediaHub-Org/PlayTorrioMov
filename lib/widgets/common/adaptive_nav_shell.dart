@@ -124,6 +124,14 @@ class _SectionTab extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final color = selected ? AppColors.ink : AppColors.inkSubtle;
+    // Clamped, not left to follow the system/in-app scale 1:1: this Column
+    // sits inside AdaptiveNavShell.mobileBottomBarHeight, a fixed 64 — a
+    // constant other chrome (the mini player) positions itself above via
+    // mobileBottomBarInset. Left unclamped, a large accessibility text size
+    // grows the label past what that fixed height has room for and this
+    // Column overflows it (#69). Icon + label still grow together, just
+    // capped short of that point.
+    final labelScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3);
     return InkWell(
       onTap: () => HubController.instance.setCurrentSection(section.id),
       child: Column(
@@ -138,6 +146,7 @@ class _SectionTab extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
+              textScaler: labelScaler,
               style: TextStyle(
                 color: color,
                 fontSize: 10,

@@ -102,6 +102,11 @@ class _SubTabButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               tab.label,
+              // Clamped: LibraryTabs hosts this row in AppBar.bottom, a
+              // PreferredSize fixed at 52 tall. Unclamped, a large
+              // accessibility text size grows this label past that fixed
+              // height and overflows it (#69).
+              textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
               style: TextStyle(
                 color: selected ? AppColors.onAccent : AppColors.inkAlpha(0.60),
                 fontSize: 12.5,

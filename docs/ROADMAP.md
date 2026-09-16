@@ -14,8 +14,9 @@ Last reconciled: **2026-09-15**, on `v1.8.0+33`.
 
 ## Pending
 
-**#70 and #71 are coded, not verified.** Translation and text scale (#68,
-#69) still need writing. The rest need a person with hardware.
+**#70 and #71 are coded, not verified. #69 is scoped and partly done** (four
+high-traffic fixes shipped, ~64 files still unaudited). #68 still needs
+writing. The rest need a person with hardware.
 
 ### Translation (#68)
 
@@ -70,24 +71,44 @@ the title field is excluded from it.
 ### Text scale and accessibility (#69)
 
 Flutter already applies the system text scale to every `Text`, so the app
-scales today — and *overflows*, because its layouts are fixed-height. This is
-not hypothetical: the collections card shipped in 1.8.0 needs
+scaled before this entry too — and *overflowed*, because its layouts are
+fixed-height. Not hypothetical: the collections card shipped in 1.8.0 needed
 `MediaQuery.textScalerOf(context).scale(38.0)` to reserve its label space, or
-it bursts its grid cell.
+it burst its grid cell.
 
-So an in-app zoom is about 10% wiring — one `MediaQuery(textScaler: ...)`
-above `MaterialApp` — and 90% making layouts survive it. **Do the audit
-first, the setting second**: shipping the control before the layouts hold
-just hands users a faster way to break their own screen.
+**Scoped and partly done, 2026-09-16** — 68 files in `lib/` declare a fixed
+`height:`, too many to exhaustively audit in one pass, so this was scoped to
+the highest-traffic chrome rather than all of them:
 
-`mobile_first_test` already asserts no widget declares a width a phone cannot
-give it. A companion that pumps the main screens at 2.0 text scale and fails
-on overflow turns this from an open-ended hunt into a finite list, the same
-way the width test did.
-
-Also worth a pass while in here: semantics labels on icon-only controls.
-`Tooltip` supplies one for free, which the library action row already gets,
-but nothing has checked the rest.
+- Fixed and regression-tested (`test/text_scale_overflow_test.dart`, which
+  pumps at 3x — the top of Android's accessibility slider — and asserts no
+  overflow): `AdaptiveNavShell`'s mobile bottom tab bar labels, and
+  `PillTabRow` (hosted inside `LibraryTabs`' `AppBar.bottom`, a
+  `PreferredSize` fixed at 52).
+- Fixed by inspection, not yet covered by an automated test:
+  `SidebarLogo`'s wordmark (inside `TopBar`'s fixed `sharedHeight`, 56 —
+  the regression test above caught this one by accident, pumping `TopBar`
+  while chasing the tab-bar fix, which is exactly the kind of thing a
+  grep-based audit misses) and the details page's per-credit role label
+  (`SizedBox(height: 12)` in `_buildCreditCard`).
+- Each fix is a clamp (`textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: ...)`),
+  not a layout rewrite: the element still grows with text scale, just capped
+  short of overflowing the fixed box it sits in.
+- **The in-app zoom setting is shipped** (Appearance & Interface → App Text
+  Size, `AppThemeService.textScale`), deliberately capped at 1.3x
+  (`AppThemeService.maxTextScale`) — the same ceiling every fix above was
+  clamped to, so the control can never ask them to render past what was
+  actually verified. It multiplies on top of the system's own accessibility
+  text size rather than replacing it.
+- **Not done:** the other ~64 files with a fixed `height:` were not audited.
+  System-level accessibility text scale (already true before this entry,
+  independent of the new in-app control) can still overflow any of them.
+  Whoever continues this: grep for `height:\s*[0-9]` the way
+  `mobile_first_test` greps for `SizedBox(width: ...)`, then check whether
+  each hit wraps scalable text.
+- Semantics labels on icon-only controls, mentioned here previously, is
+  still untouched — `Tooltip` supplies one for free, which the library
+  action row already gets, but nothing has checked the rest.
 
 ### Audio silent under Flatpak (#70)
 
@@ -123,26 +144,6 @@ wrapper that puts it in the floating glass card for the in-player overlay
 `AnimatedCrossFade`, inside a fixed dark card so it stays readable in light
 theme. Verified with `flutter analyze` (clean) and `flutter test` (no new
 failures) — not yet checked visually on a running build.
-
-### Collections, on a phone (#67)
-
-Shipped in 1.8.0 with 743 tests behind it and no device time at all. The
-tests are why the logic is believed right; they are not a device. Each of
-these is something a widget test cannot answer:
-
-1. Does a collection **survive a restart**? The round trip is tested against
-   a mocked `SharedPreferences`, not the real plugin writing real storage.
-2. Does **backup and restore** carry collections? It should, for free —
-   `BackupService` dumps every preferences key, so it needs no knowledge of
-   the feature. Believed is not seen.
-3. Does **drag-to-reorder** work under a finger? The off-by-one in
-   `ReorderableListView`'s destination index is tested directly, being the
-   part most likely to be wrong, but the gesture is not.
-4. Do the **four action buttons** fit a real phone, including one with large
-   system text? Tested at 320px at the default text scale; a device with
-   accessibility text is a different sum.
-5. Does the **picker sheet** clear the keyboard? It offsets by
-   `MediaQuery.viewInsetsOf`, which no test raises a keyboard against.
 
 ### Cast, against a real receiver (#28)
 

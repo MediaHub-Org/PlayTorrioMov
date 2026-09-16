@@ -25,6 +25,22 @@ class AppThemePalette {
 abstract final class AppThemeService {
   static const _storageKey = 'app_theme_id';
   static const _modeStorageKey = 'app_theme_mode';
+  static const _textScaleStorageKey = 'app_text_scale';
+
+  /// The in-app text zoom's allowed range (#69).
+  ///
+  /// Capped at 1.3x on purpose, not left open-ended: that is the same
+  /// ceiling the high-traffic chrome this control actually reaches
+  /// (AdaptiveNavShell's bottom tab bar, SidebarLogo's wordmark,
+  /// PillTabRow, and the details page credit cards) was individually
+  /// audited and clamped to, so this slider can never ask them to render
+  /// past what has actually been verified not to overflow. The rest of the
+  /// app was not exhaustively audited at this range -- see #69 in
+  /// docs/ROADMAP.md -- so this stays the ceiling until more of it has.
+  /// System-level accessibility text scale is unrelated and uncapped, as
+  /// it already was before this setting existed.
+  static const double minTextScale = 0.85;
+  static const double maxTextScale = 1.3;
 
   static const List<AppThemePalette> palettes = [
     AppThemePalette(
@@ -114,6 +130,11 @@ abstract final class AppThemeService {
     ThemeMode.system,
   );
 
+  /// In-app text zoom, on top of whatever the system's own accessibility
+  /// text size already applies. 1.0 = off (the default): the app scales
+  /// with the system size alone, same as before this setting existed.
+  static final ValueNotifier<double> textScale = ValueNotifier<double>(1.0);
+
   static Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString(_storageKey);
@@ -125,6 +146,18 @@ abstract final class AppThemeService {
       currentPalette.value = found;
     }
     themeMode.value = decodeMode(prefs.getString(_modeStorageKey));
+    final storedScale = prefs.getDouble(_textScaleStorageKey);
+    if (storedScale != null) {
+      textScale.value = storedScale.clamp(minTextScale, maxTextScale);
+    }
+  }
+
+  static Future<void> setTextScale(double scale) async {
+    final clamped = scale.clamp(minTextScale, maxTextScale);
+    if (textScale.value == clamped) return;
+    textScale.value = clamped;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_textScaleStorageKey, clamped);
   }
 
   static Future<void> setPalette(AppThemePalette palette) async {

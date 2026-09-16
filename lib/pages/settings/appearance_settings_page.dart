@@ -59,6 +59,10 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
 
           const SizedBox(height: 20),
 
+          const _TextScaleSelector(),
+
+          const SizedBox(height: 20),
+
           // Button: Live TV & Sports UI
           ValueListenableBuilder<bool>(
             valueListenable: IptvSettings.enableSpotlight,
@@ -273,6 +277,103 @@ class _ThemeModeSelector extends StatelessWidget {
                         if (value != _options.last.$1)
                           const SizedBox(width: 8),
                       ],
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// In-app text zoom (#69), independent of the system's own accessibility
+/// text size -- that already applies underneath this multiplier, on every
+/// screen, whether or not this control is touched.
+///
+/// Range is [AppThemeService.minTextScale, AppThemeService.maxTextScale],
+/// not left open-ended: that ceiling is exactly what the high-traffic
+/// chrome this reaches (bottom tab bar, wordmark, library pill tabs,
+/// details credit cards) was individually verified against. The rest of
+/// the app has not had the same pass yet -- see #69 in docs/ROADMAP.md.
+class _TextScaleSelector extends StatelessWidget {
+  const _TextScaleSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AppThemePalette>(
+      valueListenable: AppThemeService.currentPalette,
+      builder: (context, palette, _) {
+        return ValueListenableBuilder<double>(
+          valueListenable: AppThemeService.textScale,
+          builder: (context, scale, _) {
+            final theme = Theme.of(context);
+            final onSurface = theme.colorScheme.onSurface;
+
+            return Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: theme.cardTheme.color,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: onSurface.withValues(alpha: 0.08)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.text_fields_rounded,
+                        color: palette.primaryColor,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'App Text Size',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                color: onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              scale == 1.0
+                                  ? 'Default — follows your device\'s own text size setting'
+                                  : '${(scale * 100).round()}% of default, on top of your device\'s own setting',
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                height: 1.35,
+                                color: onSurface.withValues(alpha: 0.55),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Text('A', style: TextStyle(fontSize: 13, color: onSurface.withValues(alpha: 0.5))),
+                      Expanded(
+                        child: Slider(
+                          value: scale,
+                          min: AppThemeService.minTextScale,
+                          max: AppThemeService.maxTextScale,
+                          divisions: 9,
+                          activeColor: palette.primaryColor,
+                          label: '${(scale * 100).round()}%',
+                          onChanged: (value) => AppThemeService.setTextScale(value),
+                        ),
+                      ),
+                      Text('A', style: TextStyle(fontSize: 20, color: onSurface.withValues(alpha: 0.5))),
                     ],
                   ),
                 ],

@@ -1516,7 +1516,9 @@ class _DetailsPageState extends State<DetailsPage>
           // Fixed height, not a conditional child: a card whose role is
           // unknown has to occupy the same box as one whose role is known,
           // or a single uncredited actor shortens their column and the
-          // whole row's avatars stop lining up.
+          // whole row's avatars stop lining up. Capped at 1.0x (never
+          // grows, still shrinks with a smaller system setting) so a large
+          // accessibility text size cannot outgrow this fixed 12px (#69).
           SizedBox(
             height: 12,
             child: Text(
@@ -1524,6 +1526,7 @@ class _DetailsPageState extends State<DetailsPage>
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.0),
               style: TextStyle(
                 color: AppColors.inkSubtle,
                 fontSize: 10.5,
