@@ -12,6 +12,11 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   exclude:
     - 'build/**'
+    - android/**
+    - ios/**
+    - windows/**
+    - macos/**
+    - linux/**
   errors:
     deprecated_member_use: ignore
     # Promoted from its default info severity, because CI analyses with
