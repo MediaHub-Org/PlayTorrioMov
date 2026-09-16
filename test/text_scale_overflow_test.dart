@@ -14,6 +14,7 @@ import 'package:playtorriomov/services/continue_watching/continue_watching_servi
 import 'package:playtorriomov/services/theme/app_theme_service.dart';
 import 'package:playtorriomov/widgets/common/adaptive_nav_shell.dart';
 import 'package:playtorriomov/widgets/common/pill_tab_row.dart';
+import 'package:playtorriomov/widgets/common/section_header.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
@@ -407,6 +408,37 @@ void main() {
                 ),
               ),
             ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'a browse row header does not overflow at 3x text scale',
+    (tester) async {
+      // SectionHeader is the heading above every row on every browse page --
+      // the most-repeated text in the app. Its title is Expanded and its
+      // "See All" is short, so this was expected to pass; it is here because
+      // "expected to pass" is what the last four probes also said, and one
+      // of them was wrong.
+      //
+      // Wrapped in a scroll view because that is where it lives: a browse
+      // page is a scrollable, so the header has unbounded height and a
+      // subtitle that wraps to four lines at 3x is simply a taller header.
+      // Pumped bare it reports a 790px vertical overflow production cannot
+      // have.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: SectionHeader(
+              title: 'Popular Movies This Week',
+              subtitle: 'Updated daily from every addon you have installed',
+              onSeeAll: () {},
+            ),
           ),
         ),
       );

@@ -63,32 +63,44 @@ class SectionHeader extends StatelessWidget {
             ),
           ),
           if (onSeeAll != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 3),
-              child: TextButton(
-                onPressed: onSeeAll,
-                style: TextButton.styleFrom(
-                  foregroundColor: primaryColor,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'See All',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+            // Flexible on the button itself, not just inside it. The title
+            // beside it is Expanded and takes its share, but the button's
+            // own intrinsic width -- "See All" plus its chevron plus its
+            // padding -- still wanted 8.7px more than the row had at 3x.
+            // Small, and real: this is the heading above every row on every
+            // browse page.
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: TextButton(
+                  onPressed: onSeeAll,
+                  style: TextButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
                     ),
-                    SizedBox(width: 2),
-                    Icon(Icons.chevron_right_rounded, size: 20),
-                  ],
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          'See All',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.chevron_right_rounded, size: 20),
+                    ],
+                  ),
                 ),
               ),
             ),
