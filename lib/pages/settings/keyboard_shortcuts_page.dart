@@ -10,9 +10,14 @@ class KeyboardShortcutsPage extends StatelessWidget {
 
   static const _shortcuts = [
     ('Space / K', 'Play / Pause'),
-    ('J', 'Seek -5s'),
-    ('L', 'Seek +5s'),
+    ('J / ←', 'Seek -10s'),
+    ('L / →', 'Seek +10s'),
+    ('↑ / ↓', 'Volume'),
     ('M', 'Mute'),
+    ('C', 'Subtitles'),
+    ('A', 'Audio track'),
+    ('S', 'Playback speed'),
+    ('R', 'Aspect ratio'),
     ('F', 'Toggle fullscreen'),
     ('Esc', 'Back'),
     ('Tab', 'Focus hub switcher'),

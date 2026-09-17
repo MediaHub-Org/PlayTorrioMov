@@ -1849,6 +1849,22 @@ class _PlayerScreenState extends State<PlayerScreen>
                   event.logicalKey == LogicalKeyboardKey.f11) {
                 WindowService.instance.toggleFullscreen();
                 return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.keyC) {
+                // Subtitles, VLC's key. Opens the panel rather than
+                // toggling: the panel's Auto and Off pills cover the toggle
+                // in one more tap, and track selection is the thing a
+                // keyboard user reaching for subtitles usually wants.
+                _toggleMenu('subtitle');
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.keyA) {
+                _toggleMenu('audio');
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.keyS) {
+                _toggleMenu('speed');
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.keyR) {
+                _toggleMenu('aspect');
+                return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.escape) {
                 Navigator.pop(context);
                 return KeyEventResult.handled;

@@ -5,6 +5,20 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Keyboard shortcuts for the player's menus: C subtitles, A audio,
+  S speed, R aspect ratio** -- VLC's letters, for the four things a keyboard
+  user reaches for mid-scene. They open the same panels the transport-bar
+  buttons do, and Esc closes whichever is open.
+
+### Fixed
+- **The shortcuts page said J/L seek ±5 seconds; they seek ±10.** The code
+  has matched the double-tap zones since the one-amount-per-control work --
+  that was the whole point of it -- and the reference page was never
+  updated, so it documented the old amount next to a player that no longer
+  had it. The page also now lists the arrow keys' volume control, which
+  worked and was never written down.
+
 ### Changed
 - **Subtitle Appearance is inside the subtitle panel now, not a pop-up.**
   This reverses the deliberate decision recorded under 1.8.2, and the reason
