@@ -12,6 +12,7 @@ import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/models/movie/movie_detail.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
+import 'package:playtorriomov/services/subtitles/subtitle_languages.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_parser.dart';
 
 import '../../models/stream/stream_model.dart';
@@ -38,7 +39,6 @@ import '../../services/player/skip_segments_service.dart';
 import '../../widgets/player/player_aspect_menu.dart' show PlayerAspectMenu;
 import '../../widgets/player/player_audio_menu.dart';
 import '../../widgets/player/player_subtitle_menu.dart';
-import '../../widgets/player/player_sub_style_modal.dart';
 import '../../widgets/player/player_skip_button.dart';
 import '../../widgets/player/player_episodes_panel.dart';
 import '../../widgets/player/player_sources_panel.dart';
@@ -798,7 +798,15 @@ class _PlayerScreenState extends State<PlayerScreen>
           t.title ?? (lang != null ? lang.toUpperCase() : 'Track ${i + 1}');
       final idx = int.tryParse(t.id) ?? (i + 1);
       embeddedSubs.add(
-        PlayerEmbeddedSubtitle(index: idx, title: title, language: lang),
+        PlayerEmbeddedSubtitle(
+          index: idx,
+          title: title,
+          // Normalised here rather than rendered raw: mpv's own track tags
+          // (SPL, MON, ZHC, ZHT) are not languages, and a raw tag in the
+          // picker read as noise. See subtitle_languages.dart for what each
+          // means.
+          language: subtitleTrackLanguageName(lang),
+        ),
       );
     }
 
@@ -2246,10 +2254,8 @@ class _PlayerScreenState extends State<PlayerScreen>
                   _showSubSyncBar = true;
                 });
               },
-              onOpenStyleBar: () {
-                setState(() => _activeMenu = 'style');
-              },
               onAutoPick: _toggleSubtitlesEnabled,
+              player: _player,
               onClose: () => setState(() {
                 _activeMenu = null;
                 _menuParent = null;
@@ -2349,33 +2355,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                 _activeMenu = null;
                 _menuParent = null;
               }),
-            ),
-          ),
-
-        // Floating Subtitle Appearance & Customization Modal
-        if (_activeMenu == 'style' && !_isLoading)
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => setState(() {
-                _activeMenu = null;
-                _menuParent = null;
-              }),
-              child: Container(
-                color: Colors.black54,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GestureDetector(
-                  onTap: () {}, // Prevent tap through
-                  child: PlayerSubStyleModal(
-                    player: _player,
-                    onClose: () => setState(() {
-                _activeMenu = null;
-                _menuParent = null;
-              }),
-                  ),
-                ),
-              ),
             ),
           ),
 

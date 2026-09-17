@@ -6,6 +6,7 @@ import './providers/wyzie_provider.dart';
 import './providers/opensubtitles_provider.dart';
 import './providers/stremio_subtitle_provider.dart';
 import './subtitle_provider.dart';
+import './subtitle_languages.dart';
 
 class SubtitleService {
   static final SubtitleService _instance = SubtitleService._internal();
@@ -44,10 +45,16 @@ class SubtitleService {
     
     if (allVariants.isEmpty) return [];
 
-    // Group by language
+    // Group by canonical language. The same language arrives under
+    // different labels from different providers -- "Chinese" and "Chinese
+    // (Simplified)" and mpv's `zhc` are one language to a viewer choosing
+    // what to read -- and separate groups for each label made the picker's
+    // language bar a row of near-duplicates.
     final Map<String, List<SubtitleVariant>> grouped = {};
     for (final variant in allVariants) {
-      grouped.putIfAbsent(variant.language, () => []).add(variant);
+      grouped
+          .putIfAbsent(canonicalLanguageGroup(variant.language), () => [])
+          .add(variant);
     }
 
     // Sort languages alphabetically

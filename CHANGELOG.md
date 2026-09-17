@@ -6,6 +6,26 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- **Subtitle Appearance is inside the subtitle panel now, not a pop-up.**
+  This reverses the deliberate decision recorded under 1.8.2, and the reason
+  it reverses is that the pop-up hid the thing it exists to style: a
+  full-screen modal over the video covers the subtitles, so every change was
+  judged from the preview box alone. In the panel the video stays visible
+  behind the glass, and the tune button toggles the view in place.
+- **Embedded subtitle tracks no longer offer "SPL", "MON", "ZHC" or "ZHT"
+  as languages.** Those are mpv's own track tags, not languages: SPL is a
+  signs-and-songs track, MON is the same language as the audio, and ZHC/ZHT
+  are Chinese simplified and traditional. They rendered raw, so a file's
+  subtitle list read as noise. They are named now, and the Chinese family
+  groups under one heading instead of four.
+- **The subtitle picker groups by canonical language.** The same language
+  arriving from different providers under different labels -- "Chinese",
+  "Chinese (Simplified)", mpv's `zhc` -- used to be separate groups, which
+  made the language bar a row of near-duplicates.
+- **The player's menus sit closer to the transport bar.** The clearance was
+  sized to clear the whole bar, which left the card floating a hand's width
+  above the buttons it belongs to. It clears the bar's top padding now, so
+  the menu reads as attached to the row rather than hovering over it.
 - **The settings button is gone; the sleep timer is a button of its own.**
   After the controls grew their own buttons, the gear held only the subtitle
   entry and the sleep timer -- and a menu for one control is worse than a

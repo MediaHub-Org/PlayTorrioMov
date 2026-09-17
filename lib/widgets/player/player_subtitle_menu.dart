@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
 import 'language_flag.dart';
+import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
 import 'player_glass.dart';
 
 /// Full-featured subtitle selection, search, and timing menu.
@@ -22,8 +23,11 @@ class PlayerSubtitleMenu extends StatefulWidget {
   final ValueChanged<PlayerEmbeddedSubtitle> onSelectEmbedded;
   final VoidCallback onToggleOff;
   final VoidCallback onOpenSyncBar;
-  final VoidCallback onOpenStyleBar;
   final VoidCallback onClose;
+
+  /// The media player, handed to the embedded appearance editor so its live
+  /// preview and its changes apply to the running session.
+  final dynamic player;
 
   /// Picks the best subtitle automatically -- the audio language first, then
   /// the file's default, then English, then anything. The transport bar's
@@ -53,9 +57,9 @@ class PlayerSubtitleMenu extends StatefulWidget {
     required this.onSelectEmbedded,
     required this.onToggleOff,
     required this.onOpenSyncBar,
-    required this.onOpenStyleBar,
     required this.onAutoPick,
     required this.onClose,
+    this.player,
     this.onBack,
   });
 
@@ -68,6 +72,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   String _sourceFilter = 'all'; // 'all', 'embedded', 'external'
   bool _filterHI = false;
   bool _filterForced = false;
+
+  /// Whether the appearance editor is showing in place of the track list.
+  /// The editor used to open as its own pop-up over the video, which hid
+  /// the subtitles it exists to style -- the one thing you need to see while
+  /// adjusting them. In here it shares the panel, and the video stays
+  /// visible behind the glass.
+  bool _showAppearance = false;
   List<SubtitleLanguageGroup> _dynamicGroups = [];
   bool _isLoadingSearch = false;
   String? _searchQuery;
@@ -332,16 +343,17 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                       const SizedBox(width: 3),
                     ],
 
-                    // Subtitle Appearance Style Bar
+                    // Subtitle Appearance, shown inside this panel rather
+                    // than as a pop-up over the video: the pop-up hid the
+                    // subtitles it exists to style.
                     PlayerIconButton(
                       size: buttonSize,
                       iconSize: iconSize,
                       icon: const Icon(Icons.tune_rounded),
                       tooltip: 'Subtitle Appearance',
-                      onPressed: () {
-                        widget.onClose();
-                        widget.onOpenStyleBar();
-                      },
+                      showActiveBadge: _showAppearance,
+                      onPressed: () =>
+                          setState(() => _showAppearance = !_showAppearance),
                     ),
                     // No close button: the full-screen barrier behind every
                     // open menu dismisses on a tap anywhere off the panel,
@@ -359,11 +371,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             ),
           ),
 
-          // 2. Responsive Content Body
+          // 2. Responsive Content Body -- the track list, or the appearance
+          // editor when the tune button has switched to it.
           Expanded(
-            child: isCompact
-                ? _buildCompactLayout(context, isOff, filteredVariants, totalVariantsCount)
-                : _buildDesktopLayout(context, isOff, filteredVariants, totalVariantsCount, isLandscapeMobile),
+            child: _showAppearance
+                ? SubtitleStyleEditor(player: widget.player)
+                : (isCompact
+                    ? _buildCompactLayout(
+                        context, isOff, filteredVariants, totalVariantsCount)
+                    : _buildDesktopLayout(context, isOff, filteredVariants,
+                        totalVariantsCount, isLandscapeMobile)),
           ),
         ],
       ),

@@ -141,3 +141,50 @@ String subtitleLanguageName(String rawCode) {
   if (known != null) return known;
   return code.length <= 3 ? code.toUpperCase() : code;
 }
+
+/// mpv's own track tags that are not languages at all, mapped to what they
+/// mean. These arrive on *embedded* tracks -- the container's own metadata --
+/// and were rendered raw before, so a file's subtitle list offered "SPL",
+/// "MON", "ZHC" and "ZHT" as though they were languages, which nobody could
+/// be expected to read:
+///
+/// - `spl` — "subtitle only": a track carrying titles-on-screen or signs,
+///   with no spoken dialogue to translate. Not a language; a kind of track.
+/// - `mon` — "monolingual": the subtitles match the audio, i.e. the same
+///   language the dialogue is in.
+/// - `zhc` / `zht` — Chinese simplified and traditional. Real languages in
+///   effect, but codes mpv invents rather than ISO ones, so they rendered as
+///   three-letter noise instead of joining the Chinese group.
+const Map<String, String> _mpvTagToDisplayName = {
+  'spl': 'Signs & Songs',
+  'mon': 'Same as audio',
+  'zhc': 'Chinese (Simplified)',
+  'zht': 'Chinese (Traditional)',
+};
+
+/// The display name for a language that may be an ISO code, an mpv track
+/// tag, or a name already.
+///
+/// The mpv tags are checked first: `zhc` would otherwise fall through to the
+/// unknown-code branch and render as "ZHC", which is the noise this exists
+/// to replace.
+String subtitleTrackLanguageName(String? rawLanguage) {
+  final raw = rawLanguage?.trim() ?? '';
+  if (raw.isEmpty) return '';
+  final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
+  if (mpv != null) return mpv;
+  return subtitleLanguageName(raw);
+}
+
+/// The canonical group a language belongs to, so the same language arriving
+/// under different labels lands in one group rather than several.
+///
+/// The Chinese family is the case that made this worth writing: a single
+/// file can carry `zh`, `chi`, `zho`, `zhc` and `zht` tracks, which the
+/// picker showed as four separate languages. They are one language with two
+/// scripts, and the group header says which.
+String canonicalLanguageGroup(String? rawLanguage) {
+  final name = subtitleTrackLanguageName(rawLanguage);
+  if (name.startsWith('Chinese')) return 'Chinese';
+  return name;
+}

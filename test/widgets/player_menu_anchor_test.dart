@@ -39,7 +39,6 @@ void main() {
               onSelectEmbedded: (_) {},
               onToggleOff: () {},
               onOpenSyncBar: () {},
-              onOpenStyleBar: () {},
               onAutoPick: () {},
               onClose: () {},
             ),

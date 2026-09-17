@@ -140,7 +140,12 @@ class PlayerMenuAnchor extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final isShort = size.height < 500;
     final isCompact = size.width < 680;
-    return (isShort ? 46.0 : (isCompact ? 132.0 : 150.0)) +
+    // The menu sits just above the transport bar's buttons -- close enough
+    // that the row it belongs to is visibly the row it floats over, not a
+    // card floating mid-screen. The bar is ~126px tall on a phone and ~150
+    // on wide screens; only its top padding is cleared, so the card's bottom
+    // edge lands at the buttons rather than a hand's width above them.
+    return (isShort ? 46.0 : (isCompact ? 96.0 : 112.0)) +
         MediaQuery.paddingOf(context).bottom;
   }
 
