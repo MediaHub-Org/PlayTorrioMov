@@ -3,7 +3,14 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.3+36] - 2026-09-17
+
+The player's controls reorganised around one button each, the subtitle
+picker made legible, and a Documentaries shelf. Most of this came from
+using the player rather than from a report: the sleep timer that did
+nothing, the flags that pointed at the wrong countries, and the aspect
+menu holding a subtitle control were all found by opening the menus and
+reading what they actually said.
 
 ### Added
 - **A Documentaries row on the Films page.** Documentaries are films -- the

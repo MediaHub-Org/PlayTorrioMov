@@ -7,7 +7,7 @@ the release process is in [RELEASES.md](RELEASES.md), and item numbers
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-16**, on `v1.8.2+35`.
+Last reconciled: **2026-09-17**, on `v1.8.3+36`.
 
 ---
 
