@@ -23,7 +23,7 @@ class MediaHub extends StatelessWidget {
         return const TypeCatalogPage(
           key: ValueKey('movie'),
           type: 'movie',
-          title: 'Movies',
+          title: 'Films',
         );
       case 'series':
         SearchScope.set('series');
@@ -46,7 +46,7 @@ class MediaHub extends StatelessWidget {
         return const TypeCatalogPage(
           key: ValueKey('movie'),
           type: 'movie',
-          title: 'Movies',
+          title: 'Films',
         );
     }
   }

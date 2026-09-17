@@ -31,7 +31,7 @@ void main() {
       // position out of sync (see the dedicated position test below).
       expect(find.byType(TopBar), findsOneWidget);
 
-      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('Films'), findsOneWidget);
       expect(find.text('Series'), findsOneWidget);
       expect(find.text('Anime'), findsOneWidget);
       expect(find.text('Live TV'), findsOneWidget);
@@ -152,7 +152,7 @@ void main() {
       )));
       await tester.pumpAndSettle();
 
-      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('Films'), findsOneWidget);
       expect(find.text('hub content'), findsOneWidget);
 
       Navigator.of(hubContentContext).push(MaterialPageRoute<void>(
@@ -162,7 +162,7 @@ void main() {
 
       expect(find.text('pushed details page'), findsOneWidget);
       expect(find.text('hub content'), findsNothing);
-      expect(find.text('Movies'), findsOneWidget,
+      expect(find.text('Films'), findsOneWidget,
           reason: 'the 5-section bar must stay visible above pushed pages');
     });
   });

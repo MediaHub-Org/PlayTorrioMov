@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
 
-  "navMovies": "Movies",
+  "navMovies": "Films",
   "@navMovies": {"description": "Hub bottom tab / section label"},
   "navSeries": "Series",
   "@navSeries": {"description": "Hub bottom tab / section label"},

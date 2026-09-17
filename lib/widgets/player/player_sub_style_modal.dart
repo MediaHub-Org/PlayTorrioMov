@@ -143,27 +143,19 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     // once space gets tight.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 460;
-        final isShort = constraints.maxHeight < 420;
-
         return ValueListenableBuilder<int>(
           valueListenable: PlayerSettings.changeNotifier,
           builder: (context, _, __) {
             return Column(
               children: [
-                // 1. Header Bar
-                _buildHeader(context, isCompact || isShort),
-
-                // 2. Interactive Live Preview
-                if (!isShort) _buildLivePreview(),
-
-                // 3. Quick Presets Carousel
+                // No header of its own: the subtitle panel's header names
+                // this view and carries the back arrow. No preview box
+                // either -- the real subtitles render on the video behind
+                // the glass, which is the preview that matters.
                 _buildPresetsBar(),
 
-                // 4. Tab Bar Navigation
                 _buildTabBar(),
 
-                // 5. Scrollable Tab View Content
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
@@ -188,161 +180,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
   // Header
   // ───────────────────────────────────────────────────────────────────────────
 
-  Widget _buildHeader(BuildContext context, bool isSmall) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: isSmall ? 8 : 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: isSmall ? 28 : 34,
-                height: isSmall ? 28 : 34,
-                decoration: BoxDecoration(
-                  color: PlayerTheme.accentSoft,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.subtitles_rounded,
-                  color: PlayerTheme.accent,
-                  size: isSmall ? 16 : 19,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Subtitle Appearance',
-                    style: TextStyle(
-                      color: PlayerTheme.ink,
-                      fontSize: isSmall ? 13.5 : 15.5,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const Text(
-                    'libass / libmpv hardware-rendered subtitles',
-                    style: TextStyle(
-                      color: PlayerTheme.inkSubtle,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              // Reset Button
-              IconButton(
-                icon: const Icon(Icons.restart_alt_rounded, size: 19, color: PlayerTheme.inkMuted),
-                tooltip: 'Reset Subtitle Defaults',
-                onPressed: () => PlayerSettings.resetSubtitleDefaults(player: widget.player),
-              ),
-              // Close Button — only when floating above the player; the
-              // settings-page embedding has no dialog to dismiss.
-              if (widget.onClose != null)
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 20, color: Colors.white),
-                  tooltip: 'Close',
-                  onPressed: widget.onClose,
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   // ───────────────────────────────────────────────────────────────────────────
   // Live Subtitle Preview Area
   // ───────────────────────────────────────────────────────────────────────────
 
-  Widget _buildLivePreview() {
-    final textColor = _parseColorFromHex(PlayerSettings.subColor.value);
-    final boxColor = _parseColorFromHex(PlayerSettings.subBackColor.value, fallback: Colors.transparent);
-    final borderColor = _parseColorFromHex(PlayerSettings.subBorderColor.value, fallback: Colors.black);
-    final shadowColor = _parseColorFromHex(PlayerSettings.subShadowColor.value, fallback: Colors.black54);
-
-    final fontName = PlayerSettings.subFont.value == 'subfont'
-        ? 'Poppins'
-        : PlayerSettings.subFont.value;
-
-    final fontSize = (PlayerSettings.subFontSize.value * 0.55 * PlayerSettings.subScale.value).clamp(11.0, 32.0);
-    final borderSize = (PlayerSettings.subBorderSize.value * 0.75).clamp(0.0, 5.0);
-    final shadowOffset = PlayerSettings.subShadowOffset.value * 1.2;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(14, 10, 14, 6),
-      height: 74,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF020617), Color(0xFF1E1B4B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: const [
-          BoxShadow(color: Colors.black45, blurRadius: 8, offset: Offset(0, 3)),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Background ambient grid / video frame simulator
-          Positioned.fill(
-            child: Opacity(
-              opacity: 0.15,
-              child: CustomPaint(
-                painter: _VideoGridPainter(),
-              ),
-            ),
-          ),
-
-          // Live Subtitle Text
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: boxColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              'PlayTorrio • Sample Subtitle Preview',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: fontName,
-                fontSize: fontSize,
-                fontWeight: PlayerSettings.subBold.value ? FontWeight.bold : FontWeight.w600,
-                fontStyle: PlayerSettings.subItalic.value ? FontStyle.italic : FontStyle.normal,
-                color: textColor,
-                shadows: [
-                  if (borderSize > 0) ...[
-                    Shadow(color: borderColor, offset: Offset(-borderSize, -borderSize)),
-                    Shadow(color: borderColor, offset: Offset(borderSize, -borderSize)),
-                    Shadow(color: borderColor, offset: Offset(borderSize, borderSize)),
-                    Shadow(color: borderColor, offset: Offset(-borderSize, borderSize)),
-                  ],
-                  if (shadowOffset > 0)
-                    Shadow(
-                      color: shadowColor,
-                      offset: Offset(shadowOffset, shadowOffset),
-                      blurRadius: shadowOffset * 1.5,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ───────────────────────────────────────────────────────────────────────────
   // Presets Horizontal Bar
@@ -1147,21 +989,3 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
   }
 }
 
-class _VideoGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white24
-      ..strokeWidth = 0.5;
-
-    for (double i = 0; i < size.width; i += 20) {
-      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
-    }
-    for (double i = 0; i < size.height; i += 20) {
-      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}

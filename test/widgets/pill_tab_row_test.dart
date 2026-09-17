@@ -14,7 +14,7 @@ void main() {
         wrap(
           PillTabRow(
             tabs: const [
-              SubTab(id: 'movie', label: 'Movies', icon: Icons.movie_rounded),
+              SubTab(id: 'movie', label: 'Films', icon: Icons.movie_rounded),
               SubTab(
                 id: 'series',
                 label: 'Series',
@@ -27,7 +27,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Movies'), findsOneWidget);
+      expect(find.text('Films'), findsOneWidget);
       expect(find.text('Series'), findsOneWidget);
     });
 
@@ -37,7 +37,7 @@ void main() {
         wrap(
           PillTabRow(
             tabs: const [
-              SubTab(id: 'movie', label: 'Movies', icon: Icons.movie_rounded),
+              SubTab(id: 'movie', label: 'Films', icon: Icons.movie_rounded),
               SubTab(
                 id: 'series',
                 label: 'Series',

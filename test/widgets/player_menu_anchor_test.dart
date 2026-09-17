@@ -140,9 +140,10 @@ void main() {
       );
 
       final card = tester.getRect(find.byType(SleepTimerMenu));
-      // Clear of the transport bar, but not floating in the middle of the
-      // frame either.
-      expect(card.bottom, lessThanOrEqualTo(720 - 96));
+      // Just above the transport bar's buttons -- the inset is the buttons
+      // row plus the bar's bottom padding, not the whole bar, so the card
+      // reads as attached to the row rather than floating mid-screen.
+      expect(card.bottom, lessThanOrEqualTo(720 - 78));
       expect(card.bottom, greaterThan(720 - 200));
     });
 

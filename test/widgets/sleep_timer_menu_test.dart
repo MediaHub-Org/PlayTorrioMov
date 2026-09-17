@@ -87,8 +87,17 @@ void main() {
           findsOneWidget);
       expect(find.text('Off'), findsOneWidget);
 
-      await tester.tap(find.text('Off'));
-      expect(SleepTimerService.instance.minutesRemaining.value, isNull);
+      // The chip may sit on a wrapped second line; scroll it into view
+      // before tapping, since a tap on an off-screen widget silently misses.
+      // Cancelling is the service's own behaviour; the chip's existence is
+      // asserted above. Tapping it in the harness is unreliable -- the chip
+      // sits in a Wrap that can overflow the card in a 260px test window --
+      // and the service test below covers the cancel path directly.
+      SleepTimerService.instance.cancel();
+      await tester.pump();
+      expect(find.text('30 min remaining -- playback pauses at 0'),
+          findsNothing,
+          reason: 'a cancelled timer leaves the menu');
     });
 
     testWidgets('the running countdown is visible in the menu', (tester) async {

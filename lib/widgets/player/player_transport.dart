@@ -115,7 +115,7 @@ class PlayerTransport extends StatelessWidget {
             onScrubbingChanged: onScrubbingChanged,
           ),
 
-          SizedBox(height: isCompact ? 8 : 14),
+          SizedBox(height: isCompact ? 4 : 8),
 
           // Bottom Controls Row: volume at one end, the menu triggers at
           // the other.

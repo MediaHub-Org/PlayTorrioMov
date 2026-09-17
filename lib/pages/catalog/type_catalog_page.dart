@@ -58,6 +58,13 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
 
   List<String> _availableGenres = [];
   String? _genreFilter;
+
+  /// The Documentary genre, as its own row. Documentaries are films -- the
+  /// addon catalogs carry them under the same type -- but a viewer looking
+  /// for one is rarely browsing; they want the shelf. Sourced by genre
+  /// rather than by a catalog of its own, so it works with whatever addons
+  /// are installed and costs no new catalog.
+  List<Movie> _documentaries = [];
   List<Movie> _genreItems = [];
   bool _loadingGenre = false;
 
@@ -118,6 +125,38 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     _load();
   }
 
+  /// Loads the Documentary row. Silent on failure: it is a bonus shelf, and
+  /// a spinner or an error card for it would suggest the page is broken when
+  /// only an addon happens not to carry the genre.
+  Future<void> _loadDocumentaries() async {
+    try {
+      final sections = await _manager.fetchByGenre('Documentary');
+      final seen = <String>{};
+      final items = <Movie>[];
+      for (final section in sections) {
+        if (section.contentType != widget.type) continue;
+        for (final movie in section.movies) {
+          final typed = Movie(
+            id: movie.id,
+            name: movie.name,
+            poster: movie.poster,
+            background: movie.background,
+            year: movie.year,
+            type: widget.type,
+            addonBaseUrl: movie.addonBaseUrl,
+            imdbRating: movie.imdbRating,
+          );
+          final key = '${typed.type}:${typed.id}';
+          if (seen.add(key)) items.add(typed);
+        }
+      }
+      if (!mounted) return;
+      setState(() => _documentaries = items);
+    } catch (_) {
+      // Silent: a bonus shelf, not a load the page depends on.
+    }
+  }
+
   Future<void> _load() async {
     setState(() {
       _loading = true;
@@ -167,6 +206,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         _loading = false;
       });
       _fetchHeroDetails(_heroItems);
+      if (widget.type == 'movie') _loadDocumentaries();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -253,6 +293,11 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                 title: section.title,
                 items: _sorted(section.movies),
               ),
+          if (widget.type == 'movie' && _documentaries.isNotEmpty)
+            BrowseRow<Movie>(
+              title: 'Documentaries',
+              items: _documentaries,
+            ),
           if (_items.isNotEmpty)
             BrowseRow<Movie>(
               title: 'Latest Releases',

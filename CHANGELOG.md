@@ -6,6 +6,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **A Documentaries row on the Films page.** Documentaries are films -- the
+  addon catalogs carry them under the same type -- but a viewer looking for
+  one is rarely browsing; they want the shelf. Sourced by genre rather than
+  by a catalog of its own, so it works with whatever addons are installed
+  and costs no new catalog. It only appears when the installed addons
+  actually carry Documentary titles, and loads silently: an addon without
+  the genre costs the page nothing.
+
+### Changed
+- **"Movies" is now "Films".** The section carries documentaries, and
+  "Movies" was the name that made that feel like a misfile. "Films" is
+  broader without being vaguer. The other translations already said the
+  right thing in their own languages (Películas, أفلام, Filmes) and are
+  untouched. Live TV's portal browser still says "Movies" for its VOD tab:
+  that is the portal's own category name, not ours to rename.
 - **Keyboard shortcuts for the player's menus: C subtitles, A audio,
   S speed, R aspect ratio** -- VLC's letters, for the four things a keyboard
   user reaches for mid-scene. They open the same panels the transport-bar

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
 
 /// Design tokens and glass styling for the modern video player UI.
@@ -141,11 +142,11 @@ class PlayerMenuAnchor extends StatelessWidget {
     final isShort = size.height < 500;
     final isCompact = size.width < 680;
     // The menu sits just above the transport bar's buttons -- close enough
-    // that the row it belongs to is visibly the row it floats over, not a
-    // card floating mid-screen. The bar is ~126px tall on a phone and ~150
-    // on wide screens; only its top padding is cleared, so the card's bottom
-    // edge lands at the buttons rather than a hand's width above them.
-    return (isShort ? 46.0 : (isCompact ? 96.0 : 112.0)) +
+    // that the row it belongs to is visibly the row it floats over. The
+    // figure is the buttons row (36/42) plus the bar's bottom padding and a
+    // few px of air, not the whole bar: clearing everything put the card a
+    // hand's width above the icons, floating mid-screen.
+    return (isShort ? 46.0 : (isCompact ? 62.0 : 78.0)) +
         MediaQuery.paddingOf(context).bottom;
   }
 
@@ -286,6 +287,42 @@ class PlayerMenuHeader extends StatelessWidget {
   }
 }
 
+/// A focus indicator for D-pad/keyboard navigation: a rounded ring drawn
+/// just outside the widget it wraps.
+///
+/// The player's controls were built pointer-first -- GestureDetector, no
+/// Focus -- so a remote's directional pad could not reach them at all, and
+/// a keyboard's Tab key moved focus invisibly. This is the visible half of
+/// fixing that; the interactive widgets wrap themselves in a [Focus] and
+/// show this ring when they have it.
+class FocusRing extends StatelessWidget {
+  final bool visible;
+  final double borderRadius;
+  final Widget child;
+
+  const FocusRing({
+    super.key,
+    required this.visible,
+    this.borderRadius = 9999,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!visible) return child;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: PlayerTheme.accent, width: 2),
+      ),
+      // A little outside the widget, so the ring reads as marking it rather
+      // than as a border of it.
+      padding: const EdgeInsets.all(2),
+      child: child,
+    );
+  }
+}
+
 class PlayerIconButton extends StatefulWidget {
   final Widget icon;
   final VoidCallback? onPressed;
@@ -407,7 +444,7 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
 }
 
 /// Rounded pill toggle chip for filters and options.
-class PlayerToggleChip extends StatelessWidget {
+class PlayerToggleChip extends StatefulWidget {
   final bool active;
   final String label;
   final String? count;
@@ -424,58 +461,98 @@ class PlayerToggleChip extends StatelessWidget {
   });
 
   @override
+  State<PlayerToggleChip> createState() => _PlayerToggleChipState();
+}
+
+class _PlayerToggleChipState extends State<PlayerToggleChip> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: disabled ? null : onClick,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 150),
-        opacity: disabled ? 0.35 : 1.0,
-        child: Container(
-          height: 28,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: active ? PlayerTheme.raised : Colors.transparent,
-            borderRadius: BorderRadius.circular(9999),
-            border: Border.all(
-              color: active ? PlayerTheme.edge : Colors.transparent,
-              width: 1,
+    return Focus(
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: (node, event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.select) {
+          if (!widget.disabled) widget.onClick();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: FocusRing(
+        visible: _focused,
+        child: MouseRegion(
+        // Hover feedback on a chip: without it the sleep timer presets and
+        // the subtitle filters read as labels rather than buttons, and the
+        // only way to learn they press is to press them.
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 150),
+          opacity: widget.disabled ? 0.35 : 1.0,
+          child: AnimatedContainer(
+            height: 28,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            duration: const Duration(milliseconds: 120),
+            decoration: BoxDecoration(
+              color: widget.active
+                  ? PlayerTheme.raised
+                  : ((_hovered || _focused)
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.transparent),
+              borderRadius: BorderRadius.circular(9999),
+              border: Border.all(
+                color: widget.active
+                    ? PlayerTheme.edge
+                    : ((_hovered || _focused)
+                          ? PlayerTheme.edgeSoft
+                          : Colors.transparent),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Flexible, not bare: a chip is sized by its label, and at a
+                // large text scale the label can want more than the row it
+                // sits in has -- 13px past the settings card on the sleep
+                // timer presets. Ellipsizing a chip label beats painting it
+                // over the neighbouring one.
+                Flexible(
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: widget.active
+                          ? PlayerTheme.ink
+                          : PlayerTheme.inkMuted,
+                      fontSize: 11.5,
+                      fontWeight: widget.active
+                          ? FontWeight.w600
+                          : FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (widget.count != null) ...[
+                  const SizedBox(width: 4),
+                  Text(
+                    widget.count!,
+                    style: const TextStyle(
+                      color: PlayerTheme.inkSubtle,
+                      fontSize: 11,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Flexible, not bare: a chip is sized by its label, and at a
-              // large text scale the label can want more than the row it
-              // sits in has -- 13px past the settings card on the sleep
-              // timer presets. Ellipsizing a chip label beats painting it
-              // over the neighbouring one.
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: active ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                    fontSize: 11.5,
-                    fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                ),
-              ),
-              if (count != null) ...[
-                const SizedBox(width: 4),
-                Text(
-                  count!,
-                  style: const TextStyle(
-                    color: PlayerTheme.inkSubtle,
-                    fontSize: 11,
-                    fontFeatures: [FontFeature.tabularFigures()],
-                  ),
-                ),
-              ],
-            ],
-          ),
         ),
+      ),
       ),
     );
   }
 }
+

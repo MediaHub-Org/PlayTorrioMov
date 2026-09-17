@@ -264,7 +264,17 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                       // thing behind the gear and had no way back, so
                       // reaching Aspect ratio from here meant closing and
                       // reopening it.
-                      if (widget.onBack != null) ...[
+                      if (_showAppearance) ...[
+                        PlayerIconButton(
+                          size: buttonSize,
+                          iconSize: iconSize,
+                          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                          tooltip: 'Back to subtitles',
+                          onPressed: () =>
+                              setState(() => _showAppearance = false),
+                        ),
+                        const SizedBox(width: 6),
+                      ] else if (widget.onBack != null) ...[
                         PlayerIconButton(
                           size: buttonSize,
                           iconSize: iconSize,
@@ -274,15 +284,20 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         ),
                         const SizedBox(width: 6),
                       ],
-                      const Text(
-                        'Subtitles',
-                        style: TextStyle(
+                      Text(
+                        // The header names the view, and the back arrow
+                        // returns from Appearance to the track list -- the
+                        // same pattern every other player menu uses, so the
+                        // editor is a step inside the panel rather than a
+                        // second panel fighting it for the screen.
+                        _showAppearance ? 'Appearance' : 'Subtitles',
+                        style: const TextStyle(
                           color: PlayerTheme.ink,
                           fontSize: 14.5,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (totalVariantsCount > 0) ...[
+                      if (!_showAppearance && totalVariantsCount > 0) ...[
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
