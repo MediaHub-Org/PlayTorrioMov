@@ -395,10 +395,70 @@ class AddonManager {
     }
 
     final results = await Future.wait(futures);
-    final sections = results
+    var sections = results
         .where((s) => s != null && s.movies.isNotEmpty)
         .cast<MovieSection>()
         .toList();
+
+    // One retry for the catalogs that failed. The first network burst an app
+    // makes is the one most likely to lose entries: DNS is cold, the
+    // connection pool is empty, and a 15s timeout on one slow host would
+    // otherwise drop its whole row for the session -- which is what "the
+    // list is sometimes short" was. A failed catalog is retried once here,
+    // before the page renders, rather than waiting for a pull-to-refresh
+    // the user has no way of knowing they need.
+    final failedCount = attempted - sections.length;
+    if (failedCount > 0 && sections.isNotEmpty) {
+      final retryFutures = <Future<MovieSection?>>[];
+      for (final addon in active) {
+        for (final catalog in addon.manifest.catalogs) {
+          if (catalog.type != type) continue;
+          if (sections.any((s) =>
+              s.addonBaseUrl == addon.baseUrl &&
+              s.catalog.id == catalog.id)) {
+            continue; // already have it
+          }
+          retryFutures.add(() async {
+            try {
+              final movies = await MetadataService.fetchCatalog(
+                baseUrl: addon.baseUrl,
+                type: catalog.type,
+                catalogId: catalog.id,
+              );
+              if (movies.isEmpty) return null;
+              final typedMovies = movies
+                  .where((m) => m.type == type)
+                  .map((m) => Movie(
+                        id: m.id,
+                        name: m.name,
+                        poster: m.poster,
+                        year: m.year,
+                        type: type,
+                        addonBaseUrl: m.addonBaseUrl,
+                      ))
+                  .toList();
+              if (typedMovies.isEmpty) return null;
+              return MovieSection(
+                title: _catalogDisplayName(catalog),
+                subtitle: addon.manifest.name,
+                contentType: type,
+                addonBaseUrl: addon.baseUrl,
+                catalog: catalog,
+                movies: typedMovies,
+              );
+            } catch (_) {
+              return null; // Second failure: really gone, see if-check below
+            }
+          }());
+        }
+      }
+      final retried = await Future.wait(retryFutures);
+      sections = sections +
+          retried
+              .where((s) => s != null && s.movies.isNotEmpty)
+              .cast<MovieSection>()
+              .toList();
+    }
 
     if (sections.isEmpty && attempted > 0 && lastError != null) {
       throw lastError!;

@@ -25,11 +25,13 @@ void main() {
     // of their own; what remained was the sleep timer, and a menu for one
     // control is worse than a button for it.
 
-    testWidgets('offers the four presets', (tester) async {
+    testWidgets('offers the presets, each with its own row', (tester) async {
       await tester.pumpWidget(wrap(const SleepTimerMenu()));
 
-      for (final min in ['15 min', '30 min', '45 min', '60 min']) {
-        expect(find.text(min), findsOneWidget);
+      // Rows, not chips: each row shows the consequence of the choice
+      // ("pauses at HH:MM"), so the label is a prefix match.
+      for (final min in [15, 30, 45, 60, 90]) {
+        expect(find.textContaining('$min min -- pauses at'), findsOneWidget);
       }
     });
 
@@ -83,20 +85,18 @@ void main() {
       SleepTimerService.instance.start(30);
       await tester.pumpWidget(wrap(const SleepTimerMenu()));
 
-      expect(find.text('30 min remaining -- playback pauses at 0'),
+      // The countdown lives in the Off row now: "Off (cancel -- N min
+      // left)" is both the state and the way out, one widget instead of two.
+      expect(find.textContaining('Off (cancel -- 30 min left'),
           findsOneWidget);
-      expect(find.text('Off'), findsOneWidget);
 
-      // The chip may sit on a wrapped second line; scroll it into view
-      // before tapping, since a tap on an off-screen widget silently misses.
-      // Cancelling is the service's own behaviour; the chip's existence is
-      // asserted above. Tapping it in the harness is unreliable -- the chip
-      // sits in a Wrap that can overflow the card in a 260px test window --
-      // and the service test below covers the cancel path directly.
+      // Cancelling is the service's own behaviour; the row's existence is
+      // asserted above, and the service test covers the cancel path
+      // directly -- tapping it in the harness is unreliable in a short
+      // test window.
       SleepTimerService.instance.cancel();
       await tester.pump();
-      expect(find.text('30 min remaining -- playback pauses at 0'),
-          findsNothing,
+      expect(find.textContaining('Off (cancel'), findsNothing,
           reason: 'a cancelled timer leaves the menu');
     });
 
@@ -108,10 +108,8 @@ void main() {
       SleepTimerService.instance.start(45);
       await tester.pumpWidget(wrap(const SleepTimerMenu()));
 
-      expect(find.text('45 min remaining -- playback pauses at 0'),
+      expect(find.textContaining('Off (cancel -- 45 min left'),
           findsOneWidget);
-      // And an Off chip exists to cancel it with.
-      expect(find.text('Off'), findsOneWidget);
       SleepTimerService.instance.cancel();
     });
 
@@ -122,5 +120,66 @@ void main() {
 
       expect(find.byIcon(Icons.close_rounded), findsNothing);
     });
+    group('custom duration steppers', () {
+      // Editing alone does not arm the timer -- the row says "Set", and
+      // starting it is its own tap, so nudging past a value by accident
+      // does not silently start a two-hour timer.
+      testWidgets('nudging the steppers edits the value without starting',
+          (tester) async {
+        await tester.pumpWidget(wrap(const SleepTimerMenu()));
+
+        expect(find.text('20 min'), findsOneWidget,
+            reason: 'the steppers open on a sensible default');
+
+        await tester.tap(find.byIcon(Icons.add_rounded));
+        await tester.pump();
+        expect(find.text('25 min'), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.remove_rounded));
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.remove_rounded));
+        await tester.pump();
+        // "15 min" also matches the 15-minute preset row, so assert the
+        // custom value through arming it: the check button starts whatever
+        // the steppers currently show.
+        expect(SleepTimerService.instance.minutesRemaining.value, isNull,
+            reason: 'editing is not arming');
+        await tester.tap(find.byIcon(Icons.check_rounded).last);
+        await tester.pump();
+        expect(SleepTimerService.instance.minutesRemaining.value, 15,
+            reason: 'two minus-taps from 20 lands on 15, not on the preset');
+        SleepTimerService.instance.cancel(); // no pending timer at teardown
+      });
+
+      testWidgets('the check button arms the edited value', (tester) async {
+        await tester.pumpWidget(wrap(const SleepTimerMenu()));
+
+        await tester.tap(find.byIcon(Icons.add_rounded));
+        await tester.pump();
+        await tester.tap(find.byIcon(Icons.check_rounded).last);
+        await tester.pump();
+
+        expect(SleepTimerService.instance.minutesRemaining.value, 25);
+        SleepTimerService.instance.cancel(); // no pending timer at teardown
+      });
+
+      testWidgets('the value is clamped to 5..240', (tester) async {
+        await tester.pumpWidget(wrap(const SleepTimerMenu()));
+
+        // Default is 20; ten minus-taps cannot go below 5. Assert through
+        // arming, since "5 min" text is ambiguous against nothing but the
+        // clamp is what matters.
+        for (var i = 0; i < 10; i++) {
+          await tester.tap(find.byIcon(Icons.remove_rounded));
+          await tester.pump();
+        }
+        await tester.tap(find.byIcon(Icons.check_rounded).last);
+        await tester.pump();
+        expect(SleepTimerService.instance.minutesRemaining.value, 5,
+            reason: 'the clamp floor is 5, not below');
+        SleepTimerService.instance.cancel(); // no pending timer at teardown
+      });
+    });
   });
 }
+

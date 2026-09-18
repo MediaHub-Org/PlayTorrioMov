@@ -202,7 +202,9 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         child: Row(
-          children: SubtitleStylePreset.values.map((preset) {
+          children: SubtitleStylePreset.values
+              .where((preset) => preset != SubtitleStylePreset.custom)
+              .map((preset) {
             final isSelected = activePreset == preset;
             return Padding(
               padding: const EdgeInsets.only(right: 8),
@@ -222,17 +224,16 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (preset != SubtitleStylePreset.custom)
-                        Container(
-                          width: 10,
-                          height: 10,
-                          margin: const EdgeInsets.only(right: 6),
-                          decoration: BoxDecoration(
-                            color: _parseColorFromHex(preset.textColor),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white30, width: 0.8),
-                          ),
+                      Container(
+                        width: 10,
+                        height: 10,
+                        margin: const EdgeInsets.only(right: 6),
+                        decoration: BoxDecoration(
+                          color: _parseColorFromHex(preset.textColor),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white30, width: 0.8),
                         ),
+                      ),
                       Text(
                         preset.label,
                         style: TextStyle(
@@ -308,6 +309,10 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                   ? PlayerSettings.subFont.value
                   : 'subfont',
               isExpanded: true,
+              // The dropdown's own menu must not be wider than the panel
+              // card it opens from -- Material sizes it to the widest item,
+              // which on a narrow player panel spills past the card edge.
+              menuMaxHeight: 220,
               dropdownColor: const Color(0xFF131826),
               icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.white70),
               items: PlayerSettings.popularFonts.map((f) {

@@ -75,7 +75,7 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final Player _player = Player(
     configuration: PlayerSettings.getMediaKitPlayerConfiguration(),
   );
@@ -208,6 +208,11 @@ class _PlayerScreenState extends State<PlayerScreen>
   @override
   void initState() {
     super.initState();
+    // Re-focus after suspend/lock-screen. When the session comes back the
+    // window's focus is gone and Flutter does not restore it, so every
+    // keyboard shortcut (J/L/C/A/S/R/F/space) silently dies until the user
+    // clicks. Observing the lifecycle re-arms them on resume.
+    WidgetsBinding.instance.addObserver(this);
     _wasFullscreenBeforeEntering = WindowService.instance.isFullscreen;
     // The sleep timer pauses playback when its countdown ends. The service
     // outlives this screen -- it is a singleton the transport bar's button
@@ -297,6 +302,17 @@ class _PlayerScreenState extends State<PlayerScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _focusNode.requestFocus();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // A suspend/lock-screen cycle leaves the window focused but Flutter's
+    // focus node detached, so every keyboard shortcut died until the next
+    // click. Re-arming on resume is what "the shortcuts stopped working
+    // after the screen locked" was.
+    if (state == AppLifecycleState.resumed && mounted) {
+      _focusNode.requestFocus();
+    }
   }
 
   Future<void> _initStream() async {
@@ -1720,6 +1736,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     WakelockPlus.disable();
     _hideTimer?.cancel();
     _autoNextTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     _focusNode.dispose();
     PlaybackCoordinator.release(
       'video:${widget.episode?.id ?? widget.detail?.id ?? widget.source.url}',

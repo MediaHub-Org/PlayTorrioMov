@@ -12,7 +12,9 @@
     "--socket=pulseaudio",
     "--device=dri",
     "--filesystem=xdg-videos",
-    "--filesystem=xdg-download"
+    "--filesystem=xdg-download",
+    "--talk=org.freedesktop.ScreenSaver",
+    "--talk=org.freedesktop.portal.Desktop"
   ],
   "add-extensions": {
     "org.freedesktop.Platform.ffmpeg-full": {

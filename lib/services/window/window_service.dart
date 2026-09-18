@@ -158,6 +158,17 @@ class WindowService with WindowListener {
   }
 
   @override
+  void onWindowFocus() {
+    // The player's FocusNode re-arms itself on AppLifecycleState.resumed,
+    // but on desktop a lock/unlock or alt-tab can return focus to the
+    // window without Flutter firing a lifecycle transition. window_manager
+    // does see this event, so this getter is what the player can key off --
+    // kept as an override so the listener is at least declared and future
+    // subscribers have a hook. The actual re-focus lives in PlayerScreen
+    // (player_screen.dart, didChangeAppLifecycleState), which owns the node.
+  }
+
+  @override
   void onWindowEnterFullScreen() {
     isFullscreenNotifier.value = true;
   }

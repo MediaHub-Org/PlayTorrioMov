@@ -3,6 +3,28 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+- **Flatpak**: the PC could suspend mid-playback — the sleep inhibitor D-Bus
+  call (`org.freedesktop.ScreenSaver`) was silently blocked by the sandbox.
+  Added `--talk=org.freedesktop.ScreenSaver` and
+  `--talk=org.freedesktop.portal.Desktop` to the manifest.
+- **Player (desktop)**: keyboard shortcuts (J/L/C/A/S/R/F/space) died after a
+  suspend/lock-screen cycle; the player's focus node is now re-armed when the
+  app resumes.
+
+### Changed
+- **Catalog loading**: a catalog whose first fetch fails (cold DNS, slow host)
+  is retried once before the page renders, instead of silently dropping its
+  row until a manual refresh — "the list is sometimes short" was that.
+- **Sleep timer menu**: presets as full-width rows that show when playback
+  will pause, plus a custom -/+ stepper (5–240 min); editing does not arm the
+  timer until the check button is pressed.
+- **Subtitle appearance**: removed the redundant Custom preset chip from the
+  presets bar (the customizer's tabs already cover it) and bounded the font
+  dropdown's menu height to the panel.
+
 ## [1.8.3+36] - 2026-09-17
 
 The player's controls reorganised around one button each, the subtitle
