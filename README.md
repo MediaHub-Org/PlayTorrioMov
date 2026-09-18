@@ -76,9 +76,13 @@ Silicon only** — an Intel Mac cannot run them.
 
 | Document                     | What's in it                                                            |
 |:-----------------------------|:------------------------------------------------------------------------|
+| [Conventions](docs/CONVENTIONS.md) | How code is written here — naming, structure, comments, the correctness/clarity/efficiency triangle |
 | [Roadmap](docs/ROADMAP.md)   | What is known broken, what is waiting on a device, and which decisions are settled |
 | [Changelog](CHANGELOG.md)    | Notable changes by version                                              |
 | [Releases](docs/RELEASES.md) | Build/release process, Android signing                                  |
+
+Agents should start at [AGENTS.md](AGENTS.md), which is the short version of
+the conventions.
 
 ## Building and releases
 

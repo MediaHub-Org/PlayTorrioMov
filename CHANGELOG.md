@@ -5,6 +5,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **`docs/CONVENTIONS.md` and `AGENTS.md`**: how code is written here —
+  naming, functions, control flow, structure, comments, failure, tests, and
+  the correctness/clarity/efficiency priority order. The short agent-facing
+  version is `AGENTS.md`.
+
 ### Fixed
 - **Flatpak**: the PC could suspend mid-playback — the sleep inhibitor D-Bus
   call (`org.freedesktop.ScreenSaver`) was silently blocked by the sandbox.
