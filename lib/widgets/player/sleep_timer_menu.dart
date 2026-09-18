@@ -22,10 +22,13 @@ class SleepTimerMenu extends StatefulWidget {
 }
 
 class _SleepTimerMenuState extends State<SleepTimerMenu> {
+    static const _presetMinutes = [15, 30, 45, 60, 90, 120, 180, 240];
+
   /// The custom duration the -/+ steppers are editing, in minutes. Null
   /// until the user touches a stepper -- the presets are one tap, and the
   /// steppers should not imply a selection nobody made.
   int? _customMinutes;
+  int? _draftPresetIndex;
 
   void _start(int minutes) => SleepTimerService.instance.start(minutes);
 
@@ -47,12 +50,17 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
             builder: (context, remaining, _) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                _buildPresetSlider(remaining),
+                const SizedBox(height: 4),
                 for (final min in const [15, 30, 45, 60, 90])
                   _DurationRow(
                     minutes: min,
                     isSelected: remaining == min,
                     onTap: () {
-                      setState(() => _customMinutes = null);
+                      setState(() {
+                        _customMinutes = null;
+                        _draftPresetIndex = null;
+                      });
                       _start(min);
                     },
                   ),
@@ -64,7 +72,10 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
                     isSelected: false,
                     icon: Icons.timer_off_outlined,
                     onTap: () {
-                      setState(() => _customMinutes = null);
+                      setState(() {
+                        _customMinutes = null;
+                        _draftPresetIndex = null;
+                      });
                       SleepTimerService.instance.cancel();
                     },
                   ),
@@ -78,6 +89,77 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPresetSlider(int? remaining) {
+    final activeIndex = _presetMinutes.indexOf(remaining ?? -1);
+    final index = _draftPresetIndex ?? (activeIndex >= 0 ? activeIndex : 0);
+    final minutes = _presetMinutes[index];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            '$minutes min preset',
+            style: const TextStyle(
+              color: PlayerTheme.inkMuted,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 4,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            activeTrackColor: PlayerTheme.accent,
+            inactiveTrackColor: PlayerTheme.edgeSoft,
+            thumbColor: PlayerTheme.accent,
+            activeTickMarkColor: PlayerTheme.accent,
+            inactiveTickMarkColor: PlayerTheme.inkSubtle,
+          ),
+          child: Slider(
+            value: index.toDouble(),
+            min: 0,
+            max: (_presetMinutes.length - 1).toDouble(),
+            divisions: _presetMinutes.length - 1,
+            label: '$minutes min',
+            onChanged: (value) => setState(() {
+              _draftPresetIndex = value.round();
+            }),
+            onChangeEnd: (value) {
+              final selected = _presetMinutes[value.round()];
+              setState(() => _customMinutes = null);
+              _start(selected);
+            },
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final point in _presetMinutes)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(
+                      '$point',
+                      style: const TextStyle(
+                        color: PlayerTheme.inkSubtle,
+                        fontSize: 9,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

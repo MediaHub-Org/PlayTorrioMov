@@ -20,10 +20,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   row until a manual refresh — "the list is sometimes short" was that.
 - **Sleep timer menu**: presets as full-width rows that show when playback
   will pause, plus a custom -/+ stepper (5–240 min); editing does not arm the
-  timer until the check button is pressed.
+  timer until the check button is pressed. A discrete preset slider
+  (15–240 min) sits above the rows for one-drag selection.
+- **Playback speed**: the seven-row list became a discrete slider over the
+  same points plus 0.25×, which the list omitted.
 - **Subtitle appearance**: removed the redundant Custom preset chip from the
   presets bar (the customizer's tabs already cover it) and bounded the font
   dropdown's menu height to the panel.
+- **Subtitles**: regional labels group under their parent language
+  ("Spanish (latam)" joins "Spanish"), names are capitalised, mpv's
+  signs-only `SPL` track is no longer offered as a language, titles drop the
+  media name and the provider's own noise, and the same subtitle arriving
+  from several scrapers is collapsed to one choice. The default pick still
+  follows the audio language.
 
 ## [1.8.3+36] - 2026-09-17
 

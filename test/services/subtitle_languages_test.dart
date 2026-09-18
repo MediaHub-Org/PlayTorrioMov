@@ -56,13 +56,24 @@ void main() {
     });
 
     test('an unknown long code is left alone, being already a word', () {
-      expect(subtitleLanguageName('klingon'), 'klingon');
-      expect(subtitleLanguageName('pt-brazil'), 'pt-brazil');
+      expect(subtitleLanguageName('klingon'), 'Klingon');
+      expect(subtitleLanguageName('pt-brazil'), 'Pt-brazil');
     });
 
     test('Brazilian Portuguese is distinguished from Portuguese', () {
       expect(subtitleLanguageName('pob'), 'Portuguese (BR)');
       expect(subtitleLanguageName('por'), isNot('Portuguese (BR)'));
+    });
+
+    test('capitalizes regional names and groups them by parent language', () {
+      expect(subtitleLanguageName('spanish (latam)'), 'Spanish (Latin America)');
+      expect(canonicalLanguageGroup('Spanish'), 'Spanish');
+      expect(canonicalLanguageGroup('Spanish (latam)'), 'Spanish');
+    });
+
+    test('does not expose signs-only mpv tracks as a language', () {
+      expect(subtitleTrackLanguageName('spl'), isEmpty);
+      expect(canonicalLanguageGroup('spl'), isEmpty);
     });
   });
 }

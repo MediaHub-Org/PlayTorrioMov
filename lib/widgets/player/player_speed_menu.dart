@@ -24,7 +24,16 @@ class PlayerSpeedMenu extends StatefulWidget {
 }
 
 class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
-  static const List<double> _presets = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+  static const List<double> _points = [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -43,55 +52,59 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
           ),
 
           const SizedBox(height: 6),
-
-          // Speed Preset List
-          Column(
-            children: _presets.map((rate) {
-              final isSelected = (widget.currentRate - rate).abs() < 0.01;
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () {
-                    widget.onRateSelected(rate);
-                    widget.onClose();
-                  },
-                  child: Container(
-                    height: 38,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    decoration: BoxDecoration(
-                      color: isSelected ? PlayerTheme.raised : Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: isSelected ? PlayerTheme.edge : Colors.transparent,
-                        width: 1,
+          Text(
+            '${widget.currentRate.toStringAsFixed(2)}×',
+            style: const TextStyle(
+              color: PlayerTheme.ink,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+              activeTrackColor: PlayerTheme.accent,
+              inactiveTrackColor: PlayerTheme.edgeSoft,
+              thumbColor: PlayerTheme.accent,
+              activeTickMarkColor: PlayerTheme.accent,
+              inactiveTickMarkColor: PlayerTheme.inkSubtle,
+            ),
+            child: Slider(
+              value: widget.currentRate.clamp(0.25, 2.0),
+              min: 0.25,
+              max: 2.0,
+              divisions: _points.length - 1,
+              label: '${widget.currentRate.toStringAsFixed(2)}×',
+              onChanged: widget.onRateSelected,
+              onChangeEnd: (_) => widget.onClose(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  for (final point in _points)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Text(
+                        point
+                            .toStringAsFixed(2)
+                            .replaceFirst(RegExp(r'0+$'), '')
+                            .replaceFirst(RegExp(r'\.$'), ''),
+                        style: const TextStyle(
+                          color: PlayerTheme.inkSubtle,
+                          fontSize: 10,
+                        ),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          rate == 1.0
-                              ? 'Normal (1.0×)'
-                              : '${rate.toStringAsFixed(rate == rate.roundToDouble() ? 0 : 2)}×',
-                          style: TextStyle(
-                            color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                            fontSize: 13.5,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          ),
-                        ),
-                        if (isSelected)
-                          Icon(
-                            Icons.check_rounded,
-                            size: 16,
-                            color: PlayerTheme.accent,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+                ],
+              ),
+            ),
           ),
         ],
       ),

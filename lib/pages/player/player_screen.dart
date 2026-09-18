@@ -810,6 +810,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       final t = subList[i];
       if (t.id == 'no' || t.id == 'auto') continue;
       final lang = t.language;
+        if (lang?.trim().toLowerCase() == 'spl') continue;
       final title =
           t.title ?? (lang != null ? lang.toUpperCase() : 'Track ${i + 1}');
       final idx = int.tryParse(t.id) ?? (i + 1);

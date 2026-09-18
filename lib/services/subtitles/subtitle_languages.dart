@@ -136,11 +136,31 @@ const Map<String, String> _iso639ToDisplayName = {
 /// a three-letter code reads as an abbreviation; anything longer is already
 /// a word and is left alone.
 String subtitleLanguageName(String rawCode) {
-  final code = rawCode.toLowerCase();
+  final code = rawCode.trim().toLowerCase();
   final known = _iso639ToDisplayName[code];
   if (known != null) return known;
-  return code.length <= 3 ? code.toUpperCase() : code;
+  final regional = RegExp(r'^(.+?)\s*\(([^)]+)\)$').firstMatch(code);
+  if (regional != null) {
+    final base = subtitleLanguageName(regional.group(1)!);
+    final region = regional.group(2)!.trim();
+    final regionName = switch (region) {
+      'latam' || 'latin america' || 'latin american' => 'Latin America',
+      'br' || 'brazil' => 'Brazil',
+      'pt' || 'portugal' => 'Portugal',
+      'us' || 'usa' => 'United States',
+      _ => _capitalizeWords(region),
+    };
+    return '$base ($regionName)';
+  }
+  if (code.length <= 3) return code.toUpperCase();
+  return _capitalizeWords(code);
 }
+
+String _capitalizeWords(String value) => value
+    .split(RegExp(r'\s+'))
+    .where((word) => word.isNotEmpty)
+    .map((word) => '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+    .join(' ');
 
 /// mpv's own track tags that are not languages at all, mapped to what they
 /// mean. These arrive on *embedded* tracks -- the container's own metadata --
@@ -156,7 +176,6 @@ String subtitleLanguageName(String rawCode) {
 ///   effect, but codes mpv invents rather than ISO ones, so they rendered as
 ///   three-letter noise instead of joining the Chinese group.
 const Map<String, String> _mpvTagToDisplayName = {
-  'spl': 'Signs & Songs',
   'mon': 'Same as audio',
   'zhc': 'Chinese (Simplified)',
   'zht': 'Chinese (Traditional)',
@@ -171,6 +190,7 @@ const Map<String, String> _mpvTagToDisplayName = {
 String subtitleTrackLanguageName(String? rawLanguage) {
   final raw = rawLanguage?.trim() ?? '';
   if (raw.isEmpty) return '';
+  if (raw.toLowerCase() == 'spl') return '';
   final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
   if (mpv != null) return mpv;
   return subtitleLanguageName(raw);
@@ -185,6 +205,10 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 /// scripts, and the group header says which.
 String canonicalLanguageGroup(String? rawLanguage) {
   final name = subtitleTrackLanguageName(rawLanguage);
+  if (name.isEmpty) return '';
   if (name.startsWith('Chinese')) return 'Chinese';
-  return name;
+  final regional = RegExp(
+    r'^(.+?)\s*\((?:Latin America|Brazil|Portugal|United States)\)$',
+  ).firstMatch(name);
+  return regional?.group(1) ?? name;
 }
