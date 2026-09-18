@@ -15,21 +15,21 @@ Last reconciled: **2026-09-18**, on `v1.8.3+36`.
 
 Two kinds of work are left, and they need different things from you.
 
-**Actionable now, no hardware** — #68 and #69, both started and shipped in
-part. Each has a method below that has already been used successfully, so
-neither is a research problem; they are a long tail of small, verifiable
-pieces.
+**Actionable now, no hardware** — #68 and #69. Both have a method below that
+has already been used successfully, so neither is a research problem; they are
+a long tail of small, verifiable pieces. The settings pages — the largest
+single slice of each — are done.
 
 **Needs a device** — #28 and the torrent-cast question. Nothing here can be
 advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~410-710 of an estimated 500-800 user-facing strings are still hardcoded
-English.** Infrastructure and three languages (Spanish, Arabic, Portuguese-BR)
-shipped in 1.8.1, covering the hub navigation, the Settings hub page and the
-Appearance page — 46 keys. The Library followed in 1.8.2 (34 more), then the
-details pages and the player's gear menu (26 more). 120 keys in all.
+**~170-470 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 369 keys are translated into Spanish, Arabic and Portuguese-BR.
+The settings pages are done; what is left is the long tail outside them —
+the player's own menus and overlays, the Live TV portal browser, the search
+page, and the details-page rails.
 
 The method, per string:
 
@@ -56,15 +56,24 @@ translated. Translating a widget without this breaks every test that renders
 it, and the failure looks like a null-check crash rather than a missing
 delegate.
 
+**A `const` enum cannot hold a translated string; give it a method.** This is
+the shape the settings pages settled on, and it is what to reach for next.
 `HubSection.localizedLabel` (in `lib/utils/hub_controller.dart`) is the
-earlier, hand-rolled version of the same idea, for a `const` enum that cannot
-hold a context-dependent string. `LibrarySection.localizedLabel` and
-`LibraryShelf.localizedLabel` follow it.
+earlier hand-rolled version; `LibrarySection.localizedLabel` and
+`LibraryShelf.localizedLabel` follow it. `DecoderPreset`,
+`BufferResiliencePreset` and `SubtitleStylePreset` in
+`services/player/player_settings.dart` now expose `title(l10n)` /
+`description(l10n)` / `label(l10n)` with exhaustive switches, so a preset
+without a translation is a compile error rather than a blank row.
 
-**The next slice is the settings pages.** They are long, text-heavy, and the
-place a user who needs large text is most likely to be — which makes them
-both the biggest remaining translation target and the one that most rewards
-doing.
+**Three things stay untranslated on purpose, and all are identifiers rather
+than labels.** The debrid provider ids (`'Real-Debrid'`, `'TorBox'`, …) are
+persisted and compared with `==` throughout `DebridService`, so only the
+display of `'None'` is translated, never the value. The platform names
+(`Android`, `Windows`, `macOS`, `iOS`, `Linux`) are product names; only the
+generic `Desktop/Mobile` fallback goes through the ARB. The Keyboard
+Shortcuts page's key column (`Space`, `J`, `Esc`) is the same idea — those
+are the physical keys.
 
 **No RTL layout audit has been done for Arabic.** Flutter's `Directionality`
 follows the locale automatically for standard Material widgets, but no custom
@@ -79,9 +88,8 @@ cast/crew and scrapers' own IMDb→TMDB id matching. Translating catalog
 descriptions would mean checking whether Cinemeta's own API takes a locale, a
 separate and unstarted question.
 
-**The risk is not the UI. It is the titles**, and the rule below is settled
-before anyone starts, because getting it wrong breaks things that look
-unrelated.
+**The risk is not the UI. It is the titles**, and the rule is settled before
+anyone starts, because getting it wrong breaks things that look unrelated.
 
 > **A title is two fields, and they must never merge.**
 >
@@ -90,8 +98,7 @@ unrelated.
 > | `displayTitle`   | What the user reads                                                  | Yes         |
 > | `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never**   |
 
-Three things in this codebase depend on a stable title, and each breaks
-differently:
+Three things depend on a stable title, and each breaks differently:
 
 1. **Identity falls back to the title.** `MyListItem.uniqueKey` returns
    `title:$type:$clean:$year` when there is no IMDb, TMDB, Trakt or Simkl id
@@ -118,18 +125,15 @@ people search and recognize things.
 
 ### Text scale and accessibility (#69)
 
-**~54 of the ~68 files in `lib/` with a fixed `height:` are still
-unaudited.** Fourteen high-traffic boxes are fixed so far — four in 1.8.1,
-then the Continue Watching card and its section header, then the three
-catalog cards and the details page action rows, then the player's two menus,
-the browse row header and the settings hub, then the transport bar's seek
-labels and the sources panel's header badge and per-source badge row. What is
-left is the long tail, in rough order of how many people meet it:
+**~46 of the ~68 files in `lib/` with a fixed `height:` are still
+unaudited.** Twenty-two high-traffic boxes are fixed so far, the settings
+pages among them. What is left is the long tail, in rough order of how many
+people meet it:
 
-1. **The remaining settings pages** — the hub is done; the ten pages behind
-   it are not, and they are the most text-heavy screens in the app.
-2. **The remaining details-page rails** — cast, related, similar.
-3. **Live TV's portal browser** — a modal with its own toolbars.
+1. **The remaining details-page rails** — cast, related, similar.
+2. **Live TV's portal browser** — a modal with its own toolbars.
+3. **The player's own overlays** — the subtitle style editor's inner rows,
+   the cast sheet, the episode picker.
 
 The method is settled and does not need rediscovering:
 
@@ -143,6 +147,12 @@ The method is settled and does not need rediscovering:
   `height: 4` spacers that merely sit in the same widget subtree as a
   `fontSize: 22` title. A static scan cannot tell "box that wraps this text"
   from "box that happens to be near it", so the ranking is noise.
+- **`Wrap` and `Expanded` are not interchangeable, and the settings pages
+  proved it.** A `Wrap` hands its children unbounded width, so a block of
+  text inside one sizes to its natural 3x width and runs off the card — that
+  is a 1310px overflow, not a fix. Reach for `Wrap` when the children are
+  small and can genuinely sit on a second line (a badge, a button); reach for
+  `Expanded` when one child is a block of text that should wrap internally.
 - **A clamp is not always enough.** The Episodes control strip still wanted
   179px at 1.3, because the jump input and the batch dropdown are
   fixed-width boxes with text inside them. It sits in a `Wrap`, so the box
@@ -243,20 +253,7 @@ Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
 `dl.google.com` apt source the runner image ships that periodically breaks
 `apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`.
 
-`39b736f` ("v1.1.6") is the largest upstream commit since the fork and was
-read in full. Its headline feature — a CloudStream extension system with a
-native Android bridge — is **not taken**: it is a whole plugin ecosystem
-(477 lines of Kotlin, a marketplace, repo management, extension loading)
-and a feature, not a fix. What was taken from it is one bug, below.
-
-| From `39b736f`                                                             | Taken?                                                                                                                       |
-|:---------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
-| CloudStream bridge, marketplace, repo management                           | **No** — a feature, and a large one. Would need its own roadmap entry and a device                                           |
-| Scraper lifecycle: `stopAllScrapers`, session IDs, `cancelOngoingRequests` | **Partly.** `ScraperManager` already had the teardown; the missing link was in `StreamService`, and that is fixed. See below |
-| Player coroutine collision (`videoStreamJob` → `activeJobs` set)           | **No** — Kotlin-side, and this fork's player is Dart-side                                                                    |
-| Responsive addons page, player and subtitle fixes                          | **No** — our addons page and player have diverged too far for a patch to apply                                               |
-
-**The one real bug found in it.** Upstream's commit message says "watch
+**The one real bug found in `39b736f`.** Upstream's commit message says "watch
 screen properly cancels all scrapers on dispose". Ours did not, and the
 reason is worth recording because it looked like it did: `ScraperManager.
 scrapeAll` has had `controller.onCancel` canceling every subscription and
@@ -266,10 +263,14 @@ so canceling the outer consumer never reached the manager. Leaving a watch
 screen mid-search left all forty-odd scrapers issuing HTTP requests into a
 controller nobody was reading. Fixed, with a test that fails without it.
 
-Not taken, so they are not re-reviewed:
-
-| Commit               | Why not                                                                                                                                                                                                                                                                               |
-|:---------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `9616808`            | Blurred dual-layer hero backdrop to kill black bars. Every hero in this fork already uses `BoxFit.cover`, which fills and crops. It fixes a problem we do not have                                                                                                                    |
-| `29a4127`, `1da1940` | IPTV channels, search and storage — the area this fork has diverged furthest in (#45, #46 and the portal browser are ours). Read as ideas, not ported as patches                                                                                                                      |
-| `d2f8074`            | IPTV portal manager responsiveness. A near-total rewrite of `iptv_portals_modal.dart`; our copy carries Cloud Vault, the modal customizer and the M3U tab, so a straight port would drop them. The reported overflows were hand-fixed in #40 instead — all four, not the two reported |
+**Not taken, so they are not re-reviewed.** `39b736f`'s headline feature — a
+CloudStream extension system with a native Android bridge — is a whole plugin
+ecosystem (477 lines of Kotlin, a marketplace, repo management, extension
+loading) and a feature, not a fix. Its player coroutine collision is
+Kotlin-side, and this fork's player is Dart-side. `9616808` (blurred hero
+backdrop) fixes a problem we do not have: every hero here already uses
+`BoxFit.cover`. `29a4127` and `1da1940` (IPTV channels, search, storage) and
+`d2f8074` (portal manager responsiveness) are the area this fork has diverged
+furthest in — #45, #46 and the portal browser are ours — so they were read as
+ideas, not ported as patches. The reported overflows from `d2f8074` were
+hand-fixed in #40 instead: all four, not the two reported.

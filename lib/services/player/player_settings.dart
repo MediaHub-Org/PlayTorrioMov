@@ -7,50 +7,85 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../scraper/user_agent.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Available decoder preset types tailored for each platform.
+///
+/// The labels are methods, not fields: the enum is `const` and cannot hold a
+/// context-dependent string, so the lookup happens at render time. The
+/// `switch` is exhaustive, which makes a preset without a translation a
+/// compile error rather than a blank row.
 enum DecoderPreset {
-  hardwareAuto('Hardware Accelerated (Auto)', 'Fastest performance, GPU hardware decoded with automatic software fallback.'),
-  hardwareSafe('Hardware Safe Copy', 'GPU decoded with surface copy to fix frame tearing/glitches on certain chipsets.'),
-  softwareSafe('Software Safe (Perfect A/V Sync)', 'CPU decoded via FFmpeg/dav1d. Recommended on slow internet & Android to eliminate buffer desync.'),
-  nvidiaCuda('NVIDIA CUDA / NVDEC', 'Dedicated NVIDIA hardware acceleration for Windows & Linux.'),
-  custom('Custom Decoder Chain', 'User-defined prioritized decoder fallback list.');
+  hardwareAuto,
+  hardwareSafe,
+  softwareSafe,
+  nvidiaCuda,
+  custom;
 
-  final String title;
-  final String description;
-  const DecoderPreset(this.title, this.description);
+  String title(AppLocalizations l10n) => switch (this) {
+    DecoderPreset.hardwareAuto => l10n.videoPresetHardwareAutoTitle,
+    DecoderPreset.hardwareSafe => l10n.videoPresetHardwareSafeTitle,
+    DecoderPreset.softwareSafe => l10n.videoPresetSoftwareSafeTitle,
+    DecoderPreset.nvidiaCuda => l10n.videoPresetNvidiaTitle,
+    DecoderPreset.custom => l10n.videoPresetCustomTitle,
+  };
+
+  String description(AppLocalizations l10n) => switch (this) {
+    DecoderPreset.hardwareAuto => l10n.videoPresetHardwareAutoBody,
+    DecoderPreset.hardwareSafe => l10n.videoPresetHardwareSafeBody,
+    DecoderPreset.softwareSafe => l10n.videoPresetSoftwareSafeBody,
+    DecoderPreset.nvidiaCuda => l10n.videoPresetNvidiaBody,
+    DecoderPreset.custom => l10n.videoPresetCustomBody,
+  };
 }
 
 /// Buffer resilience cushion preset for network streams.
 enum BufferResiliencePreset {
-  minimal('Minimal (50MB / 5s)', 'Fast start, for high-speed local streams.', 1000, 50, 52428800, 5),
-  standard('Standard (150MB / 15s)', 'Balanced buffering for general streaming.', 3000, 150, 157286400, 15),
-  highResilience('High Resilience (300MB / 30s)', 'Recommended for Android & Wi-Fi. Pre-buffers cushion to prevent rebuffer stalls & A/V drift.', 6000, 300, 314572800, 30),
-  maximum('Maximum (600MB / 60s)', 'Extra large buffer for torrent streaming & congested connections.', 12000, 600, 629145600, 60),
-  custom('Custom Buffer', 'Custom duration and byte capacity.', 6000, 300, 314572800, 30);
+  minimal(1000, 50, 52428800, 5),
+  standard(3000, 150, 157286400, 15),
+  highResilience(6000, 300, 314572800, 30),
+  maximum(12000, 600, 629145600, 60),
+  custom(6000, 300, 314572800, 30);
 
-  final String label;
-  final String subtitle;
   final int durationMs;
   final int packetCount;
   final int maxBytes;
   final int cacheSecs;
-  const BufferResiliencePreset(this.label, this.subtitle, this.durationMs, this.packetCount, this.maxBytes, this.cacheSecs);
+  const BufferResiliencePreset(
+    this.durationMs,
+    this.packetCount,
+    this.maxBytes,
+    this.cacheSecs,
+  );
+
+  String label(AppLocalizations l10n) => switch (this) {
+    BufferResiliencePreset.minimal => l10n.videoBufferMinimalLabel,
+    BufferResiliencePreset.standard => l10n.videoBufferStandardLabel,
+    BufferResiliencePreset.highResilience => l10n.videoBufferHighLabel,
+    BufferResiliencePreset.maximum => l10n.videoBufferMaximumLabel,
+    BufferResiliencePreset.custom => l10n.videoBufferCustomLabel,
+  };
+
+  String subtitle(AppLocalizations l10n) => switch (this) {
+    BufferResiliencePreset.minimal => l10n.videoBufferMinimalBody,
+    BufferResiliencePreset.standard => l10n.videoBufferStandardBody,
+    BufferResiliencePreset.highResilience => l10n.videoBufferHighBody,
+    BufferResiliencePreset.maximum => l10n.videoBufferMaximumBody,
+    BufferResiliencePreset.custom => l10n.videoBufferCustomBody,
+  };
 }
 
 /// Subtitle styling preset for rapid 1-tap appearance selection.
 enum SubtitleStylePreset {
-  classicWhite('Classic White', 'Crisp white text with black outline', '#FFFFFFFF', '#00000000', '#FF000000', 2.0, 0.0, '#00000000', false, false),
-  cinemaYellow('Cinema Yellow', 'Warm yellow text with subtle shadow and border', '#FFFFEB3B', '#00000000', '#FF000000', 2.5, 1.5, '#80000000', false, false),
-  streamingBox('Streaming Box', 'White text inside a 50% translucent black box', '#FFFFFFFF', '#80000000', '#00000000', 0.0, 0.0, '#00000000', false, false),
-  highContrast('High Contrast', 'Bold yellow text with solid opaque black box', '#FFFFD600', '#FF000000', '#FF000000', 0.0, 0.0, '#00000000', true, false),
-  animeClean('Anime Clean', 'Bold white text with deep outline & shadow', '#FFFFFFFF', '#00000000', '#FF000000', 3.5, 2.0, '#BF000000', true, false),
-  cyberpunkCyan('Cyberpunk Cyan', 'Vibrant cyan text with dark border', '#00E5FF', '#00000000', '#FF0D111A', 2.5, 1.0, '#6600E5FF', false, false),
-  nightModeSoft('Night Mode Warm', 'Soft cream text with 40% translucent background', '#FFF8E1', '#66000000', '#00000000', 0.0, 0.0, '#00000000', false, false),
-  custom('Custom', 'User configured custom subtitle styles', '#FFFFFFFF', '#00000000', '#FF000000', 2.0, 0.0, '#00000000', false, false);
+  classicWhite('#FFFFFFFF', '#00000000', '#FF000000', 2.0, 0.0, '#00000000', false, false),
+  cinemaYellow('#FFFFEB3B', '#00000000', '#FF000000', 2.5, 1.5, '#80000000', false, false),
+  streamingBox('#FFFFFFFF', '#80000000', '#00000000', 0.0, 0.0, '#00000000', false, false),
+  highContrast('#FFFFD600', '#FF000000', '#FF000000', 0.0, 0.0, '#00000000', true, false),
+  animeClean('#FFFFFFFF', '#00000000', '#FF000000', 3.5, 2.0, '#BF000000', true, false),
+  cyberpunkCyan('#00E5FF', '#00000000', '#FF0D111A', 2.5, 1.0, '#6600E5FF', false, false),
+  nightModeSoft('#FFF8E1', '#66000000', '#00000000', 0.0, 0.0, '#00000000', false, false),
+  custom('#FFFFFFFF', '#00000000', '#FF000000', 2.0, 0.0, '#00000000', false, false);
 
-  final String label;
-  final String description;
   final String textColor;
   final String backColor;
   final String borderColor;
@@ -61,8 +96,6 @@ enum SubtitleStylePreset {
   final bool italic;
 
   const SubtitleStylePreset(
-    this.label,
-    this.description,
     this.textColor,
     this.backColor,
     this.borderColor,
@@ -72,6 +105,28 @@ enum SubtitleStylePreset {
     this.bold,
     this.italic,
   );
+
+  String label(AppLocalizations l10n) => switch (this) {
+    SubtitleStylePreset.classicWhite => l10n.subPresetClassicWhite,
+    SubtitleStylePreset.cinemaYellow => l10n.subPresetCinemaYellow,
+    SubtitleStylePreset.streamingBox => l10n.subPresetStreamingBox,
+    SubtitleStylePreset.highContrast => l10n.subPresetHighContrast,
+    SubtitleStylePreset.animeClean => l10n.subPresetAnimeClean,
+    SubtitleStylePreset.cyberpunkCyan => l10n.subPresetCyberpunkCyan,
+    SubtitleStylePreset.nightModeSoft => l10n.subPresetNightModeSoft,
+    SubtitleStylePreset.custom => l10n.subPresetCustom,
+  };
+
+  String description(AppLocalizations l10n) => switch (this) {
+    SubtitleStylePreset.classicWhite => l10n.subPresetClassicWhiteBody,
+    SubtitleStylePreset.cinemaYellow => l10n.subPresetCinemaYellowBody,
+    SubtitleStylePreset.streamingBox => l10n.subPresetStreamingBoxBody,
+    SubtitleStylePreset.highContrast => l10n.subPresetHighContrastBody,
+    SubtitleStylePreset.animeClean => l10n.subPresetAnimeCleanBody,
+    SubtitleStylePreset.cyberpunkCyan => l10n.subPresetCyberpunkCyanBody,
+    SubtitleStylePreset.nightModeSoft => l10n.subPresetNightModeSoftBody,
+    SubtitleStylePreset.custom => l10n.subPresetCustomBody,
+  };
 }
 
 /// Central service managing video engine properties, decoder fallback chains,

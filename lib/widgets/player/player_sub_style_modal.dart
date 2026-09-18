@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
+import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
 import 'player_glass.dart';
 
@@ -235,7 +236,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                         ),
                       ),
                       Text(
-                        preset.label,
+                        preset.label(context.l10n),
                         style: TextStyle(
                           color: isSelected ? Colors.white : PlayerTheme.inkMuted,
                           fontSize: 11.5,

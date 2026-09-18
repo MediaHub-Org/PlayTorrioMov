@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/backup/backup_service.dart';
 import '../../services/backup/cloud_backup_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
@@ -31,7 +32,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Backup saved to $path'),
+          content: Text(context.l10n.backupSavedTo(path)),
           backgroundColor: const Color(0xFF1E8E3E),
           behavior: SnackBarBehavior.floating,
         ),
@@ -40,7 +41,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Backup failed: $e'),
+            content: Text(context.l10n.backupFailed('$e')),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -52,20 +53,21 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   }
 
   Future<void> _importData(BuildContext context) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Restore backup?', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
+        title: Text(l10n.backupRestoreConfirmTitle, style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
         content: Text(
-          'Pick a backup file to restore. This overwrites your current library, settings and addon config, and cannot be undone.',
+          l10n.backupRestoreConfirmBody,
           style: TextStyle(color: AppColors.inkAlpha(0.65)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.45))),
+            child: Text(l10n.backupCancel, style: TextStyle(color: AppColors.inkAlpha(0.45))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -73,7 +75,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: Colors.red.shade700,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Restore', style: TextStyle(color: AppColors.onAccent)),
+            child: Text(l10n.backupRestore, style: const TextStyle(color: AppColors.onAccent)),
           ),
         ],
       ),
@@ -90,7 +92,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Restored $restored settings — restart the app to see all changes.'),
+          content: Text(context.l10n.backupRestored(restored)),
           backgroundColor: const Color(0xFF1E8E3E),
           behavior: SnackBarBehavior.floating,
         ),
@@ -99,7 +101,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Restore failed: $e'),
+            content: Text(context.l10n.backupRestoreFailed('$e')),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -111,6 +113,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   }
 
   Future<void> _showCloudConfigDialog() async {
+    final l10n = context.l10n;
     final current = CloudBackupSettings.config.value;
     final urlController = TextEditingController(text: current?.url ?? '');
     final userController = TextEditingController(text: current?.username ?? '');
@@ -121,13 +124,13 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Connect WebDAV', style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+        title: Text(l10n.backupWebdavTitle, style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Point this at a WebDAV endpoint on your own server (Nextcloud, etc.) — the full URL of the file to write, e.g. https://cloud.example.com/remote.php/dav/files/you/playtorrio_backup.json',
+              l10n.backupWebdavBody,
               style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: 13),
             ),
             const SizedBox(height: 14),
@@ -135,27 +138,27 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               controller: urlController,
               autofocus: true,
               style: TextStyle(color: AppColors.ink, fontSize: 14),
-              decoration: _cloudFieldDecoration('WebDAV URL'),
+              decoration: _cloudFieldDecoration(l10n.backupWebdavUrl),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: userController,
               style: TextStyle(color: AppColors.ink, fontSize: 14),
-              decoration: _cloudFieldDecoration('Username'),
+              decoration: _cloudFieldDecoration(l10n.backupWebdavUsername),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: passController,
               obscureText: true,
               style: TextStyle(color: AppColors.ink, fontSize: 14),
-              decoration: _cloudFieldDecoration('Password'),
+              decoration: _cloudFieldDecoration(l10n.backupWebdavPassword),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.6))),
+            child: Text(l10n.backupCancel, style: TextStyle(color: AppColors.inkAlpha(0.6))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -170,7 +173,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Save', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
+            child: Text(l10n.backupSave, style: const TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -196,16 +199,16 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       await BackupService.uploadToCloud(config);
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Backup uploaded.'),
-          backgroundColor: Color(0xFF1E8E3E),
+        SnackBar(
+          content: Text(context.l10n.backupUploaded),
+          backgroundColor: const Color(0xFF1E8E3E),
           behavior: SnackBarBehavior.floating,
         ),
       );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(context.l10n.backupUploadFailed('$e')), backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating),
         );
       }
     } finally {
@@ -214,6 +217,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   }
 
   Future<void> _downloadCloud(BuildContext context) async {
+    final l10n = context.l10n;
     final config = CloudBackupSettings.config.value;
     if (config == null) return;
     final confirmed = await showDialog<bool>(
@@ -221,15 +225,15 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Restore from cloud?', style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
+        title: Text(l10n.backupCloudRestoreConfirmTitle, style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
         content: Text(
-          'This overwrites your current library, settings and addon config with the backup stored on your WebDAV server. This cannot be undone.',
+          l10n.backupCloudRestoreConfirmBody,
           style: TextStyle(color: AppColors.inkAlpha(0.65)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.45))),
+            child: Text(l10n.backupCancel, style: TextStyle(color: AppColors.inkAlpha(0.45))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
@@ -237,7 +241,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               backgroundColor: Colors.red.shade700,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Restore', style: TextStyle(color: AppColors.onAccent)),
+            child: Text(l10n.backupRestore, style: const TextStyle(color: AppColors.onAccent)),
           ),
         ],
       ),
@@ -250,7 +254,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Restored $restored settings — restart the app to see all changes.'),
+          content: Text(context.l10n.backupRestored(restored)),
           backgroundColor: const Color(0xFF1E8E3E),
           behavior: SnackBarBehavior.floating,
         ),
@@ -258,7 +262,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Restore failed: $e'), backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating),
+          SnackBar(content: Text(context.l10n.backupRestoreFailed('$e')), backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating),
         );
       }
     } finally {
@@ -267,6 +271,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   }
 
   Widget _buildBackupSection() {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -293,13 +298,13 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Backup & Restore',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                    Text(
+                      l10n.backupSectionTitle,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Save your library, likes, playback history, settings and addon config to a JSON file anywhere on this device — or restore from one you saved earlier.',
+                      l10n.backupSectionBody,
                       style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),
                     ),
                   ],
@@ -320,7 +325,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   icon: const Icon(Icons.download_rounded, size: 18),
-                  label: const Text('Export'),
+                  label: Text(l10n.backupExport),
                 ),
               ),
               const SizedBox(width: 10),
@@ -334,7 +339,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   icon: const Icon(Icons.upload_rounded, size: 18),
-                  label: const Text('Import'),
+                  label: Text(l10n.backupImport),
                 ),
               ),
             ],
@@ -345,6 +350,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   }
 
   Widget _buildCloudBackupSection() {
+    final l10n = context.l10n;
     return ValueListenableBuilder<CloudBackupConfig?>(
       valueListenable: CloudBackupSettings.config,
       builder: (context, config, _) {
@@ -377,12 +383,12 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Cloud Backup (WebDAV)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                        Text(l10n.backupCloudTitle, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                         const SizedBox(height: 4),
                         Text(
                           connected
-                              ? 'Connected to your own WebDAV server.'
-                              : 'Point this at a WebDAV endpoint on your own server to sync the same backup this app already writes locally.',
+                              ? l10n.backupCloudConnected
+                              : l10n.backupCloudDisconnected,
                           style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),
                         ),
                       ],
@@ -391,7 +397,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                   if (connected)
                     TextButton(
                       onPressed: () => CloudBackupSettings.setConfig(null),
-                      child: Text('Disconnect', style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: 13)),
+                      child: Text(l10n.backupDisconnect, style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: 13)),
                     )
                   else
                     ElevatedButton(
@@ -401,7 +407,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       ),
-                      child: const Text('Connect', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      child: Text(l10n.backupConnect, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                     ),
                 ],
               ),
@@ -419,7 +425,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         icon: const Icon(Icons.cloud_upload_rounded, size: 18),
-                        label: const Text('Upload'),
+                        label: Text(l10n.backupUpload),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -433,7 +439,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         icon: const Icon(Icons.cloud_download_rounded, size: 18),
-                        label: const Text('Download'),
+                        label: Text(l10n.backupDownload),
                       ),
                     ),
                   ],
@@ -458,7 +464,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Backup & Data', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
+        title: Text(context.l10n.settingsCategoryBackup, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20)),
       ),
       body: SettingsScrollView(
         minGutter: 20,

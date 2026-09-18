@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/scraper/builtin_providers_service.dart';
@@ -61,6 +62,7 @@ class _BuiltinProvidersSettingsPageState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final inset = AppSpacing.pageInset(context);
 
     return Scaffold(
@@ -72,9 +74,9 @@ class _BuiltinProvidersSettingsPageState
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Built-in Providers',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+        title: Text(
+          l10n.builtinProvidersTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
       body: ValueListenableBuilder<int>(
@@ -97,28 +99,33 @@ class _BuiltinProvidersSettingsPageState
             minGutter: inset,
           );
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
+          // One scrollable, not a pinned header over a list. The header was
+          // pinned, but at 3x text scale it is taller than the screen on its
+          // own -- the intro paragraph, the P2P row, the counter and the
+          // filter field all grow -- so pinning it meant the list below got
+          // whatever was left, which was nothing. Scrolling the two together
+          // is what every other settings page does, and it is the only
+          // arrangement that survives the scale.
+          return CustomScrollView(
+            controller: _listController,
+            slivers: [
+              SliverPadding(
                 padding: EdgeInsets.fromLTRB(gutter, 20, gutter, 0),
-                child: _header(on, _providers.length, visible),
+                sliver: SliverToBoxAdapter(
+                  child: _header(on, _providers.length, visible),
+                ),
               ),
-              Expanded(
-                child: _providers.isEmpty
-                    ? _empty()
-                    : Scrollbar(
-                        controller: _listController,
-                        child: ListView.separated(
-                          controller: _listController,
-                          padding: EdgeInsets.fromLTRB(gutter, 16, gutter, 24),
-                          itemCount: visible.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 8),
-                          itemBuilder: (context, i) => _row(visible[i]),
-                        ),
-                      ),
-              ),
+              if (_providers.isEmpty)
+                SliverFillRemaining(hasScrollBody: false, child: _empty())
+              else
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(gutter, 16, gutter, 24),
+                  sliver: SliverList.separated(
+                    itemCount: visible.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, i) => _row(visible[i]),
+                  ),
+                ),
             ],
           );
         },
@@ -127,6 +134,7 @@ class _BuiltinProvidersSettingsPageState
   }
 
   Widget _header(int on, int total, List<StreamScraper> visible) {
+    final l10n = context.l10n;
     final visibleIds = visible.map((p) => p.id).toList();
     final visibleOff = BuiltinProvidersService.disabledCountAmong(visibleIds);
 
@@ -134,9 +142,7 @@ class _BuiltinProvidersSettingsPageState
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Turn off a provider to stop it being searched when you open a '
-          'title. Fewer providers means a faster, shorter source list; more '
-          'means a better chance something plays.',
+          l10n.builtinProvidersIntro,
           style: TextStyle(
             fontSize: 13.5,
             color: AppColors.inkAlpha(0.5),
@@ -174,7 +180,7 @@ class _BuiltinProvidersSettingsPageState
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Built-in P2P torrent source',
+                      l10n.builtinProvidersP2pLabel,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -190,7 +196,7 @@ class _BuiltinProvidersSettingsPageState
                     ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
-                    tooltip: 'P2P Advisory Details',
+                    tooltip: l10n.builtinProvidersP2pTooltip,
                     onPressed: () => showDialog(
                       context: context,
                       builder: (context) => const P2pWarningDialog(),
@@ -207,17 +213,22 @@ class _BuiltinProvidersSettingsPageState
             );
           },
         ),
-        Row(
+        // A Wrap, not a Row: at 3x the counter and the two buttons together
+        // are wider than a phone, and the buttons are the part that can
+        // move to a second line.
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Text(
-              '$on of $total active',
+              l10n.builtinProvidersActiveCount(on, total),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF10B981),
               ),
             ),
-            const Spacer(),
             // Scoped to what is on screen: with a filter typed in, "Enable
             // all" next to four visible rows should not silently switch on
             // forty others the user cannot see.
@@ -225,13 +236,13 @@ class _BuiltinProvidersSettingsPageState
               onPressed: visibleOff == 0
                   ? null
                   : () => BuiltinProvidersService.enableAll(visibleIds),
-              child: const Text('Enable all'),
+              child: Text(l10n.builtinProvidersEnableAll),
             ),
             TextButton(
               onPressed: visibleOff == visible.length
                   ? null
                   : () => BuiltinProvidersService.disableAll(visibleIds),
-              child: const Text('Disable all'),
+              child: Text(l10n.builtinProvidersDisableAll),
             ),
           ],
         ),
@@ -242,7 +253,7 @@ class _BuiltinProvidersSettingsPageState
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               isDense: true,
-              hintText: 'Filter providers',
+              hintText: l10n.builtinProvidersFilterHint,
               prefixIcon: const Icon(Icons.search_rounded, size: 20),
               filled: true,
               fillColor: AppColors.surface,
@@ -261,7 +272,7 @@ class _BuiltinProvidersSettingsPageState
     child: Padding(
       padding: const EdgeInsets.all(32),
       child: Text(
-        'No built-in providers are registered in this build.',
+        context.l10n.builtinProvidersEmpty,
         textAlign: TextAlign.center,
         style: TextStyle(color: AppColors.inkAlpha(0.5)),
       ),
@@ -269,6 +280,7 @@ class _BuiltinProvidersSettingsPageState
   );
 
   Widget _row(StreamScraper provider) {
+    final l10n = context.l10n;
     // A torrent provider that is on but whose master switch is off is not
     // actually being searched; say so rather than showing an active row that
     // does nothing.
@@ -322,10 +334,10 @@ class _BuiltinProvidersSettingsPageState
                         const SizedBox(height: 2),
                         Text(
                           mutedByP2p
-                              ? 'Torrent source \u2014 silenced by the P2P master switch'
+                              ? l10n.builtinProvidersTorrentSilenced
                               : (provider.isTorrent
-                                    ? 'Torrent source'
-                                    : 'Direct HTTP source'),
+                                    ? l10n.builtinProvidersTorrent
+                                    : l10n.builtinProvidersDirect),
                           style: TextStyle(
                             fontSize: 12,
                             color: mutedByP2p

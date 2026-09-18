@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_info.dart';
+import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/updater/app_updater_service.dart';
 import '../../widgets/updater/update_dialog.dart';
@@ -62,7 +63,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('${AppInfo.name} is up to date!'),
+            content: Text(context.l10n.aboutUpToDate(AppInfo.name)),
             backgroundColor: _kAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -72,7 +73,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error checking updates: $e'),
+            content: Text(context.l10n.aboutUpdateError('$e')),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -86,6 +87,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: _kBackground,
       appBar: AppBar(
@@ -95,9 +97,9 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'About ${AppInfo.name}',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+        title: Text(
+          l10n.settingsCategoryAbout(AppInfo.name),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
       body: SettingsScrollView(
@@ -120,72 +122,58 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
             const _TestingNotice(),
             const SizedBox(height: AppSpacing.md),
           ],
-          const _Card(
-            title: 'One app for streaming media',
-            body:
-                'Movies, Series, Anime and Live TV, plus your Library. '
-                'The same search, library and playback surface serves '
-                'every section.',
+          _Card(
+            title: l10n.aboutTaglineTitle,
+            body: l10n.aboutTaglineBody,
           ),
           const SizedBox(height: AppSpacing.md),
-          const _SectionLabel('HOW IT WORKS'),
+          _SectionLabel(l10n.aboutHowItWorks),
           const SizedBox(height: AppSpacing.sm),
-          const _Tile(
-            title: 'Stremio-compatible addons',
-            subtitle:
-                'Catalogs, metadata and streams come from addons you '
-                'install. Nothing is bundled or hosted by this app.',
+          _Tile(
+            title: l10n.aboutAddonsTitle,
+            subtitle: l10n.aboutAddonsBody,
           ),
           const SizedBox(height: 10),
-          const _Tile(
-            title: 'media_kit / libmpv playback',
-            subtitle:
-                'Hardware-accelerated decoding on every platform, with '
-                'the same subtitle and track handling throughout.',
+          _Tile(
+            title: l10n.aboutPlaybackTitle,
+            subtitle: l10n.aboutPlaybackBody,
           ),
           const SizedBox(height: 10),
-          const _Tile(
-            title: 'Torrent and debrid sources',
-            subtitle:
-                'Streams resolve from torrent swarms directly, or through '
-                'Real-Debrid and TorBox when an account is connected.',
+          _Tile(
+            title: l10n.aboutSourcesTitle,
+            subtitle: l10n.aboutSourcesBody,
           ),
           const SizedBox(height: 10),
-          const _Tile(
-            title: 'Trakt and Simkl sync',
-            subtitle:
-                'Optional. Watchlist, episode progress and scrobbling '
-                'stay in step across devices.',
+          _Tile(
+            title: l10n.aboutSyncTitle,
+            subtitle: l10n.aboutSyncBody,
           ),
           const SizedBox(height: AppSpacing.lg),
-          const _SectionLabel('PROJECT'),
+          _SectionLabel(l10n.aboutProject),
           const SizedBox(height: AppSpacing.sm),
-          const _LinkTile(
+          _LinkTile(
             icon: Icons.code_rounded,
-            title: 'Source code',
+            title: l10n.aboutSourceCode,
             subtitle: 'MediaHub-Org/PlayTorrioMov — GPL-3.0',
             url: _kRepoUrl,
           ),
           const SizedBox(height: 10),
-          const _LinkTile(
+          _LinkTile(
             icon: Icons.bug_report_outlined,
-            title: 'Report a problem',
-            subtitle: 'Open an issue with your platform and build number',
+            title: l10n.aboutReportProblem,
+            subtitle: l10n.aboutReportProblemBody,
             url: '$_kRepoUrl/issues/new',
           ),
           const SizedBox(height: 10),
-          const _LinkTile(
+          _LinkTile(
             icon: Icons.favorite_outline_rounded,
-            title: 'Original project',
-            subtitle:
-                'A fork of PlayTorrioV3 by Ayman, who wrote the addon '
-                'integration, scrapers, torrent engine and reader',
+            title: l10n.aboutOriginalProject,
+            subtitle: l10n.aboutOriginalProjectBody,
             url: _kUpstreamUrl,
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Licensed under GPL-3.0. Built with Flutter and Dart. '
-            'Playback via media_kit and libmpv.',
+            l10n.aboutLicense,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 11.5,
@@ -252,7 +240,7 @@ class _BrandHeader extends StatelessWidget {
                   ? snapshot.data!.buildNumber
                   : AppInfo.fallbackBuildNumber;
               return Text(
-                'Version $version · build $build',
+                context.l10n.aboutVersionBuild(version, build),
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.inkAlpha(0.45),
@@ -314,7 +302,7 @@ class _UpdatesRow extends StatelessWidget {
                     )
                   : const Icon(Icons.refresh_rounded, size: 18),
               label: Text(
-                isChecking ? 'Checking...' : 'Check for Updates',
+                isChecking ? context.l10n.aboutChecking : context.l10n.aboutCheckForUpdates,
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
@@ -324,7 +312,7 @@ class _UpdatesRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'Auto-check',
+            context.l10n.aboutAutoCheck,
             style: TextStyle(fontSize: 12.5, color: AppColors.inkSubtle),
           ),
           Switch(
@@ -347,6 +335,7 @@ class _TestingNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -369,9 +358,9 @@ class _TestingNotice extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Testing build',
-                  style: TextStyle(
+                Text(
+                  l10n.aboutTestingBuild,
+                  style: const TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFF59E0B),
@@ -379,9 +368,7 @@ class _TestingNotice extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'This build compiles and passes the automated checks, but it '
-                  'has not been verified on a device. Expect rough edges, and '
-                  'please report what you hit.',
+                  l10n.aboutTestingBuildBody,
                   style: TextStyle(
                     fontSize: 12.5,
                     height: 1.4,
@@ -532,13 +519,17 @@ class _LinkTile extends StatelessWidget {
 
   Future<void> _open(BuildContext context) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
+    // Captured before the await: reading `context.l10n` afterwards is a
+    // BuildContext use across an async gap, and the analyzer is right to
+    // flag it -- the widget can be gone by the time the launch returns.
+    final l10n = context.l10n;
     final ok = await launchUrl(
       Uri.parse(url),
       mode: LaunchMode.externalApplication,
     ).catchError((_) => false);
     if (!ok) {
       messenger?.showSnackBar(
-        SnackBar(content: Text('Could not open $url')),
+        SnackBar(content: Text(l10n.aboutCouldNotOpen(url))),
       );
     }
   }

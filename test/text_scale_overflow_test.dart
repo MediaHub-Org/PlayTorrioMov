@@ -8,7 +8,15 @@ import 'package:playtorriomov/models/movie/movie.dart';
 import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/models/stream/stream_model.dart';
 import 'package:playtorriomov/pages/anime/anime_details_page.dart';
+import 'package:playtorriomov/pages/settings/about_settings_page.dart';
+import 'package:playtorriomov/pages/settings/addons_settings_page.dart';
+import 'package:playtorriomov/pages/settings/backup_settings_page.dart';
+import 'package:playtorriomov/pages/settings/builtin_providers_settings_page.dart';
+import 'package:playtorriomov/pages/settings/debrid_settings_page.dart';
+import 'package:playtorriomov/pages/settings/keyboard_shortcuts_page.dart';
 import 'package:playtorriomov/pages/settings/settings_page.dart';
+import 'package:playtorriomov/pages/settings/sync_settings_page.dart';
+import 'package:playtorriomov/pages/settings/video_player_settings_page.dart';
 import 'package:playtorriomov/services/iptv/hardcoded_channels.dart';
 import 'package:playtorriomov/widgets/anime/anime_card.dart';
 import 'package:playtorriomov/widgets/iptv/iptv_channel_card.dart';
@@ -566,4 +574,39 @@ void main() {
       );
     },
   );
+
+  // The settings pages behind the hub -- #69's first remaining item, and the
+  // most text-heavy screens in the app. Each is pumped as the real page
+  // rather than a card in isolation, because the cards are private and
+  // because the page is what a user meets.
+  //
+  // `settle: false` throughout: several of these kick off a plugin call or a
+  // provider status check in `initState`, and a probe that waits for those
+  // would either time out or leave a pending timer at teardown. Overflow is
+  // raised during layout on the first frame, so a couple of pumps is all
+  // this needs.
+  for (final (name, page) in <(String, Widget)>[
+    ('keyboard shortcuts', const KeyboardShortcutsPage()),
+    ('built-in providers', const BuiltinProvidersSettingsPage()),
+    ('addons', const AddonsSettingsPage()),
+    ('about', const AboutSettingsPage()),
+    ('backup', const BackupSettingsPage()),
+    ('connect', const SyncSettingsPage()),
+    ('debrid', const DebridSettingsPage()),
+    ('video player', const VideoPlayerSettingsPage()),
+  ]) {
+    testWidgets(
+      'the $name settings page does not overflow at 3x text scale',
+      (tester) async {
+        await pumpAtScale(tester, settle: false, child: page);
+
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: 'the $name page is a column of fixed-height cards whose '
+              'titles, subtitles and badges all grow with the scale',
+        );
+      },
+    );
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../l10n/l10n.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
@@ -175,9 +176,11 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
       });
 
       if (verifiedUser != null) {
-        _showSnack('$provider key verified ($verifiedUser) & set as active provider!');
+        _showSnack(
+          context.l10n.debridKeyVerified(provider, verifiedUser),
+        );
       } else {
-        _showSnack('$provider key saved & set as active provider!');
+        _showSnack(context.l10n.debridKeySaved(provider));
       }
     } else {
       // Clear key
@@ -204,16 +207,19 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
         _loadingMap[provider] = false;
       });
 
-      _showSnack('$provider key cleared.');
+      _showSnack(context.l10n.debridKeyCleared(provider));
     }
   }
 
   Future<void> _pasteToController(TextEditingController controller) async {
+    // Read before the await: the clipboard call is an async gap, and the
+    // widget can be gone by the time it returns.
+    final pastedMessage = context.l10n.debridPastedKey;
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data?.text != null && data!.text!.isNotEmpty) {
       final sanitized = _sanitizeKey(data.text!);
       controller.text = sanitized;
-      _showSnack('Pasted key from clipboard');
+      _showSnack(pastedMessage);
     }
   }
 
@@ -235,7 +241,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
         behavior: SnackBarBehavior.floating,
         backgroundColor: isError ? Colors.red.shade700 : const Color(0xFF00E5FF),
         action: SnackBarAction(
-          label: 'Dismiss',
+          label: context.l10n.debridDismiss,
           textColor: Colors.black,
           onPressed: () {},
         ),
@@ -246,6 +252,10 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
+    // The provider ids are storage keys and API identifiers, not labels:
+    // `_selectedService` is persisted and compared with `==` throughout, so
+    // only the display of 'None' is translated, never the value.
     const services = [
       'None',
       'Real-Debrid',
@@ -264,9 +274,9 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Debrid & Cloud Streaming',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+        title: Text(
+          l10n.settingsCategoryDebrid,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
       body: SettingsScrollView(
@@ -277,7 +287,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Text(
-              'Stream torrents and magnet links instantly through high-speed cloud debrid providers without local peer-to-peer downloading.',
+              l10n.debridIntro,
               style: TextStyle(
                 fontSize: 13.5,
                 color: AppColors.inkAlpha(0.5),
@@ -321,16 +331,16 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Use Debrid for Streams',
-                            style: TextStyle(
+                          Text(
+                            l10n.debridMasterTitle,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Route torrent links through cloud servers',
+                            l10n.debridMasterSubtitle,
                             style: TextStyle(
                               color: AppColors.inkSubtle,
                               fontSize: 12.5,
@@ -350,22 +360,22 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                           final service = _selectedService;
                           if (service == 'None') {
                             _showSnack(
-                              'Select an active Debrid provider and save your API key below.',
+                              l10n.debridSelectNone,
                               isError: true,
                             );
                           } else {
                             final hasKey = await _debrid.hasKeyForService(service);
                             if (!hasKey) {
                               _showSnack(
-                                '$service has no API key saved. Please enter and save your key below.',
+                                l10n.debridNoKeyFor(service),
                                 isError: true,
                               );
                             } else {
-                              _showSnack('Debrid streaming activated via $service');
+                              _showSnack(l10n.debridActivatedVia(service));
                             }
                           }
                         } else {
-                          _showSnack('Debrid streaming disabled. Using local engine.');
+                          _showSnack(l10n.debridDisabled);
                         }
                       },
                     ),
@@ -373,7 +383,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 ),
                 const SizedBox(height: 14),
                 Text(
-                  'When enabled, all torrents from PlayTorrio and Stremio addons are resolved exclusively through your active Debrid provider without touching the local torrent engine.',
+                  l10n.debridMasterBody,
                   style: TextStyle(
                     color: AppColors.inkAlpha(0.45),
                     fontSize: 12,
@@ -388,7 +398,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
 
           // Active Provider Selector
           Text(
-            'ACTIVE PROVIDER',
+            l10n.debridActiveProviderHeader,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -411,7 +421,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Select Default Debrid Provider',
+                  l10n.debridSelectDefault,
                   style: TextStyle(
                     color: AppColors.ink,
                     fontSize: 14,
@@ -420,7 +430,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'PlayTorrio will send requests to this provider when streaming.',
+                  l10n.debridSelectDefaultBody,
                   style: TextStyle(
                     color: AppColors.inkAlpha(0.45),
                     fontSize: 12,
@@ -459,7 +469,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                             color: s == 'None' ? AppColors.inkDisabled : const Color(0xFF00E5FF),
                           ),
                           const SizedBox(width: 8),
-                          Text(s),
+                          Text(s == 'None' ? l10n.debridNone : s),
                         ],
                       ),
                     );
@@ -472,12 +482,16 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                         final hasKey = await _debrid.hasKeyForService(val);
                         if (!hasKey) {
                           _showSnack(
-                            '$val selected, but has no API key saved yet. Please enter and save your key below.',
+                            l10n.debridSelectedNoKey(val),
                           );
                           return;
                         }
                       }
-                      _showSnack('Active Debrid service set to $val');
+                      _showSnack(
+                        l10n.debridActiveSetTo(
+                          val == 'None' ? l10n.debridNone : val,
+                        ),
+                      );
                     }
                   },
                 ),
@@ -489,7 +503,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
 
           // Provider API Keys
           Text(
-            'PROVIDER CREDENTIALS',
+            l10n.debridCredentialsHeader,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -503,8 +517,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           _buildProviderCard(
             name: 'Real-Debrid',
             subtitle: _statusMap['Real-Debrid'] != null
-                ? 'Logged in as ${_statusMap['Real-Debrid']}'
-                : 'Get token from real-debrid.com/apitoken',
+                ? l10n.debridLoggedInAs(_statusMap['Real-Debrid']!)
+                : l10n.debridGetTokenRealDebrid,
             statusBadge: _statusMap['Real-Debrid'],
             badgeColor: const Color(0xFF10B981),
             controller: _rdKeyCtrl,
@@ -518,8 +532,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           _buildProviderCard(
             name: 'TorBox',
             subtitle: _statusMap['TorBox'] != null
-                ? 'Account: ${_statusMap['TorBox']}'
-                : 'Get key from torbox.app/settings',
+                ? l10n.debridAccount(_statusMap['TorBox']!)
+                : l10n.debridGetKeyTorBox,
             statusBadge: _statusMap['TorBox'],
             badgeColor: const Color(0xFF10B981),
             controller: _torboxKeyCtrl,
@@ -533,8 +547,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           _buildProviderCard(
             name: 'AllDebrid',
             subtitle: _statusMap['AllDebrid'] != null
-                ? 'Account: ${_statusMap['AllDebrid']}'
-                : 'Get key from alldebrid.com/apikeys',
+                ? l10n.debridAccount(_statusMap['AllDebrid']!)
+                : l10n.debridGetKeyAllDebrid,
             statusBadge: _statusMap['AllDebrid'],
             badgeColor: const Color(0xFF10B981),
             controller: _alldebridKeyCtrl,
@@ -548,8 +562,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           _buildProviderCard(
             name: 'Premiumize',
             subtitle: _statusMap['Premiumize'] != null
-                ? 'Account: Connected'
-                : 'Get key from premiumize.me/account',
+                ? l10n.debridAccountConnected
+                : l10n.debridGetKeyPremiumize,
             statusBadge: _statusMap['Premiumize'],
             badgeColor: const Color(0xFF10B981),
             controller: _premiumizeKeyCtrl,
@@ -563,8 +577,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
           _buildProviderCard(
             name: 'Debrid-Link',
             subtitle: _statusMap['Debrid-Link'] != null
-                ? 'Account: ${_statusMap['Debrid-Link']}'
-                : 'Get key from debrid-link.com/webapp/apikey',
+                ? l10n.debridAccount(_statusMap['Debrid-Link']!)
+                : l10n.debridGetKeyDebridLink,
             statusBadge: _statusMap['Debrid-Link'],
             badgeColor: const Color(0xFF10B981),
             controller: _debridlinkKeyCtrl,
@@ -588,6 +602,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
     String? statusBadge,
     Color? badgeColor,
   }) {
+    final l10n = context.l10n;
     final isObscured = _obscuredMap[name] ?? true;
 
     return Container(
@@ -622,9 +637,9 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                     color: const Color(0xFF00E5FF).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: const Text(
-                    'ACTIVE',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.debridActiveBadge,
+                    style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF00E5FF),
@@ -669,7 +684,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                   obscureText: isObscured,
                   style: TextStyle(color: AppColors.ink, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: 'Paste API Key / Token',
+                    hintText: l10n.debridKeyHint,
                     hintStyle: TextStyle(
                       color: AppColors.inkAlpha(0.25),
                       fontSize: 12,
@@ -696,7 +711,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                         if (controller.text.isNotEmpty)
                           IconButton(
                             icon: Icon(Icons.clear_rounded, color: AppColors.inkDisabled, size: 18),
-                            tooltip: 'Clear',
+                            tooltip: l10n.debridClear,
                             onPressed: () {
                               controller.clear();
                               setState(() {});
@@ -708,7 +723,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                             color: AppColors.inkDisabled,
                             size: 18,
                           ),
-                          tooltip: isObscured ? 'Show Key' : 'Hide Key',
+                          tooltip: isObscured ? l10n.debridShowKey : l10n.debridHideKey,
                           onPressed: () {
                             setState(() {
                               _obscuredMap[name] = !isObscured;
@@ -717,7 +732,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.content_paste_rounded, color: Color(0xFF00E5FF), size: 18),
-                          tooltip: 'Paste from Clipboard',
+                          tooltip: l10n.debridPasteClipboard,
                           onPressed: () => _pasteToController(controller),
                         ),
                       ],
@@ -741,9 +756,9 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                         height: 16,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                       )
-                    : const Text(
-                        'Save',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                    : Text(
+                        l10n.debridSave,
+                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
                       ),
               ),
             ],

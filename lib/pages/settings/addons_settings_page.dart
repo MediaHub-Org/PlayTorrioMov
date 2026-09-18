@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../models/addon/addon.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
@@ -27,7 +28,9 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${addon.manifest.name} installed successfully!'),
+          content: Text(
+            context.l10n.addonsInstalledSuccess(addon.manifest.name),
+          ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: const Color(0xFF10B981),
         ),
@@ -48,6 +51,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
   }
 
   Future<String?> _showAddDialog() {
+    final l10n = context.l10n;
     final controller = TextEditingController();
 
     return showDialog<String>(
@@ -58,16 +62,16 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text(
-            'Add Stremio Addon',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          title: Text(
+            l10n.addonsAddDialogTitle,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Paste the Stremio addon manifest.json URL to install catalogs, metadata, streams, or subtitles.',
+                l10n.addonsAddDialogBody,
                 style: TextStyle(
                   fontSize: 13,
                   color: AppColors.inkAlpha(0.50),
@@ -116,7 +120,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancel',
+                l10n.addonsCancel,
                 style: TextStyle(color: AppColors.inkAlpha(0.45)),
               ),
             ),
@@ -133,9 +137,9 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   vertical: 12,
                 ),
               ),
-              child: const Text(
-                'Install',
-                style: TextStyle(
+              child: Text(
+                l10n.addonsInstall,
+                style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),
@@ -148,6 +152,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
   }
 
   void _confirmRemove(InstalledAddon addon) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (context) {
@@ -156,16 +161,16 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Text('Remove ${addon.manifest.name}?'),
+          title: Text(l10n.addonsRemoveConfirm(addon.manifest.name)),
           content: Text(
-            'Its catalogs and metadata will be removed from your home page.',
+            l10n.addonsRemoveConfirmBody,
             style: TextStyle(color: AppColors.inkAlpha(0.55), fontSize: 13.5),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancel',
+                l10n.addonsCancel,
                 style: TextStyle(color: AppColors.inkAlpha(0.45)),
               ),
             ),
@@ -181,9 +186,9 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'Remove',
-                style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold),
+              child: Text(
+                l10n.addonsRemove,
+                style: const TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -195,6 +200,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     final addons = _manager.addons;
 
     return Scaffold(
@@ -206,9 +212,9 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Addons',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+        title: Text(
+          l10n.settingsCategoryAddons,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
       body: SettingsScrollView(
@@ -219,7 +225,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: Text(
-              'Addons provide movie, series, and anime metadata catalogs for your home page and search.',
+              l10n.addonsIntro,
               style: TextStyle(
                 fontSize: 13.5,
                 color: AppColors.inkAlpha(0.5),
@@ -236,7 +242,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           Row(
             children: [
               Text(
-                'INSTALLED ADDONS',
+                l10n.addonsInstalledHeader,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -252,7 +258,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  '${addons.length} Total',
+                  l10n.addonsTotalBadge(addons.length),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -278,12 +284,12 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                   Icon(Icons.extension_off_rounded, size: 40, color: AppColors.inkAlpha(0.25)),
                   const SizedBox(height: 12),
                   Text(
-                    'No Addons Installed',
+                    l10n.addonsEmptyTitle,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.inkMuted),
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Click "Add Addon" above to install a Stremio manifest URL.',
+                    l10n.addonsEmptyBody,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12.5, color: AppColors.inkAlpha(0.4)),
                   ),
@@ -350,6 +356,7 @@ class _AddonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     final m = addon.manifest;
 
     final hasCatalogs = m.supportsCatalog || m.catalogs.isNotEmpty;
@@ -357,6 +364,20 @@ class _AddonCard extends StatelessWidget {
     final hasStreams = m.supportsStream;
     final hasSubtitles = m.supportsSubtitles;
     final hasAnyFeature = hasCatalogs || hasSearch || hasStreams || hasSubtitles;
+
+    // The version line is assembled from translated parts rather than
+    // interpolated into one English sentence, because the count's plural
+    // form differs in the other three languages and `·` is a separator, not
+    // text. `addonsFeatureCatalogCount` carries the plural.
+    final versionLine = StringBuffer('v${m.version}  \u00b7  ');
+    if (m.supportsSubtitles && m.catalogs.isEmpty) {
+      versionLine.write(l10n.addonsFeatureSubtitlesProvider);
+    } else {
+      versionLine.write(l10n.addonsFeatureCatalogCount(m.catalogs.length));
+      if (m.supportsSubtitles) {
+        versionLine.write('  \u00b7  ${l10n.addonsFeatureSubtitles}');
+      }
+    }
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -404,9 +425,7 @@ class _AddonCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      m.supportsSubtitles && m.catalogs.isEmpty
-                          ? 'v${m.version}  ·  Subtitles Provider'
-                          : 'v${m.version}  ·  ${m.catalogs.length} catalog${m.catalogs.length == 1 ? '' : 's'}${m.supportsSubtitles ? '  ·  Subtitles' : ''}',
+                      versionLine.toString(),
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.inkAlpha(0.4),
@@ -463,7 +482,7 @@ class _AddonCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        'FUNCTIONS',
+                        l10n.addonsFunctionsHeader,
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
@@ -481,7 +500,7 @@ class _AddonCard extends StatelessWidget {
                       if (hasCatalogs)
                         _FeatureToggleChip(
                           icon: Icons.grid_view_rounded,
-                          label: 'Catalogs',
+                          label: l10n.addonsFeatureCatalogs,
                           count: m.catalogs.isNotEmpty ? m.catalogs.length : null,
                           isEnabled: addon.enableCatalogs,
                           onTap: () => onUpdateFeature(
@@ -491,7 +510,7 @@ class _AddonCard extends StatelessWidget {
                       if (hasSearch)
                         _FeatureToggleChip(
                           icon: Icons.search_rounded,
-                          label: 'Search',
+                          label: l10n.addonsFeatureSearch,
                           isEnabled: addon.enableSearch,
                           onTap: () => onUpdateFeature(
                             enableSearch: !addon.enableSearch,
@@ -500,7 +519,7 @@ class _AddonCard extends StatelessWidget {
                       if (hasStreams)
                         _FeatureToggleChip(
                           icon: Icons.play_circle_outline_rounded,
-                          label: 'Sources',
+                          label: l10n.addonsFeatureSources,
                           isEnabled: addon.enableStreams,
                           onTap: () => onUpdateFeature(
                             enableStreams: !addon.enableStreams,
@@ -509,7 +528,7 @@ class _AddonCard extends StatelessWidget {
                       if (hasSubtitles)
                         _FeatureToggleChip(
                           icon: Icons.subtitles_rounded,
-                          label: 'Subtitles',
+                          label: l10n.addonsFeatureSubtitles,
                           isEnabled: addon.enableSubtitles,
                           onTap: () => onUpdateFeature(
                             enableSubtitles: !addon.enableSubtitles,
@@ -555,7 +574,7 @@ class _AddonCard extends StatelessWidget {
                 icon: const Icon(Icons.delete_outline_rounded, size: 20),
                 color: Colors.red.withValues(alpha: 0.6),
                 onPressed: onRemove,
-                tooltip: 'Remove addon',
+                tooltip: context.l10n.addonsRemoveTooltip,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               ),
@@ -711,7 +730,7 @@ class _AddAddonButton extends StatelessWidget {
               Icon(Icons.add_rounded, color: AppColors.accent, size: 22),
             const SizedBox(width: 10),
             Text(
-              isLoading ? 'Installing...' : 'Add Addon',
+              isLoading ? context.l10n.addonsInstalling : context.l10n.addonsAdd,
               style: TextStyle(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w700,

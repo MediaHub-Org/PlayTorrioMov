@@ -12,6 +12,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   version is `AGENTS.md`.
 
 ### Changed
+- **Settings pages translated (#68)**: the seven remaining pages — Built-in
+  Providers, Addons, About, Backup & Data, Connect, Debrid & Cloud Streaming
+  and Video Player & Engine — now follow the app language, in all four
+  languages. 237 new keys, 369 in all. Two things stay untranslated on
+  purpose: the debrid provider ids (`Real-Debrid`, `TorBox`, …) are persisted
+  storage keys compared with `==`, and the platform names (`Android`,
+  `Windows`, …) are product names.
+- **Keyboard Shortcuts page translated (#68)**: the action column and the
+  page title now follow the app language. The key column (`Space`, `J`,
+  `Esc`) stays as-is — those are the physical keys.
 - **Spelling unified to American English** across code, comments, docs and
   commit history (`color`, `behavior`, `catalog`, `center`, `gray`,
   `labeled`, `canceled`, `initialize`, `normalize`, `optimize`, `analyze`,
@@ -20,6 +30,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   field and its `CANCELLED` status stay as the API spells them.
 
 ### Fixed
+- **Text scale (#69)**: all eight settings pages no longer overflow at 3×
+  text scale. Four of them did: the Keyboard Shortcuts key chip now scales
+  down, the Built-in Providers header scrolls with its list instead of being
+  pinned above it, the Connect card's name and status badge wrap, and the
+  Video Player page's engine title, preset badges, decoder-chain line and two
+  dropdowns all flex.
+- **Cast**: the "cannot cast this source" message named the wrong reason. It
+  said torrents never cast, but the rule that decides this tests the *host*:
+  a torrent that resolves through a debrid or a torrent server on another
+  machine casts fine. What a receiver cannot reach is this device's own
+  loopback, which is where TorrServer serves from. The message now says that.
 - **Text scale (#69)**: the player's transport bar and sources panel no
   longer overflow at 3× text scale. The seek bar's time labels scale down
   instead of pushing past the row, the sources panel's episode badge does the

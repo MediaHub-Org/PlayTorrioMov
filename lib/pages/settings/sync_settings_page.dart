@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../l10n/l10n.dart';
 import '../../services/trakt/trakt_constants.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
@@ -38,9 +39,9 @@ class SyncSettingsPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Connect',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+        title: Text(
+          context.l10n.settingsCategoryConnect,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
         ),
       ),
       body: SettingsScrollView(
@@ -122,6 +123,7 @@ class _SyncCardChrome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -152,7 +154,14 @@ class _SyncCardChrome extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    // A Wrap, not a Row: at 3x the provider name and the
+                    // CONNECTED/DISCONNECTED badge together are wider than
+                    // the space the buttons leave, and the badge is the part
+                    // that can move to a second line.
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         Text(
                           name,
@@ -162,7 +171,6 @@ class _SyncCardChrome extends StatelessWidget {
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -176,7 +184,7 @@ class _SyncCardChrome extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            isAuthed ? 'CONNECTED' : 'DISCONNECTED',
+                            isAuthed ? l10n.syncConnected : l10n.syncDisconnected,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -204,7 +212,7 @@ class _SyncCardChrome extends StatelessWidget {
               ),
               if (isAuthed) ...[
                 IconButton(
-                  tooltip: 'Sync now',
+                  tooltip: l10n.syncNowTooltip,
                   onPressed: onSyncNow,
                   icon: Icon(Icons.sync_rounded, color: color),
                 ),
@@ -223,9 +231,9 @@ class _SyncCardChrome extends StatelessWidget {
                     ),
                   ),
                   onPressed: onDisconnect,
-                  child: const Text(
-                    'Disconnect',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    l10n.syncDisconnect,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ] else if (unavailableNote == null && !pairing && !isLoading)
@@ -242,9 +250,9 @@ class _SyncCardChrome extends StatelessWidget {
                     ),
                   ),
                   onPressed: onConnect,
-                  child: const Text(
-                    'Connect',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    l10n.syncConnect,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
             ],
@@ -291,7 +299,7 @@ class _SyncCardChrome extends StatelessWidget {
               child: TextButton(
                 onPressed: onUnavailableAction,
                 child: Text(
-                  unavailableActionLabel ?? 'Fix this',
+                  unavailableActionLabel ?? l10n.syncFixThis,
                   style: TextStyle(
                     color: color,
                     fontWeight: FontWeight.w700,
@@ -414,7 +422,7 @@ class _SyncCardChrome extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       Text(
-                        'Waiting for authorization...',
+                        l10n.syncWaiting,
                         style: TextStyle(
                           fontSize: 12,
                           color: AppColors.inkAlpha(0.6),
@@ -450,8 +458,9 @@ Future<void> _openBrowser(String url, String logTag) async {
 }
 
 Future<void> _syncNow(BuildContext context, String providerName) async {
+  final l10n = context.l10n;
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Syncing with $providerName...')),
+    SnackBar(content: Text(l10n.syncInProgress(providerName))),
   );
   await Future.wait([
     MyListService.syncAll(),
@@ -459,7 +468,7 @@ Future<void> _syncNow(BuildContext context, String providerName) async {
   ]);
   if (context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$providerName sync complete!')),
+      SnackBar(content: Text(l10n.syncComplete(providerName))),
     );
   }
 }
@@ -515,7 +524,7 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
     if (res == null) {
       setState(() => _pairing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to request Trakt pairing code.')),
+        SnackBar(content: Text(context.l10n.syncTraktFailedCode)),
       );
       return;
     }
@@ -558,6 +567,7 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return _SyncCardChrome(
       icon: Icons.movie_filter_rounded,
       color: const Color(0xFFED1C24),
@@ -567,26 +577,21 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
       username: _username,
       pairing: _pairing,
       userCode: _userCode,
-      pairingHint: 'Enter this activation code at trakt.tv/activate:',
-      verifyUrlLabel: 'Open trakt.tv/activate',
+      pairingHint: l10n.syncTraktPairingHint,
+      verifyUrlLabel: l10n.syncTraktOpenVerify,
       // Trakt now gates creating a new API app behind a Trakt VIP
       // subscription for whoever registers it (this app's maintainer, not
       // each connecting user) -- confirmed via Trakt's own forums, this
       // isn't a bug on our end. Until that's set up, kTraktClientId stays
       // empty and Connect would just fail with no explanation, so this
       // shows why instead of a dead-end button.
-      unavailableNote: kTraktClientId.isEmpty
-          ? "Trakt sync isn't set up yet -- Trakt now requires a VIP "
-                'subscription to register a new API app, which the '
-                "developer hasn't done. Simkl sync below works without "
-                'that.'
-          : null,
+      unavailableNote: kTraktClientId.isEmpty ? l10n.syncTraktUnavailable : null,
       onConnect: _startPairing,
       onDisconnect: _logout,
       onCopyCode: () {
         Clipboard.setData(ClipboardData(text: _userCode!));
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Code copied to clipboard!')),
+          SnackBar(content: Text(l10n.syncCodeCopied)),
         );
       },
       onOpenVerifyUrl: () => _openBrowser('https://trakt.tv/activate', 'Trakt'),
@@ -650,8 +655,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            SimklSettings.lastStatus.value ??
-                'Failed to request Simkl PIN code.',
+            SimklSettings.lastStatus.value ?? context.l10n.syncSimklFailedPin,
           ),
         ),
       );
@@ -693,6 +697,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
   }
 
   Future<void> _showClientIdDialog() async {
+    final l10n = context.l10n;
     final controller = TextEditingController(
       text: SimklSettings.clientId.value ?? '',
     );
@@ -703,7 +708,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Simkl client ID',
+          l10n.syncSimklClientIdTitle,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: Column(
@@ -711,9 +716,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Register an app at simkl.com/settings/developer (free, takes '
-              'a minute) and paste its Client ID here. Any redirect URI will '
-              'do -- this app signs in with a PIN code, not a redirect.',
+              l10n.syncSimklClientIdBody,
               style: TextStyle(
                 color: AppColors.inkAlpha(0.7),
                 fontSize: 13,
@@ -726,7 +729,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
               autofocus: true,
               style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Client ID',
+                hintText: l10n.syncClientIdHint,
                 hintStyle: TextStyle(
                   color: AppColors.inkAlpha(0.3),
                 ),
@@ -744,7 +747,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Cancel',
+              l10n.syncCancel,
               style: TextStyle(color: AppColors.inkAlpha(0.6)),
             ),
           ),
@@ -756,9 +759,9 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text(
-              'Save',
-              style: TextStyle(
+            child: Text(
+              l10n.syncSave,
+              style: const TextStyle(
                 color: AppColors.onAccent,
                 fontWeight: FontWeight.bold,
               ),
@@ -786,6 +789,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
   }
 
   Widget _buildCard(String? status) {
+    final l10n = context.l10n;
     return _SyncCardChrome(
       icon: Icons.tv_rounded,
       color: const Color(0xFF00ADFF),
@@ -795,19 +799,17 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
       username: _username,
       pairing: _pairing,
       userCode: _userCode,
-      pairingHint: 'Enter this PIN code at simkl.com/pin:',
-      verifyUrlLabel: 'Open simkl.com/pin',
+      pairingHint: l10n.syncSimklPairingHint,
+      verifyUrlLabel: l10n.syncSimklOpenVerify,
       // Every published build ships an empty .env, so there is no Simkl
       // client ID in it and Connect could only ever fail. Unlike Trakt's
       // blocker, this one the user can clear themselves in a minute.
       unavailableNote: SimklSettings.needsUserClientId
-          ? 'This build shipped without a Simkl client ID, so Connect has '
-                'nothing to sign in with. Registering your own app at '
-                'simkl.com/settings/developer is free and takes a minute.'
+          ? l10n.syncSimklUnavailable
           : null,
       unavailableActionLabel: SimklSettings.clientId.value == null
-          ? 'Add a client ID'
-          : 'Change client ID',
+          ? l10n.syncSimklAddClientId
+          : l10n.syncSimklChangeClientId,
       onUnavailableAction: _showClientIdDialog,
       statusNote: status,
       onConnect: _startPairing,
@@ -815,7 +817,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
       onCopyCode: () {
         Clipboard.setData(ClipboardData(text: _userCode!));
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('PIN copied to clipboard!')),
+          SnackBar(content: Text(l10n.syncPinCopied)),
         );
       },
       onOpenVerifyUrl: () => _openBrowser('https://simkl.com/pin', 'Simkl'),
@@ -828,6 +830,7 @@ class _TmdbConnectCard extends StatelessWidget {
   const _TmdbConnectCard();
 
   Future<void> _showTmdbKeyDialog(BuildContext context) async {
+    final l10n = context.l10n;
     final controller = TextEditingController();
 
     final key = await showDialog<String>(
@@ -836,7 +839,7 @@ class _TmdbConnectCard extends StatelessWidget {
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Connect TMDB',
+          l10n.syncTmdbTitle,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: Column(
@@ -844,7 +847,7 @@ class _TmdbConnectCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Paste your TMDB API key (free — sign up at themoviedb.org, no billing required).',
+              l10n.syncTmdbBody,
               style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: 13),
             ),
             const SizedBox(height: 14),
@@ -853,7 +856,7 @@ class _TmdbConnectCard extends StatelessWidget {
               autofocus: true,
               style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'API Key',
+                hintText: l10n.syncTmdbKeyHint,
                 hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
                 filled: true,
                 fillColor: AppColors.bar,
@@ -868,7 +871,7 @@ class _TmdbConnectCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: AppColors.inkAlpha(0.6))),
+            child: Text(l10n.syncCancel, style: TextStyle(color: AppColors.inkAlpha(0.6))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
@@ -876,7 +879,7 @@ class _TmdbConnectCard extends StatelessWidget {
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Save', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
+            child: Text(l10n.syncSave, style: const TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -889,6 +892,7 @@ class _TmdbConnectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     return ValueListenableBuilder<String?>(
       valueListenable: TmdbSettings.apiKey,
       builder: (context, apiKey, _) {
@@ -925,17 +929,17 @@ class _TmdbConnectCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'TMDB Cast Photos',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                        Text(
+                          l10n.syncTmdbCardTitle,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           ownKey
-                              ? 'Connected with your own key — cast photos and character names load when available.'
+                              ? l10n.syncTmdbOwnKey
                               : bundled
-                              ? 'Using this build\'s included key — cast photos and character names load when available. Add your own if you would rather not share it.'
-                              : 'Add your own free TMDB API key to fill in cast photos and character names most addons don\'t provide.',
+                              ? l10n.syncTmdbBundledKey
+                              : l10n.syncTmdbNoKey,
                           style: TextStyle(color: AppColors.inkSubtle, fontSize: 12.5, height: 1.35),
                         ),
                       ],
@@ -947,7 +951,7 @@ class _TmdbConnectCard extends StatelessWidget {
                     TextButton(
                       onPressed: () => TmdbSettings.setApiKey(null),
                       child: Text(
-                        'Disconnect',
+                        l10n.syncDisconnect,
                         style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: 13),
                       ),
                     )
@@ -960,7 +964,7 @@ class _TmdbConnectCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       ),
                       child: Text(
-                        bundled ? 'Use my key' : 'Connect',
+                        bundled ? l10n.syncTmdbUseMyKey : l10n.syncConnect,
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
@@ -1056,10 +1060,10 @@ class _DiscordPresenceCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Discord Rich Presence',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  context.l10n.syncDiscordTitle,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                 ),
               ),
               Switch.adaptive(

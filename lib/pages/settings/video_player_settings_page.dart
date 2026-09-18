@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/animated_ambient_background.dart';
@@ -12,7 +14,8 @@ class VideoPlayerSettingsPage extends StatefulWidget {
   const VideoPlayerSettingsPage({super.key});
 
   @override
-  State<VideoPlayerSettingsPage> createState() => _VideoPlayerSettingsPageState();
+  State<VideoPlayerSettingsPage> createState() =>
+      _VideoPlayerSettingsPageState();
 }
 
 class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
@@ -27,9 +30,17 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return 'Desktop/Mobile';
   }
 
+  /// The platform names above are product names and stay as they are; only
+  /// the generic fallback is a phrase a reader would expect translated.
+  String _platformLabel(AppLocalizations l10n) =>
+      _platformName == 'Desktop/Mobile'
+      ? l10n.videoPlatformFallback
+      : _platformName;
+
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final l10n = context.l10n;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ValueListenableBuilder<int>(
@@ -46,13 +57,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
-              'Video Player & Engine Settings',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+            title: Text(
+              l10n.videoPlayerSettingsTitle,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
             ),
             actions: [
               IconButton(
-                tooltip: 'Reset to Defaults',
+                tooltip: l10n.videoResetTooltip,
                 icon: const Icon(Icons.restart_alt_rounded, size: 22),
                 onPressed: () => _confirmResetToDefaults(palette),
               ),
@@ -70,42 +81,42 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 const SizedBox(height: 24),
 
                 // ── Section 1: Video Decoders & Hardware Acceleration ──
-                _buildSectionHeader('VIDEO DECODERS & HARDWARE ACCELERATION'),
+                _buildSectionHeader(l10n.videoSectionDecoders),
                 const SizedBox(height: 12),
                 _buildDecodersCard(palette),
 
                 const SizedBox(height: 24),
 
                 // ── Section 2: Engine Performance & Fast Decode (AnymeX) ──
-                _buildSectionHeader('ENGINE DECODE OPTIMIZATIONS & CACHING'),
+                _buildSectionHeader(l10n.videoSectionOptimizations),
                 const SizedBox(height: 12),
                 _buildPerformanceOptimizationCard(palette),
 
                 const SizedBox(height: 24),
 
                 // ── Section 3: Buffer Cushion & Anti-Desync Engine ──
-                _buildSectionHeader('BUFFER CUSHION & DEMUXER RESILIENCE'),
+                _buildSectionHeader(l10n.videoSectionBuffer),
                 const SizedBox(height: 12),
                 _buildBufferCushionCard(palette),
 
                 const SizedBox(height: 24),
 
                 // ── Section 4: Network Continuity & Auto-Reconnect ──
-                _buildSectionHeader('STREAM CONTINUITY & NETWORK RECONNECT'),
+                _buildSectionHeader(l10n.videoSectionNetwork),
                 const SizedBox(height: 12),
                 _buildNetworkReconnectCard(palette),
 
                 const SizedBox(height: 24),
 
                 // ── Section 5: A/V Master Clock & Sync Calibration ──
-                _buildSectionHeader('A/V MASTER CLOCK & SYNC CALIBRATION'),
+                _buildSectionHeader(l10n.videoSectionClock),
                 const SizedBox(height: 12),
                 _buildAudioSyncCard(palette),
 
                 const SizedBox(height: 24),
 
                 // ── Section 6: Subtitle Appearance & libass Styling ──
-                _buildSectionHeader('SUBTITLE APPEARANCE & LIBASS STYLING'),
+                _buildSectionHeader(l10n.videoSectionSubtitles),
                 const SizedBox(height: 12),
                 _buildSubtitleAppearanceCard(palette),
 
@@ -143,6 +154,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildDeviceStatusCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     final effectiveDecoders = PlayerSettings.getEffectiveDecoders();
 
     return Container(
@@ -157,9 +169,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: palette.primaryColor.withValues(alpha: 0.25),
-        ),
+        border: Border.all(color: palette.primaryColor.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -177,8 +187,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   Platform.isAndroid
                       ? Icons.android_rounded
                       : (Platform.isWindows
-                          ? Icons.window_rounded
-                          : (Platform.isMacOS || Platform.isIOS ? Icons.apple_rounded : Icons.computer_rounded)),
+                            ? Icons.window_rounded
+                            : (Platform.isMacOS || Platform.isIOS
+                                  ? Icons.apple_rounded
+                                  : Icons.computer_rounded)),
                   color: palette.primaryColor,
                   size: 26,
                 ),
@@ -188,38 +200,64 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    // A Wrap, not a Row: at 3x the engine title and the
+                    // Crash-Free badge together are wider than the card, and
+                    // the badge is the part that can move to a second line.
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
                       children: [
                         Text(
-                          '$_platformName Video Engine',
+                          l10n.videoEngineTitle(_platformLabel(l10n)),
                           style: TextStyle(
                             fontSize: 16.5,
                             fontWeight: FontWeight.w800,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                            color: const Color(
+                              0xFF10B981,
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                              color: const Color(
+                                0xFF10B981,
+                              ).withValues(alpha: 0.4),
                               width: 0.8,
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.shield_rounded, color: Color(0xFF10B981), size: 12),
-                              SizedBox(width: 4),
-                              Text(
-                                'Crash-Free Fallback',
-                                style: TextStyle(
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF10B981),
+                              const Icon(
+                                Icons.shield_rounded,
+                                color: Color(0xFF10B981),
+                                size: 12,
+                              ),
+                              const SizedBox(width: 4),
+                              // The badge is a fixed-width pill with a
+                              // single-line label; at 3x the label alone is
+                              // wider than the card, so it scales down
+                              // rather than running off the edge.
+                              Flexible(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    l10n.videoCrashFreeBadge,
+                                    style: const TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF10B981),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
@@ -229,7 +267,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'libmpv hardware accelerated pipeline with auto software failover.',
+                      l10n.videoEngineBody,
                       style: TextStyle(
                         fontSize: 12.5,
                         color: AppColors.inkAlpha(0.55),
@@ -253,9 +291,18 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               children: [
                 Icon(Icons.hub_rounded, size: 14, color: AppColors.inkSubtle),
                 const SizedBox(width: 8),
-                Text(
-                  'Active Decoder Chain: ',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
+                // Both halves flex: at 3x the label alone is wider than the
+                // row, and it is a fixed phrase that cannot wrap usefully.
+                Flexible(
+                  child: Text(
+                    l10n.videoActiveDecoderChain,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.inkMuted,
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Text(
@@ -277,6 +324,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildDecodersCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     final presets = PlayerSettings.getAvailablePresetsForPlatform();
     final currentPreset = PlayerSettings.decoderPreset.value;
     final isForceSoftware = PlayerSettings.forceSoftwareDecoding.value;
@@ -304,17 +352,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
               child: Icon(
                 Icons.memory_rounded,
-                color: isForceSoftware ? const Color(0xFFF59E0B) : AppColors.inkSubtle,
+                color: isForceSoftware
+                    ? const Color(0xFFF59E0B)
+                    : AppColors.inkSubtle,
                 size: 20,
               ),
             ),
             title: Text(
-              'Software Safe Mode (CPU Decode)',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoSoftwareSafeTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Bypasses GPU hardware decoders. Recommended on Android if video & audio lose sync when buffering stalls.',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoSoftwareSafeBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: isForceSoftware,
             activeColor: const Color(0xFFF59E0B),
@@ -326,7 +384,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           const SizedBox(height: 14),
 
           Text(
-            'DECODER PRESET (${_platformName.toUpperCase()})',
+            l10n.videoDecoderPresetHeader(_platformLabel(l10n).toUpperCase()),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -377,7 +435,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           isSelected
                               ? Icons.radio_button_checked_rounded
                               : Icons.radio_button_off_rounded,
-                          color: isSelected ? palette.primaryColor : AppColors.inkDisabled,
+                          color: isSelected
+                              ? palette.primaryColor
+                              : AppColors.inkDisabled,
                           size: 18,
                         ),
                         const SizedBox(width: 12),
@@ -386,16 +446,18 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                preset.title,
+                                preset.title(l10n),
                                 style: TextStyle(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
-                                  color: isForceSoftware ? AppColors.inkDisabled : AppColors.ink,
+                                  color: isForceSoftware
+                                      ? AppColors.inkDisabled
+                                      : AppColors.ink,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                preset.description,
+                                preset.description(l10n),
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   color: AppColors.inkAlpha(0.45),
@@ -407,8 +469,14 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                         ),
                         if (isCustom)
                           IconButton(
-                            icon: Icon(Icons.tune_rounded, size: 18, color: AppColors.inkMuted),
-                            onPressed: isForceSoftware ? null : () => _showCustomDecodersDialog(palette),
+                            icon: Icon(
+                              Icons.tune_rounded,
+                              size: 18,
+                              color: AppColors.inkMuted,
+                            ),
+                            onPressed: isForceSoftware
+                                ? null
+                                : () => _showCustomDecodersDialog(palette),
                           ),
                       ],
                     ),
@@ -423,6 +491,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildPerformanceOptimizationCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -442,15 +511,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 color: palette.primaryColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.flash_on_rounded, color: palette.primaryColor, size: 20),
+              child: Icon(
+                Icons.flash_on_rounded,
+                color: palette.primaryColor,
+                size: 20,
+              ),
             ),
             title: Text(
-              'Fast Video Decoding (vd-lavc-fast)',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoFastDecodeTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Enables high-throughput FFmpeg fast decode paths to minimize stutter on high-bitrate streams.',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoFastDecodeBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: PlayerSettings.enableFastDecode.value,
             activeColor: palette.primaryColor,
@@ -470,7 +551,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   color: const Color(0xFF10B981).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.filter_alt_rounded, color: Color(0xFF10B981), size: 20),
+                child: const Icon(
+                  Icons.filter_alt_rounded,
+                  color: Color(0xFF10B981),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -478,30 +563,60 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Deblocking Loop Filter',
-                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+                      l10n.videoLoopFilterTitle,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
                     ),
                     Text(
-                      'Skip deblocking filter on non-critical frames to reduce CPU/GPU load.',
-                      style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5)),
+                      l10n.videoLoopFilterBody,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.inkAlpha(0.5),
+                      ),
                     ),
                   ],
                 ),
               ),
-              DropdownButton<String>(
-                value: PlayerSettings.skipLoopFilter.value,
-                dropdownColor: AppColors.raised,
-                underline: const SizedBox(),
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
-                items: const [
-                  DropdownMenuItem(value: 'nonkey', child: Text('Non-Key (Fast)')),
-                  DropdownMenuItem(value: 'noref', child: Text('Non-Ref')),
-                  DropdownMenuItem(value: 'all', child: Text('Skip All')),
-                  DropdownMenuItem(value: 'none', child: Text('None (Quality)')),
-                ],
-                onChanged: (val) {
-                  if (val != null) PlayerSettings.setSkipLoopFilter(val);
-                },
+              // Flexible + isExpanded: at 3x the dropdown's own intrinsic
+              // width is wider than the row leaves it, and a dropdown is the
+              // one control here that cannot wrap. Bounded, it ellipsizes
+              // the selected item instead of pushing the row off the edge.
+              Flexible(
+                child: DropdownButton<String>(
+                  value: PlayerSettings.skipLoopFilter.value,
+                  isExpanded: true,
+                  dropdownColor: AppColors.raised,
+                  underline: const SizedBox(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'nonkey',
+                      child: Text(l10n.videoLoopFilterNonKey),
+                    ),
+                    DropdownMenuItem(
+                      value: 'noref',
+                      child: Text(l10n.videoLoopFilterNonRef),
+                    ),
+                    DropdownMenuItem(
+                      value: 'all',
+                      child: Text(l10n.videoLoopFilterAll),
+                    ),
+                    DropdownMenuItem(
+                      value: 'none',
+                      child: Text(l10n.videoLoopFilterNone),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) PlayerSettings.setSkipLoopFilter(val);
+                  },
+                ),
               ),
             ],
           ),
@@ -519,7 +634,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.developer_board_rounded, color: Color(0xFFF59E0B), size: 20),
+                child: const Icon(
+                  Icons.developer_board_rounded,
+                  color: Color(0xFFF59E0B),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -527,31 +646,60 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Decoder Worker Threads',
-                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+                      l10n.videoThreadsTitle,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
                     ),
                     Text(
-                      'Multi-threaded FFmpeg decode workers (Default: 4).',
-                      style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5)),
+                      l10n.videoThreadsBody,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.inkAlpha(0.5),
+                      ),
                     ),
                   ],
                 ),
               ),
-              DropdownButton<int>(
-                value: PlayerSettings.lavcThreads.value,
-                dropdownColor: AppColors.raised,
-                underline: const SizedBox(),
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.ink),
-                items: const [
-                  DropdownMenuItem(value: 0, child: Text('Auto')),
-                  DropdownMenuItem(value: 1, child: Text('1 Thread')),
-                  DropdownMenuItem(value: 2, child: Text('2 Threads')),
-                  DropdownMenuItem(value: 4, child: Text('4 Threads')),
-                  DropdownMenuItem(value: 8, child: Text('8 Threads')),
-                ],
-                onChanged: (val) {
-                  if (val != null) PlayerSettings.setLavcThreads(val);
-                },
+              Flexible(
+                child: DropdownButton<int>(
+                  value: PlayerSettings.lavcThreads.value,
+                  isExpanded: true,
+                  dropdownColor: AppColors.raised,
+                  underline: const SizedBox(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 0,
+                      child: Text(l10n.videoThreadsAuto),
+                    ),
+                    DropdownMenuItem(
+                      value: 1,
+                      child: Text(l10n.videoThreadsCount(1)),
+                    ),
+                    DropdownMenuItem(
+                      value: 2,
+                      child: Text(l10n.videoThreadsCount(2)),
+                    ),
+                    DropdownMenuItem(
+                      value: 4,
+                      child: Text(l10n.videoThreadsCount(4)),
+                    ),
+                    DropdownMenuItem(
+                      value: 8,
+                      child: Text(l10n.videoThreadsCount(8)),
+                    ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) PlayerSettings.setLavcThreads(val);
+                  },
+                ),
               ),
             ],
           ),
@@ -569,15 +717,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.disc_full_rounded, color: Color(0xFF8B5CF6), size: 20),
+              child: const Icon(
+                Icons.disc_full_rounded,
+                color: Color(0xFF8B5CF6),
+                size: 20,
+              ),
             ),
             title: Text(
-              'Disk Stream Buffer Cache',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoDiskCacheTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Smoothly caches media chunks into the OS temporary directory to eliminate RAM pressure.',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoDiskCacheBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: PlayerSettings.enableDiskCache.value,
             activeColor: const Color(0xFF8B5CF6),
@@ -589,6 +749,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildBufferCushionCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     final currentBuffer = PlayerSettings.bufferPreset.value;
 
     return Container(
@@ -609,7 +770,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.speed_rounded, color: Color(0xFF00E5FF), size: 20),
+                child: const Icon(
+                  Icons.speed_rounded,
+                  color: Color(0xFF00E5FF),
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -617,12 +782,19 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Preload Buffer Cushion',
-                      style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+                      l10n.videoPreloadTitle,
+                      style: TextStyle(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
                     ),
                     Text(
-                      'Higher cushions buffer ahead to prevent playback hiccups and A/V desync.',
-                      style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                      l10n.videoPreloadBody,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: AppColors.inkSubtle,
+                      ),
                     ),
                   ],
                 ),
@@ -665,7 +837,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           isSelected
                               ? Icons.radio_button_checked_rounded
                               : Icons.radio_button_off_rounded,
-                          color: isSelected ? const Color(0xFF00E5FF) : AppColors.inkDisabled,
+                          color: isSelected
+                              ? const Color(0xFF00E5FF)
+                              : AppColors.inkDisabled,
                           size: 18,
                         ),
                         const SizedBox(width: 12),
@@ -673,39 +847,52 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
+                              // A Wrap, not a Row: at 3x the preset label and
+                              // the RECOMMENDED badge together are wider than
+                              // the row, and the badge can move to a second
+                              // line.
+                              Wrap(
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                spacing: 8,
+                                runSpacing: 4,
                                 children: [
                                   Text(
-                                    preset.label,
+                                    preset.label(l10n),
                                     style: TextStyle(
                                       fontSize: 13.5,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.ink,
                                     ),
                                   ),
-                                  if (preset == BufferResiliencePreset.highResilience && Platform.isAndroid) ...[
-                                    const SizedBox(width: 8),
+                                  if (preset ==
+                                          BufferResiliencePreset
+                                              .highResilience &&
+                                      Platform.isAndroid)
                                     Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 1.5,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                                        color: const Color(
+                                          0xFF10B981,
+                                        ).withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: const Text(
-                                        'RECOMMENDED',
-                                        style: TextStyle(
+                                      child: Text(
+                                        l10n.videoRecommendedBadge,
+                                        style: const TextStyle(
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF10B981),
                                         ),
                                       ),
                                     ),
-                                  ],
                                 ],
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                preset.subtitle,
+                                preset.subtitle(l10n),
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   color: AppColors.inkAlpha(0.45),
@@ -740,12 +927,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Buffer Duration Cushion',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
+                        l10n.videoBufferDuration,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.inkMuted,
+                        ),
                       ),
                       Text(
                         '${PlayerSettings.customBufferMs.value} ms (${(PlayerSettings.customBufferMs.value / 1000).toStringAsFixed(1)}s)',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF00E5FF)),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF00E5FF),
+                        ),
                       ),
                     ],
                   ),
@@ -756,19 +951,30 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     divisions: 38,
                     activeColor: const Color(0xFF00E5FF),
                     onChanged: (v) {
-                      PlayerSettings.setCustomBuffer(v.toInt(), PlayerSettings.customBufferCount.value);
+                      PlayerSettings.setCustomBuffer(
+                        v.toInt(),
+                        PlayerSettings.customBufferCount.value,
+                      );
                     },
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Packet Count Buffer',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
+                        l10n.videoPacketCount,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.inkMuted,
+                        ),
                       ),
                       Text(
                         '${PlayerSettings.customBufferCount.value} pkts',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF00E5FF)),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF00E5FF),
+                        ),
                       ),
                     ],
                   ),
@@ -779,7 +985,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     divisions: 19,
                     activeColor: const Color(0xFF00E5FF),
                     onChanged: (v) {
-                      PlayerSettings.setCustomBuffer(PlayerSettings.customBufferMs.value, v.toInt());
+                      PlayerSettings.setCustomBuffer(
+                        PlayerSettings.customBufferMs.value,
+                        v.toInt(),
+                      );
                     },
                   ),
                 ],
@@ -792,6 +1001,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildNetworkReconnectCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -810,16 +1020,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 color: const Color(0xFF10B981).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.sync_problem_rounded, color: Color(0xFF10B981), size: 20),
+              child: const Icon(
+                Icons.sync_problem_rounded,
+                color: Color(0xFF10B981),
+                size: 20,
+              ),
             ),
             title: Text(
-              'Network Auto-Reconnect',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoReconnectTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Seamlessly reconnects HLS / HTTP video demuxers without tearing down playback or corrupting timestamps on brief connection drops. '
-              'Always on for Live TV. Enabling it for movies and episodes can disable seeking on some HLS streams.',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoReconnectBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: PlayerSettings.enableNetworkReconnect.value,
             activeColor: const Color(0xFF10B981),
@@ -840,12 +1061,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Max Reconnect Delay Timeout',
-                        style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.inkMuted),
+                        l10n.videoReconnectDelay,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.inkMuted,
+                        ),
                       ),
                       Text(
                         '${PlayerSettings.reconnectDelayMax.value}s',
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFF10B981)),
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF10B981),
+                        ),
                       ),
                     ],
                   ),
@@ -855,7 +1084,8 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     max: 15,
                     divisions: 14,
                     activeColor: const Color(0xFF10B981),
-                    onChanged: (v) => PlayerSettings.setReconnectDelayMax(v.toInt()),
+                    onChanged: (v) =>
+                        PlayerSettings.setReconnectDelayMax(v.toInt()),
                   ),
                 ],
               ),
@@ -867,6 +1097,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildAudioSyncCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -885,15 +1116,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 color: palette.primaryColor.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.lock_clock_rounded, color: palette.primaryColor, size: 20),
+              child: Icon(
+                Icons.lock_clock_rounded,
+                color: palette.primaryColor,
+                size: 20,
+              ),
             ),
             title: Text(
-              'Auto-Resync On Buffer Recovery',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoResyncTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Recalibrates the video clock with the master audio timeline immediately after a network stall recovers.',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoResyncBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: PlayerSettings.autoResyncOnStall.value,
             activeColor: palette.primaryColor,
@@ -912,15 +1155,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 color: AppColors.accent.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.graphic_eq_rounded, color: AppColors.accent, size: 20),
+              child: Icon(
+                Icons.graphic_eq_rounded,
+                color: AppColors.accent,
+                size: 20,
+              ),
             ),
             title: Text(
-              'Master Audio Clock Sync',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoAudioClockTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Uses hardware audio clock as master timeline for uncompromised audio fidelity and tight frame locking.',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoAudioClockBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: PlayerSettings.hardwareAudioClock.value,
             activeColor: AppColors.accent,
@@ -939,15 +1194,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 color: AppColors.inkAlpha(0.06),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(Icons.bolt_rounded, color: AppColors.inkMuted, size: 20),
+              child: Icon(
+                Icons.bolt_rounded,
+                color: AppColors.inkMuted,
+                size: 20,
+              ),
             ),
             title: Text(
-              'Low Latency Mode',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+              l10n.videoLowLatencyTitle,
+              style: TextStyle(
+                fontSize: 14.5,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
             ),
             subtitle: Text(
-              'Minimizes buffering queue for live streams (disables deep preloading cushion).',
-              style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+              l10n.videoLowLatencyBody,
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3,
+              ),
             ),
             value: PlayerSettings.lowLatency.value,
             activeColor: palette.primaryColor,
@@ -967,15 +1234,27 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   color: palette.primaryColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.layers_rounded, color: palette.primaryColor, size: 20),
+                child: Icon(
+                  Icons.layers_rounded,
+                  color: palette.primaryColor,
+                  size: 20,
+                ),
               ),
               title: Text(
-                'Direct Surface (SurfaceView)',
-                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+                l10n.videoSurfaceTitle,
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                ),
               ),
               subtitle: Text(
-                'Renders frames directly to the hardware surface without texture blitting. Boosts 4K/60fps playback and reduces battery usage. Keep disabled if your device shows display glitches.',
-                style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5), height: 1.3),
+                l10n.videoSurfaceBody,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.inkAlpha(0.5),
+                  height: 1.3,
+                ),
               ),
               value: PlayerSettings.enableSurfaceProducer.value,
               activeColor: palette.primaryColor,
@@ -988,8 +1267,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Widget _buildSubtitleAppearanceCard(AppThemePalette palette) {
+    final l10n = context.l10n;
     final currentPreset = PlayerSettings.subStylePreset.value;
-    final fontName = PlayerSettings.subFont.value == 'subfont' ? 'Default (PlayTorrio Subfont)' : PlayerSettings.subFont.value;
+    final fontName = PlayerSettings.subFont.value == 'subfont'
+        ? l10n.videoDefaultSubfont
+        : PlayerSettings.subFont.value;
     final size = PlayerSettings.subFontSize.value;
     final scale = (PlayerSettings.subScale.value * 100).round();
 
@@ -1007,8 +1289,14 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     }
 
     final textColor = parseColor(PlayerSettings.subColor.value);
-    final boxColor = parseColor(PlayerSettings.subBackColor.value, fallback: Colors.transparent);
-    final borderColor = parseColor(PlayerSettings.subBorderColor.value, fallback: Colors.black);
+    final boxColor = parseColor(
+      PlayerSettings.subBackColor.value,
+      fallback: Colors.transparent,
+    );
+    final borderColor = parseColor(
+      PlayerSettings.subBorderColor.value,
+      fallback: Colors.black,
+    );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1020,46 +1308,85 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Expanded, not a Wrap: a Wrap hands its children unbounded width,
+          // so the title block sized to its natural width at 3x and ran off
+          // the card. Bounded, the title wraps and the button keeps its
+          // place on the right.
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: palette.primaryColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: palette.primaryColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.subtitles_rounded,
+                        color: palette.primaryColor,
+                        size: 20,
+                      ),
                     ),
-                    child: Icon(Icons.subtitles_rounded, color: palette.primaryColor, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Subtitle Styling & Engine Customization',
-                        style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.ink),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.videoSubtitleCardTitle,
+                            style: TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
+                          ),
+                          Text(
+                            l10n.videoSubtitlePresetLine(
+                              currentPreset.label(l10n),
+                              fontName,
+                              size,
+                              scale,
+                            ),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.inkAlpha(0.5),
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        'Preset: ${currentPreset.label} • $fontName (${size}pt / $scale%)',
-                        style: TextStyle(fontSize: 12, color: AppColors.inkAlpha(0.5)),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
               ElevatedButton.icon(
-                icon: Icon(_subtitleEditorExpanded ? Icons.expand_less_rounded : Icons.tune_rounded, size: 16),
-                label: Text(_subtitleEditorExpanded ? 'Done' : 'Customize'),
+                icon: Icon(
+                  _subtitleEditorExpanded
+                      ? Icons.expand_less_rounded
+                      : Icons.tune_rounded,
+                  size: 16,
+                ),
+                label: Text(
+                  _subtitleEditorExpanded
+                      ? l10n.videoSubtitleDone
+                      : l10n.videoSubtitleCustomize,
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
                   foregroundColor: AppColors.onAccent,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                onPressed: () => setState(() => _subtitleEditorExpanded = !_subtitleEditorExpanded),
+                onPressed: () => setState(
+                  () => _subtitleEditorExpanded = !_subtitleEditorExpanded,
+                ),
               ),
             ],
           ),
@@ -1080,26 +1407,47 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: boxColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      'PlayTorrio • Sample Subtitle Preview',
+                      l10n.videoSubtitlePreview,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontFamily: PlayerSettings.subFont.value == 'subfont' ? 'Poppins' : PlayerSettings.subFont.value,
+                        fontFamily: PlayerSettings.subFont.value == 'subfont'
+                            ? 'Poppins'
+                            : PlayerSettings.subFont.value,
                         fontSize: 14,
-                        fontWeight: PlayerSettings.subBold.value ? FontWeight.bold : FontWeight.w600,
-                        fontStyle: PlayerSettings.subItalic.value ? FontStyle.italic : FontStyle.normal,
+                        fontWeight: PlayerSettings.subBold.value
+                            ? FontWeight.bold
+                            : FontWeight.w600,
+                        fontStyle: PlayerSettings.subItalic.value
+                            ? FontStyle.italic
+                            : FontStyle.normal,
                         color: textColor,
                         shadows: [
                           if (PlayerSettings.subBorderSize.value > 0) ...[
-                            Shadow(color: borderColor, offset: const Offset(-1.2, -1.2)),
-                            Shadow(color: borderColor, offset: const Offset(1.2, -1.2)),
-                            Shadow(color: borderColor, offset: const Offset(1.2, 1.2)),
-                            Shadow(color: borderColor, offset: const Offset(-1.2, 1.2)),
+                            Shadow(
+                              color: borderColor,
+                              offset: const Offset(-1.2, -1.2),
+                            ),
+                            Shadow(
+                              color: borderColor,
+                              offset: const Offset(1.2, -1.2),
+                            ),
+                            Shadow(
+                              color: borderColor,
+                              offset: const Offset(1.2, 1.2),
+                            ),
+                            Shadow(
+                              color: borderColor,
+                              offset: const Offset(-1.2, 1.2),
+                            ),
                           ],
                         ],
                       ),
@@ -1117,7 +1465,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           // same fixed canvas color regardless of the app's light/dark theme.
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 200),
-            crossFadeState: _subtitleEditorExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _subtitleEditorExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Padding(
               padding: const EdgeInsets.only(top: 14),
@@ -1146,23 +1496,33 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   Future<void> _confirmResetToDefaults(AppThemePalette palette) async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Reset Player Settings?'),
+        title: Text(l10n.videoResetConfirmTitle),
         content: Text(
-          'This will restore all video decoding, fast-decode optimizations, caching, buffering, and sync settings to recommended defaults for $_platformName.',
+          l10n.videoResetConfirmBody(_platformLabel(l10n)),
           style: TextStyle(color: AppColors.inkMuted),
         ),
         actions: [
           TextButton(
-            child: Text('Cancel', style: TextStyle(color: AppColors.inkSubtle)),
+            child: Text(
+              l10n.videoCancel,
+              style: TextStyle(color: AppColors.inkSubtle),
+            ),
             onPressed: () => Navigator.pop(ctx, false),
           ),
           TextButton(
-            child: Text('Reset', style: TextStyle(color: palette.primaryColor, fontWeight: FontWeight.bold)),
+            child: Text(
+              l10n.videoReset,
+              style: TextStyle(
+                color: palette.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             onPressed: () => Navigator.pop(ctx, true),
           ),
         ],
@@ -1173,7 +1533,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Video settings reset to $_platformName defaults.'),
+            content: Text(l10n.videoResetDone(_platformLabel(l10n))),
             backgroundColor: const Color(0xFF10B981),
             behavior: SnackBarBehavior.floating,
           ),
@@ -1186,12 +1546,14 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     return Center(
       child: OutlinedButton.icon(
         icon: const Icon(Icons.restart_alt_rounded, size: 18),
-        label: const Text('Reset Video Engine to Platform Defaults'),
+        label: Text(context.l10n.videoResetButton),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.inkMuted,
           side: BorderSide(color: AppColors.inkAlpha(0.15)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
         ),
         onPressed: () => _confirmResetToDefaults(palette),
       ),
@@ -1199,6 +1561,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }
 
   void _showCustomDecodersDialog(AppThemePalette palette) {
+    final l10n = context.l10n;
     final available = PlayerSettings.getAvailableRawDecoders();
     final selected = List<String>.from(
       PlayerSettings.customDecoders.value.isNotEmpty
@@ -1212,12 +1575,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
         builder: (ctx, setDlgState) {
           return AlertDialog(
             backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
             title: Row(
               children: [
                 Icon(Icons.tune_rounded, color: AppColors.ink),
                 const SizedBox(width: 10),
-                const Text('Custom Decoder Chain', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+                Text(
+                  l10n.videoCustomChainTitle,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ],
             ),
             content: SizedBox(
@@ -1232,7 +1603,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Select prioritized decoders. FFmpeg (software) will always be appended as final crash-free safety fallback.',
+                    l10n.videoCustomChainBody,
                     style: TextStyle(fontSize: 12, color: AppColors.inkSubtle),
                   ),
                   const SizedBox(height: 14),
@@ -1244,11 +1615,15 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       dense: true,
                       contentPadding: EdgeInsets.zero,
                       title: Text(
-                        d + (isFfmpeg ? ' (Guaranteed Fallback)' : ''),
+                        d + (isFfmpeg ? l10n.videoGuaranteedFallback : ''),
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: isChecked ? FontWeight.w700 : FontWeight.w500,
-                          color: isFfmpeg ? const Color(0xFF10B981) : AppColors.ink,
+                          fontWeight: isChecked
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: isFfmpeg
+                              ? const Color(0xFF10B981)
+                              : AppColors.ink,
                         ),
                       ),
                       value: isFfmpeg ? true : isChecked,
@@ -1271,15 +1646,26 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ),
             actions: [
               TextButton(
-                child: Text('Cancel', style: TextStyle(color: AppColors.inkSubtle)),
+                child: Text(
+                  l10n.videoCancel,
+                  style: TextStyle(color: AppColors.inkSubtle),
+                ),
                 onPressed: () => Navigator.pop(ctx),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                child: const Text('Save Chain', style: TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
+                child: Text(
+                  l10n.videoSaveChain,
+                  style: const TextStyle(
+                    color: AppColors.onAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 onPressed: () async {
                   if (!selected.contains('FFmpeg')) selected.add('FFmpeg');
                   await PlayerSettings.setCustomDecoders(selected);
