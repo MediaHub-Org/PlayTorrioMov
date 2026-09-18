@@ -110,32 +110,20 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
             ),
           ),
         ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            activeTrackColor: PlayerTheme.accent,
-            inactiveTrackColor: PlayerTheme.edgeSoft,
-            thumbColor: PlayerTheme.accent,
-            activeTickMarkColor: PlayerTheme.accent,
-            inactiveTickMarkColor: PlayerTheme.inkSubtle,
-          ),
-          child: Slider(
-            value: index.toDouble(),
-            min: 0,
-            max: (_presetMinutes.length - 1).toDouble(),
-            divisions: _presetMinutes.length - 1,
-            label: '$minutes min',
-            onChanged: (value) => setState(() {
-              _draftPresetIndex = value.round();
-            }),
-            onChangeEnd: (value) {
-              final selected = _presetMinutes[value.round()];
-              setState(() => _customMinutes = null);
-              _start(selected);
-            },
-          ),
+        PlayerStepSlider(
+          value: index.toDouble(),
+          min: 0,
+          max: (_presetMinutes.length - 1).toDouble(),
+          divisions: _presetMinutes.length - 1,
+          label: '$minutes min',
+          onChanged: (value) => setState(() {
+            _draftPresetIndex = value.round();
+          }),
+          onChangeEnd: (value) {
+            final selected = _presetMinutes[value.round()];
+            setState(() => _customMinutes = null);
+            _start(selected);
+          },
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),

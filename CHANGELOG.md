@@ -24,6 +24,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (15–240 min) sits above the rows for one-drag selection.
 - **Playback speed**: the seven-row list became a discrete slider over the
   same points plus 0.25×, which the list omitted.
+- **TV / D-pad**: the speed and sleep-timer sliders are now drivable with a
+  remote's arrow keys (one step per press, with the same focus ring the
+  buttons use), instead of being pointer-only.
 - **Subtitle appearance**: removed the redundant Custom preset chip from the
   presets bar (the customizer's tabs already cover it) and bounded the font
   dropdown's menu height to the panel.

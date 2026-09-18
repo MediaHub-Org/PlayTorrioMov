@@ -556,3 +556,101 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
   }
 }
 
+/// A discrete slider that a D-pad can actually drive.
+///
+/// Material's [Slider] is pointer-only: a remote's left/right keys do
+/// nothing to it, so on a TV the speed and sleep-timer sliders would be
+/// visible but unreachable. This wraps one in a [Focus] that moves the
+/// value one step per arrow press and shows the same [FocusRing] the
+/// buttons use, so the control reads as selected from across the room.
+///
+/// [onChanged] fires on every step (live feedback); [onChangeEnd] fires
+/// once the user stops, which is where the menus commit and close.
+class PlayerStepSlider extends StatefulWidget {
+  final double value;
+  final double min;
+  final double max;
+  final int divisions;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double>? onChangeEnd;
+  final String? label;
+
+  const PlayerStepSlider({
+    super.key,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.divisions,
+    required this.onChanged,
+    this.onChangeEnd,
+    this.label,
+  });
+
+  @override
+  State<PlayerStepSlider> createState() => _PlayerStepSliderState();
+}
+
+class _PlayerStepSliderState extends State<PlayerStepSlider> {
+  bool _focused = false;
+
+  double get _step => (widget.max - widget.min) / widget.divisions;
+
+  void _nudge(int direction) {
+    final next = (widget.value + _step * direction)
+        .clamp(widget.min, widget.max);
+    if (next == widget.value) return;
+    widget.onChanged(next);
+    widget.onChangeEnd?.call(next);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      // The slider is the primary control of the menu it lives in, so it
+      // takes focus on open: a remote's arrows then work immediately
+      // instead of needing a Tab press first.
+      autofocus: true,
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+            event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          _nudge(-1);
+          return KeyEventResult.handled;
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
+            event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          _nudge(1);
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: FocusRing(
+        visible: _focused,
+        borderRadius: 12,
+        child: SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 4,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+            activeTrackColor: PlayerTheme.accent,
+            inactiveTrackColor: PlayerTheme.edgeSoft,
+            thumbColor: PlayerTheme.accent,
+            activeTickMarkColor: PlayerTheme.accent,
+            inactiveTickMarkColor: PlayerTheme.inkSubtle,
+          ),
+          child: Slider(
+            value: widget.value.clamp(widget.min, widget.max),
+            min: widget.min,
+            max: widget.max,
+            divisions: widget.divisions,
+            label: widget.label,
+            onChanged: widget.onChanged,
+            onChangeEnd: widget.onChangeEnd,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
