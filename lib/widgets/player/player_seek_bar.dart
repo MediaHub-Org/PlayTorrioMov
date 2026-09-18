@@ -103,18 +103,28 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
 
     return Row(
       children: [
-        // Time Start
-        Container(
-          constraints: const BoxConstraints(minWidth: 46),
-          child: Text(
-            _formatDuration(_scrubFraction != null
-                ? Duration(milliseconds: (_scrubFraction! * totalMs).round())
-                : currentPosition),
-            style: const TextStyle(
-              color: PlayerTheme.inkMuted,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              fontFeatures: [FontFeature.tabularFigures()],
+        // Time Start. Flexible + FittedBox, not a bare fixed-width box: at a
+        // large text scale "1:23:45" wants far more than the 46px minimum,
+        // and the row has nowhere to put it -- the track is Expanded and the
+        // labels are the only thing that can give. Scaling the label down
+        // keeps the timestamp readable and the row intact.
+        Flexible(
+          child: Container(
+            constraints: const BoxConstraints(minWidth: 46),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                _formatDuration(_scrubFraction != null
+                    ? Duration(milliseconds: (_scrubFraction! * totalMs).round())
+                    : currentPosition),
+                style: const TextStyle(
+                  color: PlayerTheme.inkMuted,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  fontFeatures: [FontFeature.tabularFigures()],
+                ),
+              ),
             ),
           ),
         ),
@@ -314,23 +324,30 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
 
         const SizedBox(width: 12),
 
-        // Time End / Remaining Toggle
-        GestureDetector(
-          onTap: () => setState(() => _showRemainingTime = !_showRemainingTime),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 46),
-              alignment: Alignment.centerRight,
-              child: Text(
-                _showRemainingTime
-                    ? (_formatDuration(-remainingDuration))
-                    : _formatDuration(widget.duration),
-                style: const TextStyle(
-                  color: PlayerTheme.inkMuted,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  fontFeatures: [FontFeature.tabularFigures()],
+        // Time End / Remaining Toggle. Same Flexible + FittedBox treatment as
+        // the start label above, for the same reason.
+        Flexible(
+          child: GestureDetector(
+            onTap: () => setState(() => _showRemainingTime = !_showRemainingTime),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 46),
+                alignment: Alignment.centerRight,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    _showRemainingTime
+                        ? (_formatDuration(-remainingDuration))
+                        : _formatDuration(widget.duration),
+                    style: const TextStyle(
+                      color: PlayerTheme.inkMuted,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
+                  ),
                 ),
               ),
             ),

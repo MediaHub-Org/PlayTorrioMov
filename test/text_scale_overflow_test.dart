@@ -5,6 +5,8 @@ import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
 import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 import 'package:playtorriomov/models/movie/movie.dart';
+import 'package:playtorriomov/models/movie/video.dart';
+import 'package:playtorriomov/models/stream/stream_model.dart';
 import 'package:playtorriomov/pages/anime/anime_details_page.dart';
 import 'package:playtorriomov/pages/settings/settings_page.dart';
 import 'package:playtorriomov/services/iptv/hardcoded_channels.dart';
@@ -19,6 +21,8 @@ import 'package:playtorriomov/widgets/common/section_header.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_sources_panel.dart';
+import 'package:playtorriomov/widgets/player/player_transport.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
 /// #69's own text: "the app scales today -- and overflows, because its
@@ -458,6 +462,107 @@ void main() {
         isNull,
         reason: 'a fixed 76px tile whose title and badge both grow with the '
             'scale has to flex or clamp',
+      );
+    },
+  );
+
+  testWidgets(
+    'the transport bar does not overflow at 3x text scale',
+    (tester) async {
+      // The player chrome the two menu probes above do not cover, and the
+      // first item on #69's remaining list. The buttons are icon-only, so
+      // the risk is the seek bar's two time labels: each sits in a
+      // `minWidth: 46` box, and at 3x "1:23:45" wants far more than 46px.
+      //
+      // Pumped at the bottom of a Stack, which is where it lives -- it is
+      // the last child of the player's overlay, anchored to the bottom edge.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: PlayerTransport(
+                  position: const Duration(hours: 1, minutes: 23, seconds: 45),
+                  duration: const Duration(hours: 2, minutes: 34, seconds: 56),
+                  buffered: const Duration(hours: 1, minutes: 50),
+                  volume: 0.8,
+                  isMuted: false,
+                  playbackRate: 1.0,
+                  isSubtitlesActive: true,
+                  onSeek: (_) {},
+                  onVolumeChanged: (_) {},
+                  onToggleMute: () {},
+                  onOpenSubtitleMenu: () {},
+                  onOpenSpeedMenu: () {},
+                  onOpenAudioMenu: () {},
+                  onOpenAspectMenu: () {},
+                  onOpenSleepTimerMenu: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'the seek bar time labels sit in fixed minWidth boxes, and a '
+            'long timestamp at 3x wants more than the box has',
+      );
+    },
+  );
+
+  testWidgets(
+    'the sources panel does not overflow at 3x text scale',
+    (tester) async {
+      // The other half of #69's first remaining item. This panel is a
+      // full-height column of source rows, each with a title, a badge row
+      // and a metadata line -- the most text-dense thing in the player.
+      //
+      // Given cached sources so it renders rows instead of starting a
+      // scrape: the probe is about layout, and a scrape would leave the
+      // panel in its loading state (and a pending timer) instead.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: PlayerSourcesPanel(
+            episode: Video(
+              id: 'tt1:1:1',
+              title: 'Pilot',
+              season: 1,
+              episode: 1,
+            ),
+            currentAddonName: 'Cinemeta',
+            cachedSources: [
+              StreamSource(
+                name: 'Torrentio',
+                title: 'A Release Name That Is Quite Long Indeed 1080p',
+                url: 'https://example.com/a.mkv',
+                addonName: 'Torrentio',
+              ),
+              StreamSource(
+                name: 'Debrid',
+                title: 'Another Source',
+                url: 'https://example.com/b.mkv',
+                addonName: 'Debrid',
+              ),
+            ],
+            onSourcesLoaded: (_) {},
+            onPlaySource: (_, __) {},
+            onBackToEpisodes: () {},
+            onClose: () {},
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'each source row stacks a title, badges and a metadata line '
+            'inside a fixed-height container',
       );
     },
   );

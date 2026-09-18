@@ -315,20 +315,30 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: PlayerTheme.accent.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: PlayerTheme.accent.withValues(alpha: 0.50)),
-                      ),
-                      child: Text(
-                        'S$sNum : E$eNum',
-                        style: const TextStyle(
-                          color: Color(0xFF9D84FF),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.4,
+                    // Flexible + FittedBox: the badge is a fixed-width pill
+                    // whose label grows with the text scale, and at 3x it
+                    // alone wanted more than the row had. Scaling it down
+                    // keeps the episode marker legible without pushing the
+                    // title off the edge.
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: PlayerTheme.accent.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: PlayerTheme.accent.withValues(alpha: 0.50)),
+                        ),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'S$sNum : E$eNum',
+                            style: const TextStyle(
+                              color: Color(0xFF9D84FF),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -597,13 +607,20 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Badges Row (Resolution, Type, Provider)
-                      Row(
+                      // Badges Row (Resolution, Type, Provider). A Wrap, not
+                      // a Row: the resolution pill and the delivery badges
+                      // are all fixed-width, so at a large text scale they
+                      // together exceed the row and there is nothing left to
+                      // flex. The column has room to grow, so letting the
+                      // badges flow onto a second line is the honest fix.
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 4,
                         children: [
-                          if (resolution.isNotEmpty) ...[
+                          if (resolution.isNotEmpty)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                              margin: const EdgeInsets.only(right: 6),
                               decoration: BoxDecoration(
                                 color: _getResolutionColor(resolution),
                                 borderRadius: BorderRadius.circular(4),
@@ -618,31 +635,21 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                                 ),
                               ),
                             ),
-                          ],
 
                           // Shared with every out-of-player source picker,
                           // so a source's delivery and seed health read the
                           // same wherever it is listed.
-                          for (final badge in sourceDeliveryBadges(source))
-                            Padding(
-                              padding: const EdgeInsets.only(right: 6),
-                              child: badge,
-                            ),
+                          ...sourceDeliveryBadges(source),
 
-                          if (source.name != null && source.name!.isNotEmpty) ...[
-                            Flexible(
-                              child: Text(
-                                source.name!,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.50),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                          if (source.name != null && source.name!.isNotEmpty)
+                            Text(
+                              source.name!,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.50),
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ],
                         ],
                       ),
 

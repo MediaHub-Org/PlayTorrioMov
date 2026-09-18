@@ -7,7 +7,7 @@ the release process is in [RELEASES.md](RELEASES.md), and item numbers
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-17**, on `v1.8.3+36`.
+Last reconciled: **2026-09-18**, on `v1.8.3+36`.
 
 ---
 
@@ -118,19 +118,18 @@ people search and recognize things.
 
 ### Text scale and accessibility (#69)
 
-**~56 of the ~68 files in `lib/` with a fixed `height:` are still unaudited.**
-Twelve high-traffic boxes are fixed so far — four in 1.8.1, then the Continue
-Watching card and its section header, then the three catalog cards and the
-details page action rows, then the player's two menus, the browse row header
-and the settings hub. What is left is the long tail, in rough order of how
-many people meet it:
+**~54 of the ~68 files in `lib/` with a fixed `height:` are still
+unaudited.** Fourteen high-traffic boxes are fixed so far — four in 1.8.1,
+then the Continue Watching card and its section header, then the three
+catalog cards and the details page action rows, then the player's two menus,
+the browse row header and the settings hub, then the transport bar's seek
+labels and the sources panel's header badge and per-source badge row. What is
+left is the long tail, in rough order of how many people meet it:
 
-1. **The transport bar and source sheet** — the player chrome the two menus
-   above do not cover.
-2. **The remaining settings pages** — the hub is done; the ten pages behind
+1. **The remaining settings pages** — the hub is done; the ten pages behind
    it are not, and they are the most text-heavy screens in the app.
-3. **The remaining details-page rails** — cast, related, similar.
-4. **Live TV's portal browser** — a modal with its own toolbars.
+2. **The remaining details-page rails** — cast, related, similar.
+3. **Live TV's portal browser** — a modal with its own toolbars.
 
 The method is settled and does not need rediscovering:
 

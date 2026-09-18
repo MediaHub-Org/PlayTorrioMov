@@ -20,6 +20,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   field and its `CANCELLED` status stay as the API spells them.
 
 ### Fixed
+- **Text scale (#69)**: the player's transport bar and sources panel no
+  longer overflow at 3× text scale. The seek bar's time labels scale down
+  instead of pushing past the row, the sources panel's episode badge does the
+  same, and its per-source badge row wraps to a second line rather than
+  running off the edge.
 - **Flatpak**: the PC could suspend mid-playback — the sleep inhibitor D-Bus
   call (`org.freedesktop.ScreenSaver`) was silently blocked by the sandbox.
   Added `--talk=org.freedesktop.ScreenSaver` and
