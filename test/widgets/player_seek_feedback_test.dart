@@ -38,7 +38,7 @@ void main() {
       expect(flash.totalSeconds, 40);
     });
 
-    test('turning around starts a new count rather than cancelling out', () {
+    test('turning around starts a new count rather than canceling out', () {
       // Going back after going forward should read "10 seconds" back, not
       // "0 seconds" -- the total is a description of the latest gesture,
       // not a running sum of the whole session.

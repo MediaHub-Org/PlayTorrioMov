@@ -140,7 +140,7 @@ void main() {
 
   group('ContinueWatchingService.matchesTypeFilter', () {
     // Anime is not identifiable by `type` alone: entries arrive from the
-    // AniList catalogue, the Arabic catalogue, and addons reporting
+    // AniList catalog, the Arabic catalog, and addons reporting
     // type == 'anime', and are told apart by id prefix and addon name. This
     // lived inside the slider until the history view needed the same answer.
     ContinueWatchingItem item({

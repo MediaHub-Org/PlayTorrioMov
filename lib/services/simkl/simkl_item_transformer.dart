@@ -112,7 +112,7 @@ class SimklItemTransformer {
   }
 
   /// Epoch-ms of the date the WRAPPER row carries, or null for the flat shapes
-  /// (best/premieres/trending/genre) that are catalogue rows rather than the
+  /// (best/premieres/trending/genre) that are catalog rows rather than the
   /// user's own.
   ///
   /// `added_to_watchlist_at` is the one the user means by "date added" — it is

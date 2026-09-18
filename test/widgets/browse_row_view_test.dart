@@ -76,7 +76,7 @@ void main() {
   group('AnimeSliderSection', () {
     // It is now a thin wrapper over BrowseRowView rather than a second copy
     // of the row. This is what stops the Anime page and the anime search
-    // page drifting apart on card size, spacing or arrow behaviour.
+    // page drifting apart on card size, spacing or arrow behavior.
     testWidgets('delegates to the shared row', (tester) async {
       setSurfaceWidth(tester, 1200);
       await tester.pumpWidget(wrap(AnimeSliderSection(

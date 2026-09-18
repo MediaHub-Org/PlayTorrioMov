@@ -27,7 +27,7 @@ class OverArtwork extends InheritedWidget {
   static bool of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<OverArtwork>()?.value ?? false;
 
-  /// The foreground colour for this subtree: fixed white over artwork, the
+  /// The foreground color for this subtree: fixed white over artwork, the
   /// theme's ink otherwise. Everything a control draws — its glyph, its
   /// label, its border, its background wash — should come from this one
   /// value at different opacities, so a control cannot end up with a light

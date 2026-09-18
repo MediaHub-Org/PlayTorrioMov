@@ -647,7 +647,7 @@ class DownloadService {
     try {
       _httpFileSinks[taskId]?.close();
     } catch (_) {
-      // Cancelling a download whose sink is already closed.
+      // Canceling a download whose sink is already closed.
     }
     _httpFileSinks.remove(taskId);
   }
@@ -702,7 +702,7 @@ class DownloadService {
         try {
           await partFile.delete();
         } catch (_) {
-          // Leftover .part file. The download is cancelled whether or not the
+          // Leftover .part file. The download is canceled whether or not the
           // file goes.
         }
       }

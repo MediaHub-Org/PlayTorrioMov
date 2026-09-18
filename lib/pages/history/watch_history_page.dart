@@ -44,7 +44,7 @@ class WatchHistoryPage extends StatelessWidget {
         backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         // Same leading inset and shared button as every other pushed page
-        // -- AppBar's own 56px slot would centre it somewhere else, and a
+        // -- AppBar's own 56px slot would center it somewhere else, and a
         // narrower slot clamps the 48x48 button into an ellipse.
         leadingWidth: inset + 48,
         leading: Padding(

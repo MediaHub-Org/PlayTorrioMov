@@ -50,7 +50,7 @@ void main() {
       offenders,
       isEmpty,
       reason: 'write `Color get x => AppColors.x` -- a stored token is '
-          'initialised once and never follows a theme change',
+          'initialized once and never follows a theme change',
     );
   });
 }

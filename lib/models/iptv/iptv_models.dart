@@ -88,7 +88,7 @@ class IptvStream {
   });
 }
 
-/// Single EPG programme entry returned by Xtream `get_short_epg`.
+/// Single EPG program entry returned by Xtream `get_short_epg`.
 class EpgEntry {
   final String title;
   final String description;

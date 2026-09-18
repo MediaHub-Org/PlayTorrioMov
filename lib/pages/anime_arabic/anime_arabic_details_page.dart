@@ -451,8 +451,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
   }
 
   /// Saves under `type: 'anime'`, the same as the AniList anime page, so a
-  /// show saved from either catalogue lands in the Library's one Anime tab
-  /// rather than a per-catalogue list.
+  /// show saved from either catalog lands in the Library's one Anime tab
+  /// rather than a per-catalog list.
   MyListItem _buildMyListItem() {
     final year = _details?.year;
     return MyListItem(
@@ -533,7 +533,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
 
         // Action row: watch, then the same Watchlist/Watched/Like controls
         // every other details page carries. This page had no library
-        // controls at all, so an Arabic-catalogue show was the one thing in
+        // controls at all, so an Arabic-catalog show was the one thing in
         // the app you could not save.
         Wrap(
           spacing: 12,

@@ -119,7 +119,7 @@ class ContinueWatchingService {
   /// Lives here rather than inside `ContinueWatchingSlider` because the
   /// history view has to answer the identical question, and anime is not
   /// identifiable by `type` alone: entries arrive from three places (the
-  /// AniList catalogue, the Arabic catalogue, and addons that report
+  /// AniList catalog, the Arabic catalog, and addons that report
   /// `type == 'anime'`) and are told apart by id prefix and addon name.
   /// Duplicating that into a second screen is how the two would drift.
   ///

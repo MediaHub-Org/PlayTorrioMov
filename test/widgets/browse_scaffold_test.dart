@@ -101,7 +101,7 @@ void main() {
       // device never fires onEnter, so it never reveals one. That means they
       // are *built* at every size, and what matters is that they sit outside
       // the viewport until a pointer arrives — asserting they are absent
-      // would have been asserting the old width check, not the behaviour.
+      // would have been asserting the old width check, not the behavior.
       setSurfaceWidth(tester, 400);
       await tester.pumpWidget(
         wrap(

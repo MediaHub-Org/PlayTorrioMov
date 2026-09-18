@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'app_theme_service.dart';
 
-/// The app's semantic colours, resolved against whichever theme is active.
+/// The app's semantic colors, resolved against whichever theme is active.
 ///
 /// ## Why these are top-level and not `Theme.of(context)`
 ///
@@ -65,7 +65,7 @@ abstract final class AppColors {
   /// a `const` instance. A const widget with no arguments is canonicalised to
   /// one object, so on the next build Flutter sees the identical instance in
   /// the same slot, reuses the element and never calls `build` on it. Nothing
-  /// is wrong with the colour; the widget simply was not asked again.
+  /// is wrong with the color; the widget simply was not asked again.
   ///
   /// Widgets reading `Theme.of(context)` escape this, because an inherited
   /// lookup marks the dependent element dirty directly and does not care what
@@ -148,7 +148,7 @@ abstract final class AppColors {
 
   // ── Accent ─────────────────────────────────────────────────────────────
 
-  /// The active palette's primary colour: selected states, spinners, focus
+  /// The active palette's primary color: selected states, spinners, focus
   /// rings, primary buttons.
   ///
   /// Not a light/dark decision -- the palette carries one primary for both
@@ -160,9 +160,9 @@ abstract final class AppColors {
   /// Whatever sits *on* this is [onAccent], never [ink].
   static Color get accent => AppThemeService.currentPalette.value.primaryColor;
 
-  // ── Fixed colours ──────────────────────────────────────────────────────
+  // ── Fixed colors ──────────────────────────────────────────────────────
 
-  /// Text and icons that sit on the accent colour, or over artwork. Always
+  /// Text and icons that sit on the accent color, or over artwork. Always
   /// white, in both themes, because what is behind it does not change with
   /// the theme -- a poster is a poster.
   static const Color onAccent = Color(0xFFFFFFFF);

@@ -6,7 +6,7 @@ import '../../services/theme/app_colors.dart';
 /// [title] is required rather than defaulting to "Could not load movies":
 /// with a default, Anime and Live TV both inherited it through
 /// [BrowseScaffold] and told the user their *movies* had failed while the
-/// line underneath said the anime catalogue had. A required parameter makes
+/// line underneath said the anime catalog had. A required parameter makes
 /// that the analyzer's problem instead of the reader's.
 class ErrorView extends StatelessWidget {
   final String? error;

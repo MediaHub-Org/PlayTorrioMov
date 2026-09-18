@@ -59,7 +59,7 @@ void main() {
       expect(MediaCollectionsService.byId(c.id)!.count, 1);
     });
 
-    test('the same title is recognised across providers by its IMDb id', () {
+    test('the same title is recognized across providers by its IMDb id', () {
       // Identity comes from MyListItem.uniqueKey, which prefers IMDb over
       // every other id. A title added from a Trakt payload and the same one
       // from a TMDB catalog must not both land in the list.

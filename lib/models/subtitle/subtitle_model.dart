@@ -158,7 +158,7 @@ abstract final class SubtitleAutoPick {
   /// "English", "en-US", "Español", "ja (Japanese)" -- to one comparable
   /// key, or null when it says nothing useful.
   ///
-  /// Audio and subtitle tracks in the same file are routinely labelled in
+  /// Audio and subtitle tracks in the same file are routinely labeled in
   /// different schemes, so comparing the raw strings would miss most real
   /// matches: an "eng" audio track beside an "English" subtitle is the
   /// common case, not the exotic one.
@@ -179,7 +179,7 @@ abstract final class SubtitleAutoPick {
     }
 
     // Unknown language: its own first token still compares equal to itself,
-    // so two tracks labelled the same way match even off this table.
+    // so two tracks labeled the same way match even off this table.
     final token = lower.split(RegExp(r'[^a-z]+')).firstWhere(
       (t) => t.isNotEmpty,
       orElse: () => '',
@@ -195,7 +195,7 @@ abstract final class SubtitleAutoPick {
         .hasMatch(haystack);
   }
 
-  /// Only the languages this app's catalogues actually surface, each keyed
+  /// Only the languages this app's catalogs actually surface, each keyed
   /// by its ISO 639-1 code. Anything absent still matches itself through
   /// the token fallback above.
   static const Map<String, List<String>> _aliases = {

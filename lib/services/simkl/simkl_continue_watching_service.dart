@@ -64,7 +64,7 @@ class SimklContinueWatchingService {
   ///  - empty lists when DISCONNECTED (authoritative — the caller clears rows);
   ///  - NULL on a transient fetch failure (a session/library GET failed while
   ///    authenticated) so the caller keeps whatever rows it already shows,
-  ///    mirroring TraktContinueWatchingService's keep-on-error behaviour;
+  ///    mirroring TraktContinueWatchingService's keep-on-error behavior;
   ///  - the paused items otherwise. Never throws. One shared library-snapshot
   ///    read enriches both lists.
   Future<

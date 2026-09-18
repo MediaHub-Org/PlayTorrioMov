@@ -14,12 +14,12 @@ import 'package:flutter/material.dart';
 ///    cards instead of sitting at the window edge where a scrollbar
 ///    belongs.
 ///  - The wheel only scrolled while the pointer was over that column.
-///    Everywhere else -- most of a maximised window -- there was no
+///    Everywhere else -- most of a maximized window -- there was no
 ///    scrollable under the cursor, so the wheel did nothing at all.
 ///
 /// This inverts the nesting: the scroll view fills the window and the
 /// *content* is constrained, by asking for a horizontal padding wide
-/// enough to centre it. Same thing on screen, but the scrollable is now
+/// enough to center it. Same thing on screen, but the scrollable is now
 /// the whole window, so the wheel works wherever the pointer is and the
 /// scrollbar rides the window's own edge.
 class SettingsScrollView extends StatefulWidget {
@@ -31,7 +31,7 @@ class SettingsScrollView extends StatefulWidget {
   final IndexedWidgetBuilder? itemBuilder;
   final IndexedWidgetBuilder? separatorBuilder;
 
-  /// The narrowest gutter, used when the window is too narrow to centre
+  /// The narrowest gutter, used when the window is too narrow to center
   /// anything -- a phone, where this is just the page's side padding.
   final double minGutter;
 

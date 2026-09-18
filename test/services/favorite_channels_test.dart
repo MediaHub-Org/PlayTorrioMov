@@ -19,13 +19,13 @@ void main() {
       expect(FavoriteChannelsService.resolvedChannels, isEmpty);
     });
 
-    test('resolves a liked id back to its catalogue entry', () async {
+    test('resolves a liked id back to its catalog entry', () async {
       await FavoriteChannelsService.toggle('ufc');
 
       final resolved = FavoriteChannelsService.resolvedChannels;
       expect(resolved.length, 1);
       expect(resolved.single.id, 'ufc');
-      // The row shows the catalogue's own name and art, looked up by id --
+      // The row shows the catalog's own name and art, looked up by id --
       // the store persists only the id and a timestamp.
       expect(resolved.single.name, isNotEmpty);
     });
@@ -51,8 +51,8 @@ void main() {
       expect(FavoriteChannelsService.resolvedChannels, isEmpty);
     });
 
-    test('an id no longer in the catalogue is skipped, not rendered blank', () async {
-      // The catalogue is static app data that changes between releases, so a
+    test('an id no longer in the catalog is skipped, not rendered blank', () async {
+      // The catalog is static app data that changes between releases, so a
       // stored id can outlive its entry. resolvedChannels drops those rather
       // than emitting a null the row would have to handle.
       await FavoriteChannelsService.toggle('ufc');

@@ -11,7 +11,7 @@ and refresh the shared build cache.
 > an Intel Mac cannot run these builds at all. Undoing it means two jobs each
 > thinned to its own architecture, which is two genuinely different artifacts
 > — not the pre-1.6.3 layout, where two jobs built the same universal app and
-> labelled them "arm64" and "intel".
+> labeled them "arm64" and "intel".
 
 There are two ways to cut a release, and **the dispatch is the one to
 reach for**:
@@ -54,12 +54,12 @@ build is a different signer and each update needs an uninstall.
 
 Two repository secrets are required:
 
-| Secret | Required | Notes |
-|:--|:--|:--|
-| `ANDROID_KEYSTORE_BASE64` | yes | The `.jks` keystore, base64-encoded |
-| `ANDROID_KEYSTORE_PASSWORD` | yes | Store password |
-| `ANDROID_KEY_ALIAS` | no | Defaults to `playtorriomov` |
-| `ANDROID_KEY_PASSWORD` | no | Defaults to the store password |
+| Secret                      | Required | Notes                               |
+|:----------------------------|:---------|:------------------------------------|
+| `ANDROID_KEYSTORE_BASE64`   | yes      | The `.jks` keystore, base64-encoded |
+| `ANDROID_KEYSTORE_PASSWORD` | yes      | Store password                      |
+| `ANDROID_KEY_ALIAS`         | no       | Defaults to `playtorriomov`         |
+| `ANDROID_KEY_PASSWORD`      | no       | Defaults to the store password      |
 
 ## What the release build does not check
 
@@ -72,14 +72,14 @@ merging, or accept that the release build proves only that it compiles.
 
 Every secret `build.yml` reads, across all platforms:
 
-| Secret | Used for |
-|:--|:--|
-| `ANDROID_KEYSTORE_BASE64` | Release signing, see above |
-| `ANDROID_KEYSTORE_PASSWORD` | Release signing, see above |
-| `ANDROID_KEY_ALIAS` | Release signing, see above |
-| `ANDROID_KEY_PASSWORD` | Release signing, see above |
-| `DOTENV_CONTENTS` | The **contents** written to `.env` before every build (`--dart-define-from-file=.env`) |
-| `ENV_FILE`, `DOTENV` | The former names. Still read, so a rename never lands as a broken build, but each emits a CI warning asking you to migrate |
+| Secret                      | Used for                                                                                                                   |
+|:----------------------------|:---------------------------------------------------------------------------------------------------------------------------|
+| `ANDROID_KEYSTORE_BASE64`   | Release signing, see above                                                                                                 |
+| `ANDROID_KEYSTORE_PASSWORD` | Release signing, see above                                                                                                 |
+| `ANDROID_KEY_ALIAS`         | Release signing, see above                                                                                                 |
+| `ANDROID_KEY_PASSWORD`      | Release signing, see above                                                                                                 |
+| `DOTENV_CONTENTS`           | The **contents** written to `.env` before every build (`--dart-define-from-file=.env`)                                     |
+| `ENV_FILE`, `DOTENV`        | The former names. Still read, so a rename never lands as a broken build, but each emits a CI warning asking you to migrate |
 
 ### Keys inside `DOTENV_CONTENTS`
 
@@ -87,12 +87,12 @@ Every secret `build.yml` reads, across all platforms:
 `--dart-define-from-file` and at runtime by `EnvService`. The keys the app
 looks for:
 
-| Key | Used for |
-|:--|:--|
-| `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` | Trakt sign-in |
-| `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET` | Simkl sign-in |
-| `DISCORD_APP_ID` | Discord Rich Presence |
-| `TMDB_API_KEY` | Cast photos and character names, so a fresh install has them with no setup |
+| Key                                      | Used for                                                                   |
+|:-----------------------------------------|:---------------------------------------------------------------------------|
+| `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` | Trakt sign-in                                                              |
+| `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET` | Simkl sign-in                                                              |
+| `DISCORD_APP_ID`                         | Discord Rich Presence                                                      |
+| `TMDB_API_KEY`                           | Cast photos and character names, so a fresh install has them with no setup |
 
 The name says *contents*, not a path, because that is the mistake the old
 name invited: `ENV_FILE` reads like somewhere to put a filename. Every line
@@ -172,12 +172,12 @@ a warning annotation, so forks and local checkouts are never blocked.
 
 None of them need signing for updates, because none of them self-install:
 
-| Platform | Updater behaviour | Signing buys |
-|:--|:--|:--|
-| Windows | Downloads the `.exe`, opens Explorer at it | An Authenticode certificate only removes the SmartScreen warning |
-| Linux | Downloads the `.AppImage`, opens the folder | Nothing — AppImages are not signed |
-| macOS | Opens the release page in a browser | Developer ID + notarization only removes the Gatekeeper warning |
-| iOS | Opens the release page in a browser | iOS cannot self-install; distribution is sideload or the App Store |
+| Platform | Updater behavior                           | Signing buys                                                       |
+|:---------|:--------------------------------------------|:-------------------------------------------------------------------|
+| Windows  | Downloads the `.exe`, opens Explorer at it  | An Authenticode certificate only removes the SmartScreen warning   |
+| Linux    | Downloads the `.AppImage`, opens the folder | Nothing — AppImages are not signed                                 |
+| macOS    | Opens the release page in a browser         | Developer ID + notarization only removes the Gatekeeper warning    |
+| iOS      | Opens the release page in a browser         | iOS cannot self-install; distribution is sideload or the App Store |
 
 There is no single credential that covers several of these: Android uses a
 Java keystore, Windows an Authenticode certificate issued by a CA, and Apple

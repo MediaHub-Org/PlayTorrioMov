@@ -86,7 +86,7 @@ class _BuiltinProvidersSettingsPageState
           );
           final on = _providers.length - off;
 
-          // Full width, with the content centred by padding rather than by
+          // Full width, with the content centered by padding rather than by
           // a ConstrainedBox around the list. This page has a pinned header
           // so it cannot use SettingsScrollView directly, but it borrows
           // that widget's gutter so it lines up with every other settings

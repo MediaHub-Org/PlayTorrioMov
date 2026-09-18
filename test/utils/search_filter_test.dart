@@ -20,7 +20,7 @@ void main() {
   });
 
   group('where a query is sent', () {
-    test('All asks both catalogues, with no addon type restriction', () {
+    test('All asks both catalogs, with no addon type restriction', () {
       expect(SearchFilter.all.searchesAddons, isTrue);
       expect(SearchFilter.all.searchesAnime, isTrue);
       expect(SearchFilter.all.addonContentType, isNull);

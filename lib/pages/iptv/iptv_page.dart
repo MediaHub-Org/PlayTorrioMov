@@ -223,7 +223,7 @@ class _IptvPageState extends State<IptvPage> {
     final liked = FavoriteChannelsService.resolvedChannels;
     // Channels the user built from a portal stream. Their own row rather
     // than folded into a category: they exist because the built-in
-    // catalogue had no entry, so filing them under one of its headings
+    // catalog had no entry, so filing them under one of its headings
     // would hide exactly what makes them worth having. Second, after Liked,
     // because a liked channel is a stronger signal than a saved one.
     final mine = CustomChannelsService.items.value;
@@ -310,7 +310,7 @@ class _IptvPageState extends State<IptvPage> {
 
 /// Live TV's header row. Sits on the shared [PillFilterHeaderBar] like
 /// every other section's header, so the inset, the bar height, the
-/// one-line scrolling behaviour and the divider all come from one place
+/// one-line scrolling behavior and the divider all come from one place
 /// instead of this page re-deriving them -- it used to hand-roll its own
 /// SafeArea and `fromLTRB(24, 24, 24, 16)` padding, which is why its
 /// controls sat a few pixels off from Movies', Series' and Anime's.
@@ -336,7 +336,7 @@ class _IptvGlassAppBar extends StatelessWidget {
         HeaderPillLabel(label: 'LIVE TV', icon: Icons.live_tv_rounded),
         HeaderPillLabel(
           label: '60+ CHANNELS',
-          emphasised: false,
+          emphasized: false,
           fontSize: 10.5,
           letterSpacing: 0.4,
         ),

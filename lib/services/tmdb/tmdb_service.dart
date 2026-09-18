@@ -133,7 +133,7 @@ abstract final class TmdbService {
     }
   }
 
-  /// The showrunners from `/tv/{id}`'s `created_by`, as crew labelled
+  /// The showrunners from `/tv/{id}`'s `created_by`, as crew labeled
   /// "Creator".
   ///
   /// One extra request, and only for a series whose `/credits` had no

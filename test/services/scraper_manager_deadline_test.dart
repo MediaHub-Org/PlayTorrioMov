@@ -121,7 +121,7 @@ void main() {
       });
     });
 
-    test('cancelling stops the scrapers still running', () {
+    test('canceling stops the scrapers still running', () {
       fakeAsync((async) {
         ScraperManager.instance.registerScraper(_NeverAnswersScraper());
 
@@ -132,7 +132,7 @@ void main() {
         sub.cancel();
         async.elapse(const Duration(seconds: 35));
 
-        // The pending deadline timer must have been cancelled with it; a
+        // The pending deadline timer must have been canceled with it; a
         // live timer here would be a leak per abandoned search.
         expect(async.pendingTimers, isEmpty);
       });

@@ -63,7 +63,7 @@ void main() {
     });
   });
 
-  group('theme-independent colours', () {
+  group('theme-independent colors', () {
     test('onAccent and scrim do not move', () {
       // What sits behind them -- an accent fill, a poster -- does not change
       // with the theme, so neither do they. They are also const, which is

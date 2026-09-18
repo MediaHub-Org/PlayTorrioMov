@@ -78,7 +78,7 @@ abstract final class SimklSettings {
   static String describeStatus(int code) => switch (code) {
     401 || 403 => 'Simkl rejected the client ID ($code). Check the ID you '
         'pasted, or register a new app at simkl.com/settings/developer.',
-    404 => 'Simkl did not recognise that PIN request (404).',
+    404 => 'Simkl did not recognize that PIN request (404).',
     429 => 'Simkl rate-limited this device (429). Try again shortly.',
     _ => 'Simkl returned HTTP $code.',
   };

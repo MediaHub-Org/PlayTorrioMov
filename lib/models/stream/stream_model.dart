@@ -80,7 +80,7 @@ class StreamSource {
 
   // Tried in order, first match wins. These used to be looser; the seed
   // count was parsed and never shown, so a false positive cost nothing.
-  // It is rendered now (as a colour-coded health badge), so two
+  // It is rendered now (as a color-coded health badge), so two
   // alternatives had to be tightened:
   //
   //  * the bare `s` prefix needed a word boundary -- without it "Files: 3"

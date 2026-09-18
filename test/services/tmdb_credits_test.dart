@@ -153,7 +153,7 @@ void main() {
   });
 
   group('parseCreators', () {
-    test('created_by becomes crew labelled Creator', () {
+    test('created_by becomes crew labeled Creator', () {
       // A series' /credits carries producers and no director -- TV
       // directors are per-episode -- so the showrunner from /tv/{id} is
       // what answers "whose show is this".
@@ -243,7 +243,7 @@ void main() {
 
     test('names a rejected key, the one failure the user can fix', () {
       // A dead or revoked key is indistinguishable from a working one on
-      // the Settings card otherwise: same "Connected" copy, same colour,
+      // the Settings card otherwise: same "Connected" copy, same color,
       // while every details page quietly shows bare actor names.
       final message = TmdbService.describeStatusForTest(401);
       expect(message, contains('401'));
@@ -267,7 +267,7 @@ void main() {
     });
 
     test('every failure message trips the Settings card error styling', () {
-      // sync_settings_page decides red-vs-grey by substring. If a message
+      // sync_settings_page decides red-vs-gray by substring. If a message
       // is reworded out of that set it silently renders as a success line.
       bool readsAsError(String s) =>
           s.contains('rejected') ||

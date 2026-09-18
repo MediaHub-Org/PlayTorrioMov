@@ -121,7 +121,7 @@ class AnimeMedia {
       case 'NOT_YET_RELEASED':
         return 'Upcoming';
       case 'CANCELLED':
-        return 'Cancelled';
+        return 'Canceled';
       case 'HIATUS':
         return 'On Hiatus';
       default:

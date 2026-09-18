@@ -238,7 +238,7 @@ void main() {
     });
 
     test('entries are sorted, and ones without usable times are dropped', () {
-      // A programme shown at the wrong time is worse than one not shown.
+      // A program shown at the wrong time is worse than one not shown.
       final epg = IptvClient.parseShortEpg(
         '[{"title":"","description":"","start_timestamp":"1893459600","stop_timestamp":"1893463200"},'
         '{"title":"","description":"","start_timestamp":"1893456000","stop_timestamp":"1893459600"},'

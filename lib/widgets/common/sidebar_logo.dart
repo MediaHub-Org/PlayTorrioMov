@@ -70,10 +70,10 @@ class SidebarLogo extends StatelessWidget {
 /// A short film-strip rule: a bar with sprocket holes punched along it.
 ///
 /// Drawn rather than shipped as an asset so it takes the theme's accent
-/// colour, and drawn as a single even-odd path rather than a bar with
+/// color, and drawn as a single even-odd path rather than a bar with
 /// holes painted over it -- the holes are genuinely transparent, so the
 /// rule works over the header's gradient instead of only over one flat
-/// colour it happened to be designed against.
+/// color it happened to be designed against.
 class _FilmStripRule extends StatelessWidget {
   final double width;
   final double height;

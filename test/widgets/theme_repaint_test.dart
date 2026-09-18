@@ -97,7 +97,7 @@ void main() {
   });
 
   test('every widget that paints from AppColors subscribes to the theme', () {
-    // The behavioural test above covers one bar. This covers the rule, which
+    // The behavioral test above covers one bar. This covers the rule, which
     // is what stops the next const-built widget reintroducing the bug: if a
     // class reads these tokens and has a build(), it has to say so.
     //

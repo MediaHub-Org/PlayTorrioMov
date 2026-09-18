@@ -35,7 +35,7 @@ class _C {
   static const bg = Color(0xFF0A0C10);
   static const surface = Color(0xFF13151C);
   static const surfaceLight = Color(0xFF1A1D26);
-  // A getter, not a `static final`: a static final is initialised once on
+  // A getter, not a `static final`: a static final is initialized once on
   // its first read and never again, which would pin the accent to
   // whichever palette was active the first time a player opened.
   static Color get accent => AppColors.accent;

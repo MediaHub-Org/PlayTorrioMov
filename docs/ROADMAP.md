@@ -114,13 +114,13 @@ with an opt-in toggle that affects display only. A translated title is not a
 stable identifier — Spain and Latin America give the same film different
 Spanish titles — while the original is the one string every provider agrees
 on. It is also what Stremio, Plex and Jellyfin default to, and titles are how
-people search and recognise things.
+people search and recognize things.
 
 ### Text scale and accessibility (#69)
 
 **~56 of the ~68 files in `lib/` with a fixed `height:` are still unaudited.**
 Twelve high-traffic boxes are fixed so far — four in 1.8.1, then the Continue
-Watching card and its section header, then the three catalogue cards and the
+Watching card and its section header, then the three catalog cards and the
 details page action rows, then the player's two menus, the browse row header
 and the settings hub. What is left is the long tail, in rough order of how
 many people meet it:
@@ -250,20 +250,20 @@ native Android bridge — is **not taken**: it is a whole plugin ecosystem
 (477 lines of Kotlin, a marketplace, repo management, extension loading)
 and a feature, not a fix. What was taken from it is one bug, below.
 
-| From `39b736f` | Taken? |
-|:--|:--|
-| CloudStream bridge, marketplace, repo management | **No** — a feature, and a large one. Would need its own roadmap entry and a device |
+| From `39b736f`                                                             | Taken?                                                                                                                       |
+|:---------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
+| CloudStream bridge, marketplace, repo management                           | **No** — a feature, and a large one. Would need its own roadmap entry and a device                                           |
 | Scraper lifecycle: `stopAllScrapers`, session IDs, `cancelOngoingRequests` | **Partly.** `ScraperManager` already had the teardown; the missing link was in `StreamService`, and that is fixed. See below |
-| Player coroutine collision (`videoStreamJob` → `activeJobs` set) | **No** — Kotlin-side, and this fork's player is Dart-side |
-| Responsive addons page, player and subtitle fixes | **No** — our addons page and player have diverged too far for a patch to apply |
+| Player coroutine collision (`videoStreamJob` → `activeJobs` set)           | **No** — Kotlin-side, and this fork's player is Dart-side                                                                    |
+| Responsive addons page, player and subtitle fixes                          | **No** — our addons page and player have diverged too far for a patch to apply                                               |
 
 **The one real bug found in it.** Upstream's commit message says "watch
 screen properly cancels all scrapers on dispose". Ours did not, and the
 reason is worth recording because it looked like it did: `ScraperManager.
-scrapeAll` has had `controller.onCancel` cancelling every subscription and
+scrapeAll` has had `controller.onCancel` canceling every subscription and
 deadline since the per-scraper deadline work. But `StreamService.fetchStreams`
 wrapped that stream in a *second* controller with no `onCancel` of its own,
-so cancelling the outer consumer never reached the manager. Leaving a watch
+so canceling the outer consumer never reached the manager. Leaving a watch
 screen mid-search left all forty-odd scrapers issuing HTTP requests into a
 controller nobody was reading. Fixed, with a test that fails without it.
 

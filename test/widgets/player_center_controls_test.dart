@@ -64,7 +64,7 @@ void main() {
       expect(forward30Taps, 1);
     });
 
-    testWidgets('a live stream gets play/pause alone, still centred', (
+    testWidgets('a live stream gets play/pause alone, still centered', (
       tester,
     ) async {
       // Seeking has no meaning without a duration, so the ±30s buttons take

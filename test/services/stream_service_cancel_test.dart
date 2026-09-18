@@ -8,22 +8,22 @@ import 'package:playtorriomov/services/stream/stream_service.dart';
 
 /// A scraper that reports whether it was torn down.
 ///
-/// `ScraperManager.scrapeAll` has always cancelled its scrapers when its own
+/// `ScraperManager.scrapeAll` has always canceled its scrapers when its own
 /// consumer stops listening -- `controller.onCancel` cancels every
 /// subscription and deadline. What was missing was the link above it:
 /// `StreamService.fetchStreams` wrapped that stream in a second controller
-/// with no `onCancel` of its own, so cancelling *its* consumer never reached
+/// with no `onCancel` of its own, so canceling *its* consumer never reached
 /// the manager, and forty-odd scrapers kept issuing HTTP requests into a
 /// controller nobody was reading.
 ///
 /// This scraper is how that link is checked. It never completes on its own,
-/// so the only way `cancelled` becomes true is if the teardown actually
-/// travelled the whole way down.
+/// so the only way `canceled` becomes true is if the teardown actually
+/// traveled the whole way down.
 class _CancellableScraper extends StreamScraper {
   final _controller = StreamController<StreamSource>();
 
-  /// True once the manager cancelled this scraper's subscription.
-  bool cancelled = false;
+  /// True once the manager canceled this scraper's subscription.
+  bool canceled = false;
 
   @override
   String get name => 'Cancellable';
@@ -37,7 +37,7 @@ class _CancellableScraper extends StreamScraper {
     int? episode,
     String? imdbId,
   }) {
-    _controller.onCancel = () => cancelled = true;
+    _controller.onCancel = () => canceled = true;
     return _controller.stream;
   }
 }
@@ -53,7 +53,7 @@ void main() {
       ScraperManager.instance.registerScraper(scraper);
     });
 
-    test('cancelling the consumer stops the scrapers underneath it', () async {
+    test('canceling the consumer stops the scrapers underneath it', () async {
       final sub = StreamService.fetchStreams(
         type: 'movie',
         id: 'tt0111161',
@@ -63,15 +63,15 @@ void main() {
       // Let the subscription reach the manager before tearing it down.
       await Future<void>.delayed(Duration.zero);
       expect(
-        scraper.cancelled,
+        scraper.canceled,
         isFalse,
-        reason: 'nothing should have cancelled it yet',
+        reason: 'nothing should have canceled it yet',
       );
 
       await sub.cancel();
 
       expect(
-        scraper.cancelled,
+        scraper.canceled,
         isTrue,
         reason: 'leaving the watch screen mid-search has to stop the '
             'scrapers, not just stop reading them -- otherwise every one of '

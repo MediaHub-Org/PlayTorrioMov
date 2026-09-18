@@ -11,6 +11,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the correctness/clarity/efficiency priority order. The short agent-facing
   version is `AGENTS.md`.
 
+### Changed
+- **Spelling unified to American English** across code, comments, docs and
+  commit history (`color`, `behavior`, `catalog`, `center`, `gray`,
+  `labeled`, `canceled`, `initialize`, `normalize`, `optimize`, `analyze`,
+  `program`). The repo mixed both variants, which made searches miss half
+  the hits. External API spellings are untouched — AniList's `favourites`
+  field and its `CANCELLED` status stay as the API spells them.
+
 ### Fixed
 - **Flatpak**: the PC could suspend mid-playback — the sleep inhibitor D-Bus
   call (`org.freedesktop.ScreenSaver`) was silently blocked by the sandbox.
@@ -37,7 +45,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   presets bar (the customizer's tabs already cover it) and bounded the font
   dropdown's menu height to the panel.
 - **Subtitles**: regional labels group under their parent language
-  ("Spanish (latam)" joins "Spanish"), names are capitalised, mpv's
+  ("Spanish (latam)" joins "Spanish"), names are capitalized, mpv's
   signs-only `SPL` track is no longer offered as a language, titles drop the
   media name and the provider's own noise, and the same subtitle arriving
   from several scrapers is collapsed to one choice. The default pick still
@@ -108,7 +116,7 @@ reading what they actually said.
   button for it. The transport bar now reads speed, audio, subtitles, sleep
   timer, aspect ratio. The subtitle button opens the full panel, whose first
   pill is Off, so the toggle it used to be is still there one tap further;
-  an Auto pill joins it, keeping the one-tap best-track behaviour the old
+  an Auto pill joins it, keeping the one-tap best-track behavior the old
   toggle had. The moon button's badge counts down while the timer runs.
 - **The sleep timer actually works now.** The chips existed for several
   releases -- in the speed menu, then in the settings menu -- and choosing
@@ -203,7 +211,7 @@ reading what they actually said.
   `controller.onCancel` cancels every subscription and deadline. What was
   missing was the link above it — `StreamService.fetchStreams` wrapped that
   stream in a *second* controller with no `onCancel` of its own, so
-  cancelling the outer consumer never reached the manager. Both
+  canceling the outer consumer never reached the manager. Both
   `fetchStreams` and `fetchStreamsForTargetAddon` now forward the cancel.
   Found by reading upstream `39b736f`, whose commit message claims to fix
   exactly this; the fix is ours, because the cause was in code upstream
@@ -262,7 +270,7 @@ real hardware. No new features; three of the four items here are things that
 were already shipped and are now either finished or verified.
 
 ### Fixed
-- **Three catalogue cards overflowed their grid cell at a large text scale
+- **Three catalog cards overflowed their grid cell at a large text scale
   (#69).** `MovieCard`, `AnimeCard` and `IptvChannelCard` are hosted in a
   `SliverGridDelegateWithFixedCrossAxisCount` cell — a hard box whose size
   comes from `childAspectRatio`, not from its own text — so at 3x the
@@ -408,7 +416,7 @@ end of this entry before treating it as done.
   Entries reuse `MyListItem` rather than a parallel type. It already resolves
   identity across four providers — `uniqueKey` prefers IMDb, then TMDB, then
   Trakt, then Simkl, then a cleaned title+year — so the same film added from a
-  Trakt payload and from a TMDB catalogue lands once, not twice. Storage is one
+  Trakt payload and from a TMDB catalog lands once, not twice. Storage is one
   SharedPreferences key, which `BackupService` already exports and restores
   without needing to know collections exist.
 
@@ -487,7 +495,7 @@ found by tests written for something else.
   device stream, but nothing ever asked the plugin to *scan*, so the stream
   had no producer and the sheet sat on "Looking for Cast devices on your
   network..." forever. The plugin's README says discovery starts automatically
-  once initialised; its source says otherwise on both platforms. On Android
+  once initialized; its source says otherwise on both platforms. On Android
   the native `onAttachedToEngine` only wires up the method channel — the
   `MediaRouter.addCallback` that actually scans lives solely inside the native
   `startDiscovery`, reachable only from Dart. iOS is the same through
@@ -573,10 +581,10 @@ working TMDB key.
 - **Movies and Anime showed an error card on a first run, and a reload fixed
   it.** Installing the default addon on first launch was a single network
   attempt whose failure was caught and discarded; the app then carried on with
-  no addons at all, so every catalogue had nothing to query for the rest of
+  no addons at all, so every catalog had nothing to query for the rest of
   the session. A cold start is exactly when that call is most likely to
   fail — DNS cold, connection pool empty, the radio still waking. It is
-  retried now when a page next asks for a catalogue, so recovering costs a
+  retried now when a page next asks for a catalog, so recovering costs a
   pull to refresh rather than a restart
 - **Export and Import had each other's icons.** Export carried the upload
   arrow and Import the download arrow
@@ -601,7 +609,7 @@ working TMDB key.
 - Offline tests for three things previously reachable only over the network:
   subtitle archive and encoding handling, the IPTV playlist parser, and Movy's
   stream cipher
-- macOS ships one universal build instead of two identical ones labelled Intel
+- macOS ships one universal build instead of two identical ones labeled Intel
   and Apple Silicon, with a check that fails the build if it stops being
   universal. Releases are about six minutes shorter
 
@@ -614,7 +622,7 @@ blocking most of them.
 - **"Could not load movies" on the Anime page.** The error card defaulted to
   that heading and no page ever replaced it, so Anime and Live TV both told
   you your *films* had failed while the line underneath correctly named the
-  anime catalogue. Each page now says what it was actually loading
+  anime catalog. Each page now says what it was actually loading
 - **Live TV and Settings stayed black in light mode.** Both read the
   palette's dark surface directly instead of resolving it against the active
   brightness — along with Live TV's hero gradients, the ambient background
@@ -639,13 +647,13 @@ blocking most of them.
 
 ## [1.6.1+29] - 2026-09-14
 
-Light mode, finished. 1.6.0 shipped the colour system; this is the chrome it
+Light mode, finished. 1.6.0 shipped the color system; this is the chrome it
 did not reach.
 
 ### Fixed
 - **The bars were black-on-black in light mode.** The top bar, the section
   switcher on desktop and the tab bar at the bottom of a phone each carried
-  their own dark colour, while the wordmark and icons on them had already
+  their own dark color, while the wordmark and icons on them had already
   moved to the theme. Choosing Light turned the glyphs dark and left the bars
   dark. They are light now, with dark icons and lettering, and take their
   tint from whichever of the eight palettes you picked
@@ -653,7 +661,7 @@ did not reach.
   on the page, so the same change would have turned *its* text black on a
   photograph. Those controls now know they are over artwork and stay white —
   in both themes, which is what they were always meant to do
-- **Seven of the eight themes only half-applied.** The accent colour was
+- **Seven of the eight themes only half-applied.** The accent color was
   written out by hand in 156 places, so choosing anything other than the
   default violet recoloured part of the app and left the rest violet —
   including the selected section in the switcher, which is the one thing on
@@ -673,11 +681,11 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 ### Added
 - **Light mode, actually painted.** The System / Light / Dark switch in
   **Appearance & Interface** was wired up in 1.5.8 with nothing behind it:
-  the app's roughly 1000 white text colours and 100 dark surface hexes
+  the app's roughly 1000 white text colors and 100 dark surface hexes
   ignored the theme, so choosing Light gave you one correct settings page
   and a dark everything else. They now resolve against the active theme, and
   the eight accent palettes stay distinguishable in light the way they are in
-  dark. A dark build is unchanged — the dark values are the same colours
+  dark. A dark build is unchanged — the dark values are the same colors
   that were there before, to the byte
 - **A Google Cast button in the Movies, Series and Anime player.** Live TV
   had one; the main player had lost it
@@ -691,7 +699,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
   the bundled ID was rate-limited or revoked; the card now takes an ID of
   your own and says which of the four things went wrong when it cannot
   connect
-- **Character names on the cast row.** Every actor was labelled "Cast"
+- **Character names on the cast row.** Every actor was labeled "Cast"
 
 ### Changed
 - **The Live TV player is now the main player with fewer parts**, rather than
@@ -730,9 +738,9 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
   season, format) are still there, reached through the page instead of
   beside it, and they carry your query across. Live TV keeps its own search:
   it matches a portal's streams by keyword rather than searching a title
-  catalogue
+  catalog
 - **Live TV channels you can make yourself.** If a portal carries something
-  the built-in catalogue has no entry for, save it from the player's top bar
+  the built-in catalog has no entry for, save it from the player's top bar
   and it becomes a real channel — likeable, listed, and found again by name
   across portals, because a channel tile is a saved search rather than a
   bookmark. They get their own row on the Live TV page, and can be deleted
@@ -743,7 +751,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
   of the screen that moved — including when the controls are hidden, which
   is exactly when a double-tap needs confirming. Repeat taps count up, so
   three quick skips read "30 seconds" rather than flashing "10" three times
-- A **film-strip accent** under the wordmark, drawn in the theme's colour
+- A **film-strip accent** under the wordmark, drawn in the theme's color
 - **History**: the Continue Watching row now has a *See all* opening the full
   log of what you have watched, newest first. That log was already being
   recorded and saved to disk — every episode, up to 100 — with nothing in
@@ -777,7 +785,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 - **Swipe-to-adjust is gone.** Dragging up and down set volume on one half
   of the screen and brightness on the other. Hardware keys and the OS do
   both more reliably, and an accidental swipe changed either one mid-watch
-- **The Live TV player matches the others.** Play/pause is centred over the
+- **The Live TV player matches the others.** Play/pause is centered over the
   video rather than tucked at the left of the bar, the volume control is the
   shared one (which also lifts its ceiling from 100% to the app's 250%
   boost — portal streams are often quiet), the top-bar buttons wear the same
@@ -842,7 +850,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 ### Added
 - Arabic anime pages get the same Watchlist / Watched / Like controls as
   everywhere else. They had no library controls at all, so a show from the
-  Arabic catalogue was the one thing in the app you could not save
+  Arabic catalog was the one thing in the app you could not save
 
 ### Changed
 - Anime now offers the same three library actions as Movies and Series —
@@ -1048,7 +1056,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 - A pushed `v1.2.0` tag now publishes as a full release. Both the release's
   `prerelease` flag and its "(dev)" title came from
   `github.event.inputs.dev_build != 'false'`, and that input is an empty
-  string on a tag push — so every tagged release would have been labelled
+  string on a tag push — so every tagged release would have been labeled
   an untested dev prerelease. The title, the badge and the channel compiled
   into the binaries are now all read from one resolved value
 - An unverified build now actually says so. `dev_build` only ever set the
@@ -1319,17 +1327,17 @@ history only.
 | #46 | Channels you make yourself |
 | #47 | Watch history |
 | #48 | One search across Movies, Series and Anime |
-| #49 | Settings scroll from anywhere in the window, not just the centre column |
+| #49 | Settings scroll from anywhere in the window, not just the center column |
 | #50 | Backup export/import through the system file picker |
 | #51 | User-supplied Simkl client ID, and a reason when Connect fails |
-| #52 | System / Light / Dark switch (the colour migration is #59) |
+| #52 | System / Light / Dark switch (the color migration is #59) |
 | #53 | One ISO-639 table for subtitle providers (two were 51 languages short) |
 | #54 | Wyzie subtitle downloads go through `SubtitleExtractor` like the rest |
 | #55 | One master-URL builder for cinesrc/cine.su/bcine (was triplicated) |
 | #56 | One pipeline for vidfast/vidup (was two ~200-line near-clones) |
 | #57 | `print()` out of `lib/`, `avoid_print` enforced as a warning |
 | #58 | A silent scraper no longer holds the stream search open forever |
-| #59 | The colour migration behind #52 — `AppColors`, and what it excludes |
+| #59 | The color migration behind #52 — `AppColors`, and what it excludes |
 | #60 | Every `package:http` call carries a timeout, enforced by a test |
 | #61 | Nav chrome (top bar, section switcher, mobile tab bar) follows the theme |
 | #62 | `HeaderPillSurface`: header pills know when they float over a hero |

@@ -31,7 +31,7 @@ const String _wa =
 const String glendaleHost = 'https://glendale-plumbing.com';
 
 /// The cache-busting query the cinesrc front end appends. cine.su does not
-/// send it, which is the one behavioural difference between those two.
+/// send it, which is the one behavioral difference between those two.
 const String glendaleVersionParam = '_v=34403446';
 
 int _ab(int e) {

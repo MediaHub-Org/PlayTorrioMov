@@ -24,7 +24,7 @@ abstract final class SearchScope {
 /// decides where a query is actually sent -- addons, AniList, or both.
 ///
 /// Live TV is deliberately not a value here. Its search matches a portal's
-/// stream list by keyword rather than searching a title catalogue, so a
+/// stream list by keyword rather than searching a title catalog, so a
 /// result there is a different kind of object; it keeps its own search.
 enum SearchFilter {
   all('all', 'All', 'movies, series and anime'),

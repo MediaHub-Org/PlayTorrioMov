@@ -47,8 +47,8 @@ void main() {
       );
     });
 
-    test('every label, icon and colour is distinct', () {
-      // The colour is what tells them apart in a grid of same-shaped cards,
+    test('every label, icon and color is distinct', () {
+      // The color is what tells them apart in a grid of same-shaped cards,
       // so two sharing one would undo the point of tinting them at all.
       for (final read in [
         LibraryShelf.values.map((s) => s.label),
@@ -75,7 +75,7 @@ void main() {
 
   group('the Library builds its tabs from the shared spec', () {
     // A source check rather than a widget test: the page needs half the
-    // app's services initialised before it will pump, and what matters here
+    // app's services initialized before it will pump, and what matters here
     // is only that it does not hand-roll its own tab list again -- which is
     // exactly how three hubs drifted to 4/5/5 tabs with different names.
     for (final path in _libraryPages) {

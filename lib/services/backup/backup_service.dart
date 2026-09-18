@@ -111,7 +111,7 @@ abstract final class BackupService {
   }
 
   /// Writes every SharedPreferences key to a file the user picks, and
-  /// returns where it went. Null means they cancelled the dialog.
+  /// returns where it went. Null means they canceled the dialog.
   ///
   /// This used to write to the app documents directory and hand back
   /// the path. On desktop that is merely inconvenient; on Android it is
@@ -147,7 +147,7 @@ abstract final class BackupService {
       !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
   /// Restores every key found in a backup file the user picks. Null means
-  /// they cancelled.
+  /// they canceled.
   ///
   /// Picked rather than read from a fixed path for the same reason as the
   /// export: the file now lives wherever they chose to put it, which may be

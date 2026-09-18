@@ -56,6 +56,9 @@ Dependencies point inward: `pages → widgets → services → models`.
 - Booleans read as questions: `isPlaying`, `canCastUrl`.
 - Callbacks: `onClose`, `onRateSelected`.
 - Private members get `_`; tests use `@visibleForTesting`, not a rename.
+- American spelling everywhere (`color`, `behavior`, `catalog`, `gray`),
+  including comments and docs — except an external API's own spelling
+  (AniList's `favourites`, its `CANCELLED` status).
 
 ## Control flow
 
@@ -64,7 +67,7 @@ Dependencies point inward: `pages → widgets → services → models`.
 - No nested ternaries.
 - Collection methods for transforms; `for` loops when you need `break`,
   `continue`, or `await`.
-- Do not optimise a loop before measuring it.
+- Do not optimize a loop before measuring it.
 
 ## Failure
 
@@ -78,4 +81,4 @@ Dependencies point inward: `pages → widgets → services → models`.
 2. Update `CHANGELOG.md` if the change is user-visible.
 3. Update `docs/ROADMAP.md` if you settled a decision or found a new break.
 4. Say when you could not verify something. "Untested against a real
-   receiver" is useful; a confident claim about untested behaviour is not.
+   receiver" is useful; a confident claim about untested behavior is not.

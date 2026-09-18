@@ -139,7 +139,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
   Widget build(BuildContext context) {
     // Sized from the constraints this widget is actually given, not the
     // screen: the floating dialog and the inline settings panel hand it
-    // different heights, and both need the same compact-layout behaviour
+    // different heights, and both need the same compact-layout behavior
     // once space gets tight.
     return LayoutBuilder(
       builder: (context, constraints) {

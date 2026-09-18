@@ -10,7 +10,7 @@ import 'anime_card.dart';
 /// Used by the Anime page and the anime search page. It used to be a full
 /// second copy of the row -- same `MovieCardSizing`, same [SectionHeader],
 /// same hover arrows -- which meant two adjacent screens could drift apart on
-/// card size, spacing or arrow behaviour with nothing to stop them.
+/// card size, spacing or arrow behavior with nothing to stop them.
 class AnimeSliderSection extends StatelessWidget {
   final String title;
   final String? subtitle;

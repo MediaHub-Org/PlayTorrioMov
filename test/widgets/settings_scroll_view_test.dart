@@ -22,14 +22,14 @@ Rect rowRect(WidgetTester tester, int i) =>
 
 void main() {
   group('SettingsScrollView', () {
-    testWidgets('the scrollable fills the window, not just the centre', (
+    testWidgets('the scrollable fills the window, not just the center', (
       tester,
     ) async {
       // The regression this exists for. Settings pages wrapped the ListView
       // in Center(ConstrainedBox(maxWidth: 800)), so on a wide desktop
       // window the scrollable was an 800px column in the middle -- the
       // wheel did nothing while the pointer was anywhere else, which on a
-      // maximised window is most of the screen.
+      // maximized window is most of the screen.
       tester.view.physicalSize = const Size(1600, 900);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);

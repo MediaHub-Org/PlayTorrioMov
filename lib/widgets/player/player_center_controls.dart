@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 /// seeking has no meaning without a duration, and the alternative -- a
 /// second, near-identical play/pause somewhere else -- is how the Live TV
 /// player drifted away from this one in the first place. With them null the
-/// play button stands alone, centred, at the same size and in the same
+/// play button stands alone, centered, at the same size and in the same
 /// place.
 class PlayerCenterControls extends StatelessWidget {
   final bool isPlaying;

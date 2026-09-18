@@ -49,7 +49,7 @@ class CollectionCard extends StatelessWidget {
   final IconData icon;
 
   /// Tints the artwork ground and the fallback icon. Lets Liked, Watchlist
-  /// and Watched keep the colours they carry everywhere else in the app.
+  /// and Watched keep the colors they carry everywhere else in the app.
   final Color accent;
 
   /// Built-in shelves draw their icon even when they hold posters, so Liked

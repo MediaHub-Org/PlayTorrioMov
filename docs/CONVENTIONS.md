@@ -61,7 +61,7 @@ When two rules below disagree, ask in this order:
 1. **Is it correct?** If not, stop. Fix that.
 2. **Is it clear?** If not, and there is no measurement saying otherwise,
    make it clear.
-3. **Is it efficient enough?** If a measurement says no, optimise — and
+3. **Is it efficient enough?** If a measurement says no, optimize — and
    leave the measurement in the comment.
 
 ---
@@ -74,22 +74,22 @@ Names are the cheapest documentation and the first thing a reader sees.
 
 `snake_case.dart`, and the name matches the primary type it holds.
 
-| File | Holds |
-|:--|:--|
-| `player_transport.dart` | `PlayerTransport` |
-| `sleep_timer_service.dart` | `SleepTimerService` |
-| `subtitle_languages.dart` | the language tables and their helpers |
+| File                       | Holds                                 |
+|:---------------------------|:--------------------------------------|
+| `player_transport.dart`    | `PlayerTransport`                     |
+| `sleep_timer_service.dart` | `SleepTimerService`                   |
+| `subtitle_languages.dart`  | the language tables and their helpers |
 
 Suffixes carry meaning, and some are load-bearing:
 
-| Suffix | Meaning | Enforced by |
-|:--|:--|:--|
-| `_menu.dart` | a player popover panel | `test/player_convergence_test.dart` globs `lib/widgets/player/*_menu.dart` |
-| `_service.dart` | a singleton or static service | convention |
-| `_provider.dart` | a subtitle scraper | convention |
-| `_model.dart` | a plain data type | convention |
-| `_page.dart` | a routed screen | convention |
-| `_test.dart` | a test, mirroring the `lib/` path | convention |
+| Suffix           | Meaning                           | Enforced by                                                                |
+|:-----------------|:----------------------------------|:---------------------------------------------------------------------------|
+| `_menu.dart`     | a player popover panel            | `test/player_convergence_test.dart` globs `lib/widgets/player/*_menu.dart` |
+| `_service.dart`  | a singleton or static service     | convention                                                                 |
+| `_provider.dart` | a subtitle scraper                | convention                                                                 |
+| `_model.dart`    | a plain data type                 | convention                                                                 |
+| `_page.dart`     | a routed screen                   | convention                                                                 |
+| `_test.dart`     | a test, mirroring the `lib/` path | convention                                                                 |
 
 The `_menu.dart` rule is not cosmetic: a test asserts that no file matching
 that glob contains a close button. Renaming a menu to something else silently
@@ -146,6 +146,22 @@ is not used in this codebase.
 static const List<double> _points = [0.25, 0.5, 0.75, 1.0];
 const Map<String, String> _iso639ToDisplayName = { ... };
 ```
+
+### Spelling: American English, everywhere
+
+One variant, not two. `color`, `behavior`, `catalog`, `center`, `gray`,
+`labeled`, `canceled`, `initialize`, `normalize`, `optimize`, `analyze`,
+`program`, `license`.
+
+This applies to identifiers, comments, doc comments, commit messages and
+docs — not just user-facing strings. Mixing the two is the actual problem:
+`colour` in one file and `color` in the next makes a search miss half the
+hits and makes the codebase read as though two people wrote it.
+
+**The exception is an external API's own spelling.** AniList's GraphQL field
+is `favourites`, and its status enum value is `CANCELLED`; those stay exactly
+as the API spells them, because renaming them breaks the wire format. When a
+British spelling is load-bearing, it is a quoted API token, not prose.
 
 ---
 
@@ -287,7 +303,7 @@ for (final variant in allVariants) {
 `forEach` is not used for side effects; a `for` loop says the same thing
 without the closure.
 
-### Do not optimise a loop before measuring it
+### Do not optimize a loop before measuring it
 
 The loop over subtitle variants runs once per search, over tens of items. The
 loop over decoded video frames runs sixty times a second. Only one of those
@@ -456,12 +472,12 @@ cannot reach a subtitle provider should return an empty list and move on.
 `lib/services/subtitles/subtitle_service.dart` →
 `test/services/subtitle_service_test.dart`.
 
-### Test behaviour, not implementation
+### Test behavior, not implementation
 
 Assert what the user gets, not which private method ran. When a test needs an
 internal, expose it with `@visibleForTesting` rather than widening the API.
 
-### Name the test as a sentence about behaviour
+### Name the test as a sentence about behavior
 
 ```dart
 test('collapses the same subtitle arriving from two providers', () { ... });
@@ -562,7 +578,7 @@ rather than claiming it passes.
 ### Say when you are unsure
 
 "I could not verify this against a real receiver" is a useful sentence. A
-confident claim about untested behaviour is not.
+confident claim about untested behavior is not.
 
 ### Do not add a dependency for something small
 
@@ -585,13 +601,15 @@ something obvious that runs per frame, measure it.
 - [ ] Guard clauses, not nesting.
 - [ ] No nested ternaries.
 - [ ] Comments explain why, in the repo's voice.
+- [ ] American spelling throughout (`color`, `behavior`, `catalog`), except
+      where an external API spells it otherwise.
 - [ ] Dependencies point inward.
 - [ ] Shared primitives reused, not re-implemented.
 - [ ] User-facing strings via `context.l10n` (bare-pumped widgets) or
       `AppLocalizations.of(context)` (real screens).
 - [ ] Failures degrade; nothing optional can crash startup.
 - [ ] `debugPrint`, not `print`.
-- [ ] Tests mirror the `lib/` path and assert behaviour.
+- [ ] Tests mirror the `lib/` path and assert behavior.
 - [ ] Network tests tagged `network`.
 - [ ] `flutter analyze --fatal-infos` clean.
 - [ ] `flutter test --exclude-tags network` green.

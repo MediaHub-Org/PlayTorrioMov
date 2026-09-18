@@ -5,7 +5,7 @@ import '../../services/theme/app_colors.dart';
 class P2pWarningDialog extends StatelessWidget {
   const P2pWarningDialog({super.key});
 
-  // Getters, not variables: a static variable is initialised lazily, once,
+  // Getters, not variables: a static variable is initialized lazily, once,
   // on its first read -- which would freeze whichever theme happened to be
   // active when this dialog was first opened, and leave it there through
   // every later theme change.

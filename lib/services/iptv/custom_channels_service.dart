@@ -13,7 +13,7 @@ import 'hardcoded_channels.dart';
 /// the stream's own name as its keyword, which is why it can be liked,
 /// listed and matched by everything that already handles the built-ins.
 ///
-/// Without this, a portal carrying something the built-in catalogue has no
+/// Without this, a portal carrying something the built-in catalog has no
 /// entry for could only be reached by browsing that portal again from
 /// scratch: no tile, no like, no way back.
 abstract final class CustomChannelsService {
@@ -43,7 +43,7 @@ abstract final class CustomChannelsService {
       _publish(list);
     } catch (_) {
       // A corrupt store is not worth losing the Live TV page over; the
-      // built-in catalogue still stands on its own.
+      // built-in catalog still stands on its own.
       _publish(const []);
     }
   }
@@ -73,7 +73,7 @@ abstract final class CustomChannelsService {
       category: category.trim().isEmpty ? 'Custom' : category.trim(),
       keywords: [name.toLowerCase()],
       // A tile gradient stored on the channel, alongside the built-in
-      // channels' own broadcaster brand colours -- data, not app chrome,
+      // channels' own broadcaster brand colors -- data, not app chrome,
       // so it does not move when the theme or the palette does.
       gradient: const [Color(0xFF7C5CFF), Color(0xFF1A1A2E)],
     );
@@ -145,7 +145,7 @@ abstract final class CustomChannelsService {
           : keywords,
       exclude: (j['exclude'] as List?)?.whereType<String>().toList() ?? const [],
       // A tile gradient stored on the channel, alongside the built-in
-      // channels' own broadcaster brand colours -- data, not app chrome,
+      // channels' own broadcaster brand colors -- data, not app chrome,
       // so it does not move when the theme or the palette does.
       gradient: const [Color(0xFF7C5CFF), Color(0xFF1A1A2E)],
       iconUrl: j['iconUrl'] as String?,

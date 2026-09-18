@@ -971,7 +971,7 @@ class _TmdbConnectCard extends StatelessWidget {
               ),
               // What the last TMDB request actually did. A key that is
               // present but rejected looks exactly like a working one from
-              // this card otherwise -- same "Connected" copy, same colour --
+              // this card otherwise -- same "Connected" copy, same color --
               // while every details page quietly shows bare actor names.
               ValueListenableBuilder<String?>(
                 valueListenable: TmdbService.lastStatus,

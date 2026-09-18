@@ -41,7 +41,7 @@ void main() {
       expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-arm64.zip'));
 
       // `intel` must not come back as a *name*. It came back once already,
-      // labelling a universal build, which is how v1.6.2 shipped two
+      // labeling a universal build, which is how v1.6.2 shipped two
       // identical downloads under names promising a choice. Intel is now not
       // built at all, so the name has nothing left to describe.
       expect(workflow, isNot(contains('macOS-intel')));

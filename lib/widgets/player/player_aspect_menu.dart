@@ -22,7 +22,7 @@ class AspectOption {
 const List<AspectOption> aspectOptions = [
   // BoxFit.contain *is* the original shape: it scales the picture to the
   // largest size that fits whole, preserving the source's own aspect ratio
-  // and letterboxing the rest. It was labelled "Fit to screen (Contain)"
+  // and letterboxing the rest. It was labeled "Fit to screen (Contain)"
   // before, which read as a mode rather than an answer to "show it the way
   // it was shot" -- the label now says that.
   AspectOption.fit('original', 'Original (keeps the source shape)', BoxFit.contain),

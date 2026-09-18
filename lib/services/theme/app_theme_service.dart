@@ -157,7 +157,7 @@ abstract final class AppThemeService {
   /// Override for the app's own UI language. Null (the default) means
   /// follow the device's language when it's one of [supportedAppLocales],
   /// falling back to English otherwise -- ordinary
-  /// [MaterialApp.localeResolutionCallback] behaviour with no override set.
+  /// [MaterialApp.localeResolutionCallback] behavior with no override set.
   static final ValueNotifier<Locale?> locale = ValueNotifier<Locale?>(null);
 
   static Future<void> initialize() async {
@@ -266,7 +266,7 @@ abstract final class AppThemeService {
     // channel is the limit: at 0.22 the tint rounded away and Cyberpunk,
     // Sunset and Pink Barbie all resolved to the same #F9F6F7, which would
     // have collapsed three palettes into one in light mode. 0.45 survives
-    // the rounding and still reads as a white page, not a coloured one.
+    // the rounding and still reads as a white page, not a colored one.
     return HSLColor.fromAHSL(1, hsl.hue, 0.45, lightness).toColor();
   }
 

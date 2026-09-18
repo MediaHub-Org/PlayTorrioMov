@@ -47,7 +47,7 @@ void main() {
           reason: 'light-mode ink must differ, or this test proves nothing');
     });
 
-    testWidgets('the bare icon carries the colour itself', (tester) async {
+    testWidgets('the bare icon carries the color itself', (tester) async {
       await tester.pumpWidget(wrap(
         LikeButton(
           isLiked: true,
@@ -126,6 +126,6 @@ void main() {
       if (toggle.hasMatch(source)) offenders.add(file.path);
     }
     expect(offenders, isEmpty,
-        reason: 'use LikeButton so the icon, colour and semantics stay in step');
+        reason: 'use LikeButton so the icon, color and semantics stay in step');
   });
 }

@@ -53,7 +53,7 @@ void main() {
     testWidgets('a pill and its decoration draw from one tint',
         (tester) async {
       // The bug this guards is a pill with a light border and a dark glyph:
-      // two colours picked from different sources for the same control.
+      // two colors picked from different sources for the same control.
       for (final overArtwork in [true, false]) {
         AppThemeService.themeMode.value = ThemeMode.light;
         await tester.pumpWidget(_wrap(

@@ -27,13 +27,13 @@ enum LikeButtonStyle {
 /// PlayTorrioMod's other content types each had their own before this was
 /// unified: two pill variants, a bare `IconButton`, and two list-row hearts,
 /// in three different reds. Worse, the two presentations had
-/// contradictory-looking colour rules — the pill filled red and turned its
+/// contradictory-looking color rules — the pill filled red and turned its
 /// icon *white*, the bare icon turned *red*.
 ///
 /// That contradiction is only apparent, and the rule is now written down here
 /// rather than rediscovered per page: a filled pill needs a white icon to stay
 /// legible against the red fill, while a bare icon has no fill and so must
-/// carry the colour itself. Both are [kLikedColor]; they differ because the
+/// carry the color itself. Both are [kLikedColor]; they differ because the
 /// backgrounds differ.
 ///
 /// Deliberately **not** used for two things that look similar but are not a
@@ -166,7 +166,7 @@ class _LikeButtonState extends State<LikeButton> {
 
   Widget _buildBoxedIcon() {
     // Mirrors details_page.dart's _libraryStatusButton exactly (padding,
-    // border, corner radius, inactive colours) so all three status buttons
+    // border, corner radius, inactive colors) so all three status buttons
     // in that row read as one consistent set.
     return Container(
       padding: const EdgeInsets.all(10),

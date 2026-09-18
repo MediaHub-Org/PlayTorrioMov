@@ -154,7 +154,7 @@ void main() {
     },
   );
 
-  /// The catalogue grids are all `SliverGridDelegateWithFixedCrossAxisCount`
+  /// The catalog grids are all `SliverGridDelegateWithFixedCrossAxisCount`
   /// with a fixed `childAspectRatio` and three columns on a phone, so a cell
   /// is a hard box: the poster is `Expanded` and the text below it is not,
   /// which means growing text eats the poster until there is none left and
@@ -174,7 +174,7 @@ void main() {
     );
   }
 
-  testWidgets('MovieCard does not overflow its catalogue cell at 3x text scale',
+  testWidgets('MovieCard does not overflow its catalog cell at 3x text scale',
       (tester) async {
     await pumpAtScale(
       tester,
@@ -203,7 +203,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimeCard does not overflow its catalogue cell at 3x text scale',
+  testWidgets('AnimeCard does not overflow its catalog cell at 3x text scale',
       (tester) async {
     await pumpAtScale(
       tester,
@@ -319,7 +319,7 @@ void main() {
       // Anime is the one that can be pumped offline -- it takes its data as a
       // constructor argument, where DetailsPage fetches its own over the
       // network. Its Play button is a bare Row of icon + label with no flex
-      // on either, the same shape that broke the three catalogue cards.
+      // on either, the same shape that broke the three catalog cards.
       await pumpAtScale(
         tester,
         settle: false,

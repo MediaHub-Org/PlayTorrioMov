@@ -771,7 +771,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   Widget _buildLibraryButton() {
     // Both layouts now give the row a line to itself -- the poster column on
     // desktop, under Play on mobile -- so it spreads across the width rather
-    // than clustering and needing to be centred.
+    // than clustering and needing to be centered.
     return LibraryActionsRow(
       itemBuilder: _buildMyListItem,
       onChanged: _mirrorToAnimeLibrary,
@@ -784,7 +784,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       // AniList ids are their own namespace, so they cannot be passed off as
       // TMDB or IMDb ids. The title/year fallback in `uniqueKey` is what
       // identifies these, which is also what lets an anime saved here match
-      // the same show saved from a Stremio catalogue.
+      // the same show saved from a Stremio catalog.
       title: _anime.titleUserPreferred.isNotEmpty
           ? _anime.titleUserPreferred
           : _anime.titleRomaji,

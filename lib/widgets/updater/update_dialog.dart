@@ -26,7 +26,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
 
-  // Getters, not variables: a top-level or static variable is initialised
+  // Getters, not variables: a top-level or static variable is initialized
   // lazily, once, on its first read -- which would freeze whichever theme
   // happened to be active when this screen was first opened, and leave it
   // there through every later theme change.

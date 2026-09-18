@@ -18,7 +18,7 @@ const _appliedInOwnFile = {
   'hardwareAudioClock', // ditto, since 2026-08-31
   // Applied to mpv and to the ASS subtitle stream generated in this same
   // file (sub-shadow-color, the shadow in the Flutter overlay, and the box
-  // colour when the subtitle is boxed). Its only *UI* reader was the live
+  // color when the subtitle is boxed). Its only *UI* reader was the live
   // preview box in the subtitle appearance editor, which was removed when
   // the editor moved inside the subtitle panel -- the real subtitles on the
   // video are the preview now.

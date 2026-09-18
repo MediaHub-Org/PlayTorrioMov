@@ -780,7 +780,7 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
-  /// One run of page content: centred, width-capped on desktop, and inset
+  /// One run of page content: centered, width-capped on desktop, and inset
   /// from the screen edges by the page's own gutter. The hero and the rows
   /// below it are two runs so the backdrop can sit behind the first one
   /// without the second inheriting it.
@@ -821,7 +821,7 @@ class _DetailsPageState extends State<DetailsPage>
   // three gradients hand it off to the page rather than to a fixed dark, so
   // no single one has to be aggressive enough to look like a hard cutoff:
   //   1. a soft cap at the very top (keeps the back button legible)
-  //   2. a bottom fade that settles into the page's own colour
+  //   2. a bottom fade that settles into the page's own color
   //   3. a gentle horizontal wash so text on the left never fights the image
   // -------------------------------------------------------------------------
   Widget _buildBackdrop(String bgUrl) {
@@ -837,7 +837,7 @@ class _DetailsPageState extends State<DetailsPage>
           ),
           // Horizontal wash -- darkens where the title and synopsis sit,
           // leaving the rest of the image breathing room instead of blacking
-          // it all out. Fades from the page's own colour so the art looks
+          // it all out. Fades from the page's own color so the art looks
           // like it grows out of the page rather than sitting on it.
           DecoratedBox(
             decoration: BoxDecoration(

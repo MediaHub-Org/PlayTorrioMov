@@ -57,7 +57,7 @@ class IptvCardSizing {
 /// Used to be a full second copy of the row -- its own `MouseRegion`,
 /// `SectionHeader`, hover-arrow `Stack` and scroll-edge tracking, all
 /// hand-rolled again. That meant Live TV's row could drift from Movies',
-/// Series' and Anime's on spacing, arrow behaviour or hover feel with
+/// Series' and Anime's on spacing, arrow behavior or hover feel with
 /// nothing to stop it. The one visual difference that's real -- channel
 /// cards being a wider, shorter shape than a poster -- stays real: it comes
 /// through [BrowseRowView.sizingOf], not from forcing every row through the

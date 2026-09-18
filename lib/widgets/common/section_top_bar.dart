@@ -80,7 +80,7 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     // The accent used to be a hardcoded violet, so the selected section
-    // stayed the same colour whichever of the eight palettes was chosen --
+    // stayed the same color whichever of the eight palettes was chosen --
     // the one control on screen that ignored the theme.
     final accent = AppThemeService.currentPalette.value.primaryColor;
     return InkWell(

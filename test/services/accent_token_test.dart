@@ -11,7 +11,7 @@ const _allowed = {
   // The palette definition itself: this literal *is* Amethyst Violet.
   'lib/services/theme/app_theme_service.dart',
   // A saved channel's tile gradient. Data on a model whose other rows carry
-  // broadcasters' own brand colours, so it is not app chrome and must not
+  // broadcasters' own brand colors, so it is not app chrome and must not
   // move when the palette does.
   'lib/services/iptv/custom_channels_service.dart',
 };

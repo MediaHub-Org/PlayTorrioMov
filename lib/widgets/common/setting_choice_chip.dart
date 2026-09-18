@@ -10,7 +10,7 @@ import '../../services/theme/app_theme_service.dart';
 /// Ten call sites across Live TV's settings page, its portals modal and the
 /// portal browser had this chip written out in full, all ten agreeing on the
 /// same six styling properties: the accent at 0.25 behind the selection, the
-/// bar colour behind the rest, a 12px label that goes accent-coloured and
+/// bar color behind the rest, a 12px label that goes accent-colored and
 /// heavier when picked, and a border at 0.6 of the accent or 0.08 of the ink.
 /// The audit counted the result as 45 duplicated windows between two of those
 /// files; it is one widget, so here it is.

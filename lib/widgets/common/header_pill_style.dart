@@ -40,15 +40,15 @@ const double headerPillMinSize = 40;
 /// it -- Live TV's "LIVE TV" and "60+ CHANNELS" markers.
 ///
 /// Live TV built both of these inline as a `DecoratedBox` + `Padding` +
-/// `Row`, twice, which is how their glyph colours came to disagree with the
+/// `Row`, twice, which is how their glyph colors came to disagree with the
 /// interactive pills beside them in the same row.
 class HeaderPillLabel extends StatelessWidget {
   final String label;
   final IconData? icon;
 
-  /// Emphasised labels use the tint at full strength; a secondary marker
+  /// Emphasized labels use the tint at full strength; a secondary marker
   /// (a count, a unit) sits back at the same 70% the icons use.
-  final bool emphasised;
+  final bool emphasized;
 
   final double fontSize;
   final double letterSpacing;
@@ -57,7 +57,7 @@ class HeaderPillLabel extends StatelessWidget {
     super.key,
     required this.label,
     this.icon,
-    this.emphasised = true,
+    this.emphasized = true,
     this.fontSize = 12,
     this.letterSpacing = 0.6,
   });
@@ -83,9 +83,9 @@ class HeaderPillLabel extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: emphasised ? tint : tint.withValues(alpha: 0.70),
+                color: emphasized ? tint : tint.withValues(alpha: 0.70),
                 fontSize: fontSize,
-                fontWeight: emphasised ? FontWeight.w800 : FontWeight.w700,
+                fontWeight: emphasized ? FontWeight.w800 : FontWeight.w700,
                 letterSpacing: letterSpacing,
               ),
             ),

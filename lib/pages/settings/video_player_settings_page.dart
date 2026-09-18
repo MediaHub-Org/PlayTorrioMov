@@ -995,7 +995,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
     // Defaulted in the body rather than the signature: a default
     // parameter value must be a compile-time constant, and the ink
-    // colour is resolved from the active theme at call time.
+    // color is resolved from the active theme at call time.
     Color parseColor(String hex, {Color? fallback}) {
       var str = hex.replaceAll('#', '').trim();
       if (str.length == 6) str = 'FF$str';
@@ -1114,7 +1114,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           // reads as part of this settings page instead of a dialog dropped
           // on top of it. The editor's own dark styling stands in for a
           // video frame, which is also why the mini preview above uses the
-          // same fixed canvas colour regardless of the app's light/dark theme.
+          // same fixed canvas color regardless of the app's light/dark theme.
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 200),
             crossFadeState: _subtitleEditorExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,

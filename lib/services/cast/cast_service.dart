@@ -63,7 +63,7 @@ abstract final class CastService {
       await GoogleCastDiscoveryManager.instance.startDiscovery();
     } catch (e) {
       // A device without Play Services, or a Cast context that failed to
-      // initialise. The picker then shows its empty state, which is honest.
+      // initialize. The picker then shows its empty state, which is honest.
       debugPrint('[CastService] startDiscovery error: $e');
     }
   }

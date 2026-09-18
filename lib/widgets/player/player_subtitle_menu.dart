@@ -33,7 +33,7 @@ class PlayerSubtitleMenu extends StatefulWidget {
   /// the file's default, then English, then anything. The transport bar's
   /// subtitle button used to do this on every press as a CC toggle; the
   /// button opens this panel now, and "Auto" is here so that one-tap
-  /// behaviour survived the move.
+  /// behavior survived the move.
   final VoidCallback onAutoPick;
 
   /// Back to the settings root, when this menu was stepped into from
@@ -447,7 +447,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           children: [
             // Auto: one tap, best track. The transport bar's subtitle button
             // used to do this on every press; the button opens this panel
-            // now, so the behaviour lives here rather than being lost.
+            // now, so the behavior lives here rather than being lost.
             _buildLanguagePill(
               label: 'Auto',
               isSelected: false,

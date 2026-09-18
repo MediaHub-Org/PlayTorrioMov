@@ -171,7 +171,7 @@ class _SearchPageState extends State<SearchPage> {
       _isMagnetMode = false;
     });
 
-    // Both catalogues are asked at once. They are separate APIs, so running
+    // Both catalogs are asked at once. They are separate APIs, so running
     // them in sequence would make every "All" search as slow as the slower
     // of the two; and each swallows its own failure, so AniList being down
     // does not blank out addon results that arrived fine.
@@ -213,7 +213,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   /// Anime rows lead when the Anime chip is active and trail otherwise, so
-  /// whichever catalogue the user asked for is the one at the top.
+  /// whichever catalog the user asked for is the one at the top.
   List<Widget> _resultSections() {
     final animeSection = _animeResults.isEmpty
         ? null

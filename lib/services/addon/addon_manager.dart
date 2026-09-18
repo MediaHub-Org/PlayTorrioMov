@@ -104,7 +104,7 @@ class AddonManager {
   @visibleForTesting
   DateTime? get lastDefaultsAttemptForTest => _lastDefaultsAttempt;
 
-  /// Return the singleton to its pre-initialise state, so each test starts
+  /// Return the singleton to its pre-initialize state, so each test starts
   /// from a fresh install rather than from whatever the last one left.
   @visibleForTesting
   void resetForTest() {
@@ -119,7 +119,7 @@ class AddonManager {
   /// The first network call an app makes is the one most likely to fail: DNS
   /// is cold, the connection pool is empty, and on mobile the radio may still
   /// be waking. That one attempt at startup used to be the only one -- it
-  /// caught its own exception, marked itself initialised and left the session
+  /// caught its own exception, marked itself initialized and left the session
   /// with no addons, so every catalog page showed its error card until the
   /// app was restarted. That is what "it fails the first time I open it and
   /// works after a reload" was.

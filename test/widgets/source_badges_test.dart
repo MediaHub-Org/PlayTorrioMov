@@ -25,7 +25,7 @@ Widget wrap(List<Widget> badges) => MaterialApp(
 void main() {
   group('seedHealthColor', () {
     test('grades a torrent by how likely it is to start', () {
-      // The boundaries matter more than the exact colours: a source with
+      // The boundaries matter more than the exact colors: a source with
       // single-digit seeds regularly never buffers at all.
       expect(seedHealthColor(0), seedHealthColor(9));
       expect(seedHealthColor(10), seedHealthColor(49));
@@ -74,7 +74,7 @@ void main() {
       tester,
     ) async {
       // These parsed as seed counts before the count was ever displayed,
-      // which cost nothing then and paints a wrong colour-coded health
+      // which cost nothing then and paints a wrong color-coded health
       // badge now: "Files: 3" hit the bare `s:` alternative, and "12/12"
       // hit the N/M one whose seeds/peers suffix was optional.
       for (final title in [

@@ -16,7 +16,7 @@ void main() {
 
   tearDown(() {
     // A started timer is a pending Timer.periodic, which the widget test
-    // binding rejects at teardown unless it is cancelled here.
+    // binding rejects at teardown unless it is canceled here.
     SleepTimerService.instance.cancel();
   });
 
@@ -90,14 +90,14 @@ void main() {
       expect(find.textContaining('Off (cancel -- 30 min left'),
           findsOneWidget);
 
-      // Cancelling is the service's own behaviour; the row's existence is
+      // Canceling is the service's own behavior; the row's existence is
       // asserted above, and the service test covers the cancel path
       // directly -- tapping it in the harness is unreliable in a short
       // test window.
       SleepTimerService.instance.cancel();
       await tester.pump();
       expect(find.textContaining('Off (cancel'), findsNothing,
-          reason: 'a cancelled timer leaves the menu');
+          reason: 'a canceled timer leaves the menu');
     });
 
     testWidgets('the running countdown is visible in the menu', (tester) async {

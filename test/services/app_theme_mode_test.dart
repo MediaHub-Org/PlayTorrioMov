@@ -151,7 +151,7 @@ void main() {
       }
     });
 
-    test('light surfaces are tinted, not one shared grey', () {
+    test('light surfaces are tinted, not one shared gray', () {
       // The whole reason the app has eight palettes is that they look
       // different. Deriving light surfaces from the primary keeps that;
       // a fixed off-white would have collapsed all eight into one.

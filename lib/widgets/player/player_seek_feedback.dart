@@ -34,7 +34,7 @@ class SeekFlash {
 /// The transient flash shown on the side of the video a seek moved it.
 ///
 /// Every way of seeking by a fixed step goes through this -- the double-tap
-/// zones, the centred ±10s buttons, the ±30s buttons in the transport bar,
+/// zones, the centered ±10s buttons, the ±30s buttons in the transport bar,
 /// and the arrow keys -- so the feedback is the same regardless of how the
 /// seek was asked for, and it always appears on the side that matches the
 /// direction.

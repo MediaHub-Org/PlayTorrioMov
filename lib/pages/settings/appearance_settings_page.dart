@@ -16,7 +16,7 @@ class AppearanceSettingsPage extends StatefulWidget {
 class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
   @override
   Widget build(BuildContext context) {
-    // Colours come from the theme on this page, not from constants. It is
+    // Colors come from the theme on this page, not from constants. It is
     // the page the theme switch lives on, so it is the one page that has to
     // be readable in whichever mode the switch just selected.
     final theme = Theme.of(context);

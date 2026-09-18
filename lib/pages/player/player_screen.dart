@@ -818,7 +818,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         PlayerEmbeddedSubtitle(
           index: idx,
           title: title,
-          // Normalised here rather than rendered raw: mpv's own track tags
+          // Normalized here rather than rendered raw: mpv's own track tags
           // (SPL, MON, ZHC, ZHT) are not languages, and a raw tag in the
           // picker read as noise. See subtitle_languages.dart for what each
           // means.
@@ -1474,7 +1474,7 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   /// Shows the step that was just taken, on the side it moved the video.
   /// Every fixed-step seek routes through [_seekRelative], so the double-tap
-  /// zones, the centred ±10s buttons, the ±30s buttons and the arrow keys
+  /// zones, the centered ±10s buttons, the ±30s buttons and the arrow keys
   /// all land here -- there is no second path that could animate
   /// differently, or not at all.
   void _flashSeek(int seconds) {

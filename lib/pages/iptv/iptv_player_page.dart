@@ -514,7 +514,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
   /// True when this page was opened from a portal stream rather than from a
   /// channel tile. The ad-hoc channel built for a stream carries the
-  /// stream's own id, which is not in the catalogue -- a real channel's is.
+  /// stream's own id, which is not in the catalog -- a real channel's is.
   bool get _canSaveAsChannel =>
       HardcodedChannels.byId(widget.channel.id) == null;
 
@@ -1095,7 +1095,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           ),
                         ),
 
-                        // Centred play/pause -- the same widget, size and
+                        // Centered play/pause -- the same widget, size and
                         // position as Movies/Series/Anime, minus the ±10s
                         // buttons, which have no meaning on a live stream.
                         // It used to be a bare IconButton at the left end of
@@ -1159,7 +1159,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 ],
 
                                 // Controls Buttons Row. Play/pause is not
-                                // here: it is centred over the video like
+                                // here: it is centered over the video like
                                 // every other player in the app.
                                 Row(
                                   children: [

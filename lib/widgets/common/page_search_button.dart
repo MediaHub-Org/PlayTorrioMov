@@ -17,8 +17,8 @@ import 'header_pill_style.dart';
 class PageSearchButton extends StatelessWidget {
   /// Overrides the default navigation to the app-wide [SearchPage]. Only
   /// two callers still need it: Live TV, whose search matches a portal's
-  /// streams by keyword rather than searching a title catalogue, and Anime
-  /// in Arabic mode, whose catalogue the unified search has no source for.
+  /// streams by keyword rather than searching a title catalog, and Anime
+  /// in Arabic mode, whose catalog the unified search has no source for.
   final VoidCallback? onTap;
 
   const PageSearchButton({super.key, this.onTap});

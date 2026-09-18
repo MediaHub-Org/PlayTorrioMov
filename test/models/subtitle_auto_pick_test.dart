@@ -89,7 +89,7 @@ void main() {
       expect(picked!.index, 1);
     });
 
-    test('English is recognised however it is spelled', () {
+    test('English is recognized however it is spelled', () {
       for (final spelling in ['en', 'eng', 'English', 'en-US', 'en_GB']) {
         final picked = SubtitleAutoPick.embedded([
           track(0, language: 'jpn'),

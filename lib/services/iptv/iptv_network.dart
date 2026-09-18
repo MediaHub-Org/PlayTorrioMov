@@ -276,7 +276,7 @@ class IptvClient {
   static String episodeUrl(IptvPortal p, IptvEpisode e) =>
       '${p.url}/series/${_enc(p.username)}/${_enc(p.password)}/${e.id}.${e.containerExt}';
 
-  /// Fetches the next [limit] EPG programmes for [streamId] via Xtream's
+  /// Fetches the next [limit] EPG programs for [streamId] via Xtream's
   /// `get_short_epg`. Returns an empty list on any failure.
   static Future<List<EpgEntry>> shortEpg(
     IptvPortal p,
@@ -293,7 +293,7 @@ class IptvClient {
     return parseShortEpg(text);
   }
 
-  /// The programme list out of `get_short_epg`.
+  /// The program list out of `get_short_epg`.
   ///
   /// Panels disagree on all three things this has to read. The root is either
   /// an object with `epg_listings` or a bare array. Times come as Unix

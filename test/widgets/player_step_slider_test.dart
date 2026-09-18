@@ -11,7 +11,7 @@ void main() {
   group('PlayerStepSlider', () {
     // Material's Slider is pointer-only, so on a TV the speed and sleep
     // timer sliders were visible but unreachable from a remote. These tests
-    // pin the D-pad behaviour that fixes it.
+    // pin the D-pad behavior that fixes it.
 
     testWidgets('right arrow moves one step up', (tester) async {
       final values = <double>[];

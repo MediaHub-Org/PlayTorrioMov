@@ -1680,7 +1680,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
         setState(() => _cachedEpg = entries);
       }
     } catch (_) {
-      // The now/next programme is decoration on the channel card. Without it
+      // The now/next program is decoration on the channel card. Without it
       // the card still plays the channel.
     }
   }
@@ -1865,7 +1865,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                     color: widget.isFavorite ? AppColors.ink : AppColors.inkDisabled,
                     size: 21,
                   ),
-                  // A pin, not a favourite: it keeps one provider's stream
+                  // A pin, not a favorite: it keeps one provider's stream
                   // at hand while browsing this portal. Liking lives on the
                   // channel tile and survives the portal (roadmap #45), and
                   // the bookmark metaphor is already Watchlist's.

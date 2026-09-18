@@ -27,7 +27,7 @@ class SubtitlePayload {
   final String text;
 
   /// Subtitle extensions worth pulling out of an archive, and the extension
-  /// each one implies. `.sub` is recognised as a subtitle but saved as `srt`:
+  /// each one implies. `.sub` is recognized as a subtitle but saved as `srt`:
   /// it is a container name, not a format, and the player reads the content.
   static const _subtitleExtensions = {
     '.srt': 'srt',

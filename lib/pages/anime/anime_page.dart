@@ -390,7 +390,7 @@ class _AnimePageState extends State<AnimePage> {
   /// AniList anime is searchable from the unified search page -- arriving
   /// from here pre-selects its Anime chip via [SearchScope], so the button
   /// means the same thing it does on Movies and Series. Arabic mode keeps
-  /// its own page: the unified search has no source for that catalogue.
+  /// its own page: the unified search has no source for that catalog.
   void _navigateToSearch() {
     pushPage(
       context,

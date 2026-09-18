@@ -72,7 +72,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         // Same leading inset as every other page's back button; AppBar's
-        // own 56px leading slot would centre it somewhere else again.
+        // own 56px leading slot would center it somewhere else again.
         // + kMinInteractiveDimension: GlassBackButton is a 48x48
         // IconButton, and a narrower slot clamps it into an ellipse.
         leadingWidth: AppSpacing.pageInset(context) + 48,
