@@ -2037,15 +2037,19 @@ class _PlayerScreenState extends State<PlayerScreen>
     // Same answer as an unreachable one, so the button never just does
     // nothing.
     if (url == null || !_isCastableSource) {
-      // Naming the alternative matters: "pick a different source" reads as
-      // "try them all until one works", and roughly half of this app's
-      // sources are torrents served over loopback. The ones that do cast are
-      // the ones a receiver can fetch by itself.
+      // The message names the actual reason, not the source's category. The
+      // old copy said "torrent ones do not", which is wrong and contradicted
+      // the rule that decides this: `canCastUrl` tests the *host*, because a
+      // torrent that resolves through a debrid or a torrent server on
+      // another machine is perfectly fetchable by a receiver. What a
+      // receiver cannot reach is this device's own loopback -- which is
+      // where TorrServer serves from, and where a downloaded file lives.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            'This source streams from your device, so a Cast receiver cannot '
-            'reach it. Direct and debrid sources cast; torrent ones do not.',
+            'This source is served from this device, so a Cast receiver '
+            'cannot reach it. Sources hosted elsewhere -- direct links, '
+            'debrid, or a torrent server on another machine -- cast fine.',
           ),
           duration: const Duration(seconds: 5),
           action: _hasOtherSources
