@@ -13,8 +13,8 @@
     "--device=dri",
     "--filesystem=xdg-videos",
     "--filesystem=xdg-download",
-    "--talk=org.freedesktop.ScreenSaver",
-    "--talk=org.freedesktop.portal.Desktop"
+    "--talk-name=org.freedesktop.ScreenSaver",
+    "--talk-name=org.freedesktop.portal.Desktop"
   ],
   "add-extensions": {
     "org.freedesktop.Platform.ffmpeg-full": {

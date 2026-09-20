@@ -56,8 +56,8 @@ hardcoded English.
   running off the edge.
 - **Flatpak**: the PC could suspend mid-playback — the sleep inhibitor D-Bus
   call (`org.freedesktop.ScreenSaver`) was silently blocked by the sandbox.
-  Added `--talk=org.freedesktop.ScreenSaver` and
-  `--talk=org.freedesktop.portal.Desktop` to the manifest.
+  Added `--talk-name=org.freedesktop.ScreenSaver` and
+  `--talk-name=org.freedesktop.portal.Desktop` to the manifest.
 - **Player (desktop)**: keyboard shortcuts (J/L/C/A/S/R/F/space) died after a
   suspend/lock-screen cycle; the player's focus node is now re-armed when the
   app resumes.
