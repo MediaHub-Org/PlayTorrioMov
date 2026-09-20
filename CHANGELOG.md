@@ -3,7 +3,9 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.7+40] - 2026-09-21
+
+The header is one row on tablet, desktop and TV.
 
 ### Changed
 - **One-row header (tablet, desktop, TV)**: the section chips moved up into the
