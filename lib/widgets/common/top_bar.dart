@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 
+import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
+import 'section_chips.dart';
 import 'sidebar_logo.dart';
 import '../../services/theme/app_colors.dart';
 
 /// The slim global top bar shown above the hub's content, on every tier --
 /// mobile included, as of the fix described below. Holds the PlayTorrio
-/// logo and a Settings button. The section switcher for the hub's sections
-/// renders below it, in [AdaptiveNavShell] — see [SectionTopBar].
+/// logo and a Settings button; on tablet and desktop the hub's sections sit
+/// between them as chips (see [SectionChips]), all in one row. Phones show
+/// the sections in the bottom tab bar instead (see [AdaptiveNavShell]).
+///
+/// The sections used to be a second bar underneath. Merging them takes back
+/// that bar's whole height and moves nothing: they were always at the top.
 ///
 /// Mobile and tablet/desktop used to be two separate widgets with
 /// independently-picked heights, padding, and button sizing, which drifted
@@ -39,6 +45,8 @@ class TopBar extends StatelessWidget {
     // but its parent is reached through a const HubPage, so the chain above
     // it does not rebuild either.
     AppColors.dependOn(context);
+    final tier = AppBreakpoints.of(context);
+    final hasSections = tier != ScreenTier.mobile;
     return Container(
       height: height,
       decoration: BoxDecoration(
@@ -68,13 +76,25 @@ class TopBar extends StatelessWidget {
       // has no such competition: the Flexible logo (alone, no competing
       // flex sibling) shrinks to its own content, and spaceBetween pushes
       // whatever's actually left to the far right.
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Flexible(child: SidebarLogo()),
-          if (onSettingsTap != null) SettingsIconButton(onTap: onSettingsTap!),
-        ],
-      ),
+      child: hasSections
+          ? Row(
+              children: [
+                // The wordmark gives way on a tablet: logo, five chips and
+                // Settings do not fit 600px with it.
+                SidebarLogo(showWordmark: tier == ScreenTier.desktop),
+                const Expanded(child: SectionChips()),
+                if (onSettingsTap != null)
+                  SettingsIconButton(onTap: onSettingsTap!),
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Flexible(child: SidebarLogo()),
+                if (onSettingsTap != null)
+                  SettingsIconButton(onTap: onSettingsTap!),
+              ],
+            ),
     );
   }
 }

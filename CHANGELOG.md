@@ -3,6 +3,16 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **One-row header (tablet, desktop, TV)**: the section chips moved up into the
+  top bar, between the logo and Settings, and the second bar under it is gone
+  — the content starts 44px higher and nothing else moved. On a tablet
+  (600–900px) the wordmark gives way to the logo icon so everything fits.
+  Chips now show a focus ring, so a remote's position reads from across the
+  room. Phones are unchanged: sections stay in the bottom tab bar.
+
 ## [1.8.6+39] - 2026-09-20
 
 A download button in the player, a simpler playback speed menu, and a fix for

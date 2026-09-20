@@ -1,8 +1,8 @@
-// test/widgets/section_top_bar_test.dart
+// test/widgets/section_chips_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/utils/hub_controller.dart';
-import 'package:playtorriomov/widgets/common/section_top_bar.dart';
+import 'package:playtorriomov/widgets/common/section_chips.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
@@ -18,11 +18,11 @@ void main() {
     HubController.instance.setMediaSection('movies');
   });
 
-  group('SectionTopBar', () {
+  group('SectionChips', () {
     testWidgets('renders nothing on mobile — the bottom bar owns sections there',
         (tester) async {
       setSurfaceWidth(tester, 400);
-      await tester.pumpWidget(wrap(const SectionTopBar()));
+      await tester.pumpWidget(wrap(const SectionChips()));
       await tester.pumpAndSettle();
 
       expect(find.text('Films'), findsNothing);
@@ -32,7 +32,7 @@ void main() {
 
     testWidgets('desktop shows every section as a chip', (tester) async {
       setSurfaceWidth(tester, 1200);
-      await tester.pumpWidget(wrap(const SectionTopBar()));
+      await tester.pumpWidget(wrap(const SectionChips()));
       await tester.pumpAndSettle();
 
       expect(find.text('Films'), findsOneWidget);
@@ -44,7 +44,7 @@ void main() {
 
     testWidgets('desktop chip tap switches the section', (tester) async {
       setSurfaceWidth(tester, 1200);
-      await tester.pumpWidget(wrap(const SectionTopBar()));
+      await tester.pumpWidget(wrap(const SectionChips()));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Anime'));

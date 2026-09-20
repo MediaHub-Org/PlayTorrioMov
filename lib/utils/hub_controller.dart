@@ -61,7 +61,7 @@ class HubController extends ChangeNotifier {
   }
 
   /// The Media hub's five sections, shown as chips on tablet/desktop
-  /// (SectionTopBar) and as the bottom tab bar on mobile (AdaptiveNavShell).
+  /// (SectionChips, inside TopBar) and as the bottom tab bar on mobile (AdaptiveNavShell).
   List<HubSection> get currentSections => const [
         HubSection(id: 'movies', label: 'Films', icon: Icons.theaters_rounded),
         HubSection(id: 'series', label: 'Series', icon: Icons.tv_rounded),

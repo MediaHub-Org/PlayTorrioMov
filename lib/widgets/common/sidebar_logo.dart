@@ -6,17 +6,32 @@ import '../../services/theme/app_colors.dart';
 
 /// The app's logo and wordmark, shown in the header.
 ///
-/// The wordmark shows at every width -- a header with only an icon does not
-/// tell a new user what they have opened. It is a little smaller on phones,
-/// where the header also carries the settings button.
+/// The wordmark shows at every width but a tablet's, where the header also
+/// holds the section chips -- a header with only an icon does not tell a new
+/// user what they have opened, so that is the one place it gives way. It is a
+/// little smaller on phones, where the header also carries the settings
+/// button.
 class SidebarLogo extends StatelessWidget {
-  const SidebarLogo({super.key});
+  /// Whether the wordmark is drawn beside the icon. Off only where the header
+  /// has to share its row with the section chips on a tablet, which cannot
+  /// hold both at 600px.
+  final bool showWordmark;
+
+  const SidebarLogo({super.key, this.showWordmark = true});
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
     final iconSize = isMobile ? 26.0 : 32.0;
+    if (!showWordmark) {
+      return Image.asset(
+        'assets/icon.png',
+        width: iconSize,
+        height: iconSize,
+        fit: BoxFit.contain,
+      );
+    }
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

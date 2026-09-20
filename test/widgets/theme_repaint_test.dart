@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/theme/app_theme_service.dart';
-import 'package:playtorriomov/widgets/common/section_top_bar.dart';
+import 'package:playtorriomov/widgets/common/top_bar.dart';
 
 /// The app's chrome is handed down as `const` — `home: const HubPage()` in
-/// main.dart, `const SectionTopBar()` in AdaptiveNavShell. A const widget with
+/// main.dart, `const TopBar()`-style chrome in AdaptiveNavShell. A const widget with
 /// no arguments is canonicalised to one instance, so on the next build Flutter
 /// finds the identical widget in the same slot, reuses the element and never
 /// calls `build` on it. These bars paint from `AppColors`, which reads globals
@@ -22,7 +22,7 @@ class _ConstHost extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      const Scaffold(body: Column(children: [SectionTopBar()]));
+      const Scaffold(body: Column(children: [TopBar()]));
 }
 
 /// Mirrors main.dart: a MaterialApp that rebuilds on the theme notifier, with
@@ -56,7 +56,7 @@ Color _barColour(WidgetTester tester) {
   final container = tester.widget<Container>(
     find
         .descendant(
-          of: find.byType(SectionTopBar),
+          of: find.byType(TopBar),
           matching: find.byType(Container),
         )
         .first,
@@ -67,7 +67,7 @@ Color _barColour(WidgetTester tester) {
 void main() {
   testWidgets('a const-built bar repaints when the theme changes',
       (tester) async {
-    // Wide enough to be a desktop tier: SectionTopBar draws nothing on mobile,
+    // Wide enough to be a desktop tier: the section chips draw nothing on mobile,
     // where the same sections live in the bottom tab bar instead.
     tester.view.physicalSize = const Size(1200, 800);
     tester.view.devicePixelRatio = 1.0;

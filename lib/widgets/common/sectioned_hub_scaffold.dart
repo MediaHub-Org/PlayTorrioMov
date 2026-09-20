@@ -7,12 +7,12 @@ import '../../services/theme/app_colors.dart';
 /// flat list of sections (Watch, Read). Rebuilds whenever [HubController]
 /// changes.
 ///
-/// [SectionTopBar] is deliberately *not* rendered here even though this is
+/// [SectionChips] is deliberately *not* rendered here even though this is
 /// "the hub content area" -- this widget sits inside `NestedNavigator`
 /// (see `HubPage`), so anything rendered here gets covered the moment a
-/// page is pushed within the hub (Details, Search, ...). `SectionTopBar`
-/// instead lives in `AdaptiveNavShell`, outside the nested navigator,
-/// alongside the mobile bottom tab bar it mirrors.
+/// page is pushed within the hub (Details, Search, ...). They live in
+/// `TopBar`, inside `AdaptiveNavShell`, outside the nested navigator,
+/// alongside the mobile bottom tab bar they mirror.
 ///
 /// Music opts out of this: its body is a `Stack` carrying ambient
 /// background glow, a keyboard listener, and drawer/modal overlays, which

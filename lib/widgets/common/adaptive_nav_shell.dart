@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
-import 'section_top_bar.dart';
 import 'top_bar.dart';
 import '../../services/theme/app_colors.dart';
 
 /// Tier-aware nav chrome wrapping the Media hub's content area.
 ///
-/// Desktop/tablet keep [TopBar]: logo, sections as a chip row beneath it
-/// (see [SectionTopBar]), settings on the right.
+/// Desktop/tablet use one [TopBar] row: logo, the sections as chips in the
+/// middle (see [SectionChips]), settings on the right.
 ///
 /// Mobile mirrors that hierarchy: the bottom bar -- the easiest thing to
 /// reach on a phone -- carries the hub's four sections. The header is just
@@ -60,15 +59,15 @@ class AdaptiveNavShell extends StatelessWidget {
     return Column(
       children: [
         SizedBox(height: topPadding),
-        TopBar(onSettingsTap: onSettingsTap),
         // Outside `child` (NestedNavigator) on purpose: a page pushed within
         // the hub's own nested Navigator (Details, Search, ...) replaces
-        // everything inside that navigator, which used to include this bar
-        // when it lived inside MediaHub -- hiding the 5 sections behind
-        // every detail/search page. Sitting here, as a sibling above the
-        // navigated content, mirrors how the mobile bottom tab bar already
-        // sits outside `child` and so never gets covered either.
-        const SectionTopBar(),
+        // everything inside that navigator, which used to include the
+        // section bar when it lived inside MediaHub -- hiding the 5 sections
+        // behind every detail/search page. Sitting here, as a sibling above
+        // the navigated content, mirrors how the mobile bottom tab bar
+        // already sits outside `child` and so never gets covered either.
+        // The sections are inside this bar now, so that holds for them too.
+        TopBar(onSettingsTap: onSettingsTap),
         Expanded(child: child),
       ],
     );
