@@ -198,11 +198,13 @@ void main() {
   });
 
   group('ordering and cover art', () {
-    test('the most recently touched collection comes first', () {
+    test('the most recently touched collection comes first', () async {
       // What the Library grid wants, and why every mutation moves updatedAt.
       MediaCollectionsService.create('First');
       final second = MediaCollectionsService.create('Second')!;
       MediaCollectionsService.create('Third');
+      // Windows' clock ticks in ~15ms steps; without a gap the rename ties.
+      await Future<void>.delayed(const Duration(milliseconds: 30));
 
       MediaCollectionsService.rename(second.id, 'Second again');
 

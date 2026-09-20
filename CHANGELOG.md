@@ -3,7 +3,11 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.4+37] - 2026-09-20
+
+A maintenance release: the settings pages translated and made 3× text-scale
+safe, the player's remaining rough edges, and a few more strings out of
+hardcoded English.
 
 ### Added
 - **`docs/CONVENTIONS.md` and `AGENTS.md`**: how code is written here —
@@ -12,6 +16,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   version is `AGENTS.md`.
 
 ### Changed
+- **Details pages (#68)**: the *Cast & Crew*, *Characters & Cast* and
+  *Franchise & Relations* section headers now follow the app language.
+  Three new keys, 372 in all. The details-page *Similar Content* loading header
+  was a hardcoded copy of a string that already had a key; it now uses it.
 - **Settings pages translated (#68)**: the seven remaining pages — Built-in
   Providers, Addons, About, Backup & Data, Connect, Debrid & Cloud Streaming
   and Video Player & Engine — now follow the app language, in all four

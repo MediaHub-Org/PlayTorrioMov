@@ -7,7 +7,7 @@ the release process is in [RELEASES.md](RELEASES.md), and item numbers
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-18**, on `v1.8.3+36`.
+Last reconciled: **2026-09-20**, on `v1.8.4+37`.
 
 ---
 
@@ -26,7 +26,7 @@ advanced by reading or writing code; each is one test away from an answer.
 ### Translation (#68)
 
 **~170-470 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 369 keys are translated into Spanish, Arabic and Portuguese-BR.
+English.** 372 keys are translated into Spanish, Arabic and Portuguese-BR.
 The settings pages are done; what is left is the long tail outside them —
 the player's own menus and overlays, the Live TV portal browser, the search
 page, and the details-page rails.

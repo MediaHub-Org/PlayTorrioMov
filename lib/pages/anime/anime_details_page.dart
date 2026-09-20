@@ -862,7 +862,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const DetailsSectionHeader('Characters & Cast'),
+        DetailsSectionHeader(context.l10n.detailsCharactersCast),
         MouseRegion(
           onEnter: (_) => setState(() => _isHoveringCast = true),
           onExit: (_) => setState(() => _isHoveringCast = false),
@@ -1313,7 +1313,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const DetailsSectionHeader('Franchise & Relations'),
+        DetailsSectionHeader(context.l10n.detailsFranchiseRelations),
         MouseRegion(
           onEnter: (_) => setState(() => _isHoveringRelations = true),
           onExit: (_) => setState(() => _isHoveringRelations = false),

@@ -118,12 +118,13 @@ void main() {
       // family; the player and IPTV portal browser use overlay controls in
       // a genuinely different visual context. Neither is part of the
       // details/search page family GlassBackButton unifies.
-      if (file.path.contains('/settings/')) continue;
-      if (file.path.contains('/player/')) continue;
-      if (file.path.contains('iptv_player_page.dart')) continue;
-      if (file.path.contains('iptv_portal_browser_page.dart')) continue;
+      final path = file.path.replaceAll(r'\', '/');
+      if (path.contains('/settings/')) continue;
+      if (path.contains('/player/')) continue;
+      if (path.contains('iptv_player_page.dart')) continue;
+      if (path.contains('iptv_portal_browser_page.dart')) continue;
       final source = file.readAsStringSync();
-      if (backButton.hasMatch(source)) offenders.add(file.path);
+      if (backButton.hasMatch(source)) offenders.add(path);
     }
     expect(offenders, isEmpty,
         reason: 'use GlassBackButton so the icon and styling stay in step');

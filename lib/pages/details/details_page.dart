@@ -752,7 +752,8 @@ class _DetailsPageState extends State<DetailsPage>
                           _buildSimilarRow(),
                           const SizedBox(height: _Space.xl),
                         ] else if (_isFetchingSimilar) ...[
-                          const DetailsSectionHeader('Similar Content'),                          const Center(
+                          DetailsSectionHeader(context.l10n.detailsSimilarContent),
+                          const Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 40),
                               child: SizedBox(
@@ -1458,7 +1459,7 @@ class _DetailsPageState extends State<DetailsPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const DetailsSectionHeader('Cast & Crew'),
+          DetailsSectionHeader(context.l10n.detailsCastCrew),
           SizedBox(
             height: 148,
             child: Stack(

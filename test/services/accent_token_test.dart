@@ -55,9 +55,10 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart'))) {
-      if (_allowed.contains(file.path)) continue;
+      final path = file.path.replaceAll(r'\', '/');
+      if (_allowed.contains(path)) continue;
       final matches = violet.allMatches(file.readAsStringSync()).length;
-      if (matches > 0) offenders.add('${file.path} ($matches)');
+      if (matches > 0) offenders.add('$path ($matches)');
     }
 
     expect(offenders, isEmpty,
