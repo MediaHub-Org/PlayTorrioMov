@@ -7,9 +7,13 @@ import 'player_glass.dart';
 ///
 /// One row per duration, rather than chips: a row carries the consequence of
 /// the choice ("pauses at 02:14") where a chip carried only the choice, and
-/// rows scan vertically the way every other player menu does. A custom
-/// value sits at the bottom with its own -/+ steppers, for durations the
-/// presets do not cover.
+/// rows scan vertically the way every other player menu does. The presets stop
+/// at an hour; a custom value at the bottom, opening on 90 minutes, has its
+/// own -/+ steppers for the longer sleeps the presets do not cover.
+///
+/// A slider over the presets sat above the rows for a while. It offered the
+/// same choices a second way, in a control too small to read its own
+/// numbers, so it went -- one way to pick a preset, not two.
 ///
 /// The chips this replaced existed for several releases before anything was
 /// wired behind them: choosing "30 min" changed a highlight and nothing
@@ -22,13 +26,19 @@ class SleepTimerMenu extends StatefulWidget {
 }
 
 class _SleepTimerMenuState extends State<SleepTimerMenu> {
-    static const _presetMinutes = [15, 30, 45, 60, 90, 120, 180, 240];
+  static const _presetMinutes = [15, 30, 45, 60];
+
+  /// Where the custom stepper opens, and how far each press moves it. The
+  /// presets end at an hour, so custom starts beyond it.
+  static const _customStart = 90;
+  static const _customStep = 15;
+  static const _customMin = 15;
+  static const _customMax = 480;
 
   /// The custom duration the -/+ steppers are editing, in minutes. Null
   /// until the user touches a stepper -- the presets are one tap, and the
   /// steppers should not imply a selection nobody made.
   int? _customMinutes;
-  int? _draftPresetIndex;
 
   void _start(int minutes) => SleepTimerService.instance.start(minutes);
 
@@ -50,17 +60,12 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
             builder: (context, remaining, _) => Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildPresetSlider(remaining),
-                const SizedBox(height: 4),
-                for (final min in const [15, 30, 45, 60, 90])
+                for (final min in _presetMinutes)
                   _DurationRow(
                     minutes: min,
                     isSelected: remaining == min,
                     onTap: () {
-                      setState(() {
-                        _customMinutes = null;
-                        _draftPresetIndex = null;
-                      });
+                      setState(() => _customMinutes = null);
                       _start(min);
                     },
                   ),
@@ -72,10 +77,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
                     isSelected: false,
                     icon: Icons.timer_off_outlined,
                     onTap: () {
-                      setState(() {
-                        _customMinutes = null;
-                        _draftPresetIndex = null;
-                      });
+                      setState(() => _customMinutes = null);
                       SleepTimerService.instance.cancel();
                     },
                   ),
@@ -92,70 +94,11 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
     );
   }
 
-  Widget _buildPresetSlider(int? remaining) {
-    final activeIndex = _presetMinutes.indexOf(remaining ?? -1);
-    final index = _draftPresetIndex ?? (activeIndex >= 0 ? activeIndex : 0);
-    final minutes = _presetMinutes[index];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            '$minutes min preset',
-            style: const TextStyle(
-              color: PlayerTheme.inkMuted,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        PlayerStepSlider(
-          value: index.toDouble(),
-          min: 0,
-          max: (_presetMinutes.length - 1).toDouble(),
-          divisions: _presetMinutes.length - 1,
-          label: '$minutes min',
-          onChanged: (value) => setState(() {
-            _draftPresetIndex = value.round();
-          }),
-          onChangeEnd: (value) {
-            final selected = _presetMinutes[value.round()];
-            setState(() => _customMinutes = null);
-            _start(selected);
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final point in _presetMinutes)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6),
-                    child: Text(
-                      '$point',
-                      style: const TextStyle(
-                        color: PlayerTheme.inkSubtle,
-                        fontSize: 9,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   /// The custom duration steppers. Editing alone does not start the timer --
   /// the row says "Set", and starting it is its own tap, so nudging past a
   /// value by accident does not silently arm a two-hour timer.
   Widget _buildCustomRow(int? remaining) {
-    final value = _customMinutes ?? 20;
+    final value = _customMinutes ?? _customStart;
     final isCustomActive =
         remaining != null && _customMinutes != null && remaining <= value;
     return Padding(
@@ -178,7 +121,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
             icon: Icons.remove_rounded,
             tooltip: 'Fewer minutes',
             onPressed: () => setState(() {
-              _customMinutes = (value - 5).clamp(5, 240);
+              _customMinutes = (value - _customStep).clamp(_customMin, _customMax);
             }),
           ),
           Flexible(
@@ -203,7 +146,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
             icon: Icons.add_rounded,
             tooltip: 'More minutes',
             onPressed: () => setState(() {
-              _customMinutes = (value + 5).clamp(5, 240);
+              _customMinutes = (value + _customStep).clamp(_customMin, _customMax);
             }),
           ),
           const SizedBox(width: 8),

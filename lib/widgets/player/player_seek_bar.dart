@@ -32,6 +32,11 @@ class PlayerSeekBar extends StatefulWidget {
 }
 
 class _PlayerSeekBarState extends State<PlayerSeekBar> {
+  /// The widest a time label may grow before its text scales down: room for
+  /// "-1:50:23" at the default text size, so it only shrinks when the user's
+  /// text scale asks for more.
+  static const double _labelMaxWidth = 72;
+
   bool _isHovered = false;
   bool _isScrubbing = false;
   double? _scrubFraction;
@@ -103,27 +108,27 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
 
     return Row(
       children: [
-        // Time Start. Flexible + FittedBox, not a bare fixed-width box: at a
-        // large text scale "1:23:45" wants far more than the 46px minimum,
-        // and the row has nowhere to put it -- the track is Expanded and the
-        // labels are the only thing that can give. Scaling the label down
-        // keeps the timestamp readable and the row intact.
-        Flexible(
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 46),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                _formatDuration(_scrubFraction != null
-                    ? Duration(milliseconds: (_scrubFraction! * totalMs).round())
-                    : currentPosition),
-                style: const TextStyle(
-                  color: PlayerTheme.inkMuted,
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
+        // Time Start. Capped and scaled down, not Flexible: a Flexible
+        // sibling of the Expanded track splits the row's free space with it
+        // by flex factor, so two label slots and a track each got a third
+        // and the scrubber stopped at a third of a desktop-wide bar. A
+        // ConstrainedBox is sized by its content up to the cap, so the track
+        // takes everything the labels leave. The cap is what still lets a
+        // large text scale shrink "1:23:45" instead of pushing past the row.
+        ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 46, maxWidth: _labelMaxWidth),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              _formatDuration(_scrubFraction != null
+                  ? Duration(milliseconds: (_scrubFraction! * totalMs).round())
+                  : currentPosition),
+              style: const TextStyle(
+                color: PlayerTheme.inkMuted,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
             ),
           ),
@@ -324,29 +329,27 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
 
         const SizedBox(width: 12),
 
-        // Time End / Remaining Toggle. Same Flexible + FittedBox treatment as
-        // the start label above, for the same reason.
-        Flexible(
-          child: GestureDetector(
-            onTap: () => setState(() => _showRemainingTime = !_showRemainingTime),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Container(
-                constraints: const BoxConstraints(minWidth: 46),
+        // Time End / Remaining Toggle. Same cap-and-scale treatment as the
+        // start label above, for the same reason.
+        GestureDetector(
+          onTap: () => setState(() => _showRemainingTime = !_showRemainingTime),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 46, maxWidth: _labelMaxWidth),
+              alignment: Alignment.centerRight,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
                 alignment: Alignment.centerRight,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    _showRemainingTime
-                        ? (_formatDuration(-remainingDuration))
-                        : _formatDuration(widget.duration),
-                    style: const TextStyle(
-                      color: PlayerTheme.inkMuted,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
+                child: Text(
+                  _showRemainingTime
+                      ? (_formatDuration(-remainingDuration))
+                      : _formatDuration(widget.duration),
+                  style: const TextStyle(
+                    color: PlayerTheme.inkMuted,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
               ),

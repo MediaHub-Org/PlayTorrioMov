@@ -3,6 +3,32 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Playback speed**: a large readout, a -/+ button either side of the slider
+  for one step at a time, and one-tap presets underneath (0.5, 0.75, 1 —
+  captioned *Normal* —, 1.25, 1.5, 2). The presets are the numbers the old
+  row printed under the slider, now tappable and no longer only roughly
+  under its ticks. 0.25× and 1.75× stay on the slider and the buttons.
+- **Sleep timer**: the slider is gone. The presets are 15, 30, 45 and 60
+  minutes, and the custom stepper now opens on 90 minutes, moves in 15-minute
+  steps and reaches 8 hours, for the longer sleeps the presets do not cover.
+- **Phones**: the sources and episodes panels fill the screen instead of
+  covering 94% of it and leaving a sliver of video down one edge.
+
+### Fixed
+- **Player seek bar (desktop)**: the scrubber stopped a third of the way across
+  the bar, with the remaining time floating in the middle. The two time labels
+  were sharing the row's free space with the track; the track now takes
+  everything the labels leave.
+- **Subtitle flags on Windows**: languages drew as two bare letters ("ES",
+  "GB") because Windows' emoji font has no flag glyphs. Flags are now bundled
+  images (`assets/flags/`, 34 of them, about 1 KB each) and look the same on
+  every platform.
+- **Subtitles**: embedded tracks tagged `mon` no longer show a "Same as audio"
+  language. They keep their own title, or their language name when untitled.
+
 ## [1.8.4+37] - 2026-09-20
 
 A maintenance release: the settings pages translated and made 3× text-scale

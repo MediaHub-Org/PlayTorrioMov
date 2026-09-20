@@ -246,7 +246,11 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     AppColors.dependOn(context);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    final drawerWidth = isCompact ? screenWidth * 0.94 : 440.0;
+    // A phone gets the whole screen, like YouTube's own settings pages. The
+    // 94% drawer this replaced left a 6% sliver of video down one edge: too
+    // little to watch, enough to make the panel read as covering the player
+    // rather than replacing it.
+    final drawerWidth = isCompact ? screenWidth : 440.0;
     final episodes = _seasonEpisodes[_selectedSeason] ?? [];
 
     return Align(

@@ -810,9 +810,12 @@ class _PlayerScreenState extends State<PlayerScreen>
       final t = subList[i];
       if (t.id == 'no' || t.id == 'auto') continue;
       final lang = t.language;
-        if (lang?.trim().toLowerCase() == 'spl') continue;
+      if (lang?.trim().toLowerCase() == 'spl') continue;
+      // The normalized name, not the raw tag: an untitled `mon` track would
+      // otherwise be labeled "MON".
+      final language = subtitleTrackLanguageName(lang);
       final title =
-          t.title ?? (lang != null ? lang.toUpperCase() : 'Track ${i + 1}');
+          t.title ?? (language.isNotEmpty ? language : 'Track ${i + 1}');
       final idx = int.tryParse(t.id) ?? (i + 1);
       embeddedSubs.add(
         PlayerEmbeddedSubtitle(
@@ -822,7 +825,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           // (SPL, MON, ZHC, ZHT) are not languages, and a raw tag in the
           // picker read as noise. See subtitle_languages.dart for what each
           // means.
-          language: subtitleTrackLanguageName(lang),
+          language: language,
         ),
       );
     }

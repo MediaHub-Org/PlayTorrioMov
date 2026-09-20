@@ -171,12 +171,13 @@ String _capitalizeWords(String value) => value
 /// - `spl` — "subtitle only": a track carrying titles-on-screen or signs,
 ///   with no spoken dialogue to translate. Not a language; a kind of track.
 /// - `mon` — "monolingual": the subtitles match the audio, i.e. the same
-///   language the dialogue is in.
+///   language the dialogue is in. Not a language either, and a row reading
+///   "Same as audio" told the viewer nothing the track's own title does not,
+///   so it is dropped like `spl` rather than given a label.
 /// - `zhc` / `zht` — Chinese simplified and traditional. Real languages in
 ///   effect, but codes mpv invents rather than ISO ones, so they rendered as
 ///   three-letter noise instead of joining the Chinese group.
 const Map<String, String> _mpvTagToDisplayName = {
-  'mon': 'Same as audio',
   'zhc': 'Chinese (Simplified)',
   'zht': 'Chinese (Traditional)',
 };
@@ -190,7 +191,7 @@ const Map<String, String> _mpvTagToDisplayName = {
 String subtitleTrackLanguageName(String? rawLanguage) {
   final raw = rawLanguage?.trim() ?? '';
   if (raw.isEmpty) return '';
-  if (raw.toLowerCase() == 'spl') return '';
+  if (const {'spl', 'mon'}.contains(raw.toLowerCase())) return '';
   final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
   if (mpv != null) return mpv;
   return subtitleLanguageName(raw);

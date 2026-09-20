@@ -22,15 +22,75 @@ void main() {
       expect(find.text('1.25×'), findsOneWidget);
     });
 
-    testWidgets('offers 0.25x, which the old list omitted', (tester) async {
+    testWidgets('shows a chip per common speed, captioning normal',
+        (tester) async {
       await tester.pumpWidget(wrap(PlayerSpeedMenu(
         currentRate: 1.0,
         onRateSelected: (_) {},
         onClose: () {},
       )));
 
-      expect(find.text('0.25'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
+      for (final label in ['0.5', '0.75', '1', '1.25', '1.5', '2']) {
+        expect(find.text(label), findsOneWidget, reason: 'chip $label');
+      }
+      expect(find.text('Normal'), findsOneWidget);
+    });
+
+    testWidgets('tapping a chip picks that speed and keeps the menu open',
+        (tester) async {
+      final reported = <double>[];
+      var closed = false;
+      await tester.pumpWidget(wrap(PlayerSpeedMenu(
+        currentRate: 1.0,
+        onRateSelected: reported.add,
+        onClose: () => closed = true,
+      )));
+
+      await tester.tap(find.text('1.5'));
+      await tester.pump();
+
+      expect(reported, [1.5]);
+      expect(closed, isFalse, reason: 'so the next nudge does not reopen it');
+    });
+
+    testWidgets('the -/+ buttons take one step each', (tester) async {
+      final reported = <double>[];
+      await tester.pumpWidget(wrap(PlayerSpeedMenu(
+        currentRate: 1.0,
+        onRateSelected: reported.add,
+        onClose: () {},
+      )));
+
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.tap(find.byIcon(Icons.remove_rounded));
+
+      expect(reported, [1.25, 0.75]);
+    });
+
+    testWidgets('the slower button reaches 0.25x, which the chips omit',
+        (tester) async {
+      final reported = <double>[];
+      await tester.pumpWidget(wrap(PlayerSpeedMenu(
+        currentRate: 0.5,
+        onRateSelected: reported.add,
+        onClose: () {},
+      )));
+
+      await tester.tap(find.byIcon(Icons.remove_rounded));
+
+      expect(reported, [0.25]);
+    });
+
+    testWidgets('the buttons stop at the ends of the range', (tester) async {
+      final reported = <double>[];
+      await tester.pumpWidget(wrap(PlayerSpeedMenu(
+        currentRate: 2.0,
+        onRateSelected: reported.add,
+        onClose: () {},
+      )));
+
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      expect(reported, isEmpty, reason: 'nothing above 2x to step to');
     });
 
     testWidgets('dragging the slider reports a rate from the point set',

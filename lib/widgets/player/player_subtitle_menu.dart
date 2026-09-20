@@ -167,7 +167,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   // Replaces the per-menu `_getLanguageEmoji` that matched ISO code
   // substrings against a display name -- which is why "Spanish" drew the
   // globe and "Chinese" drew the Indian flag. See language_flag.dart.
-  String _flag(String lang) => languageFlag(lang);
+  Widget _flag(String lang, {double height = 12}) =>
+      LanguageFlag(lang, height: height);
 
   List<SubtitleVariant> _getFilteredVariants() {
     List<SubtitleVariant> all = [];
@@ -509,7 +510,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                   padding: const EdgeInsets.only(right: 6),
                   child: _buildLanguagePill(
                     label: g.language,
-                    emoji: _flag(g.language),
+                    icon: _flag(g.language, height: 11),
                     count: g.variants.length,
                     isSelected: isSelected,
                     onTap: () => setState(() => _selectedLanguage = g.language),
@@ -813,7 +814,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         ),
                         child: Row(
                           children: [
-                            Text(_flag(g.language), style: const TextStyle(fontSize: 11.5)),
+                            _flag(g.language, height: 12),
                             const SizedBox(width: 7),
                             Expanded(
                               child: Text(
@@ -968,10 +969,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         Row(
                           children: [
                             if (track.language != null && track.language!.isNotEmpty) ...[
-                              Text(
-                                _flag(track.language!),
-                                style: const TextStyle(fontSize: 12),
-                              ),
+                              _flag(track.language!),
                               const SizedBox(width: 6),
                             ],
                             Expanded(
@@ -1170,10 +1168,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         Row(
                           children: [
                             if (variant.language.isNotEmpty) ...[
-                              Text(
-                                _flag(variant.language),
-                                style: const TextStyle(fontSize: 12),
-                              ),
+                              _flag(variant.language),
                               const SizedBox(width: 5),
                               // The language as words, not just a flag: the
                               // flags are small and several are easy to

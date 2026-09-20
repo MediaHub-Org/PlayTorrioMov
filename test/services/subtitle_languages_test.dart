@@ -75,5 +75,10 @@ void main() {
       expect(subtitleTrackLanguageName('spl'), isEmpty);
       expect(canonicalLanguageGroup('spl'), isEmpty);
     });
+
+    test('does not label monolingual mpv tracks "Same as audio"', () {
+      expect(subtitleTrackLanguageName('mon'), isEmpty);
+      expect(canonicalLanguageGroup('MON'), isEmpty);
+    });
   });
 }

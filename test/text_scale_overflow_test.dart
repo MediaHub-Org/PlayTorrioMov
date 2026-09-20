@@ -30,6 +30,7 @@ import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_sources_panel.dart';
+import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_transport.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
@@ -388,6 +389,33 @@ void main() {
         reason: 'the sleep timer chips are sized by their labels, which grow '
             'with the scale and can want more than the card has',
       );
+    },
+  );
+
+  testWidgets(
+    'the player speed menu does not overflow at 3x text scale',
+    (tester) async {
+      // The -/+ buttons flank the slider in a Row, and the preset chips sit in
+      // a Wrap: the slider takes what is left, and a chip that no longer fits
+      // drops to a second line rather than running off the card.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              PlayerMenuAnchor(
+                child: PlayerSpeedMenu(
+                  currentRate: 1.0,
+                  onRateSelected: (_) {},
+                  onClose: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
     },
   );
 

@@ -46,8 +46,9 @@ class PlayerAudioMenu extends StatelessWidget {
   // Replaces the per-menu `_getLanguageEmoji` that matched ISO code
   // substrings against a display name -- which rendered "Spanish" as the
   // globe and "Chinese" as the Indian flag. See language_flag.dart.
-  String _flag(String? lang) =>
-      (lang == null || lang.isEmpty) ? '🔊' : languageFlag(lang);
+  Widget _flag(String? lang) => (lang == null || lang.isEmpty)
+      ? const Text('🔊', style: TextStyle(fontSize: 15))
+      : LanguageFlag(lang, height: 14);
 
   String? _getTrackSubtitle(PlayerAudioTrack track) {
     final parts = <String>[];
@@ -197,10 +198,7 @@ class PlayerAudioMenu extends StatelessWidget {
                                       : null,
                                 ),
                                 const SizedBox(width: 10),
-                                Text(
-                                  _flag(track.language),
-                                  style: const TextStyle(fontSize: 15),
-                                ),
+                                _flag(track.language),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Column(
