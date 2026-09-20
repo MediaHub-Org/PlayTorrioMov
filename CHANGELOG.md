@@ -3,7 +3,9 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.6+39] - 2026-09-20
+
+A download button in the player, and a simpler playback speed menu.
 
 ### Added
 - **Download from the video player**: a download button in the player's top
