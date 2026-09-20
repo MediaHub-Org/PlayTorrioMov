@@ -13,6 +13,13 @@ class WindowService with WindowListener {
 
   final ValueNotifier<bool> isFullscreenNotifier = ValueNotifier<bool>(false);
   bool _isTransitioning = false;
+
+  /// Whether the window was maximized when it went fullscreen. Entering
+  /// fullscreen has to unmaximize first (see [_enterFullscreen]), which
+  /// throws that state away; without this, leaving fullscreen dropped a
+  /// maximized window back to its small restored size -- press F twice and
+  /// the player ended up as a little window instead of where it started.
+  bool _wasMaximizedBeforeFullscreen = false;
   bool _isClosing = false;
 
   bool get isFullscreen => isFullscreenNotifier.value;
@@ -69,24 +76,43 @@ class WindowService with WindowListener {
 
       final isCurrentlyFs = await windowManager.isFullScreen();
       if (isCurrentlyFs || isFullscreenNotifier.value) {
-        await windowManager.setFullScreen(false);
-        if (await windowManager.isMaximized()) {
-          await windowManager.unmaximize();
-        }
-        isFullscreenNotifier.value = false;
+        await _leaveFullscreen();
       } else {
-        // Crucial for Windows: unmaximize first to drop the 8px DWM resize frame
-        if (await windowManager.isMaximized()) {
-          await windowManager.unmaximize();
-        }
-        await windowManager.setFullScreen(true);
-        isFullscreenNotifier.value = true;
+        await _enterFullscreen();
       }
     } catch (e) {
       debugPrint('[WindowService] toggleFullscreen error: $e');
     } finally {
       _isTransitioning = false;
     }
+  }
+
+  Future<void> _enterFullscreen() async {
+    // Crucial for Windows: unmaximize first to drop the 8px DWM resize frame.
+    // Remember that it was maximized, so leaving can put it back.
+    _wasMaximizedBeforeFullscreen = await windowManager.isMaximized();
+    if (_wasMaximizedBeforeFullscreen) {
+      await windowManager.unmaximize();
+    }
+    await windowManager.setFullScreen(true);
+    isFullscreenNotifier.value = true;
+  }
+
+  /// Back to the state [_enterFullscreen] found: maximized if it was
+  /// maximized, restored otherwise. A window that was never maximized before
+  /// fullscreen still gets unmaximized if the OS reports it maximized on the
+  /// way out, as before.
+  Future<void> _leaveFullscreen() async {
+    final restoreMaximized = _wasMaximizedBeforeFullscreen;
+    _wasMaximizedBeforeFullscreen = false;
+    await windowManager.setFullScreen(false);
+    final isMaximized = await windowManager.isMaximized();
+    if (restoreMaximized && !isMaximized) {
+      await windowManager.maximize();
+    } else if (!restoreMaximized && isMaximized) {
+      await windowManager.unmaximize();
+    }
+    isFullscreenNotifier.value = false;
   }
 
   /// Alias for toggleFullscreen
@@ -106,11 +132,7 @@ class WindowService with WindowListener {
     try {
       final isCurrentlyFs = await windowManager.isFullScreen();
       if (isCurrentlyFs || isFullscreenNotifier.value) {
-        await windowManager.setFullScreen(false);
-        if (await windowManager.isMaximized()) {
-          await windowManager.unmaximize();
-        }
-        isFullscreenNotifier.value = false;
+        await _leaveFullscreen();
       }
     } catch (e) {
       debugPrint('[WindowService] exitFullscreen error: $e');

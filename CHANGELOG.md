@@ -5,7 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.8.6+39] - 2026-09-20
 
-A download button in the player, and a simpler playback speed menu.
+A download button in the player, a simpler playback speed menu, and a fix for
+fullscreen on Windows.
 
 ### Added
 - **Download from the video player**: a download button in the player's top
@@ -14,6 +15,12 @@ A download button in the player, and a simpler playback speed menu.
   on the sources list (duplicate check, folder prompt on phones, snack bar).
   Hidden for a file that is already local, and for a video opened with no
   title behind it, such as a bare magnet from search.
+
+### Fixed
+- **Fullscreen (Windows)**: pressing F to leave fullscreen dropped a maximized
+  window to its small restored size instead of back to maximized. Entering
+  fullscreen has to unmaximize first, which discarded the state; it is now
+  remembered and restored, on leaving with F and on leaving the player.
 
 ### Changed
 - **Player top bar (phones)**: with the extra button the bar ran over on a
