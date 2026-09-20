@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
@@ -15,12 +13,10 @@ import '../../models/movie/video.dart';
 import '../../models/movie/movie_detail.dart';
 
 import '../../models/stream/stream_model.dart';
-import '../../models/download/download_task_model.dart';
 import './player_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/stream/stream_service.dart';
-import '../../services/download/download_service.dart';
-import '../../utils/download/download_path_helper.dart';
+import '../../utils/download/download_launcher.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/player/performance_liquid_lens.dart';
 import '../../widgets/common/source_badges.dart';
@@ -2033,7 +2029,12 @@ class _SourceCardState extends State<_SourceCard> {
                           ? Colors.white.withValues(alpha: 0.1)
                           : Colors.white.withValues(alpha: 0.06),
                       child: InkWell(
-                        onTap: () => _startDownload(context, s),
+                        onTap: () => startSourceDownload(
+                          context,
+                          detail: widget.detail,
+                          episode: widget.episode,
+                          source: s,
+                        ),
                         child: const SizedBox(
                           width: 36,
                           height: 36,
@@ -2070,70 +2071,6 @@ class _SourceCardState extends State<_SourceCard> {
         ),
       ),
     );
-  }
-
-  Future<void> _startDownload(BuildContext context, StreamSource s) async {
-    final detail = widget.detail;
-    final season = widget.episode?.season;
-    final episode = widget.episode?.episode;
-
-    final existing = DownloadService.instance.tasksNotifier.value.where((t) {
-      return t.mediaId == detail.id && t.season == season && t.episode == episode;
-    }).firstOrNull;
-
-    if (existing != null) {
-      if (existing.status == DownloadStatus.downloading) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Download already in progress in background.')),
-        );
-        return;
-      } else if (existing.status == DownloadStatus.completed) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This media is already downloaded.')),
-        );
-        return;
-      }
-    }
-
-    try {
-      String? customDir;
-      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-        customDir = await DownloadPathHelper.pickDownloadsDirectory();
-        if (customDir == null) {
-          // User canceled folder selection
-          return;
-        }
-      }
-
-      await DownloadService.instance.startDownload(
-        title: detail.name,
-        mediaId: detail.id,
-        type: detail.type,
-        season: season,
-        episode: episode,
-        episodeTitle: widget.episode?.title,
-        posterUrl: detail.poster,
-        backdropUrl: detail.background,
-        year: detail.year,
-        source: s,
-        customDownloadDir: customDir,
-      );
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Download started in background. Track progress in Downloads tab.'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Download failed to start: $e')),
-        );
-      }
-    }
   }
 
   Widget _badge(String text, Color color) => SourceBadge(text, color);

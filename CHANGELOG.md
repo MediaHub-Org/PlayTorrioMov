@@ -5,7 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Download from the video player**: a download button in the player's top
+  bar, next to *Copy Stream URL*, for movies, series and anime. It downloads
+  the source currently playing, through the same path as the download button
+  on the sources list (duplicate check, folder prompt on phones, snack bar).
+  Hidden for a file that is already local, and for a video opened with no
+  title behind it, such as a bare magnet from search.
+
 ### Changed
+- **Player top bar (phones)**: with the extra button the bar ran over on a
+  360px screen, so on a narrow one the Episodes badge shows just its icon and
+  the buttons and margins are a little smaller.
 - **Playback speed**: the preset chips are gone; the slider and its -/+ buttons
   are the whole control. The slider now runs 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2
   by step, so normal speed sits in the middle of the track. 1.75× is dropped

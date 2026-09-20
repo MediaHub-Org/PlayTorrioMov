@@ -12,6 +12,11 @@ class PlayerTopBar extends StatelessWidget {
   final VoidCallback? onCast;
   final VoidCallback? onCopyStreamUrl;
 
+  /// Downloads the source being played. Null hides the button: there is
+  /// nothing to download for a file that is already local, or for a video
+  /// with no title behind it (a bare magnet opened from search).
+  final VoidCallback? onDownload;
+
   const PlayerTopBar({
     super.key,
     required this.title,
@@ -22,15 +27,25 @@ class PlayerTopBar extends StatelessWidget {
     this.isEpisodesActive = false,
     this.onCast,
     this.onCopyStreamUrl,
+    this.onDownload,
   });
 
   @override
   Widget build(BuildContext context) {
+    // A phone in portrait has no room for the title *and* four actions at
+    // their desktop sizes: with the download button added the row ran 45px
+    // over at 360px wide. Compact trims what can give -- the margins, the
+    // buttons by 4px, and the Episodes badge to its icon -- and leaves the
+    // title the rest.
+    final isCompact = MediaQuery.sizeOf(context).width < 480;
+    final buttonSize = isCompact ? 36.0 : 40.0;
+    final gap = SizedBox(width: isCompact ? 6 : 8);
+
     return Container(
       padding: EdgeInsets.only(
         top: MediaQuery.paddingOf(context).top + 12,
-        left: 24,
-        right: 24,
+        left: isCompact ? 14 : 24,
+        right: isCompact ? 14 : 24,
         bottom: 24,
       ),
       decoration: BoxDecoration(
@@ -58,7 +73,7 @@ class PlayerTopBar extends StatelessWidget {
             onPressed: onBack,
           ),
 
-          const SizedBox(width: 16),
+          SizedBox(width: isCompact ? 10 : 16),
 
           // Title & Details Column
           Expanded(
@@ -139,14 +154,16 @@ class PlayerTopBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (onToggleEpisodes != null) ...[
-                Material(
+                Tooltip(
+                  message: 'Episodes',
+                  child: Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: onToggleEpisodes,
                     borderRadius: BorderRadius.circular(12),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: EdgeInsets.symmetric(horizontal: isCompact ? 10 : 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: isEpisodesActive
                             ? PlayerTheme.accent.withValues(alpha: 0.30)
@@ -176,37 +193,51 @@ class PlayerTopBar extends StatelessWidget {
                             size: 18,
                             color: isEpisodesActive ? const Color(0xFF9D84FF) : Colors.white,
                           ),
-                          const SizedBox(width: 7),
-                          Text(
-                            'Episodes',
-                            style: TextStyle(
-                              color: isEpisodesActive ? Colors.white : Colors.white.withValues(alpha: 0.9),
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.1,
+                          if (!isCompact) ...[
+                            const SizedBox(width: 7),
+                            Text(
+                              'Episodes',
+                              style: TextStyle(
+                                color: isEpisodesActive ? Colors.white : Colors.white.withValues(alpha: 0.9),
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.1,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
                   ),
+                  ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: isCompact ? 8 : 10),
               ],
               if (onCopyStreamUrl != null) ...[
                 PlayerIconButton(
-                  size: 40,
+                  size: buttonSize,
                   iconSize: 20,
                   icon: const Icon(Icons.link_rounded),
                   tooltip: 'Copy Stream URL',
                   backgroundColor: const Color(0x22080C12),
                   onPressed: onCopyStreamUrl,
                 ),
-                const SizedBox(width: 8),
+                gap,
+              ],
+              if (onDownload != null) ...[
+                PlayerIconButton(
+                  size: buttonSize,
+                  iconSize: 20,
+                  icon: const Icon(Icons.download_rounded),
+                  tooltip: 'Download',
+                  backgroundColor: const Color(0x22080C12),
+                  onPressed: onDownload,
+                ),
+                gap,
               ],
               if (onCast != null)
                 PlayerIconButton(
-                  size: 40,
+                  size: buttonSize,
                   iconSize: 20,
                   icon: const Icon(Icons.cast_rounded),
                   tooltip: 'Cast',

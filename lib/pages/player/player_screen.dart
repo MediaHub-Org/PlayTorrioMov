@@ -47,6 +47,7 @@ import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
 import '../../services/cast/cast_service.dart';
+import '../../utils/download/download_launcher.dart';
 
 class PlayerScreen extends StatefulWidget {
   final StreamSource source;
@@ -2082,6 +2083,29 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
+  /// Whether this video can be downloaded from here: it has a title behind
+  /// it to file the download under, and it is not already a local file.
+  bool get _canDownload {
+    final url = _currentSource.url;
+    // A torrent may carry only an info hash and no URL, so a missing URL is
+    // not by itself a reason to hide the button.
+    final isLocal =
+        _currentSource.name == 'Downloaded' ||
+        (url != null && File(url).existsSync());
+    return widget.detail != null && !isLocal;
+  }
+
+  void _handleDownload() {
+    final detail = widget.detail;
+    if (detail == null) return;
+    startSourceDownload(
+      context,
+      detail: detail,
+      episode: _currentEpisode,
+      source: _currentSource,
+    );
+  }
+
   Widget _buildControlsOverlay() {
     final buffered = _buffered;
 
@@ -2152,6 +2176,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   onCopyStreamUrl: (_isLoading || _resolvedStreamUrl == null)
                       ? null
                       : _handleCopyStreamUrl,
+                  onDownload: (_isLoading || !_canDownload) ? null : _handleDownload,
                   onToggleEpisodes:
                       (!_isLoading &&
                           widget.detail?.videos.isNotEmpty == true)
