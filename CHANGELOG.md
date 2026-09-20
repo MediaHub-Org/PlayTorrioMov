@@ -3,7 +3,11 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.5+38] - 2026-09-20
+
+The player's bottom bar and menus: a seek bar that spans the window, a speed
+menu with -/+ and presets, a simpler sleep timer, and flags that show on
+Windows.
 
 ### Changed
 - **Playback speed**: a large readout, a -/+ button either side of the slider
