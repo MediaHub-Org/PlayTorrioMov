@@ -249,6 +249,10 @@ downstream of `ayman708-UX/PlayTorrioV3`.
 
 **Reviewed through `39b736f` (2026-09-16). Nothing outstanding.**
 
+Re-fetched 2026-09-20: `v3/main` has not moved (still `39b736f`, and it is
+the default branch's only one), and the archived PlayTorrioMod's last commit is
+still 2026-09-05. Nothing new to review or port.
+
 Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
 `dl.google.com` apt source the runner image ships that periodically breaks
 `apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`.
