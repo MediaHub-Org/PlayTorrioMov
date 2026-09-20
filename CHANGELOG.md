@@ -3,6 +3,14 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Playback speed**: the preset chips are gone; the slider and its -/+ buttons
+  are the whole control. The slider now runs 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2
+  by step, so normal speed sits in the middle of the track. 1.75× is dropped
+  to make that so.
+
 ## [1.8.5+38] - 2026-09-20
 
 The player's bottom bar and menus: a seek bar that spans the window, a speed

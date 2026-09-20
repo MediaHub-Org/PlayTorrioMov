@@ -22,35 +22,28 @@ void main() {
       expect(find.text('1.25×'), findsOneWidget);
     });
 
-    testWidgets('shows a chip per common speed, captioning normal',
-        (tester) async {
+    testWidgets('has no preset chips, only the slider and -/+', (tester) async {
       await tester.pumpWidget(wrap(PlayerSpeedMenu(
         currentRate: 1.0,
         onRateSelected: (_) {},
         onClose: () {},
       )));
 
-      for (final label in ['0.5', '0.75', '1', '1.25', '1.5', '2']) {
-        expect(find.text(label), findsOneWidget, reason: 'chip $label');
-      }
-      expect(find.text('Normal'), findsOneWidget);
+      expect(find.text('Normal'), findsNothing);
+      expect(find.text('1.5'), findsNothing);
+      expect(find.byType(Slider), findsOneWidget);
     });
 
-    testWidgets('tapping a chip picks that speed and keeps the menu open',
-        (tester) async {
-      final reported = <double>[];
-      var closed = false;
+    testWidgets('normal speed sits in the middle of the track', (tester) async {
       await tester.pumpWidget(wrap(PlayerSpeedMenu(
         currentRate: 1.0,
-        onRateSelected: reported.add,
-        onClose: () => closed = true,
+        onRateSelected: (_) {},
+        onClose: () {},
       )));
 
-      await tester.tap(find.text('1.5'));
-      await tester.pump();
-
-      expect(reported, [1.5]);
-      expect(closed, isFalse, reason: 'so the next nudge does not reopen it');
+      final slider = tester.widget<Slider>(find.byType(Slider));
+      expect(slider.value, (slider.min + slider.max) / 2,
+          reason: 'three steps slower on one side, three faster on the other');
     });
 
     testWidgets('the -/+ buttons take one step each', (tester) async {
@@ -67,7 +60,7 @@ void main() {
       expect(reported, [1.25, 0.75]);
     });
 
-    testWidgets('the slower button reaches 0.25x, which the chips omit',
+    testWidgets('the slower button reaches 0.25x',
         (tester) async {
       final reported = <double>[];
       await tester.pumpWidget(wrap(PlayerSpeedMenu(
@@ -91,6 +84,18 @@ void main() {
 
       await tester.tap(find.byIcon(Icons.add_rounded));
       expect(reported, isEmpty, reason: 'nothing above 2x to step to');
+    });
+
+    testWidgets('the fast end is 2x, one step past 1.5x', (tester) async {
+      final reported = <double>[];
+      await tester.pumpWidget(wrap(PlayerSpeedMenu(
+        currentRate: 1.5,
+        onRateSelected: reported.add,
+        onClose: () {},
+      )));
+
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      expect(reported, [2.0]);
     });
 
     testWidgets('dragging the slider reports a rate from the point set',
