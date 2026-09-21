@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/app_spacing.dart';
 import '../../models/movie/movie_section.dart';
@@ -218,8 +219,8 @@ class _SearchPageState extends State<SearchPage> {
     final animeSection = _animeResults.isEmpty
         ? null
         : AnimeSliderSection(
-            title: 'Anime',
-            subtitle: 'From AniList',
+            title: context.l10n.navAnime,
+            subtitle: context.l10n.searchFromAniList,
             animeList: _animeResults,
             onAnimeTap: (anime) =>
                 pushPage(context, AnimeDetailsPage(anime: anime)),
@@ -282,7 +283,7 @@ class _SearchPageState extends State<SearchPage> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Anime filters',
+                      context.l10n.searchAnimeFilters,
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w500,
@@ -310,7 +311,7 @@ class _SearchPageState extends State<SearchPage> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
-          filter.label,
+          filter.label(context.l10n),
           style: TextStyle(
             fontSize: 11.5,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -384,8 +385,9 @@ class _SearchPageState extends State<SearchPage> {
                           onChanged: _onSearchChanged,
                           onSubmitted: _performSearch,
                           decoration: InputDecoration(
-                            hintText: 'Search ${_typeFilter.scopeLabel}, '
-                                'or paste a magnet or stream link',
+                            hintText: context.l10n.searchPromptOrPaste(
+                              _typeFilter.scopeLabel(context.l10n),
+                            ),
                             hintStyle: TextStyle(
                               color: AppColors.inkAlpha(0.35),
                               fontSize: 14,
@@ -465,14 +467,14 @@ class _SearchPageState extends State<SearchPage> {
         Icons.search_off_rounded,
         64,
         0.2,
-        'No results for "$_lastQuery"',
+        context.l10n.commonNoResultsFor(_lastQuery),
       );
     }
     return _buildPlaceholder(
       Icons.manage_search_rounded,
       72,
       0.15,
-      'Search ${_typeFilter.scopeLabel}',
+      context.l10n.searchPrompt(_typeFilter.scopeLabel(context.l10n)),
     );
   }
 

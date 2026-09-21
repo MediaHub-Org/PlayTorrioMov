@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/l10n/app_localizations_en.dart';
+import 'package:playtorriomov/l10n/app_localizations_es.dart';
 import 'package:playtorriomov/utils/search_scope.dart';
 
 void main() {
@@ -46,9 +48,19 @@ void main() {
     test('every filter is reachable from its own id', () {
       for (final filter in SearchFilter.values) {
         expect(SearchFilter.fromScope(filter.id), filter);
-        expect(filter.label, isNotEmpty);
-        expect(filter.scopeLabel, isNotEmpty);
+        expect(filter.label(AppLocalizationsEn()), isNotEmpty);
+        expect(filter.scopeLabel(AppLocalizationsEn()), isNotEmpty);
       }
+    });
+
+    test('the chip and the sentence both follow the language', () {
+      expect(SearchFilter.movie.label(AppLocalizationsEs()), 'Películas');
+      expect(SearchFilter.all.scopeLabel(AppLocalizationsEs()),
+          'películas, series y anime');
+      expect(
+        AppLocalizationsEs().searchPrompt(SearchFilter.series.scopeLabel(AppLocalizationsEs())),
+        'Buscar series',
+      );
     });
   });
 }

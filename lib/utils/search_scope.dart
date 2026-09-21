@@ -1,3 +1,4 @@
+import '../l10n/app_localizations.dart';
 /// Tracks the section the user is currently browsing, so search opens on it.
 ///
 /// Each hub/section registers its content type (e.g. 'movie', 'series',
@@ -27,22 +28,33 @@ abstract final class SearchScope {
 /// stream list by keyword rather than searching a title catalog, so a
 /// result there is a different kind of object; it keeps its own search.
 enum SearchFilter {
-  all('all', 'All', 'movies, series and anime'),
-  movie('movie', 'Movies', 'movies'),
-  series('series', 'Series', 'series'),
-  anime('anime', 'Anime', 'anime');
+  all('all'),
+  movie('movie'),
+  series('series'),
+  anime('anime');
 
   /// Matches the addon `contentType` strings, so [addonContentType] can pass
   /// it straight through.
   final String id;
 
-  /// Chip text.
-  final String label;
+  const SearchFilter(this.id);
 
-  /// Reads inside a sentence: "Search $scopeLabel".
-  final String scopeLabel;
+  /// Chip text, in the app's language.
+  String label(AppLocalizations l10n) => switch (this) {
+    SearchFilter.all => l10n.commonAll,
+    SearchFilter.movie => l10n.libraryFilterMovies,
+    SearchFilter.series => l10n.libraryFilterSeries,
+    SearchFilter.anime => l10n.libraryFilterAnime,
+  };
 
-  const SearchFilter(this.id, this.label, this.scopeLabel);
+  /// Reads inside a sentence: "Search $scope". Words for the scope rather than
+  /// the chip's label, so the sentence stays one grammatical piece.
+  String scopeLabel(AppLocalizations l10n) => switch (this) {
+    SearchFilter.all => l10n.searchScopeAll,
+    SearchFilter.movie => l10n.searchScopeMovies,
+    SearchFilter.series => l10n.searchScopeSeries,
+    SearchFilter.anime => l10n.searchScopeAnime,
+  };
 
   /// AniList is a separate API from the addons, so anime-only queries skip
   /// the addon fan-out entirely rather than asking for nothing.

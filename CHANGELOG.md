@@ -11,7 +11,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   episodes panels, the cast sheet and subtitle sync bar, and the copy-URL and
   download messages, plus the player's loading and error screens and snack
   bars, plus the Films and Series catalog pages, the shared error view,
-  the mini player, the Library page and the P2P warning and update dialogs, now follow the app language, in all four. 529 keys in all.
+  the mini player, the Library, Discover and Search pages, and the P2P warning
+  and update dialogs, now follow the app language, in all four. 557 keys in all.
 
 ### Fixed
 - **Audio menu**: the "default audio stream" line and the "Audio Sync Offset"

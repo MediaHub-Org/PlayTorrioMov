@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/app_spacing.dart';
 import '../../models/addon/addon.dart';
@@ -442,7 +443,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Icon(Icons.category_outlined, size: 48, color: AppColors.inkAlpha(0.3)),
               const SizedBox(height: 12),
               Text(
-                'No catalogs available for "$_selectedType"',
+                context.l10n.discoverNoCatalogs(_selectedType),
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
@@ -469,7 +470,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           physics: const BouncingScrollPhysics(),
           padding: EdgeInsets.fromLTRB(20, topOffset + 30, 20, 100),
           child: ErrorView(
-            title: 'Could not load this catalog',
+            title: context.l10n.catalogCouldNotLoad,
             error: _error,
             onRetry: () => _loadItems(refresh: true),
           ),
@@ -488,7 +489,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Icon(Icons.inbox_rounded, size: 48, color: AppColors.inkAlpha(0.3)),
               const SizedBox(height: 12),
               Text(
-                'No titles found in this catalog',
+                context.l10n.discoverNoTitles,
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
@@ -577,7 +578,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Select Required Filter',
+                context.l10n.discoverSelectRequired,
                 style: TextStyle(
                   color: AppColors.ink,
                   fontSize: isNarrow ? 17 : 19,
@@ -586,7 +587,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'This catalog requires selecting ${missing.map((e) => e.name).join(' & ')} before loading titles.',
+                context.l10n.discoverRequiresSelecting(missing.map((e) => e.name).join(' & ')),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.inkAlpha(0.7),
@@ -632,7 +633,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Select ${extra.name[0].toUpperCase()}${extra.name.substring(1)}',
+                              context.l10n.discoverSelectExtra('${extra.name[0].toUpperCase()}${extra.name.substring(1)}'),
                               style: TextStyle(
                                 color: AppColors.ink,
                                 fontWeight: FontWeight.bold,
@@ -659,7 +660,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       ),
                       icon: const Icon(Icons.edit_rounded, size: 16),
                       label: Text(
-                        'Enter ${extra.name}',
+                        context.l10n.discoverEnterExtra(extra.name),
                         style: TextStyle(fontSize: isNarrow ? 12.5 : 14),
                       ),
                     );
@@ -686,7 +687,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           side: BorderSide(color: AppColors.inkAlpha(0.1)),
         ),
         title: Text(
-          'Enter $extraName',
+          context.l10n.discoverEnterExtra(extraName),
           style: TextStyle(color: AppColors.ink, fontSize: 18, fontWeight: FontWeight.bold),
         ),
         content: SizedBox(
@@ -696,7 +697,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             autofocus: true,
             style: TextStyle(color: AppColors.ink),
             decoration: InputDecoration(
-              hintText: 'Type $extraName here...',
+              hintText: context.l10n.discoverTypeHere(extraName),
               hintStyle: TextStyle(color: AppColors.inkDisabled),
               enabledBorder: UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.inkAlpha(0.2)),
@@ -726,7 +727,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               Navigator.pop(ctx);
               _onCustomExtraSubmitted(extraName, controller.text);
             },
-            child: const Text('Apply'),
+            child: Text(context.l10n.discoverApply),
           ),
         ],
       ),
@@ -778,7 +779,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       Icon(Icons.explore_rounded, color: AppColors.accent, size: 21),
                       const SizedBox(width: 8),
                       Text(
-                        'Discover',
+                        context.l10n.discoverTitle,
                         style: TextStyle(
                           color: AppColors.ink,
                           fontSize: isDesktop ? 20 : (isNarrow ? 17 : 18),
@@ -799,8 +800,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             onSubmitted: _onSearchSubmitted,
                             decoration: InputDecoration(
                               hintText: isNarrow
-                                  ? 'Search...'
-                                  : 'Search within ${_selectedCatalogEntry?.catalog.name ?? 'catalog'}...',
+                                  ? context.l10n.commonSearchEllipsis
+                                  : context.l10n.discoverSearchWithin(_selectedCatalogEntry?.catalog.name ?? 'catalog'),
                               hintStyle: TextStyle(
                                 color: AppColors.inkAlpha(0.4),
                                 fontSize: 14,
@@ -821,7 +822,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     if (!_isSearching && (_selectedCatalogEntry?.catalog.supportsSearch ?? false))
                       IconButton(
                         icon: Icon(Icons.search_rounded, color: AppColors.inkMuted, size: 22),
-                        tooltip: 'Search catalog',
+                        tooltip: context.l10n.discoverSearchCatalog,
                         onPressed: () => setState(() => _isSearching = true),
                       ),
                     const SizedBox(width: 8),
@@ -838,7 +839,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     // Type selector popup/dropdown
                     if (_availableTypes.isNotEmpty) ...[
                       PopupMenuButton<String>(
-                        tooltip: 'Content Type',
+                        tooltip: context.l10n.discoverContentType,
                         constraints: const BoxConstraints(maxHeight: 360),
                         color: AppColors.surface,
                         shape: RoundedRectangleBorder(
@@ -950,7 +951,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Text(
-                                            'Custom',
+                                            context.l10n.discoverCustom,
                                             style: TextStyle(
                                               fontSize: 9.5,
                                               fontWeight: FontWeight.bold,
@@ -1042,7 +1043,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    '${extra.name.toUpperCase()}: ${currentVal ?? (isReq ? "Required *" : "All")}',
+                                    '${extra.name.toUpperCase()}: ${currentVal ?? (isReq ? context.l10n.discoverRequired : context.l10n.commonAll)}',
                                     style: TextStyle(
                                       color: isSelected
                                           ? AppColors.ink
@@ -1091,7 +1092,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '${extra.name.toUpperCase()}: ${currentVal ?? (isReq ? "Required *" : "Enter")}',
+                                  '${extra.name.toUpperCase()}: ${currentVal ?? (isReq ? context.l10n.discoverRequired : context.l10n.discoverEnter)}',
                                   style: TextStyle(
                                     color: isSelected
                                         ? AppColors.ink
@@ -1139,14 +1140,14 @@ class _DiscoverPageState extends State<DiscoverPage> {
             Center(child: CircularProgressIndicator(color: AppColors.accent))
           else if (_legacyError != null)
             ErrorView(
-              title: 'Could not load these results',
+              title: context.l10n.discoverCouldNotLoadResults,
               error: _legacyError,
               onRetry: _fetchLegacyData,
             )
           else if (_legacySections.isEmpty)
             Center(
               child: Text(
-                'No results found for "${widget.query}"',
+                context.l10n.commonNoResultsFor(widget.query ?? ''),
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
               ),
             )
@@ -1180,7 +1181,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          widget.isGenre ? 'Genre: ${widget.query}' : 'Search: ${widget.query}',
+                          widget.isGenre ? context.l10n.discoverGenreTitle(widget.query ?? '') : context.l10n.discoverSearchTitle(widget.query ?? ''),
                           style: TextStyle(
                             color: AppColors.ink,
                             fontSize: isDesktop ? 22 : 20,

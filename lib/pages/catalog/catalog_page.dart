@@ -464,7 +464,7 @@ class _CatalogPageState extends State<CatalogPage> {
         itemBuilder: (context, index) {
           final extra = selectableExtras[index];
           final currentVal = _selectedExtras[extra.name];
-          final label = currentVal ?? (extra.isRequired ? 'Select ${extra.name}' : 'All ${extra.name}');
+          final label = currentVal ?? (extra.isRequired ? context.l10n.discoverSelectExtra(extra.name) : context.l10n.catalogAllOf(extra.name));
           return PopupMenuButton<String?>(
             tooltip: extra.name,
             color: AppColors.surface,
