@@ -127,6 +127,19 @@ const Map<String, String> _iso639ToDisplayName = {
     'ms': 'Malay',
     'cat': 'Catalan',
     'ca': 'Catalan',
+    'kur': 'Kurdish',
+    'ckb': 'Kurdish',
+    'ku': 'Kurdish',
+    'mn': 'Mongolian',
+    'pus': 'Pashto',
+    'ps': 'Pashto',
+    'sin': 'Sinhala',
+    'si': 'Sinhala',
+    'som': 'Somali',
+    'so': 'Somali',
+    'swa': 'Swahili',
+    'swh': 'Swahili',
+    'sw': 'Swahili',
 };
 
 /// The display name for a subtitle language code, or a sensible rendering of

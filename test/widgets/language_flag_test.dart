@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/services/subtitles/subtitle_languages.dart';
 import 'package:playtorriomov/widgets/player/language_flag.dart';
 
 void main() {
@@ -14,6 +15,30 @@ void main() {
       // "Chinese" contains "hi"; it once drew the Indian flag.
       expect(languageCountryCode('Chinese (Simplified)'), 'cn');
       expect(languageCountryCode('Hindi'), 'in');
+    });
+
+    test('Malayalam is not Malay', () {
+      // "Malayalam" contains "malay"; without its own row it drew Malaysia's flag.
+      expect(languageCountryCode('Malayalam'), 'in');
+      expect(languageCountryCode('Malay'), 'my');
+    });
+
+    test('the languages that once fell back to the globe have a flag', () {
+      for (final name in [
+        'Albanian', 'Bengali', 'Bosnian', 'Catalan', 'Icelandic', 'Kurdish',
+        'Macedonian', 'Malay', 'Mongolian', 'Pashto', 'Sinhala', 'Slovak',
+        'Slovenian', 'Somali', 'Swahili',
+      ]) {
+        expect(languageCountryCode(name), isNotNull, reason: name);
+      }
+    });
+
+    test('the subtitle name table knows the ones it was missing', () {
+      for (final code in ['ku', 'mn', 'ps', 'si', 'so', 'sw']) {
+        final name = subtitleLanguageName(code);
+        expect(name.length, greaterThan(2), reason: '$code stays a raw code');
+        expect(languageCountryCode(name), isNotNull, reason: '$code -> $name');
+      }
     });
 
     test('is null for a language with no flag', () {
@@ -31,6 +56,9 @@ void main() {
         'polish', 'ukrainian', 'greek', 'czech', 'hungarian', 'romanian',
         'persian', 'croatian', 'serbian', 'bulgarian', 'hebrew',
         'indonesian', 'vietnamese', 'thai', 'tagalog', 'filipino',
+        'albanian', 'bengali', 'bosnian', 'catalan', 'icelandic', 'kurdish',
+        'macedonian', 'malay', 'mongolian', 'pashto', 'sinhala', 'slovak',
+        'slovenian', 'somali', 'swahili',
       ]) {
         final code = languageCountryCode(name);
         expect(code, isNotNull, reason: name);

@@ -65,6 +65,25 @@ const Map<String, String> _languageCountry = {
   'thai': 'th',
   'tagalog': 'ph',
   'filipino': 'ph',
+  'albanian': 'al',
+  'bengali': 'bd',
+  'bosnian': 'ba',
+  // Catalonia has no country code; `es-ct` is the Senyera, drawn rather than
+  // fetched because flag CDNs do not carry it. Kurdistan (`ku`) likewise.
+  'catalan': 'es-ct',
+  'icelandic': 'is',
+  'kurdish': 'ku',
+  'macedonian': 'mk',
+  // Before 'malay': "Malayalam" contains it and is an Indian language.
+  'malayalam': 'in',
+  'malay': 'my',
+  'mongolian': 'mn',
+  'pashto': 'af',
+  'sinhala': 'lk',
+  'slovak': 'sk',
+  'slovenian': 'si',
+  'somali': 'so',
+  'swahili': 'tz',
 };
 
 /// The country code whose flag stands for [language] (a display name such as
