@@ -11,6 +11,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (`13628256`) and a shouting provider badge. A release name is kept when the
   provider gives one; its quality (`1080p`, `WEB-DL`, `x264`) becomes small
   tags, so a subtitle made for the release you are watching stands out.
+  Rows that would read the same (several files with only an id) are numbered
+  "Standard #1", "#2"...
   Auto-translated subtitles carry a badge saying so, and the download count
   shows where the provider reports one.
 - **Choosing a subtitle keeps the panel open** — including *Auto* and *Off* —

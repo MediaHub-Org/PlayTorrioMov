@@ -53,6 +53,18 @@ void main() {
     });
   });
 
+  group('numberedRowTitles', () {
+    test('numbers rows that would look identical, and only those', () {
+      final titles = numberedRowTitles([
+        _variant('13624072'),
+        _variant('13628256'),
+        _variant('Dune.Part.Two-GRP'),
+        _variant('13647914', provider: 'subtitlecat'),
+      ], fallback: 'Standard');
+      expect(titles, ['Standard #1', 'Standard #2', 'Dune Part Two-GRP', 'Standard']);
+    });
+  });
+
   test('compactCount abbreviates', () {
     expect(compactCount(34), '34');
     expect(compactCount(1234), '1.2k');

@@ -1328,6 +1328,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       );
     }
 
+    final rowTitles = numberedRowTitles(filteredVariants, fallback: context.l10n.subsStandardTitle);
+
     return ListView.builder(
       padding: const EdgeInsets.all(7),
       physics: const BouncingScrollPhysics(),
@@ -1407,8 +1409,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                               // A release name when there is one; otherwise
                               // "Standard", because a row that says only a
                               // language and a provider id reads as broken.
+                              // Identical rows are numbered.
                               child: Text(
-                                display.title.isEmpty ? context.l10n.subsStandardTitle : display.title,
+                                rowTitles[i],
                                 style: TextStyle(
                                   color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
                                   fontSize: 12,

@@ -49,6 +49,7 @@ final RegExp _source = RegExp(
 final RegExp _codec = RegExp(r'\b(x264|x265|h[\s.]?264|h[\s.]?265|hevc|av1|10bit)\b', caseSensitive: false);
 final RegExp _year = RegExp(r'\b(19|20)\d{2}\b');
 final RegExp _extension = RegExp(r'\.(srt|vtt|ass|ssa|sub|zip)$', caseSensitive: false);
+
 /// The placeholders `SubtitleService._cleanVariant` and the providers fall
 /// back to ("Standard", "CC - Forced", "Stremio Addon"). Each is a badge or
 /// nothing at all, never a name.
@@ -156,4 +157,39 @@ String compactCount(int n) {
   if (n >= 1000000) return '${(n / 1000000).toStringAsFixed(n >= 10000000 ? 0 : 1)}M';
   if (n >= 1000) return '${(n / 1000).toStringAsFixed(n >= 10000 ? 0 : 1)}k';
   return '$n';
+}
+
+/// The title each row of [variants] shows, in order. [fallback] stands in where
+/// [describeSubtitle] found no name ("Standard"). Rows that would otherwise be
+/// identical -- same title, provider, format, quality and flags, which is what
+/// four OpenSubtitles files for one language look like once their ids are
+/// hidden -- get " #1", " #2", ... so they can be told apart and referred to.
+List<String> numberedRowTitles(List<SubtitleVariant> variants, {required String fallback}) {
+  final displays = variants.map(describeSubtitle).toList();
+  final keys = [
+    for (var i = 0; i < variants.length; i++)
+      [
+        displays[i].title.isEmpty ? fallback : displays[i].title,
+        displays[i].provider,
+        displays[i].format,
+        displays[i].tags.join(','),
+        variants[i].isHearingImpaired,
+        variants[i].isForced,
+        displays[i].isTranslated,
+      ].join('|'),
+  ];
+  final totals = <String, int>{};
+  for (final k in keys) {
+    totals[k] = (totals[k] ?? 0) + 1;
+  }
+  final seen = <String, int>{};
+  return [
+    for (var i = 0; i < variants.length; i++)
+      () {
+        final title = displays[i].title.isEmpty ? fallback : displays[i].title;
+        if (totals[keys[i]]! < 2) return title;
+        final n = seen[keys[i]] = (seen[keys[i]] ?? 0) + 1;
+        return '$title #$n';
+      }(),
+  ];
 }
