@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
@@ -76,13 +77,13 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         backgroundColor: AppColors.canvas,
-        title: const Text('Multi-View'),
+        title: Text(context.l10n.iptvMultiView),
         actions: [
           if (_selected.isNotEmpty)
             TextButton(
               onPressed: _startGrid,
               child: Text(
-                'Watch (${_selected.length})',
+                context.l10n.iptvWatchCount(_selected.length),
                 style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
               ),
             ),
@@ -91,24 +92,23 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
       body: _loading
           ? Center(child: CircularProgressIndicator(color: AppColors.accent))
           : _available.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32),
+                    padding: const EdgeInsets.all(32),
                     child: Text(
-                      'No channels ready yet. Watch a few channels normally first '
-                      '-- multi-view reuses their already-found streams.',
+                      context.l10n.iptvMultiViewEmpty,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white54, fontSize: 15),
+                      style: const TextStyle(color: Colors.white54, fontSize: 15),
                     ),
                   ),
                 )
               : Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(16),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Text(
-                        'Pick up to $_maxTiles channels to watch at once',
-                        style: TextStyle(color: Colors.white70, fontSize: 13),
+                        context.l10n.iptvPickUpTo(_maxTiles),
+                        style: const TextStyle(color: Colors.white70, fontSize: 13),
                       ),
                     ),
                     Expanded(
@@ -276,7 +276,7 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text('Multi-View'),
+        title: Text(context.l10n.iptvMultiView),
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(4),

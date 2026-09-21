@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../widgets/common/glass_back_button.dart';
@@ -92,7 +93,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
             autofocus: true,
             style: TextStyle(color: AppColors.ink, fontSize: 14),
             decoration: InputDecoration(
-              hintText: 'Search 60+ live channels, leagues, networks…',
+              hintText: context.l10n.iptvSearchLiveHint,
               hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 13.5),
               prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 20),
               suffixIcon: _query.isNotEmpty
@@ -161,7 +162,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
           Expanded(
             child: channels.isEmpty
                 ? Center(
-                    child: Text('No channels match your search.', style: TextStyle(color: AppColors.inkSubtle)),
+                    child: Text(context.l10n.iptvNoChannelsMatch, style: TextStyle(color: AppColors.inkSubtle)),
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),

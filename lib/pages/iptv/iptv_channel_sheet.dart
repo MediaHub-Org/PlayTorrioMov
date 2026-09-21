@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../models/iptv/iptv_models.dart';
 import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
@@ -85,7 +86,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Removed $count stream feed${count == 1 ? "" : "s"}'),
+          content: Text(context.l10n.iptvRemovedFeeds(count)),
           duration: const Duration(seconds: 2),
           backgroundColor: AppColors.raised,
         ),
@@ -201,9 +202,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                   color: const Color(0xFFFF3B30),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Text(
-                                  'LIVE',
-                                  style: TextStyle(
+                                child: Text(
+                                  context.l10n.iptvLive.toUpperCase(),
+                                  style: const TextStyle(
                                     color: AppColors.onAccent,
                                     fontSize: 9,
                                     fontWeight: FontWeight.w900,
@@ -260,7 +261,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                           color: AppColors.inkMuted,
                           size: 22,
                         ),
-                        tooltip: 'Delete this channel',
+                        tooltip: context.l10n.iptvDeleteChannel,
                         onPressed: () async {
                           await CustomChannelsService.remove(ch.id);
                           if (context.mounted) Navigator.pop(context);
@@ -314,7 +315,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       style: TextStyle(color: AppColors.ink, fontSize: 13.5),
                       cursorColor: AppColors.accent,
                       decoration: InputDecoration(
-                        hintText: 'Search ${results.length} channels (e.g. 1080p, 4K, feed name)...',
+                        hintText: context.l10n.iptvSearchFeeds(results.length),
                         hintStyle: TextStyle(
                           color: AppColors.inkAlpha(0.4),
                           fontSize: 13,
@@ -408,7 +409,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                         ),
                         icon: const Icon(Icons.delete_rounded, size: 15),
                         label: Text(
-                          'Delete (${_selectedUrls.length})',
+                          context.l10n.iptvDeleteCount(_selectedUrls.length),
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                         onPressed: _selectedUrls.isEmpty ? null : _deleteSelectedStreams,
@@ -446,8 +447,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                           status.isNotEmpty
                               ? status
                               : (_searchQuery.trim().isNotEmpty
-                                  ? 'Found ${filteredResults.length} of ${results.length} feeds'
-                                  : '${results.length} live stream feeds available'),
+                                  ? context.l10n.iptvFoundFeeds(filteredResults.length, results.length)
+                                  : context.l10n.iptvFeedsAvailable(results.length)),
                           style: TextStyle(
                             color: AppColors.inkAlpha(0.75),
                             fontSize: 12.5,
@@ -458,9 +459,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       if (isScanning)
                         GestureDetector(
                           onTap: _ctrl.stopChannelSearch,
-                          child: const Text(
-                            'Stop',
-                            style: TextStyle(
+                          child: Text(
+                            context.l10n.iptvStop,
+                            style: const TextStyle(
                               color: Colors.redAccent,
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
@@ -487,19 +488,19 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                 CircularProgressIndicator(color: AppColors.accent),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'Scanning all verified portals in parallel…',
+                                  context.l10n.iptvScanningPortals,
                                   style: TextStyle(color: AppColors.inkMuted, fontSize: 14),
                                 ),
                               ] else ...[
                                 Icon(Icons.tv_off_rounded, color: AppColors.inkDisabled, size: 48),
                                 const SizedBox(height: 12),
                                 Text(
-                                  'No alive streams discovered yet.',
+                                  context.l10n.iptvNoAlive,
                                   style: TextStyle(color: AppColors.inkMuted, fontSize: 15, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Tap "Scan More Portals" to discover fresh feeds.',
+                                  context.l10n.iptvScanHint,
                                   style: TextStyle(color: AppColors.inkDisabled, fontSize: 13),
                                 ),
                               ],
@@ -517,7 +518,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                   Icon(Icons.search_off_rounded, color: AppColors.inkDisabled, size: 48),
                                   const SizedBox(height: 12),
                                   Text(
-                                    'No feeds match "$_searchQuery"',
+                                    context.l10n.iptvNoFeedsMatch(_searchQuery),
                                     style: TextStyle(
                                       color: AppColors.inkMuted,
                                       fontSize: 15,
@@ -531,7 +532,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                       setState(() => _searchQuery = '');
                                     },
                                     child: Text(
-                                      'Clear Search',
+                                      context.l10n.iptvClearSearch,
                                       style: TextStyle(
                                         color: AppColors.accent,
                                         fontWeight: FontWeight.bold,
@@ -658,7 +659,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                                       ? hit.portal.portal.username
                                                       : (hit.portal.name.isNotEmpty
                                                           ? hit.portal.name
-                                                          : 'Server ${index + 1}'),
+                                                          : context.l10n.iptvServerN(index + 1)),
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -727,9 +728,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                           icon: const Icon(Icons.play_arrow_rounded, color: AppColors.onAccent),
-                          label: const Text(
-                            'Watch Live',
-                            style: TextStyle(color: AppColors.onAccent, fontSize: 15, fontWeight: FontWeight.bold),
+                          label: Text(
+                            context.l10n.iptvWatchLive,
+                            style: const TextStyle(color: AppColors.onAccent, fontSize: 15, fontWeight: FontWeight.bold),
                           ),
                           onPressed: filteredResults.isNotEmpty
                               ? () => _playHit(filteredResults.first)
@@ -748,7 +749,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
                       icon: const Icon(Icons.refresh_rounded, size: 18),
-                      label: const Text('Scan More', style: TextStyle(fontWeight: FontWeight.w700)),
+                      label: Text(context.l10n.iptvScanMore, style: const TextStyle(fontWeight: FontWeight.w700)),
                       onPressed: isScanning ? null : () => _ctrl.getMoreChannels(),
                     ),
                   ],

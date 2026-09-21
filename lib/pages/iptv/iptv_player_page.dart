@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
@@ -66,7 +68,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     null,
   );
 
-  String _statusMessage = 'Connecting to stream…';
+  /// The loading line as a function of the language: it is set from async
+  /// code, where there is no context to translate with.
+  String Function(AppLocalizations) _status =
+      (l10n) => l10n.iptvStatusConnecting;
   bool _showControls = true;
   bool _showSourcesDrawer = false;
   Timer? _hideControlsTimer;
@@ -222,7 +227,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     if (widget.hits.isEmpty) {
       setState(() {
         _isLoading = false;
-        _statusMessage = 'No stream sources available for this channel.';
+        _status = (l10n) => l10n.iptvStatusNoSources;
       });
       return;
     }
@@ -232,8 +237,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
     setState(() {
       _isLoading = true;
-      _statusMessage =
-          'Buffering ${currentHit.stream.name.isNotEmpty ? currentHit.stream.name : currentHit.portal.name}…';
+      final bufferingName = currentHit.stream.name.isNotEmpty
+          ? currentHit.stream.name
+          : currentHit.portal.name;
+      _status = (l10n) => l10n.playerStatusBuffering(bufferingName);
     });
 
     try {
@@ -304,7 +311,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       if (!mounted || myGeneration != _initGeneration) return;
       setState(() {
         _isLoading = false;
-        _statusMessage = 'Feed failed. Trying alternative source…';
+        _status = (l10n) => l10n.iptvStatusFailedTrying;
       });
 
       // Auto-failover to next hit if available
@@ -706,7 +713,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                 else
                   Center(
                     child: Text(
-                      _statusMessage,
+                      _status(context.l10n),
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
@@ -742,7 +749,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           ),
                           const SizedBox(width: 14),
                           Text(
-                            _statusMessage,
+                            _status(context.l10n),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -930,7 +937,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   size: 40,
                                   iconSize: 20,
                                   icon: const Icon(Icons.arrow_back_rounded),
-                                  tooltip: 'Back',
+                                  tooltip: context.l10n.playerBack,
                                   backgroundColor: const Color(0x22080C12),
                                   onPressed: () => Navigator.pop(context),
                                 ),
@@ -1013,7 +1020,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     size: 40,
                                     iconSize: 20,
                                     icon: const Icon(Icons.cast_rounded),
-                                    tooltip: 'Cast',
+                                    tooltip: context.l10n.playerCast,
                                     backgroundColor: const Color(0x22080C12),
                                     onPressed: _handleCast,
                                   ),
@@ -1057,8 +1064,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     ),
                                     tooltip: isCategoryList
                                         ? (widget.categoryTitle ??
-                                              'Category Channels')
-                                        : 'Alternative Feeds',
+                                              context.l10n.iptvCategoryChannels)
+                                        : context.l10n.iptvAlternativeFeeds,
                                     onPressed: _openSourcesDrawer,
                                   ),
                                 if (Platform.isWindows ||
@@ -1213,7 +1220,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       size: 40,
                                       iconSize: 20,
                                       icon: const Icon(Icons.bedtime_rounded),
-                                      tooltip: 'Sleep timer',
+                                      tooltip: context.l10n.playerSleepTimer,
                                       active: _activeMenu != null,
                                       backgroundColor: const Color(0x22080C12),
                                       onPressed: _toggleSettingsMenu,
@@ -1598,9 +1605,9 @@ class _LiveEdgeRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        const Text(
-          'Live',
-          style: TextStyle(
+        Text(
+          context.l10n.iptvLive,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 12,
             fontWeight: FontWeight.w700,

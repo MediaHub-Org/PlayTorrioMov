@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 
 import '../../services/theme/app_theme_service.dart';
@@ -231,14 +232,14 @@ class _IptvPageState extends State<IptvPage> {
     final rows = <BrowseRow<HardcodedChannel>>[
       if (liked.isNotEmpty)
         BrowseRow<HardcodedChannel>(
-          title: 'Liked',
-          subtitle: 'Channels you keep, most recent first',
+          title: context.l10n.libraryShelfLiked,
+          subtitle: context.l10n.iptvLikedSub,
           items: liked,
         ),
       if (mine.isNotEmpty)
         BrowseRow<HardcodedChannel>(
-          title: 'Your channels',
-          subtitle: 'Built from a stream you found in a portal',
+          title: context.l10n.iptvYourChannels,
+          subtitle: context.l10n.iptvYourChannelsSub,
           items: mine,
         ),
       for (final catName in visibleCategories)
@@ -332,10 +333,10 @@ class _IptvGlassAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return PillFilterHeaderBar(
       transparent: true,
-      leading: const [
-        HeaderPillLabel(label: 'LIVE TV', icon: Icons.live_tv_rounded),
+      leading: [
+        HeaderPillLabel(label: context.l10n.navLiveTv.toUpperCase(), icon: Icons.live_tv_rounded),
         HeaderPillLabel(
-          label: '60+ CHANNELS',
+          label: context.l10n.iptvChannelsBadge.toUpperCase(),
           emphasized: false,
           fontSize: 10.5,
           letterSpacing: 0.4,
@@ -344,12 +345,12 @@ class _IptvGlassAppBar extends StatelessWidget {
       pills: [
         HeaderPillIconButton(
           icon: Icons.settings_input_antenna_rounded,
-          tooltip: 'Manage Portals & Playlists',
+          tooltip: context.l10n.iptvManagePortals,
           onTap: onSourcesTap,
         ),
         HeaderPillIconButton(
           icon: Icons.grid_view_rounded,
-          tooltip: 'Multi-View (watch several channels at once)',
+          tooltip: context.l10n.iptvMultiViewTooltip,
           onTap: onMultiViewTap,
         ),
         PageSearchButton(onTap: onSearchTap),
