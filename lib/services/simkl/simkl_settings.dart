@@ -45,6 +45,14 @@ abstract final class SimklSettings {
   /// shipped without an ID -- which the user can fix themselves.
   static bool get needsUserClientId => !isConfigured;
 
+  /// Whether [value] is worth saving as a client ID: one run of letters,
+  /// digits, `-` or `_`, long enough to be real. It cannot say the ID is
+  /// *valid* -- only Simkl can -- but it catches the common paste mistakes (a
+  /// URL, a sentence, a trailing newline's worth of spaces) before they turn
+  /// into a confusing 401.
+  static bool looksLikeClientId(String value) =>
+      RegExp(r'^[A-Za-z0-9_-]{20,}$').hasMatch(value.trim());
+
   static Future<void> initialize() async {
     final preferences = await SharedPreferences.getInstance();
     final stored = preferences.getString(_clientIdKey);
@@ -76,8 +84,8 @@ abstract final class SimklSettings {
   static void note(String message) => lastStatus.value = message;
 
   static String describeStatus(int code) => switch (code) {
-    401 || 403 => 'Simkl rejected the client ID ($code). Check the ID you '
-        'pasted, or register a new app at simkl.com/settings/developer.',
+    401 || 403 => 'Simkl rejected the client ID ($code). Check that you copied '
+        'the whole Client ID from your app at simkl.com/settings/developer.',
     404 => 'Simkl did not recognize that PIN request (404).',
     429 => 'Simkl rate-limited this device (429). Try again shortly.',
     _ => 'Simkl returned HTTP $code.',

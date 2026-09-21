@@ -5,6 +5,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Simkl setup**: when the build has no Simkl client ID, the Connect card now
+  says so plainly and offers two buttons: *Open Simkl developer page* and *Add
+  a client ID*. The dialog lists the three steps (including the redirect URI to
+  enter), has a paste button, and refuses text that cannot be a client ID (a
+  URL, a sentence) instead of saving it and failing with a 401 later.
+
 ### Removed
 - **Discord Rich Presence**: it did not work, so the setting, the service, the
   `dart_discord_presence` dependency, the `DISCORD_APP_ID` build key and every

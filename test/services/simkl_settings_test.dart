@@ -118,4 +118,27 @@ void main() {
       expect(SimklSettings.lastStatus.value, 'something happened');
     });
   });
+
+  group('SimklSettings.looksLikeClientId', () {
+    test('accepts one long run of letters, digits, dash and underscore', () {
+      expect(
+        SimklSettings.looksLikeClientId(
+          '3f1c9a7e5b2d4c8e9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f',
+        ),
+        isTrue,
+      );
+      expect(SimklSettings.looksLikeClientId('  abcdefghij_klmnop-qrst  '), isTrue,
+          reason: 'surrounding whitespace is trimmed, as the dialog does');
+    });
+
+    test('rejects the usual paste mistakes', () {
+      expect(SimklSettings.looksLikeClientId(''), isFalse);
+      expect(SimklSettings.looksLikeClientId('abc123'), isFalse,
+          reason: 'too short to be a real ID');
+      expect(SimklSettings.looksLikeClientId('https://simkl.com/settings/developer/'),
+          isFalse);
+      expect(SimklSettings.looksLikeClientId('client id: abcdefghijklmnopqrstuvwxyz'),
+          isFalse);
+    });
+  });
 }

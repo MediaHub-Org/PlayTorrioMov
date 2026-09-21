@@ -291,8 +291,8 @@ class SimklService {
     // fixes, so they get different messages.
     if (!SimklSettings.isConfigured) {
       SimklSettings.note(
-        'This build shipped without a Simkl client ID. Add your own below '
-        '-- registering an app at simkl.com/settings/developer is free.',
+        'Simkl needs a client ID and this build has none. Create a free app at '
+        'simkl.com/settings/developer, then add its Client ID here.',
       );
       return null;
     }
