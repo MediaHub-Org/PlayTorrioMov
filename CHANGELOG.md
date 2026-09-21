@@ -10,7 +10,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   speed, sleep-timer, audio, aspect-ratio and subtitle menus, the sources and
   episodes panels, the cast sheet and subtitle sync bar, and the copy-URL and
   download messages, plus the player's loading and error screens and snack
-  bars, now follow the app language, in all four. 467 keys in all.
+  bars, plus the Films and Series catalog pages, the shared error view and
+  the mini player, now follow the app language, in all four. 488 keys in all.
 
 ### Fixed
 - **Audio menu**: the "default audio stream" line and the "Audio Sync Offset"

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/playback_coordinator.dart';
 import 'like_button.dart';
@@ -30,7 +31,7 @@ class UniversalPlayBar extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        final title = PlaybackCoordinator.title ?? 'Now Playing';
+        final title = PlaybackCoordinator.title ?? context.l10n.playerNowPlaying;
         final subtitle = PlaybackCoordinator.subtitle ?? '';
         final coverUrl = PlaybackCoordinator.coverUrl;
         final isPlaying = PlaybackCoordinator.isPlaying;
@@ -146,7 +147,7 @@ class UniversalPlayBar extends StatelessWidget {
               // shade offer the same controls instead of diverging.
               if (PlaybackCoordinator.canSkipPrevious && !isMobile)
                 IconButton(
-                  tooltip: 'Previous',
+                  tooltip: context.l10n.playerPrevious,
                   icon: Icon(
                     Icons.skip_previous_rounded,
                     color: AppColors.inkMuted,
@@ -156,7 +157,7 @@ class UniversalPlayBar extends StatelessWidget {
                 ),
               // Play / Pause
               IconButton(
-                tooltip: isPlaying ? 'Pause' : 'Play',
+                tooltip: isPlaying ? context.l10n.playerPause : context.l10n.playerPlay,
                 icon: Icon(
                   isPlaying
                       ? Icons.pause_circle_filled_rounded
@@ -168,7 +169,7 @@ class UniversalPlayBar extends StatelessWidget {
               ),
               if (PlaybackCoordinator.canSkipNext)
                 IconButton(
-                  tooltip: 'Next',
+                  tooltip: context.l10n.playerNext,
                   icon: Icon(
                     Icons.skip_next_rounded,
                     color: AppColors.inkMuted,
@@ -178,7 +179,7 @@ class UniversalPlayBar extends StatelessWidget {
                 ),
               // Close (dismiss the bar)
               IconButton(
-                tooltip: 'Close',
+                tooltip: context.l10n.playerClose,
                 icon: Icon(
                   Icons.close_rounded,
                   color: AppColors.inkSubtle,

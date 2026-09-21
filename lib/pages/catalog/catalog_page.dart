@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/app_spacing.dart';
 import '../../models/addon/addon.dart';
@@ -238,14 +239,14 @@ class _CatalogPageState extends State<CatalogPage> {
             )
           else if (_items.isEmpty && _error != null)
             ErrorView(
-              title: 'Could not load this catalog',
+              title: context.l10n.catalogCouldNotLoad,
               error: _error,
               onRetry: () => _loadItems(refresh: true),
             )
           else if (_items.isEmpty)
             Center(
               child: Text(
-                'No items found',
+                context.l10n.catalogNoItems,
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
               ),
             )
@@ -338,7 +339,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                     textInputAction: TextInputAction.search,
                                     onSubmitted: _onSearchSubmitted,
                                     decoration: InputDecoration(
-                                      hintText: 'Search...',
+                                      hintText: context.l10n.commonSearchEllipsis,
                                       hintStyle: TextStyle(color: AppColors.inkAlpha(0.4)),
                                       border: InputBorder.none,
                                       suffixIcon: IconButton(
@@ -402,7 +403,7 @@ class _CatalogPageState extends State<CatalogPage> {
                   if (!singleExtra.isRequired) {
                     if (index == 0) {
                       return _GenreChip(
-                        label: 'All',
+                        label: context.l10n.commonAll,
                         isSelected: _selectedExtras[singleExtra.name] == null,
                         onTap: () => _onExtraSelected(singleExtra.name, null),
                       );

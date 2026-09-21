@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_detail.dart';
@@ -295,12 +296,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
               ),
           if (widget.type == 'movie' && _documentaries.isNotEmpty)
             BrowseRow<Movie>(
-              title: 'Documentaries',
+              title: context.l10n.catalogDocumentaries,
               items: _documentaries,
             ),
           if (_items.isNotEmpty)
             BrowseRow<Movie>(
-              title: 'Latest Releases',
+              title: context.l10n.catalogLatestReleases,
               items: latestReleases(_items),
             ),
         ],
@@ -309,7 +310,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         onRefresh: _load,
         emptyState: Center(
           child: Text(
-            'No content found. Install more addons in Settings.',
+            context.l10n.catalogNoContent,
             style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
           ),
         ),
@@ -332,10 +333,10 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
       pills: [
         if (_availableGenres.isNotEmpty) ...[
           FilterDropdown<String?>(
-            label: _genreFilter ?? 'All genres',
+            label: _genreFilter ?? context.l10n.catalogAllGenres,
             icon: Icons.category_rounded,
             items: [
-              const PopupMenuItem(value: null, child: Text('All genres')),
+              PopupMenuItem(value: null, child: Text(context.l10n.catalogAllGenres)),
               for (final g in _availableGenres)
                 PopupMenuItem(value: g, child: Text(g)),
             ],
@@ -353,10 +354,10 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         ],
         if (decades.isNotEmpty)
           FilterDropdown<int?>(
-            label: _decadeFilter == null ? 'All decades' : '${_decadeFilter}s',
+            label: _decadeFilter == null ? context.l10n.catalogAllDecades : '${_decadeFilter}s',
             icon: Icons.calendar_today_rounded,
             items: [
-              const PopupMenuItem(value: null, child: Text('All decades')),
+              PopupMenuItem(value: null, child: Text(context.l10n.catalogAllDecades)),
               for (final d in decades)
                 PopupMenuItem(value: d, child: Text('${d}s')),
             ],
@@ -364,13 +365,13 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           ),
         FilterDropdown<_CatalogSort>(
           label: switch (_sort) {
-            _CatalogSort.yearNewest => 'Newest',
-            _CatalogSort.yearOldest => 'Oldest',
+            _CatalogSort.yearNewest => context.l10n.catalogNewest,
+            _CatalogSort.yearOldest => context.l10n.catalogOldest,
           },
           icon: Icons.sort_rounded,
-          items: const [
-            PopupMenuItem(value: _CatalogSort.yearNewest, child: Text('Newest')),
-            PopupMenuItem(value: _CatalogSort.yearOldest, child: Text('Oldest')),
+          items: [
+            PopupMenuItem(value: _CatalogSort.yearNewest, child: Text(context.l10n.catalogNewest)),
+            PopupMenuItem(value: _CatalogSort.yearOldest, child: Text(context.l10n.catalogOldest)),
           ],
           onSelected: (v) => setState(() => _sort = v!),
         ),
@@ -582,7 +583,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                         color: AppColors.onAccent.withValues(alpha: 0.80),
                       ),
                       label: Text(
-                        'Details',
+                        context.l10n.commonDetails,
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: isCompact ? 13 : 14.5,
@@ -642,10 +643,10 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                   child: Center(
                     child: Text(
                       _items.isEmpty
-                          ? 'No content found. Install more addons in Settings.'
+                          ? context.l10n.catalogNoContent
                           : _genreFilter != null
-                          ? 'No titles found for $_genreFilter.'
-                          : 'No titles in the ${_decadeFilter}s.',
+                          ? context.l10n.catalogNoTitlesForGenre(_genreFilter!)
+                          : context.l10n.catalogNoTitlesInDecade(_decadeFilter ?? 0),
                       style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
                     ),
                   ),

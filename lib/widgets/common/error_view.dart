@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 
 /// Full-screen error view with retry button.
@@ -44,7 +45,7 @@ class ErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              error ?? 'Unknown error',
+              error ?? context.l10n.commonUnknownError,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.ink.withOpacity(0.58),
@@ -54,7 +55,7 @@ class ErrorView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Try again'),
+              label: Text(context.l10n.commonTryAgain),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.accent,
               ),
