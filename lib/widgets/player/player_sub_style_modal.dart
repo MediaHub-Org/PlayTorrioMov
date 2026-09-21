@@ -4,6 +4,26 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
 import 'player_glass.dart';
+import 'subtitle_overlay.dart' show SubtitleOverlay;
+
+/// How opaque the subtitle background is, 0 to 1, read from a `#AARRGGBB`
+/// string. A value that does not parse counts as no background.
+double subtitleBackgroundOpacity(String hex) {
+  final str = hex.replaceAll('#', '').trim();
+  if (str.length != 8) return 0;
+  final alpha = int.tryParse(str.substring(0, 2), radix: 16);
+  return alpha == null ? 0 : alpha / 255;
+}
+
+/// [hex] with its alpha replaced. The color underneath is kept, so a preset
+/// with a tinted box (or a saved one from before the list of boxes went
+/// away) keeps its tint and only its strength changes.
+String withSubtitleBackgroundOpacity(String hex, double opacity) {
+  final str = hex.replaceAll('#', '').trim();
+  final rgb = str.length == 8 ? str.substring(2) : '000000';
+  final alpha = (opacity.clamp(0.0, 1.0) * 255).round();
+  return '#${alpha.toRadixString(16).padLeft(2, '0')}$rgb'.toUpperCase();
+}
 
 /// Floating card used to present [SubtitleStyleEditor] as an overlay above
 /// the video during playback (`player_screen.dart`). Settings → Video
@@ -93,15 +113,6 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     {'name': 'Light Gray', 'hex': '#D1D5DB', 'color': Color(0xFFD1D5DB)},
   ];
 
-  static const List<Map<String, dynamic>> _boxColorOptions = [
-    {'name': 'None', 'hex': '#00000000', 'desc': 'Transparent'},
-    {'name': '25% Dark', 'hex': '#40000000', 'desc': 'Subtle'},
-    {'name': '50% Dark', 'hex': '#80000000', 'desc': 'Standard Box'},
-    {'name': '75% Dark', 'hex': '#BF000000', 'desc': 'High Contrast'},
-    {'name': '100% Solid', 'hex': '#FF000000', 'desc': 'Opaque Black'},
-    {'name': '50% Indigo', 'hex': '#800F172A', 'desc': 'Slate Tint'},
-  ];
-
   static const List<Map<String, dynamic>> _borderColorPalette = [
     {'name': 'Black', 'hex': '#FF000000', 'color': Color(0xFF000000)},
     {'name': 'Dark Slate', 'hex': '#FF1E293B', 'color': Color(0xFF1E293B)},
@@ -129,26 +140,6 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     'Crimson' => l10n.subStyleCrimson,
     'Neon Cyan' => l10n.subStyleNeonCyan,
     _ => name,
-  };
-
-  String _boxName(AppLocalizations l10n, String name) => switch (name) {
-    'None' => l10n.subStyleBoxNone,
-    '25% Dark' => l10n.subStyleBoxDark(25),
-    '50% Dark' => l10n.subStyleBoxDark(50),
-    '75% Dark' => l10n.subStyleBoxDark(75),
-    '100% Solid' => l10n.subStyleBoxSolid(100),
-    '50% Indigo' => l10n.subStyleBoxIndigo(50),
-    _ => name,
-  };
-
-  String _boxDesc(AppLocalizations l10n, String desc) => switch (desc) {
-    'Transparent' => l10n.subStyleBoxTransparent,
-    'Subtle' => l10n.subStyleBoxSubtle,
-    'Standard Box' => l10n.subStyleBoxStandard,
-    'High Contrast' => l10n.subStyleBoxHighContrast,
-    'Opaque Black' => l10n.subStyleBoxOpaqueBlack,
-    'Slate Tint' => l10n.subStyleBoxSlateTint,
-    _ => desc,
   };
 
   Color _parseColorFromHex(String hex, {Color fallback = Colors.white}) {
@@ -180,6 +171,13 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                 // this view and carries the back arrow.
                 _buildPresetsBar(),
 
+                // Pinned above the scrolling page, so the effect of a slider
+                // is in view while the finger is on it. The panel covers most
+                // of the picture, and the sample on the video only shows in the
+                // strip the panel leaves free -- on a phone held sideways there
+                // is none.
+                _buildPreview(compact: constraints.maxHeight < 420),
+
                 // One scrolling page, in the order people reach for things:
                 // the text itself, its background, its outline, where it
                 // sits -- then everything rarer behind "More options". It was
@@ -187,34 +185,28 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                 // three of them.
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      Text(
-                        context.l10n.subStyleSampleHint,
-                        style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11.5, height: 1.4),
-                      ),
-                      const SizedBox(height: 16),
-
                       _buildSectionHeader(context.l10n.subStyleSecText),
                       ..._sizeItems(),
                       ..._textColorItems(),
                       ..._boldItems(),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 24),
 
                       _buildSectionHeader(context.l10n.subStyleSecBackground),
                       ..._boxItems(),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 24),
 
                       _buildSectionHeader(context.l10n.subStyleSecOutline),
                       ..._outlineColorItems(),
                       ..._thicknessItems(),
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 24),
 
                       _buildSectionHeader(context.l10n.subStyleSecPosition),
                       ..._alignItems(),
                       ..._vposItems(),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 8),
 
                       Theme(
                         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -315,51 +307,38 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     );
   }
 
+  /// The fonts as chips, each set in its own face. A dropdown opened a menu
+  /// in its own overlay -- sized to its widest entry, not to this panel, and
+  /// unreachable with a remote's arrow keys -- and showed every font in the
+  /// same one, so choosing meant guessing.
   List<Widget> _fontFamilyItems() {
+    final current = PlayerSettings.popularFonts.contains(PlayerSettings.subFont.value)
+        ? PlayerSettings.subFont.value
+        : 'subfont';
     return [
-        // Font Family Selector
-        _buildSectionTitle(context.l10n.subStyleFontFamily.toUpperCase()),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: PlayerTheme.edgeSoft),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: PlayerSettings.popularFonts.contains(PlayerSettings.subFont.value)
-                  ? PlayerSettings.subFont.value
-                  : 'subfont',
-              isExpanded: true,
-              // The dropdown's own menu must not be wider than the panel
-              // card it opens from -- Material sizes it to the widest item,
-              // which on a narrow player panel spills past the card edge.
-              menuMaxHeight: 220,
-              dropdownColor: const Color(0xFF131826),
-              icon: const Icon(Icons.arrow_drop_down_rounded, color: Colors.white70),
-              items: PlayerSettings.popularFonts.map((f) {
-                final label = f == 'subfont' ? 'Default (PlayTorrio Subfont)' : f;
-                return DropdownMenuItem<String>(
-                  value: f,
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: f == 'subfont' ? 'Poppins' : f,
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) PlayerSettings.setSubFont(val, player: widget.player);
-              },
+      _buildSectionTitle(context.l10n.subStyleFontFamily.toUpperCase()),
+      const SizedBox(height: 10),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: PlayerSettings.popularFonts.map((f) {
+          final isDefault = f == 'subfont';
+          return _buildChoiceChip(
+            selected: f == current,
+            onTap: () => PlayerSettings.setSubFont(f, player: widget.player),
+            child: Text(
+              isDefault ? context.l10n.subStyleFontDefault : f,
+              style: TextStyle(
+                color: f == current ? Colors.white : PlayerTheme.inkMuted,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                fontFamily: isDefault ? 'Poppins' : f,
+              ),
             ),
-          ),
-        ),
+          );
+        }).toList(),
+      ),
+      const SizedBox(height: 18),
     ];
   }
 
@@ -367,30 +346,17 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return [
         // Base Font Size Slider
         _buildSectionTitle(context.l10n.subStyleBaseFontSize(PlayerSettings.subFontSize.value.round()).toUpperCase()),
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline_rounded, size: 20, color: Colors.white70),
-              onPressed: () => PlayerSettings.setSubFontSize(PlayerSettings.subFontSize.value - 2, player: widget.player),
-            ),
-            Expanded(
-              child: SliderTheme(
-                data: _sliderTheme(),
-                child: Slider(
-                  value: PlayerSettings.subFontSize.value.toDouble(),
-                  min: 16.0,
-                  max: 72.0,
-                  divisions: 28,
-                  onChanged: (v) => PlayerSettings.setSubFontSize(v.round(), player: widget.player),
-                ),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline_rounded, size: 20, color: Colors.white70),
-              onPressed: () => PlayerSettings.setSubFontSize(PlayerSettings.subFontSize.value + 2, player: widget.player),
-            ),
-          ],
+        SliderTheme(
+          data: _sliderTheme(),
+          child: Slider(
+            value: PlayerSettings.subFontSize.value.toDouble(),
+            min: 16.0,
+            max: 72.0,
+            divisions: 28,
+            onChanged: (v) => PlayerSettings.setSubFontSize(v.round(), player: widget.player),
+          ),
         ),
+        const SizedBox(height: 8),
     ];
   }
 
@@ -408,6 +374,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubScale(v, player: widget.player),
           ),
         ),
+        const SizedBox(height: 8),
     ];
   }
 
@@ -449,115 +416,66 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           runSpacing: 8,
           children: _textColorPalette.map((item) {
             final isSelected = activeColor.toLowerCase() == (item['hex'] as String).toLowerCase();
-            return InkWell(
+            return _buildChoiceChip(
+              selected: isSelected,
               onTap: () => PlayerSettings.setSubColor(item['hex'], player: widget.player),
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: item['color'] as Color,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white38, width: 0.8),
-                      ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: item['color'] as Color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white38, width: 0.8),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
+                  ),
+                  const SizedBox(width: 8),
+                  // Flexible: at a large text scale the name is wider than
+                  // the panel, and a Row sizes its children to their natural
+                  // width unless one may give.
+                  Flexible(
+                    child: Text(
                       _paletteName(context.l10n, item['name'] as String),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           }).toList(),
         ),
+        const SizedBox(height: 18),
     ];
   }
 
+  /// The background as one slider, from none to solid. It was a list of six
+  /// boxes -- "25% dark", "50% dark", ... "50% indigo" -- which were a slider
+  /// with the steps hard-coded and one odd tint. The color is kept as it is;
+  /// only its strength moves.
   List<Widget> _boxItems() {
-    final activeBox = PlayerSettings.subBackColor.value;
+    final hex = PlayerSettings.subBackColor.value;
+    final percent = (subtitleBackgroundOpacity(hex) * 100).round();
     return [
-        // Background Box Style
-        _buildSectionTitle(context.l10n.subStyleBoxTitle.toUpperCase()),
-        const SizedBox(height: 10),
-        Column(
-          children: _boxColorOptions.map((opt) {
-            final isSelected = activeBox.toLowerCase() == (opt['hex'] as String).toLowerCase();
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: InkWell(
-                onTap: () => PlayerSettings.setSubBackColor(opt['hex'], player: widget.player),
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? PlayerTheme.accentSoft : PlayerTheme.raised,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isSelected ? PlayerTheme.accent : PlayerTheme.edgeSoft,
-                    ),
-                  ),
-                  // Both texts flex: name and description together came to more
-                  // than a 360px phone's row once every section shared one
-                  // page (they used to sit alone on a tab that was rarely
-                  // opened, and overflowed there too).
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: _parseColorFromHex(opt['hex']),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: Colors.white30),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _boxName(context.l10n, opt['name'] as String),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          _boxDesc(context.l10n, opt['desc'] as String),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
+      _buildSectionTitle(context.l10n.subStyleBackgroundOpacity(percent).toUpperCase()),
+      SliderTheme(
+        data: _sliderTheme(),
+        child: Slider(
+          value: (percent / 5).round() * 5 / 100,
+          min: 0.0,
+          max: 1.0,
+          divisions: 20,
+          onChanged: (v) => PlayerSettings.setSubBackColor(withSubtitleBackgroundOpacity(hex, v), player: widget.player),
         ),
+      ),
+      const SizedBox(height: 8),
     ];
   }
 
@@ -566,51 +484,49 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return [
         // Outline Color Selector
         _buildSectionTitle(context.l10n.subStyleOutlineColor.toUpperCase()),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: _borderColorPalette.map((item) {
             final isSelected = activeBorderColor.toLowerCase() == (item['hex'] as String).toLowerCase();
-            return InkWell(
+            return _buildChoiceChip(
+              selected: isSelected,
               onTap: () => PlayerSettings.setSubBorderColor(item['hex'], player: widget.player),
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: item['color'] as Color,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white38, width: 0.8),
-                      ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: item['color'] as Color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white38, width: 0.8),
                     ),
-                    const SizedBox(width: 8),
-                    Text(
+                  ),
+                  const SizedBox(width: 8),
+                  // Flexible: at a large text scale the name is wider than
+                  // the panel, and a Row sizes its children to their natural
+                  // width unless one may give.
+                  Flexible(
+                    child: Text(
                       _paletteName(context.l10n, item['name'] as String),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           }).toList(),
         ),
+        const SizedBox(height: 18),
     ];
   }
 
@@ -628,6 +544,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubBorderSize(v, player: widget.player),
           ),
         ),
+        const SizedBox(height: 8),
     ];
   }
 
@@ -645,6 +562,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubShadowOffset(v, player: widget.player),
           ),
         ),
+        const SizedBox(height: 8),
     ];
   }
 
@@ -662,6 +580,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             _buildAlignButton(context.l10n.subStyleRight, 'right', Icons.format_align_right_rounded),
           ],
         ),
+        const SizedBox(height: 18),
     ];
   }
 
@@ -679,6 +598,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubMarginY(v, player: widget.player),
           ),
         ),
+        const SizedBox(height: 8),
     ];
   }
 
@@ -849,6 +769,63 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
         fontWeight: FontWeight.w700,
         color: PlayerTheme.inkSubtle,
         letterSpacing: 1.1,
+      ),
+    );
+  }
+
+  /// A selectable pill: a swatch or a font name. One widget for the colors and
+  /// the fonts, so they select, focus and size the same way.
+  Widget _buildChoiceChip({
+    required bool selected,
+    required VoidCallback onTap,
+    required Widget child,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? PlayerTheme.accent : PlayerTheme.raised,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: selected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  /// The sample, drawn with the same text style and side as the overlay on the
+  /// video. Scaled down to fit -- a 72 pt size at full scale is taller than the
+  /// strip -- so it shows the colors, outline and background faithfully but not
+  /// the real size; the sample on the picture does that.
+  ///
+  /// It is drawn by the app, so it says nothing about the native (libass)
+  /// engine, which paints its own text. Its controls change the same mpv
+  /// properties either way.
+  Widget _buildPreview({required bool compact}) {
+    return Container(
+      height: compact ? 58 : 84,
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: const BoxDecoration(
+        // A mid-dark gradient rather than flat black: a white outline or a
+        // dark background is only judged against something like a picture.
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF3A4256), Color(0xFF1B2030)],
+        ),
+        border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
+      ),
+      alignment: Alignment(SubtitleOverlay.alignmentX(PlayerSettings.subAlignX.value), 0),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          '${context.l10n.subSampleTitle}\n${context.l10n.subSampleBody}',
+          textAlign: PlayerSettings.subtitleTextAlign(),
+          style: PlayerSettings.subtitleTextStyle(),
+        ),
       ),
     );
   }

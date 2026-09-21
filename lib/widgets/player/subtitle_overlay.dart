@@ -43,8 +43,8 @@ class SubtitleOverlay extends StatefulWidget {
   static double alignmentY(double position) =>
       (position.clamp(0.0, 100.0) / 50.0) - 1.0;
 
-  /// Which side the block hugs, as an [Alignment.x].
-  @visibleForTesting
+  /// Which side the block hugs, as an [Alignment.x]. The appearance editor's
+  /// preview uses it too, so the two cannot disagree about a side.
   static double alignmentX(String side) => switch (side) {
     'left' => -1.0,
     'right' => 1.0,

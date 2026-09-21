@@ -3,6 +3,27 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **Subtitle list**: a row reads "Arabic · Standard" with a quiet
+  "OpenSubtitles · SRT" line under it, instead of the provider's file id
+  (`13628256`) and a shouting provider badge. A release name is kept when the
+  provider gives one; its quality (`1080p`, `WEB-DL`, `x264`) becomes small
+  tags, so a subtitle made for the release you are watching stands out.
+  Auto-translated subtitles carry a badge saying so, and the download count
+  shows where the provider reports one.
+- **Choosing a subtitle keeps the panel open** — including *Auto* and *Off* —
+  so trying several to compare them is one tap each. Tap outside the panel or
+  use the back arrow to leave.
+- **Subtitle Appearance**: the background is one opacity slider (0-100 %)
+  instead of a list of boxes, and the "50 % Indigo" one is gone; whatever tint a
+  preset or an earlier choice gave the box is kept. A preview of the sample sits
+  pinned above the controls, so a slider's effect is visible even where the
+  panel covers the video. Fonts are chips, each in its own face, instead of a
+  dropdown that opened a separate menu. Every slider now has the same
+  layout, and the spacing between controls is even.
+
 ## [1.8.8+41] - 2026-09-21
 
 Subtitles that follow your settings, macOS for Intel again, a much larger part of

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:playtorriomov/l10n/l10n.dart';
+import 'package:playtorriomov/models/subtitle/subtitle_display.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
 import 'language_flag.dart';
@@ -484,7 +485,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         icon: Icons.download_done_rounded,
                       ),
                     ],
-                    onTap: widget.onClose,
+                    onTap: () {},
                   ),
                 for (final track in embedded)
                   _buildStripChip(
@@ -514,10 +515,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           icon: Icons.translate_rounded,
                         ),
                     ],
-                    onTap: () {
-                      widget.onSelectEmbedded(track);
-                      widget.onClose();
-                    },
+                    onTap: () => widget.onSelectEmbedded(track),
                   ),
               ],
             ),
@@ -640,10 +638,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                 size: 13,
                 color: PlayerTheme.inkSubtle,
               ),
-              onTap: () {
-                widget.onAutoPick();
-                widget.onClose();
-              },
+              onTap: widget.onAutoPick,
             ),
             const SizedBox(width: 6),
 
@@ -656,10 +651,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                 size: 13,
                 color: isOff ? Colors.white : PlayerTheme.inkSubtle,
               ),
-              onTap: () {
-                widget.onToggleOff();
-                widget.onClose();
-              },
+              onTap: widget.onToggleOff,
             ),
             const SizedBox(width: 6),
 
@@ -805,10 +797,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(8),
-                  onTap: () {
-                    widget.onToggleOff();
-                    widget.onClose();
-                  },
+                  onTap: widget.onToggleOff,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
                     decoration: BoxDecoration(
@@ -1137,10 +1126,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              widget.onSelectEmbedded(track);
-              widget.onClose();
-            },
+            onTap: () => widget.onSelectEmbedded(track),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               margin: const EdgeInsets.only(bottom: 4),
@@ -1356,15 +1342,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         // at render time.
         final isHI = variant.isHearingImpaired;
         final isForced = variant.isForced;
+        final display = describeSubtitle(variant);
 
         return Material(
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              widget.onSelectVariant(variant);
-              widget.onClose();
-            },
+            onTap: () => widget.onSelectVariant(variant),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7.5),
               margin: const EdgeInsets.only(bottom: 4),
@@ -1420,8 +1404,11 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                               const SizedBox(width: 5),
                             ],
                             Expanded(
+                              // A release name when there is one; otherwise
+                              // "Standard", because a row that says only a
+                              // language and a provider id reads as broken.
                               child: Text(
-                                variant.title,
+                                display.title.isEmpty ? context.l10n.subsStandardTitle : display.title,
                                 style: TextStyle(
                                   color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
                                   fontSize: 12,
@@ -1435,26 +1422,18 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         ),
                         const SizedBox(height: 3),
                         Wrap(
-                          spacing: 5,
+                          spacing: 6,
                           runSpacing: 3,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: PlayerTheme.raised,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                variant.providerName.toUpperCase(),
-                                style: const TextStyle(
-                                  color: PlayerTheme.inkSubtle,
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
+                            // Where it came from, as quiet text: it is the
+                            // last thing to choose by, so it must not shout
+                            // like the badges that change what you see.
+                            Text(
+                              [display.provider, display.format].where((s) => s.isNotEmpty).join(' · '),
+                              style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 10.5),
                             ),
-                            if (variant.format.isNotEmpty)
+                            for (final tag in display.tags)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                 decoration: BoxDecoration(
@@ -1462,31 +1441,50 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                                   borderRadius: BorderRadius.circular(3),
                                 ),
                                 child: Text(
-                                  variant.format.toUpperCase(),
+                                  tag,
                                   style: const TextStyle(
-                                    color: PlayerTheme.inkSubtle,
-                                    fontSize: 8.5,
+                                    color: PlayerTheme.inkMuted,
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                            if (isHI) ...[
-                              const SizedBox(width: 4),
+                            if (isHI)
                               _TrackBadge(
                                 label: context.l10n.subsHearingImpaired,
                                 color: const Color(0xFF10B981),
                                 icon: Icons.hearing_rounded,
                                 tooltip: context.l10n.subsHearingImpairedTip,
                               ),
-                            ],
-                            if (isForced) ...[
-                              const SizedBox(width: 4),
+                            if (isForced)
                               _TrackBadge(
                                 label: context.l10n.subsForced,
                                 color: const Color(0xFFF59E0B),
                                 icon: Icons.translate_rounded,
                                 tooltip: context.l10n.subsForcedTip,
                               ),
-                            ],
+                            if (display.isTranslated)
+                              _TrackBadge(
+                                label: context.l10n.subsAutoTranslated,
+                                color: const Color(0xFF8B5CF6),
+                                icon: Icons.auto_awesome_rounded,
+                                tooltip: context.l10n.subsAutoTranslatedTip,
+                              ),
+                            if (display.downloads != null && display.downloads! > 0)
+                              Tooltip(
+                                message: context.l10n.subsDownloadsTip(compactCount(display.downloads!)),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.download_rounded, size: 10, color: PlayerTheme.inkSubtle),
+                                    const SizedBox(width: 2),
+                                    Text(
+                                      compactCount(display.downloads!),
+                                      style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 10),
+                                    ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       ],

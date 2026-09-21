@@ -24,6 +24,8 @@ Widget menu({
   List<PlayerEmbeddedSubtitle> embedded = const [],
   List<SubtitleVariant> variants = const [],
   ValueChanged<PlayerEmbeddedSubtitle>? onEmbedded,
+  ValueChanged<SubtitleVariant?>? onVariant,
+  VoidCallback? onClose,
   SubtitleVariant? selected,
 }) {
   return MaterialApp(
@@ -38,12 +40,12 @@ Widget menu({
           isSubtitleEnabled: selected != null,
           movieTitle: 'A Movie',
           delaySec: 0,
-          onSelectVariant: (_) {},
+          onSelectVariant: onVariant ?? (_) {},
           onSelectEmbedded: onEmbedded ?? (_) {},
           onToggleOff: () {},
           onOpenSyncBar: () {},
           onAutoPick: () {},
-          onClose: () {},
+          onClose: onClose ?? () {},
         ),
       ),
     ),
@@ -116,10 +118,10 @@ void main() {
 
   group('the CC and Forced filters', () {
     final variants = [
-      variant('Movie.2020.SDH', 'u1'),
-      variant('Movie.2020.HI.CC', 'u2'),
-      variant('Movie.2020.forced', 'u3'),
-      variant('Movie.2020', 'u4'),
+      variant('Alpha.SDH', 'u1'),
+      variant('Bravo.HI.CC', 'u2'),
+      variant('Charlie.forced', 'u3'),
+      variant('Delta', 'u4'),
     ];
 
     testWidgets('show how many each would leave', (tester) async {
@@ -146,15 +148,18 @@ void main() {
 
       await tester.pumpWidget(menu(variants: variants));
       await tester.pump();
-      expect(find.textContaining('Movie.2020'), findsNWidgets(4));
+      expect(find.text('Delta'), findsOneWidget);
+      expect(find.text('Alpha'), findsOneWidget);
 
       await tester.tap(chip('CC / SDH'));
       await tester.pump();
-      expect(find.textContaining('Movie.2020'), findsNWidgets(2));
+      expect(find.text('Alpha'), findsOneWidget);
+      expect(find.text('Bravo HI'), findsOneWidget);
+      expect(find.text('Delta'), findsNothing);
 
       await tester.tap(chip('All'));
       await tester.pump();
-      expect(find.textContaining('Movie.2020'), findsNWidgets(4));
+      expect(find.text('Delta'), findsOneWidget);
     });
 
     testWidgets('a filter with nothing behind it does nothing', (tester) async {
@@ -162,13 +167,56 @@ void main() {
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);
 
-      await tester.pumpWidget(menu(variants: [variant('Movie.2020', 'u1')]));
+      await tester.pumpWidget(menu(variants: [variant('Delta', 'u1')]));
       await tester.pump();
 
       // No forced track exists: pressing Forced must not empty the list.
       await tester.tap(chip('Forced'));
       await tester.pump();
-      expect(find.textContaining('Movie.2020'), findsOneWidget);
+      expect(find.text('Delta'), findsOneWidget);
+    });
+  });
+
+  group('a subtitle row', () {
+    testWidgets('hides the provider id and says what is left about it',
+        (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(menu(variants: [
+        variant('13628256', 'u1'),
+        variant('Movie.2020.1080p.WEB-DL.x264-GRP', 'u2'),
+      ]));
+      await tester.pump();
+
+      expect(find.text('13628256'), findsNothing);
+      expect(find.text('Standard'), findsOneWidget);
+      // Provider and format in one quiet line, quality as its own tags.
+      expect(find.text('test · SRT'), findsNWidgets(2));
+      expect(find.text('1080p'), findsOneWidget);
+      expect(find.text('WEB-DL'), findsOneWidget);
+    });
+
+    testWidgets('choosing one leaves the panel open', (tester) async {
+      tester.view.physicalSize = const Size(900, 700);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      SubtitleVariant? picked;
+      var closed = false;
+      await tester.pumpWidget(menu(
+        variants: [variant('Delta', 'u1')],
+        onVariant: (v) => picked = v,
+        onClose: () => closed = true,
+      ));
+      await tester.pump();
+
+      await tester.tap(find.text('Delta'));
+      await tester.pump();
+
+      expect(picked?.downloadUrl, 'u1');
+      expect(closed, isFalse, reason: 'the viewer may just be trying it');
     });
   });
 }

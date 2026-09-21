@@ -167,13 +167,6 @@ class _PlayerScreenState extends State<PlayerScreen>
   double _subtitleDelayMs = 0;
   double _subtitleScale = 1.0;
 
-  // Remembers the subtitle selection across a disable so the transport
-  // bar's toggle button (see _toggleSubtitlesEnabled) can turn the same
-  // track back on directly -- _disableSubtitles clears the active
-  // selection entirely, so this is the only place it survives.
-  SubtitleVariant? _lastSubtitleVariant;
-  int? _lastEmbeddedSubtitleIndex;
-
   // Skip Segments State (IntroDB)
   List<MediaSkipSegment> _skipSegments = [];
   MediaSkipSegment? _activeSkipSegment;
@@ -1088,40 +1081,12 @@ class _PlayerScreenState extends State<PlayerScreen>
     _player.setSubtitleTrack(SubtitleTrack.no());
   }
 
-  /// The transport bar's subtitle button: a plain on/off toggle (YouTube's
-  /// CC button), not the track/style picker -- that now lives behind the
-  /// settings gear (see PlayerSettingsMenu.onTapSubtitles).
-  void _toggleSubtitlesEnabled() {
-    if (_isSubtitleEnabled) {
-      _lastSubtitleVariant = _currentSubtitleVariant;
-      _lastEmbeddedSubtitleIndex = _selectedEmbeddedSubtitleIndex;
-      _disableSubtitles();
-      return;
-    }
-
-    if (_lastEmbeddedSubtitleIndex != null) {
-      PlayerEmbeddedSubtitle? embedded;
-      for (final e in _embeddedSubtitles) {
-        if (e.index == _lastEmbeddedSubtitleIndex) {
-          embedded = e;
-          break;
-        }
-      }
-      if (embedded != null) {
-        _selectEmbeddedSubtitle(embedded);
-        return;
-      }
-    }
-
-    if (_lastSubtitleVariant != null) {
-      _loadSubtitle(_lastSubtitleVariant!);
-      return;
-    }
-
-    // Nothing was selected yet this session. The button picks the best
-    // track it can find rather than opening the picker: this is a CC
-    // toggle, and YouTube's never asks a question. The picker is still one
-    // tap away behind the gear for anyone who wants a different track.
+  /// Turns on the best subtitle there is -- the audio language's embedded
+  /// track, then a matching online one -- whatever is on now. It is the
+  /// panel's "Auto" pill: a choice, so pressing it twice never switches
+  /// subtitles off. (The transport bar's subtitle button opens the panel;
+  /// the CC on/off toggle that used to live here had no caller left.)
+  void _pickBestSubtitle() {
     final auto = SubtitleAutoPick.embedded(
       _embeddedSubtitles,
       audioLanguage: _selectedAudioLanguage,
@@ -1153,9 +1118,14 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   Future<void> _loadSubtitle(SubtitleVariant variant) async {
-    _currentSubtitleVariant = variant;
-    _selectedEmbeddedSubtitleIndex = null;
-    _isSubtitleEnabled = true;
+    // setState, not bare assignments: the subtitle panel stays open after a
+    // pick (a viewer is often just trying tracks), and it shows what is
+    // selected from these fields.
+    setState(() {
+      _currentSubtitleVariant = variant;
+      _selectedEmbeddedSubtitleIndex = null;
+      _isSubtitleEnabled = true;
+    });
     _player.setSubtitleTrack(SubtitleTrack.no());
 
     if (mounted) {
@@ -2348,7 +2318,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   _showSubSyncBar = true;
                 });
               },
-              onAutoPick: _toggleSubtitlesEnabled,
+              onAutoPick: _pickBestSubtitle,
               player: _player,
               onClose: () => setState(() {
                 _activeMenu = null;
