@@ -3,7 +3,10 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.8+41] - 2026-09-21
+
+Subtitles that follow your settings, macOS for Intel again, a much larger part of
+the app in Spanish, Arabic and Portuguese, and Discord Rich Presence removed.
 
 ### Fixed
 - **Subtitle position**: the Left / Center / Right buttons and the vertical
