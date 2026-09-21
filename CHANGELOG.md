@@ -9,10 +9,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Much more of the app translated (#68)**: the player (controls, menus,
   the sources and episodes panels, the cast sheet, loading and error screens
   and snack bars), the Films, Series, Discover, Search, Anime browse and
-  Library pages, the shared error view and the mini player, the P2P warning and
+  Library pages, the shared error view and the mini player, the skip button and text sync
+  overlay, the P2P warning and
   update dialogs, and Live TV's page, settings page, portals modal, portal
   browser, channel sheet, player and multi-view now follow the app language, in all four.
-  758 keys in all.
+  781 keys in all.
 
 ### Fixed
 - **Text scale (#69)**: Live TV's settings page no longer overflows at 3× text

@@ -199,7 +199,7 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
 
                                     // Action Label
                                     Text(
-                                      widget.segment.label,
+                                      widget.segment.label(context.l10n),
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: isCompact ? 12.5 : 14.0,

@@ -1,3 +1,4 @@
+import '../../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 /// Represents a media skip segment (intro, recap, credits, preview).
@@ -21,19 +22,23 @@ class MediaSkipSegment {
   /// Unique key to identify this segment for dismissal/deduplication.
   String get uniqueKey => '${type}_${startMs ?? 0}_${endMs ?? -1}';
 
-  /// Human-friendly display label.
-  String get label {
+  /// Human-friendly display label, in the app's language.
+  String label(AppLocalizations l10n) {
     switch (type.toLowerCase()) {
       case 'intro':
-        return 'Skip Intro';
+        return l10n.playerSkipIntro;
       case 'recap':
-        return 'Skip Recap';
+        return l10n.playerSkipRecap;
       case 'credits':
-        return 'Skip Credits';
+        return l10n.playerSkipCredits;
       case 'preview':
-        return 'Skip Preview';
+        return l10n.playerSkipPreview;
       default:
-        return 'Skip ${type.isNotEmpty ? type[0].toUpperCase() + type.substring(1) : "Segment"}';
+        return l10n.playerSkipOther(
+          type.isNotEmpty
+              ? type[0].toUpperCase() + type.substring(1)
+              : l10n.playerSkipSegment,
+        );
     }
   }
 

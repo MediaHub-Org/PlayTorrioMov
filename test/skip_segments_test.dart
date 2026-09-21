@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/l10n/app_localizations_en.dart';
+import 'package:playtorriomov/l10n/app_localizations_es.dart';
 import 'package:playtorriomov/models/player/skip_segment_model.dart';
 
 void main() {
@@ -35,25 +37,25 @@ void main() {
       final intro = data.segments.firstWhere((s) => s.type == 'intro');
       expect(intro.start, Duration.zero);
       expect(intro.end, const Duration(milliseconds: 23000));
-      expect(intro.label, 'Skip Intro');
+      expect(intro.label(AppLocalizationsEn()), 'Skip Intro');
 
       // Recap
       final recap = data.segments.firstWhere((s) => s.type == 'recap');
       expect(recap.start, const Duration(milliseconds: 25000));
       expect(recap.end, const Duration(milliseconds: 134000));
-      expect(recap.label, 'Skip Recap');
+      expect(recap.label(AppLocalizationsEn()), 'Skip Recap');
 
       // Credits
       final credits = data.segments.where((s) => s.type == 'credits').toList();
       expect(credits.length, 2);
-      expect(credits.first.label, 'Skip Credits');
+      expect(credits.first.label(AppLocalizationsEn()), 'Skip Credits');
       expect(credits.last.end, isNull);
 
       // Preview
       final preview = data.segments.firstWhere((s) => s.type == 'preview');
       expect(preview.start, const Duration(milliseconds: 1680000));
       expect(preview.end, const Duration(milliseconds: 1740000));
-      expect(preview.label, 'Skip Preview');
+      expect(preview.label(AppLocalizationsEn()), 'Skip Preview');
     });
 
     test('Contains method checks position intervals accurately', () {
@@ -92,5 +94,14 @@ void main() {
       expect(seg1.uniqueKey, seg2.uniqueKey);
       expect(seg1.uniqueKey, isNot(seg3.uniqueKey));
     });
+  });
+
+  test('a segment labels its skip button in the app language', () {
+    final intro = MediaSkipSegment(type: 'intro', startMs: 0, endMs: 1000);
+    expect(intro.label(AppLocalizationsEs()), 'Saltar intro');
+
+    final odd = MediaSkipSegment(type: 'mixed', startMs: 0, endMs: 1000);
+    expect(odd.label(AppLocalizationsEn()), 'Skip Mixed');
+    expect(odd.label(AppLocalizationsEs()), 'Saltar Mixed');
   });
 }

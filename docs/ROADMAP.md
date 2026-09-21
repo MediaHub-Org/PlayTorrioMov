@@ -25,17 +25,16 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**Roughly 200 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 758 keys are translated into Spanish, Arabic and Portuguese-BR.
+**Roughly 170 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 781 keys are translated into Spanish, Arabic and Portuguese-BR.
 Done: the settings pages, nearly all of the player's chrome (controls, menus,
 panels, cast sheet, loading and error screens, snack bars), the Films, Series,
 Discover, Search, Anime browse and Library pages, the shared error view, the
 mini player, the P2P warning and update dialogs, and Live TV's page, settings
 page, portals modal, portal browser, channel sheet, player and multi-view.
 
-Left is the long tail: the curated hub descriptions on Live TV's page; the subtitle style editor and text sync
-overlay; the skip button's own labels; the anime details and stream pages; and
-the details-page rails.
+Left is the long tail: the curated hub descriptions on Live TV's page; the subtitle style editor; the anime details
+and stream pages; and the details-page rails.
 
 Genre names (Action, Slice of Life, ...) and anime formats (TV, OVA, ...) stay
 in English on purpose: they are AniList's own values, sent back to its API to

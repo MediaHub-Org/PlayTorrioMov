@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'package:media_kit/media_kit.dart';
 
 import '../../services/subtitles/subtitle_parser.dart';
@@ -286,7 +287,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving sync: $e')),
+          SnackBar(content: Text(context.l10n.syncSaveError('$e'))),
         );
       }
     } finally {
@@ -310,13 +311,13 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
 
     String hintText;
     if (_sectionMode) {
-      hintText = 'Tap first & last line of section, then tap line playing now and "Sync from here".';
+      hintText = context.l10n.syncHintSection;
     } else if (_points.isEmpty) {
-      hintText = 'Tap the line you hear right now, then tap "Sync from here".';
+      hintText = context.l10n.syncHintFirst;
     } else if (_points.length == 1) {
-      hintText = 'Point 1 set. If subtitles drift later on, tap "Sync from here" at a later line.';
+      hintText = context.l10n.syncHintOnePoint;
     } else {
-      hintText = 'Drift correction active (2 anchor points). Fine-tune with buttons.';
+      hintText = context.l10n.syncHintTwoPoints;
     }
 
     final panelWidth = isLandscapeMobile
@@ -377,7 +378,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              _sectionMode ? 'FIX SECTION' : 'SUBTITLE TIMING',
+                              _sectionMode ? context.l10n.syncFixSection.toUpperCase() : context.l10n.syncSubtitleTiming.toUpperCase(),
                               style: const TextStyle(
                                 color: PlayerTheme.inkSubtle,
                                 fontSize: 10,
@@ -386,7 +387,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                               ),
                             ),
                             Text(
-                              _sectionMode ? 'Select Range & Sync' : 'Speech Dialogue Sync',
+                              _sectionMode ? context.l10n.syncSelectRange : context.l10n.syncSpeechDialogue,
                               style: TextStyle(
                                 color: PlayerTheme.ink,
                                 fontSize: isLandscapeMobile ? 14 : 16,
@@ -402,7 +403,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                         size: 30,
                         iconSize: 15,
                         icon: const Icon(Icons.close_rounded),
-                        tooltip: 'Close',
+                        tooltip: context.l10n.playerClose,
                         onPressed: widget.onClose,
                       ),
                     ],
@@ -455,9 +456,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                             controller: _searchController,
                             style: TextStyle(color: PlayerTheme.ink, fontSize: isLandscapeMobile ? 12 : 12.5),
                             onSubmitted: (_) => _goToNextMatch(),
-                            decoration: const InputDecoration(
-                              hintText: 'Search dialogue...',
-                              hintStyle: TextStyle(color: PlayerTheme.inkSubtle, fontSize: 12),
+                            decoration: InputDecoration(
+                              hintText: context.l10n.syncSearchDialogue,
+                              hintStyle: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 12),
                               border: InputBorder.none,
                               isDense: true,
                               contentPadding: EdgeInsets.zero,
@@ -729,9 +730,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
                                           ),
                                           icon: const Icon(Icons.check_rounded, size: 14),
-                                          label: const Text(
-                                            'Sync from here',
-                                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                                          label: Text(
+                                            context.l10n.syncFromHere,
+                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
                                           ),
                                           onPressed: () => _handleSyncFromHere(index),
                                         ),
@@ -744,7 +745,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
                                           ),
                                           icon: const Icon(Icons.play_arrow_rounded, size: 14),
-                                          label: const Text('Jump here', style: TextStyle(fontSize: 11)),
+                                          label: Text(context.l10n.syncJumpHere, style: const TextStyle(fontSize: 11)),
                                           onPressed: () => _handleSeekTo(index),
                                         ),
                                       ],
@@ -772,9 +773,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 ),
                                 icon: const Icon(Icons.arrow_downward_rounded, size: 13),
-                                label: const Text(
-                                  'Jump to now',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                label: Text(
+                                  context.l10n.syncJumpToNow,
+                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
                                 ),
                                 onPressed: _jumpToNow,
                               ),
@@ -847,7 +848,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 icon: const Icon(Icons.content_cut_rounded, size: 12),
-                label: Text(_sectionMode ? 'Selecting' : 'Fix section', style: const TextStyle(fontSize: 11)),
+                label: Text(_sectionMode ? context.l10n.syncSelecting : context.l10n.syncFixSection, style: const TextStyle(fontSize: 11)),
                 onPressed: () {
                   setState(() {
                     _sectionMode = !_sectionMode;
@@ -860,7 +861,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                 const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(Icons.replay_rounded, size: 15, color: PlayerTheme.inkSubtle),
-                  tooltip: 'Reset timing',
+                  tooltip: context.l10n.syncResetTiming,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
                   onPressed: _handleReset,
@@ -890,7 +891,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                     size: 15,
                   ),
                   label: Text(
-                    _isPlaying ? 'Pause' : 'Play',
+                    _isPlaying ? context.l10n.playerPause : context.l10n.playerPlay,
                     style: TextStyle(fontSize: isLandscapeMobile ? 11 : 12),
                   ),
                   onPressed: () {
@@ -926,7 +927,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                         )
                       : const Icon(Icons.check_rounded, size: 15),
                   label: Text(
-                    _isSaving ? 'Saving...' : 'Save Timing',
+                    _isSaving ? context.l10n.syncSaving : context.l10n.syncSaveTiming,
                     style: TextStyle(
                       fontSize: isLandscapeMobile ? 11 : 12,
                       fontWeight: FontWeight.bold,
