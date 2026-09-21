@@ -13,7 +13,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   overlay, the P2P warning and
   update dialogs, and Live TV's page, settings page, portals modal, portal
   browser, channel sheet, player and multi-view now follow the app language, in all four.
-  781 keys in all.
+  796 keys in all.
 
 ### Fixed
 - **Text scale (#69)**: Live TV's settings page no longer overflows at 3× text

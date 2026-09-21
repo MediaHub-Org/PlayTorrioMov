@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/continue_watching/continue_watching_item.dart';
 import '../../services/app_spacing.dart';
@@ -71,10 +72,10 @@ class WatchHistoryPage extends StatelessWidget {
                 ..sort((a, b) => b.lastWatchedAt.compareTo(a.lastWatchedAt));
 
           if (items.isEmpty) {
-            return const LibraryEmptyState(
+            return LibraryEmptyState(
               icon: Icons.history_rounded,
-              title: 'Nothing watched yet',
-              subtitle: 'Play something and it will be listed here.',
+              title: context.l10n.historyNothing,
+              subtitle: context.l10n.historyNothingHint,
             );
           }
 

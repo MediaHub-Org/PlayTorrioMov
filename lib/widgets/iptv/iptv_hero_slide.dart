@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -132,18 +133,18 @@ class IptvHeroSlide extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.sensors_rounded,
                           color: AppColors.onAccent,
                           size: 14,
                         ),
-                        SizedBox(width: 5),
+                        const SizedBox(width: 5),
                         Text(
-                          'LIVE BROADCAST',
-                          style: TextStyle(
+                          context.l10n.iptvLiveBroadcast.toUpperCase(),
+                          style: const TextStyle(
                             color: AppColors.onAccent,
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
@@ -221,7 +222,7 @@ class IptvHeroSlide extends StatelessWidget {
 
               // Description / stream info
               Text(
-                'Instant live multi-source streaming with real-time stream resolution & high-framerate playback.',
+                context.l10n.iptvHeroBlurb,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
@@ -261,18 +262,18 @@ class IptvHeroSlide extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.play_arrow_rounded,
                               color: AppColors.onAccent,
                               size: 22,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'Watch Live',
-                              style: TextStyle(
+                              context.l10n.iptvWatchLive,
+                              style: const TextStyle(
                                 color: AppColors.onAccent,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
@@ -313,9 +314,9 @@ class IptvHeroSlide extends StatelessWidget {
                               size: 18,
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              'Stream Feeds',
-                              style: TextStyle(
+                            Text(
+                              context.l10n.iptvStreamFeeds,
+                              style: const TextStyle(
                                 color: AppColors.onAccent,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,

@@ -25,8 +25,8 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**Roughly 170 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 781 keys are translated into Spanish, Arabic and Portuguese-BR.
+**Roughly 130 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 796 keys are translated into Spanish, Arabic and Portuguese-BR.
 Done: the settings pages, nearly all of the player's chrome (controls, menus,
 panels, cast sheet, loading and error screens, snack bars), the Films, Series,
 Discover, Search, Anime browse and Library pages, the shared error view, the

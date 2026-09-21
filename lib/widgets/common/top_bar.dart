@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
@@ -112,7 +113,7 @@ class SettingsIconButton extends StatelessWidget {
     AppColors.dependOn(context);
     return IconButton(
       onPressed: onTap,
-      tooltip: 'Settings',
+      tooltip: context.l10n.commonSettings,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       style: IconButton.styleFrom(

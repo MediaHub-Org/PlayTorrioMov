@@ -569,7 +569,7 @@ class _DetailsPageState extends State<DetailsPage>
           ),
           const SizedBox(height: _Space.md),
           Text(
-            'Details unavailable.',
+            context.l10n.detailsUnavailable,
             style: TextStyle(color: AppColors.inkSubtle, fontSize: 18),
           ),
           const SizedBox(height: _Space.lg),

@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -254,7 +255,7 @@ class PlayerMenuHeader extends StatelessWidget {
                   size: 28,
                   iconSize: 14,
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  tooltip: 'Back to settings',
+                  tooltip: context.l10n.playerBackToSettings,
                   onPressed: back,
                 ),
               Flexible(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/theme/app_colors.dart';
@@ -83,22 +84,22 @@ class SectionHeader extends StatelessWidget {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Flexible(
                         child: Text(
-                          'See All',
+                          context.l10n.commonSeeAll,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                      SizedBox(width: 2),
-                      Icon(Icons.chevron_right_rounded, size: 20),
+                      const SizedBox(width: 2),
+                      const Icon(Icons.chevron_right_rounded, size: 20),
                     ],
                   ),
                 ),

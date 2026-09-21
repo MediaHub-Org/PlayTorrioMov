@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/my_list/my_list_item.dart';
 import '../../services/app_spacing.dart';
@@ -278,7 +279,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: _Palette.accent),
                               onPressed: _loadDetails,
-                              child: const Text('Retry'),
+                              child: Text(context.l10n.commonTryAgain),
                             ),
                           ],
                         ),

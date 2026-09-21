@@ -97,10 +97,10 @@ void main() {
   });
 
   test('a segment labels its skip button in the app language', () {
-    final intro = MediaSkipSegment(type: 'intro', startMs: 0, endMs: 1000);
+    const intro = MediaSkipSegment(type: 'intro', startMs: 0, endMs: 1000);
     expect(intro.label(AppLocalizationsEs()), 'Saltar intro');
 
-    final odd = MediaSkipSegment(type: 'mixed', startMs: 0, endMs: 1000);
+    const odd = MediaSkipSegment(type: 'mixed', startMs: 0, endMs: 1000);
     expect(odd.label(AppLocalizationsEn()), 'Skip Mixed');
     expect(odd.label(AppLocalizationsEs()), 'Saltar Mixed');
   });

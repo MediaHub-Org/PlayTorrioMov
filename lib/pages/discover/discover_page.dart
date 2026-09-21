@@ -715,7 +715,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel', style: TextStyle(color: AppColors.inkSubtle)),
+            child: Text(context.l10n.libraryCancel, style: TextStyle(color: AppColors.inkSubtle)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(

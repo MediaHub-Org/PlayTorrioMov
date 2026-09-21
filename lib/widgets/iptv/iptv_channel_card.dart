@@ -1,6 +1,7 @@
 import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
@@ -290,7 +291,7 @@ class IptvChannelCard extends StatelessWidget {
                         ],
                         Flexible(
                           child: Text(
-                            'HD Live',
+                            context.l10n.iptvHdLive,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(

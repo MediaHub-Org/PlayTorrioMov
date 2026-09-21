@@ -2,6 +2,7 @@ import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/continue_watching/continue_watching_item.dart';
 import '../../models/movie/movie.dart';
@@ -20,12 +21,12 @@ import '../../services/theme/app_colors.dart';
 class ContinueWatchingSlider extends StatefulWidget {
   final String?
   typeFilter; // 'main', 'anime', 'movie', 'series', or null for all
-  final String title;
+  final String? title;
 
   const ContinueWatchingSlider({
     super.key,
     this.typeFilter,
-    this.title = 'Continue Watching',
+    this.title,
   });
 
   /// Height of the section header line (accent bar, title, count, "See all").
@@ -203,7 +204,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                             children: [
                               Flexible(
                                 child: Text(
-                                  widget.title,
+                                  widget.title ?? context.l10n.continueWatchingTitle,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -263,10 +264,10 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                               context,
                               WatchHistoryPage(
                                 typeFilter: widget.typeFilter,
-                                title: 'History',
+                                title: context.l10n.historyTitle,
                               ),
                             ),
-                            child: const Text('See all'),
+                            child: Text(context.l10n.commonSeeAll),
                           ),
                       ],
                     ),

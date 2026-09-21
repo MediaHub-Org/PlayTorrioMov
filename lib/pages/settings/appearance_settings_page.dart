@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/iptv_settings.dart';
 import 'appearance/live_tv_settings_page.dart';
@@ -79,8 +80,8 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                   return _buildSectionButton(
                     icon: Icons.live_tv_rounded,
                     iconColor: currentPalette.primaryColor,
-                    title: 'Live TV & Sports UI',
-                    subtitle: 'Broadcast hero spotlight, channel card density, category ordering, and live badge styling',
+                    title: context.l10n.liveTvSettingsTitle,
+                    subtitle: context.l10n.liveTvSettingsSub,
                     badgeText: spotlightEnabled ? 'Spotlight ON' : 'Compact',
                     badgeColor: currentPalette.primaryColor,
                     onTap: () async {

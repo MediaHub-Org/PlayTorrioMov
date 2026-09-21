@@ -285,7 +285,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
             body: LibraryEmptyState(
               icon: Icons.playlist_remove_rounded,
               title: context.l10n.libraryCollectionGoneTitle,
-              subtitle: 'It was deleted.',
+              subtitle: context.l10n.libraryCollectionGoneHint,
             ),
           );
         }
@@ -341,8 +341,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
               ? LibraryEmptyState(
                   icon: Icons.playlist_add_rounded,
                   title: context.l10n.libraryEmptyCollectionTitle,
-                  subtitle:
-                      'Open anything and tap Add to collection to file it here.',
+                  subtitle: context.l10n.libraryEmptyCollectionHint,
                 )
               : _reordering
               ? _buildReorderList(collection)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../pages/search/search_page.dart';
 import '../../utils/navigation/route_transitions.dart';
@@ -26,7 +27,7 @@ class PageSearchButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Search',
+      message: context.l10n.commonSearch,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
