@@ -25,8 +25,8 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~20-300 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 557 keys are translated into Spanish, Arabic and Portuguese-BR.
+**~5-260 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 610 keys are translated into Spanish, Arabic and Portuguese-BR.
 The settings pages and nearly all of the player's own chrome are done (the
 transport bar, top bar and centered controls, the speed, sleep-timer, audio,
 aspect-ratio and subtitle menus, the sources and episodes panels, the cast
@@ -34,10 +34,14 @@ sheet, the subtitle sync bar, the loading and error screens and the player's
 snack bars, the download and copy-URL messages); what is
 left is the long tail outside them — the subtitle style editor and the text
 sync overlay, the skip button's own labels, the Live TV portal browser and
-its modals, the anime pages, and the details-page rails. The Films and Series
-catalog pages, the Discover and Search pages, the Library page, the shared
+its modals, the anime details and stream pages, and the details-page rails. The
+Films and Series catalog pages, the Discover, Search and Anime browse pages, the Library page, the shared
 error view,
 the mini player, and the P2P warning and update dialogs are done.
+
+Genre names (Action, Slice of Life, ...) and anime formats (TV, OVA, ...) stay
+in English on purpose: they are AniList's own values, sent back to its API to
+filter, and would need a display-name map per language on top.
 
 Translating a menu can expose an overflow the English hid: the audio menu's
 "Default audio stream playing." and "Audio Sync Offset" rows were fixed-width

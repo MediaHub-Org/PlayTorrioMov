@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
+import '../../widgets/player/language_flag.dart';
 
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
@@ -128,7 +130,7 @@ class _AnimePageState extends State<AnimePage> {
         if (mounted) {
           setState(() {
             _error =
-                'Failed to load Arabic Anime catalog. Check your internet connection.';
+                context.l10n.animeArabicLoadFailed;
             _loading = false;
           });
         }
@@ -268,27 +270,27 @@ class _AnimePageState extends State<AnimePage> {
       transparent: true,
       pills: [
         FilterDropdown<String?>(
-          label: _genreFilter ?? 'All Genres',
+          label: _genreFilter ?? context.l10n.animeAllGenres,
           icon: Icons.filter_list_rounded,
           items: [
-            const PopupMenuItem(value: null, child: Text('All Genres')),
+            PopupMenuItem(value: null, child: Text(context.l10n.animeAllGenres)),
             for (final g in _kAnimeGenres)
               PopupMenuItem(value: g, child: Text(g)),
           ],
           onSelected: _selectGenre,
         ),
         FilterDropdown<bool>(
-          label: _isArabicMode ? '🇸🇦 Arabic' : '🇬🇧 English',
+          label: _isArabicMode ? context.l10n.animeLangArabic : context.l10n.animeLangEnglish,
           icon: Icons.language_rounded,
-          items: const [
+          items: [
             PopupMenuItem(
               value: false,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('🇬🇧', style: TextStyle(fontSize: 16)),
-                  SizedBox(width: 10),
-                  Text('English'),
+                  const LanguageFlag('English', height: 14),
+                  const SizedBox(width: 10),
+                  Text(context.l10n.animeLangEnglish),
                 ],
               ),
             ),
@@ -297,9 +299,9 @@ class _AnimePageState extends State<AnimePage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('🇸🇦', style: TextStyle(fontSize: 16)),
-                  SizedBox(width: 10),
-                  Text('Arabic'),
+                  const LanguageFlag('Arabic', height: 14),
+                  const SizedBox(width: 10),
+                  Text(context.l10n.animeLangArabic),
                 ],
               ),
             ),
@@ -463,43 +465,43 @@ class _AnimePageState extends State<AnimePage> {
     }
     return [
       BrowseRow(
-        title: '🔥 Trending Anime',
-        subtitle: 'Top popular and trending series',
+        title: '🔥 ${context.l10n.animeTrendingTitle}',
+        subtitle: context.l10n.animeTrendingSub,
         items: _trending,
       ),
       BrowseRow(
-        title: '🌟 Popular This Season (${AnilistService.currentSeason()})',
-        subtitle: 'Currently airing hits',
+        title: '🌟 ${context.l10n.animeSeasonTitle(AnilistService.currentSeason())}',
+        subtitle: context.l10n.animeSeasonSub,
         items: _popularSeason,
       ),
       BrowseRow(
-        title: '⭐ All-Time Masterpieces',
-        subtitle: 'Critically acclaimed top rated anime',
+        title: '⭐ ${context.l10n.animeTopTitle}',
+        subtitle: context.l10n.animeTopSub,
         items: _topRated,
       ),
       BrowseRow(
-        title: '🚀 Anticipated Next Season',
-        subtitle: 'Upcoming anime you cannot miss',
+        title: '🚀 ${context.l10n.animeUpcomingTitle}',
+        subtitle: context.l10n.animeUpcomingSub,
         items: _upcoming,
       ),
       BrowseRow(
-        title: '⚔️ Action & Adventure',
-        subtitle: 'High octane battles and epic journeys',
+        title: '⚔️ ${context.l10n.animeActionTitle}',
+        subtitle: context.l10n.animeActionSub,
         items: _actionAnime,
       ),
       BrowseRow(
-        title: '💖 Romance & Drama',
-        subtitle: 'Heartfelt emotional stories',
+        title: '💖 ${context.l10n.animeRomanceTitle}',
+        subtitle: context.l10n.animeRomanceSub,
         items: _romanceAnime,
       ),
       BrowseRow(
-        title: '🔮 Fantasy & Isekai',
-        subtitle: 'Magical realms and alternate worlds',
+        title: '🔮 ${context.l10n.animeFantasyTitle}',
+        subtitle: context.l10n.animeFantasySub,
         items: _fantasyAnime,
       ),
       BrowseRow(
-        title: '🤖 Sci-Fi & Cyberpunk',
-        subtitle: 'Futuristic technologies and dystopian worlds',
+        title: '🤖 ${context.l10n.animeSciFiTitle}',
+        subtitle: context.l10n.animeSciFiSub,
         items: _sciFiAnime,
       ),
     ];
@@ -532,7 +534,7 @@ class _AnimePageState extends State<AnimePage> {
             header: pillHeader,
             belowHero: ContinueWatchingSlider(
               typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',
-              title: _isArabicMode ? 'متابعة المشاهدة' : 'Continue Watching',
+              title: context.l10n.animeContinueWatching,
             ),
             belowHeroExtent: ContinueWatchingSlider.bandHeight,
             isLoading: _loading,
@@ -551,7 +553,7 @@ class _AnimePageState extends State<AnimePage> {
             onRefresh: _loadAnimeData,
             emptyState: Center(
               child: Text(
-                'Failed to load the Anime catalog.',
+                context.l10n.animeLoadFailed,
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
               ),
             ),
@@ -840,9 +842,9 @@ class _AnimeHeroSlide extends StatelessWidget {
                       ElevatedButton.icon(
                         onPressed: onWatchNow,
                         icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                        label: const Text(
-                          'Watch Ep 1',
-                          style: TextStyle(
+                        label: Text(
+                          context.l10n.animeWatchEp1,
+                          style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15.5,
                           ),
@@ -875,7 +877,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                           color: AppColors.onAccent.withValues(alpha: 0.80),
                         ),
                         label: Text(
-                          'Details',
+                          context.l10n.commonDetails,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: isCompact ? 14 : 15.5,
