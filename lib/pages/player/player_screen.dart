@@ -23,7 +23,6 @@ import '../../services/debrid/debrid_service.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
 import '../../services/player/player_settings.dart';
-import '../../services/discord/discord_rpc_service.dart';
 
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_top_bar.dart';
@@ -244,7 +243,6 @@ class _PlayerScreenState extends State<PlayerScreen>
       _player.stream.playing.listen((playing) {
         if (mounted) {
           setState(() => _isPlaying = playing);
-          _updateDiscordRpc(isPaused: !playing);
         }
       }),
       _player.stream.position.listen((pos) {
@@ -256,7 +254,6 @@ class _PlayerScreenState extends State<PlayerScreen>
       _player.stream.duration.listen((dur) {
         if (mounted) {
           setState(() => _duration = dur);
-          _updateDiscordRpc();
         }
       }),
       _player.stream.buffer.listen((buf) {
@@ -1686,56 +1683,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  void _updateDiscordRpc({bool? isPaused}) {
-    final paused = isPaused ?? !_isPlaying;
-    final detail = widget.detail;
-    final episode = _currentEpisode;
-    final title = detail?.name ?? _currentTitle;
-    final poster = widget.backdropUrl ?? detail?.poster ?? detail?.background;
-
-    final type = (detail?.type ?? '').toLowerCase();
-    final isAnime =
-        type == 'anime' ||
-        (detail == null &&
-            _currentTitle.toLowerCase().contains('episode') &&
-            episode != null);
-    final isSeries =
-        type == 'series' || type == 'tv' || (!isAnime && episode != null);
-
-    if (isAnime) {
-      DiscordRpcService.instance.setWatchingAnime(
-        title: title,
-        season: episode?.season,
-        episode: episode?.episode,
-        episodeTitle: episode?.title,
-        posterUrl: poster,
-        position: _position,
-        duration: _duration,
-        isPaused: paused,
-      );
-    } else if (isSeries) {
-      DiscordRpcService.instance.setWatchingSeries(
-        title: title,
-        season: episode?.season,
-        episode: episode?.episode,
-        episodeTitle: episode?.title,
-        posterUrl: poster,
-        position: _position,
-        duration: _duration,
-        isPaused: paused,
-      );
-    } else {
-      DiscordRpcService.instance.setWatchingMovie(
-        title: title,
-        year: detail?.year,
-        posterUrl: poster,
-        position: _position,
-        duration: _duration,
-        isPaused: paused,
-      );
-    }
-  }
-
   @override
   void dispose() {
     // The timer keeps running across screens by design -- a viewer who sets
@@ -1772,7 +1719,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (!_wasFullscreenBeforeEntering && WindowService.instance.isFullscreen) {
       WindowService.instance.exitFullscreen();
     }
-    DiscordRpcService.instance.clearToIdle();
     _seekFlashTimer?.cancel();
     super.dispose();
   }

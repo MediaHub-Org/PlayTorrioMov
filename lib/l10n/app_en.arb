@@ -965,7 +965,6 @@
   "syncTmdbBundledKey": "Using this build's included key — cast photos and character names load when available. Add your own if you would rather not share it.",
   "syncTmdbNoKey": "Add your own free TMDB API key to fill in cast photos and character names most addons don't provide.",
   "syncTmdbUseMyKey": "Use my key",
-  "syncDiscordTitle": "Discord Rich Presence",
   "debridIntro": "Stream torrents and magnet links instantly through high-speed cloud debrid providers without local peer-to-peer downloading.",
   "debridMasterTitle": "Use Debrid for Streams",
   "debridMasterSubtitle": "Route torrent links through cloud servers",

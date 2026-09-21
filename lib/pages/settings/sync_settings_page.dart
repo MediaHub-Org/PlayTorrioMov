@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -10,22 +9,18 @@ import '../../services/simkl/simkl_service.dart';
 import '../../services/simkl/simkl_settings.dart';
 import '../../services/my_list/my_list_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
-import '../../services/discord/discord_rpc_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
-/// Simkl, TMDB and Discord Rich Presence. Trakt/Simkl used to be the whole
-/// page (two nearly identical cards -- status, connect/disconnect, one sync
-/// action); TMDB and Discord joined from the old "General & Data" catch-all,
-/// which had nothing left in it once they moved out.
+/// Simkl and TMDB. Trakt/Simkl used to be the whole page (two nearly
+/// identical cards -- status, connect/disconnect, one sync action); TMDB
+/// joined from the old "General & Data" catch-all, which had nothing left in
+/// it once it moved out.
 class SyncSettingsPage extends StatelessWidget {
   const SyncSettingsPage({super.key});
-
-  static bool get _isDesktop =>
-      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +39,13 @@ class SyncSettingsPage extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
         ),
       ),
-      body: SettingsScrollView(
+      body: const SettingsScrollView(
         children: [
-          const _TraktSyncCard(),
-          const SizedBox(height: 16),
-          const _SimklSyncCard(),
-          const SizedBox(height: 16),
-          const _TmdbConnectCard(),
-          if (_isDesktop) ...[
-            const SizedBox(height: 16),
-            const _DiscordPresenceCard(),
-          ],
+          _TraktSyncCard(),
+          SizedBox(height: 16),
+          _SimklSyncCard(),
+          SizedBox(height: 16),
+          _TmdbConnectCard(),
         ],
       ),
     );
@@ -1016,60 +1007,6 @@ class _TmdbConnectCard extends StatelessWidget {
                     ),
                   );
                 },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _DiscordPresenceCard extends StatelessWidget {
-  const _DiscordPresenceCard();
-
-  @override
-  Widget build(BuildContext context) {
-    AppColors.dependOn(context);
-    return ValueListenableBuilder<bool>(
-      valueListenable: DiscordRpcService.instance.isEnabled,
-      builder: (context, isEnabled, _) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isEnabled
-                  ? const Color(0xFF5865F2).withValues(alpha: 0.3)
-                  : AppColors.inkAlpha(0.08),
-            ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF5865F2).withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.sports_esports_rounded,
-                  color: Color(0xFF5865F2),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  context.l10n.syncDiscordTitle,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                ),
-              ),
-              Switch.adaptive(
-                value: isEnabled,
-                activeColor: const Color(0xFF5865F2),
-                onChanged: (val) => DiscordRpcService.instance.setEnabled(val),
               ),
             ],
           ),

@@ -9,7 +9,6 @@ import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/iptv_controller.dart';
 import '../../services/content_display_enums.dart';
 import '../../services/iptv/iptv_settings.dart';
-import '../../services/discord/discord_rpc_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/header_pill_style.dart';
@@ -49,7 +48,6 @@ class _IptvPageState extends State<IptvPage> {
   @override
   void initState() {
     super.initState();
-    DiscordRpcService.instance.setWatchingLiveTv(channelName: 'Live TV');
     IptvSettings.changeNotifier.addListener(_onSettingsChanged);
     AppThemeService.currentPalette.addListener(_onSettingsChanged);
     // Liking a channel has to reorder the row it appears in, and the sheet
@@ -66,7 +64,6 @@ class _IptvPageState extends State<IptvPage> {
     AppThemeService.currentPalette.removeListener(_onSettingsChanged);
     FavoriteChannelsService.items.removeListener(_onSettingsChanged);
     CustomChannelsService.items.removeListener(_onSettingsChanged);
-    DiscordRpcService.instance.clearToIdle();
     super.dispose();
   }
 

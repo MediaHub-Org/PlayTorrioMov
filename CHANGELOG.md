@@ -5,6 +5,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Removed
+- **Discord Rich Presence**: it did not work, so the setting, the service, the
+  `dart_discord_presence` dependency, the `DISCORD_APP_ID` build key and every
+  call that fed it are gone. Also gone: `simklClientSecret`, which nothing read
+  (Simkl's PIN flow signs in with the client ID alone).
+
 ### Changed
 - **Much more of the app translated (#68)**: the player (controls, menus,
   the sources and episodes panels, the cast sheet, loading and error screens

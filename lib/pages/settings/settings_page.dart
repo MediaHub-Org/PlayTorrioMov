@@ -216,9 +216,8 @@ class _SettingsPageState extends State<SettingsPage> {
 /// status badge, and a chevron. Every category uses this same shape and
 /// size now; there used to also be a subtitle sentence under the title and
 /// a visually distinct switch-tile variant for the two toggles that lived
-/// here (P2P, Discord) -- both toggles moved to the page whose behavior
-/// they actually control (Built-in Providers, Connect), so every remaining
-/// entry is just "go to this category", uniformly.
+/// here -- they moved to the pages whose behavior they actually control, so
+/// every remaining entry is just "go to this category", uniformly.
 class _SettingsCategoryTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;

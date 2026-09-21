@@ -95,8 +95,7 @@ looks for:
 | Key                                      | Used for                                                                   |
 |:-----------------------------------------|:---------------------------------------------------------------------------|
 | `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` | Trakt sign-in                                                              |
-| `SIMKL_CLIENT_ID`, `SIMKL_CLIENT_SECRET` | Simkl sign-in                                                              |
-| `DISCORD_APP_ID`                         | Discord Rich Presence                                                      |
+| `SIMKL_CLIENT_ID`                        | Simkl sign-in (the PIN flow needs no secret)                               |
 | `TMDB_API_KEY`                           | Cast photos and character names, so a fresh install has them with no setup |
 
 The name says *contents*, not a path, because that is the mistake the old

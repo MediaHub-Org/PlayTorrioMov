@@ -103,12 +103,6 @@ class EnvService {
     return get('SIMKL_CLIENT_ID');
   }
 
-  static String get simklClientSecret {
-    const compileVal = String.fromEnvironment('SIMKL_CLIENT_SECRET');
-    if (compileVal.isNotEmpty) return compileVal;
-    return get('SIMKL_CLIENT_SECRET');
-  }
-
   // TMDB API key (checks compile-time dart-define first, then runtime .env).
   //
   // A release build carries this via the ENV_FILE repository secret, the
@@ -119,12 +113,5 @@ class EnvService {
     const compileVal = String.fromEnvironment('TMDB_API_KEY');
     if (compileVal.isNotEmpty) return compileVal;
     return get('TMDB_API_KEY');
-  }
-
-  // Discord Rich Presence App ID (checks compile-time dart-define first, then runtime .env)
-  static String get discordAppId {
-    const compileVal = String.fromEnvironment('DISCORD_APP_ID');
-    if (compileVal.isNotEmpty) return compileVal;
-    return get('DISCORD_APP_ID');
   }
 }

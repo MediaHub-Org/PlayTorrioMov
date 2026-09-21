@@ -744,7 +744,6 @@
   "syncTmdbBundledKey": "Usando la clave incluida en esta compilación: las fotos del reparto y los nombres de personaje se cargan cuando están disponibles. Añade la tuya si prefieres no compartirla.",
   "syncTmdbNoKey": "Añade tu propia clave gratuita de API de TMDB para completar las fotos del reparto y los nombres de personaje que la mayoría de complementos no aportan.",
   "syncTmdbUseMyKey": "Usar mi clave",
-  "syncDiscordTitle": "Discord Rich Presence",
   "debridIntro": "Reproduce torrents y enlaces magnet al instante mediante proveedores debrid en la nube de alta velocidad, sin descarga P2P local.",
   "debridMasterTitle": "Usar Debrid para las fuentes",
   "debridMasterSubtitle": "Enruta los enlaces torrent por servidores en la nube",

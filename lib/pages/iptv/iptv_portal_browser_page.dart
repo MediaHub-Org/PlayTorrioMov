@@ -10,7 +10,6 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_network.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../services/iptv/iptv_storage.dart';
-import '../../services/discord/discord_rpc_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
@@ -83,8 +82,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   @override
   void initState() {
     super.initState();
-    final name = widget.portal?.name ?? widget.m3uPlaylist?.name ?? 'IPTV Portal';
-    DiscordRpcService.instance.setWatchingLiveTv(channelName: 'Portal: $name');
     _categoryScrollController.addListener(_updateCategoryScrollState);
     _contentScrollController.addListener(_updateContentScrollState);
     IptvSettings.changeNotifier.addListener(_onSettingsChanged);
@@ -131,7 +128,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     _contentScrollController.dispose();
     _searchCtrl.dispose();
     _catSearchCtrl.dispose();
-    DiscordRpcService.instance.clearToIdle();
     super.dispose();
   }
 
