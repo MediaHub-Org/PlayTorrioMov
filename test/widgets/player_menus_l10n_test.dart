@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/services/player/sleep_timer_service.dart';
+import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
+import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_top_bar.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
@@ -66,5 +68,38 @@ void main() {
     expect(find.byTooltip('Baixar'), findsOneWidget);
     expect(find.byTooltip('Copiar URL da transmissão'), findsOneWidget);
     expect(find.byTooltip('Transmitir'), findsOneWidget);
+  });
+
+  testWidgets('the aspect ratio menu follows the app language', (tester) async {
+    await tester.pumpWidget(inLocale(
+      'es',
+      PlayerAspectMenu(
+        currentFit: BoxFit.contain,
+        onFitSelected: (_) {},
+        onRatioSelected: (_) {},
+        onClose: () {},
+      ),
+    ));
+
+    expect(find.text('RELACIÓN DE ASPECTO'), findsOneWidget);
+    expect(find.text('Original (mantiene la forma de la fuente)'), findsOneWidget);
+    expect(find.text('Forzar 16:9 (panorámico)'), findsOneWidget);
+    expect(find.textContaining('Force'), findsNothing);
+  });
+
+  testWidgets('the audio menu follows the app language', (tester) async {
+    await tester.pumpWidget(inLocale(
+      'pt',
+      PlayerAudioMenu(
+        audioTracks: const [],
+        selectedIndex: 0,
+        delaySec: 0,
+        onTrackSelected: (_) {},
+        onDelayChanged: (_) {},
+      ),
+    ));
+
+    expect(find.text('Reproduzindo o áudio padrão.'), findsOneWidget);
+    expect(find.text('Deslocamento do áudio'), findsOneWidget);
   });
 }

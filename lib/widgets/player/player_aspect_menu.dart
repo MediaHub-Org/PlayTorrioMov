@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 class AspectOption {
   final String id;
-  final String label;
 
   /// The [BoxFit] handed to the video widget. Null when this option forces a
   /// ratio instead — see [forcedRatio].
@@ -14,9 +15,21 @@ class AspectOption {
   /// modes, which keep whatever shape the source has.
   final double? forcedRatio;
 
-  const AspectOption.fit(this.id, this.label, this.fit) : forcedRatio = null;
+  const AspectOption.fit(this.id, this.fit) : forcedRatio = null;
 
-  const AspectOption.ratio(this.id, this.label, this.forcedRatio) : fit = null;
+  const AspectOption.ratio(this.id, this.forcedRatio) : fit = null;
+
+  /// The row's label in the app's language. Keyed on [id] rather than stored
+  /// on the option: the options are a `const` list with no `BuildContext`, and
+  /// a label baked into one could only ever be English.
+  String label(AppLocalizations l10n) => switch (id) {
+    'original' => l10n.playerAspectOriginal,
+    'cover' => l10n.playerAspectFill,
+    'fill' => l10n.playerAspectStretch,
+    '16:9' => l10n.playerAspect169,
+    '4:3' => l10n.playerAspect43,
+    _ => id,
+  };
 }
 
 const List<AspectOption> aspectOptions = [
@@ -25,36 +38,16 @@ const List<AspectOption> aspectOptions = [
   // and letterboxing the rest. It was labeled "Fit to screen (Contain)"
   // before, which read as a mode rather than an answer to "show it the way
   // it was shot" -- the label now says that.
-  AspectOption.fit('original', 'Original (keeps the source shape)', BoxFit.contain),
-  AspectOption.fit('cover', 'Fill screen (crops the edges)', BoxFit.cover),
-  AspectOption.fit('fill', 'Stretch to fill (distorts)', BoxFit.fill),
+  AspectOption.fit('original', BoxFit.contain),
+  AspectOption.fit('cover', BoxFit.cover),
+  AspectOption.fit('fill', BoxFit.fill),
   // Ratio overrides, for the two shapes old content is most often trapped
   // in. A 4:3 film mis-tagged as 16:9 shows squeezed in Original; forcing
   // the ratio re-squares it. Done by wrapping the video in an AspectRatio,
   // not by a BoxFit -- BoxFit has no "force this shape" mode.
-  AspectOption.ratio('16:9', 'Force 16:9 (widescreen)', 16 / 9),
-  AspectOption.ratio('4:3', 'Force 4:3 (classic TV)', 4 / 3),
+  AspectOption.ratio('16:9', 16 / 9),
+  AspectOption.ratio('4:3', 4 / 3),
 ];
-
-/// The human label for the current picture mode, for the settings row.
-String aspectLabelFor(BoxFit fit, double? forcedRatio) {
-  if (forcedRatio != null) {
-    for (final opt in aspectOptions) {
-      if (opt.forcedRatio != null &&
-          (opt.forcedRatio! - forcedRatio).abs() < 0.001) {
-        return opt.label
-            .replaceAll('Force ', '')
-            .replaceAll(' (widescreen)', '')
-            .replaceAll(' (classic TV)', '');
-      }
-    }
-  }
-  return switch (fit) {
-    BoxFit.cover => 'Fill',
-    BoxFit.fill => 'Stretch',
-    _ => 'Original',
-  };
-}
 
 /// Aspect ratio and picture popover menu.
 ///
@@ -97,7 +90,7 @@ class PlayerAspectMenu extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PlayerMenuHeader(
-            title: 'ASPECT RATIO',
+            title: context.l10n.detailsAspectRatio.toUpperCase(),
             onBack: onBack,
           ),
 
@@ -147,7 +140,7 @@ class PlayerAspectMenu extends StatelessWidget {
                         // rather than pushing it off the edge.
                         Flexible(
                           child: Text(
-                            opt.label,
+                            opt.label(context.l10n),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(

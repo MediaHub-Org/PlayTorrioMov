@@ -6,9 +6,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- **Player controls translated (#68)**: the transport bar and top bar tooltips,
-  the speed and sleep-timer menus, and the copy-URL and download messages now
-  follow the app language, in all four. 21 new keys, 393 in all.
+- **Player menus translated (#68)**: the transport bar and top bar tooltips,
+  and the speed, sleep-timer, audio, aspect-ratio and subtitle menus, plus the
+  copy-URL and download messages, now follow the app language, in all four.
+  419 keys in all.
+
+### Fixed
+- **Audio menu**: the "default audio stream" line and the "Audio Sync Offset"
+  label could run past the card in a language longer than English; they wrap
+  and shorten instead.
 
 ### Added
 - **macOS for Intel**: releases carry a `macOS-x86_64` DMG and ZIP again,

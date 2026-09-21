@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:playtorriomov/l10n/l10n.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
 import 'language_flag.dart';
@@ -270,7 +271,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           size: buttonSize,
                           iconSize: iconSize,
                           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                          tooltip: 'Back to subtitles',
+                          tooltip: context.l10n.subsBackToSubtitles,
                           onPressed: () =>
                               setState(() => _showAppearance = false),
                         ),
@@ -280,7 +281,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           size: buttonSize,
                           iconSize: iconSize,
                           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                          tooltip: 'Back to settings',
+                          tooltip: context.l10n.playerBackToSettings,
                           onPressed: widget.onBack,
                         ),
                         const SizedBox(width: 6),
@@ -291,7 +292,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         // same pattern every other player menu uses, so the
                         // editor is a step inside the panel rather than a
                         // second panel fighting it for the screen.
-                        _showAppearance ? 'Appearance' : 'Subtitles',
+                        _showAppearance ? context.l10n.subsAppearance : context.l10n.detailsSubtitles,
                         style: const TextStyle(
                           color: PlayerTheme.ink,
                           fontSize: 14.5,
@@ -338,7 +339,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                               ),
                             )
                           : const Icon(Icons.refresh_rounded),
-                      tooltip: 'Refresh Online Subtitles',
+                      tooltip: context.l10n.subsRefreshOnline,
                       onPressed: _isLoadingSearch ? null : _searchOnline,
                     ),
                     const SizedBox(width: 3),
@@ -349,7 +350,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         size: buttonSize,
                         iconSize: iconSize,
                         icon: const Icon(Icons.timer_outlined),
-                        tooltip: 'Subtitle Sync Bar',
+                        tooltip: context.l10n.subsSyncBar,
                         showActiveBadge: widget.delaySec != 0,
                         onPressed: () {
                           widget.onClose();
@@ -366,7 +367,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                       size: buttonSize,
                       iconSize: iconSize,
                       icon: const Icon(Icons.tune_rounded),
-                      tooltip: 'Subtitle Appearance',
+                      tooltip: context.l10n.subsAppearanceTooltip,
                       showActiveBadge: _showAppearance,
                       onPressed: () =>
                           setState(() => _showAppearance = !_showAppearance),
@@ -450,7 +451,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             // used to do this on every press; the button opens this panel
             // now, so the behavior lives here rather than being lost.
             _buildLanguagePill(
-              label: 'Auto',
+              label: context.l10n.subsAuto,
               isSelected: false,
               icon: const Icon(
                 Icons.auto_awesome_rounded,
@@ -466,7 +467,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
             // Off Button
             _buildLanguagePill(
-              label: 'Off',
+              label: context.l10n.detailsOff,
               isSelected: isOff,
               icon: Icon(
                 Icons.block_rounded,
@@ -483,7 +484,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             // Embedded Subtitles Pill
             if (widget.embeddedSubtitles.isNotEmpty) ...[
               _buildLanguagePill(
-                label: 'Embedded',
+                label: context.l10n.subsEmbedded,
                 emoji: '⚡',
                 count: widget.embeddedSubtitles.length,
                 isSelected: _selectedLanguage == '__embedded__',
@@ -495,7 +496,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             // All Languages Pill
             if (_dynamicGroups.isNotEmpty) ...[
               _buildLanguagePill(
-                label: 'All',
+                label: context.l10n.subsAll,
                 emoji: '🌐',
                 count: totalVariantsCount,
                 isSelected: _selectedLanguage == '__all__',
@@ -651,9 +652,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                               : null,
                         ),
                         const SizedBox(width: 7),
-                        const Text(
-                          'Off',
-                          style: TextStyle(
+                        Text(
+                          context.l10n.detailsOff,
+                          style: const TextStyle(
                             color: PlayerTheme.inkMuted,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -667,11 +668,11 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
               // Embedded Subtitles Category
               if (widget.embeddedSubtitles.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.only(left: 8, top: 10, bottom: 4),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 10, bottom: 4),
                   child: Text(
-                    'EMBEDDED',
-                    style: TextStyle(
+                    context.l10n.subsEmbedded.toUpperCase(),
+                    style: const TextStyle(
                       color: PlayerTheme.inkSubtle,
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
@@ -699,10 +700,10 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         children: [
                           const Text('⚡', style: TextStyle(fontSize: 11.5)),
                           const SizedBox(width: 7),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'Embedded',
-                              style: TextStyle(
+                              context.l10n.subsEmbedded,
+                              style: const TextStyle(
                                 color: PlayerTheme.ink,
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w600,
@@ -734,11 +735,11 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               ],
 
               if (_dynamicGroups.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.only(left: 8, top: 10, bottom: 4),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, top: 10, bottom: 4),
                   child: Text(
-                    'LANGUAGES',
-                    style: TextStyle(
+                    context.l10n.subsLanguages.toUpperCase(),
+                    style: const TextStyle(
                       color: PlayerTheme.inkSubtle,
                       fontSize: 9,
                       fontWeight: FontWeight.w700,
@@ -768,10 +769,10 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         children: [
                           const Text('🌐', style: TextStyle(fontSize: 11.5)),
                           const SizedBox(width: 7),
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              'All Languages',
-                              style: TextStyle(
+                              context.l10n.subsAllLanguages,
+                              style: const TextStyle(
                                 color: PlayerTheme.inkMuted,
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w500,
@@ -876,7 +877,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         children: [
           PlayerToggleChip(
             active: _sourceFilter == 'all',
-            label: 'All',
+            label: context.l10n.subsAll,
             onClick: () => setState(() => _sourceFilter = 'all'),
           ),
           const SizedBox(width: 5),
@@ -888,7 +889,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           const SizedBox(width: 5),
           PlayerToggleChip(
             active: _filterForced,
-            label: 'Forced',
+            label: context.l10n.subsForced,
             onClick: () => setState(() => _filterForced = !_filterForced),
           ),
           const Spacer(),
@@ -900,7 +901,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                   Icon(Icons.search_rounded, size: 13, color: PlayerTheme.accent),
                   const SizedBox(width: 4),
                   Text(
-                    'Search Online',
+                    context.l10n.subsSearchOnline,
                     style: TextStyle(
                       color: PlayerTheme.accent,
                       fontSize: 11,
@@ -996,7 +997,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                'EMBEDDED',
+                                context.l10n.subsEmbedded.toUpperCase(),
                                 style: TextStyle(
                                   color: PlayerTheme.accent,
                                   fontSize: 8.5,
@@ -1062,9 +1063,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               strokeWidth: 2.5,
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Searching subtitles...',
-              style: TextStyle(color: PlayerTheme.inkMuted, fontSize: 12),
+            Text(
+              context.l10n.subsSearching,
+              style: const TextStyle(color: PlayerTheme.inkMuted, fontSize: 12),
             ),
           ],
         ),
@@ -1084,9 +1085,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                 color: PlayerTheme.inkSubtle,
               ),
               const SizedBox(height: 8),
-              const Text(
-                'No subtitles available.',
-                style: TextStyle(
+              Text(
+                context.l10n.subsNone,
+                style: const TextStyle(
                   color: PlayerTheme.inkMuted,
                   fontSize: 12.5,
                 ),
@@ -1102,7 +1103,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                   ),
                 ),
                 icon: const Icon(Icons.search_rounded, size: 15),
-                label: const Text('Search Online Providers', style: TextStyle(fontSize: 11.5)),
+                label: Text(context.l10n.subsSearchProviders, style: const TextStyle(fontSize: 11.5)),
                 onPressed: _searchOnline,
               ),
             ],
@@ -1261,9 +1262,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                                   color: const Color(0x22F59E0B),
                                   borderRadius: BorderRadius.circular(3),
                                 ),
-                                child: const Text(
-                                  'FORCED',
-                                  style: TextStyle(
+                                child: Text(
+                                  context.l10n.subsForced.toUpperCase(),
+                                  style: const TextStyle(
                                     color: Color(0xFFF59E0B),
                                     fontSize: 8.5,
                                     fontWeight: FontWeight.w700,
@@ -1305,9 +1306,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                 children: [
                   Icon(Icons.search_rounded, size: 13, color: PlayerTheme.accent),
                   const SizedBox(width: 5),
-                  const Text(
-                    'Find more subtitles',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.subsFindMore,
+                    style: const TextStyle(
                       color: PlayerTheme.inkMuted,
                       fontSize: 11.5,
                       fontWeight: FontWeight.w600,

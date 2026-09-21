@@ -25,18 +25,20 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~150-450 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 393 keys are translated into Spanish, Arabic and Portuguese-BR.
-The settings pages and the player's own controls are done (the transport bar,
-the top bar, the speed and sleep-timer menus, the download and copy-URL
-messages); what is left is the long tail outside them — the player's other
-menus and overlays (subtitle, audio and aspect-ratio menus, the sources and
-episodes panels, the subtitle style editor, the cast sheet), the Live TV
-portal browser, the search page, and the details-page rails.
+**~120-420 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 419 keys are translated into Spanish, Arabic and Portuguese-BR.
+The settings pages and most of the player's own chrome are done (the transport
+bar, the top bar, the speed, sleep-timer, audio, aspect-ratio and subtitle
+menus, the download and copy-URL messages); what is left is the long tail
+outside them — the sources and episodes panels, the subtitle style editor and
+sync bars, the cast sheet and skip button, the Live TV portal browser, the
+search page, and the details-page rails.
 
-The aspect-ratio menu is the awkward one: its labels come from a top-level
-function with no `BuildContext` (`aspectLabel` in `player_aspect_menu.dart`),
-so it needs a signature change before it can use `context.l10n`.
+Translating a menu can expose an overflow the English hid: the audio menu's
+"Default audio stream playing." and "Audio Sync Offset" rows were fixed-width
+Rows that a longer Portuguese string pushed 75px past the card. Probe each
+newly translated widget in the longest language (Portuguese or Spanish) at a
+phone's width, not only in English.
 
 The method, per string:
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import 'language_flag.dart';
 import 'player_glass.dart';
@@ -50,7 +51,7 @@ class PlayerAudioMenu extends StatelessWidget {
       ? const Text('🔊', style: TextStyle(fontSize: 15))
       : LanguageFlag(lang, height: 14);
 
-  String? _getTrackSubtitle(PlayerAudioTrack track) {
+  String? _getTrackSubtitle(BuildContext context, PlayerAudioTrack track) {
     final parts = <String>[];
     if (track.language != null && track.language!.isNotEmpty) {
       parts.add(track.language!.toUpperCase());
@@ -59,7 +60,7 @@ class PlayerAudioMenu extends StatelessWidget {
       parts.add(track.codec!.toUpperCase());
     }
     if (track.channels != null && track.channels! > 0) {
-      parts.add(track.channels == 6 ? '5.1 Surround' : (track.channels == 8 ? '7.1 Surround' : '${track.channels} ch'));
+      parts.add(track.channels == 6 ? '5.1 Surround' : (track.channels == 8 ? '7.1 Surround' : context.l10n.playerChannelsShort(track.channels!)));
     }
     return parts.isEmpty ? null : parts.join(' · ');
   }
@@ -99,7 +100,7 @@ class PlayerAudioMenu extends StatelessWidget {
                         size: 28,
                         iconSize: 14,
                         icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        tooltip: 'Back to settings',
+                        tooltip: context.l10n.playerBackToSettings,
                         onPressed: onBack,
                       ),
                       const SizedBox(width: 4),
@@ -110,7 +111,7 @@ class PlayerAudioMenu extends StatelessWidget {
                         vertical: isCompactH ? 2 : 4,
                       ),
                       child: Text(
-                        'AUDIO TRACKS',
+                        context.l10n.playerAudioTracks.toUpperCase(),
                         style: TextStyle(
                           color: PlayerTheme.inkSubtle,
                           fontSize: isCompactH ? 9.5 : 10.5,
@@ -154,7 +155,7 @@ class PlayerAudioMenu extends StatelessWidget {
                     itemBuilder: (context, i) {
                       final track = audioTracks[i];
                       final isSelected = track.index == selectedIndex;
-                      final subtitle = _getTrackSubtitle(track);
+                      final subtitle = _getTrackSubtitle(context, track);
 
                       return Material(
                         color: Colors.transparent,
@@ -238,15 +239,19 @@ class PlayerAudioMenu extends StatelessWidget {
                       );
                     },
                   )
-                : const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                : Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     child: Row(
                       children: [
-                        Icon(Icons.audiotrack_rounded, size: 16, color: Colors.white38),
-                        SizedBox(width: 8),
-                        Text(
-                          'Default audio stream playing.',
-                          style: TextStyle(color: Colors.white54, fontSize: 13),
+                        const Icon(Icons.audiotrack_rounded, size: 16, color: Colors.white38),
+                        const SizedBox(width: 8),
+                        // Expanded: a longer translation wraps instead of
+                        // pushing past the card.
+                        Expanded(
+                          child: Text(
+                            context.l10n.playerAudioDefaultStream,
+                            style: const TextStyle(color: Colors.white54, fontSize: 13),
+                          ),
                         ),
                       ],
                     ),
@@ -271,20 +276,30 @@ class PlayerAudioMenu extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.sync_rounded, size: 14, color: Colors.white70),
-                        const SizedBox(width: 5),
-                        Text(
-                          'Audio Sync Offset',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: isCompactH ? 11 : 12,
-                            fontWeight: FontWeight.w600,
+                    // Flexible so the label gives way to the offset badge beside
+                    // it: a translation can be longer than the English it
+                    // replaced, and this Row had nowhere to put the difference.
+                    Flexible(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.sync_rounded, size: 14, color: Colors.white70),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              context.l10n.playerAudioSyncOffset,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: isCompactH ? 11 : 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Row(
                       children: [
                         Container(
