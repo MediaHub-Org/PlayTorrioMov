@@ -25,11 +25,18 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~170-470 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 372 keys are translated into Spanish, Arabic and Portuguese-BR.
-The settings pages are done; what is left is the long tail outside them —
-the player's own menus and overlays, the Live TV portal browser, the search
-page, and the details-page rails.
+**~150-450 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 393 keys are translated into Spanish, Arabic and Portuguese-BR.
+The settings pages and the player's own controls are done (the transport bar,
+the top bar, the speed and sleep-timer menus, the download and copy-URL
+messages); what is left is the long tail outside them — the player's other
+menus and overlays (subtitle, audio and aspect-ratio menus, the sources and
+episodes panels, the subtitle style editor, the cast sheet), the Live TV
+portal browser, the search page, and the details-page rails.
+
+The aspect-ratio menu is the awkward one: its labels come from a top-level
+function with no `BuildContext` (`aspectLabel` in `player_aspect_menu.dart`),
+so it needs a signature change before it can use `context.l10n`.
 
 The method, per string:
 

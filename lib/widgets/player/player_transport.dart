@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/sleep_timer_service.dart';
 import 'player_glass.dart';
@@ -141,7 +142,7 @@ class PlayerTransport extends StatelessWidget {
                               ? Icons.volume_up_rounded
                               : Icons.volume_down_rounded),
                   ),
-                  tooltip: isMuted ? 'Unmute' : 'Mute',
+                  tooltip: isMuted ? context.l10n.playerUnmute : context.l10n.playerMute,
                   onPressed: onToggleMute,
                 ),
 
@@ -159,7 +160,7 @@ class PlayerTransport extends StatelessWidget {
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: const Icon(Icons.speed_rounded),
-                    tooltip: 'Playback speed',
+                    tooltip: context.l10n.detailsPlaybackSpeed,
                     showActiveBadge: playbackRate != 1.0,
                     onPressed: onOpenSpeedMenu,
                   ),
@@ -171,7 +172,7 @@ class PlayerTransport extends StatelessWidget {
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: const Icon(Icons.audiotrack_rounded),
-                    tooltip: 'Audio track',
+                    tooltip: context.l10n.detailsAudioTrack,
                     onPressed: onOpenAudioMenu,
                   ),
 
@@ -185,7 +186,7 @@ class PlayerTransport extends StatelessWidget {
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: const Icon(Icons.subtitles_rounded),
-                    tooltip: 'Subtitles',
+                    tooltip: context.l10n.detailsSubtitles,
                     showActiveBadge: isSubtitlesActive,
                     badgeColor: const Color(0xFF10B981), // Emerald
                     onPressed: onOpenSubtitleMenu,
@@ -203,8 +204,8 @@ class PlayerTransport extends StatelessWidget {
                       iconSize: btnIconSize,
                       icon: const Icon(Icons.bedtime_rounded),
                       tooltip: minutes == null
-                          ? 'Sleep timer'
-                          : 'Sleep timer: $minutes min left',
+                          ? context.l10n.playerSleepTimer
+                          : context.l10n.playerSleepTimerLeft(minutes),
                       showActiveBadge: minutes != null,
                       onPressed: onOpenSleepTimerMenu,
                     ),
@@ -217,7 +218,7 @@ class PlayerTransport extends StatelessWidget {
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: const Icon(Icons.aspect_ratio_rounded),
-                    tooltip: 'Aspect ratio',
+                    tooltip: context.l10n.detailsAspectRatio,
                     onPressed: onOpenAspectMenu,
                   ),
                 ],

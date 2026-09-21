@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 /// Interactive volume slider with high-gain boost support (up to 250%).
@@ -96,7 +97,7 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                 _getVolumeIcon(),
                 color: isBoosting ? boostColor : (widget.isMuted ? PlayerTheme.inkSubtle : Colors.white),
               ),
-              tooltip: widget.isMuted ? 'Unmute' : 'Mute',
+              tooltip: widget.isMuted ? context.l10n.playerUnmute : context.l10n.playerMute,
               onPressed: widget.onToggleMute,
             ),
 

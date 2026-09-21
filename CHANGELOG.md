@@ -5,6 +5,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Player controls translated (#68)**: the transport bar and top bar tooltips,
+  the speed and sleep-timer menus, and the copy-URL and download messages now
+  follow the app language, in all four. 21 new keys, 393 in all.
+
 ### Added
 - **macOS for Intel**: releases carry a `macOS-x86_64` DMG and ZIP again,
   alongside `macOS-arm64`. One build, thinned into two bundles, each verified

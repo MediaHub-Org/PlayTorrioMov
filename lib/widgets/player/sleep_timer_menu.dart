@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/player/sleep_timer_service.dart';
 import 'player_glass.dart';
 
@@ -53,7 +54,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PlayerMenuHeader(title: 'SLEEP TIMER'),
+          PlayerMenuHeader(title: context.l10n.playerSleepTimer.toUpperCase()),
           const SizedBox(height: 6),
           ValueListenableBuilder<int?>(
             valueListenable: SleepTimerService.instance.minutesRemaining,
@@ -73,7 +74,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
                   const SizedBox(height: 4),
                   _DurationRow(
                     minutes: remaining,
-                    labelOverride: 'Off (cancel -- $remaining min left)',
+                    labelOverride: context.l10n.playerSleepOff(remaining),
                     isSelected: false,
                     icon: Icons.timer_off_outlined,
                     onTap: () {
@@ -105,12 +106,12 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Row(
         children: [
-          const Flexible(
+          Flexible(
             child: Text(
-              'Custom',
+              context.l10n.playerSleepCustom,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: PlayerTheme.ink,
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -119,7 +120,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
           ),
           _StepperButton(
             icon: Icons.remove_rounded,
-            tooltip: 'Fewer minutes',
+            tooltip: context.l10n.playerFewerMinutes,
             onPressed: () => setState(() {
               _customMinutes = (value - _customStep).clamp(_customMin, _customMax);
             }),
@@ -144,7 +145,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
           ),
           _StepperButton(
             icon: Icons.add_rounded,
-            tooltip: 'More minutes',
+            tooltip: context.l10n.playerMoreMinutes,
             onPressed: () => setState(() {
               _customMinutes = (value + _customStep).clamp(_customMin, _customMax);
             }),
@@ -154,7 +155,7 @@ class _SleepTimerMenuState extends State<SleepTimerMenu> {
             size: 30,
             iconSize: 16,
             icon: const Icon(Icons.check_rounded),
-            tooltip: 'Set custom timer',
+            tooltip: context.l10n.playerSetCustomTimer,
             active: isCustomActive,
             onPressed: () {
               setState(() => _customMinutes = value);
@@ -190,7 +191,8 @@ class _DurationRow extends StatelessWidget {
     final endsAt = DateTime.now().add(Duration(minutes: minutes));
     final hh = endsAt.hour.toString().padLeft(2, '0');
     final mm = endsAt.minute.toString().padLeft(2, '0');
-    final label = labelOverride ?? '$minutes min -- pauses at $hh:$mm';
+    final label = labelOverride ??
+        context.l10n.playerSleepPausesAt(minutes, '$hh:$mm');
 
     return Material(
       color: Colors.transparent,

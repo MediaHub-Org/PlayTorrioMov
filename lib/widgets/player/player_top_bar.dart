@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 /// Top header bar for the video player.
@@ -67,7 +68,7 @@ class PlayerTopBar extends StatelessWidget {
             size: 44,
             iconSize: 26,
             icon: const Icon(Icons.chevron_left_rounded),
-            tooltip: 'Back',
+            tooltip: context.l10n.playerBack,
             backgroundColor: const Color(0x33080C12),
             borderRadius: 9999,
             onPressed: onBack,
@@ -155,7 +156,7 @@ class PlayerTopBar extends StatelessWidget {
             children: [
               if (onToggleEpisodes != null) ...[
                 Tooltip(
-                  message: 'Episodes',
+                  message: context.l10n.detailsEpisodes,
                   child: Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -196,7 +197,7 @@ class PlayerTopBar extends StatelessWidget {
                           if (!isCompact) ...[
                             const SizedBox(width: 7),
                             Text(
-                              'Episodes',
+                              context.l10n.detailsEpisodes,
                               style: TextStyle(
                                 color: isEpisodesActive ? Colors.white : Colors.white.withValues(alpha: 0.9),
                                 fontSize: 12.5,
@@ -218,7 +219,7 @@ class PlayerTopBar extends StatelessWidget {
                   size: buttonSize,
                   iconSize: 20,
                   icon: const Icon(Icons.link_rounded),
-                  tooltip: 'Copy Stream URL',
+                  tooltip: context.l10n.playerCopyStreamUrl,
                   backgroundColor: const Color(0x22080C12),
                   onPressed: onCopyStreamUrl,
                 ),
@@ -229,7 +230,7 @@ class PlayerTopBar extends StatelessWidget {
                   size: buttonSize,
                   iconSize: 20,
                   icon: const Icon(Icons.download_rounded),
-                  tooltip: 'Download',
+                  tooltip: context.l10n.playerDownload,
                   backgroundColor: const Color(0x22080C12),
                   onPressed: onDownload,
                 ),
@@ -240,7 +241,7 @@ class PlayerTopBar extends StatelessWidget {
                   size: buttonSize,
                   iconSize: 20,
                   icon: const Icon(Icons.cast_rounded),
-                  tooltip: 'Cast',
+                  tooltip: context.l10n.playerCast,
                   backgroundColor: const Color(0x22080C12),
                   onPressed: onCast,
                 ),

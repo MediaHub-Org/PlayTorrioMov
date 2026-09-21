@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 /// Playback speed floating popover menu: a readout, and a slider with a -/+
@@ -73,7 +74,7 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PlayerMenuHeader(
-            title: 'PLAYBACK SPEED',
+            title: context.l10n.detailsPlaybackSpeed.toUpperCase(),
             onBack: widget.onBack,
           ),
 
@@ -95,7 +96,7 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
                 size: 32,
                 iconSize: 18,
                 icon: const Icon(Icons.remove_rounded),
-                tooltip: 'Slower',
+                tooltip: context.l10n.playerSlower,
                 onPressed: index > 0 ? () => _step(-1) : null,
               ),
               Expanded(
@@ -114,7 +115,7 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
                 size: 32,
                 iconSize: 18,
                 icon: const Icon(Icons.add_rounded),
-                tooltip: 'Faster',
+                tooltip: context.l10n.playerFaster,
                 onPressed: index < _points.length - 1 ? () => _step(1) : null,
               ),
             ],

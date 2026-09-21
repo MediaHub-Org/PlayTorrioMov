@@ -47,6 +47,7 @@ import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
 import '../../services/cast/cast_service.dart';
+import '../../l10n/l10n.dart';
 import '../../utils/download/download_launcher.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -2079,7 +2080,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (url == null) return;
     Clipboard.setData(ClipboardData(text: url));
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Stream URL copied to clipboard')),
+      SnackBar(content: Text(context.l10n.playerStreamUrlCopied)),
     );
   }
 

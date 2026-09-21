@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../models/download/download_task_model.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
@@ -25,7 +26,10 @@ Future<void> startSourceDownload(
 }) async {
   final season = episode?.season;
   final episodeNumber = episode?.episode;
+  // Both read before the first await, so nothing below touches the context
+  // across an async gap.
   final messenger = ScaffoldMessenger.of(context);
+  final l10n = context.l10n;
 
   final existing = DownloadService.instance.tasksNotifier.value.where((t) {
     return t.mediaId == detail.id &&
@@ -36,12 +40,12 @@ Future<void> startSourceDownload(
   if (existing != null) {
     if (existing.status == DownloadStatus.downloading) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Download already in progress in background.')),
+        SnackBar(content: Text(l10n.downloadAlreadyInProgress)),
       );
       return;
     } else if (existing.status == DownloadStatus.completed) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('This media is already downloaded.')),
+        SnackBar(content: Text(l10n.downloadAlreadyDone)),
       );
       return;
     }
@@ -72,14 +76,14 @@ Future<void> startSourceDownload(
     );
 
     messenger.showSnackBar(
-      const SnackBar(
-        content: Text('Download started in background. Track progress in Downloads tab.'),
-        duration: Duration(seconds: 3),
+      SnackBar(
+        content: Text(l10n.downloadStarted),
+        duration: const Duration(seconds: 3),
       ),
     );
   } catch (e) {
     messenger.showSnackBar(
-      SnackBar(content: Text('Download failed to start: $e')),
+      SnackBar(content: Text(l10n.downloadFailedToStart('$e'))),
     );
   }
 }
