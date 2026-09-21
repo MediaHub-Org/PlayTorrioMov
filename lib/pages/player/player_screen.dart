@@ -718,9 +718,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                     size: 26,
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Up Next',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.upNext,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
                     ),
@@ -732,7 +732,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Playing next episode in $_autoNextCountdown seconds...',
+                    context.l10n.upNextCountdown(_autoNextCountdown),
                     style: const TextStyle(color: Colors.white70),
                   ),
                   const SizedBox(height: 8),
@@ -753,9 +753,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                     Navigator.pop(dialogContext);
                     _autoNextDialogVisible = false;
                   },
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(color: Colors.white54),
+                  child: Text(
+                    context.l10n.libraryCancel,
+                    style: const TextStyle(color: Colors.white54),
                   ),
                 ),
                 ElevatedButton(

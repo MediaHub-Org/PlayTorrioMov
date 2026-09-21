@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../models/stream/stream_model.dart';
 import '../../pages/player/player_screen.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -304,7 +305,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    _isDebrid ? 'Using $_providerName for files...' : 'Connecting to swarm peers...',
+                    _isDebrid ? context.l10n.playerStatusUsing(_providerName) : context.l10n.magnetConnecting,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -313,7 +314,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Gathering file list & stream metadata',
+                    context.l10n.magnetGathering,
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.inkAlpha(0.5),
@@ -343,7 +344,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Failed to Read Magnet',
+                    context.l10n.magnetFailed,
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.ink),
                   ),
                   const SizedBox(height: 8),
@@ -362,7 +363,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Try Again', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(context.l10n.commonTryAgain, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -398,7 +399,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 40),
                   child: Text(
-                    'No files match filter',
+                    context.l10n.magnetNoMatch,
                     style: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 14),
                   ),
                 ),

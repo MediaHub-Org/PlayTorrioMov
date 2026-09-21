@@ -1,5 +1,6 @@
 // lib/widgets/collection/collection_picker_sheet.dart
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/collection/media_collection.dart';
 import '../../models/my_list/my_list_item.dart';
@@ -92,7 +93,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Add to collection',
+                        context.l10n.libraryAddToCollection,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -105,7 +106,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                     IconButton(
                       icon: const Icon(Icons.close_rounded, size: 18),
                       color: AppColors.inkMuted,
-                      tooltip: 'Close',
+                      tooltip: context.l10n.playerClose,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
@@ -162,7 +163,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                 Icon(Icons.add_rounded, color: AppColors.accent, size: 20),
                 const SizedBox(width: 12),
                 Text(
-                  'New collection',
+                  context.l10n.libraryNewCollection,
                   style: TextStyle(
                     color: AppColors.accent,
                     fontSize: 14,
@@ -189,7 +190,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
               onSubmitted: (_) => _submitNew(),
               style: TextStyle(color: AppColors.ink, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Collection name',
+                hintText: context.l10n.libraryCollectionNameHint,
                 hintStyle: TextStyle(color: AppColors.inkSubtle, fontSize: 14),
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(
@@ -208,7 +209,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
             ),
           ),
           const SizedBox(width: 8),
-          TextButton(onPressed: _submitNew, child: const Text('Create')),
+          TextButton(onPressed: _submitNew, child: Text(context.l10n.libraryCreate)),
         ],
       ),
     );

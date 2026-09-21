@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/collection/media_collection.dart';
 import '../../models/my_list/my_list_item.dart';
@@ -114,7 +115,7 @@ class LibraryActionsRow extends StatelessWidget {
                 icon: inAny
                     ? Icons.playlist_add_check_rounded
                     : Icons.playlist_add_rounded,
-                label: inAny ? 'In a collection' : 'Add to collection',
+                label: inAny ? context.l10n.libraryInCollection : context.l10n.libraryAddToCollection,
                 active: inAny,
                 color: AppColors.accent,
                 onTap: () =>

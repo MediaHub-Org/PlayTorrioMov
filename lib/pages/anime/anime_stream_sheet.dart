@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/anime/anime_scraper_service.dart';
@@ -90,7 +91,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
             _isScraping = false;
             if (_allSources.isEmpty) {
               _error =
-                  'No playable streams found for Episode ${widget.episodeNumber}.';
+                  context.l10n.animeNoStreamsForEpisode(widget.episodeNumber);
             }
           });
         }
@@ -196,7 +197,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'Cascading native anime extractors...',
+                              context.l10n.animeCascading,
                               style: TextStyle(
                                 color: AppThemeService.currentPalette.value.primaryColor,
                                 fontSize: 12,
@@ -252,7 +253,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                         CircularProgressIndicator(color: AppColors.accent),
                         const SizedBox(height: 14),
                         Text(
-                          'Extracting MegaPlay, VidWish, AllAnime & Miruro streams...',
+                          context.l10n.animeExtracting,
                           style: TextStyle(color: AppColors.inkMuted, fontSize: 13),
                         ),
                       ],
@@ -284,7 +285,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                 backgroundColor: AppColors.accent,
                               ),
                               onPressed: _startScraping,
-                              child: const Text('Retry Scraping'),
+                              child: Text(context.l10n.animeRetryScraping),
                             ),
                           ],
                         ),
@@ -353,7 +354,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                s.name ?? 'Stream Source',
+                                                s.name ?? context.l10n.playerStreamSourceFallback,
                                                 style: TextStyle(
                                                   color: AppColors.ink,
                                                   fontSize: 14,

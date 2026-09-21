@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 
@@ -474,9 +475,9 @@ class _WatchScreenState extends State<WatchScreen>
                               size: 20,
                             ),
                             const SizedBox(width: _S.xs),
-                            const Text(
-                              'Watch Sources',
-                              style: TextStyle(
+                            Text(
+                              context.l10n.watchSources,
+                              style: const TextStyle(
                                 color: _C.textPrimary,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
@@ -1031,9 +1032,9 @@ class _WatchScreenState extends State<WatchScreen>
               children: [
                 Icon(Icons.stream_rounded, color: _C.accent, size: 20),
                 const SizedBox(width: _S.xs),
-                const Text(
-                  'Watch Sources',
-                  style: TextStyle(
+                Text(
+                  context.l10n.watchSources,
+                  style: const TextStyle(
                     color: _C.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
