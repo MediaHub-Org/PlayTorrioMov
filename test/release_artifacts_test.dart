@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Pins the shape of the macOS release, which three separate things have to
 /// agree on: the workflow that builds it, the names it publishes under, and
-/// `AppUpdaterService._findMacOSAsset`, which picks a download by name.
+/// `AppUpdaterService.findMacOSAsset`, which picks a download by name.
 ///
 /// v1.6.2 shipped four macOS assets that were two copies of the same
 /// universal app -- an "Intel" download that was not an Intel build. Nothing
@@ -21,9 +21,9 @@ void main() {
   group('macOS release artifacts', () {
     test('there is exactly one macOS build job', () {
       // `flutter build macos` emits a universal binary, so a second
-      // per-architecture job produces the same two slices at ~14 minutes a
-      // release. If one is ever added back, the artifact names below stop
-      // describing what is published.
+      // per-architecture build produces the same two slices at ~14 minutes a
+      // release. The two downloads differ by what is thinned away, not by
+      // what is built: one build, two thinned bundles.
       final macBuilds = RegExp(
         r'flutter build macos --release',
       ).allMatches(workflow).length;
@@ -36,31 +36,46 @@ void main() {
       );
     });
 
-    test('the macOS artifacts are named arm64', () {
-      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-arm64.dmg'));
-      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-arm64.zip'));
+    test('the macOS artifacts are named for both architectures', () {
+      // The packaging step names each file from the loop variable...
+      expect(workflow, contains('for arch in arm64 x86_64'));
+      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-$arch.dmg'));
+      expect(workflow, contains(r'PlayTorrioMov-$APP_VERSION-macOS-$arch.zip'));
 
-      // `intel` must not come back as a *name*. It came back once already,
-      // labeling a universal build, which is how v1.6.2 shipped two
-      // identical downloads under names promising a choice. Intel is now not
-      // built at all, so the name has nothing left to describe.
+      // ...and the upload step names all four outright, so a rename of the
+      // loop cannot quietly drop one from the release.
+      for (final name in [
+        'macOS-arm64.dmg',
+        'macOS-arm64.zip',
+        'macOS-x86_64.dmg',
+        'macOS-x86_64.zip',
+      ]) {
+        expect(workflow, contains('PlayTorrioMov-*-$name'), reason: name);
+      }
+
+      // `intel` must not come back as a *name*. It labeled a universal build
+      // once, which is how v1.6.2 shipped two identical downloads under names
+      // promising a choice. x86_64 says what is inside.
       expect(workflow, isNot(contains('macOS-intel')));
       expect(workflow, isNot(contains('macOS-universal')));
     });
 
-    test('the build proves the binary really is arm64 only', () {
+    test('the build proves each binary is only the architecture it is named', () {
       // Two halves, and both matter. Thinning without verifying would ship
       // whatever lipo happened to leave; verifying without thinning would
-      // fail every build, since Flutter emits universal. The guard used to
-      // require BOTH slices and now requires only arm64 -- it is the same
-      // check inverted, which is the honest way to change this decision.
-      expect(workflow, contains('lipo -thin arm64'));
+      // fail every build, since Flutter emits universal. The name on each
+      // download is only true because both run for both architectures.
+      expect(workflow, contains(r'lipo -thin "$arch"'));
       expect(workflow, contains('lipo -archs'));
-      expect(workflow, contains('macOS build is not arm64-only'));
+      expect(workflow, contains(r'macOS $arch build is not $arch-only'));
 
       // Thinning nothing means Flutter stopped emitting universal output, or
       // the bundle moved. Either way it is not something to publish through.
       expect(workflow, contains('Nothing to thin'));
+
+      // A binary with no slice for an architecture would crash on launch
+      // there, so it fails the build instead of shipping.
+      expect(workflow, contains('No \$arch slice'));
     });
 
     test('the release waits on the macOS job', () {
@@ -74,7 +89,8 @@ void main() {
       expect(
         needs,
         isNot(contains('macos-intel')),
-        reason: 'the release job would wait forever on a job that no longer exists',
+        reason: 'there is one macOS job; the release would wait forever on '
+            'a second one that does not exist',
       );
     });
   });

@@ -5,7 +5,7 @@
 #    - Windows: Installer (Inno Setup) & Portable ZIP (x64)
 #    - Android: Split-per-ABI APKs (arm64-v8a, armeabi-v7a, x86_64) & Universal APK
 #    - Linux: AppImage & Tar.gz (x86_64)
-#    - macOS: Apple Silicon (arm64) DMG & ZIP -- Intel is not built
+#    - macOS: Apple Silicon (arm64) and Intel (x86_64) DMG & ZIP, one of each
 #    - iOS: Sideloadable IPA (no-codesign)
 #  Trigger: Git tag push (v*) or Manual Workflow Dispatch
 #
@@ -656,23 +656,26 @@ jobs:
           path: PlayTorrioMov-*-Linux-x86_64.flatpak
           if-no-files-found: error
 
-  # ─── macOS Build (Apple Silicon) ─────────────────────────────────────────
+  # ─── macOS Build (Apple Silicon and Intel) ───────────────────────────────
   #
-  #  arm64 only, by decision rather than by accident. `flutter build macos`
-  #  emits a universal binary and this thins it, because the x86_64 half is
-  #  half the download and none of the audience: measured on v1.6.2, the
-  #  x86_64 slices were 50.2 MB of a 102 MB bundle across 37 fat binaries.
+  #  One build, two artifacts. `flutter build macos` emits a universal binary
+  #  (arm64 + x86_64), so building it twice would produce the same two slices
+  #  twice; what differs between the downloads is what is *thinned away*. Each
+  #  bundle is copied, thinned to exactly one architecture, and verified to be
+  #  exactly that one before it is packaged -- so the name on each download
+  #  says what is inside it.
   #
-  #  What this costs, stated plainly: an Intel Mac cannot run these builds at
-  #  all. Not slowly -- not at all. If that ever needs undoing, the honest
-  #  shape is two jobs each thinned to its own arch, which is genuinely two
-  #  different artifacts. It is NOT the pre-1.6.3 layout, where two jobs
-  #  built the same universal app and labelled them "arm64" and "intel".
+  #  This is the shape the old comment here called "the honest one". It is NOT
+  #  the pre-1.6.3 layout, where two jobs built the same universal app and
+  #  labelled the copies "arm64" and "intel": there the names promised a choice
+  #  the files did not offer. Here the verify step fails the job if either
+  #  bundle carries anything but its own architecture.
   #
-  #  The check below is the guard inverted: it used to require both slices,
-  #  and now requires that only arm64 survives.
+  #  Apple Silicon was the only one built from v1.6.3 to v1.8.7, because the
+  #  universal bundle is twice the size. Two thin bundles are each about half
+  #  of it, so an Apple Silicon user still downloads the small one.
   macos:
-    name: macOS (Apple Silicon)
+    name: macOS (Apple Silicon & Intel)
     needs: [version]
     runs-on: macos-latest
     steps:
@@ -714,65 +717,87 @@ jobs:
       - name: Build macOS Release
         run: flutter build macos --release --dart-define-from-file=.env --dart-define=APP_CHANNEL=${{ env.APP_CHANNEL }}
 
-      - name: Thin the bundle to arm64
+      - name: Split into one thinned bundle per architecture
         run: |
           set -euo pipefail
-          APP=build/macos/Build/Products/Release/PlayTorrioMov.app
-          thinned=0
+          SRC=build/macos/Build/Products/Release/PlayTorrioMov.app
 
-          # Every Mach-O in the bundle, not just the main executable: the
-          # Flutter framework and each plugin dylib carry their own x86_64
-          # slice, and they are most of the weight.
-          while IFS= read -r f; do
-            archs=$(lipo -archs "$f" 2>/dev/null) || continue
-            case " $archs " in
-              *" x86_64 "*) ;;
-              *) continue ;;
-            esac
-            tmp=$(mktemp)
-            lipo -thin arm64 "$f" -output "$tmp"
-            # `cat >` rather than `mv`: it keeps the original file's mode and
-            # inode, so the executable bit and any hard links survive.
-            cat "$tmp" > "$f"
-            rm -f "$tmp"
-            thinned=$((thinned + 1))
-          done < <(find "$APP" -type f)
+          for arch in arm64 x86_64; do
+            OUT="build/macos-$arch"
+            rm -rf "$OUT"
+            mkdir -p "$OUT"
+            # ditto, not cp: it keeps the bundle's symlinks (the Flutter
+            # framework's Versions/Current) and resource forks intact.
+            ditto "$SRC" "$OUT/PlayTorrioMov.app"
+            thinned=0
 
-          echo "Thinned $thinned binaries to arm64."
-          if [ "$thinned" -eq 0 ]; then
-            echo "::error title=Nothing to thin::No fat binary was found in the bundle. Either Flutter stopped emitting universal output -- in which case this step is obsolete and the verify below still protects us -- or the bundle is not where this expects it. Do not publish without looking."
-            exit 1
-          fi
+            # Every Mach-O in the bundle, not just the main executable: the
+            # Flutter framework and each plugin dylib carry their own slice
+            # of each architecture, and they are most of the weight.
+            while IFS= read -r f; do
+              archs=$(lipo -archs "$f" 2>/dev/null) || continue
+              case " $archs " in
+                *" $arch "*) ;;
+                *)
+                  # A binary with no slice for this architecture would make
+                  # the bundle crash on launch there. Fail rather than ship it.
+                  echo "::error title=No $arch slice::$f carries only '$archs', so the $arch bundle cannot run. Do not publish without looking." >&2
+                  exit 1
+                  ;;
+              esac
+              # Already exactly this architecture: nothing to remove.
+              if [ "$archs" = "$arch" ]; then continue; fi
+              tmp=$(mktemp)
+              lipo -thin "$arch" "$f" -output "$tmp"
+              # `cat >` rather than `mv`: it keeps the original file's mode and
+              # inode, so the executable bit and any hard links survive.
+              cat "$tmp" > "$f"
+              rm -f "$tmp"
+              thinned=$((thinned + 1))
+            done < <(find "$OUT/PlayTorrioMov.app" -type f)
 
-      - name: Verify the binary is arm64 only
+            echo "Thinned $thinned binaries to $arch."
+            if [ "$thinned" -eq 0 ]; then
+              echo "::error title=Nothing to thin::No fat binary was found in the bundle. Either Flutter stopped emitting universal output -- in which case this step is obsolete and the verify below still protects us -- or the bundle is not where this expects it. Do not publish without looking." >&2
+              exit 1
+            fi
+          done
+
+      - name: Verify each binary is its own architecture only
         run: |
-          BIN=build/macos/Build/Products/Release/PlayTorrioMov.app/Contents/MacOS/PlayTorrioMov
-          ARCHS=$(lipo -archs "$BIN")
-          echo "Architectures: $ARCHS"
-          if [ "$ARCHS" != "arm64" ]; then
-            echo "::error title=macOS build is not arm64-only::Expected exactly 'arm64' in $BIN, got '$ARCHS'. The release calls this artifact arm64; publishing it now would either ship an Intel slice nobody asked for or ship the wrong architecture entirely." >&2
-            exit 1
-          fi
+          for arch in arm64 x86_64; do
+            BIN="build/macos-$arch/PlayTorrioMov.app/Contents/MacOS/PlayTorrioMov"
+            ARCHS=$(lipo -archs "$BIN")
+            echo "$arch bundle architectures: $ARCHS"
+            if [ "$ARCHS" != "$arch" ]; then
+              echo "::error title=macOS $arch build is not $arch-only::Expected exactly '$arch' in $BIN, got '$ARCHS'. The release names this artifact $arch; publishing it now would ship a different architecture than its name says." >&2
+              exit 1
+            fi
+          done
 
       - name: Package as DMG & ZIP
         env:
           APP_VERSION: ${{ needs.version.outputs.version }}
         run: |
-          cd build/macos/Build/Products/Release
+          for arch in arm64 x86_64; do
+            (
+              cd "build/macos-$arch"
 
-          codesign --sign - --force --deep PlayTorrioMov.app
+              codesign --sign - --force --deep PlayTorrioMov.app
 
-          mkdir -p dmg_temp
-          cp -R PlayTorrioMov.app dmg_temp/
-          ln -s /Applications dmg_temp/Applications
+              mkdir -p dmg_temp
+              cp -R PlayTorrioMov.app dmg_temp/
+              ln -s /Applications dmg_temp/Applications
 
-          sync
-          sleep 2
+              sync
+              sleep 2
 
-          for i in {1..3}; do
-            hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO "../../../../../PlayTorrioMov-$APP_VERSION-macOS-arm64.dmg" && break || sleep 3
+              for i in {1..3}; do
+                hdiutil create -volname "PlayTorrioMov" -srcfolder dmg_temp -ov -format UDZO "../../PlayTorrioMov-$APP_VERSION-macOS-$arch.dmg" && break || sleep 3
+              done
+              zip -ry "../../PlayTorrioMov-$APP_VERSION-macOS-$arch.zip" PlayTorrioMov.app
+            )
           done
-          zip -ry "../../../../../PlayTorrioMov-$APP_VERSION-macOS-arm64.zip" PlayTorrioMov.app
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v6
@@ -781,6 +806,9 @@ jobs:
           path: |
             PlayTorrioMov-*-macOS-arm64.dmg
             PlayTorrioMov-*-macOS-arm64.zip
+            PlayTorrioMov-*-macOS-x86_64.dmg
+            PlayTorrioMov-*-macOS-x86_64.zip
+          if-no-files-found: error
 
   # ─── iOS Build (Sideloadable IPA — no-codesign) ───────────────────────────
   ios:

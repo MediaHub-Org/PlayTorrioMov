@@ -69,8 +69,8 @@ torrent engine. Nothing else needs configuring to start browsing.
 Prebuilt installers and APKs for every platform are on the
 [releases page](https://github.com/MediaHub-Org/PlayTorrioMov/releases). On
 Android, prefer `arm64-v8a` unless you know you need otherwise — it is the same
-build as the universal APK at a third of the size. **macOS builds are Apple
-Silicon only** — an Intel Mac cannot run them.
+build as the universal APK at a third of the size. On macOS, take
+`arm64` for Apple Silicon and `x86_64` for an Intel Mac.
 
 ## Documentation
 

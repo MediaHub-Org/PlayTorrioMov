@@ -152,7 +152,7 @@ class AppUpdaterService {
     } else if (Platform.isLinux) {
       return isFlatpak ? _findFlatpakAsset(assets, abi) : _findLinuxAsset(assets, abi);
     } else if (Platform.isMacOS) {
-      return _findMacOSAsset(assets, abi);
+      return findMacOSAsset(assets, abi);
     }
     return null;
   }
@@ -328,24 +328,37 @@ class AppUpdaterService {
     return flatpakAssets.first['browser_download_url'];
   }
 
-  /// macOS: prefer the disk image over the zip.
+  /// macOS: this Mac's architecture first, then the disk image over the zip.
   ///
-  /// There is deliberately no architecture branch here, unlike every other
-  /// platform: `flutter build macos` emits a universal binary, so the release
-  /// carries one DMG and one ZIP that both run on Apple Silicon and Intel.
-  /// `abi` stays in the signature to match the other finders.
+  /// A release carries an arm64 build and an x86_64 one, each thinned to its
+  /// own architecture (see the macOS job in build.yml), and a build for the
+  /// wrong one cannot run at all -- so the architecture is picked before the
+  /// format. Releases from v1.6.3 to v1.8.7 carry arm64 only; on an Intel Mac
+  /// those match nothing here and fall through to the unfiltered list, which
+  /// is the best that release can offer.
   ///
-  /// The order matters because this used to return whichever asset GitHub
-  /// happened to list first, across four mac assets that were two copies of
-  /// the same app. Naming them `universal` removed the duplicate pair; naming
-  /// the format we want removes the rest of the guess.
-  String? _findMacOSAsset(List assets, Abi? abi) {
-    final macAssets = assets.where((a) {
+  /// The format order matters because this used to return whichever asset
+  /// GitHub happened to list first, across four mac assets that were two
+  /// copies of the same app.
+  @visibleForTesting
+  String? findMacOSAsset(List assets, Abi? abi) {
+    var macAssets = assets.where((a) {
       final name = (a['name'] as String).toLowerCase();
       return name.contains('mac') || name.contains('darwin') || name.endsWith('.dmg') || name.endsWith('.pkg');
     }).toList();
 
     if (macAssets.isEmpty) return null;
+
+    // Unknown ABI is treated as Apple Silicon: it is what every Mac sold
+    // since 2020 is, and it was the only build published for a long stretch.
+    final keywords = abi == Abi.macosX64
+        ? const ['x86_64', 'x64', 'amd64', 'intel']
+        : const ['arm64', 'aarch64'];
+    final forThisMac = macAssets.where((a) {
+      final name = (a['name'] as String).toLowerCase();
+      return keywords.any(name.contains);
+    }).toList();
+    if (forThisMac.isNotEmpty) macAssets = forThisMac;
 
     // A DMG mounts with a drag-to-Applications window; a ZIP leaves the user
     // to move the .app themselves, so it is the fallback rather than the pick.

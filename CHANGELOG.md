@@ -3,6 +3,15 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **macOS for Intel**: releases carry a `macOS-x86_64` DMG and ZIP again,
+  alongside `macOS-arm64`. One build, thinned into two bundles, each verified
+  to hold only its own architecture. The in-app updater now picks the download
+  that matches the Mac it is running on. Untested on an Intel Mac: CI proves
+  the binary's architecture, not that it launches.
+
 ## [1.8.7+40] - 2026-09-21
 
 The header is one row on tablet, desktop and TV.

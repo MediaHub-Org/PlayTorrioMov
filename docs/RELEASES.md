@@ -4,14 +4,19 @@ CI builds every platform. Pull requests run analysis, the test suite, an
 Android APK and a Linux desktop build; merges to `main` run the same checks
 and refresh the shared build cache.
 
-> **macOS is built for Apple Silicon only.** `flutter build macos` emits a
-> universal binary and the workflow thins it with `lipo`, because the x86_64
-> half is half the download and none of the audience — measured on v1.6.2,
-> 50.2 MB of a 102 MB bundle across 37 fat binaries. The cost, stated plainly:
-> an Intel Mac cannot run these builds at all. Undoing it means two jobs each
-> thinned to its own architecture, which is two genuinely different artifacts
-> — not the pre-1.6.3 layout, where two jobs built the same universal app and
-> labeled them "arm64" and "intel".
+> **macOS ships two builds, one per architecture.** `flutter build macos`
+> emits a universal binary, so the workflow builds once and thins two copies:
+> `macOS-arm64` for Apple Silicon and `macOS-x86_64` for Intel. Each is
+> verified to carry only its own architecture before it is packaged, so the
+> name says what is inside. Each is about half the size of the universal
+> bundle (measured on v1.6.2: 50.2 MB of the x86_64 slices in a 102 MB bundle),
+> so nobody downloads the half they cannot use. Releases v1.6.3 through v1.8.7
+> published Apple Silicon only; an Intel Mac cannot run those. This is not the
+> pre-1.6.3 layout, where two jobs built the same universal app and labeled
+> the copies "arm64" and "intel".
+>
+> The Intel build is verified by `lipo -archs` in CI only. Nothing in this
+> project has run it on an Intel Mac.
 
 There are two ways to cut a release, and **the dispatch is the one to
 reach for**:
