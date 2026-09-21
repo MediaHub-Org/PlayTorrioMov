@@ -6,10 +6,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- **Player menus translated (#68)**: the transport bar and top bar tooltips,
-  and the speed, sleep-timer, audio, aspect-ratio and subtitle menus, plus the
-  copy-URL and download messages, now follow the app language, in all four.
-  419 keys in all.
+- **Player translated (#68)**: the transport, top and center controls, the
+  speed, sleep-timer, audio, aspect-ratio and subtitle menus, the sources and
+  episodes panels, the cast sheet and subtitle sync bar, and the copy-URL and
+  download messages now follow the app language, in all four. 446 keys in all.
 
 ### Fixed
 - **Audio menu**: the "default audio stream" line and the "Audio Sync Offset"

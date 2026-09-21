@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
 
 import '../../services/cast/cast_service.dart';
@@ -80,9 +81,9 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                 children: [
                   Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
                   const SizedBox(width: 10),
-                  const Text(
-                    'CAST TO DEVICE',
-                    style: TextStyle(
+                  Text(
+                    context.l10n.playerCastToDevice.toUpperCase(),
+                    style: const TextStyle(
                       color: PlayerTheme.ink,
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -94,7 +95,7 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                     size: 28,
                     iconSize: 14,
                     icon: const Icon(Icons.close_rounded),
-                    tooltip: 'Close',
+                    tooltip: context.l10n.playerClose,
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -126,19 +127,18 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                                 ),
                               ),
                               const SizedBox(height: 14),
-                              const Text(
-                                'Looking for Cast devices on your network...',
-                                style: TextStyle(
+                              Text(
+                                context.l10n.playerCastLooking,
+                                style: const TextStyle(
                                   color: PlayerTheme.inkSubtle,
                                   fontSize: 13,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 6),
-                              const Text(
-                                'The phone and the receiver have to be on the '
-                                'same Wi-Fi.',
-                                style: TextStyle(
+                              Text(
+                                context.l10n.playerCastSameWifi,
+                                style: const TextStyle(
                                   color: PlayerTheme.inkSubtle,
                                   fontSize: 11,
                                 ),

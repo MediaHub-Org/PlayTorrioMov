@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 /// Centered play/pause with ±30s seek on either side. Lives over the middle
 /// of the video, not in the bottom transport bar, so it stays reachable (and
@@ -53,7 +54,7 @@ class PlayerCenterControls extends StatelessWidget {
             size: sideSize,
             iconSize: sideIconSize,
             icon: Icons.replay_30_rounded,
-            tooltip: 'Back 30 seconds',
+            tooltip: context.l10n.playerBack30,
             onTap: seekBack,
           ),
           SizedBox(width: gap),
@@ -70,7 +71,7 @@ class PlayerCenterControls extends StatelessWidget {
             size: sideSize,
             iconSize: sideIconSize,
             icon: Icons.forward_30_rounded,
-            tooltip: 'Forward 30 seconds',
+            tooltip: context.l10n.playerForward30,
             onTap: seekForward,
           ),
         ],

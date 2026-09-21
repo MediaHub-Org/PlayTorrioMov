@@ -4,7 +4,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/services/player/sleep_timer_service.dart';
+import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
+import 'package:playtorriomov/widgets/player/player_center_controls.dart';
+import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_top_bar.dart';
@@ -101,5 +104,48 @@ void main() {
 
     expect(find.text('Reproduzindo o áudio padrão.'), findsOneWidget);
     expect(find.text('Deslocamento do áudio'), findsOneWidget);
+  });
+
+  testWidgets('the episodes panel follows the app language, and fits a phone',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    final videos = [
+      for (var e = 1; e <= 3; e++)
+        Video(id: 'tt1:1:$e', title: '', season: 1, episode: e),
+    ];
+    await tester.pumpWidget(inLocale(
+      'es',
+      PlayerEpisodesPanel(
+        videos: videos,
+        onEpisodeSelected: (_) {},
+        onClose: () {},
+      ),
+    ));
+    // The panel schedules an auto-scroll to the current episode; let it run,
+    // so no Timer is left pending at teardown.
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(find.text('Temporada 1 • 3 episodios'), findsOneWidget);
+    expect(find.text('Episodio 1'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the center controls tooltips follow the app language',
+      (tester) async {
+    await tester.pumpWidget(inLocale(
+      'pt',
+      PlayerCenterControls(
+        isPlaying: true,
+        onPlayPause: () {},
+        onSeekBack30: () {},
+        onSeekForward30: () {},
+      ),
+    ));
+
+    expect(find.byTooltip('Voltar 30 segundos'), findsOneWidget);
+    expect(find.byTooltip('Avançar 30 segundos'), findsOneWidget);
   });
 }

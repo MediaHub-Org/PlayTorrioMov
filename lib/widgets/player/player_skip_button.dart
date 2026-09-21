@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../models/player/skip_segment_model.dart';
 
@@ -237,7 +238,7 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                                 hoverColor: Colors.white.withValues(alpha: 0.15),
                                 splashColor: Colors.white.withValues(alpha: 0.25),
                                 child: Tooltip(
-                                  message: 'Dismiss (✕)',
+                                  message: context.l10n.playerDismiss,
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
                                       horizontal: isCompact ? 9 : 12,

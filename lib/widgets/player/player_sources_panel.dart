@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
@@ -306,7 +307,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
             size: 36,
             iconSize: 20,
             icon: const Icon(Icons.chevron_left_rounded),
-            tooltip: 'Back to Episodes',
+            tooltip: context.l10n.playerBackToEpisodes,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
             onPressed: widget.onBackToEpisodes,
           ),
@@ -351,7 +352,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                       child: Text(
                         widget.episode.title.isNotEmpty
                             ? widget.episode.title
-                            : 'Episode $eNum',
+                            : context.l10n.playerEpisodeN(eNum),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14.5,
@@ -382,7 +383,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
             size: 36,
             iconSize: 18,
             icon: const Icon(Icons.close_rounded),
-            tooltip: 'Close',
+            tooltip: context.l10n.playerClose,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
             onPressed: widget.onClose,
           ),
@@ -463,9 +464,9 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
           children: [
             Icon(Icons.search_off_rounded, color: Colors.white.withValues(alpha: 0.30), size: 48),
             const SizedBox(height: 12),
-            const Text(
-              'No streams found for this episode',
-              style: TextStyle(
+            Text(
+              context.l10n.playerNoStreams,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14.5,
                 fontWeight: FontWeight.w700,
@@ -473,7 +474,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Try going back to episodes and choosing another episode or provider.',
+              context.l10n.playerNoStreamsHint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.50),
@@ -484,7 +485,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
             ElevatedButton.icon(
               onPressed: _startScraping,
               icon: const Icon(Icons.refresh_rounded, size: 16),
-              label: const Text('Rescrape Sources'),
+              label: Text(context.l10n.playerRescrape),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PlayerTheme.accent,
                 foregroundColor: Colors.white,
@@ -524,7 +525,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Scraping additional sources...',
+                  context.l10n.playerScrapingMore,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.60),
                     fontSize: 11.5,
@@ -549,7 +550,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     bool isHovered,
     bool isCompact,
   ) {
-    final title = source.title ?? source.name ?? 'Stream Source';
+    final title = source.title ?? source.name ?? context.l10n.playerStreamSourceFallback;
     // StreamSource.isMagnet, not a bare infoHash check: a magnet: URL
     // with no separate infoHash field is still a torrent, and the icon
     // has to agree with the P2P/HTTP badge next to it.
@@ -688,14 +689,14 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: const Row(
+                            content: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
-                                SizedBox(width: 8),
+                                const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Magnet link copied to clipboard',
-                                  style: TextStyle(
+                                  context.l10n.playerMagnetCopied,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,

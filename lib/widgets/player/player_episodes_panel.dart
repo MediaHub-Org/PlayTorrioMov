@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../models/movie/video.dart';
 import 'player_glass.dart';
@@ -79,7 +80,9 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
       }
       _seasons = seasons;
       _seasonEpisodes = map;
-      _seasonLabels = {for (final s in seasons) s: 'Season $s'};
+      // Season tabs take their label at build time, from the app's language;
+      // only the episode-range batches below are labeled here.
+      _seasonLabels = {};
     } else if (widget.videos.length > 50) {
       // Group single season with 50+ episodes into 50-episode tabs (e.g. 1-50, 51-100)
       const chunkSize = 50;
@@ -110,7 +113,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
         ..sort((a, b) => (a.episode ?? 0).compareTo(b.episode ?? 0));
       _seasons = [s];
       _seasonEpisodes = map;
-      _seasonLabels = {s: 'Season 1'};
+      _seasonLabels = {};
     }
   }
 
@@ -322,7 +325,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                           top: 12,
                           child: _buildScrollFloatingButton(
                             icon: Icons.keyboard_arrow_up_rounded,
-                            tooltip: 'Scroll Up',
+                            tooltip: context.l10n.playerScrollUp,
                             onTap: () => _scrollStep(false),
                           ),
                         ),
@@ -331,7 +334,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                           bottom: 12,
                           child: _buildScrollFloatingButton(
                             icon: Icons.keyboard_arrow_down_rounded,
-                            tooltip: 'Scroll Down',
+                            tooltip: context.l10n.playerScrollDown,
                             onTap: () => _scrollStep(true),
                           ),
                         ),
@@ -379,9 +382,9 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Episodes',
-                  style: TextStyle(
+                Text(
+                  context.l10n.detailsEpisodes,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
@@ -389,7 +392,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   ),
                 ),
                 Text(
-                  '${_seasonLabels[_selectedSeason] ?? "Season $_selectedSeason"} • $episodeCount Episodes',
+                  '${_seasonLabels[_selectedSeason] ?? context.l10n.playerSeasonN(_selectedSeason)} • ${context.l10n.playerEpisodeCount(episodeCount)}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.55),
                     fontSize: 12,
@@ -403,7 +406,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
             size: 36,
             iconSize: 18,
             icon: const Icon(Icons.close_rounded),
-            tooltip: 'Close',
+            tooltip: context.l10n.playerClose,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
             onPressed: widget.onClose,
           ),
@@ -427,7 +430,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               padding: const EdgeInsets.only(left: 4, right: 2),
               child: _buildSeasonArrowButton(
                 icon: Icons.chevron_left_rounded,
-                tooltip: 'Previous Seasons',
+                tooltip: context.l10n.playerPreviousSeasons,
                 onTap: () => _scrollSeason(false),
               ),
             ),
@@ -444,7 +447,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               itemBuilder: (context, index) {
                 final season = _seasons[index];
                 final isActive = season == _selectedSeason;
-                final tabLabel = _seasonLabels[season] ?? 'Season $season';
+                final tabLabel = _seasonLabels[season] ?? context.l10n.playerSeasonN(season);
 
                 return Material(
                   color: Colors.transparent,
@@ -497,7 +500,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               padding: const EdgeInsets.only(left: 2, right: 4),
               child: _buildSeasonArrowButton(
                 icon: Icons.chevron_right_rounded,
-                tooltip: 'Next Seasons',
+                tooltip: context.l10n.playerNextSeasons,
                 onTap: () => _scrollSeason(true),
               ),
             ),
@@ -549,7 +552,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     required bool isCompact,
   }) {
     final epNum = video.episode ?? (index + 1);
-    final epTitle = video.title.isNotEmpty ? video.title : 'Episode $epNum';
+    final epTitle = video.title.isNotEmpty ? video.title : context.l10n.playerEpisodeN(epNum);
     final hasOverview = video.overview != null && video.overview!.trim().isNotEmpty;
     final isHovered = _hoveredIndex == index;
 
@@ -647,7 +650,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  'EP $epNum',
+                                  context.l10n.playerEpShort(epNum),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -713,9 +716,9 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                                         ),
                                       ),
                                       const SizedBox(width: 4),
-                                      const Text(
-                                        'PLAYING',
-                                        style: TextStyle(
+                                      Text(
+                                        context.l10n.playerPlaying.toUpperCase(),
+                                        style: const TextStyle(
                                           color: Color(0xFF34D399),
                                           fontSize: 9.5,
                                           fontWeight: FontWeight.w800,
@@ -816,14 +819,14 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: 18),
-                            SizedBox(width: 8),
+                            const Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: 18),
+                            const SizedBox(width: 8),
                             Text(
-                              'Select Sources',
-                              style: TextStyle(
+                              context.l10n.playerSelectSources,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,

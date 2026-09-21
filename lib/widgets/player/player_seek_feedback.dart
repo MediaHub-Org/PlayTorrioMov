@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 /// One seek, as the overlay needs to know about it.
 ///
@@ -139,7 +140,7 @@ class _PlayerSeekFeedbackState extends State<PlayerSeekFeedback>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$seconds seconds',
+                    context.l10n.playerSecondsN(seconds),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: isCompact ? 12 : 14,

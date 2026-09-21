@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 /// Floating glass toolbar for quick live subtitle delay adjustment.
@@ -160,7 +161,7 @@ class _SubSyncBarState extends State<SubSyncBar> {
                 size: 32,
                 iconSize: 15,
                 icon: const Icon(Icons.undo_rounded),
-                tooltip: 'Discard changes',
+                tooltip: context.l10n.playerDiscardChanges,
                 onPressed: _handleDiscard,
               ),
               const SizedBox(width: 4),
@@ -175,9 +176,9 @@ class _SubSyncBarState extends State<SubSyncBar> {
                 minimumSize: const Size(0, 32),
               ),
               icon: const Icon(Icons.check_rounded, size: 15),
-              label: const Text(
-                'Done',
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+              label: Text(
+                context.l10n.playerDone,
+                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
               ),
               onPressed: _handleSave,
             ),
@@ -187,7 +188,7 @@ class _SubSyncBarState extends State<SubSyncBar> {
               size: 32,
               iconSize: 15,
               icon: const Icon(Icons.close_rounded),
-              tooltip: 'Close',
+              tooltip: context.l10n.playerClose,
               onPressed: widget.onClose,
             ),
           ],

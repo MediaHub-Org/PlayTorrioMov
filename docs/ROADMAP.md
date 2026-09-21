@@ -25,13 +25,14 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**~120-420 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 419 keys are translated into Spanish, Arabic and Portuguese-BR.
-The settings pages and most of the player's own chrome are done (the transport
-bar, the top bar, the speed, sleep-timer, audio, aspect-ratio and subtitle
-menus, the download and copy-URL messages); what is left is the long tail
-outside them — the sources and episodes panels, the subtitle style editor and
-sync bars, the cast sheet and skip button, the Live TV portal browser, the
+**~90-390 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 446 keys are translated into Spanish, Arabic and Portuguese-BR.
+The settings pages and nearly all of the player's own chrome are done (the
+transport bar, top bar and centered controls, the speed, sleep-timer, audio,
+aspect-ratio and subtitle menus, the sources and episodes panels, the cast
+sheet, the subtitle sync bar, the download and copy-URL messages); what is
+left is the long tail outside them — the subtitle style editor and the text
+sync overlay, the skip button's own labels, the Live TV portal browser, the
 search page, and the details-page rails.
 
 Translating a menu can expose an overflow the English hid: the audio menu's
