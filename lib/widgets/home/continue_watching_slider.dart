@@ -267,7 +267,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                                 title: context.l10n.historyTitle,
                               ),
                             ),
-                            child: Text(context.l10n.commonSeeAll),
+                            child: Text(context.l10n.continueWatchingSeeAll),
                           ),
                       ],
                     ),

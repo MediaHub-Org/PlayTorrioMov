@@ -644,6 +644,8 @@
   "syncSaveTiming": "Save Timing",
   "commonSearch": "Search",
   "commonSeeAll": "See All",
+  "continueWatchingSeeAll": "See all",
+  "@continueWatchingSeeAll": {"description": "Button on the Continue Watching row; the section headers use commonSeeAll"},
   "commonSettings": "Settings",
   "iptvHdLive": "HD Live",
   "iptvLiveBroadcast": "Live Broadcast",
