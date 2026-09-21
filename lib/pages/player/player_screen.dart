@@ -47,6 +47,7 @@ import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
 import '../../services/cast/cast_service.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../utils/download/download_launcher.dart';
 
@@ -107,7 +108,11 @@ class _PlayerScreenState extends State<PlayerScreen>
   Duration _duration = Duration.zero;
   Duration? _buffered;
   bool _wasBuffering = false;
-  String _statusMessage = 'Initializing...';
+  /// The loading screen's status line, as a function of the language rather
+  /// than a string: it is set from async code and field initializers, where
+  /// there is no context to look a translation up with.
+  String Function(AppLocalizations) _status =
+      (l10n) => l10n.playerStatusInitializing;
   bool _showControls = true;
   bool _isHoveringUI = false;
   Timer? _hideTimer;
@@ -402,7 +407,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         if (useDebrid) {
           final activeService = await DebridService().getSelectedService();
           if (!mounted) return;
-          setState(() => _statusMessage = 'Using $activeService for files...');
+          setState(() => _status = (l10n) => l10n.playerStatusUsing(activeService));
 
           final seasonNum = _currentEpisode?.season;
           final episodeNum = _currentEpisode?.episode;
@@ -423,7 +428,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           debugPrint('[PlayerScreen] Debrid resolved stream URL: $streamUrl');
         } else {
           if (!mounted) return;
-          setState(() => _statusMessage = 'Gathering metadata & peers...');
+          setState(() => _status = (l10n) => l10n.playerStatusGathering);
 
           streamUrl = await TorrentStreamService().streamTorrent(
             magnet,
@@ -461,10 +466,15 @@ class _PlayerScreenState extends State<PlayerScreen>
       );
 
       if (!mounted) return;
-      final epLabel = _currentEpisode != null
-          ? 'S${_currentEpisode!.season ?? 1}:E${_currentEpisode!.episode ?? 1} - ${_currentEpisode!.title.isNotEmpty ? _currentEpisode!.title : "Episode ${_currentEpisode!.episode ?? 1}"}'
-          : (widget.detail?.name ?? _currentTitle);
-      setState(() => _statusMessage = 'Buffering $epLabel...');
+      final bufferingEpisode = _currentEpisode;
+      final bufferingName = widget.detail?.name ?? _currentTitle;
+      setState(
+        () => _status = (l10n) => l10n.playerStatusBuffering(
+          bufferingEpisode != null
+              ? _episodeStatusLabel(l10n, bufferingEpisode)
+              : bufferingName,
+        ),
+      );
 
       final lowerClean = sanitizedUrlStr.toLowerCase();
       final bool isLive =
@@ -620,22 +630,20 @@ class _PlayerScreenState extends State<PlayerScreen>
           _isLoading = false;
           _showSourcesPanel = true;
           _sourcesEpisode = _currentEpisode;
-          _sourcesErrorMessage =
-              'Source failed to play. Please select another source below.';
+          _sourcesErrorMessage = context.l10n.playerSourceFailed;
         });
         return;
       }
 
-      String displayMessage = 'Error: $e';
+      String displayMessage = context.l10n.playerErrorGeneric('$e');
       if (e is PlatformException &&
           (e.message?.contains('invalid or unsupported media') ?? false)) {
-        displayMessage =
-            'Media Open Error: Stream server quota exceeded or invalid media format.\nPlease select another stream.';
+        displayMessage = context.l10n.playerMediaOpenError;
       }
 
       setState(() {
         _isLoading = false;
-        _statusMessage = displayMessage;
+        _status = (_) => displayMessage;
         _fatalError = displayMessage;
       });
     }
@@ -1020,7 +1028,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Switched to embedded subtitle: ${embedded.title}'),
+          content: Text(context.l10n.playerSubSwitchedEmbedded(embedded.title)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -1094,9 +1102,9 @@ class _PlayerScreenState extends State<PlayerScreen>
     // that looks broken.
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No subtitles available for this stream'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(context.l10n.playerNoSubtitlesForStream),
+          duration: const Duration(seconds: 2),
         ),
       );
     }
@@ -1111,7 +1119,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Downloading ${variant.language} subtitle...'),
+          content: Text(context.l10n.playerSubDownloading(variant.language)),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -1121,7 +1129,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (path == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to download subtitle')),
+          SnackBar(content: Text(context.l10n.playerSubDownloadFailed)),
         );
       }
       return;
@@ -1161,7 +1169,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            '${variant.language} subtitle loaded (${_currentCues.length} lines)',
+            context.l10n.playerSubLoaded(variant.language, _currentCues.length),
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -1237,8 +1245,8 @@ class _PlayerScreenState extends State<PlayerScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Subtitle timing synchronized and saved!'),
+          SnackBar(
+            content: Text(context.l10n.playerSubSyncSaved),
           ),
         );
       }
@@ -1261,7 +1269,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not load subtitle: $errorMsg'),
+            content: Text(context.l10n.playerSubLoadFailed(errorMsg)),
             duration: const Duration(seconds: 3),
           ),
         );
@@ -1313,8 +1321,9 @@ class _PlayerScreenState extends State<PlayerScreen>
 
     setState(() {
       _isLoading = false;
-      _statusMessage = 'Playback error: $errorMsg';
-      _fatalError = 'Playback error: $errorMsg';
+      final message = context.l10n.playerPlaybackError(errorMsg);
+      _status = (_) => message;
+      _fatalError = message;
     });
   }
 
@@ -1325,7 +1334,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     setState(() {
       _fatalError = null;
       _isLoading = true;
-      _statusMessage = 'Retrying...';
+      _status = (l10n) => l10n.playerStatusRetrying;
     });
     await _initStream();
   }
@@ -1372,7 +1381,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 FilledButton.icon(
                   onPressed: _retryPlayback,
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Try again'),
+                  label: Text(context.l10n.playerTryAgain),
                   style: FilledButton.styleFrom(
                     backgroundColor: PlayerTheme.accent,
                   ),
@@ -1380,7 +1389,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 OutlinedButton.icon(
                   onPressed: () => Navigator.of(context).maybePop(),
                   icon: const Icon(Icons.arrow_back_rounded, size: 18),
-                  label: const Text('Pick another source'),
+                  label: Text(context.l10n.playerPickAnotherSource),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
                     side: const BorderSide(color: Colors.white24),
@@ -1555,8 +1564,9 @@ class _PlayerScreenState extends State<PlayerScreen>
       final sNum = newEpisode.season ?? 1;
       _currentTitle = '$showName - S${sNum}E$epNum ${newEpisode.title}';
       _isLoading = true;
-      _statusMessage =
-          'Buffering S$sNum:E$epNum - ${newEpisode.title.isNotEmpty ? newEpisode.title : "Episode $epNum"}...';
+      _status = (l10n) => l10n.playerStatusBuffering(
+        _episodeStatusLabel(l10n, newEpisode),
+      );
       _showEpisodesPanel = false;
       _showSourcesPanel = false;
       _activeMenu = null;
@@ -1988,7 +1998,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                       ),
                     const SizedBox(height: 32),
                     Text(
-                      _statusMessage,
+                      _status(context.l10n),
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 16,
@@ -2051,15 +2061,11 @@ class _PlayerScreenState extends State<PlayerScreen>
       // where TorrServer serves from, and where a downloaded file lives.
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text(
-            'This source is served from this device, so a Cast receiver '
-            'cannot reach it. Sources hosted elsewhere -- direct links, '
-            'debrid, or a torrent server on another machine -- cast fine.',
-          ),
+          content: Text(context.l10n.playerCastUnreachable),
           duration: const Duration(seconds: 5),
           action: _hasOtherSources
               ? SnackBarAction(
-                  label: 'Sources',
+                  label: context.l10n.playerSources,
                   onPressed: () => setState(() => _showSourcesPanel = true),
                 )
               : null,
@@ -2105,6 +2111,15 @@ class _PlayerScreenState extends State<PlayerScreen>
       episode: _currentEpisode,
       source: _currentSource,
     );
+  }
+
+  /// "S1:E2 - Title" for the loading screen, with a translated stand-in when
+  /// the episode has no title.
+  String _episodeStatusLabel(AppLocalizations l10n, Video episode) {
+    final number = episode.episode ?? 1;
+    final title =
+        episode.title.isNotEmpty ? episode.title : l10n.playerEpisodeN(number);
+    return 'S${episode.season ?? 1}:E$number - $title';
   }
 
   Widget _buildControlsOverlay() {
@@ -2306,11 +2321,11 @@ class _PlayerScreenState extends State<PlayerScreen>
               onOpenSyncBar: () {
                 if (_selectedEmbeddedSubtitleIndex != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(
-                        'Subtitle sync is not supported for embedded subtitles.',
+                        context.l10n.playerSubSyncEmbeddedUnsupported,
                       ),
-                      duration: Duration(seconds: 2),
+                      duration: const Duration(seconds: 2),
                     ),
                   );
                   return;
