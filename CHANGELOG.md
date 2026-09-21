@@ -3,7 +3,10 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.9+42] - 2026-09-22
+
+A clearer subtitle list and a simpler Subtitle Appearance editor; choosing a
+subtitle no longer closes the panel.
 
 ### Changed
 - **Subtitle list**: a row reads "Arabic · Standard" with a quiet
