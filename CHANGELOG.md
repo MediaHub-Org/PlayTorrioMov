@@ -6,13 +6,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- **Player translated (#68)**: the transport, top and center controls, the
-  speed, sleep-timer, audio, aspect-ratio and subtitle menus, the sources and
-  episodes panels, the cast sheet and subtitle sync bar, and the copy-URL and
-  download messages, plus the player's loading and error screens and snack
-  bars, plus the Films and Series catalog pages, the shared error view,
-  the mini player, the Library, Discover, Search and Anime browse pages, and the
-  P2P warning and update dialogs, now follow the app language, in all four. 687 keys in all.
+- **Much more of the app translated (#68)**: the player (controls, menus,
+  the sources and episodes panels, the cast sheet, loading and error screens
+  and snack bars), the Films, Series, Discover, Search, Anime browse and
+  Library pages, the shared error view and the mini player, the P2P warning and
+  update dialogs, and Live TV's page, portals modal, portal browser, channel
+  sheet, player and multi-view now follow the app language, in all four.
+  718 keys in all.
 
 ### Fixed
 - **Anime page language switch**: the English/Arabic switch showed flags as
