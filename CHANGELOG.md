@@ -10,11 +10,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   the sources and episodes panels, the cast sheet, loading and error screens
   and snack bars), the Films, Series, Discover, Search, Anime browse and
   Library pages, the shared error view and the mini player, the P2P warning and
-  update dialogs, and Live TV's page, portals modal, portal browser, channel
-  sheet, player and multi-view now follow the app language, in all four.
-  718 keys in all.
+  update dialogs, and Live TV's page, settings page, portals modal, portal
+  browser, channel sheet, player and multi-view now follow the app language, in all four.
+  758 keys in all.
 
 ### Fixed
+- **Text scale (#69)**: Live TV's settings page no longer overflows at 3× text
+  scale: three label/value rows (rotation interval, grid columns, sidebar
+  width) let the label wrap and cap the value's growth.
 - **Anime page language switch**: the English/Arabic switch showed flags as
   emoji, which Windows draws as two letters; it uses the bundled flag images.
 - **Audio menu**: the "default audio stream" line and the "Audio Sync Offset"

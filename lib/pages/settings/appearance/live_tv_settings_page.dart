@@ -30,9 +30,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Live TV & Sports UI',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+        title: Text(
+          context.l10n.liveTvSettingsTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
         ),
       ),
       body: SettingsScrollView(
@@ -41,7 +41,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
         children: [
           // ── 1. Hero Spotlight Carousel ──
           Text(
-            'LIVE SPOTLIGHT & HERO BANNER',
+            context.l10n.liveTvSecSpotlight.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -56,7 +56,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
           // ── 2. Card Layout & Poster Density ──
           Text(
-            'CHANNEL CARDS & POSTER DENSITY',
+            context.l10n.liveTvSecCards.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -71,7 +71,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
           // ── 3. Category Visibility & Ordering ──
           Text(
-            'SECTIONS & CATEGORY MANAGER',
+            context.l10n.liveTvSecSections.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -86,7 +86,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
           // ── 4. Portals Modal Customization ──
           Text(
-            'PORTALS & PLAYLISTS MODAL',
+            context.l10n.liveTvSecPortalsModal.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -101,7 +101,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
           // ── 5. Portal Browser Customization ──
           Text(
-            'PORTAL BROWSER & CHANNEL GUIDE',
+            context.l10n.liveTvSecBrowser.toUpperCase(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -158,7 +158,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show Live Spotlight Banner',
+                          context.l10n.liveTvShowSpotlight,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
@@ -167,7 +167,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Featured championship matches and top broadcast channels at the top',
+                          context.l10n.liveTvShowSpotlightSub,
                           style: TextStyle(fontSize: 12, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -191,7 +191,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
                 // Style Selection
                 Text(
-                  'Hero Banner Style',
+                  context.l10n.liveTvHeroStyle,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -208,7 +208,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       children: HeroStyle.values.map((style) {
                         final isSelected = style == currentStyle;
                         return SettingChoiceChip(
-                          label: style.label,
+                          label: style.localizedLabel(context.l10n),
                           selected: isSelected,
                           onSelect: () {
                             IptvSettings.setHeroStyle(style);
@@ -235,7 +235,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Auto-Rotate Channels',
+                                context.l10n.liveTvAutoRotate,
                                 style: TextStyle(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
@@ -244,7 +244,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Automatically cycle through featured live events',
+                                context.l10n.liveTvAutoRotateSub,
                                 style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                               ),
                             ],
@@ -275,15 +275,21 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Rotation Interval',
+                                // Expanded: the label yields to the value beside it. At a large text
+                                // scale this Row ran 692px past the card (#69).
+                                Expanded(child: Text(
+                                  context.l10n.liveTvRotationInterval,
                                   style: TextStyle(
                                     fontSize: 12.5,
                                     color: AppColors.inkAlpha(0.7),
                                   ),
-                                ),
+                                )),
+                                const SizedBox(width: 8),
                                 Text(
-                                  '$seconds seconds',
+                                  context.l10n.liveTvSecondsN(seconds),
+                                  // The value has nowhere to go; the label beside it is the part that
+                                  // wraps, so this one is clamped instead.
+                                  textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                                   style: TextStyle(
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w800,
@@ -335,7 +341,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
         children: [
           // Density Choice
           Text(
-            'Channel Card Size',
+            context.l10n.liveTvCardSize,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -352,7 +358,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 children: CardDensity.values.map((density) {
                   final isSelected = density == currentDensity;
                   return SettingChoiceChip(
-                    label: density.label,
+                    label: density.localizedLabel(context.l10n),
                     selected: isSelected,
                     onSelect: () {
                       IptvSettings.setCardDensity(density);
@@ -380,7 +386,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Card Hover Scale Zoom',
+                        context.l10n.liveTvHoverZoom,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -433,7 +439,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show LIVE / HD Stream Badge',
+                          context.l10n.liveTvShowHdBadge,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -442,7 +448,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Display radiant live broadcast badge on channel corners',
+                          context.l10n.liveTvShowHdBadgeSub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -473,7 +479,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show Channel Category Tag',
+                          context.l10n.liveTvShowCategoryTag,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -482,7 +488,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Show category label below channel name',
+                          context.l10n.liveTvShowCategoryTagSub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -523,7 +529,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Channel Categories & Sections',
+                        context.l10n.liveTvCategoriesSections,
                         style: TextStyle(
                           fontSize: 14.5,
                           fontWeight: FontWeight.w800,
@@ -532,7 +538,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Toggle visibility of Live TV rows',
+                        context.l10n.liveTvToggleRows,
                         style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                       ),
                     ],
@@ -540,7 +546,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   TextButton.icon(
                     onPressed: () => IptvSettings.resetCategories(),
                     icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: const Text('Reset All', style: TextStyle(fontSize: 12)),
+                    label: Text(context.l10n.liveTvResetAll, style: const TextStyle(fontSize: 12)),
                     style: TextButton.styleFrom(
                       foregroundColor: palette.primaryColor,
                     ),
@@ -590,7 +596,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Portal Card Display Style',
+            context.l10n.iptvCardDisplayStyle,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -633,7 +639,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show Portal Expiry Date',
+                          context.l10n.iptvShowExpiry,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -642,7 +648,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Display subscription expiration tag on portal cards',
+                          context.l10n.liveTvShowExpirySub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -672,7 +678,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show Max Active Connections Tag',
+                          context.l10n.liveTvShowConnTag,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -681,7 +687,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Display current and max concurrent streaming connections',
+                          context.l10n.liveTvShowConnTagSub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -702,7 +708,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
           const SizedBox(height: 12),
 
           Text(
-            'Default Starting Tab',
+            context.l10n.iptvDefaultTab,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -728,7 +734,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Channel Stream Layout Mode',
+            context.l10n.iptvStreamLayoutMode,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -774,16 +780,22 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'Grid Stream Columns',
+                          // Expanded: the label yields to the value beside it. At a large text
+                          // scale this Row ran 692px past the card (#69).
+                          Expanded(child: Text(
+                            context.l10n.liveTvGridColumns,
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                               color: AppColors.inkAlpha(0.8),
                             ),
-                          ),
+                          )),
+                          const SizedBox(width: 8),
                           Text(
-                            '$cols Columns',
+                            context.l10n.liveTvColumnsN(cols),
+                            // The value has nowhere to go; the label beside it is the part that
+                            // wraps, so this one is clamped instead.
+                            textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w800,
@@ -827,16 +839,22 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Category Sidebar Width',
+                      // Expanded: the label yields to the value beside it. At a large text
+                      // scale this Row ran 692px past the card (#69).
+                      Expanded(child: Text(
+                        context.l10n.liveTvSidebarWidth,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: AppColors.inkAlpha(0.8),
                         ),
-                      ),
+                      )),
+                      const SizedBox(width: 8),
                       Text(
                         '${width.round()} px',
+                        // The value has nowhere to go; the label beside it is the part that
+                        // wraps, so this one is clamped instead.
+                        textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                         style: TextStyle(
                           fontSize: 12.5,
                           fontWeight: FontWeight.w800,
@@ -880,7 +898,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show Channel Stream Logos',
+                          context.l10n.liveTvShowLogos,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -889,7 +907,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Display channel poster and logos in stream rows',
+                          context.l10n.liveTvShowLogosSub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -919,7 +937,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show EPG "Now Playing" Snippet',
+                          context.l10n.liveTvShowEpg,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -928,7 +946,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Display current television guide title below channel',
+                          context.l10n.liveTvShowEpgSub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],
@@ -958,7 +976,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Show Category Stream Counts',
+                          context.l10n.liveTvShowCounts,
                           style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w700,
@@ -967,7 +985,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Show number of available streams next to category names',
+                          context.l10n.liveTvShowCountsSub,
                           style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
                         ),
                       ],

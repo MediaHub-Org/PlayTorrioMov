@@ -25,16 +25,15 @@ advanced by reading or writing code; each is one test away from an answer.
 
 ### Translation (#68)
 
-**Roughly 250 of an estimated 500-800 user-facing strings are still hardcoded
-English.** 718 keys are translated into Spanish, Arabic and Portuguese-BR.
+**Roughly 200 of an estimated 500-800 user-facing strings are still hardcoded
+English.** 758 keys are translated into Spanish, Arabic and Portuguese-BR.
 Done: the settings pages, nearly all of the player's chrome (controls, menus,
 panels, cast sheet, loading and error screens, snack bars), the Films, Series,
 Discover, Search, Anime browse and Library pages, the shared error view, the
-mini player, the P2P warning and update dialogs, and Live TV's page, portals
-modal, portal browser, channel sheet, player and multi-view.
+mini player, the P2P warning and update dialogs, and Live TV's page, settings
+page, portals modal, portal browser, channel sheet, player and multi-view.
 
-Left is the long tail: Live TV's settings page and the curated hub descriptions
-on its page; the subtitle style editor and text sync
+Left is the long tail: the curated hub descriptions on Live TV's page; the subtitle style editor and text sync
 overlay; the skip button's own labels; the anime details and stream pages; and
 the details-page rails.
 

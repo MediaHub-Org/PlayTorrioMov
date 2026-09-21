@@ -6,13 +6,19 @@
 /// removed page.
 library;
 
-enum HeroStyle {
-  immersive('Immersive Cinematic Carousel'),
-  compact('Compact Spotlight'),
-  minimalist('Minimalist Header');
+import '../l10n/app_localizations.dart';
 
-  final String label;
-  const HeroStyle(this.label);
+enum HeroStyle {
+  immersive,
+  compact,
+  minimalist;
+
+  /// The chip text, in the app's language.
+  String localizedLabel(AppLocalizations l10n) => switch (this) {
+    HeroStyle.immersive => l10n.liveTvHeroImmersive,
+    HeroStyle.compact => l10n.liveTvHeroCompact,
+    HeroStyle.minimalist => l10n.liveTvHeroMinimalist,
+  };
 }
 
 enum AmbientLightPattern {
@@ -26,10 +32,14 @@ enum AmbientLightPattern {
 }
 
 enum CardDensity {
-  compact('Compact (Dense Grid)'),
-  standard('Standard Balanced'),
-  cinematic('Cinematic (Large Posters)');
+  compact,
+  standard,
+  cinematic;
 
-  final String label;
-  const CardDensity(this.label);
+  /// The chip text, in the app's language.
+  String localizedLabel(AppLocalizations l10n) => switch (this) {
+    CardDensity.compact => l10n.liveTvDensityCompact,
+    CardDensity.standard => l10n.liveTvDensityStandard,
+    CardDensity.cinematic => l10n.liveTvDensityCinematic,
+  };
 }

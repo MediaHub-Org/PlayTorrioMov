@@ -13,6 +13,7 @@ import 'package:playtorriomov/pages/settings/addons_settings_page.dart';
 import 'package:playtorriomov/pages/settings/backup_settings_page.dart';
 import 'package:playtorriomov/pages/settings/builtin_providers_settings_page.dart';
 import 'package:playtorriomov/pages/settings/debrid_settings_page.dart';
+import 'package:playtorriomov/pages/settings/appearance/live_tv_settings_page.dart';
 import 'package:playtorriomov/pages/settings/keyboard_shortcuts_page.dart';
 import 'package:playtorriomov/pages/settings/settings_page.dart';
 import 'package:playtorriomov/pages/settings/sync_settings_page.dart';
@@ -622,6 +623,7 @@ void main() {
     ('connect', const SyncSettingsPage()),
     ('debrid', const DebridSettingsPage()),
     ('video player', const VideoPlayerSettingsPage()),
+    ('live tv', const LiveTvSettingsPage()),
   ]) {
     testWidgets(
       'the $name settings page does not overflow at 3x text scale',

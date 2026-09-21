@@ -6,6 +6,7 @@ import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/services/player/sleep_timer_service.dart';
 import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/l10n/app_localizations_pt.dart';
+import 'package:playtorriomov/pages/settings/appearance/live_tv_settings_page.dart';
 import 'package:playtorriomov/services/iptv/iptv_settings.dart';
 import 'package:playtorriomov/widgets/common/error_view.dart';
 import 'package:playtorriomov/widgets/iptv/default_portal_tab_picker.dart';
@@ -179,5 +180,20 @@ void main() {
       expect(layout.localizedLabel(pt), isNotEmpty);
     }
     expect(PortalCardStyle.compact.localizedLabel(pt), 'Linha compacta');
+  });
+
+  testWidgets('the Live TV settings page fits a phone in the longer languages',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    for (final code in ['es', 'pt', 'ar']) {
+      await tester.pumpWidget(inLocale(code, const LiveTvSettingsPage()));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.takeException(), isNull, reason: code);
+    }
+    expect(find.text('Live TV & Sports UI'), findsNothing);
   });
 }
