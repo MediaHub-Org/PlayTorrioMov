@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -105,9 +106,9 @@ class P2pWarningDialog extends StatelessWidget {
                                       color: _warningColor.withValues(alpha: 0.20),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
-                                    child: const Text(
-                                      'PRIVACY & NETWORK ADVISORY',
-                                      style: TextStyle(
+                                    child: Text(
+                                      context.l10n.p2pAdvisoryBadge.toUpperCase(),
+                                      style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1.1,
@@ -119,7 +120,7 @@ class P2pWarningDialog extends StatelessWidget {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                'P2P Torrent Streaming Notice',
+                                context.l10n.p2pTitle,
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
@@ -132,7 +133,7 @@ class P2pWarningDialog extends StatelessWidget {
                         ),
                         IconButton(
                           icon: Icon(Icons.close_rounded, color: AppColors.inkAlpha(0.60)),
-                          tooltip: 'Exit',
+                          tooltip: context.l10n.p2pExit,
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ],
@@ -148,7 +149,7 @@ class P2pWarningDialog extends StatelessWidget {
                         children: [
                           // Main advisory text
                           Text(
-                            'P2P (peer-to-peer torrent) streaming connects directly to public torrent swarms to download and seed video pieces. In certain countries and regions, unencrypted torrent activity may be monitored and could result in warning letters or notices from your Internet Service Provider (ISP).',
+                            context.l10n.p2pBody,
                             style: TextStyle(
                               fontSize: 13.5,
                               color: AppColors.inkAlpha(0.88),
@@ -172,8 +173,8 @@ class P2pWarningDialog extends StatelessWidget {
                                 _buildSourceInfoRow(
                                   icon: Icons.cloud_done_rounded,
                                   iconColor: const Color(0xFF10B981),
-                                  title: 'PlayTorrio HTTP (Direct Stream)',
-                                  subtitle: 'Safe direct HTTPS web streams. No torrenting or peer uploading.',
+                                  title: context.l10n.p2pHttpTitle,
+                                  subtitle: context.l10n.p2pHttpSubtitle,
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 10),
@@ -185,8 +186,8 @@ class P2pWarningDialog extends StatelessWidget {
                                 _buildSourceInfoRow(
                                   icon: Icons.hub_rounded,
                                   iconColor: _warningColor,
-                                  title: 'PlayTorrio (Torrent Engine)',
-                                  subtitle: 'P2P swarms (Knaben, TorrentGalaxy). Involves peer data sharing.',
+                                  title: context.l10n.p2pEngineTitle,
+                                  subtitle: context.l10n.p2pEngineSubtitle,
                                 ),
                               ],
                             ),
@@ -214,7 +215,7 @@ class P2pWarningDialog extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'Would you like to turn off the built-in PlayTorrio P2P torrent source and use only direct HTTP streaming?',
+                                    context.l10n.p2pQuestion,
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
@@ -228,7 +229,7 @@ class P2pWarningDialog extends StatelessWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            'Note: You can easily toggle the built-in P2P source back on or off anytime in Settings.',
+                            context.l10n.p2pNote,
                             style: TextStyle(
                               fontSize: 11.5,
                               color: AppColors.inkAlpha(0.45),
@@ -336,9 +337,9 @@ class P2pWarningDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: const Text(
-            "Don't Show Again",
-            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+          child: Text(
+            context.l10n.p2pDontShowAgain,
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(width: 10),
@@ -350,9 +351,9 @@ class P2pWarningDialog extends StatelessWidget {
             await P2pSettingsService.setNeverShowWarning(true);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('P2P torrent source turned off. PlayTorrioHTTP will be used.'),
-                  backgroundColor: Color(0xFF10B981),
+                SnackBar(
+                  content: Text(context.l10n.p2pTurnedOff),
+                  backgroundColor: const Color(0xFF10B981),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -360,9 +361,9 @@ class P2pWarningDialog extends StatelessWidget {
             }
           },
           icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-          label: const Text(
-            'Yes, Turn Off P2P',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+          label: Text(
+            context.l10n.p2pTurnOff,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: _warningColor,
@@ -388,9 +389,9 @@ class P2pWarningDialog extends StatelessWidget {
             await P2pSettingsService.setNeverShowWarning(true);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('P2P torrent source turned off. PlayTorrioHTTP will be used.'),
-                  backgroundColor: Color(0xFF10B981),
+                SnackBar(
+                  content: Text(context.l10n.p2pTurnedOff),
+                  backgroundColor: const Color(0xFF10B981),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -398,9 +399,9 @@ class P2pWarningDialog extends StatelessWidget {
             }
           },
           icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-          label: const Text(
-            'Yes, Turn Off P2P',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+          label: Text(
+            context.l10n.p2pTurnOff,
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: _warningColor,
@@ -426,9 +427,9 @@ class P2pWarningDialog extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text(
-                  "Don't Show Again",
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                child: Text(
+                  context.l10n.p2pDontShowAgain,
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
             ),

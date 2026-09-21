@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/updater/app_updater_service.dart';
 import '../../app_info.dart';
 import '../../services/theme/app_colors.dart';
@@ -107,7 +108,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'UPDATE AVAILABLE',
+                          context.l10n.updateAvailable.toUpperCase(),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
@@ -117,7 +118,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Version ${widget.updateInfo.latestVersion}',
+                          context.l10n.updateVersion(widget.updateInfo.latestVersion),
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -154,7 +155,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Current',
+                              context.l10n.updateCurrent,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: AppColors.inkDisabled,
@@ -180,7 +181,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'Latest',
+                              context.l10n.updateLatest,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: AppColors.inkDisabled,
@@ -206,7 +207,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
                   // Release notes header & box
                   Text(
-                    "WHAT'S NEW",
+                    context.l10n.updateWhatsNew.toUpperCase(),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -258,9 +259,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              "This Flatpak isn't on a live repo, so "
-                              "'flatpak update' won't find this release. "
-                              'Download the new bundle below, then reinstall it.',
+                              context.l10n.updateFlatpakNote,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.orange.shade200,
@@ -314,7 +313,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Downloading...',
+                              context.l10n.updateDownloading,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -374,7 +373,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           ),
                         ),
                         child: Text(
-                          'Later',
+                          context.l10n.updateLater,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -397,18 +396,18 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           ),
                           elevation: 0,
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Update Now',
-                              style: TextStyle(
+                              context.l10n.updateNow,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 8),
-                            Icon(Icons.download_rounded, size: 20),
+                            const SizedBox(width: 8),
+                            const Icon(Icons.download_rounded, size: 20),
                           ],
                         ),
                       ),
@@ -477,11 +476,11 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       _isDownloading = false;
                       WakelockPlus.disable();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            'Please enable "Install unknown apps" permission for ${AppInfo.name} in Android settings.',
+                            context.l10n.updatePermission(AppInfo.name),
                           ),
-                          duration: Duration(seconds: 5),
+                          duration: const Duration(seconds: 5),
                           backgroundColor: Colors.orange,
                         ),
                       );
@@ -495,7 +494,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       WakelockPlus.disable();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Update failed: ${event.status}'),
+                          content: Text(context.l10n.updateFailed('${event.status}')),
                           backgroundColor: Colors.redAccent,
                         ),
                       );
@@ -513,7 +512,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 setState(() => _isDownloading = false);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Download failed: $error'),
+                    content: Text(context.l10n.updateDownloadFailed('$error')),
                     backgroundColor: Colors.redAccent,
                   ),
                 );
@@ -526,7 +525,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
         setState(() => _isDownloading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Update failed: $e'),
+            content: Text(context.l10n.updateFailed('$e')),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -604,7 +603,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 const Icon(Icons.check_circle, color: Colors.green, size: 32),
                 const SizedBox(width: 12),
                 Text(
-                  'Download Complete',
+                  context.l10n.updateDownloadComplete,
                   style: TextStyle(color: AppColors.ink),
                 ),
               ],
@@ -614,7 +613,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Update downloaded to:',
+                  context.l10n.updateDownloadedTo,
                   style: TextStyle(color: AppColors.inkMuted),
                 ),
                 const SizedBox(height: 8),
@@ -636,7 +635,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 const SizedBox(height: 16),
                 if (widget.updateInfo.isFlatpak) ...[
                   Text(
-                    'Reinstall the bundle to update:',
+                    context.l10n.updateReinstallBundle,
                     style: TextStyle(color: AppColors.inkMuted),
                   ),
                   const SizedBox(height: 8),
@@ -659,8 +658,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
                 ] else
                   Text(
                     Platform.isWindows
-                        ? 'Close ${AppInfo.name} and run the installer to update.'
-                        : 'Make the file executable and run it:\nchmod +x "$fileName"\n./$fileName',
+                        ? context.l10n.updateCloseAndRun(AppInfo.name)
+                        : context.l10n.updateMakeExecutable(fileName),
                     style: TextStyle(color: AppColors.inkMuted),
                   ),
               ],
@@ -676,14 +675,14 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Command copied to clipboard'),
+                        SnackBar(
+                          content: Text(context.l10n.updateCommandCopied),
                         ),
                       );
                     }
                   },
                   child: Text(
-                    'Copy Command',
+                    context.l10n.updateCopyCommand,
                     style: TextStyle(color: AppColors.inkMuted),
                   ),
                 ),
@@ -697,7 +696,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   if (context.mounted) Navigator.of(context).pop();
                 },
                 child: Text(
-                  'Open Folder',
+                  context.l10n.updateOpenFolder,
                   style: TextStyle(color: AppColors.inkMuted),
                 ),
               ),
@@ -707,7 +706,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   backgroundColor: _accentColor,
                   foregroundColor: AppColors.onAccent,
                 ),
-                child: const Text('OK'),
+                child: Text(context.l10n.commonOk),
               ),
             ],
           ),
@@ -723,7 +722,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
         setState(() => _isDownloading = false);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Download failed: $e')));
+        ).showSnackBar(SnackBar(content: Text(context.l10n.updateDownloadFailed('$e'))));
       }
     }
   }

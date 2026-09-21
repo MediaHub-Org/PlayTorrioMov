@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/collection/media_collection.dart';
 import '../../models/continue_watching/continue_watching_item.dart';
@@ -50,7 +51,7 @@ class _CollectionPageState extends State<CollectionPage> {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return LibraryTabs(
-      title: 'Library',
+      title: context.l10n.navLibrary,
       titleIcon: Icons.video_library_rounded,
       initialIndex: widget.initialTabIndex,
       tabs: [
@@ -92,6 +93,7 @@ class _CollectionPageState extends State<CollectionPage> {
                 CollectionCard(
                   title: shelf.localizedLabel(context),
                   subtitle: _countLabel(
+                    context,
                     items.where((i) => switch (shelf) {
                       LibraryShelf.liked => i.isLiked,
                       LibraryShelf.watchlist => i.isWatchlist,
@@ -109,7 +111,7 @@ class _CollectionPageState extends State<CollectionPage> {
               for (final collection in collections)
                 CollectionCard(
                   title: collection.name,
-                  subtitle: _countLabel(collection.count),
+                  subtitle: _countLabel(context, collection.count),
                   posters: collection.mosaicPosters,
                   icon: Icons.playlist_play_rounded,
                   accent: AppColors.accent,
@@ -128,7 +130,8 @@ class _CollectionPageState extends State<CollectionPage> {
     );
   }
 
-  String _countLabel(int count) => count == 1 ? '1 title' : '$count titles';
+  String _countLabel(BuildContext context, int count) =>
+      context.l10n.libraryTitleCount(count);
 
   /// Sized from the width it actually gets rather than the screen's, so the
   /// grid is right inside a desktop side panel too. `mainAxisExtent` rather
@@ -185,7 +188,7 @@ class _CollectionPageState extends State<CollectionPage> {
         backgroundColor: AppColors.raised,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'New collection',
+          ctx.l10n.libraryNewCollection,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
         ),
         content: TextField(
@@ -194,19 +197,19 @@ class _CollectionPageState extends State<CollectionPage> {
           textInputAction: TextInputAction.done,
           onSubmitted: (value) => Navigator.pop(ctx, value),
           style: TextStyle(color: AppColors.ink),
-          decoration: const InputDecoration(hintText: 'Collection name'),
+          decoration: InputDecoration(hintText: ctx.l10n.libraryCollectionNameHint),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Cancel',
+              ctx.l10n.libraryCancel,
               style: TextStyle(color: AppColors.inkAlpha(0.6)),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Create'),
+            child: Text(ctx.l10n.libraryCreate),
           ),
         ],
       ),
@@ -232,10 +235,10 @@ class _CollectionPageState extends State<CollectionPage> {
       valueListenable: ContinueWatchingService.activeItems,
       builder: (context, items, _) {
         if (items.isEmpty) {
-          return const LibraryEmptyState(
+          return LibraryEmptyState(
             icon: Icons.play_circle_outline_rounded,
-            title: 'Nothing in progress',
-            subtitle: 'Start something and it will wait for you here.',
+            title: context.l10n.libraryNothingInProgress,
+            subtitle: context.l10n.libraryNothingInProgressHint,
           );
         }
 
@@ -298,11 +301,10 @@ class _CollectionPageState extends State<CollectionPage> {
             )
             .toList();
         if (downloads.isEmpty) {
-          return const LibraryEmptyState(
+          return LibraryEmptyState(
             icon: Icons.download_done_rounded,
-            title: 'No Downloads',
-            subtitle:
-                'Downloaded movies and episodes will appear here for offline viewing.',
+            title: context.l10n.libraryNoDownloads,
+            subtitle: context.l10n.libraryNoDownloadsHint,
           );
         }
 
@@ -471,7 +473,7 @@ class _NewCollectionCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'New collection',
+            context.l10n.libraryNewCollection,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
