@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
 import 'player_glass.dart';
@@ -123,6 +124,46 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     _tabController.dispose();
     super.dispose();
   }
+
+  /// The display name of a palette swatch. The palettes are `const` maps keyed
+  /// by an English name, so the name is looked up here rather than stored
+  /// translated; an unknown name (a future palette entry) shows as written.
+  String _paletteName(AppLocalizations l10n, String name) => switch (name) {
+    'White' => l10n.subStyleWhite,
+    'Cinema Yellow' => l10n.subStyleCinemaYellow,
+    'Amber Gold' => l10n.subStyleAmberGold,
+    'Electric Cyan' => l10n.subStyleElectricCyan,
+    'Neon Green' => l10n.subStyleNeonGreen,
+    'Vibrant Orange' => l10n.subStyleVibrantOrange,
+    'Soft Rose' => l10n.subStyleSoftRose,
+    'Light Gray' => l10n.subStyleLightGray,
+    'Black' => l10n.subStyleBlack,
+    'Dark Slate' => l10n.subStyleDarkSlate,
+    'Gold' => l10n.subStyleGold,
+    'Crimson' => l10n.subStyleCrimson,
+    'Neon Cyan' => l10n.subStyleNeonCyan,
+    _ => name,
+  };
+
+  String _boxName(AppLocalizations l10n, String name) => switch (name) {
+    'None' => l10n.subStyleBoxNone,
+    '25% Dark' => l10n.subStyleBoxDark(25),
+    '50% Dark' => l10n.subStyleBoxDark(50),
+    '75% Dark' => l10n.subStyleBoxDark(75),
+    '100% Solid' => l10n.subStyleBoxSolid(100),
+    '50% Indigo' => l10n.subStyleBoxIndigo(50),
+    _ => name,
+  };
+
+  String _boxDesc(AppLocalizations l10n, String desc) => switch (desc) {
+    'Transparent' => l10n.subStyleBoxTransparent,
+    'Subtle' => l10n.subStyleBoxSubtle,
+    'Standard Box' => l10n.subStyleBoxStandard,
+    'High Contrast' => l10n.subStyleBoxHighContrast,
+    'Opaque Black' => l10n.subStyleBoxOpaqueBlack,
+    'Slate Tint' => l10n.subStyleBoxSlateTint,
+    _ => desc,
+  };
 
   Color _parseColorFromHex(String hex, {Color fallback = Colors.white}) {
     var str = hex.replaceAll('#', '').trim();
@@ -274,12 +315,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         unselectedLabelColor: PlayerTheme.inkSubtle,
         labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        tabs: const [
-          Tab(text: 'Typography', icon: Icon(Icons.text_fields_rounded, size: 16)),
-          Tab(text: 'Colors & Box', icon: Icon(Icons.palette_rounded, size: 16)),
-          Tab(text: 'Outline & Shadow', icon: Icon(Icons.border_style_rounded, size: 16)),
-          Tab(text: 'Position', icon: Icon(Icons.vertical_align_bottom_rounded, size: 16)),
-          Tab(text: 'Advanced / ASS', icon: Icon(Icons.tune_rounded, size: 16)),
+        tabs: [
+          Tab(text: context.l10n.subStyleTabTypography, icon: const Icon(Icons.text_fields_rounded, size: 16)),
+          Tab(text: context.l10n.subStyleTabColors, icon: const Icon(Icons.palette_rounded, size: 16)),
+          Tab(text: context.l10n.subStyleTabOutline, icon: const Icon(Icons.border_style_rounded, size: 16)),
+          Tab(text: context.l10n.subStyleTabPosition, icon: const Icon(Icons.vertical_align_bottom_rounded, size: 16)),
+          Tab(text: context.l10n.subStyleTabAdvanced, icon: const Icon(Icons.tune_rounded, size: 16)),
         ],
       ),
     );
@@ -295,7 +336,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
       physics: const BouncingScrollPhysics(),
       children: [
         // Font Family Selector
-        _buildSectionTitle('FONT FAMILY'),
+        _buildSectionTitle(context.l10n.subStyleFontFamily.toUpperCase()),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -341,7 +382,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         const SizedBox(height: 18),
 
         // Base Font Size Slider
-        _buildSectionTitle('BASE FONT SIZE (${PlayerSettings.subFontSize.value}pt)'),
+        _buildSectionTitle(context.l10n.subStyleBaseFontSize(PlayerSettings.subFontSize.value.round()).toUpperCase()),
         Row(
           children: [
             IconButton(
@@ -370,7 +411,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         const SizedBox(height: 14),
 
         // Scale Multiplier Slider
-        _buildSectionTitle('SCALE MULTIPLIER (${(PlayerSettings.subScale.value * 100).round()}%)'),
+        _buildSectionTitle(context.l10n.subStyleScale((PlayerSettings.subScale.value * 100).round()).toUpperCase()),
         SliderTheme(
           data: _sliderTheme(),
           child: Slider(
@@ -389,7 +430,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
           children: [
             Expanded(
               child: _buildToggleTile(
-                title: 'Bold Text',
+                title: context.l10n.subStyleBold,
                 icon: Icons.format_bold_rounded,
                 value: PlayerSettings.subBold.value,
                 onChanged: (val) => PlayerSettings.setSubBold(val, player: widget.player),
@@ -398,7 +439,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             const SizedBox(width: 12),
             Expanded(
               child: _buildToggleTile(
-                title: 'Italic Text',
+                title: context.l10n.subStyleItalic,
                 icon: Icons.format_italic_rounded,
                 value: PlayerSettings.subItalic.value,
                 onChanged: (val) => PlayerSettings.setSubItalic(val, player: widget.player),
@@ -423,7 +464,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
       physics: const BouncingScrollPhysics(),
       children: [
         // Text Color Palette
-        _buildSectionTitle('SUBTITLE TEXT COLOR'),
+        _buildSectionTitle(context.l10n.subStyleTextColor.toUpperCase()),
         const SizedBox(height: 10),
         Wrap(
           spacing: 8,
@@ -456,7 +497,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      item['name'] as String,
+                      _paletteName(context.l10n, item['name'] as String),
                       style: TextStyle(
                         color: isSelected ? Colors.white : PlayerTheme.inkMuted,
                         fontSize: 11.5,
@@ -473,7 +514,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         const SizedBox(height: 22),
 
         // Background Box Style
-        _buildSectionTitle('BACKGROUND BOX (ACCESSIBILITY & READABILITY)'),
+        _buildSectionTitle(context.l10n.subStyleBoxTitle.toUpperCase()),
         const SizedBox(height: 10),
         Column(
           children: _boxColorOptions.map((opt) {
@@ -508,7 +549,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            opt['name'] as String,
+                            _boxName(context.l10n, opt['name'] as String),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
@@ -518,7 +559,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                         ],
                       ),
                       Text(
-                        opt['desc'] as String,
+                        _boxDesc(context.l10n, opt['desc'] as String),
                         style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11.5),
                       ),
                     ],
@@ -544,7 +585,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
       physics: const BouncingScrollPhysics(),
       children: [
         // Outline Color Selector
-        _buildSectionTitle('OUTLINE / BORDER COLOR'),
+        _buildSectionTitle(context.l10n.subStyleOutlineColor.toUpperCase()),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -577,7 +618,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      item['name'] as String,
+                      _paletteName(context.l10n, item['name'] as String),
                       style: TextStyle(
                         color: isSelected ? Colors.white : PlayerTheme.inkMuted,
                         fontSize: 11.5,
@@ -594,7 +635,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         const SizedBox(height: 18),
 
         // Outline Thickness Slider
-        _buildSectionTitle('OUTLINE THICKNESS (${PlayerSettings.subBorderSize.value.toStringAsFixed(1)}px)'),
+        _buildSectionTitle(context.l10n.subStyleOutlineThickness(PlayerSettings.subBorderSize.value.toStringAsFixed(1)).toUpperCase()),
         SliderTheme(
           data: _sliderTheme(),
           child: Slider(
@@ -609,7 +650,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         const SizedBox(height: 18),
 
         // Drop Shadow Offset Slider
-        _buildSectionTitle('DROP SHADOW OFFSET (${PlayerSettings.subShadowOffset.value.toStringAsFixed(1)}px)'),
+        _buildSectionTitle(context.l10n.subStyleShadowOffset(PlayerSettings.subShadowOffset.value.toStringAsFixed(1)).toUpperCase()),
         SliderTheme(
           data: _sliderTheme(),
           child: Slider(
@@ -634,22 +675,22 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
       physics: const BouncingScrollPhysics(),
       children: [
         // Horizontal Alignment
-        _buildSectionTitle('HORIZONTAL ALIGNMENT'),
+        _buildSectionTitle(context.l10n.subStyleHAlign.toUpperCase()),
         const SizedBox(height: 8),
         Row(
           children: [
-            _buildAlignButton('Left', 'left', Icons.format_align_left_rounded),
+            _buildAlignButton(context.l10n.subStyleLeft, 'left', Icons.format_align_left_rounded),
             const SizedBox(width: 8),
-            _buildAlignButton('Center', 'center', Icons.format_align_center_rounded),
+            _buildAlignButton(context.l10n.subStyleCenter, 'center', Icons.format_align_center_rounded),
             const SizedBox(width: 8),
-            _buildAlignButton('Right', 'right', Icons.format_align_right_rounded),
+            _buildAlignButton(context.l10n.subStyleRight, 'right', Icons.format_align_right_rounded),
           ],
         ),
 
         const SizedBox(height: 20),
 
         // Bottom Margin
-        _buildSectionTitle('BOTTOM MARGIN / OFFSET (${PlayerSettings.subMarginY.value.round()}px)'),
+        _buildSectionTitle(context.l10n.subStyleBottomMargin(PlayerSettings.subMarginY.value.round()).toUpperCase()),
         SliderTheme(
           data: _sliderTheme(),
           child: Slider(
@@ -664,7 +705,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         const SizedBox(height: 20),
 
         // Vertical Screen Position
-        _buildSectionTitle('VERTICAL POSITION (${PlayerSettings.subPos.value.round()}%)'),
+        _buildSectionTitle(context.l10n.subStyleVPosition(PlayerSettings.subPos.value.round()).toUpperCase()),
         SliderTheme(
           data: _sliderTheme(),
           child: Slider(
@@ -724,23 +765,23 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     final overrideModes = [
       {
         'val': 'no',
-        'title': 'Preserve Anime & SSA/ASS Styling (Recommended)',
-        'subtitle': 'Leaves SSA/ASS anime subtitles untouched to preserve custom karaoke, styling & positions. Plain SRT/VTT are styled with your custom theme.',
+        'title': context.l10n.subStyleAssPreserve,
+        'subtitle': context.l10n.subStyleAssPreserveDesc,
       },
       {
         'val': 'scale',
-        'title': 'Scale Only',
-        'subtitle': 'Applies size scaling to SSA/ASS scripts while preserving their fonts, colors, and author typography.',
+        'title': context.l10n.subStyleAssScale,
+        'subtitle': context.l10n.subStyleAssScaleDesc,
       },
       {
         'val': 'yes',
-        'title': 'Override Colors & Outlines',
-        'subtitle': 'Applies your custom colors and outlines on top of SSA/ASS subtitle scripts.',
+        'title': context.l10n.subStyleAssColors,
+        'subtitle': context.l10n.subStyleAssColorsDesc,
       },
       {
         'val': 'force',
-        'title': 'Force Full Override (Aggressive)',
-        'subtitle': 'Forces all custom fonts, colors, and styles onto all subtitle formats (may break anime effects).',
+        'title': context.l10n.subStyleAssForce,
+        'subtitle': context.l10n.subStyleAssForceDesc,
       },
     ];
 
@@ -750,7 +791,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
       padding: const EdgeInsets.all(16),
       physics: const BouncingScrollPhysics(),
       children: [
-        _buildSectionTitle('SUBTITLE RENDERING ENGINE'),
+        _buildSectionTitle(context.l10n.subStyleEngine.toUpperCase()),
         const SizedBox(height: 10),
         
         // Flutter Engine Option
@@ -780,22 +821,22 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                     },
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Flutter Subtitle Engine (Recommended)',
-                          style: TextStyle(
+                          context.l10n.subStyleFlutterEngine,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(height: 3),
+                        const SizedBox(height: 3),
                         Text(
-                          '100% reliable hardware-accelerated subtitle overlay across Android, iOS, Windows, Mac, and Linux with full styling support.',
-                          style: TextStyle(
+                          context.l10n.subStyleFlutterEngineDesc,
+                          style: const TextStyle(
                             color: PlayerTheme.inkSubtle,
                             fontSize: 11,
                             height: 1.3,
@@ -837,22 +878,22 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                     },
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Native MPV libass Engine',
-                          style: TextStyle(
+                          context.l10n.subStyleMpvEngine,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(height: 3),
+                        const SizedBox(height: 3),
                         Text(
-                          'Direct GPU video texture rendering powered by libass with bundled Poppins font and SSA/ASS script layout support.',
-                          style: TextStyle(
+                          context.l10n.subStyleMpvEngineDesc,
+                          style: const TextStyle(
                             color: PlayerTheme.inkSubtle,
                             fontSize: 11,
                             height: 1.3,
@@ -867,7 +908,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
           ),
         ),
 
-        _buildSectionTitle('SSA / ASS FANSUB SCRIPT OVERRIDE MODE'),
+        _buildSectionTitle(context.l10n.subStyleAssMode.toUpperCase()),
         const SizedBox(height: 10),
         ...overrideModes.map((m) {
           final isSelected = activeOverride == m['val'];
@@ -961,17 +1002,25 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
         border: Border.all(color: PlayerTheme.edgeSoft),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Colors.white70),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w600),
-              ),
-            ],
+          // Expanded, with the title free to wrap: two of these tiles share a
+          // row, so on a 360px phone each is under 170px wide and the fixed
+          // icon + title + switch came to more than that, in English too.
+          Expanded(
+            child: Row(
+              children: [
+                Icon(icon, size: 18, color: Colors.white70),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
           ),
           Switch.adaptive(
             value: value,

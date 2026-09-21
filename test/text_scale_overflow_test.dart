@@ -32,6 +32,7 @@ import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_sources_panel.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
+import 'package:playtorriomov/widgets/player/player_sub_style_modal.dart';
 import 'package:playtorriomov/widgets/player/player_transport.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
@@ -413,6 +414,23 @@ void main() {
               ),
             ],
           ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the subtitle style editor does not overflow at 3x text scale',
+    (tester) async {
+      // Two toggle tiles share a row, so each is under 170px wide at 360; the
+      // fixed icon + title + switch overflowed there even at normal size.
+      await pumpAtScale(
+        tester,
+        settle: false,
+        child: const Scaffold(
+          body: SizedBox(height: 700, child: SubtitleStyleEditor()),
         ),
       );
 

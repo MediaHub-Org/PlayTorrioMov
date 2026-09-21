@@ -15,6 +15,7 @@ import 'package:playtorriomov/widgets/player/player_center_controls.dart';
 import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
+import 'package:playtorriomov/widgets/player/player_sub_style_modal.dart';
 import 'package:playtorriomov/widgets/player/player_top_bar.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
@@ -195,5 +196,22 @@ void main() {
       expect(tester.takeException(), isNull, reason: code);
     }
     expect(find.text('Live TV & Sports UI'), findsNothing);
+  });
+
+  testWidgets('the subtitle style editor follows the app language',
+      (tester) async {
+    tester.view.physicalSize = const Size(360, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    for (final code in ['es', 'pt', 'ar']) {
+      await tester.pumpWidget(inLocale(
+        code,
+        const SizedBox(height: 640, child: SubtitleStyleEditor()),
+      ));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.takeException(), isNull, reason: code);
+    }
+    expect(find.text('Typography'), findsNothing);
   });
 }
