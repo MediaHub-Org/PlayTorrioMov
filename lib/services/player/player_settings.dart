@@ -931,14 +931,10 @@ abstract final class PlayerSettings {
     }
   }
 
-  /// Builds a reactive [SubtitleViewConfiguration] for Flutter's subtitle overlay widget.
-  static SubtitleViewConfiguration getSubtitleViewConfiguration() {
-    if (useLibass.value) {
-      return const SubtitleViewConfiguration(
-        visible: false,
-      );
-    }
-
+  /// The text style subtitles are drawn with, from the saved appearance
+  /// settings. Shared by [getSubtitleViewConfiguration] (Live TV's player) and
+  /// the main player's own [SubtitleOverlay], so the two cannot drift.
+  static TextStyle subtitleTextStyle() {
     Color parseColor(String hex, {Color fallback = Colors.white}) {
       var str = hex.replaceAll('#', '').trim();
       if (str.length == 6) str = 'FF$str';
@@ -955,9 +951,6 @@ abstract final class PlayerSettings {
     final shadowColor = parseColor(subShadowColor.value, fallback: Colors.black54);
 
     final font = (subFont.value.isEmpty || subFont.value == 'subfont') ? 'Poppins' : subFont.value;
-    final align = subAlignX.value == 'left'
-        ? TextAlign.left
-        : (subAlignX.value == 'right' ? TextAlign.right : TextAlign.center);
 
     final shadows = <Shadow>[];
     if (subBorderSize.value > 0) {
@@ -985,24 +978,45 @@ abstract final class PlayerSettings {
       );
     }
 
+    return TextStyle(
+      fontFamily: font,
+      fontSize: (subFontSize.value * subScale.value).clamp(12.0, 96.0),
+      fontWeight: subBold.value ? FontWeight.bold : FontWeight.w600,
+      fontStyle: subItalic.value ? FontStyle.italic : FontStyle.normal,
+      color: textColor,
+      backgroundColor: boxColor,
+      shadows: shadows.isNotEmpty ? shadows : null,
+    );
+  }
+
+  /// Which side of the picture subtitles sit on: `left`, `center` or `right`.
+  static TextAlign subtitleTextAlign() => switch (subAlignX.value) {
+    'left' => TextAlign.left,
+    'right' => TextAlign.right,
+    _ => TextAlign.center,
+  };
+
+  /// Builds a reactive [SubtitleViewConfiguration] for Flutter's subtitle
+  /// overlay widget. Only Live TV's player uses this now: the main player
+  /// draws its own overlay, because this widget centers its text and cannot
+  /// honor the alignment or vertical position.
+  static SubtitleViewConfiguration getSubtitleViewConfiguration() {
+    if (useLibass.value) {
+      return const SubtitleViewConfiguration(
+        visible: false,
+      );
+    }
+
     return SubtitleViewConfiguration(
       visible: true,
-      textAlign: align,
+      textAlign: subtitleTextAlign(),
       padding: EdgeInsets.fromLTRB(
         subAlignX.value == 'left' ? 32 : 16,
         0,
         subAlignX.value == 'right' ? 32 : 16,
         subMarginY.value.clamp(8.0, 300.0),
       ),
-      style: TextStyle(
-        fontFamily: font,
-        fontSize: (subFontSize.value * subScale.value).clamp(12.0, 96.0),
-        fontWeight: subBold.value ? FontWeight.bold : FontWeight.w600,
-        fontStyle: subItalic.value ? FontStyle.italic : FontStyle.normal,
-        color: textColor,
-        backgroundColor: boxColor,
-        shadows: shadows.isNotEmpty ? shadows : null,
-      ),
+      style: subtitleTextStyle(),
     );
   }
 

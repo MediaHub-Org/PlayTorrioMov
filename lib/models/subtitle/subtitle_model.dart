@@ -33,22 +33,28 @@ class SubtitleVariant {
         // was doing before, only now it happens once at the source instead
         // of being re-derived at every render.
         isHearingImpaired =
-            isHearingImpaired ?? _titleSaysHearingImpaired(title),
-        isForced = isForced ?? _titleSaysForced(title);
+            isHearingImpaired ?? titleSaysHearingImpaired(title),
+        isForced = isForced ?? titleSaysForced(title);
+}
 
-  static bool _titleSaysHearingImpaired(String title) {
-    final t = title.toLowerCase();
-    return t.contains('[cc]') ||
-        t.contains('(cc)') ||
-        t.contains(' sdh') ||
-        t.startsWith('sdh') ||
-        t.contains(' hearing impaired') ||
-        RegExp(r'\bhi\b').hasMatch(t);
-  }
+/// Whether a subtitle's title marks it for the deaf and hard of hearing.
+/// Weak evidence -- a release named "White.House" matches "HI" -- but all a
+/// title-only source offers. Shared by online variants and embedded tracks.
+bool titleSaysHearingImpaired(String title) {
+  // Word boundaries, so "Movie.2020.SDH" and "Movie_CC" match as well as
+  // "Movie (CC)" -- release names separate with dots and underscores, and the
+  // old `' sdh'` check only saw a space.
+  return _hearingImpairedMarker.hasMatch(title);
+}
 
-  static bool _titleSaysForced(String title) {
-    return RegExp(r'\bforced\b', caseSensitive: false).hasMatch(title);
-  }
+final RegExp _hearingImpairedMarker = RegExp(
+  r'\b(sdh|hoh|hi|cc)\b|hearing[\s._-]*impaired|\bdeaf\b',
+  caseSensitive: false,
+);
+
+/// Whether a subtitle's title marks it as a forced-narrative track.
+bool titleSaysForced(String title) {
+  return RegExp(r'\bforced\b', caseSensitive: false).hasMatch(title);
 }
 
 class SubtitleLanguageGroup {
@@ -68,13 +74,35 @@ class PlayerEmbeddedSubtitle {
   final String? codec;
   final bool isDefault;
 
+  /// The container marks this track forced (mpv's own `forced` flag), as
+  /// opposed to a title that merely says so -- see [isForced].
+  final bool isForcedTrack;
+
   const PlayerEmbeddedSubtitle({
     required this.index,
     required this.title,
     this.language,
     this.codec,
     this.isDefault = false,
+    this.isForcedTrack = false,
   });
+
+  /// Marked forced by the file's flag, or by its title.
+  bool get isForced => isForcedTrack || titleSaysForced(title);
+
+  bool get isHearingImpaired => titleSaysHearingImpaired(title);
+
+  PlayerEmbeddedSubtitle withFlags({
+    required bool isDefault,
+    required bool isForcedTrack,
+  }) => PlayerEmbeddedSubtitle(
+    index: index,
+    title: title,
+    language: language,
+    codec: codec,
+    isDefault: isDefault,
+    isForcedTrack: isForcedTrack,
+  );
 }
 
 /// Which subtitle to turn on when the user presses CC and has not chosen a

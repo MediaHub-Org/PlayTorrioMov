@@ -38,6 +38,7 @@ import '../../services/player/skip_segments_service.dart';
 import '../../widgets/player/player_aspect_menu.dart' show PlayerAspectMenu;
 import '../../widgets/player/player_audio_menu.dart';
 import '../../widgets/player/player_subtitle_menu.dart';
+import '../../widgets/player/subtitle_overlay.dart';
 import '../../widgets/player/player_skip_button.dart';
 import '../../widgets/player/player_episodes_panel.dart';
 import '../../widgets/player/player_sources_panel.dart';
@@ -124,6 +125,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   // its rows open. 'subtitle' and 'style' are reached from the transport
   // bar directly.
   String? _activeMenu;
+
+  /// Whether the subtitle appearance editor is open. While it is, the video
+  /// shows sample subtitles in the current style (there may be no dialogue on
+  /// screen to judge it by), and the subtitle panel moves to the top so it
+  /// does not sit on top of them.
+  bool _showSubtitleSample = false;
   bool _showSubSyncBar = false;
   bool _showTextSyncOverlay = false;
 
@@ -850,6 +857,44 @@ class _PlayerScreenState extends State<PlayerScreen>
         _selectedAudioTrackIndex = activeIdx;
       }
     });
+    _markDefaultSubtitleTracks();
+  }
+
+  /// Reads which embedded subtitle tracks the file itself marks default or
+  /// forced. media_kit's track model does not carry either flag, so this asks
+  /// libmpv for its own `track-list`. Best effort: without the flags the menu
+  /// simply shows no Default badge, and auto-pick falls back to its other
+  /// rules.
+  Future<void> _markDefaultSubtitleTracks() async {
+    try {
+      final dynamic platform = _player.platform;
+      if (platform == null) return;
+      Future<String> read(String property) async =>
+          (await platform.getProperty(property) as String?) ?? '';
+
+      final count = int.tryParse(await read('track-list/count')) ?? 0;
+      final defaults = <int>{};
+      final forced = <int>{};
+      for (var i = 0; i < count; i++) {
+        if (await read('track-list/$i/type') != 'sub') continue;
+        final id = int.tryParse(await read('track-list/$i/id'));
+        if (id == null) continue;
+        if (await read('track-list/$i/default') == 'yes') defaults.add(id);
+        if (await read('track-list/$i/forced') == 'yes') forced.add(id);
+      }
+      if (!mounted || (defaults.isEmpty && forced.isEmpty)) return;
+      setState(() {
+        _embeddedSubtitles = [
+          for (final track in _embeddedSubtitles)
+            track.withFlags(
+              isDefault: defaults.contains(track.index),
+              isForcedTrack: forced.contains(track.index),
+            ),
+        ];
+      });
+    } catch (e) {
+      debugPrint('[PlayerScreen] could not read subtitle track flags: $e');
+    }
   }
 
   static String cleanMediaTitle(String raw) {
@@ -1957,24 +2002,39 @@ class _PlayerScreenState extends State<PlayerScreen>
                   child: ValueListenableBuilder<int>(
                     valueListenable: PlayerSettings.changeNotifier,
                     builder: (context, _, __) {
+                      // media_kit's own subtitle view is off: SubtitleOverlay
+                      // below draws the text, so alignment and vertical
+                      // position actually apply (see its doc comment).
                       final video = mk.Video(
                         controller: _videoController,
                         fit: _videoFit,
                         controls: mk.NoVideoControls,
                         subtitleViewConfiguration:
-                            PlayerSettings.getSubtitleViewConfiguration(),
+                            const mk.SubtitleViewConfiguration(visible: false),
                       );
                       // A forced ratio wraps the video in an AspectRatio:
                       // the picture is letterboxed into the chosen shape and
                       // BoxFit.contain inside it keeps the pixels whole.
                       // Null ratio means the video fills the box on its own
                       // terms -- that is the "Original" option.
-                      if (_forcedAspectRatio == null) return video;
-                      return Center(
-                        child: AspectRatio(
-                          aspectRatio: _forcedAspectRatio!,
-                          child: video,
-                        ),
+                      final picture = _forcedAspectRatio == null
+                          ? video
+                          : Center(
+                              child: AspectRatio(
+                                aspectRatio: _forcedAspectRatio!,
+                                child: video,
+                              ),
+                            );
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          picture,
+                          SubtitleOverlay(
+                            lines: _player.stream.subtitle,
+                            initialLines: _player.state.subtitle,
+                            showSample: _showSubtitleSample,
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -2244,8 +2304,14 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Subtitle Menu Popover
         if (_activeMenu == 'subtitle' && !_isLoading)
           PlayerMenuAnchor(
+            alignTop: _showSubtitleSample,
             child: PlayerSubtitleMenu(
               onBack: _backToSettings,
+              onAppearanceOpenChanged: (open) {
+                if (mounted && _showSubtitleSample != open) {
+                  setState(() => _showSubtitleSample = open);
+                }
+              },
               groups: _subtitleGroups,
               embeddedSubtitles: _embeddedSubtitles,
               selectedEmbeddedIndex: _selectedEmbeddedSubtitleIndex,

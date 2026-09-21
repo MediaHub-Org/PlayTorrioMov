@@ -41,6 +41,11 @@ class PlayerSubtitleMenu extends StatefulWidget {
   /// there rather than opened directly from the transport bar.
   final VoidCallback? onBack;
 
+  /// Told when the appearance editor opens or closes, so the player can show
+  /// sample subtitles while it is open. Also told `false` when this menu goes
+  /// away with the editor still showing.
+  final ValueChanged<bool>? onAppearanceOpenChanged;
+
   const PlayerSubtitleMenu({
     super.key,
     required this.groups,
@@ -62,6 +67,7 @@ class PlayerSubtitleMenu extends StatefulWidget {
     required this.onClose,
     this.player,
     this.onBack,
+    this.onAppearanceOpenChanged,
   });
 
   @override
@@ -70,7 +76,6 @@ class PlayerSubtitleMenu extends StatefulWidget {
 
 class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   String? _selectedLanguage;
-  String _sourceFilter = 'all'; // 'all', 'embedded', 'external'
   bool _filterHI = false;
   bool _filterForced = false;
 
@@ -80,6 +85,23 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   /// adjusting them. In here it shares the panel, and the video stays
   /// visible behind the glass.
   bool _showAppearance = false;
+
+  void _setAppearance(bool open) {
+    setState(() => _showAppearance = open);
+    widget.onAppearanceOpenChanged?.call(open);
+  }
+
+  @override
+  void dispose() {
+    // The menu can close (a tap off the panel) with the editor still open;
+    // the sample subtitles must not outlive it. After the frame, because this
+    // runs while the tree is being torn down and the callback calls setState.
+    final onChanged = widget.onAppearanceOpenChanged;
+    if (_showAppearance && onChanged != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => onChanged(false));
+    }
+    super.dispose();
+  }
   List<SubtitleLanguageGroup> _dynamicGroups = [];
   bool _isLoadingSearch = false;
   String? _searchQuery;
@@ -171,7 +193,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   Widget _flag(String lang, {double height = 12}) =>
       LanguageFlag(lang, height: height);
 
-  List<SubtitleVariant> _getFilteredVariants() {
+  /// Every variant of the selected language, before the CC and Forced
+  /// filters -- what the filter chips count.
+  List<SubtitleVariant> _variantsForLanguage() {
     List<SubtitleVariant> all = [];
     if (_selectedLanguage == '__all__' || _selectedLanguage == null) {
       all = _dynamicGroups.expand((g) => g.variants).toList();
@@ -182,8 +206,11 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       );
       all = g.variants;
     }
+    return all;
+  }
 
-    return all.where((v) {
+  List<SubtitleVariant> _getFilteredVariants() {
+    return _variantsForLanguage().where((v) {
       // The variant's own classification, not a title sniff -- same source
       // the row badges use, so the filter and the badges can never disagree.
       if (_filterHI && !v.isHearingImpaired) {
@@ -273,7 +300,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                           icon: const Icon(Icons.arrow_back_ios_new_rounded),
                           tooltip: context.l10n.subsBackToSubtitles,
                           onPressed: () =>
-                              setState(() => _showAppearance = false),
+                              _setAppearance(false),
                         ),
                         const SizedBox(width: 6),
                       ] else if (widget.onBack != null) ...[
@@ -370,7 +397,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                       tooltip: context.l10n.subsAppearanceTooltip,
                       showActiveBadge: _showAppearance,
                       onPressed: () =>
-                          setState(() => _showAppearance = !_showAppearance),
+                          _setAppearance(!_showAppearance),
                     ),
                     // No close button: the full-screen barrier behind every
                     // open menu dismisses on a tap anywhere off the panel,
@@ -390,6 +417,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
           // 2. Responsive Content Body -- the track list, or the appearance
           // editor when the tune button has switched to it.
+          if (!_showAppearance) _buildLoadedStrip(),
+
           Expanded(
             child: _showAppearance
                 ? SubtitleStyleEditor(player: widget.player)
@@ -400,6 +429,159 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                         totalVariantsCount, isLandscapeMobile)),
           ),
         ],
+      ),
+    );
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // "In this video" strip
+  // ───────────────────────────────────────────────────────────────────────────
+
+  /// The subtitles that are already there, one tap away at the top: the
+  /// online one currently loaded, then the tracks stored inside the file with
+  /// the file's own default first. They used to sit behind an "Embedded" pill
+  /// and a category of their own, two taps in and easy to miss -- though for
+  /// most videos they are the answer.
+  Widget _buildLoadedStrip() {
+    final loaded = widget.isSubtitleEnabled ? widget.selectedVariant : null;
+    final embedded = [...widget.embeddedSubtitles]
+      ..sort((a, b) => (b.isDefault ? 1 : 0).compareTo(a.isDefault ? 1 : 0));
+    if (loaded == null && embedded.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      decoration: const BoxDecoration(
+        color: Color(0x14000000),
+        border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.subsInThisVideo.toUpperCase(),
+            style: const TextStyle(
+              color: PlayerTheme.inkSubtle,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 6),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                if (loaded != null)
+                  _buildStripChip(
+                    language: loaded.language,
+                    label: loaded.language,
+                    isSelected: true,
+                    badges: [
+                      _TrackBadge(
+                        label: context.l10n.subsLoadedBadge,
+                        color: PlayerTheme.accent,
+                        icon: Icons.download_done_rounded,
+                      ),
+                    ],
+                    onTap: widget.onClose,
+                  ),
+                for (final track in embedded)
+                  _buildStripChip(
+                    language: track.language,
+                    label: (track.language != null && track.language!.isNotEmpty)
+                        ? track.language!
+                        : track.title,
+                    isSelected: widget.isSubtitleEnabled &&
+                        widget.selectedEmbeddedIndex == track.index,
+                    badges: [
+                      if (track.isDefault)
+                        _TrackBadge(
+                          label: context.l10n.subsDefaultBadge,
+                          color: const Color(0xFF60A5FA),
+                          icon: Icons.star_rounded,
+                        ),
+                      if (track.isHearingImpaired)
+                        _TrackBadge(
+                          label: context.l10n.subsHearingImpaired,
+                          color: const Color(0xFF10B981),
+                          icon: Icons.hearing_rounded,
+                        ),
+                      if (track.isForced)
+                        _TrackBadge(
+                          label: context.l10n.subsForced,
+                          color: const Color(0xFFF59E0B),
+                          icon: Icons.translate_rounded,
+                        ),
+                    ],
+                    onTap: () {
+                      widget.onSelectEmbedded(track);
+                      widget.onClose();
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStripChip({
+    required String? language,
+    required String label,
+    required bool isSelected,
+    required List<Widget> badges,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 6),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? PlayerTheme.accent.withValues(alpha: 0.22) : PlayerTheme.raised,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected ? PlayerTheme.accent : PlayerTheme.edgeSoft,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (language != null && language.isNotEmpty) ...[
+                  _flag(language),
+                  const SizedBox(width: 6),
+                ],
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 130),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    ),
+                  ),
+                ),
+                for (final badge in badges) ...[
+                  const SizedBox(width: 5),
+                  badge,
+                ],
+                if (isSelected) ...[
+                  const SizedBox(width: 5),
+                  Icon(Icons.check_rounded, size: 14, color: PlayerTheme.accent),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -868,6 +1050,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   // ───────────────────────────────────────────────────────────────────────────
 
   Widget _buildFilterToolbar({required bool compact}) {
+    final inLanguage = _variantsForLanguage();
+    final hearingCount = inLanguage.where((v) => v.isHearingImpaired).length;
+    final forcedCount = inLanguage.where((v) => v.isForced).length;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: compact ? 6 : 7),
       decoration: const BoxDecoration(
@@ -875,22 +1060,41 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       ),
       child: Row(
         children: [
+          // "All" is the absence of a filter: lit when neither CC nor Forced
+          // is on, and pressing it clears them. It used to be a permanently
+          // lit chip that did nothing.
           PlayerToggleChip(
-            active: _sourceFilter == 'all',
+            active: !_filterHI && !_filterForced,
             label: context.l10n.subsAll,
-            onClick: () => setState(() => _sourceFilter = 'all'),
+            onClick: () => setState(() {
+              _filterHI = false;
+              _filterForced = false;
+            }),
           ),
           const SizedBox(width: 5),
-          PlayerToggleChip(
-            active: _filterHI,
-            label: 'HI / CC',
-            onClick: () => setState(() => _filterHI = !_filterHI),
+          // Counted, and dimmed when the language has none: the chip used to
+          // be pressable whatever was there, and pressing it just emptied the
+          // list.
+          Tooltip(
+            message: context.l10n.subsHearingImpairedTip,
+            child: PlayerToggleChip(
+              active: _filterHI,
+              label: context.l10n.subsHearingImpaired,
+              count: '$hearingCount',
+              disabled: hearingCount == 0 && !_filterHI,
+              onClick: () => setState(() => _filterHI = !_filterHI),
+            ),
           ),
           const SizedBox(width: 5),
-          PlayerToggleChip(
-            active: _filterForced,
-            label: context.l10n.subsForced,
-            onClick: () => setState(() => _filterForced = !_filterForced),
+          Tooltip(
+            message: context.l10n.subsForcedTip,
+            child: PlayerToggleChip(
+              active: _filterForced,
+              label: context.l10n.subsForced,
+              count: '$forcedCount',
+              disabled: forcedCount == 0 && !_filterForced,
+              onClick: () => setState(() => _filterForced = !_filterForced),
+            ),
           ),
           const Spacer(),
           if (compact)
@@ -1005,6 +1209,32 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                                 ),
                               ),
                             ),
+                            if (track.isDefault) ...[
+                              const SizedBox(width: 4),
+                              _TrackBadge(
+                                label: context.l10n.subsDefaultBadge,
+                                color: const Color(0xFF60A5FA),
+                                icon: Icons.star_rounded,
+                              ),
+                            ],
+                            if (track.isHearingImpaired) ...[
+                              const SizedBox(width: 4),
+                              _TrackBadge(
+                                label: context.l10n.subsHearingImpaired,
+                                color: const Color(0xFF10B981),
+                                icon: Icons.hearing_rounded,
+                                tooltip: context.l10n.subsHearingImpairedTip,
+                              ),
+                            ],
+                            if (track.isForced) ...[
+                              const SizedBox(width: 4),
+                              _TrackBadge(
+                                label: context.l10n.subsForced,
+                                color: const Color(0xFFF59E0B),
+                                icon: Icons.translate_rounded,
+                                tooltip: context.l10n.subsForcedTip,
+                              ),
+                            ],
                             if (track.language != null && track.language!.isNotEmpty) ...[
                               const SizedBox(width: 5),
                               Text(
@@ -1239,38 +1469,24 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                                   ),
                                 ),
                               ),
-                            if (isHI)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x2210B981),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                                child: const Text(
-                                  'HI / CC',
-                                  style: TextStyle(
-                                    color: Color(0xFF10B981),
-                                    fontSize: 8.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
+                            if (isHI) ...[
+                              const SizedBox(width: 4),
+                              _TrackBadge(
+                                label: context.l10n.subsHearingImpaired,
+                                color: const Color(0xFF10B981),
+                                icon: Icons.hearing_rounded,
+                                tooltip: context.l10n.subsHearingImpairedTip,
                               ),
-                            if (isForced)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x22F59E0B),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
-                                child: Text(
-                                  context.l10n.subsForced.toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Color(0xFFF59E0B),
-                                    fontSize: 8.5,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
+                            ],
+                            if (isForced) ...[
+                              const SizedBox(width: 4),
+                              _TrackBadge(
+                                label: context.l10n.subsForced,
+                                color: const Color(0xFFF59E0B),
+                                icon: Icons.translate_rounded,
+                                tooltip: context.l10n.subsForcedTip,
                               ),
+                            ],
                           ],
                         ),
                       ],
@@ -1321,5 +1537,49 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         ],
       ),
     );
+  }
+}
+
+/// A small tag on a subtitle row: an icon and a short label in one color --
+/// CC / SDH, Forced, Default, Loaded. One widget so the online list, the
+/// embedded list and the strip on top show them the same way.
+class _TrackBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData icon;
+  final String? tooltip;
+
+  const _TrackBadge({
+    required this.label,
+    required this.color,
+    required this.icon,
+    this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final badge = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 9.5, color: color),
+          const SizedBox(width: 2),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              color: color,
+              fontSize: 8.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+    return tooltip == null ? badge : Tooltip(message: tooltip!, child: badge);
   }
 }

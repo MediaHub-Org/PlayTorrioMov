@@ -80,9 +80,7 @@ class SubtitleStyleEditor extends StatefulWidget {
   State<SubtitleStyleEditor> createState() => _SubtitleStyleEditorState();
 }
 
-class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
 
   static const List<Map<String, dynamic>> _textColorPalette = [
     {'name': 'White', 'hex': '#FFFFFFFF', 'color': Color(0xFFFFFFFF)},
@@ -112,18 +110,6 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     {'name': 'Crimson', 'hex': '#FFE11D48', 'color': Color(0xFFE11D48)},
     {'name': 'Neon Cyan', 'hex': '#FF00E5FF', 'color': Color(0xFF00E5FF)},
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 5, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   /// The display name of a palette swatch. The palettes are `const` maps keyed
   /// by an English name, so the name is looked up here rather than stored
@@ -191,22 +177,66 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             return Column(
               children: [
                 // No header of its own: the subtitle panel's header names
-                // this view and carries the back arrow. No preview box
-                // either -- the real subtitles render on the video behind
-                // the glass, which is the preview that matters.
+                // this view and carries the back arrow.
                 _buildPresetsBar(),
 
-                _buildTabBar(),
-
+                // One scrolling page, in the order people reach for things:
+                // the text itself, its background, its outline, where it
+                // sits -- then everything rarer behind "More options". It was
+                // five tabs, and a viewer hunting for one setting opened
+                // three of them.
                 Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    physics: const BouncingScrollPhysics(),
                     children: [
-                      _buildTypographyTab(),
-                      _buildColorsAndBoxTab(),
-                      _buildOutlinesAndShadowsTab(),
-                      _buildPositionAndLayoutTab(),
-                      _buildAdvancedTab(),
+                      Text(
+                        context.l10n.subStyleSampleHint,
+                        style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11.5, height: 1.4),
+                      ),
+                      const SizedBox(height: 16),
+
+                      _buildSectionHeader(context.l10n.subStyleSecText),
+                      ..._sizeItems(),
+                      ..._textColorItems(),
+                      ..._boldItems(),
+                      const SizedBox(height: 22),
+
+                      _buildSectionHeader(context.l10n.subStyleSecBackground),
+                      ..._boxItems(),
+                      const SizedBox(height: 22),
+
+                      _buildSectionHeader(context.l10n.subStyleSecOutline),
+                      ..._outlineColorItems(),
+                      ..._thicknessItems(),
+                      const SizedBox(height: 22),
+
+                      _buildSectionHeader(context.l10n.subStyleSecPosition),
+                      ..._alignItems(),
+                      ..._vposItems(),
+                      const SizedBox(height: 14),
+
+                      Theme(
+                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                        child: ExpansionTile(
+                          tilePadding: EdgeInsets.zero,
+                          childrenPadding: EdgeInsets.zero,
+                          iconColor: PlayerTheme.inkMuted,
+                          collapsedIconColor: PlayerTheme.inkMuted,
+                          title: Text(
+                            context.l10n.subStyleMore,
+                            style: const TextStyle(color: PlayerTheme.ink, fontSize: 13.5, fontWeight: FontWeight.w700),
+                          ),
+                          children: [
+                            const SizedBox(height: 6),
+                            ..._fontFamilyItems(),
+                            ..._scaleItems(),
+                            ..._shadowItems(),
+                            ..._marginItems(),
+                            ..._advancedItems(),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -217,16 +247,6 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
       },
     );
   }
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Header
-  // ───────────────────────────────────────────────────────────────────────────
-
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Live Subtitle Preview Area
-  // ───────────────────────────────────────────────────────────────────────────
-
 
   // ───────────────────────────────────────────────────────────────────────────
   // Presets Horizontal Bar
@@ -295,46 +315,8 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Tab Bar Navigation
-  // ───────────────────────────────────────────────────────────────────────────
-
-  Widget _buildTabBar() {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0x18000000),
-        border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        tabAlignment: TabAlignment.start,
-        indicatorColor: PlayerTheme.accent,
-        indicatorWeight: 2.5,
-        labelColor: Colors.white,
-        unselectedLabelColor: PlayerTheme.inkSubtle,
-        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-        unselectedLabelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
-        tabs: [
-          Tab(text: context.l10n.subStyleTabTypography, icon: const Icon(Icons.text_fields_rounded, size: 16)),
-          Tab(text: context.l10n.subStyleTabColors, icon: const Icon(Icons.palette_rounded, size: 16)),
-          Tab(text: context.l10n.subStyleTabOutline, icon: const Icon(Icons.border_style_rounded, size: 16)),
-          Tab(text: context.l10n.subStyleTabPosition, icon: const Icon(Icons.vertical_align_bottom_rounded, size: 16)),
-          Tab(text: context.l10n.subStyleTabAdvanced, icon: const Icon(Icons.tune_rounded, size: 16)),
-        ],
-      ),
-    );
-  }
-
-  // ───────────────────────────────────────────────────────────────────────────
-  // Tab 1: Typography
-  // ───────────────────────────────────────────────────────────────────────────
-
-  Widget _buildTypographyTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      children: [
+  List<Widget> _fontFamilyItems() {
+    return [
         // Font Family Selector
         _buildSectionTitle(context.l10n.subStyleFontFamily.toUpperCase()),
         const SizedBox(height: 8),
@@ -378,9 +360,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             ),
           ),
         ),
+    ];
+  }
 
-        const SizedBox(height: 18),
-
+  List<Widget> _sizeItems() {
+    return [
         // Base Font Size Slider
         _buildSectionTitle(context.l10n.subStyleBaseFontSize(PlayerSettings.subFontSize.value.round()).toUpperCase()),
         Row(
@@ -407,9 +391,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             ),
           ],
         ),
+    ];
+  }
 
-        const SizedBox(height: 14),
-
+  List<Widget> _scaleItems() {
+    return [
         // Scale Multiplier Slider
         _buildSectionTitle(context.l10n.subStyleScale((PlayerSettings.subScale.value * 100).round()).toUpperCase()),
         SliderTheme(
@@ -422,9 +408,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             onChanged: (v) => PlayerSettings.setSubScale(v, player: widget.player),
           ),
         ),
+    ];
+  }
 
-        const SizedBox(height: 14),
-
+  List<Widget> _boldItems() {
+    return [
         // Bold and Italic Toggles
         Row(
           children: [
@@ -447,22 +435,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             ),
           ],
         ),
-      ],
-    );
+    ];
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Tab 2: Colors & Box
-  // ───────────────────────────────────────────────────────────────────────────
-
-  Widget _buildColorsAndBoxTab() {
+  List<Widget> _textColorItems() {
     final activeColor = PlayerSettings.subColor.value;
-    final activeBox = PlayerSettings.subBackColor.value;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      children: [
+    return [
         // Text Color Palette
         _buildSectionTitle(context.l10n.subStyleTextColor.toUpperCase()),
         const SizedBox(height: 10),
@@ -510,9 +488,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             );
           }).toList(),
         ),
+    ];
+  }
 
-        const SizedBox(height: 22),
-
+  List<Widget> _boxItems() {
+    final activeBox = PlayerSettings.subBackColor.value;
+    return [
         // Background Box Style
         _buildSectionTitle(context.l10n.subStyleBoxTitle.toUpperCase()),
         const SizedBox(height: 10),
@@ -533,34 +514,42 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
                       color: isSelected ? PlayerTheme.accent : PlayerTheme.edgeSoft,
                     ),
                   ),
+                  // Both texts flex: name and description together came to more
+                  // than a 360px phone's row once every section shared one
+                  // page (they used to sit alone on a tab that was rarely
+                  // opened, and overflowed there too).
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: _parseColorFromHex(opt['hex']),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: Colors.white30),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            _boxName(context.l10n, opt['name'] as String),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: _parseColorFromHex(opt['hex']),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.white30),
+                        ),
                       ),
-                      Text(
-                        _boxDesc(context.l10n, opt['desc'] as String),
-                        style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11.5),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _boxName(context.l10n, opt['name'] as String),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          _boxDesc(context.l10n, opt['desc'] as String),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11.5),
+                        ),
                       ),
                     ],
                   ),
@@ -569,21 +558,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             );
           }).toList(),
         ),
-      ],
-    );
+    ];
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Tab 3: Outlines & Shadows
-  // ───────────────────────────────────────────────────────────────────────────
-
-  Widget _buildOutlinesAndShadowsTab() {
+  List<Widget> _outlineColorItems() {
     final activeBorderColor = PlayerSettings.subBorderColor.value;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      children: [
+    return [
         // Outline Color Selector
         _buildSectionTitle(context.l10n.subStyleOutlineColor.toUpperCase()),
         const SizedBox(height: 8),
@@ -631,9 +611,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             );
           }).toList(),
         ),
+    ];
+  }
 
-        const SizedBox(height: 18),
-
+  List<Widget> _thicknessItems() {
+    return [
         // Outline Thickness Slider
         _buildSectionTitle(context.l10n.subStyleOutlineThickness(PlayerSettings.subBorderSize.value.toStringAsFixed(1)).toUpperCase()),
         SliderTheme(
@@ -646,9 +628,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             onChanged: (v) => PlayerSettings.setSubBorderSize(v, player: widget.player),
           ),
         ),
+    ];
+  }
 
-        const SizedBox(height: 18),
-
+  List<Widget> _shadowItems() {
+    return [
         // Drop Shadow Offset Slider
         _buildSectionTitle(context.l10n.subStyleShadowOffset(PlayerSettings.subShadowOffset.value.toStringAsFixed(1)).toUpperCase()),
         SliderTheme(
@@ -661,19 +645,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             onChanged: (v) => PlayerSettings.setSubShadowOffset(v, player: widget.player),
           ),
         ),
-      ],
-    );
+    ];
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Tab 4: Position & Layout
-  // ───────────────────────────────────────────────────────────────────────────
-
-  Widget _buildPositionAndLayoutTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      children: [
+  List<Widget> _alignItems() {
+    return [
         // Horizontal Alignment
         _buildSectionTitle(context.l10n.subStyleHAlign.toUpperCase()),
         const SizedBox(height: 8),
@@ -686,9 +662,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             _buildAlignButton(context.l10n.subStyleRight, 'right', Icons.format_align_right_rounded),
           ],
         ),
+    ];
+  }
 
-        const SizedBox(height: 20),
-
+  List<Widget> _marginItems() {
+    return [
         // Bottom Margin
         _buildSectionTitle(context.l10n.subStyleBottomMargin(PlayerSettings.subMarginY.value.round()).toUpperCase()),
         SliderTheme(
@@ -701,9 +679,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             onChanged: (v) => PlayerSettings.setSubMarginY(v, player: widget.player),
           ),
         ),
+    ];
+  }
 
-        const SizedBox(height: 20),
-
+  List<Widget> _vposItems() {
+    return [
         // Vertical Screen Position
         _buildSectionTitle(context.l10n.subStyleVPosition(PlayerSettings.subPos.value.round()).toUpperCase()),
         SliderTheme(
@@ -716,8 +696,17 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
             onChanged: (v) => PlayerSettings.setSubPos(v, player: widget.player),
           ),
         ),
-      ],
-    );
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(context.l10n.subStyleTop, style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11)),
+              Text(context.l10n.subStyleBottom, style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11)),
+            ],
+          ),
+        ),
+    ];
   }
 
   Widget _buildAlignButton(String title, String alignVal, IconData icon) {
@@ -755,220 +744,96 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor>
     );
   }
 
-  // ───────────────────────────────────────────────────────────────────────────
-  // Tab 5: Advanced / ASS Script Behavior
-  // ───────────────────────────────────────────────────────────────────────────
-
-  Widget _buildAdvancedTab() {
-    final activeOverride = PlayerSettings.subAssOverride.value;
-
-    final overrideModes = [
-      {
-        'val': 'no',
-        'title': context.l10n.subStyleAssPreserve,
-        'subtitle': context.l10n.subStyleAssPreserveDesc,
-      },
-      {
-        'val': 'scale',
-        'title': context.l10n.subStyleAssScale,
-        'subtitle': context.l10n.subStyleAssScaleDesc,
-      },
-      {
-        'val': 'yes',
-        'title': context.l10n.subStyleAssColors,
-        'subtitle': context.l10n.subStyleAssColorsDesc,
-      },
-      {
-        'val': 'force',
-        'title': context.l10n.subStyleAssForce,
-        'subtitle': context.l10n.subStyleAssForceDesc,
-      },
+  /// The two switches that used to be a whole tab. A four-way choice of how
+  /// hard to override styled (SSA/ASS) subtitles, and a radio pair for the
+  /// rendering engine, came down to: use my style on styled subtitles or not,
+  /// and whether to let libass draw. The saved values are unchanged, so the
+  /// old "scale only" and "force" modes still work if they were chosen; they
+  /// show as "on".
+  List<Widget> _advancedItems() {
+    final l10n = context.l10n;
+    return [
+      _buildSectionTitle(l10n.subStyleAssMode.toUpperCase()),
+      const SizedBox(height: 8),
+      _buildSwitchCard(
+        title: l10n.subStyleAssApply,
+        description: l10n.subStyleAssApplyDesc,
+        value: PlayerSettings.subAssOverride.value != 'no',
+        onChanged: (on) => PlayerSettings.setSubAssOverride(on ? 'yes' : 'no', player: widget.player),
+      ),
+      const SizedBox(height: 10),
+      _buildSwitchCard(
+        title: l10n.subStyleNativeEngine,
+        description: l10n.subStyleNativeEngineDesc,
+        value: PlayerSettings.useLibass.value,
+        onChanged: (on) => PlayerSettings.setUseLibass(on, player: widget.player),
+      ),
+      const SizedBox(height: 8),
     ];
+  }
 
-    final useLibass = PlayerSettings.useLibass.value;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      children: [
-        _buildSectionTitle(context.l10n.subStyleEngine.toUpperCase()),
-        const SizedBox(height: 10),
-        
-        // Flutter Engine Option
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: InkWell(
-            onTap: () => PlayerSettings.setUseLibass(false, player: widget.player),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: !useLibass ? PlayerTheme.accentSoft : PlayerTheme.raised,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: !useLibass ? PlayerTheme.accent : PlayerTheme.edgeSoft,
+  Widget _buildSwitchCard({
+    required String title,
+    required String description,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+      decoration: BoxDecoration(
+        color: PlayerTheme.raised,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PlayerTheme.edgeSoft),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(color: PlayerTheme.ink, fontSize: 13, fontWeight: FontWeight.w700),
                 ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Radio<bool>(
-                    value: false,
-                    groupValue: useLibass,
-                    activeColor: PlayerTheme.accent,
-                    onChanged: (val) {
-                      if (val != null) PlayerSettings.setUseLibass(val, player: widget.player);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.subStyleFlutterEngine,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          context.l10n.subStyleFlutterEngineDesc,
-                          style: const TextStyle(
-                            color: PlayerTheme.inkSubtle,
-                            fontSize: 11,
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11, height: 1.35),
+                ),
+              ],
             ),
           ),
-        ),
+          Switch.adaptive(
+            value: value,
+            activeColor: PlayerTheme.accent,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
+    );
+  }
 
-        // Native libass Option
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: InkWell(
-            onTap: () => PlayerSettings.setUseLibass(true, player: widget.player),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: useLibass ? PlayerTheme.accentSoft : PlayerTheme.raised,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: useLibass ? PlayerTheme.accent : PlayerTheme.edgeSoft,
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Radio<bool>(
-                    value: true,
-                    groupValue: useLibass,
-                    activeColor: PlayerTheme.accent,
-                    onChanged: (val) {
-                      if (val != null) PlayerSettings.setUseLibass(val, player: widget.player);
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.subStyleMpvEngine,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          context.l10n.subStyleMpvEngineDesc,
-                          style: const TextStyle(
-                            color: PlayerTheme.inkSubtle,
-                            fontSize: 11,
-                            height: 1.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 14,
+            decoration: BoxDecoration(
+              color: PlayerTheme.accent,
+              borderRadius: BorderRadius.circular(2),
             ),
           ),
-        ),
-
-        _buildSectionTitle(context.l10n.subStyleAssMode.toUpperCase()),
-        const SizedBox(height: 10),
-        ...overrideModes.map((m) {
-          final isSelected = activeOverride == m['val'];
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: InkWell(
-              onTap: () => PlayerSettings.setSubAssOverride(m['val']!, player: widget.player),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isSelected ? PlayerTheme.accentSoft : PlayerTheme.raised,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? PlayerTheme.accent : PlayerTheme.edgeSoft,
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Radio<String>(
-                      value: m['val']!,
-                      groupValue: activeOverride,
-                      activeColor: PlayerTheme.accent,
-                      onChanged: (val) {
-                        if (val != null) PlayerSettings.setSubAssOverride(val, player: widget.player);
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            m['title']!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            m['subtitle']!,
-                            style: const TextStyle(
-                              color: PlayerTheme.inkSubtle,
-                              fontSize: 11,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }),
-      ],
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(color: PlayerTheme.ink, fontSize: 14.5, fontWeight: FontWeight.w800),
+          ),
+        ],
+      ),
     );
   }
 

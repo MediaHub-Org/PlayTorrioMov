@@ -5,6 +5,40 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Subtitle position**: the Left / Center / Right buttons and the vertical
+  position slider did nothing on the default subtitle engine, because
+  media_kit's own subtitle view pins its text to the bottom centre. The player
+  now draws the subtitle text itself, so alignment, vertical position and
+  bottom margin all take effect. (Live TV's player still uses the old view.)
+- **CC / SDH and Forced filters**: they ignored mouse and touch — only a
+  remote's select key worked. They respond to a click now, show how many
+  subtitles each would leave, and dim when there are none. *All* clears both.
+- **CC detection**: a subtitle named `Movie.2020.SDH` or `Movie_CC` is now
+  recognised as hearing-impaired; only `Movie SDH` (with a space) was.
+
+### Added
+- **Sample subtitles**: while the Subtitle Appearance editor is open, the video
+  shows "Testing subtitles…" in the current style, and the subtitle panel moves
+  to the top so it does not hide them.
+- **"In this video" strip**: the embedded subtitle tracks, with the file's
+  default first, and the online subtitle currently loaded, sit at the top of
+  the subtitle menu, one tap away. Tracks the file marks default or forced
+  (read from libmpv) and ones titled CC / SDH carry badges.
+- **Flags for 15 more subtitle languages**: Albanian, Bengali, Bosnian,
+  Catalan, Icelandic, Kurdish, Macedonian, Malay, Mongolian, Pashto, Sinhala,
+  Slovak, Slovenian, Somali and Swahili (the Catalan and Kurdish flags are
+  drawn, as flag services do not carry them). The language table also learns
+  the Kurdish, Mongolian, Pashto, Sinhala, Somali and Swahili codes.
+
+### Changed
+- **Subtitle Appearance, simplified**: one scrolling page — Text, Background,
+  Outline, Position — instead of five tabs, with the rarer options (font, scale,
+  shadow, bottom margin, and the two advanced switches) under *More options*.
+- **Advanced / ASS, simplified**: a four-way override choice and an engine
+  radio pair became two switches: *Use my style on styled subtitles* and
+  *Native subtitle engine (libass)*. Saved values are unchanged.
+
 ### Changed
 - **Simkl setup**: when the build has no Simkl client ID, the Connect card now
   says so plainly and offers two buttons: *Open Simkl developer page* and *Add

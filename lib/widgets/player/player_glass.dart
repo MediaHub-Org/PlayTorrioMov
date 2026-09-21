@@ -126,7 +126,13 @@ class PlayerGlassCard extends StatelessWidget {
 class PlayerMenuAnchor extends StatelessWidget {
   final Widget child;
 
-  const PlayerMenuAnchor({super.key, required this.child});
+  /// Pin the card to the top edge instead of the bottom. The subtitle
+  /// appearance editor asks for this: sample subtitles are drawn near the
+  /// bottom of the picture by default, exactly where a bottom-anchored card
+  /// would hide them.
+  final bool alignTop;
+
+  const PlayerMenuAnchor({super.key, required this.child, this.alignTop = false});
 
   /// Clearance for the transport bar the popover sits above, plus whatever
   /// the system puts below it (gesture bar, home indicator).
@@ -195,7 +201,9 @@ class PlayerMenuAnchor extends StatelessWidget {
       child: Align(
         // Wide enough to have a corner to sit in, it sits in it; a narrow
         // screen has no spare width, so the card centres over the full span.
-        alignment: isNarrow ? Alignment.bottomCenter : Alignment.bottomRight,
+        alignment: alignTop
+            ? (isNarrow ? Alignment.topCenter : Alignment.topRight)
+            : (isNarrow ? Alignment.bottomCenter : Alignment.bottomRight),
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: child,
@@ -489,7 +497,12 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
         // only way to learn they press is to press them.
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
-        child: AnimatedOpacity(
+        // The tap lives here. Only the D-pad's select key called onClick, so a
+        // mouse or a finger on the CC / Forced filters did nothing at all.
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.disabled ? null : widget.onClick,
+          child: AnimatedOpacity(
           duration: const Duration(milliseconds: 150),
           opacity: widget.disabled ? 0.35 : 1.0,
           child: AnimatedContainer(
@@ -550,6 +563,7 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
               ],
             ),
           ),
+        ),
         ),
       ),
       ),
