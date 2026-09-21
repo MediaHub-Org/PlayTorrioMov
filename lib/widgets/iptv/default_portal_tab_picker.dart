@@ -1,5 +1,6 @@
 // lib/widgets/iptv/default_portal_tab_picker.dart
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../services/iptv/iptv_settings.dart';
 import '../common/setting_choice_chip.dart';
@@ -32,12 +33,12 @@ class DefaultPortalTabPicker extends StatelessWidget {
           runSpacing: 8,
           children: [
             SettingChoiceChip(
-              label: 'Xtream Panels',
+              label: context.l10n.iptvXtreamPanels,
               selected: tabIdx == 0,
               onSelect: () => IptvSettings.setDefaultPortalTab(0),
             ),
             SettingChoiceChip(
-              label: 'M3U Playlists',
+              label: context.l10n.iptvM3uPlaylists,
               selected: tabIdx == 1,
               onSelect: () => IptvSettings.setDefaultPortalTab(1),
             ),

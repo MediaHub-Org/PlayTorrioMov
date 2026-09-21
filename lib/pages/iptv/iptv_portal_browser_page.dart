@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 
 import '../../models/iptv/iptv_models.dart';
 import '../../models/iptv/m3u_models.dart';
@@ -158,7 +159,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                       Icon(Icons.tune_rounded, color: palette.primaryColor, size: 20),
                       const SizedBox(width: 10),
                       Text(
-                        'Customize Portal Browser',
+                        context.l10n.iptvCustomizeBrowser,
                         style: TextStyle(
                           color: AppColors.ink,
                           fontSize: 16.5,
@@ -177,7 +178,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                   const SizedBox(height: 12),
 
                   Text(
-                    'Channel Stream Layout Mode',
+                    context.l10n.iptvStreamLayoutMode,
                     style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 8),
@@ -190,7 +191,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         children: PortalBrowserLayout.values.map((l) {
                           final isSelected = l == layout;
                           return SettingChoiceChip(
-                            label: l.label,
+                            label: l.localizedLabel(context.l10n),
                             selected: isSelected,
                             onSelect: () => IptvSettings.setBrowserLayout(l),
                           );
@@ -341,11 +342,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   String _selectedCategoryName() {
-    if (_selectedCategoryId == favoritesCategoryId) return 'Pinned';
-    if (_selectedCategoryId.isEmpty) return 'All Categories';
+    if (_selectedCategoryId == favoritesCategoryId) return context.l10n.iptvPinned;
+    if (_selectedCategoryId.isEmpty) return context.l10n.iptvAllCategories;
     final found = _categories.firstWhere(
       (c) => c.id == _selectedCategoryId,
-      orElse: () => const IptvCategory(id: '', name: 'All Categories'),
+      orElse: () => IptvCategory(id: '', name: context.l10n.iptvAllCategories),
     );
     return found.name;
   }
@@ -362,6 +363,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
       _catSearchCtrl.clear();
     });
 
+    // Read before the first await: the synthetic category names below are
+    // translated when the list is built, and there is no context to do it
+    // with once the network calls return.
+    final l10n = context.l10n;
+
     try {
       if (widget.portal != null) {
         final p = widget.portal!.portal;
@@ -371,8 +377,8 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         if (!mounted) return;
         setState(() {
           _categories = [
-            const IptvCategory(id: '', name: 'All Categories'),
-            const IptvCategory(id: favoritesCategoryId, name: 'Pinned'),
+            IptvCategory(id: '', name: l10n.iptvAllCategories),
+            IptvCategory(id: favoritesCategoryId, name: l10n.iptvPinned),
             ...cats,
           ];
           _selectedCategoryId = '';
@@ -408,8 +414,8 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         if (!mounted) return;
         setState(() {
           _categories = [
-            const IptvCategory(id: '', name: 'All Categories'),
-            const IptvCategory(id: favoritesCategoryId, name: 'Pinned'),
+            IptvCategory(id: '', name: l10n.iptvAllCategories),
+            IptvCategory(id: favoritesCategoryId, name: l10n.iptvPinned),
             ...cats,
           ];
           _selectedCategoryId = '';
@@ -421,7 +427,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Failed to load content: $e';
+        _errorMessage = l10n.iptvLoadFailed('$e');
       });
     }
 
@@ -529,7 +535,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
     final currentCat = _categories.firstWhere(
       (c) => c.id == _selectedCategoryId,
-      orElse: () => IptvCategory(id: '', name: isLive ? 'Live Channels' : (_activeSection == IptvSection.vod ? 'Movies' : 'Series')),
+      orElse: () => IptvCategory(id: '', name: isLive ? context.l10n.iptvLiveChannels : (_activeSection == IptvSection.vod ? context.l10n.libraryFilterMovies : context.l10n.libraryFilterSeries)),
     );
 
     if (widget.portal != null) {
@@ -664,12 +670,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         Icon(Icons.folder_rounded, color: AppColors.accent, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          'Select Category',
+                          context.l10n.iptvSelectCategory,
                           style: TextStyle(color: AppColors.ink, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const Spacer(),
                         Text(
-                          '${_categories.length} total',
+                          context.l10n.iptvCategoriesTotal(_categories.length),
                           style: TextStyle(color: AppColors.inkDisabled, fontSize: 12),
                         ),
                       ],
@@ -689,7 +695,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         controller: _catSearchCtrl,
                         style: TextStyle(color: AppColors.ink, fontSize: 13),
                         decoration: InputDecoration(
-                          hintText: 'Filter categories…',
+                          hintText: context.l10n.iptvFilterCategories,
                           hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12.5),
                           prefixIcon: Icon(Icons.search_rounded, color: AppColors.inkSubtle, size: 18),
                           suffixIcon: _catSearchQuery.isNotEmpty
@@ -751,7 +757,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     final palette = AppThemeService.currentPalette.value;
     final title = widget.portal?.name.isNotEmpty == true
         ? widget.portal!.name
-        : (widget.m3uPlaylist?.name ?? 'IPTV Portal');
+        : (widget.m3uPlaylist?.name ?? context.l10n.iptvPortalFallback);
 
     final isDesktop = _isDesktop(context);
 
@@ -774,7 +780,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                   children: [
                     IconButton(
                       icon: Icon(Icons.arrow_back_rounded, color: AppColors.ink, size: 22),
-                      tooltip: 'Back',
+                      tooltip: context.l10n.playerBack,
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 8),
@@ -812,14 +818,14 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             Row(
                               children: [
                                 Text(
-                                  'Expiry: ${widget.portal!.expiry}',
+                                  context.l10n.iptvExpiryLong(widget.portal!.expiry),
                                   style: const TextStyle(color: Color(0xFF9D4EDD), fontSize: 11, fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(width: 10),
                                 Container(width: 3, height: 3, decoration: BoxDecoration(color: AppColors.inkAlpha(0.30), shape: BoxShape.circle)),
                                 const SizedBox(width: 10),
                                 Text(
-                                  'Connections: ${widget.portal!.activeConnections}/${widget.portal!.maxConnections}',
+                                  context.l10n.iptvConnectionsLong(widget.portal!.activeConnections, widget.portal!.maxConnections),
                                   style: const TextStyle(color: Colors.greenAccent, fontSize: 11, fontWeight: FontWeight.w600),
                                 ),
                               ],
@@ -843,11 +849,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            _buildSectionTab('Live TV', Icons.live_tv_rounded, IptvSection.live),
+                            _buildSectionTab(context.l10n.navLiveTv, Icons.live_tv_rounded, IptvSection.live),
                             const SizedBox(width: 4),
-                            _buildSectionTab('Movies', Icons.movie_rounded, IptvSection.vod),
+                            _buildSectionTab(context.l10n.libraryFilterMovies, Icons.movie_rounded, IptvSection.vod),
                             const SizedBox(width: 4),
-                            _buildSectionTab('TV Series', Icons.tv_rounded, IptvSection.series),
+                            _buildSectionTab(context.l10n.iptvTvSeries, Icons.tv_rounded, IptvSection.series),
                           ],
                         ),
                       ),
@@ -862,7 +868,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         controller: _searchCtrl,
                         style: TextStyle(color: AppColors.ink, fontSize: 13),
                         decoration: InputDecoration(
-                          hintText: 'Search channels…',
+                          hintText: context.l10n.iptvSearchChannels,
                           hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 12.5),
                           prefixIcon: Icon(Icons.search_rounded, color: palette.primaryColor, size: 18),
                           suffixIcon: _searchQuery.isNotEmpty
@@ -907,7 +913,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                               )
                             : const Icon(Icons.speed_rounded, size: 16, color: AppColors.onAccent),
                         label: Text(
-                          _isCheckingAlive ? 'Stop ($_aliveChecked/$_aliveTotal)' : 'Check Health',
+                          _isCheckingAlive ? context.l10n.iptvStopChecking(_aliveChecked, _aliveTotal) : context.l10n.iptvCheckHealth,
                           style: const TextStyle(color: AppColors.onAccent, fontSize: 12.5, fontWeight: FontWeight.w700),
                         ),
                         onPressed: _isCheckingAlive ? () => setState(() => _cancelAlive = true) : _startAliveCheck,
@@ -918,7 +924,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                     IconButton(
                       icon: Icon(Icons.tune_rounded, color: AppColors.inkMuted, size: 20),
-                      tooltip: 'Customize Portal Browser Layout',
+                      tooltip: context.l10n.iptvCustomizeLayoutTooltip,
                       onPressed: () => _showBrowserCustomizer(context),
                     ),
                   ],
@@ -971,7 +977,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                               ),
                               if (widget.portal != null)
                                 Text(
-                                  'Conn: ${widget.portal!.activeConnections}/${widget.portal!.maxConnections} • ${widget.portal!.expiry}',
+                                  context.l10n.iptvConnAndExpiry(widget.portal!.activeConnections, widget.portal!.maxConnections, widget.portal!.expiry),
                                   style: TextStyle(color: AppColors.inkSubtle, fontSize: 10.5),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -981,7 +987,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         ),
                         if (_activeSection == IptvSection.live && widget.portal != null)
                           IconButton(
-                            tooltip: 'Check Health',
+                            tooltip: context.l10n.iptvCheckHealth,
                             icon: _isCheckingAlive
                                 ? const SizedBox(
                                     width: 18,
@@ -993,7 +999,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                           ),
                         IconButton(
                           icon: Icon(Icons.tune_rounded, color: AppColors.inkMuted, size: 20),
-                          tooltip: 'Customize',
+                          tooltip: context.l10n.iptvCustomize,
                           onPressed: () => _showBrowserCustomizer(context),
                         ),
                       ],
@@ -1053,11 +1059,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _buildSectionTab('Live', Icons.live_tv_rounded, IptvSection.live),
+                                    _buildSectionTab(context.l10n.iptvLive, Icons.live_tv_rounded, IptvSection.live),
                                     const SizedBox(width: 2),
-                                    _buildSectionTab('Movies', Icons.movie_rounded, IptvSection.vod),
+                                    _buildSectionTab(context.l10n.libraryFilterMovies, Icons.movie_rounded, IptvSection.vod),
                                     const SizedBox(width: 2),
-                                    _buildSectionTab('Series', Icons.tv_rounded, IptvSection.series),
+                                    _buildSectionTab(context.l10n.libraryFilterSeries, Icons.tv_rounded, IptvSection.series),
                                   ],
                                 ),
                               ),
@@ -1080,7 +1086,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         controller: _searchCtrl,
                         style: TextStyle(color: AppColors.ink, fontSize: 12.5),
                         decoration: InputDecoration(
-                          hintText: 'Search in this category…',
+                          hintText: context.l10n.iptvSearchInCategory,
                           hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
                           prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 18),
                           suffixIcon: _searchQuery.isNotEmpty
@@ -1137,7 +1143,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                               controller: _catSearchCtrl,
                                               style: TextStyle(color: AppColors.ink, fontSize: 12.5),
                                               decoration: InputDecoration(
-                                                hintText: 'Filter categories…',
+                                                hintText: context.l10n.iptvFilterCategories,
                                                 hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
                                                 prefixIcon: Icon(Icons.filter_list_rounded, color: AppColors.inkSubtle, size: 18),
                                                 suffixIcon: _catSearchQuery.isNotEmpty
@@ -1331,12 +1337,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Nothing pinned yet',
+                context.l10n.iptvNothingPinned,
                 style: TextStyle(color: AppColors.ink, fontSize: 17, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 6),
               Text(
-                'Pin a stream to keep it at hand while you browse this portal.',
+                context.l10n.iptvPinHint,
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: 13.5),
               ),
             ],
@@ -1351,8 +1357,8 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
             const SizedBox(height: 12),
             Text(
               _searchQuery.isNotEmpty
-                  ? 'No streams matching "$_searchQuery"'
-                  : 'No streams available in this category.',
+                  ? context.l10n.iptvNoStreamsMatching(_searchQuery)
+                  : context.l10n.iptvNoStreamsInCategory,
               style: TextStyle(color: AppColors.inkSubtle, fontSize: 15),
             ),
           ],
@@ -1803,14 +1809,14 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.4)),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.fiber_manual_record_rounded, color: Colors.greenAccent, size: 7),
-                                  SizedBox(width: 3),
+                                  const Icon(Icons.fiber_manual_record_rounded, color: Colors.greenAccent, size: 7),
+                                  const SizedBox(width: 3),
                                   Text(
-                                    'LIVE',
-                                    style: TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900),
+                                    context.l10n.iptvLive.toUpperCase(),
+                                    style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900),
                                   ),
                                 ],
                               ),
@@ -1822,14 +1828,14 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                         const SizedBox(height: 2),
                         if (currentEpg != null) ...[
                           Text(
-                            'NOW: ${currentEpg.title}${nextEpg != null ? "  |  NEXT: ${nextEpg.title}" : ""}',
+                            '${context.l10n.iptvNowPlaying(currentEpg.title)}${nextEpg != null ? "  |  ${context.l10n.iptvNextPlaying(nextEpg.title)}" : ""}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(color: AppColors.inkAlpha(0.65), fontSize: 11),
                           ),
                         ] else ...[
                           Text(
-                            'Live Stream Feed',
+                            context.l10n.iptvLiveFeed,
                             style: TextStyle(color: AppColors.inkAlpha(0.3), fontSize: 11),
                           ),
                         ],

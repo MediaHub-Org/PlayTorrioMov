@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../l10n/l10n.dart';
 import '../../../services/theme/app_theme_service.dart';
 import '../../../services/content_display_enums.dart';
 import '../../../services/iptv/iptv_settings.dart';
@@ -606,7 +607,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 children: PortalCardStyle.values.map((s) {
                   final isSelected = s == style;
                   return SettingChoiceChip(
-                    label: s.label,
+                    label: s.localizedLabel(context.l10n),
                     selected: isSelected,
                     onSelect: () {
                       IptvSettings.setPortalCardStyle(s);
@@ -744,7 +745,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 children: PortalBrowserLayout.values.map((l) {
                   final isSelected = l == layout;
                   return SettingChoiceChip(
-                    label: l.label,
+                    label: l.localizedLabel(context.l10n),
                     selected: isSelected,
                     onSelect: () {
                       IptvSettings.setBrowserLayout(l);

@@ -1,23 +1,31 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import '../content_display_enums.dart';
 import 'iptv_network.dart';
 
 enum PortalCardStyle {
-  rich('Rich Card with Badges'),
-  compact('Compact Row');
+  rich,
+  compact;
 
-  final String label;
-  const PortalCardStyle(this.label);
+  /// The chip text, in the app's language.
+  String localizedLabel(AppLocalizations l10n) => switch (this) {
+    PortalCardStyle.rich => l10n.iptvCardRich,
+    PortalCardStyle.compact => l10n.iptvCardCompact,
+  };
 }
 
 enum PortalBrowserLayout {
-  grid('Grid Cards'),
-  list('Detailed List with EPG'),
-  compactList('Compact Channel List');
+  grid,
+  list,
+  compactList;
 
-  final String label;
-  const PortalBrowserLayout(this.label);
+  /// The chip text, in the app's language.
+  String localizedLabel(AppLocalizations l10n) => switch (this) {
+    PortalBrowserLayout.grid => l10n.iptvLayoutGrid,
+    PortalBrowserLayout.list => l10n.iptvLayoutList,
+    PortalBrowserLayout.compactList => l10n.iptvLayoutCompact,
+  };
 }
 
 abstract final class IptvSettings {

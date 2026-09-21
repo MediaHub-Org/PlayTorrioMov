@@ -5,7 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/services/player/sleep_timer_service.dart';
 import 'package:playtorriomov/models/movie/video.dart';
+import 'package:playtorriomov/l10n/app_localizations_pt.dart';
+import 'package:playtorriomov/services/iptv/iptv_settings.dart';
 import 'package:playtorriomov/widgets/common/error_view.dart';
+import 'package:playtorriomov/widgets/iptv/default_portal_tab_picker.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_center_controls.dart';
 import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
@@ -158,5 +161,23 @@ void main() {
 
     expect(find.text('Error desconocido'), findsOneWidget);
     expect(find.text('Reintentar'), findsOneWidget);
+  });
+
+  testWidgets('the Live TV tab picker follows the app language', (tester) async {
+    await tester.pumpWidget(inLocale('es', const DefaultPortalTabPicker()));
+
+    expect(find.text('Paneles Xtream'), findsOneWidget);
+    expect(find.text('Listas M3U'), findsOneWidget);
+  });
+
+  test('portal card styles and browser layouts have a label per language', () {
+    final pt = AppLocalizationsPt();
+    for (final style in PortalCardStyle.values) {
+      expect(style.localizedLabel(pt), isNotEmpty);
+    }
+    for (final layout in PortalBrowserLayout.values) {
+      expect(layout.localizedLabel(pt), isNotEmpty);
+    }
+    expect(PortalCardStyle.compact.localizedLabel(pt), 'Linha compacta');
   });
 }

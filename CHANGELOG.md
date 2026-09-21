@@ -12,7 +12,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   download messages, plus the player's loading and error screens and snack
   bars, plus the Films and Series catalog pages, the shared error view,
   the mini player, the Library, Discover, Search and Anime browse pages, and the
-  P2P warning and update dialogs, now follow the app language, in all four. 610 keys in all.
+  P2P warning and update dialogs, now follow the app language, in all four. 687 keys in all.
 
 ### Fixed
 - **Anime page language switch**: the English/Arabic switch showed flags as
