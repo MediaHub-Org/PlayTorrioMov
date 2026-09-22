@@ -3,7 +3,10 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.10+43] - 2026-09-22
+
+The Subtitle Appearance panel stays put, its sample sits where real subtitles
+will, and the phone-sized subtitle panel no longer overflows.
 
 ### Changed
 - **Subtitle Appearance**: the small preview strip inside the panel (added in
