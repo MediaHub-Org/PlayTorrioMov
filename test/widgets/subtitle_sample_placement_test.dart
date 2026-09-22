@@ -1,8 +1,8 @@
 // test/widgets/subtitle_sample_placement_test.dart
 //
-// The sample subtitle shown while Subtitle Appearance is open must not sit
-// under the panel that is open over it -- that panel is where the viewer is
-// looking, and a sample they cannot see judges nothing.
+// Opening Subtitle Appearance must not move the panel, and the sample it shows
+// must sit where real subtitles will -- the exact centre of the picture for
+// "center" -- even when the panel, over on the right, covers part of it.
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -16,8 +16,8 @@ import 'package:playtorriomov/widgets/player/subtitle_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// The player's arrangement, cut down to what decides where things sit: the
-/// sample overlay, the transport bar's band along the bottom, and the
-/// subtitle panel in its anchor -- the same three the player screen stacks.
+/// sample overlay and the subtitle panel in its anchor, stacked as the player
+/// screen stacks them.
 class _Harness extends StatefulWidget {
   const _Harness();
 
@@ -30,16 +30,10 @@ class _HarnessState extends State<_Harness> {
 
   @override
   Widget build(BuildContext context) {
-    // The same two lines the player screen runs.
-    final insets = sample ? PlayerSubtitleMenu.sampleInsets(context) : null;
     return Stack(
       children: [
         const ColoredBox(color: Colors.black, child: SizedBox.expand()),
-        SubtitleOverlay(
-          lines: const Stream.empty(),
-          showSample: sample && insets != null,
-          avoid: insets ?? EdgeInsets.zero,
-        ),
+        SubtitleOverlay(lines: const Stream.empty(), showSample: sample),
         PlayerMenuAnchor(
           child: PlayerSubtitleMenu(
             groups: const [],
@@ -62,7 +56,9 @@ class _HarnessState extends State<_Harness> {
   }
 }
 
-Future<({Rect panel, Rect? text, double transportTop})> openAppearance(
+/// Where the panel stands before Appearance is opened, and where panel and
+/// sample stand after.
+Future<({Rect before, Rect panel, Rect text})> openAppearance(
   WidgetTester tester,
   Size size,
 ) async {
@@ -78,27 +74,27 @@ Future<({Rect panel, Rect? text, double transportTop})> openAppearance(
     ),
   );
   await tester.pump();
+  final before = tester.getRect(find.byType(PlayerGlassCard));
 
   await tester.tap(find.byIcon(Icons.tune_rounded));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 100));
 
-  final text = find.descendant(
-    of: find.byType(SubtitleOverlay),
-    matching: find.byType(Text),
-  );
   return (
+    before: before,
     panel: tester.getRect(find.byType(PlayerGlassCard)),
-    // Null: no room worth using, and the pinned preview stands in.
-    text: text.evaluate().isEmpty ? null : tester.getRect(text),
-    transportTop: size.height -
-        PlayerMenuAnchor.transportClearance(tester.element(find.byType(Scaffold))),
+    text: tester.getRect(
+      find.descendant(
+        of: find.byType(SubtitleOverlay),
+        matching: find.byType(Text),
+      ),
+    ),
   );
 }
 
 /// The real subtitle face. Without it the tests draw in Ahem, where every
-/// glyph is a full em wide, and a two-line sample comes out three times the
-/// size it really is -- overlaps that never happen, hiding the ones that do.
+/// glyph is a full em wide, and the two-line sample comes out three times the
+/// size it really is.
 Future<void> loadPoppins() async {
   final loader = FontLoader('Poppins');
   for (final weight in ['Regular', 'Medium', 'SemiBold', 'Bold']) {
@@ -122,35 +118,31 @@ void main() {
   };
 
   for (final entry in sizes.entries) {
-    for (final pos in [100.0, 50.0, 0.0]) {
-      testWidgets('${entry.key}, vertical position ${pos.round()}', (tester) async {
-        PlayerSettings.subPos.value = pos;
-        addTearDown(() => PlayerSettings.subPos.value = 100.0);
+    testWidgets('${entry.key}: the panel stays put and the sample is centred',
+        (tester) async {
+      final r = await openAppearance(tester, entry.value);
 
-        final r = await openAppearance(tester, entry.value);
-        final text = r.text;
-        // ignore: avoid_print
-        print('${entry.key} pos=${pos.round()} panel=${r.panel} text=$text');
-        // The panel stays where the subtitle menu is: opening Appearance must
-        // not send it to another corner.
-        expect(
-          r.panel.bottom,
-          entry.value.height - PlayerMenuAnchor.bottomInset(tester.element(find.byType(Scaffold))),
-          reason: 'the appearance panel moved off the subtitle menu spot',
-        );
-        if (text == null) return;
-
-        expect(r.panel.overlaps(text), isFalse, reason: 'the sample sits under the panel');
-        expect(text.bottom, lessThanOrEqualTo(r.transportTop), reason: 'the sample sits under the transport bar');
-        expect(text.top, greaterThanOrEqualTo(0));
-        expect(text.left, greaterThanOrEqualTo(0));
-        expect(text.right, lessThanOrEqualTo(entry.value.width));
-      });
-    }
+      expect(r.panel, r.before, reason: 'opening Appearance moved the panel');
+      expect(
+        r.text.center.dx,
+        closeTo(entry.value.width / 2, 0.5),
+        reason: 'the sample is off the centre of the picture',
+      );
+    });
   }
 
-  testWidgets('a phone held sideways has no room, so no sample is drawn', (tester) async {
-    final r = await openAppearance(tester, const Size(844, 390));
-    expect(r.text, isNull);
+  testWidgets('the sample follows the side and vertical position settings',
+      (tester) async {
+    PlayerSettings.subAlignX.value = 'left';
+    PlayerSettings.subPos.value = 0;
+    addTearDown(() {
+      PlayerSettings.subAlignX.value = 'center';
+      PlayerSettings.subPos.value = 100;
+    });
+
+    final r = await openAppearance(tester, const Size(1280, 720));
+
+    expect(r.text.left, lessThan(64), reason: 'left hugs the left edge');
+    expect(r.text.top, lessThan(8), reason: 'position 0 is the top of the picture');
   });
 }

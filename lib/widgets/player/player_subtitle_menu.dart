@@ -6,7 +6,6 @@ import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
 import 'language_flag.dart';
 import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
 import 'player_glass.dart';
-import 'subtitle_overlay.dart' show SubtitleOverlay;
 
 /// Full-featured subtitle selection, search, and timing menu.
 /// Responsive across mobile portrait, mobile landscape, tablet, and desktop screens.
@@ -47,61 +46,6 @@ class PlayerSubtitleMenu extends StatefulWidget {
   /// sample subtitles while it is open. Also told `false` when this menu goes
   /// away with the editor still showing.
   final ValueChanged<bool>? onAppearanceOpenChanged;
-
-  /// How big the panel is on this screen. Public because the player places the
-  /// sample subtitle around the panel, and has to know where the panel is
-  /// without laying it out first.
-  static Size cardSize(BuildContext context) {
-    final screen = MediaQuery.sizeOf(context);
-
-    // Responsive Breakpoints
-    final isCompact = screen.width < 560; // Mobile portrait or narrow screen
-    final isLandscapeMobile = screen.height < 450 && screen.width >= 560; // Mobile landscape
-
-    // Compute responsive dimensions
-    final double cardWidth;
-    if (isCompact) {
-      cardWidth = (screen.width - 24).clamp(280.0, 520.0);
-    } else if (isLandscapeMobile) {
-      cardWidth = (screen.width - 48).clamp(460.0, 600.0);
-    } else {
-      cardWidth = (540.0).clamp(400.0, screen.width - 48);
-    }
-
-    // This panel fixes its own height -- its two columns share one Expanded,
-    // which needs a bounded box -- so it has to agree with the anchor about
-    // how much room there is. Clamping to the anchor's figure is what keeps
-    // a landscape phone from being handed a card taller than the gap above
-    // the transport bar.
-    final roomForCard = PlayerMenuAnchor.availableHeight(context);
-    final double preferredHeight;
-    if (isLandscapeMobile) {
-      preferredHeight = roomForCard;
-    } else if (isCompact) {
-      preferredHeight = (screen.height * 0.65).clamp(340.0, 520.0);
-    } else {
-      preferredHeight = (screen.height * 0.65).clamp(380.0, 540.0);
-    }
-    // min, not clamp: clamp(lower, upper) throws when upper < lower, and a
-    // very short viewport can leave less room than any of the preferred
-    // heights above.
-    final cardHeight = preferredHeight < roomForCard
-        ? preferredHeight
-        : roomForCard;
-    return Size(cardWidth, cardHeight);
-  }
-
-  /// Where the sample subtitle can go while the appearance editor is open:
-  /// the room left around this panel, as insets for [SubtitleOverlay.avoid], or
-  /// null when there is none worth using. The panel stays where the subtitle
-  /// menu is -- it does not jump elsewhere for the editor -- so the sample
-  /// makes way for it instead.
-  static EdgeInsets? sampleInsets(BuildContext context) =>
-      SubtitleOverlay.insetsAround(
-        screen: MediaQuery.sizeOf(context),
-        panel: PlayerMenuAnchor.cardRect(context, cardSize(context)),
-        bottomReserved: PlayerMenuAnchor.transportClearance(context),
-      );
 
   const PlayerSubtitleMenu({
     super.key,
@@ -291,9 +235,36 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     final isCompact = screen.width < 560; // Mobile portrait or narrow screen
     final isLandscapeMobile = screen.height < 450 && screen.width >= 560; // Mobile landscape
 
-    final card = PlayerSubtitleMenu.cardSize(context);
-    final cardWidth = card.width;
-    final cardHeight = card.height;
+    // Compute responsive dimensions
+    final double cardWidth;
+    if (isCompact) {
+      cardWidth = (screen.width - 24).clamp(280.0, 520.0);
+    } else if (isLandscapeMobile) {
+      cardWidth = (screen.width - 48).clamp(460.0, 600.0);
+    } else {
+      cardWidth = (540.0).clamp(400.0, screen.width - 48);
+    }
+
+    // This panel fixes its own height -- its two columns share one Expanded,
+    // which needs a bounded box -- so it has to agree with the anchor about
+    // how much room there is. Clamping to the anchor's figure is what keeps
+    // a landscape phone from being handed a card taller than the gap above
+    // the transport bar.
+    final roomForCard = PlayerMenuAnchor.availableHeight(context);
+    final double preferredHeight;
+    if (isLandscapeMobile) {
+      preferredHeight = roomForCard;
+    } else if (isCompact) {
+      preferredHeight = (screen.height * 0.65).clamp(340.0, 520.0);
+    } else {
+      preferredHeight = (screen.height * 0.65).clamp(380.0, 540.0);
+    }
+    // min, not clamp: clamp(lower, upper) throws when upper < lower, and a
+    // very short viewport can leave less room than any of the preferred
+    // heights above.
+    final cardHeight = preferredHeight < roomForCard
+        ? preferredHeight
+        : roomForCard;
 
     final headerPaddingV = (isLandscapeMobile || isCompact) ? 8.0 : 12.0;
     final buttonSize = (isLandscapeMobile || isCompact) ? 30.0 : 34.0;

@@ -4,7 +4,6 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
 import 'player_glass.dart';
-import 'subtitle_overlay.dart' show SubtitleOverlay;
 
 /// How opaque the subtitle background is, 0 to 1, read from a `#AARRGGBB`
 /// string. A value that does not parse counts as no background.
@@ -170,13 +169,6 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                 // No header of its own: the subtitle panel's header names
                 // this view and carries the back arrow.
                 _buildPresetsBar(),
-
-                // Pinned above the scrolling page, so the effect of a slider
-                // is in view while the finger is on it. The panel covers most
-                // of the picture, and the sample on the video only shows in the
-                // strip the panel leaves free -- on a phone held sideways there
-                // is none.
-                _buildPreview(compact: constraints.maxHeight < 420),
 
                 // One scrolling page, in the order people reach for things:
                 // the text itself, its background, its outline, where it
@@ -791,41 +783,6 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           border: Border.all(color: selected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft),
         ),
         child: child,
-      ),
-    );
-  }
-
-  /// The sample, drawn with the same text style and side as the overlay on the
-  /// video. Scaled down to fit -- a 72 pt size at full scale is taller than the
-  /// strip -- so it shows the colors, outline and background faithfully but not
-  /// the real size; the sample on the picture does that.
-  ///
-  /// It is drawn by the app, so it says nothing about the native (libass)
-  /// engine, which paints its own text. Its controls change the same mpv
-  /// properties either way.
-  Widget _buildPreview({required bool compact}) {
-    return Container(
-      height: compact ? 58 : 84,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        // A mid-dark gradient rather than flat black: a white outline or a
-        // dark background is only judged against something like a picture.
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF3A4256), Color(0xFF1B2030)],
-        ),
-        border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
-      ),
-      alignment: Alignment(SubtitleOverlay.alignmentX(PlayerSettings.subAlignX.value), 0),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          '${context.l10n.subSampleTitle}\n${context.l10n.subSampleBody}',
-          textAlign: PlayerSettings.subtitleTextAlign(),
-          style: PlayerSettings.subtitleTextStyle(),
-        ),
       ),
     );
   }

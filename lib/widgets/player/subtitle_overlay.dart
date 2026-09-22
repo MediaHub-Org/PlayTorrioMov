@@ -30,52 +30,12 @@ class SubtitleOverlay extends StatefulWidget {
   final List<String> initialLines;
   final bool showSample;
 
-  /// Space to leave clear on each edge: the text is laid out in what remains,
-  /// so position and margin are measured from there. The appearance editor
-  /// passes the room around its own panel, so the sample lands where the
-  /// viewer can see it instead of under the panel they are adjusting it with.
-  final EdgeInsets avoid;
-
   const SubtitleOverlay({
     super.key,
     required this.lines,
     this.initialLines = const [],
     this.showSample = false,
-    this.avoid = EdgeInsets.zero,
   });
-
-  /// The largest free space around [panel] on a [screen], as insets, or null
-  /// when nothing is big enough to read a sample in. [bottomReserved] is the
-  /// transport bar's share of the bottom edge.
-  ///
-  /// Two places are candidates: beside the panel (a wide screen puts it in the
-  /// right-hand corner) and above it (a narrow one centres it along the
-  /// bottom). The bigger wins. On a phone held sideways neither is, and the
-  /// answer is null: the editor's own pinned preview is the sample there.
-  static EdgeInsets? insetsAround({
-    required Size screen,
-    required Rect panel,
-    required double bottomReserved,
-    double gap = 12,
-    double minWidth = 220,
-    double minHeight = 80,
-  }) {
-    final floor = screen.height - bottomReserved;
-    final beside = Rect.fromLTRB(0, 0, panel.left - gap, floor);
-    final above = Rect.fromLTRB(0, 0, screen.width, panel.top - gap);
-
-    bool fits(Rect r) => r.width >= minWidth && r.height >= minHeight;
-    double area(Rect r) => fits(r) ? r.width * r.height : 0;
-
-    final best = area(beside) >= area(above) ? beside : above;
-    if (!fits(best)) return null;
-    return EdgeInsets.fromLTRB(
-      best.left,
-      best.top,
-      screen.width - best.right,
-      screen.height - best.bottom,
-    );
-  }
 
   /// Where the text block sits vertically, as an [Alignment.y]: a position of
   /// 100 (the bottom) is `1`, 0 (the top) is `-1`.
@@ -128,33 +88,22 @@ class _SubtitleOverlayState extends State<SubtitleOverlay> {
         final side = PlayerSettings.subAlignX.value;
         return IgnorePointer(
           child: Padding(
-            padding: widget.avoid,
-            // Measured inside the free space, so the margin can be held to a
-            // share of it: 150 px of bottom margin is a sensible ask of a
-            // full screen and pushes the text out of a 100 px gap.
-            child: LayoutBuilder(
-              builder: (context, box) {
-                final margin = PlayerSettings.subMarginY.value.clamp(0.0, 300.0);
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    side == 'left' ? 32 : 16,
-                    0,
-                    side == 'right' ? 32 : 16,
-                    widget.avoid == EdgeInsets.zero ? margin : margin.clamp(0.0, box.maxHeight * 0.25),
-                  ),
-                  child: Align(
-                    alignment: Alignment(
-                      SubtitleOverlay.alignmentX(side),
-                      SubtitleOverlay.alignmentY(PlayerSettings.subPos.value),
-                    ),
-                    child: Text(
-                      text,
-                      textAlign: PlayerSettings.subtitleTextAlign(),
-                      style: PlayerSettings.subtitleTextStyle(),
-                    ),
-                  ),
-                );
-              },
+            padding: EdgeInsets.fromLTRB(
+              side == 'left' ? 32 : 16,
+              0,
+              side == 'right' ? 32 : 16,
+              PlayerSettings.subMarginY.value.clamp(0.0, 300.0),
+            ),
+            child: Align(
+              alignment: Alignment(
+                SubtitleOverlay.alignmentX(side),
+                SubtitleOverlay.alignmentY(PlayerSettings.subPos.value),
+              ),
+              child: Text(
+                text,
+                textAlign: PlayerSettings.subtitleTextAlign(),
+                style: PlayerSettings.subtitleTextStyle(),
+              ),
             ),
           ),
         );

@@ -63,22 +63,6 @@ void main() {
     expect(PlayerSettings.subBackColor.value, '#FF0F172A');
   });
 
-  testWidgets('a preview of the sample sits above the controls', (tester) async {
-    tester.view.physicalSize = const Size(900, 900);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(editor());
-    await tester.pump();
-
-    // The sample's two lines are one Text, outside the scrolling list.
-    final preview = find.byWidgetPredicate(
-      (w) => w is Text && (w.data ?? '').contains('\n'),
-    );
-    expect(preview, findsOneWidget);
-    expect(find.descendant(of: find.byType(ListView), matching: preview), findsNothing);
-  });
-
   testWidgets('fonts are chips, so no dropdown opens its own menu', (tester) async {
     tester.view.physicalSize = const Size(900, 900);
     tester.view.devicePixelRatio = 1.0;

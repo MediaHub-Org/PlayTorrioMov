@@ -151,33 +151,6 @@ class PlayerMenuAnchor extends StatelessWidget {
         MediaQuery.paddingOf(context).bottom;
   }
 
-  /// Everything the transport bar occupies along the bottom -- the buttons row
-  /// [bottomInset] measures *and* the seek row above it. A menu floats over
-  /// the seek row on purpose; anything that must stay readable next to an open
-  /// menu, like the sample subtitle, has to clear all of it.
-  static double transportClearance(BuildContext context) =>
-      bottomInset(context) +
-      (MediaQuery.sizeOf(context).height < 500 ? 32.0 : 40.0);
-
-  /// Where a card of [card] size sits on this screen: the rectangle [build]
-  /// puts it in. Kept beside that method, so the two agree about the corner
-  /// and the insets.
-  static Rect cardRect(BuildContext context, Size card) {
-    final screen = MediaQuery.sizeOf(context);
-    final side = sideInset(context);
-    final isNarrow = screen.width < 560;
-    final top = topInset(context);
-    final bottom = bottomInset(context);
-    // The card can be shorter than the span the anchor gives it, so it sits
-    // against the bottom of the span rather than filling it.
-    final spanHeight = screen.height - top - bottom;
-    final height = card.height < spanHeight ? card.height : spanHeight;
-    final left = isNarrow
-        ? side + ((screen.width - 2 * side) - card.width) / 2
-        : screen.width - side - card.width;
-    return Rect.fromLTWH(left, screen.height - bottom - height, card.width, height);
-  }
-
   /// Clearance for the title bar above. Being bounded at the top is the
   /// whole point: it is what turns "too tall" into a scroll instead of an
   /// overflow off-screen.
