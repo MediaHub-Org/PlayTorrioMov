@@ -41,7 +41,6 @@ class _HarnessState extends State<_Harness> {
           avoid: insets ?? EdgeInsets.zero,
         ),
         PlayerMenuAnchor(
-          alignTop: sample,
           child: PlayerSubtitleMenu(
             groups: const [],
             isSubtitleEnabled: false,
@@ -132,6 +131,13 @@ void main() {
         final text = r.text;
         // ignore: avoid_print
         print('${entry.key} pos=${pos.round()} panel=${r.panel} text=$text');
+        // The panel stays where the subtitle menu is: opening Appearance must
+        // not send it to another corner.
+        expect(
+          r.panel.bottom,
+          entry.value.height - PlayerMenuAnchor.bottomInset(tester.element(find.byType(Scaffold))),
+          reason: 'the appearance panel moved off the subtitle menu spot',
+        );
         if (text == null) return;
 
         expect(r.panel.overlaps(text), isFalse, reason: 'the sample sits under the panel');

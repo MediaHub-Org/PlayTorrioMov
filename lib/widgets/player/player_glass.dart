@@ -126,13 +126,7 @@ class PlayerGlassCard extends StatelessWidget {
 class PlayerMenuAnchor extends StatelessWidget {
   final Widget child;
 
-  /// Pin the card to the top edge instead of the bottom. The subtitle
-  /// appearance editor asks for this: sample subtitles are drawn near the
-  /// bottom of the picture by default, exactly where a bottom-anchored card
-  /// would hide them.
-  final bool alignTop;
-
-  const PlayerMenuAnchor({super.key, required this.child, this.alignTop = false});
+  const PlayerMenuAnchor({super.key, required this.child});
 
   /// Clearance for the transport bar the popover sits above, plus whatever
   /// the system puts below it (gesture bar, home indicator).
@@ -168,21 +162,20 @@ class PlayerMenuAnchor extends StatelessWidget {
   /// Where a card of [card] size sits on this screen: the rectangle [build]
   /// puts it in. Kept beside that method, so the two agree about the corner
   /// and the insets.
-  static Rect cardRect(BuildContext context, Size card, {required bool alignTop}) {
+  static Rect cardRect(BuildContext context, Size card) {
     final screen = MediaQuery.sizeOf(context);
     final side = sideInset(context);
     final isNarrow = screen.width < 560;
     final top = topInset(context);
     final bottom = bottomInset(context);
     // The card can be shorter than the span the anchor gives it, so it sits
-    // against the edge it is aligned to rather than filling the span.
+    // against the bottom of the span rather than filling it.
     final spanHeight = screen.height - top - bottom;
     final height = card.height < spanHeight ? card.height : spanHeight;
     final left = isNarrow
         ? side + ((screen.width - 2 * side) - card.width) / 2
         : screen.width - side - card.width;
-    final y = alignTop ? top : screen.height - bottom - height;
-    return Rect.fromLTWH(left, y, card.width, height);
+    return Rect.fromLTWH(left, screen.height - bottom - height, card.width, height);
   }
 
   /// Clearance for the title bar above. Being bounded at the top is the
@@ -229,9 +222,7 @@ class PlayerMenuAnchor extends StatelessWidget {
       child: Align(
         // Wide enough to have a corner to sit in, it sits in it; a narrow
         // screen has no spare width, so the card centres over the full span.
-        alignment: alignTop
-            ? (isNarrow ? Alignment.topCenter : Alignment.topRight)
-            : (isNarrow ? Alignment.bottomCenter : Alignment.bottomRight),
+        alignment: isNarrow ? Alignment.bottomCenter : Alignment.bottomRight,
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
           child: child,

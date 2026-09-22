@@ -2286,7 +2286,6 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Subtitle Menu Popover
         if (_activeMenu == 'subtitle' && !_isLoading)
           PlayerMenuAnchor(
-            alignTop: _showSubtitleSample,
             child: PlayerSubtitleMenu(
               onBack: _backToSettings,
               onAppearanceOpenChanged: (open) {

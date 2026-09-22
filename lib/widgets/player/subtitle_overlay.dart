@@ -49,9 +49,9 @@ class SubtitleOverlay extends StatefulWidget {
   /// transport bar's share of the bottom edge.
   ///
   /// Two places are candidates: beside the panel (a wide screen puts it in the
-  /// right-hand corner) and under it (a narrow one centres it at the top). The
-  /// bigger wins. On a phone held sideways neither is, and the answer is null:
-  /// the editor's own pinned preview is the sample there.
+  /// right-hand corner) and above it (a narrow one centres it along the
+  /// bottom). The bigger wins. On a phone held sideways neither is, and the
+  /// answer is null: the editor's own pinned preview is the sample there.
   static EdgeInsets? insetsAround({
     required Size screen,
     required Rect panel,
@@ -62,12 +62,12 @@ class SubtitleOverlay extends StatefulWidget {
   }) {
     final floor = screen.height - bottomReserved;
     final beside = Rect.fromLTRB(0, 0, panel.left - gap, floor);
-    final below = Rect.fromLTRB(0, panel.bottom + gap, screen.width, floor);
+    final above = Rect.fromLTRB(0, 0, screen.width, panel.top - gap);
 
     bool fits(Rect r) => r.width >= minWidth && r.height >= minHeight;
     double area(Rect r) => fits(r) ? r.width * r.height : 0;
 
-    final best = area(beside) >= area(below) ? beside : below;
+    final best = area(beside) >= area(above) ? beside : above;
     if (!fits(best)) return null;
     return EdgeInsets.fromLTRB(
       best.left,

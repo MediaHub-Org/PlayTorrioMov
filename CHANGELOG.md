@@ -6,14 +6,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
-- **Sample subtitle under the appearance panel**: the sample was drawn where the
-  settings put subtitles -- bottom centre by default -- and the panel and the
-  transport bar were both over that spot, so it could sit under either. It is
-  now laid out in the free space around the panel (beside it on a wide screen,
-  below it on a phone held upright), clear of the transport bar, and the
-  position and margin sliders move it within that space. On a phone held
-  sideways the panel leaves no room, and the preview pinned inside the panel is
-  the sample.
+- **Subtitle Appearance stays where the subtitle menu is**: opening it used to
+  throw the panel to the top of the screen, to keep it off the sample text. The
+  panel no longer moves; the sample makes way for it instead. It is laid out in
+  the free space around the panel (beside it on a wide screen, above it on a
+  phone held upright), clear of the transport bar, and the position and margin
+  sliders move it within that space. On a phone held sideways the panel leaves
+  no room, and the preview pinned inside the panel is the sample.
 - **Phone subtitle panel overflow**: on a phone-width panel the CC / SDH / Forced
   filter row ran 126 px past the edge (since 1.8.8). It scrolls sideways now,
   and its "Search online" link, which the "Find more" bar under the list

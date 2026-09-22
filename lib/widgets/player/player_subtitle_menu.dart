@@ -93,16 +93,13 @@ class PlayerSubtitleMenu extends StatefulWidget {
 
   /// Where the sample subtitle can go while the appearance editor is open:
   /// the room left around this panel, as insets for [SubtitleOverlay.avoid], or
-  /// null when there is none worth using. The editor opens the panel at the
-  /// top, so that is where it is measured.
+  /// null when there is none worth using. The panel stays where the subtitle
+  /// menu is -- it does not jump elsewhere for the editor -- so the sample
+  /// makes way for it instead.
   static EdgeInsets? sampleInsets(BuildContext context) =>
       SubtitleOverlay.insetsAround(
         screen: MediaQuery.sizeOf(context),
-        panel: PlayerMenuAnchor.cardRect(
-          context,
-          cardSize(context),
-          alignTop: true,
-        ),
+        panel: PlayerMenuAnchor.cardRect(context, cardSize(context)),
         bottomReserved: PlayerMenuAnchor.transportClearance(context),
       );
 
