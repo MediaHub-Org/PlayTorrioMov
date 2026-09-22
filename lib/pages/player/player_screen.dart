@@ -1995,6 +1995,14 @@ class _PlayerScreenState extends State<PlayerScreen>
                                 child: video,
                               ),
                             );
+                      // While the appearance panel is open the sample is laid
+                      // out around it. It is drawn where the settings say --
+                      // bottom centre by default -- and the panel and the
+                      // transport bar are both over that spot, which made the
+                      // sample the one thing the editor could not show.
+                      final sampleInsets = _showSubtitleSample
+                          ? PlayerSubtitleMenu.sampleInsets(context)
+                          : null;
                       return Stack(
                         fit: StackFit.expand,
                         children: [
@@ -2002,7 +2010,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                           SubtitleOverlay(
                             lines: _player.stream.subtitle,
                             initialLines: _player.state.subtitle,
-                            showSample: _showSubtitleSample,
+                            // No room around the panel: the editor's own
+                            // preview stands in for the sample.
+                            showSample:
+                                _showSubtitleSample && sampleInsets != null,
+                            avoid: sampleInsets ?? EdgeInsets.zero,
                           ),
                         ],
                       );

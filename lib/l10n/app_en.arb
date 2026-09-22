@@ -194,7 +194,6 @@
   "subsAllLanguages": "All Languages",
   "subsForced": "Forced",
   "@subsForced": {"description": "Subtitles shown only for foreign-language dialogue"},
-  "subsSearchOnline": "Search Online",
   "subsSearching": "Searching subtitles...",
   "subsNone": "No subtitles available.",
   "subsSearchProviders": "Search Online Providers",

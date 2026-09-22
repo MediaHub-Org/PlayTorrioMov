@@ -6,6 +6,7 @@ import 'package:playtorriomov/services/subtitles/subtitle_service.dart';
 import 'language_flag.dart';
 import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
 import 'player_glass.dart';
+import 'subtitle_overlay.dart' show SubtitleOverlay;
 
 /// Full-featured subtitle selection, search, and timing menu.
 /// Responsive across mobile portrait, mobile landscape, tablet, and desktop screens.
@@ -46,6 +47,64 @@ class PlayerSubtitleMenu extends StatefulWidget {
   /// sample subtitles while it is open. Also told `false` when this menu goes
   /// away with the editor still showing.
   final ValueChanged<bool>? onAppearanceOpenChanged;
+
+  /// How big the panel is on this screen. Public because the player places the
+  /// sample subtitle around the panel, and has to know where the panel is
+  /// without laying it out first.
+  static Size cardSize(BuildContext context) {
+    final screen = MediaQuery.sizeOf(context);
+
+    // Responsive Breakpoints
+    final isCompact = screen.width < 560; // Mobile portrait or narrow screen
+    final isLandscapeMobile = screen.height < 450 && screen.width >= 560; // Mobile landscape
+
+    // Compute responsive dimensions
+    final double cardWidth;
+    if (isCompact) {
+      cardWidth = (screen.width - 24).clamp(280.0, 520.0);
+    } else if (isLandscapeMobile) {
+      cardWidth = (screen.width - 48).clamp(460.0, 600.0);
+    } else {
+      cardWidth = (540.0).clamp(400.0, screen.width - 48);
+    }
+
+    // This panel fixes its own height -- its two columns share one Expanded,
+    // which needs a bounded box -- so it has to agree with the anchor about
+    // how much room there is. Clamping to the anchor's figure is what keeps
+    // a landscape phone from being handed a card taller than the gap above
+    // the transport bar.
+    final roomForCard = PlayerMenuAnchor.availableHeight(context);
+    final double preferredHeight;
+    if (isLandscapeMobile) {
+      preferredHeight = roomForCard;
+    } else if (isCompact) {
+      preferredHeight = (screen.height * 0.65).clamp(340.0, 520.0);
+    } else {
+      preferredHeight = (screen.height * 0.65).clamp(380.0, 540.0);
+    }
+    // min, not clamp: clamp(lower, upper) throws when upper < lower, and a
+    // very short viewport can leave less room than any of the preferred
+    // heights above.
+    final cardHeight = preferredHeight < roomForCard
+        ? preferredHeight
+        : roomForCard;
+    return Size(cardWidth, cardHeight);
+  }
+
+  /// Where the sample subtitle can go while the appearance editor is open:
+  /// the room left around this panel, as insets for [SubtitleOverlay.avoid], or
+  /// null when there is none worth using. The editor opens the panel at the
+  /// top, so that is where it is measured.
+  static EdgeInsets? sampleInsets(BuildContext context) =>
+      SubtitleOverlay.insetsAround(
+        screen: MediaQuery.sizeOf(context),
+        panel: PlayerMenuAnchor.cardRect(
+          context,
+          cardSize(context),
+          alignTop: true,
+        ),
+        bottomReserved: PlayerMenuAnchor.transportClearance(context),
+      );
 
   const PlayerSubtitleMenu({
     super.key,
@@ -235,36 +294,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     final isCompact = screen.width < 560; // Mobile portrait or narrow screen
     final isLandscapeMobile = screen.height < 450 && screen.width >= 560; // Mobile landscape
 
-    // Compute responsive dimensions
-    final double cardWidth;
-    if (isCompact) {
-      cardWidth = (screen.width - 24).clamp(280.0, 520.0);
-    } else if (isLandscapeMobile) {
-      cardWidth = (screen.width - 48).clamp(460.0, 600.0);
-    } else {
-      cardWidth = (540.0).clamp(400.0, screen.width - 48);
-    }
-
-    // This panel fixes its own height -- its two columns share one Expanded,
-    // which needs a bounded box -- so it has to agree with the anchor about
-    // how much room there is. Clamping to the anchor's figure is what keeps
-    // a landscape phone from being handed a card taller than the gap above
-    // the transport bar.
-    final roomForCard = PlayerMenuAnchor.availableHeight(context);
-    final double preferredHeight;
-    if (isLandscapeMobile) {
-      preferredHeight = roomForCard;
-    } else if (isCompact) {
-      preferredHeight = (screen.height * 0.65).clamp(340.0, 520.0);
-    } else {
-      preferredHeight = (screen.height * 0.65).clamp(380.0, 540.0);
-    }
-    // min, not clamp: clamp(lower, upper) throws when upper < lower, and a
-    // very short viewport can leave less room than any of the preferred
-    // heights above.
-    final cardHeight = preferredHeight < roomForCard
-        ? preferredHeight
-        : roomForCard;
+    final card = PlayerSubtitleMenu.cardSize(context);
+    final cardWidth = card.width;
+    final cardHeight = card.height;
 
     final headerPaddingV = (isLandscapeMobile || isCompact) ? 8.0 : 12.0;
     final buttonSize = (isLandscapeMobile || isCompact) ? 30.0 : 34.0;
@@ -1047,64 +1079,55 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
       ),
-      child: Row(
-        children: [
-          // "All" is the absence of a filter: lit when neither CC nor Forced
-          // is on, and pressing it clears them. It used to be a permanently
-          // lit chip that did nothing.
-          PlayerToggleChip(
-            active: !_filterHI && !_filterForced,
-            label: context.l10n.subsAll,
-            onClick: () => setState(() {
-              _filterHI = false;
-              _filterForced = false;
-            }),
-          ),
-          const SizedBox(width: 5),
-          // Counted, and dimmed when the language has none: the chip used to
-          // be pressable whatever was there, and pressing it just emptied the
-          // list.
-          Tooltip(
-            message: context.l10n.subsHearingImpairedTip,
-            child: PlayerToggleChip(
-              active: _filterHI,
-              label: context.l10n.subsHearingImpaired,
-              count: '$hearingCount',
-              disabled: hearingCount == 0 && !_filterHI,
-              onClick: () => setState(() => _filterHI = !_filterHI),
+      // Scrolls sideways rather than squeezing: the three counted chips came
+      // to 400 px in English on a phone whose panel row is 344, and a language
+      // with longer words needs more.
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            // "All" is the absence of a filter: lit when neither CC nor Forced
+            // is on, and pressing it clears them. It used to be a permanently
+            // lit chip that did nothing.
+            PlayerToggleChip(
+              active: !_filterHI && !_filterForced,
+              label: context.l10n.subsAll,
+              onClick: () => setState(() {
+                _filterHI = false;
+                _filterForced = false;
+              }),
             ),
-          ),
-          const SizedBox(width: 5),
-          Tooltip(
-            message: context.l10n.subsForcedTip,
-            child: PlayerToggleChip(
-              active: _filterForced,
-              label: context.l10n.subsForced,
-              count: '$forcedCount',
-              disabled: forcedCount == 0 && !_filterForced,
-              onClick: () => setState(() => _filterForced = !_filterForced),
-            ),
-          ),
-          const Spacer(),
-          if (compact)
-            GestureDetector(
-              onTap: _searchOnline,
-              child: Row(
-                children: [
-                  Icon(Icons.search_rounded, size: 13, color: PlayerTheme.accent),
-                  const SizedBox(width: 4),
-                  Text(
-                    context.l10n.subsSearchOnline,
-                    style: TextStyle(
-                      color: PlayerTheme.accent,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+            const SizedBox(width: 5),
+            // Counted, and dimmed when the language has none: the chip used to
+            // be pressable whatever was there, and pressing it just emptied the
+            // list.
+            Tooltip(
+              message: context.l10n.subsHearingImpairedTip,
+              child: PlayerToggleChip(
+                active: _filterHI,
+                label: context.l10n.subsHearingImpaired,
+                count: '$hearingCount',
+                disabled: hearingCount == 0 && !_filterHI,
+                onClick: () => setState(() => _filterHI = !_filterHI),
               ),
             ),
-        ],
+            const SizedBox(width: 5),
+            Tooltip(
+              message: context.l10n.subsForcedTip,
+              child: PlayerToggleChip(
+                active: _filterForced,
+                label: context.l10n.subsForced,
+                count: '$forcedCount',
+                disabled: forcedCount == 0 && !_filterForced,
+                onClick: () => setState(() => _filterForced = !_filterForced),
+              ),
+            ),
+            // No "Search online" link here on a phone any more: the "Find more"
+            // bar under the list does the same, and the link was what pushed
+            // this row 126 px past the panel.
+          ],
+        ),
       ),
     );
   }
