@@ -31,6 +31,10 @@ migrate_working_dir/
 .flutter-plugins
 .pub-cache/
 .pub/
+# Releases are built and published by GitHub Actions. `build/` is only ever a
+# local artifact and is safe to delete outright; a local test build does not
+# land here at all -- scripts\build_windows.bat stages it in %TEMP%. See
+# docs/RELEASES.md, "Local builds".
 /build/
 /coverage/
 
