@@ -35,6 +35,7 @@ import './services/stream/torrent_stream_service.dart';
 import './services/config/env_service.dart';
 import './services/window/window_service.dart';
 import './services/p2p/p2p_settings_service.dart';
+import './services/sources/source_filter_settings.dart';
 import './services/scraper/builtin_providers_service.dart';
 import './widgets/updater/update_dialog.dart';
 import './pages/hub/hub_page.dart';
@@ -106,6 +107,9 @@ void main() async {
     TmdbSettings.initialize(),
     SimklSettings.initialize(),
     P2pSettingsService.initialize(),
+    // The remembered source filters. Must land before the first WatchScreen
+    // builds, which reads them synchronously to seed its dropdowns.
+    SourceFilterSettings.initialize(),
     // Loads which built-in scrapers the user switched off. Must land before
     // the first scrapeAll, which reads the result synchronously.
     BuiltinProvidersService.initialize(),

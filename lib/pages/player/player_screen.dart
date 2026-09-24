@@ -23,6 +23,7 @@ import '../../services/debrid/debrid_service.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
 import '../../services/player/player_settings.dart';
+import '../../services/sources/source_filter_settings.dart';
 
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_top_bar.dart';
@@ -150,6 +151,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   double? _forcedAspectRatio;
   List<PlayerAudioTrack> _audioTracks = [];
   int _selectedAudioTrackIndex = 0;
+
+  /// Whether the preferred-audio ranking has already had its one chance at
+  /// this file. Tracks arrive once, but a manual choice afterwards must not
+  /// be undone by a later track update, so the ranking only fires on the
+  /// first non-empty track list.
+  bool _audioPreferenceApplied = false;
   double _audioDelaySec = 0.0;
   bool _showAudioHud = false;
   String _audioHudText = '';
@@ -843,6 +850,21 @@ class _PlayerScreenState extends State<PlayerScreen>
       activeIdx = int.tryParse(activeAid) ?? audioTracks.first.index;
     }
 
+    // The preferred-audio ranking gets one shot, on the first populated
+    // track list. It is applied by index into the *file's* track order the
+    // same way this loop built them, so the index it returns lines up with
+    // `audioTracks`.
+    if (!_audioPreferenceApplied && audioTracks.isNotEmpty) {
+      _audioPreferenceApplied = true;
+      final preferredIdx = preferredAudioTrackIndex(
+        audioTracks.map((t) => t.language).toList(growable: false),
+      );
+      if (preferredIdx != null) {
+        activeIdx = audioTracks[preferredIdx].index;
+        _applyPreferredAudioTrack(activeIdx);
+      }
+    }
+
     setState(() {
       _audioTracks = audioTracks;
       _embeddedSubtitles = embeddedSubs;
@@ -851,6 +873,25 @@ class _PlayerScreenState extends State<PlayerScreen>
       }
     });
     _markDefaultSubtitleTracks();
+  }
+
+  /// Switches to the ranked track libmpv reported, mirroring what a tap in
+  /// the audio menu does: the Dart-side call plus the raw `aid` property for
+  /// builds that only honour one of them.
+  void _applyPreferredAudioTrack(int index) {
+    try {
+      final matching = _player.state.tracks.audio.firstWhere(
+        (t) => t.id == index.toString(),
+        orElse: () => AudioTrack(index.toString(), null, null),
+      );
+      _player.setAudioTrack(matching);
+      final np = _player.platform as dynamic;
+      np.setProperty('aid', index.toString());
+    } catch (_) {
+      // Best effort, exactly as the manual path: a build that rejects one
+      // of the two calls still gets the other, and the file's own default
+      // is a correct fallback either way.
+    }
   }
 
   /// Reads which embedded subtitle tracks the file itself marks default or

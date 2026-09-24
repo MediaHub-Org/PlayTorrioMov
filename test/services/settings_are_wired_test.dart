@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 const _settingsFiles = [
   'lib/services/iptv/iptv_settings.dart',
   'lib/services/player/player_settings.dart',
+  'lib/services/sources/source_filter_settings.dart',
 ];
 
 /// Settings that are deliberately read only by their own file — applied to a

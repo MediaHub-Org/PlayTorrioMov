@@ -248,10 +248,31 @@ class StreamSource {
   }
 
   /// Whether this stream source matches the selected audio filter key.
+  ///
+  /// A source tagged `multi` matches *every* concrete language, not only the
+  /// `multi` key. "Multi-audio" means the file carries more than one dub and
+  /// does not say which -- so the one you are filtering for is plausibly in
+  /// there, and hiding it would be the filter lying about what exists. This
+  /// is why `MULTI · Spanish` now shows under English too: before, the
+  /// English detector only fired on an explicit "English" tag or on a source
+  /// with no other language named, so naming a second language removed the
+  /// English match the bare `MULTI` would have had.
   bool hasAudioLanguage(String filterKey, {String? mediaTitle}) {
     if (filterKey == 'all') return true;
     final langs = getAudioLanguages(mediaTitle: mediaTitle);
-    return langs.contains(filterKey);
+    if (langs.contains(filterKey)) return true;
+    return filterKey != 'multi' && langs.contains('multi');
+  }
+
+  /// Whether the detected [quality] matches the selected quality filter key.
+  ///
+  /// An exact match, not a "at least": the filter keys are the four labels
+  /// [quality] already produces, so "1080p" means 1080p and not "1080p or
+  /// better". A source whose resolution was never detected has a null
+  /// [quality] and never matches a specific key.
+  bool hasQuality(String filterKey) {
+    if (filterKey == 'all') return true;
+    return quality == filterKey;
   }
 
   /// Returns a clean UI badge label if a special or regional dub is detected.

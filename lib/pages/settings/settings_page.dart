@@ -16,6 +16,7 @@ import 'keyboard_shortcuts_page.dart';
 import 'sync_settings_page.dart';
 import 'about_settings_page.dart';
 import 'video_player_settings_page.dart';
+import 'source_filter_settings_page.dart';
 import '../../services/scraper/builtin_providers_service.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/stream/stream_service.dart';
@@ -143,6 +144,12 @@ class _SettingsPageState extends State<SettingsPage> {
         iconColor: const Color(0xFF8B5CF6),
         title: l10n.settingsCategoryVideoPlayback,
         onTap: () => _navigateTo(const VideoPlayerSettingsPage()),
+      ),
+      _SettingsCategoryTile(
+        icon: Icons.filter_alt_rounded,
+        iconColor: const Color(0xFF38BDF8),
+        title: l10n.settingsCategorySources,
+        onTap: () => _navigateTo(const SourceFilterSettingsPage()),
       ),
     ];
 

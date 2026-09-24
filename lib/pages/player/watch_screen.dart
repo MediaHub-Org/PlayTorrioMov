@@ -16,6 +16,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/stream/stream_model.dart';
 import './player_screen.dart';
 import '../../services/app_breakpoints.dart';
+import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/download/download_launcher.dart';
 import '../../utils/fullscreen_navigator.dart';
@@ -111,11 +112,15 @@ class _WatchScreenState extends State<WatchScreen>
         );
 
     _animController.forward();
+    SourceFilterSettings.audioLanguage.addListener(_onSourceFilterChanged);
+    SourceFilterSettings.quality.addListener(_onSourceFilterChanged);
     _loadStreams();
   }
 
   @override
   void dispose() {
+    SourceFilterSettings.audioLanguage.removeListener(_onSourceFilterChanged);
+    SourceFilterSettings.quality.removeListener(_onSourceFilterChanged);
     _sourceBatchTimer?.cancel();
     _animController.dispose();
     _sourcesScrollController.dispose();
@@ -222,7 +227,20 @@ class _WatchScreenState extends State<WatchScreen>
 
   String? _selectedAddonFilter;
   String? _selectedSizeFilter;
-  String _selectedAudioFilter = 'all'; // 'all', 'multi', 'english', 'hindi', 'german', 'french', 'spanish', 'russian', 'japanese', 'italian'
+
+  /// The audio-language and quality filters live in [SourceFilterSettings]
+  /// rather than here, so the choice made on this screen is the same one the
+  /// Sources & Filters settings page shows, and it survives opening the next
+  /// episode. The getters keep the call sites reading like the local fields
+  /// they replaced.
+  String get _selectedAudioFilter => SourceFilterSettings.audioLanguage.value;
+  String get _selectedQualityFilter => SourceFilterSettings.quality.value;
+
+  /// Repaints when either shared filter changes, including a change made on
+  /// the settings page while this screen sits underneath it.
+  void _onSourceFilterChanged() {
+    if (mounted) setState(() {});
+  }
 
   List<StreamSource> get _filteredSources {
     var list = List<StreamSource>.from(_sources);
@@ -270,6 +288,11 @@ class _WatchScreenState extends State<WatchScreen>
           .where((s) => s.hasAudioLanguage(_selectedAudioFilter,
               mediaTitle: widget.detail.name))
           .toList();
+    }
+
+    // Filter by video quality / resolution
+    if (_selectedQualityFilter != 'all') {
+      list = list.where((s) => s.hasQuality(_selectedQualityFilter)).toList();
     }
 
     if (_selectedSizeFilter == 'largest') {
@@ -498,19 +521,7 @@ class _WatchScreenState extends State<WatchScreen>
                     ),
                     if (_sources.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        physics: const BouncingScrollPhysics(),
-                        child: Row(
-                          children: [
-                            _buildSizeFilterDropdown(),
-                            const SizedBox(width: 8),
-                            _buildAddonFilterDropdown(),
-                            const SizedBox(width: 8),
-                            _buildAudioFilterDropdown(),
-                          ],
-                        ),
-                      ),
+                      _buildFilterPillRail(),
                     ],
                     const SizedBox(height: _S.md),
                   ],
@@ -1024,37 +1035,27 @@ class _WatchScreenState extends State<WatchScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header
+        // Header. The pills used to share this row, which squeezed the title
+        // on a narrow panel and put a wrapping cluster right against it; they
+        // get their own line now, the same one the phone layout gives them.
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                Icon(Icons.stream_rounded, color: _C.accent, size: 20),
-                const SizedBox(width: _S.xs),
-                Text(
-                  context.l10n.watchSources,
-                  style: const TextStyle(
-                    color: _C.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            if (_sources.isNotEmpty)
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  _buildSizeFilterDropdown(),
-                  _buildAddonFilterDropdown(),
-                  _buildAudioFilterDropdown(),
-                ],
+            Icon(Icons.stream_rounded, color: _C.accent, size: 20),
+            const SizedBox(width: _S.xs),
+            Text(
+              context.l10n.watchSources,
+              style: const TextStyle(
+                color: _C.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
               ),
+            ),
           ],
         ),
+        if (_sources.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          _buildFilterPillRail(),
+        ],
         const SizedBox(height: _S.sm),
 
         // Source count
@@ -1081,6 +1082,13 @@ class _WatchScreenState extends State<WatchScreen>
     }
 
     if (!_isLoadingSources && sources.isEmpty) {
+      // A filter that hid every source is a different situation from a title
+      // with no sources at all: one is the user's own setting to change, the
+      // other is a fact about the title. Telling them apart is the whole
+      // point, because an empty list with no explanation reads as a bug.
+      if (_hasActiveSourceFilter && _sources.isNotEmpty) {
+        return _buildFilteredEmptyState();
+      }
       return _buildEmptyState();
     }
 
@@ -1111,13 +1119,18 @@ class _WatchScreenState extends State<WatchScreen>
     return list;
   }
 
-  Widget _buildSizeFilterDropdown() {
-    final currentText = _getSizeFilterLabel(_selectedSizeFilter);
-
+  /// The pill that opens one filter's glass menu, shared by every filter
+  /// (size, source, quality, audio) so the four read as one control in a row
+  /// rather than four lookalikes.
+  Widget _buildFilterDropdownButton({
+    required void Function(BuildContext buttonContext) onTap,
+    required String currentText,
+    IconData? icon,
+  }) {
     return Builder(
       builder: (buttonContext) {
         return GestureDetector(
-          onTap: () => _showSizeGlassDropdown(buttonContext),
+          onTap: () => onTap(buttonContext),
           child: DecoratedBox(
             decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(18)),
@@ -1140,12 +1153,10 @@ class _WatchScreenState extends State<WatchScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.data_usage_rounded,
-                      color: Colors.white70,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 6),
+                    if (icon != null) ...[
+                      Icon(icon, color: Colors.white70, size: 16),
+                      const SizedBox(width: 6),
+                    ],
                     Text(
                       currentText,
                       style: const TextStyle(
@@ -1170,7 +1181,56 @@ class _WatchScreenState extends State<WatchScreen>
     );
   }
 
-  void _showSizeGlassDropdown(BuildContext buttonContext) {
+  /// One selectable row inside a filter's glass menu. [selected] highlights
+  /// it; [onTap] is expected to already pop the menu.
+  Widget _buildFilterMenuItem({
+    required String title,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: selected
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: selected ? Colors.white : Colors.white70,
+                  fontSize: 14,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ),
+            if (selected)
+              const Icon(Icons.check_circle, color: Colors.white, size: 18),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The glass menu a filter button opens, anchored under [buttonContext] and
+  /// scrolling if the row of [items] is taller than the room below it.
+  ///
+  /// Every filter shares this: the anchor math, the open-above fallback and
+  /// the material all used to be copied per filter, and a fourth copy for the
+  /// quality filter was the point at which copying stopped being cheaper than
+  /// sharing.
+  void _showFilterMenu({
+    required BuildContext buttonContext,
+    required List<Widget> items,
+  }) {
     final RenderBox button = buttonContext.findRenderObject() as RenderBox;
     final RenderBox overlay =
         Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
@@ -1179,17 +1239,22 @@ class _WatchScreenState extends State<WatchScreen>
       ancestor: overlay,
     );
     const double dialogWidth = 230.0;
-    final double spaceBelow = overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
+    final double spaceBelow =
+        overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
     final double spaceAbove = buttonOffset.dy - 16;
     final bool openAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
 
-    final double maxMenuHeight = (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
-    final double? topOffset = openAbove ? null : (buttonOffset.dy + button.size.height + 8);
-    final double? bottomOffset = openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
+    final double maxMenuHeight =
+        (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
+    final double? topOffset =
+        openAbove ? null : (buttonOffset.dy + button.size.height + 8);
+    final double? bottomOffset =
+        openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
 
     final double rawLeft = buttonOffset.dx;
     final double maxLeft = overlay.size.width - dialogWidth - 12.0;
-    final double leftOffset = rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
+    final double leftOffset =
+        rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
 
     showGeneralDialog(
       context: context,
@@ -1244,28 +1309,7 @@ class _WatchScreenState extends State<WatchScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildSizeDropdownItem('All Sizes', null),
-                              const SizedBox(height: 4),
-                              Container(
-                                height: 1,
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
-                              const SizedBox(height: 4),
-                              _buildSizeDropdownItem('< 1 GB', '<1gb'),
-                              _buildSizeDropdownItem('1 GB – 5 GB', '1-5gb'),
-                              _buildSizeDropdownItem('5 GB – 15 GB', '5-15gb'),
-                              _buildSizeDropdownItem('15 GB – 30 GB', '15-30gb'),
-                              _buildSizeDropdownItem('> 30 GB', '>30gb'),
-                              const SizedBox(height: 4),
-                              Container(
-                                height: 1,
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
-                              const SizedBox(height: 4),
-                              _buildSizeDropdownItem('Largest First', 'largest'),
-                              _buildSizeDropdownItem('Smallest First', 'smallest'),
-                            ],
+                            children: items,
                           ),
                         ),
                       ),
@@ -1280,459 +1324,242 @@ class _WatchScreenState extends State<WatchScreen>
     );
   }
 
+  /// A thin divider between groups inside a filter menu.
+  Widget _buildFilterMenuDivider() {
+    return Column(
+      children: [
+        const SizedBox(height: 4),
+        Container(height: 1, color: Colors.white.withValues(alpha: 0.1)),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+
+  Widget _buildSizeFilterDropdown() {
+    return _buildFilterDropdownButton(
+      onTap: (buttonContext) => _showSizeGlassDropdown(buttonContext),
+      currentText: _getSizeFilterLabel(_selectedSizeFilter),
+      icon: Icons.data_usage_rounded,
+    );
+  }
+
+  /// The four filter pills, in the one scrollable frame both layouts use.
+  ///
+  /// The add-on pill is dropped rather than added as an empty box when
+  /// there is only one add-on: its dropdown would offer a single choice that
+  /// is already the only thing shown.
+  Widget _buildFilterPillRail() {
+    final hasAddonChoice =
+        _sources.map((e) => e.addonName).toSet().length > 1;
+    return _FilterPillRail(
+      children: [
+        _buildSizeFilterDropdown(),
+        if (hasAddonChoice) _buildAddonFilterDropdown(),
+        _buildQualityFilterDropdown(),
+        _buildAudioFilterDropdown(),
+      ],
+    );
+  }
+
+  void _showSizeGlassDropdown(BuildContext buttonContext) {
+    _showFilterMenu(
+      buttonContext: buttonContext,
+      items: [
+        _buildSizeDropdownItem('All Sizes', null),
+        _buildFilterMenuDivider(),
+        _buildSizeDropdownItem('< 1 GB', '<1gb'),
+        _buildSizeDropdownItem('1 GB – 5 GB', '1-5gb'),
+        _buildSizeDropdownItem('5 GB – 15 GB', '5-15gb'),
+        _buildSizeDropdownItem('15 GB – 30 GB', '15-30gb'),
+        _buildSizeDropdownItem('> 30 GB', '>30gb'),
+        _buildFilterMenuDivider(),
+        _buildSizeDropdownItem('Largest First', 'largest'),
+        _buildSizeDropdownItem('Smallest First', 'smallest'),
+      ],
+    );
+  }
+
   Widget _buildSizeDropdownItem(String title, String? value) {
-    final isSelected = _selectedSizeFilter == value;
-    return InkWell(
+    return _buildFilterMenuItem(
+      title: title,
+      selected: _selectedSizeFilter == value,
       onTap: () {
         setState(() {
           _selectedSizeFilter = value;
         });
         Navigator.pop(context);
       },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: isSelected
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white70,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.white, size: 18),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildAddonFilterDropdown() {
     final addons = _sources.map((e) => e.addonName).toSet().toList();
     if (addons.isEmpty) return const SizedBox.shrink();
-    final currentText = _selectedAddonFilter ?? 'All Sources';
 
-    return Builder(
-      builder: (buttonContext) {
-        return GestureDetector(
-          onTap: () => _showGlassDropdown(buttonContext, addons),
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(18)),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x40000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: PerformanceLiquidLens(
-              child: Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0x26FFFFFF)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      currentText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_drop_down,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    return _buildFilterDropdownButton(
+      onTap: (buttonContext) => _showAddonGlassDropdown(buttonContext, addons),
+      currentText: _selectedAddonFilter ?? 'All Sources',
     );
   }
 
-  void _showGlassDropdown(BuildContext buttonContext, List<String> addons) {
-    final RenderBox button = buttonContext.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-    final Offset buttonOffset = button.localToGlobal(
-      Offset.zero,
-      ancestor: overlay,
-    );
-
-    const double dialogWidth = 230.0;
-    final double spaceBelow = overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
-    final double spaceAbove = buttonOffset.dy - 16;
-    final bool openAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
-
-    final double maxMenuHeight = (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
-    final double? topOffset = openAbove ? null : (buttonOffset.dy + button.size.height + 8);
-    final double? bottomOffset = openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
-
-    final double rawLeft = buttonOffset.dx;
-    final double maxLeft = overlay.size.width - dialogWidth - 12.0;
-    final double leftOffset = rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      barrierColor: Colors.transparent,
-      transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Stack(
-          children: [
-            Positioned(
-              top: topOffset,
-              bottom: bottomOffset,
-              left: leftOffset,
-              child: Material(
-                color: Colors.transparent,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(
-                        0,
-                        (openAbove ? 10 : -10) * (1 - value),
-                      ),
-                      child: Opacity(
-                        opacity: value.clamp(0.0, 1.0),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x99000000),
-                          blurRadius: 18,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: PerformanceLiquidLens(
-                      child: Container(
-                        width: dialogWidth,
-                        constraints: BoxConstraints(maxHeight: maxMenuHeight),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0x26FFFFFF)),
-                        ),
-                        child: SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildDropdownItem('All Sources', null),
-                              const SizedBox(height: 4),
-                              Container(
-                                height: 1,
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
-                              const SizedBox(height: 4),
-                              ...addons.map((a) => _buildDropdownItem(a, a)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+  void _showAddonGlassDropdown(BuildContext buttonContext, List<String> addons) {
+    _showFilterMenu(
+      buttonContext: buttonContext,
+      items: [
+        _buildAddonDropdownItem('All Sources', null),
+        _buildFilterMenuDivider(),
+        ...addons.map((a) => _buildAddonDropdownItem(a, a)),
+      ],
     );
   }
 
-  Widget _buildDropdownItem(String title, String? value) {
-    final isSelected = _selectedAddonFilter == value;
-    return InkWell(
+  Widget _buildAddonDropdownItem(String title, String? value) {
+    return _buildFilterMenuItem(
+      title: title,
+      selected: _selectedAddonFilter == value,
       onTap: () {
         setState(() {
           _selectedAddonFilter = value;
         });
         Navigator.pop(context);
       },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: isSelected
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white70,
-                  fontSize: 15,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
+    );
+  }
+
+  Widget _buildQualityFilterDropdown() {
+    return _buildFilterDropdownButton(
+      onTap: (buttonContext) => _showQualityGlassDropdown(buttonContext),
+      currentText: qualityFilterLabel(context.l10n, _selectedQualityFilter),
+      icon: Icons.high_quality_rounded,
+    );
+  }
+
+  void _showQualityGlassDropdown(BuildContext buttonContext) {
+    _showFilterMenu(
+      buttonContext: buttonContext,
+      items: kQualityFilterKeys
+          .map(
+            (key) => _buildFilterMenuItem(
+              title: qualityFilterLabel(context.l10n, key),
+              selected: _selectedQualityFilter == key,
+              onTap: () {
+                SourceFilterSettings.setQuality(key);
+                Navigator.pop(context);
+              },
             ),
-            if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.white, size: 20),
-          ],
-        ),
-      ),
+          )
+          .toList(),
     );
   }
 
   Widget _buildAudioFilterDropdown() {
-    const labels = {
-      'all': 'All Audio',
-      'multi': '🌐 Multi-Audio',
-      'english': '🇺🇸 English / Orig',
-      'hindi': '🇮🇳 Hindi / Indian',
-      'german': '🇩🇪 German',
-      'french': '🇫🇷 French',
-      'spanish': '🇪🇸 Spanish',
-      'russian': '🇷🇺 Russian',
-      'japanese': '🇯🇵 Japanese',
-      'italian': '🇮🇹 Italian',
-    };
-    final currentText = labels[_selectedAudioFilter] ?? 'All Audio';
-
-    return Builder(
-      builder: (buttonContext) {
-        return GestureDetector(
-          onTap: () => _showAudioGlassDropdown(buttonContext),
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(18)),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x40000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: PerformanceLiquidLens(
-              child: Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0x26FFFFFF)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.language_rounded,
-                      color: Colors.white70,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      currentText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_drop_down,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    return _buildFilterDropdownButton(
+      onTap: (buttonContext) => _showAudioGlassDropdown(buttonContext),
+      currentText: audioFilterLabel(context.l10n, _selectedAudioFilter),
+      icon: Icons.language_rounded,
     );
   }
 
   void _showAudioGlassDropdown(BuildContext buttonContext) {
-    final RenderBox button = buttonContext.findRenderObject() as RenderBox;
-    final RenderBox overlay =
-        Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-    final Offset buttonOffset = button.localToGlobal(
-      Offset.zero,
-      ancestor: overlay,
-    );
-    const double dialogWidth = 230.0;
-    final double spaceBelow = overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
-    final double spaceAbove = buttonOffset.dy - 16;
-    final bool openAbove = spaceBelow < 280 && spaceAbove > spaceBelow;
-
-    final double maxMenuHeight = (openAbove ? spaceAbove : spaceBelow).clamp(160.0, 420.0);
-    final double? topOffset = openAbove ? null : (buttonOffset.dy + button.size.height + 8);
-    final double? bottomOffset = openAbove ? (overlay.size.height - buttonOffset.dy + 8) : null;
-
-    final double rawLeft = buttonOffset.dx;
-    final double maxLeft = overlay.size.width - dialogWidth - 12.0;
-    final double leftOffset = rawLeft.clamp(12.0, maxLeft > 12.0 ? maxLeft : 12.0);
-
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Dismiss',
-      barrierColor: Colors.transparent,
-      transitionDuration: const Duration(milliseconds: 250),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Stack(
-          children: [
-            Positioned(
-              top: topOffset,
-              bottom: bottomOffset,
-              left: leftOffset,
-              child: Material(
-                color: Colors.transparent,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, (openAbove ? 10 : -10) * (1 - value)),
-                      child: Opacity(
-                        opacity: value.clamp(0.0, 1.0),
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x99000000),
-                          blurRadius: 18,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: PerformanceLiquidLens(
-                      child: Container(
-                        width: dialogWidth,
-                        constraints: BoxConstraints(maxHeight: maxMenuHeight),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0x26FFFFFF)),
-                        ),
-                        child: SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildAudioDropdownItem('All Audio', 'all'),
-                              const SizedBox(height: 4),
-                              Container(
-                                height: 1,
-                                color: Colors.white.withValues(alpha: 0.1),
-                              ),
-                              const SizedBox(height: 4),
-                              _buildAudioDropdownItem('🌐 Multi-Audio', 'multi'),
-                              _buildAudioDropdownItem('🇺🇸 English / Orig', 'english'),
-                              _buildAudioDropdownItem('🇮🇳 Hindi / Indian', 'hindi'),
-                              _buildAudioDropdownItem('🇩🇪 German', 'german'),
-                              _buildAudioDropdownItem('🇫🇷 French', 'french'),
-                              _buildAudioDropdownItem('🇪🇸 Spanish', 'spanish'),
-                              _buildAudioDropdownItem('🇷🇺 Russian', 'russian'),
-                              _buildAudioDropdownItem('🇯🇵 Japanese', 'japanese'),
-                              _buildAudioDropdownItem('🇮🇹 Italian', 'italian'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+    _showFilterMenu(
+      buttonContext: buttonContext,
+      items: [
+        _buildAudioDropdownItem('all'),
+        _buildFilterMenuDivider(),
+        // Everything after "all", which the header row above already covers.
+        ...kAudioFilterKeys
+            .where((key) => key != 'all')
+            .map(_buildAudioDropdownItem),
+      ],
     );
   }
 
-  Widget _buildAudioDropdownItem(String title, String value) {
-    final isSelected = _selectedAudioFilter == value;
-    return InkWell(
+  Widget _buildAudioDropdownItem(String value) {
+    return _buildFilterMenuItem(
+      title: audioFilterLabel(context.l10n, value),
+      selected: _selectedAudioFilter == value,
       onTap: () {
-        setState(() {
-          _selectedAudioFilter = value;
-        });
+        SourceFilterSettings.setAudioLanguage(value);
         Navigator.pop(context);
       },
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: isSelected
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.white70,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                ),
-              ),
-            ),
-            if (isSelected)
-              const Icon(Icons.check_circle, color: Colors.white, size: 18),
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildEmptyState() {
     return const _EmptySourcesStateWidget();
+  }
+
+  /// Whether a filter the user can change is narrowing the list right now.
+  /// The add-on filter is excluded: it is a per-title choice made from the
+  /// sources actually present, so it cannot itself be the thing that made
+  /// the list empty.
+  bool get _hasActiveSourceFilter =>
+      _selectedAudioFilter != 'all' || _selectedQualityFilter != 'all';
+
+  /// The empty list you get when a filter, not the title, emptied it. Says
+  /// which and offers the way out in one tap, rather than the generic "no
+  /// sources found" that would send you looking for add-ons that are fine.
+  Widget _buildFilteredEmptyState() {
+    final l10n = context.l10n;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      decoration: BoxDecoration(
+        color: _C.surface.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.filter_alt_off_rounded,
+            color: _C.accent,
+            size: 36,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.sourceFilterFilteredEmptyTitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _C.textPrimary,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 320),
+            child: Text(
+              l10n.sourceFilterFilteredEmptyBody,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: _C.textSecondary,
+                fontSize: 13,
+                height: 1.5,
+              ),
+            ),
+          ),
+          const SizedBox(height: 22),
+          OutlinedButton.icon(
+            icon: const Icon(Icons.restart_alt_rounded, size: 18),
+            label: Text(l10n.sourceFilterFilteredEmptyClear),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: _C.textPrimary,
+              side: BorderSide(color: _C.accent.withValues(alpha: 0.5)),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: () => SourceFilterSettings.clearFilters(),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildShimmerList() {
@@ -2470,6 +2297,174 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
         );
       },
       child: glassCard,
+    );
+  }
+}
+
+/// The row of filter pills under the sources heading, scrollable sideways
+/// and framed so that a pill hidden past either edge is visible as content
+/// rather than simply gone.
+///
+/// The row is genuinely wider than a phone, and on a narrow panel wider than
+/// the surface it sits on, so it has to scroll. A bare horizontal scroll area
+/// hides that: with no scrollbar and no cut-off hint, a pill off the right
+/// edge looks identical to one that does not exist, and there is nothing to
+/// tell the user to try dragging. So the row is drawn inside a bordered
+/// rectangle -- the "there is a region here" cue -- and each edge fades in a
+/// chevron exactly while there is more content in that direction, which is
+/// the whole trick: the fade *is* the overflow indicator, and it disappears
+/// at the ends so the last pill is never ambiguous with a hard cut.
+class _FilterPillRail extends StatefulWidget {
+  final List<Widget> children;
+
+  const _FilterPillRail({required this.children});
+
+  @override
+  State<_FilterPillRail> createState() => _FilterPillRailState();
+}
+
+class _FilterPillRailState extends State<_FilterPillRail> {
+  final ScrollController _controller = ScrollController();
+
+  /// Whether content continues past the left / right edge. Read on every
+  /// scroll frame, but stored as plain bools rather than a notifier: the
+  /// rebuild is this one row, and the value only changes at the very ends.
+  bool _canScrollBack = false;
+  bool _canScrollForward = false;
+
+  /// The fade + chevron width. Wide enough to hold the chevron clear of the
+  /// edge pill, narrow enough not to swallow a whole pill behind it.
+  static const double _edgeFadeWidth = 28;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_syncOverflow);
+    // First frame: the scroll extent only exists once layout has run, so
+    // this cannot be read in initState.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverflow());
+  }
+
+  @override
+  void didUpdateWidget(covariant _FilterPillRail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // The pill set changes when the sources or their add-ons do, which can
+    // push the row in or out of overflow at either end without a scroll.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _syncOverflow());
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_syncOverflow);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Recomputes both edge flags. A row that does not scroll reports no
+  /// overflow at either end, so a short row shows no chevrons at all.
+  void _syncOverflow() {
+    if (!mounted || !_controller.hasClients) return;
+    final position = _controller.position;
+    final back = position.pixels > 0;
+    final forward = position.pixels < position.maxScrollExtent - 0.5;
+    if (back == _canScrollBack && forward == _canScrollForward) return;
+    setState(() {
+      _canScrollBack = back;
+      _canScrollForward = forward;
+    });
+  }
+
+  void _nudge(bool forward) {
+    if (!_controller.hasClients) return;
+    final target = (_controller.offset + (forward ? 160.0 : -160.0))
+        .clamp(0.0, _controller.position.maxScrollExtent);
+    _controller.animateTo(
+      target,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        color: Colors.white.withValues(alpha: 0.02),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            ScrollConfiguration(
+              // The desktop scrollbar on a 36px row is taller than the row
+              // and clips against the frame; the edge chevrons are this
+              // rail's overflow cue instead.
+              behavior: ScrollConfiguration.of(context).copyWith(
+                scrollbars: false,
+              ),
+              child: SingleChildScrollView(
+                controller: _controller,
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    for (var i = 0; i < widget.children.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      widget.children[i],
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            if (_canScrollBack)
+              _buildEdgeFade(forward: false),
+            if (_canScrollForward)
+              _buildEdgeFade(forward: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// One end's indicator: a gradient into the panel colour plus a tappable
+  /// chevron, sized to the frame's height. Tapping nudges the row, so a tap
+  /// or a drag both work.
+  Widget _buildEdgeFade({required bool forward}) {
+    return Positioned(
+      top: 0,
+      bottom: 0,
+      left: forward ? null : 0,
+      right: forward ? 0 : null,
+      child: GestureDetector(
+        onTap: () => _nudge(forward),
+        child: Container(
+          width: _edgeFadeWidth,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: forward ? Alignment.centerLeft : Alignment.centerRight,
+              end: forward ? Alignment.centerRight : Alignment.centerLeft,
+              colors: [
+                _C.surface.withValues(alpha: 0.92),
+                _C.surface.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            forward
+                ? Icons.chevron_right_rounded
+                : Icons.chevron_left_rounded,
+            size: 18,
+            color: _C.textSecondary,
+          ),
+        ),
+      ),
     );
   }
 }
