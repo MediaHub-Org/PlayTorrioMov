@@ -48,6 +48,13 @@ matching `v*` publish a full release; a tag carrying a semver prerelease
 suffix (`v1.2.0-rc.1`) publishes as a prerelease. Release artifact filenames
 are stamped with the app version.
 
+> **Dispatch more than once before a release if you want.** Each dispatch
+> uploads its artifacts to *that run* and, when `release_tag` is empty,
+> publishes nothing; the GitHub-hosted artifacts have their own retention and
+> cost nothing in the repository. The local equivalent does accumulate, which
+> is why `scripts\build_windows.bat` stages into `%TEMP%` — see "Local builds".
+> Nothing in the repo grows from either.
+
 ## Release signing
 
 Only **Android** requires signing for the in-app updater to work. `OtaUpdate`
@@ -65,6 +72,28 @@ Two repository secrets are required:
 | `ANDROID_KEYSTORE_PASSWORD` | yes      | Store password                      |
 | `ANDROID_KEY_ALIAS`         | no       | Defaults to `playtorriomov`         |
 | `ANDROID_KEY_PASSWORD`      | no       | Defaults to the store password      |
+
+## Local builds
+
+**Releases are built and published by GitHub Actions. A local build is for
+testing, and is kept out of the repository.**
+
+`build/` is gitignored and regenerable, and a Windows release in it is about
+1 GB with the intermediates. A local test build used to land there too, which
+meant the folder grew every time somebody built one. It does not any more:
+
+```bat
+scripts\build_windows.bat        REM -> %TEMP%\PlayTorrioMov-dev-<timestamp>
+scripts\run_windows.bat          REM runs the newest of those, logs to playtorrio-console.log
+```
+
+The build carries `--dart-define=APP_CHANNEL=dev`, the same marker a `dev_build`
+dispatch carries, so Settings → About says "Testing build" and a local build
+can never be mistaken for a release. Delete the folder when done; nothing
+depends on it.
+
+`build\releases\*.zip` is gone with the old script. To hand a Windows build to
+somebody, use a GitHub Actions artifact or a dispatch release, not a local zip.
 
 ## What the release build does not check
 

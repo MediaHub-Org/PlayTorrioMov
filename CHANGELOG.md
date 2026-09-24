@@ -3,6 +3,47 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+The source list remembers how you like it filtered, there is a new quality
+filter, and the player now picks your audio language inside multi-audio files.
+
+### Added
+- **Video-quality filter on the sources screen**: 4K / 1080p / 720p / 480p,
+  next to the existing size, source and audio-language filters. A source
+  whose resolution was not detected never matches a specific quality.
+- **Sources & Filters settings page** (`Settings > Sources & Filters`): the
+  audio-language and quality filters are now a global default rather than a
+  per-episode choice, plus a **preferred audio languages** ranking.
+- **Preferred audio languages**: rank the languages you want in priority
+  order. When a multi-audio file plays, the player switches to the first
+  track matching the highest-ranked language it actually carries. Empty (the
+  default) always keeps the file's own default track. This works on the
+  *real* tracks in the file -- the source list cannot know them, because a
+  release named `MULTI` does not say which languages are inside.
+- **A clearer empty source list**: when a filter hid every source, the list
+  now says so and offers to clear the filters, instead of the generic "no
+  sources found" that sends you looking for add-ons that are fine.
+- **The source filters sit in their own scrollable row**: a bordered strip
+  under the "Watch Sources" heading, with an edge chevron that fades in only
+  while there is a pill past that edge. Before, the pills shared the heading's
+  line on desktop and scrolled on a phone with nothing to show that a pill
+  was hidden off the edge.
+
+### Changed
+- **The audio-language filter is remembered.** It used to reset to "All
+  Audio" every time a title was opened. It now persists, and the dropdown on
+  the sources screen and the settings page write the same value, so whichever
+  was changed last is the one that applies.
+
+### Fixed
+- **A `MULTI` source now matches every language filter, not just `multi`.**
+  It used to match a concrete language only when that language was named, or
+  when no other language was -- so `MULTI · Spanish` showed under Spanish but
+  not under English, which a bare `MULTI` would have. "Multi-audio" means the
+  file has several dubs and names none of them, so it now stands for all of
+  them rather than hiding sources that would have played.
+
 ## [1.8.10+43] - 2026-09-22
 
 The Subtitle Appearance panel stays put, its sample sits where real subtitles
@@ -1583,3 +1624,6 @@ history only.
 | #69 | Text scale and accessibility — ten high-traffic overflow fixes + in-app zoom shipped, capped at 1.3x; ~58 files still unaudited |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; confirmed on real speakers 2026-09-16 |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |
+| #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |
+| #73 | Preferred audio languages: a ranked list applied to the real tracks inside a multi-audio file, plus the `MULTI` filter fix |
+| #74 | The source-filter pills on their own scrollable row, with edge chevrons showing when a pill is hidden past either end |

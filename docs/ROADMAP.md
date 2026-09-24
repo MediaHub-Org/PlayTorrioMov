@@ -23,6 +23,28 @@ single slice of each — are done.
 **Needs a device** — #28 and the torrent-cast question. Nothing here can be
 advanced by reading or writing code; each is one test away from an answer.
 
+### Open questions
+
+**Whether more belongs under Sources & Filters (#72).** #72 shipped the audio
+language and quality filters as a global default. The size / sort filter and
+the add-on filter on the sources screen are still per-episode, and could move
+into the same page — but a size range and a "largest first" sort are browsing
+choices for *this* title, not a standing preference, so it is not obvious they
+belong with the two that are. Settle it before adding more there.
+
+**The preferred-audio ranking has no way to be scanned.** #73 applies the
+ranking on the first non-empty track list only, once. If a source's tracks
+arrive in stages, a late update will not re-apply it — deliberate, so a manual
+switch in the audio menu is never undone, but it means a file whose tracks
+arrive after the first frame keeps its own default. Not observed yet on a real
+device.
+
+**#73 and #74 have never been run against real media.** #73's track switch
+and #74's pill rail were both checked by `flutter analyze` and the test suite,
+and by no eye. The ranking's libmpv `aid` call and the rail's edge-chevron
+timing are the two things a first real session should confirm; a source list
+too short to overflow, and a multi-audio file, are the two cases to look at.
+
 ### Translation (#68)
 
 **A small tail of user-facing strings is still hardcoded English.**
