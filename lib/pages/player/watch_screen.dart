@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
@@ -20,6 +21,7 @@ import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/download/download_launcher.dart';
 import '../../utils/fullscreen_navigator.dart';
+import '../../widgets/common/horizontal_slider_scroll.dart';
 import '../../widgets/player/performance_liquid_lens.dart';
 import '../../widgets/common/source_badges.dart';
 import '../settings/settings_page.dart';
@@ -2334,7 +2336,20 @@ class _FilterPillRailState extends State<_FilterPillRail> {
 
   /// The fade + chevron width. Wide enough to hold the chevron clear of the
   /// edge pill, narrow enough not to swallow a whole pill behind it.
-  static const double _edgeFadeWidth = 28;
+  static const double _edgeFadeWidth = 40;
+
+  /// The fade alone, on touch platforms. Narrower than [_edgeFadeWidth]
+  /// because there is no button to hold clear of the pills -- it only has to
+  /// be wide enough to read as a fade rather than a hard cut.
+  static const double _edgeFadeWidthMobile = 24;
+
+  /// The chevron's own circle. The first version of this rail drew a bare
+  /// 18px `textSecondary` glyph on a 28px fade, and it was reported as "not
+  /// very visible, and only on the right" -- a glyph with no edge reads as
+  /// decoration, not as something to press. The circle is what makes it a
+  /// button: it has a border, it holds the glyph off the pills behind it,
+  /// and it is the same size at both ends so the row never looks lopsided.
+  static const double _edgeButtonSize = 32;
 
   @override
   void initState() {
@@ -2385,85 +2400,179 @@ class _FilterPillRailState extends State<_FilterPillRail> {
     );
   }
 
+  /// A plain vertical wheel over the rail scrolls it sideways.
+  ///
+  /// A horizontal [Scrollable] reads only `scrollDelta.dx`, so a vertical
+  /// wheel over this row was silently swallowed: the user hovered the pills,
+  /// scrolled, and nothing moved. Shift+wheel and a trackpad's two-finger
+  /// swipe already worked, but neither is discoverable, and the plain wheel
+  /// is what a desktop user reaches for first.
+  ///
+  /// The event is claimed through the pointer-signal resolver rather than
+  /// acted on directly. A signal reaches every listener on the hit-test
+  /// chain, so acting directly would scroll the rail *and* the page behind
+  /// it; the resolver picks exactly one. Registering here wins over the page
+  /// because this listener is hit first, and it is skipped when the rail is
+  /// already at the end in that direction, so the page takes over instead of
+  /// the wheel appearing to stick.
+  void _onPointerSignal(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent) return;
+    // A horizontal delta means a trackpad swipe or a tilt wheel, which the
+    // rail's own Scrollable already handles correctly.
+    if (event.scrollDelta.dx.abs() > 0.5) return;
+    final dy = event.scrollDelta.dy;
+    if (dy == 0 || !_controller.hasClients) return;
+    final position = _controller.position;
+    if (position.maxScrollExtent <= 0) return;
+    final atStart = position.pixels <= position.minScrollExtent;
+    final atEnd = position.pixels >= position.maxScrollExtent;
+    if ((dy < 0 && atStart) || (dy > 0 && atEnd)) return;
+    GestureBinding.instance.pointerSignalResolver.register(event, (_) {
+      position.pointerScroll(dy);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-        color: Colors.white.withValues(alpha: 0.02),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          children: [
-            ScrollConfiguration(
-              // The desktop scrollbar on a 36px row is taller than the row
-              // and clips against the frame; the edge chevrons are this
-              // rail's overflow cue instead.
-              behavior: ScrollConfiguration.of(context).copyWith(
-                scrollbars: false,
-              ),
-              child: SingleChildScrollView(
-                controller: _controller,
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
+    // The listener wraps the whole rail, not just the scroll view, so the
+    // wheel works over the edge buttons too -- they sit on top of the row in
+    // the Stack and would otherwise swallow the signal.
+    return Listener(
+      onPointerSignal: _onPointerSignal,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          color: Colors.white.withValues(alpha: 0.02),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              ScrollConfiguration(
+                // The desktop scrollbar on a 36px row is taller than the row
+                // and clips against the frame; the edge chevrons are this
+                // rail's overflow cue instead.
+                behavior: ScrollConfiguration.of(context).copyWith(
+                  scrollbars: false,
                 ),
-                child: Row(
-                  children: [
-                    for (var i = 0; i < widget.children.length; i++) ...[
-                      if (i > 0) const SizedBox(width: 8),
-                      widget.children[i],
+                child: SingleChildScrollView(
+                  controller: _controller,
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      for (var i = 0; i < widget.children.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 8),
+                        widget.children[i],
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-            if (_canScrollBack)
-              _buildEdgeFade(forward: false),
-            if (_canScrollForward)
-              _buildEdgeFade(forward: true),
-          ],
+              // Both ends are drawn whenever the row overflows at all, with
+              // the spent end dimmed rather than removed. Showing only the
+              // live end made the row look lopsided -- a lone chevron on the
+              // right reads as "there is more", but it also reads as the
+              // control having moved, and at the far end of the scroll the
+              // row appeared to have no control at all.
+              //
+              // The fade is drawn on every platform; the button inside it is
+              // desktop-only, which [_buildEdgeFade] decides. On a phone the
+              // row is dragged, and two 40px buttons over a 360px row would
+              // cover the first and last pill -- a tap meant for either would
+              // land on a button instead. The check is the platform, not the
+              // width: a tablet is wide enough to pass any breakpoint and is
+              // still a touch device.
+              if (_canScrollBack || _canScrollForward) ...[
+                _buildEdgeFade(forward: false, enabled: _canScrollBack),
+                _buildEdgeFade(forward: true, enabled: _canScrollForward),
+              ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// One end's indicator: a gradient into the panel colour plus a tappable
-  /// chevron, sized to the frame's height. Tapping nudges the row, so a tap
-  /// or a drag both work.
-  Widget _buildEdgeFade({required bool forward}) {
+  /// One end's indicator: a gradient into the panel colour, plus a tappable
+  /// chevron button on desktop platforms. Tapping nudges the row, so a tap
+  /// or a drag both work. [enabled] is false at an end with nothing further
+  /// to scroll; the button stays in place, dimmed and inert.
+  ///
+  /// On a touch platform the gradient is drawn alone. It is the cue that
+  /// there is more content past the edge, and it costs no tap target -- the
+  /// row is dragged there, and a button over the first and last pill would
+  /// swallow taps meant for them.
+  Widget _buildEdgeFade({required bool forward, required bool enabled}) {
+    final showButton = isDesktopPlatform();
     return Positioned(
       top: 0,
       bottom: 0,
       left: forward ? null : 0,
       right: forward ? 0 : null,
-      child: GestureDetector(
-        onTap: () => _nudge(forward),
-        child: Container(
-          width: _edgeFadeWidth,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: forward ? Alignment.centerLeft : Alignment.centerRight,
-              end: forward ? Alignment.centerRight : Alignment.centerLeft,
-              colors: [
-                _C.surface.withValues(alpha: 0.92),
-                _C.surface.withValues(alpha: 0.0),
-              ],
+      child: IgnorePointer(
+        ignoring: !enabled,
+        child: AnimatedOpacity(
+          opacity: enabled ? 1.0 : 0.35,
+          duration: const Duration(milliseconds: 180),
+          child: Container(
+            width: showButton ? _edgeFadeWidth : _edgeFadeWidthMobile,
+            decoration: BoxDecoration(
+              // Opaque at the outer edge, transparent toward the pills. The
+              // first version had this the other way round, which put the
+              // chevron on the transparent end of its own fade -- part of why
+              // it read as a smudge rather than a button.
+              gradient: LinearGradient(
+                begin: forward ? Alignment.centerLeft : Alignment.centerRight,
+                end: forward ? Alignment.centerRight : Alignment.centerLeft,
+                colors: [
+                  _C.surface.withValues(alpha: 0.0),
+                  _C.surface.withValues(alpha: 0.92),
+                ],
+              ),
             ),
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            forward
-                ? Icons.chevron_right_rounded
-                : Icons.chevron_left_rounded,
-            size: 18,
-            color: _C.textSecondary,
+            alignment: Alignment.center,
+            child: showButton
+                ? MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () => _nudge(forward),
+                      child: _buildEdgeButton(forward),
+                    ),
+                  )
+                : null,
           ),
         ),
+      ),
+    );
+  }
+
+  /// The circular chevron button itself, shared by both ends.
+  Widget _buildEdgeButton(bool forward) {
+    return Container(
+      width: _edgeButtonSize,
+      height: _edgeButtonSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: _C.surfaceLight.withValues(alpha: 0.95),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x66000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(
+        forward ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
+        size: 20,
+        color: _C.textPrimary,
       ),
     );
   }

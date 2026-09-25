@@ -2,12 +2,12 @@
 
 **What is left to do.** Shipped work is in [CHANGELOG.md](../CHANGELOG.md),
 the release process is in [RELEASES.md](RELEASES.md), and item numbers
-(`#15`–`#71`) are indexed at the end of the changelog.
+(`#15`–`#74`) are indexed at the end of the changelog.
 
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-22**, on `v1.8.10+43`.
+Last reconciled: **2026-09-25**, on `v1.8.11+44`.
 
 ---
 
@@ -39,11 +39,34 @@ switch in the audio menu is never undone, but it means a file whose tracks
 arrive after the first frame keeps its own default. Not observed yet on a real
 device.
 
-**#73 and #74 have never been run against real media.** #73's track switch
-and #74's pill rail were both checked by `flutter analyze` and the test suite,
-and by no eye. The ranking's libmpv `aid` call and the rail's edge-chevron
-timing are the two things a first real session should confirm; a source list
-too short to overflow, and a multi-audio file, are the two cases to look at.
+**#74's pill rail has not been seen on screen.** #73 was confirmed in a local
+temp build; the rail was not. What to look at: a source list too short to
+overflow (no buttons at all), one long enough to overflow (a button at each
+end, the left one dimmed), and a scroll to the end (the right one dimmed, the
+left one lit). The buttons are driven by `maxScrollExtent`, so the case worth
+checking is a row that is *just* wider than its frame.
+
+The rail's first version was reported as "not very visible, and only on the
+right", and both halves of that were real: the chevron was a bare 18px
+`textSecondary` glyph on a 28px fade whose gradient ran the wrong way, so it
+sat on the transparent end of its own fade; and the spent end was removed
+rather than dimmed, so the row looked lopsided and had no control at all at
+the far end of the scroll. Both are fixed. The wheel handling is the part
+still unverified on a real desktop -- in particular that a wheel over the
+rail does not also scroll the page behind it, which is what the pointer
+signal resolver is there to prevent.
+
+The rail is shared by the phone and desktop layouts, so the edge affordances
+are split by *platform*, not width: the fade is drawn everywhere, the button
+only on desktop. A tablet is wide enough to pass any breakpoint and is still
+a touch device, where the row is dragged and a button over the first and last
+pill would swallow taps meant for them. The check reuses
+`isDesktopPlatform()` from `horizontal_slider_scroll.dart`, which the other
+horizontal rails already use -- it was a method on the mixin and is now a
+top-level function so a non-mixin widget can call it too. **The phone layout
+has not been seen on a device either**; what to check is that the fade reads
+as "more this way" without a button, and that the first and last pill are
+tappable right to their edges.
 
 ### Translation (#68)
 

@@ -5,6 +5,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.8.11+44] - 2026-09-25
+
 The source list remembers how you like it filtered, there is a new quality
 filter, and the player now picks your audio language inside multi-audio files.
 
@@ -25,10 +27,14 @@ filter, and the player now picks your audio language inside multi-audio files.
   now says so and offers to clear the filters, instead of the generic "no
   sources found" that sends you looking for add-ons that are fine.
 - **The source filters sit in their own scrollable row**: a bordered strip
-  under the "Watch Sources" heading, with an edge chevron that fades in only
-  while there is a pill past that edge. Before, the pills shared the heading's
-  line on desktop and scrolled on a phone with nothing to show that a pill
-  was hidden off the edge.
+  under the "Watch Sources" heading, with an edge button at each end that
+  fades in only while there is a pill past that edge. Before, the pills shared
+  the heading's line on desktop and scrolled on a phone with nothing to show
+  that a pill was hidden off the edge. A plain mouse wheel over the row now
+  scrolls it sideways, which it did not before -- only Shift+wheel and a
+  trackpad swipe worked, and neither is discoverable. On a phone the row keeps
+  the edge fade but not the button: the row is dragged there, and a button
+  over the first and last pill would swallow taps meant for them.
 
 ### Changed
 - **The audio-language filter is remembered.** It used to reset to "All
@@ -1626,4 +1632,4 @@ history only.
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |
 | #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |
 | #73 | Preferred audio languages: a ranked list applied to the real tracks inside a multi-audio file, plus the `MULTI` filter fix |
-| #74 | The source-filter pills on their own scrollable row, with edge chevrons showing when a pill is hidden past either end |
+| #74 | The source-filter pills on their own scrollable row, with edge buttons showing when a pill is hidden past either end (desktop; the phone keeps the fade alone) |

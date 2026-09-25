@@ -1,6 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// Whether this build runs on a desktop platform, where a horizontal rail
+/// gets arrow buttons.
+///
+/// A *platform* check, deliberately not a width one: a tablet is wide enough
+/// to pass any breakpoint and is still a touch device, where dragging the row
+/// is the natural gesture and an arrow button sitting over the first and last
+/// item is a tap target that steals taps meant for them.
+bool isDesktopPlatform() {
+  if (kIsWeb) return true;
+  return defaultTargetPlatform == TargetPlatform.windows ||
+      defaultTargetPlatform == TargetPlatform.macOS ||
+      defaultTargetPlatform == TargetPlatform.linux;
+}
+
 /// Scroll-state logic shared by every horizontal card slider with desktop
 /// arrow buttons (Movies, IPTV channels, ...): tracks whether the arrows
 /// should show, and drives the "scroll by 80% of the viewport" animation.
@@ -56,12 +70,5 @@ mixin HorizontalSliderScroll<T extends StatefulWidget> on State<T> {
       duration: const Duration(milliseconds: 650),
       curve: Curves.easeOutCubic,
     );
-  }
-
-  bool isDesktopPlatform() {
-    if (kIsWeb) return true;
-    return defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.linux;
   }
 }
