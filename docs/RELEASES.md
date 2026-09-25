@@ -95,6 +95,29 @@ depends on it.
 `build\releases\*.zip` is gone with the old script. To hand a Windows build to
 somebody, use a GitHub Actions artifact or a dispatch release, not a local zip.
 
+### `pubspec.lock` churns on a local `pub get`
+
+**Do not commit `pubspec.lock` from a local build.** The SDK's own
+`flutter_localizations` pins `intl` to an exact version (`0.20.2` on Flutter
+3.44.0), and that pin cascades: a local `flutter pub get` resolves `intl`,
+`meta`, `matcher`, `test_api` and `vector_math` *down* to what the SDK wants,
+even when the lockfile already holds newer versions that satisfy every
+constraint. The result is a five-package downgrade in the diff that has
+nothing to do with the change being made.
+
+It is not a version mismatch -- CI and a local checkout can be on the same
+Flutter release and still disagree, because the pin is in the SDK's own
+package rather than in the app's constraints. `git restore pubspec.lock`
+before committing; CI resolves its own lockfile and does not need the local
+one.
+
+### Runner labels are pinned
+
+`ubuntu-latest` migrates to Ubuntu 26 on 2026-10-19, which would change the
+build environment under a release with no commit to point at. The workflows
+name `ubuntu-24.04` explicitly instead. `windows-latest` and `macos-latest`
+are still floating; pin them the same way if either announces a migration.
+
 ## What the release build does not check
 
 **`build.yml` has no analyze or test step.** Only `pr-checks.yml` runs them,

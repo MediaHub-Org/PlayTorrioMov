@@ -1353,7 +1353,7 @@ class _WatchScreenState extends State<WatchScreen>
   Widget _buildFilterPillRail() {
     final hasAddonChoice =
         _sources.map((e) => e.addonName).toSet().length > 1;
-    return _FilterPillRail(
+    return FilterPillRail(
       children: [
         _buildSizeFilterDropdown(),
         if (hasAddonChoice) _buildAddonFilterDropdown(),
@@ -2316,16 +2316,21 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
 /// chevron exactly while there is more content in that direction, which is
 /// the whole trick: the fade *is* the overflow indicator, and it disappears
 /// at the ends so the last pill is never ambiguous with a hard cut.
-class _FilterPillRail extends StatefulWidget {
+///
+/// Public rather than private so a widget test can pump it directly: the
+/// platform split (button on desktop, fade alone on touch) is a decision
+/// worth locking down, and it cannot be reached through [WatchScreen]
+/// without a network-backed source list.
+class FilterPillRail extends StatefulWidget {
   final List<Widget> children;
 
-  const _FilterPillRail({required this.children});
+  const FilterPillRail({super.key, required this.children});
 
   @override
-  State<_FilterPillRail> createState() => _FilterPillRailState();
+  State<FilterPillRail> createState() => _FilterPillRailState();
 }
 
-class _FilterPillRailState extends State<_FilterPillRail> {
+class _FilterPillRailState extends State<FilterPillRail> {
   final ScrollController _controller = ScrollController();
 
   /// Whether content continues past the left / right edge. Read on every
@@ -2361,7 +2366,7 @@ class _FilterPillRailState extends State<_FilterPillRail> {
   }
 
   @override
-  void didUpdateWidget(covariant _FilterPillRail oldWidget) {
+  void didUpdateWidget(covariant FilterPillRail oldWidget) {
     super.didUpdateWidget(oldWidget);
     // The pill set changes when the sources or their add-ons do, which can
     // push the row in or out of overflow at either end without a scroll.

@@ -91,7 +91,7 @@ jobs:
   # silently overwrite each other under an identical name.
   version:
     name: Resolve Version
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.resolve.outputs.version }}
     steps:
@@ -258,7 +258,7 @@ jobs:
   android:
     name: Android (Split-per-ABI APKs)
     needs: [version]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -375,7 +375,7 @@ jobs:
   android-universal:
     name: Android (Universal APK)
     needs: [version]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -481,7 +481,7 @@ jobs:
   linux-x64:
     name: Linux x64 (AppImage & Tar)
     needs: [version]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -608,7 +608,7 @@ jobs:
   linux-flatpak:
     name: Linux x64 (Flatpak)
     needs: [version, linux-x64]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: bilelmoussaoui/flatpak-github-actions:freedesktop-24.08
       options: --privileged
@@ -876,7 +876,7 @@ jobs:
         startsWith(github.ref, 'refs/tags/v') ||
         github.event.inputs.release_tag != ''
       )
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:

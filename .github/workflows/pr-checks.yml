@@ -96,7 +96,7 @@ jobs:
   # several times as much per minute and this is a per-PR check.
   linux-desktop:
     name: Linux Desktop Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -177,7 +177,7 @@ jobs:
   # stop reading it.
   analyze-test:
     name: Analyze & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -223,7 +223,7 @@ jobs:
 
   android:
     name: Android Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
