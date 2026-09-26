@@ -43,6 +43,9 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart'))) {
+      // Generated from the ARB files; nothing here is hand-written.
+      if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+
       final source = file.readAsStringSync();
       final exempt = allowed[file.path] ?? const <String>{};
 

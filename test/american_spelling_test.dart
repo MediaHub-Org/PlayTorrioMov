@@ -23,7 +23,14 @@ import 'package:flutter_test/flutter_test.dart';
 /// API uses the doubled ones, and a guard that fights the framework is a
 /// guard someone turns off.
 ///
-/// The scan covers `lib/`, `test/` and `docs/` -- source and the living docs.
+/// The scan covers `lib/`, `test/` and `docs/` -- source and the living docs,
+/// `.arb` message files included. It found nothing in `lib/` on its first run
+/// and CI still failed, because `flutter gen-l10n` copies an ARB
+/// `@description` into a doc comment: the one British spelling left was in
+/// `app_en.arb`, which a `.dart`-and-`.md` scan could not see. Generated
+/// output is skipped for the same reason it is gitignored -- it is not a file
+/// anyone edits.
+///
 /// `CHANGELOG.md` is outside it on purpose: a released entry is a record of
 /// what shipped and when, not a document that gets corrected afterwards.
 void main() {
@@ -89,7 +96,12 @@ void main() {
           .listSync(recursive: true)
           .whereType<File>()
           .where((f) =>
-              f.path.endsWith('.dart') || f.path.endsWith('.md'))) {
+              f.path.endsWith('.dart') ||
+              f.path.endsWith('.md') ||
+              f.path.endsWith('.arb'))) {
+        // `flutter gen-l10n` writes these from the ARB files; correcting a
+        // copy would only hide the original.
+        if (file.path.startsWith('lib/l10n/app_localizations')) continue;
         // This file's own list is the list; skipping it whole rather than
         // word by word, since every entry would need allowing.
         if (file.path == 'test/american_spelling_test.dart') continue;

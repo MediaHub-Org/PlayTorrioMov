@@ -100,7 +100,7 @@
   "@libraryTabDownloads": {"description": "Library tab: titles available offline"},
 
   "libraryShelfLiked": "Liked",
-  "@libraryShelfLiked": {"description": "Built-in shelf card: favourited titles"},
+  "@libraryShelfLiked": {"description": "Built-in shelf card: favorited titles"},
   "libraryShelfWatchlist": "Watchlist",
   "@libraryShelfWatchlist": {"description": "Built-in shelf card: kept to watch later"},
   "libraryShelfWatched": "Watched",

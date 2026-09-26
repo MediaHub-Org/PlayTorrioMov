@@ -35,6 +35,9 @@ void main() {
           .listSync(recursive: true)
           .whereType<File>()
           .where((f) => f.path.endsWith('.dart'))) {
+        // Generated from the ARB files; nothing here is hand-written.
+        if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+
         final source = file.readAsStringSync();
         for (final match in call.allMatches(source)) {
           // `IconButton({` with a brace is the constructor *declaration* of a
