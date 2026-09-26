@@ -15,10 +15,20 @@ Last reconciled: **2026-09-26**, on `v1.8.11+44`.
 
 Two kinds of work are left, and they need different things from you.
 
-**Actionable now, no hardware** — #68 and #69. Both have a method below that
-has already been used successfully, so neither is a research problem; they are
-a long tail of small, verifiable pieces. The settings pages — the largest
-single slice of each — are done.
+**Actionable now, no hardware** — #68 and #69. Neither is a research problem;
+each has a method below that has already been used. What is left of both is
+now the part a test cannot hold, which is worth being precise about:
+
+| Held by a test | What that leaves |
+|:--|:--|
+| `no_hardcoded_text_test` — no `Text()` holds an English sentence | Strings built from data, which stay English on purpose |
+| `rtl_directional_padding_test` — no padding names a physical edge | ~87 `Alignment` constants and icon direction, which need judgment per site |
+| `icon_button_tooltip_test` — every icon-only *button* carries a label | Icon-only controls that are not buttons: ~24 candidates, and the count is unreliable |
+| `text_scale_overflow_test` — 19 widgets survive 3x on a 360px view | ~46 files with a fixed `height:` that nothing has probed |
+
+An invariant with a test behind it does not need revisiting, so the four
+right-hand cells are the work. Each of them needs a judgment a test cannot
+make, which is why none of them is behind one.
 
 **Needs a device** — #28 and the torrent-cast question. Nothing here can be
 advanced by reading or writing code; each is one test away from an answer.
@@ -100,18 +110,36 @@ tappable right to their edges.
 
 ### Translation (#68)
 
-**A small tail of user-facing strings is still hardcoded English.**
-868 keys are translated into Spanish, Arabic and Portuguese-BR, covering the
+**The hardcoded-string tail is closed, and a test holds it closed.**
+981 keys are translated into Spanish, Arabic and Portuguese-BR, covering the
 settings pages, the player (controls, menus, panels, the subtitle style
 editor, cast sheet, loading and error screens, snack bars), the Films, Series,
 Discover, Search, Anime browse and Library pages, the shared header buttons,
 the mini player, the P2P warning and update dialogs, and Live TV end to end.
 
-What is left has not been counted, because a scan no longer finds it: single-line
-literals are nearly gone. Still to check by hand are the curated hub
-descriptions on Live TV's page, the details pages' remaining rows, and strings
-built from data (channel names, provider names, error text from a library),
-which regexes miss (multi-line and interpolated text).
+The tail was found by reading the *argument* to `Text(` rather than the line
+it sits on, which is what the previous note said a scan could no longer do.
+79 literal first arguments, 42 of them prose; a third needed no new key
+because one already existed -- the portal browser had its own English copies
+of four Live TV settings rows, and three badges duplicated `iptvLive`,
+`commonAll` and `playerSeasonN`. Eleven more reach the screen through a named
+argument or a field instead of `Text(`, so the same scan cannot see them:
+two tooltips on the Continue Watching card, a hint, the player's own title for
+an anime episode, the Arabic pages' error text, and the browse pages' error
+heading.
+
+`test/no_hardcoded_text_test.dart` fails on the next one. A literal first
+argument to `Text(` with a run of three letters *outside* an interpolation is
+prose; `'S${season}E${episode}'`, `'${n} px'` and `'${pct}%'` are codes and
+units and do not trip it. Two literals are allowlisted by name -- a packet-count
+unit and a shell command someone pastes -- and an entry there is a decision
+that a string is not prose, not a way to defer translating it.
+
+What stays English is data rather than UI, and that is a decision rather than
+a gap. The 48 scrapers build a source's `title` and `description` from their
+own name and the release's quality ("VidRock · Alpha · 1080p"); those strings
+are how a source row is read and matched, not sentences. Channel names,
+provider names and a library's own error text are the same kind of thing.
 
 Genre names (Action, Slice of Life, ...) and anime formats (TV, OVA, ...) stay
 in English on purpose: they are AniList's own values, sent back to its API to
@@ -239,11 +267,11 @@ people search and recognize things.
 
 **~46 of the ~68 files in `lib/` with a fixed `height:` are still
 unaudited.** Twenty-five high-traffic boxes are fixed so far, the settings
-pages among them. What is left is the long tail, in rough order of how many
-people meet it:
-
-1. **Live TV's portal browser** — a modal with its own toolbars. The only
-   named target left.
+pages among them, and **no named target is left** -- Live TV's portal browser
+was the last, and its four search pills are capped. What remains is the long
+tail, deliberately unranked: the one attempt to rank it by grepping `height:`
+returned 165 hits whose loudest were `height: 4` spacers, and a ranking that
+wrong is worse than none.
 
 The player's overlays are done and probed: the subtitle style editor, the
 episode picker (which passed untouched — its rows already flex) and the cast
@@ -303,9 +331,24 @@ The method is settled and does not need rediscovering:
   cannot have is not finding a bug — it is finding the test's own scaffolding,
   and it wastes exactly the time it takes to work that out.
 
-Semantics labels on icon-only controls, mentioned here previously, is still
-untouched — `Tooltip` supplies one for free, which the library action row
-already gets, but nothing has checked the rest.
+**Semantics labels on icon-only buttons are done, for every `IconButton` and
+`PlayerIconButton` in `lib/`.** 46 went in with the Close/Back pass and seven
+more after it; the earlier count of "twelve left" was wrong in a useful way --
+five of the twelve were `IconButton.styleFrom` or a wrapper class whose
+tooltip is required at the type level, which a grep cannot tell from a call.
+`test/icon_button_tooltip_test.dart` fails on the next one added without a
+tooltip, which is what Material turns into the label a screen reader reads.
+The details page's three status buttons also carry the *state* now
+(`Semantics(toggled:)`), because a tooltip gives a name and not an answer to
+"is Watched on?"
+
+What is left is the controls that are not buttons: an `Icon` inside a
+`GestureDetector`. A scan finds 24 candidates across 15 files, and **that
+number should not be trusted** -- a `Tooltip` or `Semantics` on an *ancestor*
+labels the control just as well, and the scan cannot see one. The library
+action row and the Continue Watching card both appear in the list and are both
+already labelled. These need reading one at a time, which is why they are not
+behind a test.
 
 ### Cast, against a real receiver (#28)
 
