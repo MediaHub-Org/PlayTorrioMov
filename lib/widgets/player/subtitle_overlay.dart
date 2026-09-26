@@ -75,10 +75,21 @@ class _SubtitleOverlayState extends State<SubtitleOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: PlayerSettings.changeNotifier,
-      builder: (context, _, __) {
-        if (PlayerSettings.useLibass.value) return const SizedBox.shrink();
+    return ListenableBuilder(
+      // Both, because either can turn libass on: the preference, or an
+      // embedded track being selected. Listening only to the preference
+      // meant the overlay kept drawing after an embedded track turned
+      // libass on, so every line appeared twice -- once from mpv, once from
+      // Flutter.
+      listenable: Listenable.merge([
+        PlayerSettings.changeNotifier,
+        PlayerSettings.embeddedSubtitleActive,
+      ]),
+      builder: (context, _) {
+        // `shouldUseLibass`, not `useLibass`: an embedded track turns libass
+        // on without the preference being set, and the overlay has to know
+        // or it draws the same text a second time.
+        if (PlayerSettings.shouldUseLibass) return const SizedBox.shrink();
 
         final text = widget.showSample
             ? '${context.l10n.subSampleTitle}\n${context.l10n.subSampleBody}'
