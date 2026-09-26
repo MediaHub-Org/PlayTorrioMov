@@ -1266,19 +1266,17 @@ class _PlayerScreenState extends State<PlayerScreen>
 
   /// Turns mpv's own subtitle rendering on, for an embedded track.
   ///
-  /// Deliberately not routed through [PlayerSettings.applySubtitleStyling]:
-  /// that honours the `useLibass` preference, and this is not a preference.
-  /// An embedded ASS track has no other way to reach the screen.
+  /// The state is set first, because [PlayerSettings.applySubtitleStyling]
+  /// reads it rather than taking a flag -- see
+  /// [PlayerSettings.embeddedSubtitleActive] for why.
   void _enableLibassForEmbedded() {
     try {
+      PlayerSettings.embeddedSubtitleActive.value = true;
       final dynamic platform = _player.platform;
       if (platform == null) return;
       platform.setProperty('sub-visibility', 'yes');
       platform.setProperty('sub-ass', 'yes');
-      // forceLibass, because the preference is off by default and this is
-      // not a preference: without it this call would set
-      // `sub-visibility=no` and undo the two lines above.
-      PlayerSettings.applySubtitleStyling(_player, forceLibass: true);
+      PlayerSettings.applySubtitleStyling(_player);
     } catch (e) {
       debugPrint('[PlayerScreen] could not enable libass for embedded subs: $e');
     }
@@ -1292,6 +1290,9 @@ class _PlayerScreenState extends State<PlayerScreen>
       _currentSubtitlePath = null;
       _currentCues = [];
     });
+    // Cleared here, so an appearance change after this does not turn libass
+    // back on for a track that is no longer selected.
+    PlayerSettings.embeddedSubtitleActive.value = false;
     _player.setSubtitleTrack(SubtitleTrack.no());
   }
 
@@ -1388,6 +1389,10 @@ class _PlayerScreenState extends State<PlayerScreen>
       _selectedEmbeddedSubtitleIndex = null;
       _isSubtitleEnabled = true;
     });
+    // An online subtitle is a downloaded file drawn by the Flutter overlay,
+    // not by libass. Leaving the embedded state set would keep libass on for
+    // a track that is no longer selected.
+    PlayerSettings.embeddedSubtitleActive.value = false;
     _player.setSubtitleTrack(SubtitleTrack.no());
 
     if (mounted) {
@@ -1476,24 +1481,11 @@ class _PlayerScreenState extends State<PlayerScreen>
     return Uri.file(pathOrUrl).toString();
   }
 
-  /// Whether the selected subtitle is one of the file's own tracks.
-  ///
-  /// An embedded track is rendered by libass and never emitted as text, so
-  /// every call that applies subtitle styling has to know to keep libass on
-  /// -- otherwise the scale slider, or any appearance change, silently turns
-  /// the subtitles back off.
-  bool get _isEmbeddedSubtitleSelected =>
-      _selectedEmbeddedSubtitleIndex != null;
-
   void _setSubtitleScale(double scale) {
     if (!mounted) return;
     final clamped = scale.clamp(0.5, 3.0);
     setState(() => _subtitleScale = clamped);
-    PlayerSettings.setSubScale(
-      clamped,
-      player: _player,
-      forceLibass: _isEmbeddedSubtitleSelected,
-    );
+    PlayerSettings.setSubScale(clamped, player: _player);
   }
 
   Future<void> _applyLiveDelay(double delaySec) async {
