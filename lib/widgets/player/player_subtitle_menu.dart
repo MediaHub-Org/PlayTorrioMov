@@ -79,8 +79,6 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   /// Which list is showing. Opens on Embedded when the file has any, since
   /// those are already there and play instantly; otherwise on Online.
-  /// Forced is never the default: it narrows to a kind of track, and a
-  /// viewer who opened the panel chose to browse.
   late _SubtitleSource _source = widget.embeddedSubtitles.isNotEmpty
       ? _SubtitleSource.embedded
       : _SubtitleSource.online;
@@ -263,15 +261,12 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     );
   }
 
-  /// Embedded / Online / Forced, as three pills rather than one merged list.
+  /// Embedded / Online, as two pills rather than one merged list.
   ///
-  /// They are different questions. An embedded track is already in the file
-  /// and plays instantly; an online one has to be fetched; a forced one
-  /// covers only the foreign-language dialogue, whichever side it comes
-  /// from. Merging them meant the file's own tracks -- usually the answer --
-  /// sat among a hundred downloads, and forced tracks hid among full
-  /// translations they are not. Forced spans both sources, so it reads both
-  /// lists narrowed to forced files.
+  /// They are different questions: an embedded track is already in the file
+  /// and plays instantly, an online one has to be fetched. Forced tracks
+  /// live inside each side under the Forced chip rather than in a third
+  /// pill of their own.
   Widget _buildSourceTabs(BuildContext context) {
     final hasEmbedded = widget.embeddedSubtitles.isNotEmpty;
     return Row(
@@ -293,23 +288,6 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             onTap: () => setState(() => _source = _SubtitleSource.online),
           ),
         ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: _TabButton(
-            label: context.l10n.subsForced,
-            count: _forcedCount,
-            isSelected: _source == _SubtitleSource.forced,
-            // The whole view is forced files, so arriving with the Forced
-            // filter chip set would show a state no visible chip explains.
-            // It falls back to All; the chip row below hides Forced here.
-            onTap: () => setState(() {
-              _source = _SubtitleSource.forced;
-              if (_filter == _SubtitleFilter.forced) {
-                _filter = _SubtitleFilter.subtitles;
-              }
-            }),
-          ),
-        ),
         // A file with no embedded tracks has nothing to show on that tab, so
         // it opens on Online rather than on an empty list.
         if (!hasEmbedded && _source == _SubtitleSource.embedded)
@@ -318,24 +296,11 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     );
   }
 
-  /// How many forced rows the Forced pill counts: embedded forced tracks
-  /// plus online forced files, the same "rows below" convention the other
-  /// two pills use.
-  int get _forcedCount =>
-      widget.embeddedSubtitles.where((t) => t.isForced).length +
-      widget.groups.fold(
-        0,
-        (sum, group) =>
-            sum + group.variants.where((v) => v.isForced).length,
-      );
-
   /// Subtitles / CC-SDH / Forced: three independent kinds, not a filter
   /// with an All. "All" could never say whether forced tracks were in or
   /// out, so every view mixed back in what the pills separate out. Plain
   /// translations, hearing-impaired ones, and forced ones each get their
-  /// own chip; tapping the active chip falls back to Subtitles. On Forced
-  /// only the CC-SDH chip shows: the view is forced files already, and a
-  /// Subtitles chip there would promise plain translations it cannot list.
+  /// own chip; tapping the active chip falls back to Subtitles.
   Widget _buildFilterChips(BuildContext context) {
     void pick(_SubtitleFilter next) => setState(() {
       _filter = _filter == next && next != _SubtitleFilter.subtitles
@@ -352,26 +317,23 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-        if (_source != _SubtitleSource.forced)
           _FilterChip(
             label: context.l10n.detailsSubtitles,
             isSelected: _filter == _SubtitleFilter.subtitles,
             onTap: () => pick(_SubtitleFilter.subtitles),
           ),
-        if (_source != _SubtitleSource.forced) const SizedBox(width: 6),
-        _FilterChip(
-          label: context.l10n.subsSdhShort,
-          isSelected: _filter == _SubtitleFilter.sdh,
-          onTap: () => pick(_SubtitleFilter.sdh),
-        ),
-        if (_source != _SubtitleSource.forced) ...[
+          const SizedBox(width: 6),
+          _FilterChip(
+            label: context.l10n.subsSdhShort,
+            isSelected: _filter == _SubtitleFilter.sdh,
+            onTap: () => pick(_SubtitleFilter.sdh),
+          ),
           const SizedBox(width: 6),
           _FilterChip(
             label: context.l10n.subsForced,
             isSelected: _filter == _SubtitleFilter.forced,
             onTap: () => pick(_SubtitleFilter.forced),
           ),
-        ],
         ],
       ),
     );
@@ -421,8 +383,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     // cannot both claim it.
     var markedSelected = false;
 
-    if (_source != _SubtitleSource.online) {
-      // Embedded, and the embedded half of Forced.
+    if (_source == _SubtitleSource.embedded) {
+      // Embedded rows: the file's own tracks, audio language first.
       //
       // File order is the muxer's, which is arbitrary to a viewer -- a
       // twelve-track disc put its languages in whatever order they were
@@ -435,9 +397,6 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         audioLanguage: widget.audioLanguage,
       );
       for (final track in embedded) {
-        // Forced shows forced files only; the All and CC-SDH chips still
-        // narrow them further below.
-        if (_source == _SubtitleSource.forced && !track.isForced) continue;
         if (!_passesFilter(
           isForced: track.isForced,
           isHearingImpaired: track.isHearingImpaired,
@@ -460,10 +419,10 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       }
     }
 
-    // Not `else`: Forced reads both halves narrowed to forced files, so it
-    // runs each block the other pills skip.
+    // The mirror condition, so each pill reads exactly the block the other
+    // skips.
     if (_source != _SubtitleSource.embedded) {
-      // Online, and the online half of Forced.
+      // Online rows: downloads grouped by language.
       //
       // The language being heard first, then most files first.
       //
@@ -475,25 +434,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       // junk lives, and it is also what made this list 200 rows. Alphabetical
       // breaks a tie, so the order is stable rather than whatever the
       // providers happened to answer in.
-      //
-      // Forced narrows each group to its forced files first, dropping
-      // languages with none: the pill promises forced files, and a group
-      // whose best file is forced but whose second is not would otherwise
-      // offer the second one anyway.
-      final base = _source == _SubtitleSource.forced
-          ? [
-              for (final group in widget.groups)
-                if (group.variants.any((v) => v.isForced))
-                  SubtitleLanguageGroup(
-                    language: group.language,
-                    variants: group.variants
-                        .where((v) => v.isForced)
-                        .toList(),
-                  ),
-            ]
-          : widget.groups;
       final spoken = SubtitleAutoPick.languageKey(widget.audioLanguage);
-      final groups = base
+      final groups = widget.groups
           .where((g) => g.variants.isNotEmpty)
           // A result with no language has no row name and nothing to
           // choose it by, so it is not offered rather than listed blank.
@@ -593,21 +535,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     if (rows.isEmpty) {
       // A chip that matched nothing is not the same as a stream with no
       // subtitles, and saying the latter would be wrong -- the tracks are
-      // there, the chip is hiding them. Forced gets its own line for the
-      // same reason: non-forced tracks being there does not mean a forced
-      // one is.
+      // there, the chip is hiding them.
       final hasAny = widget.embeddedSubtitles.isNotEmpty ||
           widget.groups.any((g) => g.variants.isNotEmpty);
-      late final String message;
-      if (!hasAny) {
-        message = context.l10n.playerNoSubtitlesForStream;
-      } else if (_source == _SubtitleSource.forced &&
-          _filter != _SubtitleFilter.sdh) {
-        message = context.l10n.playerNoForcedSubtitles;
-      } else {
-        message = context.l10n.playerSubtitleNoneMatchFilter;
-      }
-      rows.add(PlayerMenuEmptyRow(message));
+      rows.add(
+        PlayerMenuEmptyRow(
+          hasAny
+              ? context.l10n.playerSubtitleNoneMatchFilter
+              : context.l10n.playerNoSubtitlesForStream,
+        ),
+      );
     }
     return rows;
   }
@@ -641,26 +578,20 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   /// Whether a track survives the active chip. Each chip names one kind --
   /// plain translations, hearing-impaired ones, forced ones -- so there is
-  /// no "everything" state for forced tracks to leak back through. On Forced
-  /// the pill already narrowed to forced files, so only the CC-SDH chip
-  /// narrows further there.
+  /// no "everything" state for forced tracks to leak back through.
   bool _passesFilter({
     required bool isForced,
     required bool isHearingImpaired,
-  }) {
-    if (_source == _SubtitleSource.forced) {
-      return _filter != _SubtitleFilter.sdh || isHearingImpaired;
-    }
-    return switch (_filter) {
-      _SubtitleFilter.subtitles => !isForced && !isHearingImpaired,
-      _SubtitleFilter.sdh => isHearingImpaired,
-      _SubtitleFilter.forced => isForced,
-    };
-  }
+  }) =>
+      switch (_filter) {
+        _SubtitleFilter.subtitles => !isForced && !isHearingImpaired,
+        _SubtitleFilter.sdh => isHearingImpaired,
+        _SubtitleFilter.forced => isForced,
+      };
 }
 
 /// Which list the panel is showing.
-enum _SubtitleSource { embedded, online, forced }
+enum _SubtitleSource { embedded, online }
 
 /// Which tracks the list is narrowed to.
 enum _SubtitleFilter { subtitles, sdh, forced }

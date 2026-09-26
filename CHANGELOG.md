@@ -45,14 +45,12 @@ rather than files, and the sleep timer can wait for the video to end.
   Forced filters.** The file's own tracks and the online downloads were one
   merged list, so the tracks already in the file -- usually the answer -- sat
   among a hundred downloads. The filters narrow whichever tab is showing.
-- **Forced subtitles get their own pill.** Forced tracks hid among full
-  translations they are not: they cover only foreign-language dialogue,
-  whichever side it comes from. The third pill reads the embedded list and
-  the online list narrowed to forced files, with the file's own tracks
-  first. The filter chips are three independent kinds now -- Subtitles,
-  CC-SDH, Forced -- instead of an All that could never say whether forced
-  tracks were in or out; tapping the active chip falls back to Subtitles.
-  The Forced chip hides in the Forced view, leaving CC-SDH.
+- **Forced subtitles live under their own chip.** Forced tracks hid among
+  full translations they are not: they cover only foreign-language dialogue,
+  whichever side it comes from. The filter chips are three independent kinds
+  now -- Subtitles, CC-SDH, Forced -- instead of an All that could never say
+  whether forced tracks were in or out; tapping the active chip falls back
+  to Subtitles.
 - **Regional subtitle variants are separate languages.** Spanish (ES) and
   Spanish (LATAM) are different recordings, not two spellings of one label,
   and they used to collapse into a single "Spanish" group -- so the choice
@@ -75,11 +73,12 @@ rather than files, and the sleep timer can wait for the video to end.
   coin flip. Subtitle sync is unchanged.
 - **Two tracks in one language are told apart.** A file with both Spanish
   dubs listed "Spanish" twice, so the choice between them was invisible.
-  Duplicates take the region where the track's own title names one --
-  `Spanish (ES)`, `Spanish (LATAM)` -- since a file's handful of tracks are
-  told apart by trial. The audio menu additionally numbers them
-  (`Spanish #1`), where identical rows would otherwise collide with no
-  recourse.
+  Every language now follows one pattern: a canonical base with the title's
+  region swapped in -- `Spanish (ES)`, `Spanish (LATAM)`, `Chinese
+  (Traditional)` -- so "Chinese" never sits beside a second spelling of
+  itself. The audio menu additionally numbers repeats (`Spanish (ES) #1`),
+  where identical rows would otherwise collide with no recourse; embedded
+  lists do not number, since a handful of tracks are told apart by trial.
 - **Spanish and Portuguese forced tracks are recognized.** Only the English
   word "forced" was matched, so a track titled "Espanol (Forzados)" got no
   badge and sat outside the Forced filter. The Spanish and Portuguese

@@ -9,22 +9,36 @@ import 'package:playtorriomov/services/subtitles/subtitle_languages.dart';
 void main() {
   group('uniqueTrackLanguageNames', () {
     test('leaves a single track of a language alone', () {
+      // Untagged Spanish joins Spanish (ES), so even a singleton reads
+      // like its region-tagged siblings.
       expect(
         uniqueTrackLanguageNames(['spa'], ['Spanish']),
-        ['Spanish'],
+        ['Spanish (ES)'],
       );
     });
 
-    test('names duplicates with region and number', () {
+    test('one region each needs no number', () {
       // The case that matters: a file with both Spanish dubs. Each takes a
-      // region from its own title, and the group still numbers throughout --
-      // a second "Spanish (ES)" would otherwise collide with the first.
+      // region from its own title, and with one row per region there is
+      // nothing left to collide.
       expect(
         uniqueTrackLanguageNames(
           ['spa', 'spa'],
           ['Spanish (Castilian)', 'Spanish (Latin America)'],
         ),
-        ['Spanish (ES) #1', 'Spanish (LATAM) #2'],
+        ['Spanish (ES)', 'Spanish (LATAM)'],
+      );
+    });
+
+    test('a repeated region numbers within itself', () {
+      // Numbering stays inside the region: the second ES track is
+      // "Spanish (ES) #2", not a global counter shared with LATAM.
+      expect(
+        uniqueTrackLanguageNames(
+          ['spa', 'spa', 'spa'],
+          ['Spanish (Castilian)', 'Spanish (ES)', 'Spanish (Latin America)'],
+        ),
+        ['Spanish (ES) #1', 'Spanish (ES) #2', 'Spanish (LATAM)'],
       );
     });
 
@@ -34,7 +48,7 @@ void main() {
       // them is picking by trial.
       expect(
         uniqueTrackLanguageNames(['spa', 'spa'], ['Spanish', 'Spanish']),
-        ['Spanish #1', 'Spanish #2'],
+        ['Spanish (ES) #1', 'Spanish (ES) #2'],
       );
     });
 
@@ -44,27 +58,26 @@ void main() {
           ['eng', 'spa', 'spa'],
           ['English', 'Spanish', 'Spanish'],
         ),
-        ['English', 'Spanish #1', 'Spanish #2'],
+        ['English', 'Spanish (ES) #1', 'Spanish (ES) #2'],
       );
     });
 
-    test('a region shows where known, and the group still numbers', () {
-      // One title naming no region does not hide the other's: the region
-      // shows where the track states it, and the number keeps every row
-      // unique either way.
+    test('a lone region needs no number', () {
+      // One title naming no region does not hide the other's, and neither
+      // row collides: the region shows where the track states it.
       expect(
         uniqueTrackLanguageNames(
           ['spa', 'spa'],
           ['Spanish (Latin America)', 'Spanish'],
         ),
-        ['Spanish (LATAM) #1', 'Spanish #2'],
+        ['Spanish (LATAM)', 'Spanish (ES)'],
       );
     });
 
     test('a bracketed region code is read too', () {
       expect(
         uniqueTrackLanguageNames(['spa', 'spa'], ['Spanish [ES]', 'Spanish [MX]']),
-        ['Spanish (ES) #1', 'Spanish (MX) #2'],
+        ['Spanish (ES)', 'Spanish (MX)'],
       );
     });
 
@@ -84,7 +97,7 @@ void main() {
       expect(uniqueTrackLanguageNames([null], ['eng']), ['English']);
       expect(
         uniqueTrackLanguageNames([null], ['English (US) PGS']),
-        ['English'],
+        ['English (US)'],
       );
     });
 
@@ -95,7 +108,28 @@ void main() {
     });
 
     test('a real tag beats whatever the title says', () {
-      expect(uniqueTrackLanguageNames(['spa'], ['chi']), ['Spanish']);
+      expect(uniqueTrackLanguageNames(['spa'], ['chi']), ['Spanish (ES)']);
+    });
+
+    test('script spellings collapse to one Chinese', () {
+      // "Chinese" beside "Chinese (Traditional)" was the complaint: every
+      // spelling joins one group, with the script kept where stated.
+      expect(
+        uniqueTrackLanguageNames(
+          ['zh', 'zht', 'chi', 'cht'],
+          ['', '', '', ''],
+          numberDuplicates: false,
+        ),
+        ['Chinese', 'Chinese', 'Chinese', 'Chinese'],
+      );
+      expect(
+        uniqueTrackLanguageNames(
+          ['zhc', 'zht'],
+          ['Simplified', 'Traditional'],
+          numberDuplicates: false,
+        ),
+        ['Chinese (Simplified)', 'Chinese (Traditional)'],
+      );
     });
   });
 
@@ -137,7 +171,7 @@ void main() {
       // than a label the track does not claim.
       expect(
         uniqueTrackLanguageNames(['spa', 'spa'], ['Standard', 'Standard']),
-        ['Spanish #1', 'Spanish #2'],
+        ['Spanish (ES) #1', 'Spanish (ES) #2'],
       );
     });
   });
@@ -146,14 +180,14 @@ void main() {
     // Embedded lists turn numbering off: a handful of tracks are told apart
     // by trial, and numbers beside regions read as two different kinds of
     // thing. The audio menu keeps the default.
-    test('duplicates take regions, bare otherwise', () {
+    test('regions show per track without numbers', () {
       expect(
         uniqueTrackLanguageNames(
           ['spa', 'spa', 'spa'],
           ['Spanish (Castilian)', 'Spanish (Latin America)', 'Spanish'],
           numberDuplicates: false,
         ),
-        ['Spanish (ES)', 'Spanish (LATAM)', 'Spanish'],
+        ['Spanish (ES)', 'Spanish (LATAM)', 'Spanish (ES)'],
       );
     });
 
@@ -175,7 +209,7 @@ void main() {
           ['English', 'Spanish'],
           numberDuplicates: false,
         ),
-        ['English', 'Spanish'],
+        ['English', 'Spanish (ES)'],
       );
     });
   });

@@ -105,6 +105,13 @@ void main() {
       expect(canonicalLanguageGroup('es'), 'Spanish (ES)');
     });
 
+    test('muxer spellings of the Chinese tags join Chinese', () {
+      // Containers write "chs" and "cht" where mpv reports "zhc" and "zht".
+      expect(subtitleTrackLanguageName('chs'), 'Chinese (Simplified)');
+      expect(subtitleTrackLanguageName('cht'), 'Chinese (Traditional)');
+      expect(canonicalLanguageGroup('cht'), 'Chinese');
+    });
+
     test('does not expose signs-only mpv tracks as a language', () {
       expect(subtitleTrackLanguageName('spl'), isEmpty);
       expect(canonicalLanguageGroup('spl'), isEmpty);

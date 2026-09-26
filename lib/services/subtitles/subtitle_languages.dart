@@ -333,6 +333,11 @@ String _capitalizeWords(String value) => value
 const Map<String, String> _mpvTagToDisplayName = {
   'zhc': 'Chinese (Simplified)',
   'zht': 'Chinese (Traditional)',
+  // Bare muxer spellings of the same two tags. Containers write "chs" and
+  // "cht" where mpv reports "zhc" and "zht"; without these they rendered as
+  // three-letter noise instead of joining the Chinese group.
+  'chs': 'Chinese (Simplified)',
+  'cht': 'Chinese (Traditional)',
 };
 
 /// The display name for a language that may be an ISO code, an mpv track
@@ -357,11 +362,12 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 ///
 /// A file with two Spanish subtitle tracks -- one Castilian, one Latin
 /// American -- rendered both as "Spanish", so the list showed the same word
-/// twice and the choice between them was invisible. Duplicates take a region
-/// from their own title where the title names one -- `Spanish (ES)`,
-/// `Spanish (LATAM)` -- and, unless [numberDuplicates] is off, a number
-/// where they do not, as `Spanish #1`. Numbering is the honest answer there:
-/// the tracks really are indistinguishable from their metadata.
+/// twice and the choice between them was invisible. Every language follows
+/// the same pattern: a canonical base (`Spanish (ES)`, `Chinese`) with the
+/// title's region swapped in (`Spanish (LATAM)`, `Chinese (Traditional)`),
+/// and -- unless [numberDuplicates] is off -- a number where rows would
+/// otherwise collide, as `Spanish (ES) #1`. Numbering is the honest answer
+/// there: the tracks really are indistinguishable from their metadata.
 ///
 /// Embedded lists turn numbering off: a handful of tracks are told apart by
 /// trial, and "Spanish #1" next to "Spanish (LATAM)" reads as two different
@@ -369,40 +375,57 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 /// otherwise collide with no recourse.
 ///
 /// A track whose tag is empty but whose title is a bare code ("chi") is
-/// named for the code -- see [_guessLanguageFromTitle]. Tracks whose
-/// language is unknown even then are left alone: numbering "Track 3" would
-/// invent a language.
+/// named for the code -- see [_namedOrGuessed]. Tracks whose language is
+/// unknown even then are left alone: numbering "Track 3" would invent a
+/// language.
 List<String> uniqueTrackLanguageNames(
   List<String?> rawLanguages,
   List<String?> titles, {
   bool numberDuplicates = true,
 }) {
+  // Canonical first, so every language groups like Spanish does: script
+  // variants collapse to Chinese, untagged Spanish joins Spanish (ES).
+  // Without this each spelling was its own row -- "Chinese" beside
+  // "Chinese (Traditional)".
   final names = <String>[
     for (var i = 0; i < rawLanguages.length; i++)
-      _namedOrGuessed(rawLanguages[i], i < titles.length ? titles[i] : null),
+      canonicalLanguageGroup(
+        _namedOrGuessed(rawLanguages[i], i < titles.length ? titles[i] : null),
+      ),
+  ];
+
+  // The title's region swapped in, replacing any the base carries: a track
+  // tagged generic but titled for Mexico reads "Spanish (MX)", not
+  // "Spanish (ES) (MX)". A bare code never gains a region it did not state.
+  final labeled = <String>[
+    for (var i = 0; i < names.length; i++)
+      () {
+        final name = names[i];
+        if (name.isEmpty) return '';
+        final region =
+            _regionFromTitle(i < titles.length ? titles[i] : null);
+        if (region == null) return name;
+        final base = name.replaceAll(RegExp(r'\s*\([^)]*\)\s*$'), '');
+        return '$base ($region)';
+      }(),
   ];
 
   final totals = <String, int>{};
-  for (final name in names) {
-    if (name.isEmpty) continue;
-    totals[name] = (totals[name] ?? 0) + 1;
+  for (final label in labeled) {
+    if (label.isEmpty) continue;
+    totals[label] = (totals[label] ?? 0) + 1;
   }
 
   final seen = <String, int>{};
   return [
-    for (var i = 0; i < names.length; i++)
+    for (var i = 0; i < labeled.length; i++)
       () {
-        final name = names[i];
-        if (name.isEmpty || totals[name]! < 2) return name;
-
-        // A region where the track states one, so "Spanish (LATAM)" never
-        // reads as a duplicate of "Spanish (ES)".
-        final region = _regionFromTitle(titles[i]);
-        final labeled = region != null ? '$name ($region)' : name;
-        if (!numberDuplicates) return labeled;
-
-        final n = seen[name] = (seen[name] ?? 0) + 1;
-        return '$labeled #$n';
+        final label = labeled[i];
+        if (label.isEmpty || totals[label]! < 2 || !numberDuplicates) {
+          return label;
+        }
+        final n = seen[label] = (seen[label] ?? 0) + 1;
+        return '$label #$n';
       }(),
   ];
 }
