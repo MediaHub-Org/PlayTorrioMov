@@ -251,6 +251,7 @@
   "playerCastUnreachable": "Esta fuente se sirve desde este dispositivo, por lo que un receptor Cast no puede acceder a ella. Las fuentes alojadas en otro lugar (enlaces directos, debrid o un servidor de torrents en otra máquina) se transmiten sin problema.",
   "playerSubSwitchedEmbedded": "Cambiado al subtítulo incrustado: {title}",
   "playerNoSubtitlesForStream": "No hay subtítulos disponibles para esta transmisión",
+  "playerNoForcedSubtitles": "No hay subtítulos forzados para esta transmisión",
   "playerSubDownloading": "Descargando subtítulo en {language}...",
   "playerSubDownloadFailed": "No se pudo descargar el subtítulo",
   "playerSubLoaded": "Subtítulo en {language} cargado ({count} líneas)",

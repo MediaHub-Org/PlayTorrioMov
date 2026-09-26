@@ -79,6 +79,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   /// Which list is showing. Opens on Embedded when the file has any, since
   /// those are already there and play instantly; otherwise on Online.
+  /// Forced is never the default: it narrows to a kind of track, and a
+  /// viewer who opened the panel chose to browse.
   late _SubtitleSource _source = widget.embeddedSubtitles.isNotEmpty
       ? _SubtitleSource.embedded
       : _SubtitleSource.online;
@@ -261,12 +263,15 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     );
   }
 
-  /// Embedded / Online, as two tabs rather than one merged list.
+  /// Embedded / Online / Forced, as three pills rather than one merged list.
   ///
-  /// They are different kinds of thing: an embedded track is already in the
-  /// file and plays instantly, an online one has to be fetched. Merging them
-  /// meant the file's own tracks -- usually the answer -- were mixed in with
-  /// a hundred downloads, so the tabs separate the two questions.
+  /// They are different questions. An embedded track is already in the file
+  /// and plays instantly; an online one has to be fetched; a forced one
+  /// covers only the foreign-language dialogue, whichever side it comes
+  /// from. Merging them meant the file's own tracks -- usually the answer --
+  /// sat among a hundred downloads, and forced tracks hid among full
+  /// translations they are not. Forced spans both sources, so it reads both
+  /// lists narrowed to forced files.
   Widget _buildSourceTabs(BuildContext context) {
     final hasEmbedded = widget.embeddedSubtitles.isNotEmpty;
     return Row(
@@ -288,6 +293,23 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             onTap: () => setState(() => _source = _SubtitleSource.online),
           ),
         ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: _TabButton(
+            label: context.l10n.subsForced,
+            count: _forcedCount,
+            isSelected: _source == _SubtitleSource.forced,
+            // The whole view is forced files, so arriving with the Forced
+            // filter chip set would show a state no visible chip explains.
+            // It falls back to All; the chip row below hides Forced here.
+            onTap: () => setState(() {
+              _source = _SubtitleSource.forced;
+              if (_filter == _SubtitleFilter.forced) {
+                _filter = _SubtitleFilter.all;
+              }
+            }),
+          ),
+        ),
         // A file with no embedded tracks has nothing to show on that tab, so
         // it opens on Online rather than on an empty list.
         if (!hasEmbedded && _source == _SubtitleSource.embedded)
@@ -296,7 +318,20 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     );
   }
 
-  /// All / CC-SDH / Forced, filtering whichever tab is showing.
+  /// How many forced rows the Forced pill counts: embedded forced tracks
+  /// plus online forced files, the same "rows below" convention the other
+  /// two pills use.
+  int get _forcedCount =>
+      widget.embeddedSubtitles.where((t) => t.isForced).length +
+      widget.groups.fold(
+        0,
+        (sum, group) =>
+            sum + group.variants.where((v) => v.isForced).length,
+      );
+
+  /// All / CC-SDH / Forced, filtering whichever pill is showing. On Forced
+  /// the last chip is hidden: the whole view is forced files, so a chip for
+  /// it would change nothing and read as broken.
   Widget _buildFilterChips(BuildContext context) {
     return Row(
       children: [
@@ -311,12 +346,14 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           isSelected: _filter == _SubtitleFilter.sdh,
           onTap: () => setState(() => _filter = _SubtitleFilter.sdh),
         ),
-        const SizedBox(width: 6),
-        _FilterChip(
-          label: context.l10n.subsForced,
-          isSelected: _filter == _SubtitleFilter.forced,
-          onTap: () => setState(() => _filter = _SubtitleFilter.forced),
-        ),
+        if (_source != _SubtitleSource.forced) ...[
+          const SizedBox(width: 6),
+          _FilterChip(
+            label: context.l10n.subsForced,
+            isSelected: _filter == _SubtitleFilter.forced,
+            onTap: () => setState(() => _filter = _SubtitleFilter.forced),
+          ),
+        ],
       ],
     );
   }
@@ -358,8 +395,15 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   List<Widget> _buildRows(BuildContext context) {
     final rows = <Widget>[];
 
-    if (_source == _SubtitleSource.embedded) {
-      // The language being heard first, then alphabetical.
+    // One tick for the whole list. The group and its open files would each
+    // match the playing file on their own; the flag below moves the tick
+    // down to the file. Embedded rows tick by unique index instead, and the
+    // player clears one side when the other is picked, so the two halves
+    // cannot both claim it.
+    var markedSelected = false;
+
+    if (_source != _SubtitleSource.online) {
+      // Embedded, and the embedded half of Forced.
       //
       // File order is the muxer's, which is arbitrary to a viewer -- a
       // twelve-track disc put its languages in whatever order they were
@@ -372,6 +416,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         audioLanguage: widget.audioLanguage,
       );
       for (final track in embedded) {
+        // Forced shows forced files only; the All and CC-SDH chips still
+        // narrow them further below.
+        if (_source == _SubtitleSource.forced && !track.isForced) continue;
         if (!_passesFilter(
           isForced: track.isForced,
           isHearingImpaired: track.isHearingImpaired,
@@ -392,7 +439,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           ),
         );
       }
-    } else {
+    }
+
+    // Not `else`: Forced reads both halves narrowed to forced files, so it
+    // runs each block the other pills skip.
+    if (_source != _SubtitleSource.embedded) {
+      // Online, and the online half of Forced.
+      //
       // The language being heard first, then most files first.
       //
       // Audio-first for the same reason the embedded list leads with it: it
@@ -403,8 +456,25 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       // junk lives, and it is also what made this list 200 rows. Alphabetical
       // breaks a tie, so the order is stable rather than whatever the
       // providers happened to answer in.
+      //
+      // Forced narrows each group to its forced files first, dropping
+      // languages with none: the pill promises forced files, and a group
+      // whose best file is forced but whose second is not would otherwise
+      // offer the second one anyway.
+      final base = _source == _SubtitleSource.forced
+          ? [
+              for (final group in widget.groups)
+                if (group.variants.any((v) => v.isForced))
+                  SubtitleLanguageGroup(
+                    language: group.language,
+                    variants: group.variants
+                        .where((v) => v.isForced)
+                        .toList(),
+                  ),
+            ]
+          : widget.groups;
       final spoken = SubtitleAutoPick.languageKey(widget.audioLanguage);
-      final groups = widget.groups
+      final groups = base
           .where((g) => g.variants.isNotEmpty)
           // A result with no language has no row name and nothing to
           // choose it by, so it is not offered rather than listed blank.
@@ -429,10 +499,6 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
       final visible = _showAllOnline ? groups : groups.take(_onlineCap).toList();
 
-      // A radio list marks one row. The group and its open files would each
-      // match the playing file on their own, so without this the expanded
-      // language showed two ticks: one on the group, one on the file.
-      var markedSelected = false;
       for (final group in visible) {
         final best = group.variants.first;
         final isExpanded = _expandedLanguage == group.language;
@@ -508,14 +574,19 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     if (rows.isEmpty) {
       // A filter that matched nothing is not the same as a stream with no
       // subtitles, and saying the latter would be wrong -- the tracks are
-      // there, the filter is hiding them.
-      rows.add(
-        PlayerMenuEmptyRow(
-          _filter == _SubtitleFilter.all
-              ? context.l10n.playerNoSubtitlesForStream
-              : context.l10n.playerSubtitleNoneMatchFilter,
-        ),
-      );
+      // there, the filter is hiding them. Forced gets its own line for the
+      // same reason: non-forced tracks being there does not mean a forced
+      // one is.
+      late final String message;
+      if (_source == _SubtitleSource.forced &&
+          _filter != _SubtitleFilter.sdh) {
+        message = context.l10n.playerNoForcedSubtitles;
+      } else if (_filter == _SubtitleFilter.all) {
+        message = context.l10n.playerNoSubtitlesForStream;
+      } else {
+        message = context.l10n.playerSubtitleNoneMatchFilter;
+      }
+      rows.add(PlayerMenuEmptyRow(message));
     }
     return rows;
   }
@@ -559,7 +630,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 }
 
 /// Which list the panel is showing.
-enum _SubtitleSource { embedded, online }
+enum _SubtitleSource { embedded, online, forced }
 
 /// Which tracks the list is narrowed to.
 enum _SubtitleFilter { all, sdh, forced }

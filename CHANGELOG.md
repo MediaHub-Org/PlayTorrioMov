@@ -45,6 +45,12 @@ rather than files, and the sleep timer can wait for the video to end.
   Forced filters.** The file's own tracks and the online downloads were one
   merged list, so the tracks already in the file -- usually the answer -- sat
   among a hundred downloads. The filters narrow whichever tab is showing.
+- **Forced subtitles get their own pill.** Forced tracks hid among full
+  translations they are not: they cover only foreign-language dialogue,
+  whichever side it comes from. The third pill reads the embedded list and
+  the online list narrowed to forced files, with the file's own tracks
+  first. The Forced filter chip hides there -- the whole view is forced
+  files, so it would change nothing -- leaving All and CC-SDH.
 - **Regional subtitle variants are separate languages.** Spanish (ES) and
   Spanish (LATAM) are different recordings, not two spellings of one label,
   and they used to collapse into a single "Spanish" group -- so the choice

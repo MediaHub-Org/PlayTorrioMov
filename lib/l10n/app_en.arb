@@ -325,6 +325,7 @@
   "playerSubSwitchedEmbedded": "Switched to embedded subtitle: {title}",
   "@playerSubSwitchedEmbedded": {"placeholders": {"title": {"type": "String"}}},
   "playerNoSubtitlesForStream": "No subtitles available for this stream",
+  "playerNoForcedSubtitles": "No forced subtitles for this stream",
   "playerSubDownloading": "Downloading {language} subtitle...",
   "@playerSubDownloading": {"placeholders": {"language": {"type": "String"}}},
   "playerSubDownloadFailed": "Failed to download subtitle",
