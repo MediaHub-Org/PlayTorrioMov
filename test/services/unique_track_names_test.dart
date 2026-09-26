@@ -47,16 +47,17 @@ void main() {
       );
     });
 
-    test('a region in one title does not number the other', () {
-      // One is named by its region; the other is still a duplicate of the
-      // bare name, so it takes a number. The two rows are distinguishable,
-      // which is the whole point.
+    test('a region in one title numbers the whole group', () {
+      // Regions are used throughout or not at all. "Spanish (LATAM)" beside
+      // "Spanish #1" reads as two different kinds of thing when they are the
+      // same kind of thing, and the number says nothing a viewer can act on.
+      // One title naming no region means the group is numbered.
       expect(
         uniqueTrackLanguageNames(
           ['spa', 'spa'],
           ['Spanish (Latin America)', 'Spanish'],
         ),
-        ['Spanish (LATAM)', 'Spanish #1'],
+        ['Spanish #1', 'Spanish #2'],
       );
     });
 
@@ -93,6 +94,75 @@ void main() {
         uniqueTrackLanguageNames(['spa', 'spa'], ['Standard', 'Standard']),
         ['Spanish #1', 'Spanish #2'],
       );
+    });
+  });
+
+  group('language codes a provider actually sends', () {
+    test('Norwegian is recognized from nb, not rendered as "NB"', () {
+      // `nb` is Bokmål, which is what a provider means by "Norwegian". It
+      // was missing from the table, so the row read "NB".
+      for (final code in ['nb', 'nob', 'no', 'nor']) {
+        expect(subtitleLanguageName(code), 'Norwegian', reason: code);
+      }
+    });
+
+    test('Nynorsk is kept apart from Bokmål', () {
+      // A different written form, not a spelling of the same one.
+      expect(subtitleLanguageName('nn'), 'Norwegian (Nynorsk)');
+      expect(subtitleLanguageName('nno'), 'Norwegian (Nynorsk)');
+    });
+
+    test('the long tail of codes renders as names, not raw codes', () {
+      // Each of these was rendering as a three-letter code -- "MAR", "YUE",
+      // "AFR" -- which reads as noise rather than as a language.
+      const expected = {
+        'mar': 'Marathi',
+        'guj': 'Gujarati',
+        'kan': 'Kannada',
+        'pan': 'Punjabi',
+        'urd': 'Urdu',
+        'nep': 'Nepali',
+        'mya': 'Burmese',
+        'khm': 'Khmer',
+        'lao': 'Lao',
+        'yue': 'Cantonese',
+        'cmn': 'Mandarin',
+        'afr': 'Afrikaans',
+        'amh': 'Amharic',
+        'yor': 'Yoruba',
+        'hau': 'Hausa',
+        'zul': 'Zulu',
+        'aze': 'Azerbaijani',
+        'kaz': 'Kazakh',
+        'uzb': 'Uzbek',
+        'kat': 'Georgian',
+        'hye': 'Armenian',
+        'bel': 'Belarusian',
+        'gle': 'Irish',
+        'cym': 'Welsh',
+        'eus': 'Basque',
+        'glg': 'Galician',
+        'mlt': 'Maltese',
+        'asm': 'Assamese',
+        'snd': 'Sindhi',
+        'tat': 'Tatar',
+        'tuk': 'Turkmen',
+        'kir': 'Kyrgyz',
+        'tgk': 'Tajik',
+      };
+      for (final entry in expected.entries) {
+        expect(
+          subtitleLanguageName(entry.key),
+          entry.value,
+          reason: entry.key,
+        );
+      }
+    });
+
+    test('a genuinely unknown code still renders as itself', () {
+      // The fallback has to survive: a code we do not know is better shown
+      // than dropped.
+      expect(subtitleLanguageName('zzz'), 'ZZZ');
     });
   });
 }

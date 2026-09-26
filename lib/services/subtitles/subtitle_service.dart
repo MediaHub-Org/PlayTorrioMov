@@ -70,9 +70,12 @@ class SubtitleService {
 
     // Sort languages alphabetically
     final sortedKeys = grouped.keys.toList()..sort((a, b) => a.compareTo(b));
-    
+
     return sortedKeys.map((lang) {
-      return SubtitleLanguageGroup(language: lang, variants: grouped[lang]!);
+      return SubtitleLanguageGroup(
+        language: lang,
+        variants: dedupeVariants(grouped[lang]!),
+      );
     }).toList();
   }
 
@@ -141,7 +144,75 @@ class SubtitleService {
         .replaceAll(RegExp(r'[^a-z0-9]+'), ' ')
         .trim();
     final translated = variant.extraData['isTranslate'] == true ? 'translated' : '';
-    return '$language|$title|${variant.isHearingImpaired}|${variant.isForced}|$translated';
+    // The provider is part of the identity. Without it, two different files
+    // that happen to share a language and a cleaned title collapsed into one
+    // -- and the survivor was whichever provider answered first, so a
+    // SubtitleCat file could be dropped in favour of an OpenSubtitles one
+    // with no way to tell. They are different downloads; the viewer is
+    // choosing between them.
+    final provider = variant.providerName.toLowerCase().trim();
+    return '$language|$provider|$title|${variant.isHearingImpaired}|${variant.isForced}|$translated';
+  }
+
+  /// Collapses variants that are the same file offered twice, and numbers the
+  /// ones that are genuinely different but identically named.
+  ///
+  /// A provider can return the same release several times -- SubtitleCat
+  /// lists a file once per language it has been translated into, and the
+  /// translations share a title. Those are one choice, not four. What is left
+  /// after collapsing is numbered, because four rows reading "SubtitleCat"
+  /// give a viewer nothing to choose between them by.
+  @visibleForTesting
+  static List<SubtitleVariant> dedupeVariants(List<SubtitleVariant> variants) {
+    final seen = <String>{};
+    final kept = <SubtitleVariant>[];
+    for (final variant in variants) {
+      // The URL is in the key, so only an exact repeat collapses. Two files
+      // that share a name but not a URL are two downloads, and the viewer is
+      // choosing between them.
+      final key = [
+        variant.providerName.toLowerCase().trim(),
+        variant.title.toLowerCase().trim(),
+        variant.format.toLowerCase().trim(),
+        variant.downloadUrl.trim(),
+        variant.isHearingImpaired,
+        variant.isForced,
+        variant.extraData['isTranslate'] == true,
+      ].join('|');
+      if (!seen.add(key)) continue;
+      kept.add(variant);
+    }
+
+    // Number only the names that repeat *within one provider*, so a group of
+    // distinct titles is left alone, two providers each offering one file do
+    // not become "#1" and "#2", and a provider's own identical rows become
+    // #1, #2, #3.
+    String groupOf(SubtitleVariant v) =>
+        '${v.providerName.toLowerCase().trim()}|${v.title.toLowerCase().trim()}';
+    final totals = <String, int>{};
+    for (final variant in kept) {
+      final group = groupOf(variant);
+      totals[group] = (totals[group] ?? 0) + 1;
+    }
+    final seenCount = <String, int>{};
+    return [
+      for (final variant in kept)
+        () {
+          final group = groupOf(variant);
+          if (totals[group]! < 2) return variant;
+          final n = seenCount[group] = (seenCount[group] ?? 0) + 1;
+          return SubtitleVariant(
+            providerName: variant.providerName,
+            language: variant.language,
+            title: '${variant.title} #$n',
+            downloadUrl: variant.downloadUrl,
+            format: variant.format,
+            extraData: variant.extraData,
+            isHearingImpaired: variant.isHearingImpaired,
+            isForced: variant.isForced,
+          );
+        }(),
+    ];
   }
 
   static Set<String> _words(String value) => value

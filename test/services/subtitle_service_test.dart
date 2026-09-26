@@ -69,7 +69,13 @@ void main() {
   });
 
   group('dedupe', () {
-    test('collapses the same subtitle arriving from two providers', () {
+    test('the same title from two providers is two choices', () {
+      // It used to collapse to one, on the theory that the same subtitle
+      // from two providers is one choice. But they are different downloads
+      // from different hosts, and the survivor was whichever answered first
+      // -- so a SubtitleCat file could be dropped in favour of an
+      // OpenSubtitles one with no way to tell. The provider is part of the
+      // identity; what the viewer sees repeated is one provider's own rows.
       final deduped = dedupe(
         [
           variant(provider: 'Wyzie', language: 'English', title: 'Standard'),
@@ -78,8 +84,11 @@ void main() {
         'Some Movie',
       );
 
-      expect(deduped.length, 1,
-          reason: 'same language, same title, same flags is one choice');
+      expect(deduped.length, 2);
+      expect(
+        deduped.map((v) => v.providerName),
+        containsAll(['Wyzie', 'OpenSubtitles']),
+      );
     });
 
     test('keeps variants that differ in a meaningful way', () {
@@ -102,6 +111,25 @@ void main() {
 
       expect(deduped.length, 3,
           reason: 'CC and forced are different tracks, not duplicates');
+    });
+
+    test('two providers offering the same title are two choices', () {
+      // The provider is part of the identity. Without it the survivor was
+      // whichever answered first, so a SubtitleCat file could be dropped in
+      // favour of an OpenSubtitles one with no way to tell.
+      final deduped = dedupe(
+        [
+          variant(provider: 'SubtitleCat', language: 'English', title: 'Standard'),
+          variant(provider: 'OpenSubtitles', language: 'English', title: 'Standard'),
+        ],
+        'Some Movie',
+      );
+
+      expect(deduped.length, 2);
+      expect(
+        deduped.map((v) => v.providerName),
+        containsAll(['SubtitleCat', 'OpenSubtitles']),
+      );
     });
 
     test('strips the media name from the title', () {
@@ -128,6 +156,92 @@ void main() {
       );
 
       expect(deduped.single.title, 'Standard');
+    });
+  });
+
+  group('dedupeVariants', () {
+    test('collapses the same file offered twice by one provider', () {
+      // SubtitleCat lists a file once per language it has been translated
+      // into, and the translations share a title *and* a URL. Those are one
+      // choice, not four.
+      final collapsed = SubtitleService.dedupeVariants([
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://x/same.srt',
+        ),
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://x/same.srt',
+        ),
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://x/same.srt',
+        ),
+      ]);
+
+      expect(collapsed.length, 1);
+    });
+
+    test('numbers what is left when the names are identical', () {
+      // Four rows reading "SubtitleCat" give a viewer nothing to choose
+      // between them by.
+      final numbered = SubtitleService.dedupeVariants([
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://x/1.srt',
+        ),
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://x/2.srt',
+        ),
+      ]);
+
+      expect(numbered.map((v) => v.title), ['Standard #1', 'Standard #2']);
+    });
+
+    test('leaves distinct titles alone', () {
+      final kept = SubtitleService.dedupeVariants([
+        variant(provider: 'SubDL', language: 'English', title: 'BluRay'),
+        variant(provider: 'SubDL', language: 'English', title: 'WEB-DL'),
+      ]);
+
+      expect(kept.map((v) => v.title), ['BluRay', 'WEB-DL']);
+    });
+
+    test('a different format is a different file', () {
+      final kept = SubtitleService.dedupeVariants([
+        variant(provider: 'SubDL', language: 'English', title: 'Standard'),
+        SubtitleVariant(
+          providerName: 'SubDL',
+          language: 'English',
+          title: 'Standard',
+          downloadUrl: 'https://x/2.vtt',
+          format: 'vtt',
+        ),
+      ]);
+
+      expect(kept.length, 2);
+    });
+
+    test('numbering does not leak across providers', () {
+      // Each provider's own duplicates are numbered from one, so two
+      // providers each offering one file do not become "#1" and "#2".
+      final kept = SubtitleService.dedupeVariants([
+        variant(provider: 'SubtitleCat', language: 'English', title: 'Standard'),
+        variant(provider: 'OpenSubtitles', language: 'English', title: 'Standard'),
+      ]);
+
+      expect(kept.map((v) => v.title), ['Standard', 'Standard']);
     });
   });
 }

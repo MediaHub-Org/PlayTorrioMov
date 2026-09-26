@@ -189,6 +189,7 @@
   "@playerSubtitleShowAll": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "playerSubtitleNoneMatchFilter": "Ningún subtítulo coincide con este filtro",
   "playerAudioDefaultStream": "Reproduciendo el audio predeterminado.",
   "playerAudioSyncOffset": "Desfase de audio",
   "playerChannelsShort": "{count} can.",

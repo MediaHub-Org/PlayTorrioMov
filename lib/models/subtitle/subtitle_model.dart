@@ -41,14 +41,16 @@ class SubtitleVariant {
 /// Weak evidence -- a release named "White.House" matches "HI" -- but all a
 /// title-only source offers. Shared by online variants and embedded tracks.
 bool titleSaysHearingImpaired(String title) {
-  // Word boundaries, so "Movie.2020.SDH" and "Movie_CC" match as well as
-  // "Movie (CC)" -- release names separate with dots and underscores, and the
-  // old `' sdh'` check only saw a space.
+  // Not `\b`: an underscore is a word character, so `\bcc\b` does not match
+  // "Movie_CC" -- which is exactly how release names spell it. The lookaround
+  // treats anything that is not a letter or digit as a separator, so dots,
+  // underscores, brackets and spaces all work.
   return _hearingImpairedMarker.hasMatch(title);
 }
 
 final RegExp _hearingImpairedMarker = RegExp(
-  r'\b(sdh|hoh|hi|cc)\b|hearing[\s._-]*impaired|\bdeaf\b',
+  r'(?<![a-z0-9])(sdh|hoh|hi|cc)(?![a-z0-9])'
+  r'|hearing[\s._-]*impaired|\bdeaf\b',
   caseSensitive: false,
 );
 
@@ -74,6 +76,17 @@ class PlayerEmbeddedSubtitle {
   final String? codec;
   final bool isDefault;
 
+  /// The container's own title for this track, kept verbatim.
+  ///
+  /// [title] is the *display* name, which prefers the language -- a container
+  /// title is written by whoever muxed the file and is routinely technical
+  /// noise ("eng", "[Full] SDH", "English (US) PGS"). But the two things a
+  /// title can say that a language name cannot, forced and hearing-impaired,
+  /// are only in that raw title. Overwriting it with the language name meant
+  /// [isForced] and [isHearingImpaired] sniffed "Spanish" and never matched,
+  /// so the Forced and CC/SDH filters had nothing to find.
+  final String? containerTitle;
+
   /// The container marks this track forced (mpv's own `forced` flag), as
   /// opposed to a title that merely says so -- see [isForced].
   final bool isForcedTrack;
@@ -83,14 +96,22 @@ class PlayerEmbeddedSubtitle {
     required this.title,
     this.language,
     this.codec,
+    this.containerTitle,
     this.isDefault = false,
     this.isForcedTrack = false,
   });
 
   /// Marked forced by the file's flag, or by its title.
-  bool get isForced => isForcedTrack || titleSaysForced(title);
+  bool get isForced =>
+      isForcedTrack || titleSaysForced(containerTitle ?? title);
 
-  bool get isHearingImpaired => titleSaysHearingImpaired(title);
+  bool get isHearingImpaired =>
+      titleSaysHearingImpaired(containerTitle ?? title);
+
+  /// What the picker shows for this track: its language, or the container's
+  /// own title when the language is unknown.
+  String get displayName =>
+      (language?.isNotEmpty ?? false) ? language! : title;
 
   PlayerEmbeddedSubtitle withFlags({
     required bool isDefault,
@@ -100,6 +121,7 @@ class PlayerEmbeddedSubtitle {
     title: title,
     language: language,
     codec: codec,
+    containerTitle: containerTitle,
     isDefault: isDefault,
     isForcedTrack: isForcedTrack,
   );
@@ -152,6 +174,44 @@ abstract final class SubtitleAutoPick {
       }
     }
     return tracks.first;
+  }
+
+  /// The embedded tracks in the order a viewer should see them.
+  ///
+  /// The language being heard comes first, because that is the track a
+  /// viewer is most likely to want and the one [embedded] would choose. The
+  /// rest follow alphabetically by the name shown, which is the order
+  /// someone scanning for "Spanish" can use -- the file's own order is the
+  /// muxer's and is arbitrary.
+  ///
+  /// When nothing matches the audio, the whole list is alphabetical. There
+  /// is no second-best language to promote: a viewer whose audio is Korean
+  /// and whose file carries no Korean subtitles is choosing from a list, not
+  /// accepting a default, and a promoted track would only be in the way.
+  static List<PlayerEmbeddedSubtitle> embeddedForDisplay(
+    List<PlayerEmbeddedSubtitle> tracks, {
+    String? audioLanguage,
+  }) {
+    final sorted = [...tracks]..sort(
+      (a, b) => a.displayName.toLowerCase().compareTo(
+        b.displayName.toLowerCase(),
+      ),
+    );
+
+    final spoken = languageKey(audioLanguage);
+    if (spoken == null) return sorted;
+
+    final matching = <PlayerEmbeddedSubtitle>[];
+    final rest = <PlayerEmbeddedSubtitle>[];
+    for (final track in sorted) {
+      if (languageKey(track.language) == spoken ||
+          languageKey(track.title) == spoken) {
+        matching.add(track);
+      } else {
+        rest.add(track);
+      }
+    }
+    return [...matching, ...rest];
   }
 
   /// The downloadable subtitle to fall back on when there is no embedded

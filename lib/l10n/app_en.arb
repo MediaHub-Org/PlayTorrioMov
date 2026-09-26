@@ -241,6 +241,8 @@
   "@playerSubtitleShowAll": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "playerSubtitleNoneMatchFilter": "No subtitles match this filter",
+  "@playerSubtitleNoneMatchFilter": {"description": "Shown when the CC/SDH or Forced filter empties the subtitle list"},
   "@playerAudioTracks": {"description": "Heading of the audio track menu"},
   "playerAudioDefaultStream": "Default audio stream playing.",
   "playerAudioSyncOffset": "Audio Sync Offset",

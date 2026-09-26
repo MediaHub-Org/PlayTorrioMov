@@ -81,6 +81,73 @@ rather than files, and the sleep timer can wait for the video to end.
   is what every text editor uses, and it takes a quarter of the height.
 
 ### Fixed
+- **The online subtitle list no longer marks every row as selected.** The
+  comparison was `selectedVariant?.downloadUrl == variant.downloadUrl`, and
+  when both sides were empty every row matched -- so the whole list drew with
+  a filled radio button. A variant with no URL is now never the selected one.
+- **Picking a language's second file marks the language.** The row was marked
+  only when its *best* file was the one playing, so choosing the second file
+  for Arabic left the Arabic row unmarked -- which read as "nothing is
+  selected" while a subtitle was on screen.
+- **A file row no longer repeats its own format.** A provider that names its
+  files "Movie.srt" produced rows reading "SubtitleCat · SRT" beside a title
+  that already said SRT. The format is dropped when the title ends in it.
+- **The same title from two providers is two choices, not one.** Dedupe
+  ignored the provider, so the survivor was whichever answered first -- a
+  SubtitleCat file could be dropped in favour of an OpenSubtitles one with no
+  way to tell. They are different downloads from different hosts.
+- **A provider's own identical rows are collapsed and numbered.** SubtitleCat
+  lists a file once per language it has been translated into, and the
+  translations share a title and a URL: those are one choice, not four. What
+  is left after collapsing is numbered per provider, so four rows reading
+  "SubtitleCat" become #1, #2, #3 rather than giving a viewer nothing to
+  choose between them by.
+- **The Forced and CC/SDH filters work on a file's own subtitles.** Both are
+  read off a track's *title* -- "forced" and "SDH" are words a muxer writes
+  there, and there is no other place they appear. But the player overwrote
+  the container's title with the language name before building the track, so
+  the check ran against "Spanish" and could never match. The filters were not
+  broken; they were looking in a field that had been emptied. The container's
+  own title is now kept alongside the display name.
+- **"Movie_CC" is recognized as a hearing-impaired track.** The marker used
+  `\b`, and an underscore is a word character, so `\bcc\b` never matched the
+  way release names actually spell it. The check now treats anything that is
+  not a letter or digit as a separator, so dots, underscores and brackets all
+  work.
+- **A filter that matches nothing says so.** It used to read "No subtitles
+  available for this stream", which is wrong -- the tracks are there, the
+  filter is hiding them.
+- **Norwegian is no longer shown as "NB".** `nb` is Bokmål, which is what a
+  provider means by "Norwegian", and it was missing from the language table.
+  Nynorsk (`nn`) is kept apart from it, because it is a different written
+  form rather than a spelling of the same one.
+- **Thirty-three more language codes render as names.** Marathi, Cantonese,
+  Afrikaans, Zulu, Georgian and the rest were showing as raw three-letter
+  codes -- "MAR", "YUE", "AFR" -- which read as noise rather than as a
+  language.
+- **A duplicated language is named one way or the other, not both.** A file
+  with two Spanish tracks could show "Spanish (LATAM)" beside "Spanish #1",
+  which reads as two different kinds of thing when they are the same kind of
+  thing, and the number says nothing a viewer can act on. The group now uses
+  regions throughout or numbers throughout.
+- **The embedded subtitle list leads with the language you are hearing.**
+  It used to lead with the file's own default track, which is the muxer's
+  opinion rather than the viewer's. The tracks matching the selected audio
+  now come first -- the same track the `C` key would pick -- and everything
+  else follows alphabetically. When nothing matches the audio the whole list
+  is alphabetical: there is no second-best language to promote, and a
+  promoted track would only be in the way of someone scanning for one.
+- **"Auto" is no longer offered as a subtitle language.** It is mpv's own
+  pseudo-track, not a language, and it reached the picker as a row reading
+  "Auto" -- which cannot be chosen deliberately, because there is nothing to
+  choose it by. It is filtered out of the list, and the language helper
+  returns nothing for it rather than capitalizing it into a name.
+- **Online subtitles are never downloaded on their own.** A search that
+  turns up two hundred languages is a list to choose from, not a decision to
+  make on the viewer's behalf: fetching one costs bandwidth, takes a moment,
+  and puts a subtitle on screen that nobody asked for. The list is populated
+  and the viewer picks. The only automatic subtitle is the file's own
+  embedded track, which is already on disk.
 - **A file's own subtitles actually render now.** The previous fix was
   self-defeating: it turned libass on and then called
   `applySubtitleStyling`, which honours the `useLibass` preference -- off by

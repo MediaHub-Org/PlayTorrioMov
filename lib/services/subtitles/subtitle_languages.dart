@@ -95,6 +95,13 @@ const Map<String, String> _iso639ToDisplayName = {
     'sv': 'Swedish',
     'nor': 'Norwegian',
     'no': 'Norwegian',
+    // `nb` is Bokmål, which is what a provider means by "Norwegian" -- it is
+    // the written form the overwhelming majority of releases ship. It was
+    // missing, so a Norwegian track rendered as the raw code "NB".
+    'nb': 'Norwegian',
+    'nob': 'Norwegian',
+    'nno': 'Norwegian (Nynorsk)',
+    'nn': 'Norwegian (Nynorsk)',
     'dan': 'Danish',
     'da': 'Danish',
     'fin': 'Finnish',
@@ -176,6 +183,81 @@ const Map<String, String> _iso639ToDisplayName = {
     'swa': 'Swahili',
     'swh': 'Swahili',
     'sw': 'Swahili',
+    // The rest of the codes a provider actually sends. Each of these was
+    // rendering as a raw three-letter code -- "MAR", "YUE", "AFR" -- which
+    // reads as noise rather than as a language.
+    'mar': 'Marathi',
+    'mr': 'Marathi',
+    'guj': 'Gujarati',
+    'gu': 'Gujarati',
+    'kan': 'Kannada',
+    'kn': 'Kannada',
+    'pan': 'Punjabi',
+    'pa': 'Punjabi',
+    'urd': 'Urdu',
+    'ur': 'Urdu',
+    'nep': 'Nepali',
+    'ne': 'Nepali',
+    'mya': 'Burmese',
+    'bur': 'Burmese',
+    'my': 'Burmese',
+    'khm': 'Khmer',
+    'km': 'Khmer',
+    'lao': 'Lao',
+    'lo': 'Lao',
+    'yue': 'Cantonese',
+    'cmn': 'Mandarin',
+    'afr': 'Afrikaans',
+    'af': 'Afrikaans',
+    'amh': 'Amharic',
+    'am': 'Amharic',
+    'yor': 'Yoruba',
+    'yo': 'Yoruba',
+    'hau': 'Hausa',
+    'ha': 'Hausa',
+    'zul': 'Zulu',
+    'zu': 'Zulu',
+    'aze': 'Azerbaijani',
+    'az': 'Azerbaijani',
+    'kaz': 'Kazakh',
+    'kk': 'Kazakh',
+    'uzb': 'Uzbek',
+    'uz': 'Uzbek',
+    'geo': 'Georgian',
+    'kat': 'Georgian',
+    'ka': 'Georgian',
+    'arm': 'Armenian',
+    'hye': 'Armenian',
+    'hy': 'Armenian',
+    'bel': 'Belarusian',
+    'be': 'Belarusian',
+    'gle': 'Irish',
+    'ga': 'Irish',
+    'cym': 'Welsh',
+    'wel': 'Welsh',
+    'cy': 'Welsh',
+    'eus': 'Basque',
+    'baq': 'Basque',
+    'eu': 'Basque',
+    'glg': 'Galician',
+    'gl': 'Galician',
+    'mlt': 'Maltese',
+    'mt': 'Maltese',
+    'asm': 'Assamese',
+    'as': 'Assamese',
+    'ori': 'Odia',
+    'ory': 'Odia',
+    'or': 'Odia',
+    'snd': 'Sindhi',
+    'sd': 'Sindhi',
+    'tat': 'Tatar',
+    'tt': 'Tatar',
+    'tuk': 'Turkmen',
+    'tk': 'Turkmen',
+    'kir': 'Kyrgyz',
+    'ky': 'Kyrgyz',
+    'tgk': 'Tajik',
+    'tg': 'Tajik',
 };
 
 /// The display name for a subtitle language code, or a sensible rendering of
@@ -262,7 +344,10 @@ const Map<String, String> _mpvTagToDisplayName = {
 String subtitleTrackLanguageName(String? rawLanguage) {
   final raw = rawLanguage?.trim() ?? '';
   if (raw.isEmpty) return '';
-  if (const {'spl', 'mon'}.contains(raw.toLowerCase())) return '';
+  // `auto` is mpv's own pseudo-track, not a language. It reached the picker
+  // as a row reading "Auto", which is not something anyone can choose
+  // deliberately -- there is nothing to choose it by.
+  if (const {'spl', 'mon', 'auto'}.contains(raw.toLowerCase())) return '';
   final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
   if (mpv != null) return mpv;
   return subtitleLanguageName(raw);
@@ -297,6 +382,21 @@ List<String> uniqueTrackLanguageNames(
     totals[name] = (totals[name] ?? 0) + 1;
   }
 
+  // Whether every track sharing a name names a region in its own title.
+  //
+  // A region is the better label, but only when it is available for all of
+  // them. "Spanish (LATAM)" beside "Spanish #1" reads as two different
+  // kinds of thing when they are the same kind of thing, and the number
+  // says nothing a viewer can act on. So the group either uses regions
+  // throughout or numbers throughout.
+  final everyTrackHasRegion = <String, bool>{};
+  for (var i = 0; i < names.length; i++) {
+    final name = names[i];
+    if (name.isEmpty || totals[name]! < 2) continue;
+    final has = _regionFromTitle(titles[i]) != null;
+    everyTrackHasRegion[name] = (everyTrackHasRegion[name] ?? true) && has;
+  }
+
   final seen = <String, int>{};
   return [
     for (var i = 0; i < names.length; i++)
@@ -304,9 +404,10 @@ List<String> uniqueTrackLanguageNames(
         final name = names[i];
         if (name.isEmpty || totals[name]! < 2) return name;
 
-        // A region in the title is the better label, so it is tried first.
-        final region = _regionFromTitle(titles[i]);
-        if (region != null) return '$name ($region)';
+        if (everyTrackHasRegion[name] == true) {
+          final region = _regionFromTitle(titles[i]);
+          if (region != null) return '$name ($region)';
+        }
 
         final n = seen[name] = (seen[name] ?? 0) + 1;
         return '$name #$n';

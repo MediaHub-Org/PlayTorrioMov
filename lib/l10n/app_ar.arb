@@ -189,6 +189,7 @@
   "@playerSubtitleShowAll": {
     "placeholders": { "count": { "type": "int" } }
   },
+  "playerSubtitleNoneMatchFilter": "لا توجد ترجمات تطابق هذا الفلتر",
   "playerAudioDefaultStream": "يتم تشغيل المسار الصوتي الافتراضي.",
   "playerAudioSyncOffset": "إزاحة مزامنة الصوت",
   "playerChannelsShort": "{count} قنوات",

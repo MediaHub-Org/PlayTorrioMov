@@ -5,9 +5,11 @@
 //
 // The order was the muxer's, which is arbitrary -- a twelve-track disc put
 // its languages in whatever order they were authored, so the list looked
-// shuffled. The default track stays on top because it is the one the file
-// itself recommends; the rest are alphabetical, which is the order someone
-// scanning for "Spanish" can use.
+// shuffled. The language being heard now leads, because that is the track a
+// viewer is most likely to want; the rest are alphabetical, which is the
+// order someone scanning for "Spanish" can use. When nothing matches the
+// audio the whole list is alphabetical -- there is no second-best language
+// to promote.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
@@ -15,13 +17,17 @@ import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/widgets/player/player_menu_row.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 
-Widget menu(List<PlayerEmbeddedSubtitle> embedded) => MaterialApp(
+Widget menu(
+  List<PlayerEmbeddedSubtitle> embedded, {
+  String? audioLanguage,
+}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(
     body: Center(
       child: PlayerSubtitleMenu(
         embeddedSubtitles: embedded,
+        audioLanguage: audioLanguage,
         isSubtitleEnabled: false,
         onSelectVariant: (_) {},
         onSelectEmbedded: (_) {},
@@ -63,19 +69,45 @@ void main() {
       expect(rowTitles(tester), ['Arabic', 'English', 'French', 'Spanish']);
     });
 
-    testWidgets('puts the file\'s own default first', (tester) async {
+    testWidgets('puts the audio language first, then alphabetical', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        menu([
-          track(1, 'Spanish'),
-          track(2, 'English', isDefault: true),
-          track(3, 'Arabic'),
-        ]),
+        menu(
+          [
+            track(1, 'Spanish'),
+            track(2, 'English'),
+            track(3, 'Arabic'),
+            track(4, 'French'),
+          ],
+          audioLanguage: 'spa',
+        ),
       );
       await tester.pump();
 
-      // The default is the one the file recommends, so it leads even though
-      // it is not alphabetically first.
-      expect(rowTitles(tester), ['English', 'Arabic', 'Spanish']);
+      // Spanish leads because it is being heard; the rest are alphabetical.
+      expect(rowTitles(tester), ['Spanish', 'Arabic', 'English', 'French']);
+    });
+
+    testWidgets('is alphabetical when nothing matches the audio', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          [
+            track(1, 'Spanish'),
+            track(2, 'English', isDefault: true),
+            track(3, 'Arabic'),
+          ],
+          audioLanguage: 'kor',
+        ),
+      );
+      await tester.pump();
+
+      // The file's own default is not promoted. It is the muxer's opinion,
+      // not the viewer's, and with no audio match the list is simply
+      // alphabetical.
+      expect(rowTitles(tester), ['Arabic', 'English', 'Spanish']);
     });
 
     testWidgets('is case-insensitive when sorting', (tester) async {

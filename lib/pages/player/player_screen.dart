@@ -873,6 +873,11 @@ class _PlayerScreenState extends State<PlayerScreen>
     for (final t in subList) {
       if (t.id == 'no' || t.id == 'auto') continue;
       if (t.language?.trim().toLowerCase() == 'spl') continue;
+      // mpv's "auto" pseudo-track, arriving as the language or as the title.
+      // It is not a language, and a row reading "Auto" cannot be chosen
+      // deliberately -- there is nothing to choose it by.
+      if (t.language?.trim().toLowerCase() == 'auto') continue;
+      if (t.title?.trim().toLowerCase() == 'auto') continue;
       keptSubs.add(t);
     }
 
@@ -908,6 +913,11 @@ class _PlayerScreenState extends State<PlayerScreen>
           // picker read as noise. See subtitle_languages.dart for what each
           // means.
           language: language,
+          // The container's own title, kept because it is the only place a
+          // forced or hearing-impaired marker lives. `title` above is the
+          // display name and prefers the language, so sniffing it meant
+          // looking for "forced" in the word "Spanish".
+          containerTitle: t.title,
         ),
       );
     }
@@ -1117,22 +1127,12 @@ class _PlayerScreenState extends State<PlayerScreen>
       if (mounted && groups.isNotEmpty) {
         setState(() => _subtitleGroups = groups);
 
-        // Auto-load matching language subtitle for the new episode if subtitles were enabled
-        if (_isSubtitleEnabled && _currentSubtitleVariant != null) {
-          final previousLang = _currentSubtitleVariant!.language.toLowerCase();
-          final matchingGroup = groups.firstWhere(
-            (g) => g.language.toLowerCase() == previousLang,
-            orElse: () => groups.firstWhere(
-              (g) =>
-                  g.language.toLowerCase().contains('english') ||
-                  g.language.toLowerCase() == 'en',
-              orElse: () => groups.first,
-            ),
-          );
-          if (matchingGroup.variants.isNotEmpty) {
-            _loadSubtitle(matchingGroup.variants.first);
-          }
-        }
+        // Nothing is downloaded here. A search that turns up two hundred
+        // languages is a list to choose from, not a decision to make on the
+        // viewer's behalf: fetching one costs bandwidth, takes a moment, and
+        // puts a subtitle on screen that nobody asked for. The list is
+        // populated and the viewer picks. The only automatic subtitle is the
+        // file's own embedded track, which is already on disk.
       }
     } catch (e) {
       debugPrint('[PlayerScreen] Error loading subtitles: $e');
@@ -2545,6 +2545,7 @@ class _PlayerScreenState extends State<PlayerScreen>
               },
               groups: _subtitleGroups,
               embeddedSubtitles: _embeddedSubtitles,
+              audioLanguage: _selectedAudioLanguage,
               selectedEmbeddedIndex: _selectedEmbeddedSubtitleIndex,
               selectedVariant: _currentSubtitleVariant,
               isSubtitleEnabled: _isSubtitleEnabled,

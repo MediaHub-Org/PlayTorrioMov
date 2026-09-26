@@ -20,6 +20,10 @@ import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
 class PlayerSubtitleMenu extends StatefulWidget {
   final List<SubtitleLanguageGroup> groups;
   final List<PlayerEmbeddedSubtitle> embeddedSubtitles;
+
+  /// The language being heard, so the embedded list can put its tracks
+  /// first. Null when the audio track carries no language tag.
+  final String? audioLanguage;
   final int? selectedEmbeddedIndex;
   final SubtitleVariant? selectedVariant;
   final bool isSubtitleEnabled;
@@ -49,6 +53,7 @@ class PlayerSubtitleMenu extends StatefulWidget {
     super.key,
     this.groups = const [],
     this.embeddedSubtitles = const [],
+    this.audioLanguage,
     this.selectedEmbeddedIndex,
     this.selectedVariant,
     required this.isSubtitleEnabled,
@@ -315,22 +320,42 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     );
   }
 
+  /// Whether [variant] is the one playing.
+  ///
+  /// Compared by URL, and a variant with no URL is never the selected one.
+  /// The guard matters: an empty `downloadUrl` on both sides made every row
+  /// in the list match, so the whole online list drew as selected.
+  bool _isSelectedVariant(SubtitleVariant variant) {
+    if (!widget.isSubtitleEnabled) return false;
+    final selected = widget.selectedVariant?.downloadUrl;
+    if (selected == null || selected.isEmpty) return false;
+    return selected == variant.downloadUrl;
+  }
+
+  /// Whether any file in [group] is the one playing.
+  ///
+  /// The language row is marked when the language is on, not only when its
+  /// *best* file is. Picking the second file for Arabic left the Arabic row
+  /// unmarked, which read as "nothing is selected" while a subtitle played.
+  bool _isSelectedGroup(SubtitleLanguageGroup group) =>
+      group.variants.any(_isSelectedVariant);
+
   List<Widget> _buildRows(BuildContext context) {
     final rows = <Widget>[];
 
     if (_source == _SubtitleSource.embedded) {
-      // The file's own default first, then alphabetical by language.
+      // The language being heard first, then alphabetical.
       //
       // File order is the muxer's, which is arbitrary to a viewer -- a
       // twelve-track disc put its languages in whatever order they were
       // authored, so the list looked shuffled. Alphabetical is the order
-      // someone scanning for "Spanish" can actually use, and the default
-      // stays on top because it is the one the file itself recommends.
-      final embedded = [...widget.embeddedSubtitles]
-        ..sort((a, b) {
-          if (a.isDefault != b.isDefault) return a.isDefault ? -1 : 1;
-          return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-        });
+      // someone scanning for "Spanish" can actually use, and the audio
+      // language leads because it is the track they are most likely to
+      // want. See SubtitleAutoPick.embeddedForDisplay.
+      final embedded = SubtitleAutoPick.embeddedForDisplay(
+        widget.embeddedSubtitles,
+        audioLanguage: widget.audioLanguage,
+      );
       for (final track in embedded) {
         if (!_passesFilter(
           isForced: track.isForced,
@@ -341,9 +366,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         rows.add(
           PlayerMenuRow(
             leading: LanguageFlag(track.language ?? '', height: 13),
-            title: track.language?.isNotEmpty == true
-                ? track.language!
-                : track.title,
+            title: track.displayName,
             badges: [
               if (track.isForced) context.l10n.subsForced,
               if (track.isHearingImpaired) context.l10n.subsSdhShort,
@@ -385,10 +408,8 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               if (group.variants.length > 1)
                 context.l10n.playerSubtitleCount(group.variants.length),
             ],
-            isSelected: widget.isSubtitleEnabled &&
-                widget.selectedVariant?.downloadUrl == best.downloadUrl,
-            trailing: group.variants.length > 1
-                ? Icon(
+            isSelected: _isSelectedGroup(group),
+            trailing: group.variants.length > 1                ? Icon(
                     isExpanded
                         ? Icons.expand_less_rounded
                         : Icons.expand_more_rounded,
@@ -418,8 +439,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               PlayerMenuRow(
                 leading: const SizedBox(width: 0),
                 title: _variantLabel(context, variant),
-                isSelected: widget.isSubtitleEnabled &&
-                    widget.selectedVariant?.downloadUrl == variant.downloadUrl,
+                isSelected: _isSelectedVariant(variant),
                 onTap: () => widget.onSelectVariant(variant),
               ),
             );
@@ -438,7 +458,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     }
 
     if (rows.isEmpty) {
-      rows.add(PlayerMenuEmptyRow(context.l10n.playerNoSubtitlesForStream));
+      // A filter that matched nothing is not the same as a stream with no
+      // subtitles, and saying the latter would be wrong -- the tracks are
+      // there, the filter is hiding them.
+      rows.add(
+        PlayerMenuEmptyRow(
+          _filter == _SubtitleFilter.all
+              ? context.l10n.playerNoSubtitlesForStream
+              : context.l10n.playerSubtitleNoneMatchFilter,
+        ),
+      );
     }
     return rows;
   }
@@ -449,13 +478,24 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   /// two files for one language apart. They are hidden until the row is
   /// opened, because at the top level they are noise -- but once a viewer is
   /// choosing between files, they are the whole basis for the choice.
+  ///
+  /// The format is left out when the title already ends in it. A provider
+  /// that names its files "Movie.srt" produced rows reading "SubtitleCat ·
+  /// SRT" beside a title that said SRT, which is the same fact twice.
   String _variantLabel(BuildContext context, SubtitleVariant variant) {
+    final title = variant.title.trim();
+    final format = variant.format.toUpperCase();
+    final titleSaysFormat = format.isNotEmpty &&
+        title.toUpperCase().endsWith(format);
     final parts = <String>[
       if (variant.providerName.isNotEmpty) variant.providerName,
-      if (variant.format.isNotEmpty) variant.format.toUpperCase(),
+      if (format.isNotEmpty && !titleSaysFormat) format,
       if (variant.isHearingImpaired) context.l10n.subsSdhShort,
       if (variant.isForced) context.l10n.subsForced,
     ];
+    if (title.isNotEmpty && title.toLowerCase() != 'standard') {
+      parts.add(title);
+    }
     return parts.isEmpty ? variant.title : parts.join(' · ');
   }
 

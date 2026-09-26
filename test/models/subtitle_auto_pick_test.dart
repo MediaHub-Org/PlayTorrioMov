@@ -173,4 +173,104 @@ void main() {
       expect(picked!.language, 'it');
     });
   });
+
+  group('SubtitleAutoPick.embeddedForDisplay', () {
+    List<String> namesOf(List<PlayerEmbeddedSubtitle> tracks) =>
+        tracks.map((t) => t.displayName).toList();
+
+    test('the audio language leads, the rest are alphabetical', () {
+      final ordered = SubtitleAutoPick.embeddedForDisplay(
+        [
+          track(0, language: 'Dutch'),
+          track(1, language: 'Spanish'),
+          track(2, language: 'English'),
+          track(3, language: 'Arabic'),
+        ],
+        audioLanguage: 'spa',
+      );
+
+      expect(namesOf(ordered), [
+        'Spanish',
+        'Arabic',
+        'Dutch',
+        'English',
+      ]);
+    });
+
+    test('with no audio match the whole list is alphabetical', () {
+      // No second-best language is promoted. A viewer whose audio is Korean
+      // and whose file has no Korean subtitles is choosing from a list, not
+      // accepting a default, and a promoted track would only be in the way.
+      final ordered = SubtitleAutoPick.embeddedForDisplay(
+        [
+          track(0, language: 'Spanish'),
+          track(1, language: 'English'),
+          track(2, language: 'Arabic'),
+        ],
+        audioLanguage: 'kor',
+      );
+
+      expect(namesOf(ordered), ['Arabic', 'English', 'Spanish']);
+    });
+
+    test('an untagged audio language leaves the list alphabetical', () {
+      for (final unknown in [null, '', 'und']) {
+        final ordered = SubtitleAutoPick.embeddedForDisplay(
+          [track(0, language: 'Spanish'), track(1, language: 'Arabic')],
+          audioLanguage: unknown,
+        );
+        expect(namesOf(ordered), ['Arabic', 'Spanish'], reason: '"$unknown"');
+      }
+    });
+
+    test('the file default is not promoted', () {
+      // It used to lead the list. The audio language is the better answer,
+      // and when there is no match the list is simply alphabetical -- a
+      // default is the muxer's opinion, not the viewer's.
+      final ordered = SubtitleAutoPick.embeddedForDisplay(
+        [
+          track(0, language: 'Spanish', isDefault: true),
+          track(1, language: 'Arabic'),
+        ],
+        audioLanguage: 'kor',
+      );
+
+      expect(namesOf(ordered), ['Arabic', 'Spanish']);
+    });
+
+    test('every track matching the audio leads, in alphabetical order', () {
+      // Two Spanish tracks -- Castilian and Latin American -- both belong
+      // above the rest, and keep their relative order.
+      final ordered = SubtitleAutoPick.embeddedForDisplay(
+        [
+          track(0, language: 'Spanish (LATAM)'),
+          track(1, language: 'English'),
+          track(2, language: 'Spanish (ES)'),
+        ],
+        audioLanguage: 'spa',
+      );
+
+      expect(namesOf(ordered), [
+        'Spanish (ES)',
+        'Spanish (LATAM)',
+        'English',
+      ]);
+    });
+
+    test('a track with no language is named by its title', () {
+      final ordered = SubtitleAutoPick.embeddedForDisplay([
+        track(0, language: null, title: 'Signs & Songs'),
+        track(1, language: 'Arabic'),
+      ]);
+
+      expect(namesOf(ordered), ['Arabic', 'Signs & Songs']);
+    });
+
+    test('the input list is not reordered in place', () {
+      final tracks = [track(0, language: 'Spanish'), track(1, language: 'Arabic')];
+      SubtitleAutoPick.embeddedForDisplay(tracks, audioLanguage: 'spa');
+
+      expect(namesOf(tracks), ['Spanish', 'Arabic']);
+    });
+  });
 }

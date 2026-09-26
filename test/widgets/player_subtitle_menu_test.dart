@@ -51,6 +51,150 @@ Widget menu({
 );
 
 void main() {
+  group('the online list marks exactly one row', () {
+    testWidgets('a variant with no URL does not select every row', (
+      tester,
+    ) async {
+      // The whole online list drew as selected. The comparison was
+      // `selectedVariant?.downloadUrl == variant.downloadUrl`, and when both
+      // sides were empty every row matched.
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [
+                SubtitleVariant(
+                  providerName: 'SubtitleCat',
+                  language: 'Arabic',
+                  title: 'Standard',
+                  downloadUrl: '',
+                  format: 'srt',
+                ),
+                SubtitleVariant(
+                  providerName: 'OpenSubtitles',
+                  language: 'Arabic',
+                  title: 'Standard',
+                  downloadUrl: '',
+                  format: 'srt',
+                ),
+              ],
+            ),
+          ],
+          enabled: true,
+          selected: SubtitleVariant(
+            providerName: 'SubtitleCat',
+            language: 'Arabic',
+            title: 'Standard',
+            downloadUrl: '',
+            format: 'srt',
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byIcon(Icons.radio_button_checked_rounded), findsNothing);
+      expect(find.byIcon(Icons.radio_button_unchecked_rounded), findsWidgets);
+    });
+
+    testWidgets('the selected file is the only one marked', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [
+                variant('Arabic', 'https://x/1.srt'),
+                variant('Arabic', 'https://x/2.srt'),
+              ],
+            ),
+          ],
+          enabled: true,
+          selected: variant('Arabic', 'https://x/2.srt'),
+        ),
+      );
+      await tester.pump();
+
+      // The language row is marked, and so is the file inside it once the
+      // row is opened -- but never both files.
+      expect(find.byIcon(Icons.radio_button_checked_rounded), findsOneWidget);
+    });
+  });
+
+  group('a file row does not repeat its own format', () {
+    testWidgets('the format is dropped when the title already says it', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [
+                SubtitleVariant(
+                  providerName: 'SubtitleCat',
+                  language: 'Arabic',
+                  title: 'Movie.srt',
+                  downloadUrl: 'https://x/1.srt',
+                  format: 'srt',
+                ),
+                SubtitleVariant(
+                  providerName: 'SubtitleCat',
+                  language: 'Arabic',
+                  title: 'Movie.srt',
+                  downloadUrl: 'https://x/2.srt',
+                  format: 'srt',
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Arabic'));
+      await tester.pump();
+
+      // "SubtitleCat · SRT · Movie.srt" says SRT twice.
+      expect(find.textContaining('SRT'), findsNothing);
+      expect(find.textContaining('SubtitleCat'), findsWidgets);
+    });
+
+    testWidgets('the format is kept when the title does not say it', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [
+                SubtitleVariant(
+                  providerName: 'SubDL',
+                  language: 'Arabic',
+                  title: 'BluRay',
+                  downloadUrl: 'https://x/1.srt',
+                  format: 'srt',
+                ),
+                SubtitleVariant(
+                  providerName: 'SubDL',
+                  language: 'Arabic',
+                  title: 'WEB-DL',
+                  downloadUrl: 'https://x/2.srt',
+                  format: 'srt',
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Arabic'));
+      await tester.pump();
+
+      expect(find.textContaining('SRT'), findsWidgets);
+    });
+  });
+
   group('rows are languages, not files', () {
     testWidgets('four files for one language are one row', (tester) async {
       await tester.pumpWidget(

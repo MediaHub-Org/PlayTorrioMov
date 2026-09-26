@@ -111,5 +111,14 @@ void main() {
       expect(subtitleTrackLanguageName('mon'), isEmpty);
       expect(canonicalLanguageGroup('MON'), isEmpty);
     });
+
+    test('does not offer mpv\'s "auto" pseudo-track as a language', () {
+      // It reached the picker as a row reading "Auto", which is not
+      // something anyone can choose deliberately -- there is nothing to
+      // choose it by.
+      expect(subtitleTrackLanguageName('auto'), isEmpty);
+      expect(subtitleTrackLanguageName('AUTO'), isEmpty);
+      expect(subtitleTrackLanguageName(' auto '), isEmpty);
+    });
   });
 }
