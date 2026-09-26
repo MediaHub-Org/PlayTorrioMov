@@ -45,13 +45,16 @@ void main() {
   // presentation rules live here rather than in five scrapers that would
   // drift apart.
   group('language grouping', () {
-    test('groups regional variants under the parent language', () {
-      // "Spanish" and "Spanish (latam)" are one language to a viewer
-      // choosing what to read; two groups made the language bar a row of
-      // near-duplicates.
+    test('keeps regional variants as separate groups', () {
+      // These used to collapse to the parent language. They are different
+      // recordings -- a viewer who wants Spanish (LATAM) does not want
+      // Spanish (ES) -- so collapsing them hid the choice rather than
+      // simplifying it.
       expect(canonicalLanguageGroup('Spanish'), 'Spanish');
-      expect(canonicalLanguageGroup('Spanish (latam)'), 'Spanish');
-      expect(canonicalLanguageGroup('Portuguese (BR)'), 'Portuguese');
+      expect(canonicalLanguageGroup('Spanish (ES)'), 'Spanish (ES)');
+      expect(canonicalLanguageGroup('Spanish (LATAM)'), 'Spanish (LATAM)');
+      expect(canonicalLanguageGroup('Portuguese (BR)'), 'Portuguese (BR)');
+      expect(canonicalLanguageGroup('Portuguese (PT)'), 'Portuguese (PT)');
     });
 
     test('drops signs-only tracks instead of offering them as a language', () {

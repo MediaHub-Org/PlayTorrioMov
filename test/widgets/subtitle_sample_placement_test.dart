@@ -36,16 +36,12 @@ class _HarnessState extends State<_Harness> {
         SubtitleOverlay(lines: const Stream.empty(), showSample: sample),
         PlayerMenuAnchor(
           child: PlayerSubtitleMenu(
-            groups: const [],
             isSubtitleEnabled: false,
-            movieTitle: 'A Movie',
-            delaySec: 0,
             onSelectVariant: (_) {},
             onSelectEmbedded: (_) {},
-            onToggleOff: () {},
+            onEnable: () {},
+            onDisable: () {},
             onOpenSyncBar: () {},
-            onAutoPick: () {},
-            onClose: () {},
             onAppearanceOpenChanged: (open) {
               if (mounted) setState(() => sample = open);
             },

@@ -9,13 +9,21 @@ import '../../widgets/settings/settings_scroll_view.dart';
 
 /// The one place the source-list filters are set as a global default.
 ///
-/// The Watch screen still carries the same two dropdowns, so the filter can
-/// be changed while browsing sources; both write through
-/// [SourceFilterSettings], so this page and that dropdown always agree.
+/// The Watch screen still carries the same two filters, so they can be
+/// changed while browsing sources; both write through [SourceFilterSettings],
+/// so this page and that menu always agree.
 ///
-/// This one has state because of the preferred-audio ranking, the only
-/// filter with an order: it needs to repaint when a language is promoted or
-/// demoted, and it owns the subscription that makes that happen.
+/// Two blocks, not three. There used to be a single-select audio *filter*, a
+/// single-select quality filter, and a separate ordered *preferred audio*
+/// ranking -- and the first and third both said "audio language" while doing
+/// different jobs, which read as three unrelated settings. The audio filter
+/// and the ranking are one list now: pick the languages you want, and the
+/// source list shows sources matching any of them while the player prefers
+/// them in the order you put them.
+///
+/// This one has state because of that order: it needs to repaint when a
+/// language is promoted or demoted, and it owns the subscription that makes
+/// that happen.
 class SourceFilterSettingsPage extends StatefulWidget {
   const SourceFilterSettingsPage({super.key});
 
@@ -28,15 +36,15 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
   @override
   void initState() {
     super.initState();
-    // The ranked list is the one filter with its own reordering UI, so this
-    // page listens to it directly rather than wrapping the whole body in a
-    // third ValueListenableBuilder.
-    SourceFilterSettings.preferredAudioLanguages.addListener(_onChanged);
+    // The audio list is the one with its own reordering UI, so this page
+    // listens to it directly rather than wrapping the whole body in a third
+    // ValueListenableBuilder.
+    SourceFilterSettings.audioLanguages.addListener(_onChanged);
   }
 
   @override
   void dispose() {
-    SourceFilterSettings.preferredAudioLanguages.removeListener(_onChanged);
+    SourceFilterSettings.audioLanguages.removeListener(_onChanged);
     super.dispose();
   }
 
@@ -65,35 +73,26 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
         ),
       ),
       body: AnimatedAmbientBackground(
-        child: ValueListenableBuilder<String>(
-          valueListenable: SourceFilterSettings.audioLanguage,
-          builder: (context, audioKey, __) {
-            return ValueListenableBuilder<String>(
-              valueListenable: SourceFilterSettings.quality,
-              builder: (context, qualityKey, _) {
-                return SettingsScrollView(
-                  maxContentWidth: 820,
-                  bottomPadding: 32 + bottomInset,
-                  children: [
-                    _buildIntroCard(context),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader(l10n.sourceFilterAudioSection),
-                    const SizedBox(height: 12),
-                    _buildAudioCard(context, audioKey),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader(l10n.sourceFilterQualitySection),
-                    const SizedBox(height: 12),
-                    _buildQualityCard(context, qualityKey),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader(l10n.sourceFilterPreferredSection),
-                    const SizedBox(height: 12),
-                    _buildPreferredAudioCard(context),
-                    const SizedBox(height: 32),
-                    _buildResetButton(context),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              },
+        child: ValueListenableBuilder<List<String>>(
+          valueListenable: SourceFilterSettings.qualities,
+          builder: (context, qualityKeys, __) {
+            return SettingsScrollView(
+              maxContentWidth: 820,
+              bottomPadding: 32 + bottomInset,
+              children: [
+                _buildIntroCard(context),
+                const SizedBox(height: 24),
+                _buildSectionHeader(l10n.sourceFilterAudioSection),
+                const SizedBox(height: 12),
+                _buildAudioCard(context),
+                const SizedBox(height: 24),
+                _buildSectionHeader(l10n.sourceFilterQualitySection),
+                const SizedBox(height: 12),
+                _buildQualityCard(context, qualityKeys),
+                const SizedBox(height: 32),
+                _buildResetButton(context),
+                const SizedBox(height: 16),
+              ],
             );
           },
         ),
@@ -164,62 +163,23 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
     );
   }
 
-  Widget _buildAudioCard(BuildContext context, String selectedKey) {
-    final l10n = context.l10n;
-    return _buildCard(
-      title: l10n.sourceFilterAudioBody,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: kAudioFilterKeys
-            .map(
-              (key) => SettingChoiceChip(
-                label: audioFilterLabel(l10n, key),
-                selected: selectedKey == key,
-                onSelect: () => SourceFilterSettings.setAudioLanguage(key),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildQualityCard(BuildContext context, String selectedKey) {
-    final l10n = context.l10n;
-    return _buildCard(
-      title: l10n.sourceFilterQualityBody,
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: kQualityFilterKeys
-            .map(
-              (key) => SettingChoiceChip(
-                label: qualityFilterLabel(l10n, key),
-                selected: selectedKey == key,
-                onSelect: () => SourceFilterSettings.setQuality(key),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-
-  /// The ranked list, above the full catalogue of choosable languages.
+  /// The audio list: the ranked selection on top, the rest of the catalogue
+  /// below it.
   ///
   /// Two blocks rather than one, because the two do different jobs: the top
   /// one is what the player will actually do, in order; the bottom is the
   /// menu of everything you can add to it. Selected languages are removed
   /// from the bottom row so the same chip never appears twice with two
   /// different meanings.
-  Widget _buildPreferredAudioCard(BuildContext context) {
+  Widget _buildAudioCard(BuildContext context) {
     final l10n = context.l10n;
-    final ranked = SourceFilterSettings.preferredAudioLanguages.value;
-    final available = kPreferredAudioLanguageKeys
+    final ranked = SourceFilterSettings.audioLanguages.value;
+    final available = kAudioFilterKeys
         .where((key) => !ranked.contains(key))
         .toList();
 
     return _buildCard(
-      title: l10n.sourceFilterPreferredBody,
+      title: l10n.sourceFilterAudioBody,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -252,16 +212,38 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
               children: available
                   .map(
                     (key) => SettingChoiceChip(
-                      label: preferredAudioLabel(l10n, key),
+                      label: audioFilterLabel(l10n, key),
                       selected: false,
+                      multiSelect: true,
                       onSelect: () =>
-                          SourceFilterSettings.togglePreferredAudio(key),
+                          SourceFilterSettings.toggleAudioLanguage(key),
                     ),
                   )
                   .toList(),
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildQualityCard(BuildContext context, List<String> selectedKeys) {
+    final l10n = context.l10n;
+    return _buildCard(
+      title: l10n.sourceFilterQualityBody,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: kQualityFilterKeys
+            .map(
+              (key) => SettingChoiceChip(
+                label: qualityFilterLabel(l10n, key),
+                selected: selectedKeys.contains(key),
+                multiSelect: true,
+                onSelect: () => SourceFilterSettings.toggleQuality(key),
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -297,7 +279,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              preferredAudioLabel(l10n, key),
+              audioFilterLabel(l10n, key),
               style: TextStyle(fontSize: 14, color: AppColors.ink),
             ),
           ),
@@ -306,18 +288,18 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
             icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 20),
             onPressed: index == 0
                 ? null
-                : () => SourceFilterSettings.promotePreferredAudio(key),
+                : () => SourceFilterSettings.promoteAudioLanguage(key),
           ),
           IconButton(
             tooltip: l10n.sourceFilterPreferredDown,
             icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
             onPressed: index == total - 1
                 ? null
-                : () => SourceFilterSettings.demotePreferredAudio(key),
+                : () => SourceFilterSettings.demoteAudioLanguage(key),
           ),
           IconButton(
             icon: const Icon(Icons.close_rounded, size: 18),
-            onPressed: () => SourceFilterSettings.togglePreferredAudio(key),
+            onPressed: () => SourceFilterSettings.toggleAudioLanguage(key),
           ),
         ],
       ),

@@ -63,11 +63,10 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
     final index = _index;
 
     return PlayerGlassCard(
-      width: (320.0).clamp(240.0, screenWidth - 32),
+      width: PlayerTheme.menuWidthFor(context),
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,

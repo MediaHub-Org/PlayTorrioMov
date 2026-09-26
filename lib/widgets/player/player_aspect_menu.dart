@@ -80,10 +80,8 @@ class PlayerAspectMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-
     return PlayerGlassCard(
-      width: (320.0).clamp(240.0, screenWidth - 32),
+      width: PlayerTheme.menuWidthFor(context),
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -134,10 +132,24 @@ class PlayerAspectMenu extends StatelessWidget {
                       ),
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Flexible so the label yields to the check icon
-                        // rather than pushing it off the edge.
+                        // A radio mark, matching the audio, subtitle and
+                        // sleep menus. This row used a trailing check while
+                        // those used a leading radio, so the same gesture --
+                        // pick one of these -- was drawn two ways depending
+                        // on which menu you happened to have open.
+                        Icon(
+                          isSelected
+                              ? Icons.radio_button_checked_rounded
+                              : Icons.radio_button_unchecked_rounded,
+                          size: 15,
+                          color: isSelected
+                              ? PlayerTheme.accent
+                              : PlayerTheme.inkDisabled,
+                        ),
+                        const SizedBox(width: 8),
+                        // Flexible so the label yields to the mark rather
+                        // than pushing it off the edge.
                         Flexible(
                           child: Text(
                             opt.label(context.l10n),
@@ -150,12 +162,6 @@ class PlayerAspectMenu extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (isSelected)
-                          Icon(
-                            Icons.check_rounded,
-                            size: 16,
-                            color: PlayerTheme.accent,
-                          ),
                       ],
                     ),
                   ),

@@ -38,9 +38,9 @@ void main() {
     await tester.pumpWidget(inLocale('es', const SleepTimerMenu()));
 
     expect(find.text('TEMPORIZADOR DE APAGADO'), findsOneWidget);
-    expect(find.text('Personalizado'), findsOneWidget);
-    expect(find.textContaining('se pausa a las'), findsWidgets);
-    expect(find.textContaining('pauses at'), findsNothing);
+    expect(find.text('10 min'), findsOneWidget);
+    expect(find.text('Fin del vídeo'), findsOneWidget);
+    expect(find.text('End of video'), findsNothing);
   });
 
   testWidgets('the speed menu follows the app language, and fits a phone',
@@ -102,14 +102,11 @@ void main() {
       PlayerAudioMenu(
         audioTracks: const [],
         selectedIndex: 0,
-        delaySec: 0,
         onTrackSelected: (_) {},
-        onDelayChanged: (_) {},
       ),
     ));
 
     expect(find.text('Reproduzindo o áudio padrão.'), findsOneWidget);
-    expect(find.text('Deslocamento do áudio'), findsOneWidget);
   });
 
   testWidgets('the episodes panel follows the app language, and fits a phone',

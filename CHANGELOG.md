@@ -5,6 +5,94 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+Sources & Filters is two settings instead of three, and both take more than
+one choice. The player's `C` key toggles subtitles, its menus list languages
+rather than files, and the sleep timer can wait for the video to end.
+
+### Added
+- **`C` toggles subtitles on and off.** It used to open the subtitle panel.
+  Turning them on matches the language you are hearing, so an English audio
+  track gets English subtitles rather than whatever the file happens to
+  default to. The panel is one tap on the transport bar, and `A` still opens
+  the audio menu.
+- **A sleep timer that can wait for the video to end.** Six options, one row
+  each: 10, 15, 30, 45 and 60 minutes, then "End of video", which pauses when
+  the film does rather than after a count. The custom stepper and the
+  "pauses at 02:14" line under every preset are gone -- the list is a list of
+  numbers now, and the end time is arithmetic a viewer can do. #76
+
+### Changed
+- **Audio tracks are labelled by language.** A row said whatever the
+  container's own title was -- "English [DD+ 5.1]", "JPN 2ch" -- which put
+  codec and channel detail in the one field a viewer reads to answer "which
+  language is this". Rows read "English", "Italian", "Portuguese (Brazil)"
+  now, and the track the file opens with carries an **ORIGINAL** badge. The
+  codec and channel line under each row is gone too.
+- **The subtitle on/off control is one button.** It reads "Turn subtitles
+  off" while they are on and "Turn subtitles on" while they are off, so the
+  label always names where a press takes you. It was two chips, one of which
+  was always inert.
+- **Subtitle rows are languages, not files.** Four OpenSubtitles files for
+  Arabic are one row with a count; picking it takes the best of them. The
+  provider, format, quality and release tags are not shown -- none of it
+  changes which language a viewer wants, and the list of files buried the
+  languages it was supposed to be listing.
+- **Embedded subtitle tracks are labelled by language too.** A container
+  title is written by whoever muxed the file and is routinely "eng",
+  "[Full] SDH" or "English (US) PGS". Forced and hearing-impaired are still
+  read off the title and shown as their own badges.
+- **The subtitle panel has Embedded and Online tabs, with All / CC-SDH /
+  Forced filters.** The file's own tracks and the online downloads were one
+  merged list, so the tracks already in the file -- usually the answer -- sat
+  among a hundred downloads. The filters narrow whichever tab is showing.
+- **Regional subtitle variants are separate languages.** Spanish (ES) and
+  Spanish (LATAM) are different recordings, not two spellings of one label,
+  and they used to collapse into a single "Spanish" group -- so the choice
+  was hidden rather than simplified. The same for Portuguese (BR) and (PT),
+  and for English (US) and (UK). Only the Chinese *script* split still
+  collapses, because Simplified and Traditional are the same audio.
+- **Every player menu is the same width.** They were 280, 320 and 330, so
+  the panel moved sideways as a viewer switched between them, and grouping
+  any two under one icon would have been a layout change rather than a
+  wiring change. `PlayerTheme.menuWidth` is the one number now.
+- **Selection is marked the same way in every menu.** The aspect menu drew a
+  trailing check while the audio, subtitle and sleep menus drew a leading
+  radio, so the same gesture was drawn two ways depending on which menu was
+  open. All four use the radio.
+- **Audio sync is gone.** The only sync a viewer reaches for is the subtitle
+  one, and a second control with the same name in a different menu was a
+  coin flip. Subtitle sync is unchanged.
+
+### Changed
+- **The source filters are multi-select.** Audio language and video quality
+  both take several choices now; a source matching *any* of them is shown.
+  Before, each was one choice, so "English or Spanish" was not expressible
+  and had to be re-picked every time you switched between them. An empty
+  selection means no filter, which is what "All" used to mean.
+- **The audio-language filter and the preferred-audio ranking are one list.**
+  They were two of the page's three blocks, and both said "audio language"
+  while doing different jobs: the filter chose which *sources* to offer, from
+  the release name, and the ranking chose which *track* to play inside a file
+  that carries several. They were always the same choice asked twice, so the
+  list is now read both ways — it shows sources in any of its languages, and
+  the player tries them in the order you put them. #75
+- **Five languages became detectable from a release name.** Arabic, Chinese,
+  Korean, Portuguese and Turkish were offered by the ranking, which only ever
+  needed to read a file's own track tags. As filter entries they would have
+  hidden every source, because the release-name detector had no pattern for
+  them. A test now asserts every offered key is one the detector can look for.
+
+### Fixed
+- **An update keeps the filters you had set.** The stored value changed shape
+  — one string per filter became a list — so both shapes are read on load. A
+  language that was ranked but not filtered on is folded into the list too,
+  rather than dropped.
+- **`SettingChoiceChip` can report a deselection.** It deliberately swallowed
+  Material's "now unchecked" callback, which is right for a row of mutually
+  exclusive choices and wrong for a multi-select one — tapping a selected
+  chip is how you turn it off, and the tap did nothing. Rows that allow
+  several chips at once opt back in with `multiSelect: true`.
+
 ## [1.8.11+44] - 2026-09-25
 
 The source list remembers how you like it filtered, there is a new quality
@@ -1633,3 +1721,5 @@ history only.
 | #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |
 | #73 | Preferred audio languages: a ranked list applied to the real tracks inside a multi-audio file, plus the `MULTI` filter fix |
 | #74 | The source-filter pills on their own scrollable row, with edge buttons showing when a pill is hidden past either end (desktop; the phone keeps the fade alone) |
+| #75 | Sources & Filters became two multi-select settings, with the audio filter and the preferred-audio ranking merged into one ordered list |
+| #76 | Sleep timer gained 10 and 45 minute presets and an End of video mode |

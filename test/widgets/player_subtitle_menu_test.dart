@@ -1,222 +1,307 @@
 // test/widgets/player_subtitle_menu_test.dart
+//
+// Two things are worth guarding here. The rows are languages, not files --
+// four OpenSubtitles files for Arabic are one row, because a list of files
+// buried the languages it was meant to list. And the on/off control is one
+// button whose label names where a press takes you, not two chips with one
+// of them dead.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
-import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_menu_row.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 
-SubtitleVariant variant(String title, String url, {String language = 'English'}) =>
-    SubtitleVariant(
-      providerName: 'test',
-      language: language,
-      title: title,
-      downloadUrl: url,
-      format: 'srt',
-    );
-
-/// A filter chip by its label -- the row badges say "CC / SDH" and "Forced" too.
-Finder chip(String label) => find.descendant(
-      of: find.byType(PlayerToggleChip),
-      matching: find.text(label),
-    );
+SubtitleVariant variant(String language, String url) => SubtitleVariant(
+  providerName: 'test',
+  language: language,
+  title: '',
+  downloadUrl: url,
+  format: 'srt',
+);
 
 Widget menu({
+  List<SubtitleLanguageGroup> groups = const [],
   List<PlayerEmbeddedSubtitle> embedded = const [],
-  List<SubtitleVariant> variants = const [],
-  ValueChanged<PlayerEmbeddedSubtitle>? onEmbedded,
-  ValueChanged<SubtitleVariant?>? onVariant,
-  VoidCallback? onClose,
+  bool enabled = false,
   SubtitleVariant? selected,
-}) {
-  return MaterialApp(
-    home: Scaffold(
-      body: Center(
-        child: PlayerSubtitleMenu(
-          groups: variants.isEmpty
-              ? const []
-              : [SubtitleLanguageGroup(language: 'English', variants: variants)],
-          embeddedSubtitles: embedded,
-          selectedVariant: selected,
-          isSubtitleEnabled: selected != null,
-          movieTitle: 'A Movie',
-          delaySec: 0,
-          onSelectVariant: onVariant ?? (_) {},
-          onSelectEmbedded: onEmbedded ?? (_) {},
-          onToggleOff: () {},
-          onOpenSyncBar: () {},
-          onAutoPick: () {},
-          onClose: onClose ?? () {},
-        ),
+  int? selectedEmbedded,
+  ValueChanged<SubtitleVariant>? onVariant,
+  VoidCallback? onEnable,
+  VoidCallback? onDisable,
+}) => MaterialApp(
+  localizationsDelegates: AppLocalizations.localizationsDelegates,
+  supportedLocales: AppLocalizations.supportedLocales,
+  home: Scaffold(
+    body: Center(
+      child: PlayerSubtitleMenu(
+        groups: groups,
+        embeddedSubtitles: embedded,
+        selectedVariant: selected,
+        selectedEmbeddedIndex: selectedEmbedded,
+        isSubtitleEnabled: enabled,
+        onSelectVariant: onVariant ?? (_) {},
+        onSelectEmbedded: (_) {},
+        onEnable: onEnable ?? () {},
+        onDisable: onDisable ?? () {},
+        onOpenSyncBar: () {},
       ),
     ),
-  );
-}
+  ),
+);
 
 void main() {
-  group('the "In this video" strip', () {
-    testWidgets('lists the embedded tracks up top, the file default first',
-        (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(menu(
-        variants: [variant('Movie.2020', 'u1')],
-        embedded: const [
-          PlayerEmbeddedSubtitle(index: 1, title: 'English', language: 'English'),
-          PlayerEmbeddedSubtitle(
-            index: 2,
-            title: 'Spanish',
-            language: 'Spanish',
-            isDefault: true,
-          ),
-        ],
-      ));
+  group('rows are languages, not files', () {
+    testWidgets('four files for one language are one row', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [
+                variant('Arabic', 'a1'),
+                variant('Arabic', 'a2'),
+                variant('Arabic', 'a3'),
+                variant('Arabic', 'a4'),
+              ],
+            ),
+          ],
+        ),
+      );
       await tester.pump();
 
-      expect(find.text('IN THIS VIDEO'), findsOneWidget);
-      // The default track's chip comes before the other one's.
-      final spanish = tester.getTopLeft(find.text('Spanish').first).dx;
-      final english = tester.getTopLeft(find.text('English').first).dx;
-      expect(spanish, lessThan(english), reason: 'default first');
-      expect(find.text('DEFAULT'), findsWidgets);
+      expect(find.text('Arabic'), findsOneWidget);
+      expect(find.text('4 files'), findsOneWidget);
     });
 
-    testWidgets('tapping a chip selects that embedded track', (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      PlayerEmbeddedSubtitle? picked;
-      await tester.pumpWidget(menu(
-        variants: [variant('Movie.2020', 'u1')],
-        embedded: const [
-          PlayerEmbeddedSubtitle(index: 7, title: 'Spanish', language: 'Spanish'),
-        ],
-        onEmbedded: (t) => picked = t,
-      ));
+    testWidgets('the per-file tags are not shown at all', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'a1')],
+            ),
+          ],
+        ),
+      );
       await tester.pump();
 
-      await tester.tap(find.text('Spanish').first);
-      await tester.pump();
-
-      expect(picked?.index, 7);
+      // Provider, format and release tags were the clutter this removed.
+      expect(find.textContaining('SRT'), findsNothing);
+      expect(find.textContaining('BluRay'), findsNothing);
+      expect(find.textContaining('test'), findsNothing);
     });
 
-    testWidgets('is absent when the video carries none and none is loaded',
-        (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(menu(variants: [variant('Movie.2020', 'u1')]));
-      await tester.pump();
-
-      expect(find.text('IN THIS VIDEO'), findsNothing);
-    });
-  });
-
-  group('the CC and Forced filters', () {
-    final variants = [
-      variant('Alpha.SDH', 'u1'),
-      variant('Bravo.HI.CC', 'u2'),
-      variant('Charlie.forced', 'u3'),
-      variant('Delta', 'u4'),
-    ];
-
-    testWidgets('show how many each would leave', (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(menu(variants: variants));
-      await tester.pump();
-
-      expect(chip('CC / SDH'), findsOneWidget);
-      expect(chip('Forced'), findsOneWidget);
-      final counts = tester
-          .widgetList<PlayerToggleChip>(find.byType(PlayerToggleChip))
-          .map((c) => '${c.label}:${c.count}')
-          .toList();
-      expect(counts, containsAll(['CC / SDH:2', 'Forced:1']));
-    });
-
-    testWidgets('CC narrows the list, and All clears it again', (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(menu(variants: variants));
-      await tester.pump();
-      expect(find.text('Delta'), findsOneWidget);
-      expect(find.text('Alpha'), findsOneWidget);
-
-      await tester.tap(chip('CC / SDH'));
-      await tester.pump();
-      expect(find.text('Alpha'), findsOneWidget);
-      expect(find.text('Bravo HI'), findsOneWidget);
-      expect(find.text('Delta'), findsNothing);
-
-      await tester.tap(chip('All'));
-      await tester.pump();
-      expect(find.text('Delta'), findsOneWidget);
-    });
-
-    testWidgets('a filter with nothing behind it does nothing', (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(menu(variants: [variant('Delta', 'u1')]));
-      await tester.pump();
-
-      // No forced track exists: pressing Forced must not empty the list.
-      await tester.tap(chip('Forced'));
-      await tester.pump();
-      expect(find.text('Delta'), findsOneWidget);
-    });
-  });
-
-  group('a subtitle row', () {
-    testWidgets('hides the provider id and says what is left about it',
-        (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
-      await tester.pumpWidget(menu(variants: [
-        variant('13628256', 'u1'),
-        variant('Movie.2020.1080p.WEB-DL.x264-GRP', 'u2'),
-      ]));
-      await tester.pump();
-
-      expect(find.text('13628256'), findsNothing);
-      expect(find.text('Standard'), findsOneWidget);
-      // Provider and format in one quiet line, quality as its own tags.
-      expect(find.text('test · SRT'), findsNWidgets(2));
-      expect(find.text('1080p'), findsOneWidget);
-      expect(find.text('WEB-DL'), findsOneWidget);
-    });
-
-    testWidgets('choosing one leaves the panel open', (tester) async {
-      tester.view.physicalSize = const Size(900, 700);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.reset);
-
+    testWidgets('picking a language picks its best file', (tester) async {
       SubtitleVariant? picked;
-      var closed = false;
-      await tester.pumpWidget(menu(
-        variants: [variant('Delta', 'u1')],
-        onVariant: (v) => picked = v,
-        onClose: () => closed = true,
-      ));
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'best'), variant('Arabic', 'worse')],
+            ),
+          ],
+          onVariant: (v) => picked = v,
+        ),
+      );
       await tester.pump();
 
-      await tester.tap(find.text('Delta'));
+      await tester.tap(find.text('Arabic'));
       await tester.pump();
 
-      expect(picked?.downloadUrl, 'u1');
-      expect(closed, isFalse, reason: 'the viewer may just be trying it');
+      expect(picked?.downloadUrl, 'best');
+    });
+
+    testWidgets('embedded and online are separate tabs, not one list', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          embedded: const [
+            PlayerEmbeddedSubtitle(
+              index: 1,
+              title: 'English',
+              language: 'English',
+            ),
+          ],
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'a')],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      // The file has embedded tracks, so it opens on that tab and the online
+      // list is not mixed in with it.
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('Arabic'), findsNothing);
+
+      await tester.tap(find.textContaining('Online'));
+      await tester.pump();
+
+      expect(find.text('Arabic'), findsOneWidget);
+      expect(find.text('English'), findsNothing);
+    });
+
+    testWidgets('a file with no embedded tracks opens on Online', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'a')],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      // Opening on an empty Embedded tab would look like "no subtitles".
+      expect(find.text('Arabic'), findsOneWidget);
+    });
+
+    testWidgets('nothing available says so', (tester) async {
+      await tester.pumpWidget(menu());
+      await tester.pump();
+
+      expect(
+        find.text('No subtitles available for this stream'),
+        findsOneWidget,
+      );
+    });
+  });
+
+  group('the on/off button', () {
+    testWidgets('offers to turn subtitles on while they are off', (
+      tester,
+    ) async {
+      await tester.pumpWidget(menu(enabled: false));
+      await tester.pump();
+
+      expect(find.text('Turn subtitles on'), findsOneWidget);
+      expect(find.text('Turn subtitles off'), findsNothing);
+      expect(find.byIcon(Icons.closed_caption_disabled_rounded), findsOneWidget);
+    });
+
+    testWidgets('offers to turn them off while they are on', (tester) async {
+      await tester.pumpWidget(
+        menu(enabled: true, selected: variant('English', 'e')),
+      );
+      await tester.pump();
+
+      expect(find.text('Turn subtitles off'), findsOneWidget);
+      expect(find.text('Turn subtitles on'), findsNothing);
+      expect(find.byIcon(Icons.closed_caption_rounded), findsOneWidget);
+    });
+
+    testWidgets('a press while off calls onEnable, not onDisable', (
+      tester,
+    ) async {
+      var enabled = 0;
+      var disabled = 0;
+      await tester.pumpWidget(
+        menu(
+          enabled: false,
+          onEnable: () => enabled++,
+          onDisable: () => disabled++,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Turn subtitles on'));
+      await tester.pump();
+
+      expect(enabled, 1);
+      expect(disabled, 0);
+    });
+
+    testWidgets('a press while on calls onDisable, not onEnable', (
+      tester,
+    ) async {
+      var enabled = 0;
+      var disabled = 0;
+      await tester.pumpWidget(
+        menu(
+          enabled: true,
+          selected: variant('English', 'e'),
+          onEnable: () => enabled++,
+          onDisable: () => disabled++,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Turn subtitles off'));
+      await tester.pump();
+
+      expect(disabled, 1);
+      expect(enabled, 0);
+    });
+
+    testWidgets('it is one control, not two chips', (tester) async {
+      await tester.pumpWidget(menu(enabled: false));
+      await tester.pump();
+
+      // The old panel drew an On chip and an Off chip, so one of them was
+      // always inert and the pair read as a state rather than an action.
+      expect(find.text('On'), findsNothing);
+      expect(find.text('Off'), findsNothing);
+    });
+  });
+
+  group('selection marks the row', () {
+    testWidgets('the playing language is the one ticked', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          enabled: true,
+          selected: variant('Arabic', 'a'),
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'a')],
+            ),
+            SubtitleLanguageGroup(
+              language: 'French',
+              variants: [variant('French', 'f')],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      final rows = tester
+          .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+          .toList();
+      final ticked = rows.where((r) => r.isSelected).toList();
+      expect(ticked.length, 1);
+      expect(ticked.single.title, 'Arabic');
+    });
+
+    testWidgets('with subtitles off nothing is ticked', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          enabled: false,
+          selected: variant('Arabic', 'a'),
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'a')],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      final rows = tester
+          .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+          .toList();
+      expect(rows.every((r) => !r.isSelected), isTrue);
     });
   });
 }

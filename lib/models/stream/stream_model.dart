@@ -181,6 +181,42 @@ class StreamSource {
     caseSensitive: false,
   );
 
+  // The five below were added when the audio filter and the preferred-audio
+  // ranking became one list. Before that the ranking could name a language
+  // the release-name detector had no pattern for, which was harmless -- the
+  // ranking only ever reads a file's own track tags. As a *filter* the same
+  // key would have hidden every source, because a detector with no pattern
+  // for a language reports it absent from all of them. A language the list
+  // offers has to be one the filter can actually look for.
+  //
+  // Deliberately full words rather than the three-letter codes: `ara`, `por`
+  // and `tur` are short enough to appear inside unrelated release names, and
+  // a false positive here silently hides sources.
+  static final RegExp _arabicRegex = RegExp(
+    r'\b(arabic|arab|عربي)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _chineseRegex = RegExp(
+    r'\b(chinese|mandarin|cantonese)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _koreanRegex = RegExp(
+    r'\b(korean)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _portugueseRegex = RegExp(
+    r'\b(portuguese|português|portugues|dublado)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
+  static final RegExp _turkishRegex = RegExp(
+    r'\b(turkish|türkçe|turkce)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
+    caseSensitive: false,
+  );
+
   static final RegExp _englishRegex = RegExp(
     r'\b(eng|english|original audio)\b(?![- ]?(?:sub|subbed|subs|subtitles))',
     caseSensitive: false,
@@ -209,7 +245,8 @@ class StreamSource {
   /// Returns detected audio languages for this stream.
   /// Standard keys: 'multi', 'english', 'hindi', 'german', 'french',
   /// 'spanish' (either Spanish variant, or neither detected specifically),
-  /// 'spanish_castilian', 'spanish_latino', 'russian', 'japanese', 'italian'.
+  /// 'spanish_castilian', 'spanish_latino', 'russian', 'japanese', 'italian',
+  /// 'arabic', 'chinese', 'korean', 'portuguese', 'turkish'.
   Set<String> getAudioLanguages({String? mediaTitle}) {
     final tags = <String>{};
     var fullText = _textWithoutMediaTitle(mediaTitle: mediaTitle);
@@ -235,6 +272,11 @@ class StreamSource {
     if (_russianRegex.hasMatch(fullText)) tags.add('russian');
     if (_japaneseRegex.hasMatch(fullText)) tags.add('japanese');
     if (_italianRegex.hasMatch(fullText)) tags.add('italian');
+    if (_arabicRegex.hasMatch(fullText)) tags.add('arabic');
+    if (_chineseRegex.hasMatch(fullText)) tags.add('chinese');
+    if (_koreanRegex.hasMatch(fullText)) tags.add('korean');
+    if (_portugueseRegex.hasMatch(fullText)) tags.add('portuguese');
+    if (_turkishRegex.hasMatch(fullText)) tags.add('turkish');
 
     final hasRegional = tags.any((t) => t != 'multi');
     final isMovySource = fullText.toLowerCase().contains('movy');
@@ -273,6 +315,29 @@ class StreamSource {
   bool hasQuality(String filterKey) {
     if (filterKey == 'all') return true;
     return quality == filterKey;
+  }
+
+  /// Whether this source matches *any* of the selected audio languages.
+  ///
+  /// An empty selection means "no filter", which is the same thing the old
+  /// single `'all'` key meant. The per-language rule is [hasAudioLanguage]'s,
+  /// including the MULTI rule, so a source tagged MULTI still matches every
+  /// concrete language rather than only the `multi` entry.
+  bool hasAnyAudioLanguage(
+    Iterable<String> filterKeys, {
+    String? mediaTitle,
+  }) {
+    if (filterKeys.isEmpty) return true;
+    return filterKeys.any(
+      (key) => hasAudioLanguage(key, mediaTitle: mediaTitle),
+    );
+  }
+
+  /// Whether this source matches *any* of the selected qualities. An empty
+  /// selection means "no filter".
+  bool hasAnyQuality(Iterable<String> filterKeys) {
+    if (filterKeys.isEmpty) return true;
+    return filterKeys.any(hasQuality);
   }
 
   /// Returns a clean UI badge label if a special or regional dub is detected.

@@ -65,10 +65,41 @@ void main() {
       expect(subtitleLanguageName('por'), isNot('Portuguese (BR)'));
     });
 
-    test('capitalizes regional names and groups them by parent language', () {
-      expect(subtitleLanguageName('spanish (latam)'), 'Spanish (Latin America)');
+    test('keeps regional variants apart, and names them', () {
+      // Spanish (ES) and Spanish (LATAM) are different recordings, not two
+      // spellings of one label, so they are two groups -- a viewer who wants
+      // one does not want the other.
+      expect(subtitleLanguageName('es-es'), 'Spanish (ES)');
+      expect(subtitleLanguageName('es-419'), 'Spanish (LATAM)');
+      expect(canonicalLanguageGroup('Spanish (ES)'), 'Spanish (ES)');
+      expect(canonicalLanguageGroup('Spanish (LATAM)'), 'Spanish (LATAM)');
+      expect(
+        canonicalLanguageGroup('Spanish (ES)'),
+        isNot(canonicalLanguageGroup('Spanish (LATAM)')),
+      );
+    });
+
+    test('Portuguese (BR) and (PT) are two groups', () {
+      expect(subtitleLanguageName('pt-br'), 'Portuguese (BR)');
+      expect(subtitleLanguageName('pt-pt'), 'Portuguese (PT)');
+      expect(
+        canonicalLanguageGroup('Portuguese (BR)'),
+        isNot(canonicalLanguageGroup('Portuguese (PT)')),
+      );
+    });
+
+    test('English (US) and (UK) are two groups', () {
+      expect(subtitleLanguageName('en-us'), 'English (US)');
+      expect(subtitleLanguageName('en-gb'), 'English (UK)');
+      expect(
+        canonicalLanguageGroup('English (US)'),
+        isNot(canonicalLanguageGroup('English (UK)')),
+      );
+    });
+
+    test('a bare code still groups with its own language', () {
       expect(canonicalLanguageGroup('Spanish'), 'Spanish');
-      expect(canonicalLanguageGroup('Spanish (latam)'), 'Spanish');
+      expect(canonicalLanguageGroup('es'), 'Spanish');
     });
 
     test('does not expose signs-only mpv tracks as a language', () {

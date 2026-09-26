@@ -26,11 +26,13 @@ advanced by reading or writing code; each is one test away from an answer.
 ### Open questions
 
 **Whether more belongs under Sources & Filters (#72).** #72 shipped the audio
-language and quality filters as a global default. The size / sort filter and
-the add-on filter on the sources screen are still per-episode, and could move
-into the same page — but a size range and a "largest first" sort are browsing
-choices for *this* title, not a standing preference, so it is not obvious they
-belong with the two that are. Settle it before adding more there.
+language and quality filters as a global default. #75 then merged the audio
+filter with the preferred-audio ranking and made both filters multi-select,
+which settled the page's shape: two blocks, one per media kind. The size /
+sort filter and the add-on filter on the sources screen are still
+per-episode. A size range and a "largest first" sort are browsing choices for
+*this* title, not a standing preference, so they stay on the sources screen —
+the question #72 left open is answered by leaving them where they are.
 
 **The preferred-audio ranking has no way to be scanned.** #73 applies the
 ranking on the first non-empty track list only, once. If a source's tracks
@@ -38,6 +40,23 @@ arrive in stages, a late update will not re-apply it — deliberate, so a manual
 switch in the audio menu is never undone, but it means a file whose tracks
 arrive after the first frame keeps its own default. Not observed yet on a real
 device.
+
+**"Original" on an audio track is a guess, and it is labelled as one.** #76
+badges the track the file *opens with* as ORIGINAL, because there is no
+original-language flag to read: the media_kit fork this builds against
+exposes no `isDefault` or `original` marker on an audio track, and mpv's own
+track list carries none either. What a release ships as its opening track is
+its own statement of which one it is, which is what other players treat as
+primary -- but a release that defaults to the dub would badge the dub. The
+subtitle auto-match on `C` does not rely on it: it matches the *selected*
+audio language, which is always the language being heard. Worth checking on a
+multi-audio file that defaults to a dub.
+
+**The `C` key no longer opens the subtitle panel, and nothing else does.**
+`A`, `S` and `R` are the audio, speed and aspect menus, so there was no free
+key to give the panel once `C` became a toggle. Keyboard-only users reach it
+only through the transport bar, which needs a pointer. Deliverable trade made
+deliberately; revisit if a key frees up.
 
 **#74's pill rail has not been seen on screen.** #73 was confirmed in a local
 temp build; the rail was not. What to look at: a source list too short to

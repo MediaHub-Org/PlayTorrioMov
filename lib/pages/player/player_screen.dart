@@ -31,14 +31,14 @@ import '../../widgets/player/player_transport.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_seek_feedback.dart';
 import '../../widgets/player/sleep_timer_menu.dart';
+import '../../widgets/player/player_subtitle_menu.dart';
+import '../../widgets/player/player_audio_menu.dart';
 import '../../services/player/sleep_timer_service.dart';
 import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/skip_segments_service.dart';
 import '../../widgets/player/player_aspect_menu.dart' show PlayerAspectMenu;
-import '../../widgets/player/player_audio_menu.dart';
-import '../../widgets/player/player_subtitle_menu.dart';
 import '../../widgets/player/subtitle_overlay.dart';
 import '../../widgets/player/player_skip_button.dart';
 import '../../widgets/player/player_episodes_panel.dart';
@@ -152,18 +152,26 @@ class _PlayerScreenState extends State<PlayerScreen>
   List<PlayerAudioTrack> _audioTracks = [];
   int _selectedAudioTrackIndex = 0;
 
+  /// The track the file opens with, so the audio menu can mark one row as
+  /// the release's own primary track. Only ever set once, on the first track
+  /// list, and never cleared: it describes the file, not the current choice.
+  int? _primaryAudioTrackIndex;
+
   /// Whether the preferred-audio ranking has already had its one chance at
   /// this file. Tracks arrive once, but a manual choice afterwards must not
   /// be undone by a later track update, so the ranking only fires on the
   /// first non-empty track list.
   bool _audioPreferenceApplied = false;
-  double _audioDelaySec = 0.0;
   bool _showAudioHud = false;
   String _audioHudText = '';
   Timer? _audioHudTimer;
 
   // Subtitle State
   List<SubtitleLanguageGroup> _subtitleGroups = [];
+
+  /// Guards the panel's refresh button against a second press while the
+  /// first search is still running.
+  bool _isRefreshingSubtitles = false;
   List<PlayerEmbeddedSubtitle> _embeddedSubtitles = [];
   int? _selectedEmbeddedSubtitleIndex;
   SubtitleVariant? _currentSubtitleVariant;
@@ -300,6 +308,11 @@ class _PlayerScreenState extends State<PlayerScreen>
       _player.stream.completed.listen((completed) {
         if (completed && mounted) {
           _savePlaybackProgress();
+          // "End of video" is armed, not counting down, so this is the only
+          // thing that can fire it. `mounted` is true here by the guard
+          // above; the flag is passed anyway so the service does not call
+          // back into a screen that has since gone away.
+          SleepTimerService.instance.notifyVideoEnded(mounted: mounted);
         }
       }),
     ]);
@@ -805,14 +818,23 @@ class _PlayerScreenState extends State<PlayerScreen>
       final t = audioList[i];
       if (t.id == 'no' || t.id == 'auto') continue;
       final lang = t.language;
-      final title =
-          t.title ?? (lang != null ? lang.toUpperCase() : 'Track ${i + 1}');
+      // The clean language name, not the raw tag and not the container's
+      // own title. A track titled "English [DD+ 5.1]" or "JPN 2ch" is
+      // offering codec and channel detail in the one field a viewer uses to
+      // answer "which language is this", and the codec/channels are already
+      // shown as their own line under it. Falls back to the raw tag only
+      // when the name is unknown, so nothing ever renders blank.
+      final cleaned = subtitleTrackLanguageName(lang);
+      final title = cleaned.isNotEmpty
+          ? cleaned
+          : (t.title ?? 'Track ${i + 1}');
       final idx = int.tryParse(t.id) ?? (i + 1);
       audioTracks.add(
         PlayerAudioTrack(
           index: idx,
           title: title,
           language: lang,
+          codec: t.codec,
           channels: int.tryParse(t.channels?.toString() ?? ''),
         ),
       );
@@ -828,8 +850,16 @@ class _PlayerScreenState extends State<PlayerScreen>
       // The normalized name, not the raw tag: an untitled `mon` track would
       // otherwise be labeled "MON".
       final language = subtitleTrackLanguageName(lang);
-      final title =
-          t.title ?? (language.isNotEmpty ? language : 'Track ${i + 1}');
+      // The language name leads, with the container's own title only as a
+      // fallback. A container title is written by whoever muxed the file and
+      // is routinely technical noise -- "eng", "[Full] SDH", "English (US)
+      // PGS". The two things a title can say that a language name cannot,
+      // forced and hearing-impaired, are read off the title separately and
+      // shown as their own badges, so nothing is lost by preferring the
+      // name here.
+      final title = language.isNotEmpty
+          ? language
+          : (t.title ?? 'Track ${i + 1}');
       final idx = int.tryParse(t.id) ?? (i + 1);
       embeddedSubs.add(
         PlayerEmbeddedSubtitle(
@@ -844,10 +874,26 @@ class _PlayerScreenState extends State<PlayerScreen>
       );
     }
 
+    // The track the file itself opens with, captured before the preferred-
+    // audio ranking can override it. This is the closest thing to "the
+    // original" the data offers, and it is deliberately read *here*
+    // rather than derived later: the ranking below changes what is selected,
+    // which would erase the very signal being recorded.
+    //
+    // It is not the same claim as an `original` flag, and there is not one to
+    // read -- the media_kit fork this builds against exposes no default or
+    // original marker on an audio track at all, and mpv's track list carries
+    // none either. What a release ships as its opening track is the release's
+    // own statement of which one it is, and it is what every other player
+    // treats as primary. Null while there is no track list yet, or when the
+    // single track means the question does not arise.
     int activeIdx = _selectedAudioTrackIndex;
     if (activeIdx == 0 && audioTracks.isNotEmpty) {
       final activeAid = _player.state.track.audio.id;
       activeIdx = int.tryParse(activeAid) ?? audioTracks.first.index;
+    }
+    if (_primaryAudioTrackIndex == null && audioTracks.isNotEmpty) {
+      _primaryAudioTrackIndex = activeIdx;
     }
 
     // The preferred-audio ranking gets one shot, on the first populated
@@ -947,6 +993,22 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
     name = name.replaceAll(RegExp(r'-[a-zA-Z0-9]+$'), '');
     return name.trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  /// Re-runs the online subtitle search, for the panel's refresh button.
+  ///
+  /// The player scrapes once when a stream opens; this is the manual retry
+  /// for when that came back thin, or when a provider was briefly down. It
+  /// replaces the groups rather than merging, so a provider that has since
+  /// gone away does not leave its stale rows behind.
+  Future<void> _refreshOnlineSubtitles() async {
+    if (_isRefreshingSubtitles) return;
+    setState(() => _isRefreshingSubtitles = true);
+    try {
+      await _fetchInitialSubtitles();
+    } finally {
+      if (mounted) setState(() => _isRefreshingSubtitles = false);
+    }
   }
 
   Future<void> _fetchInitialSubtitles() async {
@@ -1122,11 +1184,59 @@ class _PlayerScreenState extends State<PlayerScreen>
     _player.setSubtitleTrack(SubtitleTrack.no());
   }
 
+  /// Turns subtitles on or off, for the `C` shortcut.
+  ///
+  /// On is not a bare "show something": it matches the language you are
+  /// hearing. A viewer whose audio is English wants English subtitles, and
+  /// one who switched to a dub wants that dub's subtitles -- the language
+  /// they are listening to is the one they can be assumed to read.
+  ///
+  /// There is no "original" flag to read: mpv's track list carries the
+  /// container's `default` marker, which plenty of releases set on the dub,
+  /// and nothing else that claims which track the film was made in. So the
+  /// selected audio track is the answer, and [_pickBestSubtitle]'s own
+  /// fallbacks cover a file whose tracks carry no language tag at all.
+  void _toggleSubtitleShortcut() {
+    if (_isSubtitleEnabled) {
+      _disableSubtitles();
+      return;
+    }
+
+    final preferred = _selectedAudioLanguage;
+    final embedded = SubtitleAutoPick.embedded(
+      _embeddedSubtitles,
+      audioLanguage: preferred,
+    );
+    if (embedded != null) {
+      _selectEmbeddedSubtitle(embedded);
+      return;
+    }
+
+    final variant = SubtitleAutoPick.variant(
+      _subtitleGroups,
+      audioLanguage: preferred,
+    );
+    if (variant != null) {
+      _loadSubtitle(variant);
+      return;
+    }
+
+    // Nothing to turn on -- say so rather than leaving the key inert.
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.playerNoSubtitlesForStream),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   /// Turns on the best subtitle there is -- the audio language's embedded
   /// track, then a matching online one -- whatever is on now. It is the
   /// panel's "Auto" pill: a choice, so pressing it twice never switches
-  /// subtitles off. (The transport bar's subtitle button opens the panel;
-  /// the CC on/off toggle that used to live here had no caller left.)
+  /// subtitles off. (The `C` key is the toggle; see
+  /// [_toggleSubtitleShortcut].)
   void _pickBestSubtitle() {
     final auto = SubtitleAutoPick.embedded(
       _embeddedSubtitles,
@@ -1885,14 +1995,19 @@ class _PlayerScreenState extends State<PlayerScreen>
                 WindowService.instance.toggleFullscreen();
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyC) {
-                // Subtitles, VLC's key. Opens the panel rather than
-                // toggling: the panel's Auto and Off pills cover the toggle
-                // in one more tap, and track selection is the thing a
-                // keyboard user reaching for subtitles usually wants.
-                _toggleMenu('subtitle');
+                // Subtitles on/off, VLC's key. Turning them on matches the
+                // language being heard.
+                //
+                // The panel is not behind this key -- it is one panel for
+                // audio, subtitles and sleep, and it opens on A with the
+                // audio menu it replaced. Both keys would be a coin flip.
+                _toggleSubtitleShortcut();
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyA) {
-                _toggleMenu('audio');
+                // Opens the merged panel. "A" was the audio menu and the
+                // panel is where that menu went, so the key follows the
+                // content rather than being retired.
+                _toggleMenu('settings');
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyS) {
                 _toggleMenu('speed');
@@ -2314,6 +2429,8 @@ class _PlayerScreenState extends State<PlayerScreen>
 
         // Floating Subtitle Menu Popover
         if (_activeMenu == 'subtitle' && !_isLoading)
+          // Floating Subtitle Menu Popover
+        if (_activeMenu == 'subtitle' && !_isLoading)
           PlayerMenuAnchor(
             child: PlayerSubtitleMenu(
               onBack: _backToSettings,
@@ -2327,19 +2444,15 @@ class _PlayerScreenState extends State<PlayerScreen>
               selectedEmbeddedIndex: _selectedEmbeddedSubtitleIndex,
               selectedVariant: _currentSubtitleVariant,
               isSubtitleEnabled: _isSubtitleEnabled,
-              movieTitle: widget.detail?.name ?? widget.title,
-              imdbId: widget.detail?.id,
-              season: _currentEpisode?.season,
-              episode: _currentEpisode?.episode,
-              year: widget.detail?.year != null
-                  ? int.tryParse(widget.detail!.year!)
-                  : null,
               delaySec: _subtitleDelayMs / 1000.0,
-              onSelectVariant: (v) {
-                if (v != null) _loadSubtitle(v);
-              },
-              onSelectEmbedded: (emb) => _selectEmbeddedSubtitle(emb),
-              onToggleOff: _disableSubtitles,
+              onSelectVariant: _loadSubtitle,
+              onSelectEmbedded: _selectEmbeddedSubtitle,
+              // One button, and it does whichever of these is not already
+              // done: on picks the track for the language being heard, off
+              // clears it.
+              onEnable: _pickBestSubtitle,
+              onDisable: _disableSubtitles,
+              onRefresh: _refreshOnlineSubtitles,
               onOpenSyncBar: () {
                 if (_selectedEmbeddedSubtitleIndex != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -2358,12 +2471,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   _showSubSyncBar = true;
                 });
               },
-              onAutoPick: _pickBestSubtitle,
               player: _player,
-              onClose: () => setState(() {
-                _activeMenu = null;
-                _menuParent = null;
-              }),
             ),
           ),
 
@@ -2374,7 +2482,7 @@ class _PlayerScreenState extends State<PlayerScreen>
               onBack: _backToSettings,
               audioTracks: _audioTracks,
               selectedIndex: _selectedAudioTrackIndex,
-              delaySec: _audioDelaySec,
+              primaryIndex: _primaryAudioTrackIndex,
               onTrackSelected: (idx) {
                 setState(() => _selectedAudioTrackIndex = idx);
                 try {
@@ -2395,28 +2503,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                     .firstOrNull;
                 _showAudioHudToast(match?.title ?? 'Track $idx');
               },
-              onDelayChanged: (sec) {
-                setState(() => _audioDelaySec = sec);
-                try {
-                  final np = _player.platform as dynamic;
-                  np.setProperty('audio-delay', sec.toString());
-                } catch (_) {
-                  // 'audio-delay' is libmpv-only. The value stays in the UI
-                  // either way, so a desktop build without it just does not
-                  // shift the audio.
-                }
-                _showAudioHudToast(
-                  'AUDIO SYNC: ${sec > 0 ? "+" : ""}${sec.toStringAsFixed(2)}s',
-                );
-              },
             ),
           ),
 
         // Floating Sleep Timer Popover
         if (_activeMenu == 'sleep' && !_isLoading)
-          const PlayerMenuAnchor(
-            child: SleepTimerMenu(),
-          ),
+          const PlayerMenuAnchor(child: SleepTimerMenu()),
 
         // Floating Speed Menu Popover
         if (_activeMenu == 'speed' && !_isLoading)

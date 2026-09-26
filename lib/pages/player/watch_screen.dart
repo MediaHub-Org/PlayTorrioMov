@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
@@ -114,15 +115,15 @@ class _WatchScreenState extends State<WatchScreen>
         );
 
     _animController.forward();
-    SourceFilterSettings.audioLanguage.addListener(_onSourceFilterChanged);
-    SourceFilterSettings.quality.addListener(_onSourceFilterChanged);
+    SourceFilterSettings.audioLanguages.addListener(_onSourceFilterChanged);
+    SourceFilterSettings.qualities.addListener(_onSourceFilterChanged);
     _loadStreams();
   }
 
   @override
   void dispose() {
-    SourceFilterSettings.audioLanguage.removeListener(_onSourceFilterChanged);
-    SourceFilterSettings.quality.removeListener(_onSourceFilterChanged);
+    SourceFilterSettings.audioLanguages.removeListener(_onSourceFilterChanged);
+    SourceFilterSettings.qualities.removeListener(_onSourceFilterChanged);
     _sourceBatchTimer?.cancel();
     _animController.dispose();
     _sourcesScrollController.dispose();
@@ -235,8 +236,10 @@ class _WatchScreenState extends State<WatchScreen>
   /// Sources & Filters settings page shows, and it survives opening the next
   /// episode. The getters keep the call sites reading like the local fields
   /// they replaced.
-  String get _selectedAudioFilter => SourceFilterSettings.audioLanguage.value;
-  String get _selectedQualityFilter => SourceFilterSettings.quality.value;
+  List<String> get _selectedAudioFilters =>
+      SourceFilterSettings.audioLanguages.value;
+  List<String> get _selectedQualityFilters =>
+      SourceFilterSettings.qualities.value;
 
   /// Repaints when either shared filter changes, including a change made on
   /// the settings page while this screen sits underneath it.
@@ -284,17 +287,22 @@ class _WatchScreenState extends State<WatchScreen>
       }
     }
 
-    // Filter by audio language / dub
-    if (_selectedAudioFilter != 'all') {
+    // Filter by audio language / dub. Any of the selected languages matches,
+    // and an empty selection is no filter at all.
+    if (_selectedAudioFilters.isNotEmpty) {
       list = list
-          .where((s) => s.hasAudioLanguage(_selectedAudioFilter,
-              mediaTitle: widget.detail.name))
+          .where((s) => s.hasAnyAudioLanguage(
+                _selectedAudioFilters,
+                mediaTitle: widget.detail.name,
+              ))
           .toList();
     }
 
     // Filter by video quality / resolution
-    if (_selectedQualityFilter != 'all') {
-      list = list.where((s) => s.hasQuality(_selectedQualityFilter)).toList();
+    if (_selectedQualityFilters.isNotEmpty) {
+      list = list
+          .where((s) => s.hasAnyQuality(_selectedQualityFilters))
+          .toList();
     }
 
     if (_selectedSizeFilter == 'largest') {
@@ -1431,7 +1439,11 @@ class _WatchScreenState extends State<WatchScreen>
   Widget _buildQualityFilterDropdown() {
     return _buildFilterDropdownButton(
       onTap: (buttonContext) => _showQualityGlassDropdown(buttonContext),
-      currentText: qualityFilterLabel(context.l10n, _selectedQualityFilter),
+      currentText: _multiFilterLabel(
+        context.l10n,
+        _selectedQualityFilters,
+        qualityFilterLabel,
+      ),
       icon: Icons.high_quality_rounded,
     );
   }
@@ -1443,11 +1455,11 @@ class _WatchScreenState extends State<WatchScreen>
           .map(
             (key) => _buildFilterMenuItem(
               title: qualityFilterLabel(context.l10n, key),
-              selected: _selectedQualityFilter == key,
-              onTap: () {
-                SourceFilterSettings.setQuality(key);
-                Navigator.pop(context);
-              },
+              selected: _selectedQualityFilters.contains(key),
+              // The menu stays open: a multi-select that closed on every tap
+              // would make picking two qualities a two-open job, and the
+              // checkmarks are the only feedback that the first one landed.
+              onTap: () => SourceFilterSettings.toggleQuality(key),
             ),
           )
           .toList(),
@@ -1457,7 +1469,11 @@ class _WatchScreenState extends State<WatchScreen>
   Widget _buildAudioFilterDropdown() {
     return _buildFilterDropdownButton(
       onTap: (buttonContext) => _showAudioGlassDropdown(buttonContext),
-      currentText: audioFilterLabel(context.l10n, _selectedAudioFilter),
+      currentText: _multiFilterLabel(
+        context.l10n,
+        _selectedAudioFilters,
+        audioFilterLabel,
+      ),
       icon: Icons.language_rounded,
     );
   }
@@ -1465,26 +1481,33 @@ class _WatchScreenState extends State<WatchScreen>
   void _showAudioGlassDropdown(BuildContext buttonContext) {
     _showFilterMenu(
       buttonContext: buttonContext,
-      items: [
-        _buildAudioDropdownItem('all'),
-        _buildFilterMenuDivider(),
-        // Everything after "all", which the header row above already covers.
-        ...kAudioFilterKeys
-            .where((key) => key != 'all')
-            .map(_buildAudioDropdownItem),
-      ],
+      items: kAudioFilterKeys.map(_buildAudioDropdownItem).toList(),
     );
   }
 
   Widget _buildAudioDropdownItem(String value) {
     return _buildFilterMenuItem(
       title: audioFilterLabel(context.l10n, value),
-      selected: _selectedAudioFilter == value,
-      onTap: () {
-        SourceFilterSettings.setAudioLanguage(value);
-        Navigator.pop(context);
-      },
+      selected: _selectedAudioFilters.contains(value),
+      onTap: () => SourceFilterSettings.toggleAudioLanguage(value),
     );
+  }
+
+  /// The label for a multi-select filter button.
+  ///
+  /// One selection is named outright, because that is the common case and
+  /// the name is more useful than a count. More than one becomes a count:
+  /// the button is a fixed-width pill in a scrolling row, and three language
+  /// names would push the other pills off the edge. None is "Any", which is
+  /// the same word the settings page uses for an empty selection.
+  String _multiFilterLabel(
+    AppLocalizations l10n,
+    List<String> selected,
+    String Function(AppLocalizations, String) label,
+  ) {
+    if (selected.isEmpty) return l10n.sourceFilterNoneSelected;
+    if (selected.length == 1) return label(l10n, selected.first);
+    return l10n.sourceFilterSelectedCount(selected.length);
   }
 
   Widget _buildEmptyState() {
@@ -1496,7 +1519,7 @@ class _WatchScreenState extends State<WatchScreen>
   /// sources actually present, so it cannot itself be the thing that made
   /// the list empty.
   bool get _hasActiveSourceFilter =>
-      _selectedAudioFilter != 'all' || _selectedQualityFilter != 'all';
+      _selectedAudioFilters.isNotEmpty || _selectedQualityFilters.isNotEmpty;
 
   /// The empty list you get when a filter, not the title, emptied it. Says
   /// which and offers the way out in one tap, rather than the generic "no

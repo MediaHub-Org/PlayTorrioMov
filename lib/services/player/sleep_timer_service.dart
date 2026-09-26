@@ -22,9 +22,22 @@ class SleepTimerService {
   /// transport bar's button, which shows the count in its badge.
   final ValueNotifier<int?> minutesRemaining = ValueNotifier<int?>(null);
 
-  /// Called when the countdown reaches zero. The player screen supplies it,
-  /// and pauses playback there -- the service owns the clock, not the
-  /// player, so it has no business reaching into playback itself.
+  /// Whether the timer is armed to fire at the end of the video rather than
+  /// after a number of minutes.
+  ///
+  /// Its own notifier rather than a sentinel in [minutesRemaining]: the
+  /// transport bar reads that one as a countdown and would have to special-
+  /// case a magic value, and "end of video" has no number to count down to.
+  final ValueNotifier<bool> armedForEndOfVideo = ValueNotifier<bool>(false);
+
+  /// Whether any timer is armed, of either kind.
+  bool get isArmed =>
+      minutesRemaining.value != null || armedForEndOfVideo.value;
+
+  /// Called when the countdown reaches zero, or when the video ends with
+  /// [armedForEndOfVideo] set. The player screen supplies it, and pauses
+  /// playback there -- the service owns the clock, not the player, so it has
+  /// no business reaching into playback itself.
   VoidCallback? onExpired;
 
   Timer? _ticker;
@@ -50,9 +63,29 @@ class SleepTimerService {
     });
   }
 
+  /// Arms the timer to fire when the video ends instead of after a count of
+  /// minutes. No ticker: there is nothing to count down, and the player is
+  /// what knows when the video ended.
+  void startUntilEndOfVideo() {
+    cancel();
+    armedForEndOfVideo.value = true;
+  }
+
+  /// Called by the player when playback reaches the end.
+  ///
+  /// Pass [mounted] as false when the completion arrived after the player was
+  /// torn down -- a disposed screen has nothing left to pause, and firing
+  /// would call into a dead State.
+  void notifyVideoEnded({bool mounted = true}) {
+    if (!armedForEndOfVideo.value) return;
+    armedForEndOfVideo.value = false;
+    if (mounted) onExpired?.call();
+  }
+
   void cancel() {
     _ticker?.cancel();
     _ticker = null;
     minutesRemaining.value = null;
+    armedForEndOfVideo.value = false;
   }
 }

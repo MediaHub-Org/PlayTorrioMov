@@ -17,16 +17,42 @@ const Map<String, String> _iso639ToDisplayName = {
     'ar': 'Arabic',
     'eng': 'English',
     'en': 'English',
+    // Regional variants, which providers send as `en-US`, `es-419`, `pt-BR`
+    // and so on. Without these the code fell through to the unknown branch
+    // and rendered as "EN-US" -- and worse, Spanish (Spain) and Spanish
+    // (Latin America) arrived as one indistinguishable "Spanish", which is
+    // the pair a viewer is most likely to care about: the dubs are different
+    // recordings, not different spellings.
+    'en-us': 'English (US)',
+    'en-gb': 'English (UK)',
+    'en-au': 'English (AU)',
+    'eng-us': 'English (US)',
+    'eng-gb': 'English (UK)',
     'spa': 'Spanish',
     'es': 'Spanish',
+    'es-es': 'Spanish (ES)',
+    'es-spain': 'Spanish (ES)',
+    'spa-es': 'Spanish (ES)',
+    'es-419': 'Spanish (LATAM)',
+    'es-la': 'Spanish (LATAM)',
+    'es-mx': 'Spanish (LATAM)',
+    'es-ar': 'Spanish (LATAM)',
+    'es-co': 'Spanish (LATAM)',
+    'es-cl': 'Spanish (LATAM)',
+    'spa-419': 'Spanish (LATAM)',
     'fre': 'French',
     'fra': 'French',
     'fr': 'French',
+    'fr-fr': 'French (FR)',
+    'fr-ca': 'French (CA)',
     'ger': 'German',
     'deu': 'German',
     'de': 'German',
+    'de-de': 'German (DE)',
+    'de-at': 'German (AT)',
     'ita': 'Italian',
     'it': 'Italian',
+    'it-it': 'Italian (IT)',
     'jpn': 'Japanese',
     'ja': 'Japanese',
     'kor': 'Korean',
@@ -37,9 +63,19 @@ const Map<String, String> _iso639ToDisplayName = {
     'pt': 'Portuguese',
     'pob': 'Portuguese (BR)',
     'pb': 'Portuguese (BR)',
+    'pt-br': 'Portuguese (BR)',
+    'por-br': 'Portuguese (BR)',
+    'pt-pt': 'Portuguese (PT)',
+    'por-pt': 'Portuguese (PT)',
     'chi': 'Chinese',
     'zho': 'Chinese',
     'zh': 'Chinese',
+    'zh-cn': 'Chinese (Simplified)',
+    'zh-hans': 'Chinese (Simplified)',
+    'zh-sg': 'Chinese (Simplified)',
+    'zh-tw': 'Chinese (Traditional)',
+    'zh-hant': 'Chinese (Traditional)',
+    'zh-hk': 'Chinese (Traditional)',
     'hin': 'Hindi',
     'hi': 'Hindi',
     'tur': 'Turkish',
@@ -157,10 +193,32 @@ String subtitleLanguageName(String rawCode) {
     final base = subtitleLanguageName(regional.group(1)!);
     final region = regional.group(2)!.trim();
     final regionName = switch (region) {
-      'latam' || 'latin america' || 'latin american' => 'Latin America',
-      'br' || 'brazil' => 'Brazil',
-      'pt' || 'portugal' => 'Portugal',
-      'us' || 'usa' => 'United States',
+      // Short codes throughout, so a language and its variants read as a
+      // family: "Spanish (ES)" beside "Spanish (LATAM)", not "Spanish
+      // (Spain)" beside "Spanish (Latin America)". The long spellings were
+      // also inconsistent with the code path -- `es-419` and `spanish
+      // (latam)` are the same variant and have to render the same way.
+      'latam' || 'latin america' || 'latin american' || '419' || 'la' =>
+        'LATAM',
+      'br' || 'brazil' => 'BR',
+      'pt' || 'portugal' => 'PT',
+      'us' || 'usa' || 'united states' => 'US',
+      'uk' || 'gb' || 'united kingdom' => 'UK',
+      'au' || 'australia' => 'AU',
+      'ca' || 'canada' => 'CA',
+      'mx' || 'mexico' => 'MX',
+      'ar' || 'argentina' => 'AR',
+      'co' || 'colombia' => 'CO',
+      'cl' || 'chile' => 'CL',
+      'es' || 'spain' => 'ES',
+      'cn' || 'china' => 'CN',
+      'tw' || 'taiwan' => 'TW',
+      'hk' || 'hong kong' => 'HK',
+      'sg' || 'singapore' => 'SG',
+      'fr' || 'france' => 'FR',
+      'de' || 'germany' => 'DE',
+      'at' || 'austria' => 'AT',
+      'it' || 'italy' => 'IT',
       _ => _capitalizeWords(region),
     };
     return '$base ($regionName)';
@@ -217,12 +275,19 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 /// file can carry `zh`, `chi`, `zho`, `zhc` and `zht` tracks, which the
 /// picker showed as four separate languages. They are one language with two
 /// scripts, and the group header says which.
+///
+/// **Regional variants are deliberately kept apart.** Spanish (ES) and
+/// Spanish (LATAM) are different recordings, not different spellings of one
+/// label, and a viewer who wants one does not want the other -- so they are
+/// two groups. The same goes for Portuguese (BR) and (PT), and for English
+/// (US) and (UK). Only the *script* split is collapsed, because Simplified
+/// and Traditional Chinese are the same audio with two writing systems, and
+/// a viewer reading one can generally read the other.
 String canonicalLanguageGroup(String? rawLanguage) {
   final name = subtitleTrackLanguageName(rawLanguage);
   if (name.isEmpty) return '';
+  // Script variants collapse to one Chinese group; the row still says which
+  // script it is.
   if (name.startsWith('Chinese')) return 'Chinese';
-  final regional = RegExp(
-    r'^(.+?)\s*\((?:Latin America|Brazil|Portugal|United States)\)$',
-  ).firstMatch(name);
-  return regional?.group(1) ?? name;
+  return name;
 }

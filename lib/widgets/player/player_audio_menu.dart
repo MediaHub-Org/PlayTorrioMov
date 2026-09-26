@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+
 import '../../l10n/l10n.dart';
-import '../../services/theme/app_colors.dart';
 import 'language_flag.dart';
 import 'player_glass.dart';
+import 'player_menu_row.dart';
 
+/// One audio track, as the menu needs to draw it.
 class PlayerAudioTrack {
   final int index;
+
+  /// The clean language name, e.g. "English". The container's own title is
+  /// not used: it tends to carry codec and channel detail ("English [DD+
+  /// 5.1]"), which the row does not show at all.
   final String title;
   final String? language;
   final String? codec;
   final int? channels;
-  final bool isDefault;
 
   const PlayerAudioTrack({
     required this.index,
@@ -18,395 +23,85 @@ class PlayerAudioTrack {
     this.language,
     this.codec,
     this.channels,
-    this.isDefault = false,
   });
 }
 
-/// Audio tracks selector and audio sync offset adjuster.
+/// The audio tracks, on their own.
+///
+/// This shared a panel with the subtitles and the sleep timer for a while.
+/// They are three unrelated questions -- what am I hearing, what am I reading,
+/// when does this stop -- asked at different moments, and putting them side by
+/// side made a viewer answer all three to change one. Each has its own icon
+/// on the transport bar again.
+///
+/// A row is the language and nothing else. Codec, channel count and the
+/// container's own track title are all gone: the list exists to answer "which
+/// language", and every extra field is another thing to read past on the way
+/// to that answer.
 class PlayerAudioMenu extends StatelessWidget {
   final List<PlayerAudioTrack> audioTracks;
   final int selectedIndex;
-  final double delaySec;
-  final ValueChanged<int> onTrackSelected;
-  final ValueChanged<double> onDelayChanged;
 
-  /// Back to the settings root, when this menu was stepped into from
-  /// there rather than opened directly.
+  /// The track the file opens with, badged as the original. Null when it is
+  /// not known, which is better than badging a guess.
+  final int? primaryIndex;
+
+  final ValueChanged<int> onTrackSelected;
+
+  /// Back to the settings root, when this menu was stepped into from there.
   final VoidCallback? onBack;
 
   const PlayerAudioMenu({
     super.key,
     required this.audioTracks,
     required this.selectedIndex,
-    required this.delaySec,
     required this.onTrackSelected,
-    required this.onDelayChanged,
+    this.primaryIndex,
     this.onBack,
   });
 
-  // Replaces the per-menu `_getLanguageEmoji` that matched ISO code
-  // substrings against a display name -- which rendered "Spanish" as the
-  // globe and "Chinese" as the Indian flag. See language_flag.dart.
-  Widget _flag(String? lang) => (lang == null || lang.isEmpty)
-      ? const Text('🔊', style: TextStyle(fontSize: 15))
-      : LanguageFlag(lang, height: 14);
-
-  String? _getTrackSubtitle(BuildContext context, PlayerAudioTrack track) {
-    final parts = <String>[];
-    if (track.language != null && track.language!.isNotEmpty) {
-      parts.add(track.language!.toUpperCase());
-    }
-    if (track.codec != null && track.codec!.isNotEmpty) {
-      parts.add(track.codec!.toUpperCase());
-    }
-    if (track.channels != null && track.channels! > 0) {
-      parts.add(track.channels == 6 ? '5.1 Surround' : (track.channels == 8 ? '7.1 Surround' : context.l10n.playerChannelsShort(track.channels!)));
-    }
-    return parts.isEmpty ? null : parts.join(' · ');
-  }
-
   @override
   Widget build(BuildContext context) {
-    AppColors.dependOn(context);
-    final hasTracks = audioTracks.isNotEmpty;
-    final size = MediaQuery.sizeOf(context);
-    final screenWidth = size.width;
-    final screenHeight = size.height;
-    final isCompactH = screenHeight < 500;
-
-    final cardWidth = (370.0).clamp(270.0, screenWidth - 28);
-    final maxTrackListHeight = isCompactH
-        ? (screenHeight - 170).clamp(70.0, 160.0)
-        : (240.0).clamp(110.0, (screenHeight - 240).clamp(110.0, 320.0));
-
     return PlayerGlassCard(
-      width: cardWidth,
-      padding: EdgeInsets.all(isCompactH ? 8 : 12),
+      width: PlayerTheme.menuWidthFor(context),
+      padding: const EdgeInsets.all(10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header. No close button: tapping off the panel dismisses it,
-          // and the back arrow returns to the settings root.
           Row(
             children: [
+              if (onBack != null) ...[
+                PlayerIconButton(
+                  size: 28,
+                  iconSize: 14,
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                  tooltip: context.l10n.playerBackToSettings,
+                  onPressed: onBack,
+                ),
+                const SizedBox(width: 4),
+              ],
               Expanded(
-                child: Row(
-                  children: [
-                    // Back to the settings root -- this menu is reached from
-                    // there, and had no way back to it.
-                    if (onBack != null) ...[
-                      PlayerIconButton(
-                        size: 28,
-                        iconSize: 14,
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                        tooltip: context.l10n.playerBackToSettings,
-                        onPressed: onBack,
-                      ),
-                      const SizedBox(width: 4),
-                    ],
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isCompactH ? 4 : 8,
-                        vertical: isCompactH ? 2 : 4,
-                      ),
-                      child: Text(
-                        context.l10n.playerAudioTracks.toUpperCase(),
-                        style: TextStyle(
-                          color: PlayerTheme.inkSubtle,
-                          fontSize: isCompactH ? 9.5 : 10.5,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                    ),
-                    if (hasTracks)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: PlayerTheme.raised,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          '${audioTracks.length}',
-                          style: TextStyle(
-                            color: PlayerTheme.inkSubtle,
-                            fontSize: isCompactH ? 9 : 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                  ],
+                child: PlayerMenuHeader(
+                  title: context.l10n.playerAudioTracks.toUpperCase(),
                 ),
               ),
             ],
           ),
-
-          SizedBox(height: isCompactH ? 4 : 6),
-
-          // Track List
-          ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxTrackListHeight),
-            child: hasTracks
-                ? ListView.builder(
-                    shrinkWrap: true,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: audioTracks.length,
-                    itemBuilder: (context, i) {
-                      final track = audioTracks[i];
-                      final isSelected = track.index == selectedIndex;
-                      final subtitle = _getTrackSubtitle(context, track);
-
-                      return Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(10),
-                          onTap: () {
-                            onTrackSelected(track.index);
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            margin: const EdgeInsets.only(bottom: 4),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.accent.withValues(alpha: 0.18)
-                                  : Colors.white.withValues(alpha: 0.03),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.accent.withValues(alpha: 0.6)
-                                    : Colors.white.withValues(alpha: 0.06),
-                                width: isSelected ? 1.4 : 1.0,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 20,
-                                  height: 20,
-                                  decoration: BoxDecoration(
-                                    color: isSelected ? AppColors.accent : Colors.white.withValues(alpha: 0.08),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isSelected ? AppColors.accent : Colors.white30,
-                                      width: 1.5,
-                                    ),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: isSelected
-                                      ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
-                                      : null,
-                                ),
-                                const SizedBox(width: 10),
-                                _flag(track.language),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        track.title,
-                                        style: TextStyle(
-                                          color: isSelected ? Colors.white : Colors.white70,
-                                          fontSize: 13,
-                                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      if (subtitle != null) ...[
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          subtitle,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? const Color(0xFF00D2EF)
-                                                : Colors.white.withValues(alpha: 0.4),
-                                            fontSize: 10.5,
-                                            fontWeight: FontWeight.w600,
-                                            letterSpacing: 0.4,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.audiotrack_rounded, size: 16, color: Colors.white38),
-                        const SizedBox(width: 8),
-                        // Expanded: a longer translation wraps instead of
-                        // pushing past the card.
-                        Expanded(
-                          child: Text(
-                            context.l10n.playerAudioDefaultStream,
-                            style: const TextStyle(color: Colors.white54, fontSize: 13),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-          ),
-
-          SizedBox(height: isCompactH ? 4 : 8),
-          const Divider(color: PlayerTheme.edgeSoft, height: 1),
-          SizedBox(height: isCompactH ? 4 : 8),
-
-          // Audio Sync Offset Row
-          Container(
-            padding: EdgeInsets.all(isCompactH ? 6 : 9),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.04),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Flexible so the label gives way to the offset badge beside
-                    // it: a translation can be longer than the English it
-                    // replaced, and this Row had nowhere to put the difference.
-                    Flexible(
-                      child: Row(
-                        children: [
-                          const Icon(Icons.sync_rounded, size: 14, color: Colors.white70),
-                          const SizedBox(width: 5),
-                          Flexible(
-                            child: Text(
-                              context.l10n.playerAudioSyncOffset,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: isCompactH ? 11 : 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: delaySec != 0
-                                ? AppColors.accent.withValues(alpha: 0.25)
-                                : Colors.white.withValues(alpha: 0.06),
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(
-                              color: delaySec != 0
-                                  ? AppColors.accent.withValues(alpha: 0.5)
-                                  : Colors.transparent,
-                            ),
-                          ),
-                          child: Text(
-                            '${delaySec > 0 ? "+" : ""}${delaySec.toStringAsFixed(2)}s',
-                            style: TextStyle(
-                              color: delaySec != 0 ? const Color(0xFF00D2EF) : Colors.white60,
-                              fontSize: isCompactH ? 11.5 : 12.5,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ),
-                        if (delaySec != 0) ...[
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () => onDelayChanged(0.0),
-                            child: const Icon(
-                              Icons.refresh_rounded,
-                              size: 16,
-                              color: Color(0xFF00D2EF),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: isCompactH ? 5 : 8),
-                Row(
-                  children: [
-                    // -0.5s
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                          minimumSize: Size(0, isCompactH ? 26 : 32),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                        ),
-                        onPressed: () => onDelayChanged(((delaySec - 0.5) * 10).round() / 10.0),
-                        child: Text('−0.5s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    // -0.1s
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                          minimumSize: Size(0, isCompactH ? 26 : 32),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                        ),
-                        onPressed: () => onDelayChanged(((delaySec - 0.1) * 10).round() / 10.0),
-                        child: Text('−0.1s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    // +0.1s
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                          minimumSize: Size(0, isCompactH ? 26 : 32),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                        ),
-                        onPressed: () => onDelayChanged(((delaySec + 0.1) * 10).round() / 10.0),
-                        child: Text('+0.1s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    // +0.5s
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                          padding: EdgeInsets.symmetric(vertical: isCompactH ? 3 : 6),
-                          minimumSize: Size(0, isCompactH ? 26 : 32),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
-                        ),
-                        onPressed: () => onDelayChanged(((delaySec + 0.5) * 10).round() / 10.0),
-                        child: Text('+0.5s', style: TextStyle(fontSize: isCompactH ? 10 : 11.5, fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          const SizedBox(height: 6),
+          if (audioTracks.isEmpty)
+            PlayerMenuEmptyRow(context.l10n.playerAudioDefaultStream)
+          else
+            for (final track in audioTracks)
+              PlayerMenuRow(
+                leading: LanguageFlag(track.language ?? '', height: 13),
+                title: track.title,
+                badges: [
+                  if (track.index == primaryIndex) 'original',
+                ],
+                isSelected: track.index == selectedIndex,
+                onTap: () => onTrackSelected(track.index),
+              ),
         ],
       ),
     );

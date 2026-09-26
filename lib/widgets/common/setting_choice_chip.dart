@@ -19,19 +19,30 @@ import '../../services/theme/app_theme_service.dart';
 /// `onSelected` also reports a chip being *un*-selected, which none of these
 /// rows want — every one of them had written the same `if (selected)` guard
 /// around its body.
+///
+/// That guard is right for a row where the choices are mutually exclusive:
+/// tapping the one already on cannot mean "turn everything off". It is wrong
+/// for a multi-select row, where tapping an on chip is exactly how you turn
+/// that one off — so [multiSelect] opts back into the deselection report.
 class SettingChoiceChip extends StatelessWidget {
   final String label;
   final bool selected;
 
-  /// Called when this chip is chosen. Callers that do not listen to the
-  /// setting they are writing pass their own `setState` in here.
+  /// Called when this chip is chosen, and — when [multiSelect] is true —
+  /// also when it is unchosen. Callers that do not listen to the setting
+  /// they are writing pass their own `setState` in here.
   final VoidCallback onSelect;
+
+  /// Whether more than one chip in this row can be on at once. When true,
+  /// [onSelect] also fires for a chip being turned off.
+  final bool multiSelect;
 
   const SettingChoiceChip({
     super.key,
     required this.label,
     required this.selected,
     required this.onSelect,
+    this.multiSelect = false,
   });
 
   @override
@@ -56,7 +67,7 @@ class SettingChoiceChip extends StatelessWidget {
             : AppColors.inkAlpha(0.08),
       ),
       onSelected: (isSelected) {
-        if (isSelected) onSelect();
+        if (isSelected || multiSelect) onSelect();
       },
     );
   }

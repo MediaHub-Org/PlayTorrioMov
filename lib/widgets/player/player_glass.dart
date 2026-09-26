@@ -6,6 +6,19 @@ import '../../services/theme/app_colors.dart';
 
 /// Design tokens and glass styling for the modern video player UI.
 class PlayerTheme {
+  /// The width every player popover is built at.
+  ///
+  /// One number rather than one per menu. They were 280, 320 and 330, which
+  /// meant the panel jumped sideways as a viewer moved between them, and it
+  /// made grouping any two of them under a single icon a layout change
+  /// rather than a wiring change. A menu that needs more room than this
+  /// should say why in its own file.
+  static const double menuWidth = 320;
+
+  /// The width a popover clamps to on a narrow screen, leaving a gutter.
+  static double menuWidthFor(BuildContext context) =>
+      menuWidth.clamp(240.0, MediaQuery.sizeOf(context).width - 32);
+
   // Backgrounds & Surfaces
   static const Color canvas = Color(0xFF080C12);
   static const Color elevated = Color(0xF0101622);

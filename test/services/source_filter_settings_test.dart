@@ -12,9 +12,8 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    SourceFilterSettings.audioLanguage.value = 'all';
-    SourceFilterSettings.quality.value = 'all';
-    SourceFilterSettings.preferredAudioLanguages.value = const <String>[];
+    SourceFilterSettings.audioLanguages.value = const <String>[];
+    SourceFilterSettings.qualities.value = const <String>[];
   });
 
   group('StreamSource.hasAudioLanguage and MULTI', () {
@@ -47,13 +46,86 @@ void main() {
     });
   });
 
+  group('hasAnyAudioLanguage', () {
+    test('an empty selection is no filter at all', () {
+      expect(
+        _source('Some Movie German DL').hasAnyAudioLanguage(const []),
+        isTrue,
+      );
+    });
+
+    test('matches when any one of the selected languages matches', () {
+      final s = _source('Some Movie German DL 1080p');
+      expect(s.hasAnyAudioLanguage(const ['french', 'german']), isTrue);
+      expect(s.hasAnyAudioLanguage(const ['french', 'italian']), isFalse);
+    });
+
+    test('a MULTI source matches a selection of concrete languages', () {
+      final s = _source('Some Movie MULTI 1080p');
+      expect(s.hasAnyAudioLanguage(const ['korean', 'turkish']), isTrue);
+    });
+  });
+
+  group('hasAnyQuality', () {
+    test('an empty selection is no filter at all', () {
+      expect(_source('Some stream').hasAnyQuality(const []), isTrue);
+    });
+
+    test('matches when any one of the selected qualities matches', () {
+      final s = _source('Movie 1080p WEB-DL');
+      expect(s.hasAnyQuality(const ['720p', '1080p']), isTrue);
+      expect(s.hasAnyQuality(const ['720p', '480p']), isFalse);
+    });
+  });
+
+  group('the five languages added to the detector', () {
+    // These were offered by the preferred-audio ranking before the two lists
+    // merged, and the ranking never needed a release-name pattern because it
+    // reads a file's own track tags. As a *filter* the same key would have
+    // hidden every source, so each one needs a pattern that fires.
+    test('each is detected from a release name', () {
+      expect(
+        _source('Movie Arabic Dub 1080p').hasAudioLanguage('arabic'),
+        isTrue,
+      );
+      expect(_source('Movie Chinese 1080p').hasAudioLanguage('chinese'), isTrue);
+      expect(_source('Movie Korean 1080p').hasAudioLanguage('korean'), isTrue);
+      expect(
+        _source('Movie Portuguese 1080p').hasAudioLanguage('portuguese'),
+        isTrue,
+      );
+      expect(_source('Movie Turkish 1080p').hasAudioLanguage('turkish'), isTrue);
+    });
+
+    test('a subtitle listing does not read as an audio language', () {
+      // The detector strips "subs: ..." listings before matching, so a
+      // release that only *subtitles* Korean must not match a Korean filter.
+      final s = _source('Movie 1080p\nSubs: Korean, Arabic');
+      expect(s.hasAudioLanguage('korean'), isFalse);
+      expect(s.hasAudioLanguage('arabic'), isFalse);
+    });
+
+    test('every offered key is one the detector can look for', () {
+      // The invariant that keeps the merged list honest: a key with no
+      // pattern would filter the list down to nothing.
+      for (final key in kAudioFilterKeys) {
+        final s = _source('Movie $key 1080p');
+        expect(
+          s.hasAudioLanguage(key),
+          isTrue,
+          reason: '$key is offered but not detectable',
+        );
+      }
+    });
+  });
+
   group('preferredAudioTrackIndex', () {
     test('an empty ranking never overrides the file default', () {
       expect(preferredAudioTrackIndex(['eng', 'spa']), isNull);
     });
 
     test('walks the ranking in priority order, not track order', () {
-      SourceFilterSettings.preferredAudioLanguages.value = const [
+      SourceFilterSettings.audioLanguages.value = const [
         'spanish',
         'english',
       ];
@@ -62,7 +134,7 @@ void main() {
     });
 
     test('falls through to the next ranked language when absent', () {
-      SourceFilterSettings.preferredAudioLanguages.value = const [
+      SourceFilterSettings.audioLanguages.value = const [
         'spanish',
         'english',
       ];
@@ -70,85 +142,221 @@ void main() {
     });
 
     test('null when no track carries a ranked language', () {
-      SourceFilterSettings.preferredAudioLanguages.value = const ['japanese'];
+      SourceFilterSettings.audioLanguages.value = const ['japanese'];
       expect(preferredAudioTrackIndex(['eng', 'spa']), isNull);
     });
 
     test('matches a full language name, not only an ISO code', () {
-      SourceFilterSettings.preferredAudioLanguages.value = const ['english'];
+      SourceFilterSettings.audioLanguages.value = const ['english'];
       expect(preferredAudioTrackIndex(['Spanish', 'English']), 1);
     });
 
     test('a track with no language tag is skipped, not matched', () {
-      SourceFilterSettings.preferredAudioLanguages.value = const ['english'];
+      SourceFilterSettings.audioLanguages.value = const ['english'];
       expect(preferredAudioTrackIndex([null, 'eng']), 1);
     });
   });
 
-  group('preferred audio ranking persistence', () {
+  group('audio list persistence', () {
     test('toggle adds to the end, and toggling again removes', () async {
-      await SourceFilterSettings.togglePreferredAudio('spanish');
-      await SourceFilterSettings.togglePreferredAudio('english');
-      expect(SourceFilterSettings.preferredAudioLanguages.value,
-          ['spanish', 'english']);
+      await SourceFilterSettings.toggleAudioLanguage('spanish');
+      await SourceFilterSettings.toggleAudioLanguage('english');
+      expect(SourceFilterSettings.audioLanguages.value, ['spanish', 'english']);
 
-      await SourceFilterSettings.togglePreferredAudio('spanish');
-      expect(SourceFilterSettings.preferredAudioLanguages.value, ['english']);
+      await SourceFilterSettings.toggleAudioLanguage('spanish');
+      expect(SourceFilterSettings.audioLanguages.value, ['english']);
     });
 
     test('promote and demote move one place and clamp at the ends', () async {
-      SourceFilterSettings.preferredAudioLanguages.value = const [
+      SourceFilterSettings.audioLanguages.value = const [
         'english',
         'spanish',
         'french',
       ];
 
-      await SourceFilterSettings.promotePreferredAudio('spanish');
-      expect(SourceFilterSettings.preferredAudioLanguages.value,
-          ['spanish', 'english', 'french']);
+      await SourceFilterSettings.promoteAudioLanguage('spanish');
+      expect(SourceFilterSettings.audioLanguages.value, [
+        'spanish',
+        'english',
+        'french',
+      ]);
 
-      await SourceFilterSettings.demotePreferredAudio('spanish');
-      expect(SourceFilterSettings.preferredAudioLanguages.value,
-          ['english', 'spanish', 'french']);
+      await SourceFilterSettings.demoteAudioLanguage('spanish');
+      expect(SourceFilterSettings.audioLanguages.value, [
+        'english',
+        'spanish',
+        'french',
+      ]);
 
       // At the ends, both are no-ops rather than wrapping.
-      await SourceFilterSettings.promotePreferredAudio('english');
-      await SourceFilterSettings.demotePreferredAudio('french');
-      expect(SourceFilterSettings.preferredAudioLanguages.value,
-          ['english', 'spanish', 'french']);
+      await SourceFilterSettings.promoteAudioLanguage('english');
+      await SourceFilterSettings.demoteAudioLanguage('french');
+      expect(SourceFilterSettings.audioLanguages.value, [
+        'english',
+        'spanish',
+        'french',
+      ]);
     });
 
-    test('the ranking survives a fresh initialize', () async {
-      await SourceFilterSettings.togglePreferredAudio('japanese');
-      await SourceFilterSettings.togglePreferredAudio('english');
+    test('the list survives a fresh initialize', () async {
+      await SourceFilterSettings.toggleAudioLanguage('japanese');
+      await SourceFilterSettings.toggleAudioLanguage('english');
 
-      SourceFilterSettings.preferredAudioLanguages.value = const <String>[];
+      SourceFilterSettings.audioLanguages.value = const <String>[];
       await SourceFilterSettings.initialize();
 
-      expect(SourceFilterSettings.preferredAudioLanguages.value,
-          ['japanese', 'english']);
+      expect(SourceFilterSettings.audioLanguages.value, [
+        'japanese',
+        'english',
+      ]);
     });
 
     test('a stored language this build does not know is dropped', () async {
       SharedPreferences.setMockInitialValues({
-        'source_preferred_audio_languages': ['english', 'klingon'],
+        'source_filter_audio_language': ['english', 'klingon'],
       });
 
       await SourceFilterSettings.initialize();
 
-      expect(SourceFilterSettings.preferredAudioLanguages.value, ['english']);
+      expect(SourceFilterSettings.audioLanguages.value, ['english']);
     });
 
-    test('clearFilters leaves the ranking alone', () async {
-      SourceFilterSettings.preferredAudioLanguages.value = const ['spanish'];
-      await SourceFilterSettings.setAudioLanguage('spanish');
+    test('an unknown key passed to a toggle is not stored', () async {
+      await SourceFilterSettings.toggleAudioLanguage('klingon');
+
+      expect(SourceFilterSettings.audioLanguages.value, isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getStringList('source_filter_audio_language'), isNull);
+    });
+  });
+
+  group('quality list persistence', () {
+    test('toggle adds and removes, and the list survives a reload', () async {
+      await SourceFilterSettings.toggleQuality('1080p');
+      await SourceFilterSettings.toggleQuality('720p');
+      expect(SourceFilterSettings.qualities.value, ['1080p', '720p']);
+
+      SourceFilterSettings.qualities.value = const <String>[];
+      await SourceFilterSettings.initialize();
+      expect(SourceFilterSettings.qualities.value, ['1080p', '720p']);
+
+      await SourceFilterSettings.toggleQuality('1080p');
+      expect(SourceFilterSettings.qualities.value, ['720p']);
+    });
+
+    test('an unknown key passed to a toggle is not stored', () async {
+      await SourceFilterSettings.toggleQuality('9000p');
+
+      expect(SourceFilterSettings.qualities.value, isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getStringList('source_filter_quality'), isNull);
+    });
+  });
+
+  group('migration from the single-value keys', () {
+    // The previous build stored one string per filter. A viewer who had
+    // picked Spanish should not have to pick it again after updating.
+    test('a stored single audio language becomes a one-item list', () async {
+      SharedPreferences.setMockInitialValues({
+        'source_filter_audio_language': 'spanish',
+      });
+
+      await SourceFilterSettings.initialize();
+
+      expect(SourceFilterSettings.audioLanguages.value, ['spanish']);
+    });
+
+    test('a stored single quality becomes a one-item list', () async {
+      SharedPreferences.setMockInitialValues({
+        'source_filter_quality': '1080p',
+      });
+
+      await SourceFilterSettings.initialize();
+
+      expect(SourceFilterSettings.qualities.value, ['1080p']);
+    });
+
+    test("the old 'all' sentinel migrates to an empty list", () async {
+      SharedPreferences.setMockInitialValues({
+        'source_filter_audio_language': 'all',
+        'source_filter_quality': 'all',
+      });
+
+      await SourceFilterSettings.initialize();
+
+      expect(SourceFilterSettings.audioLanguages.value, isEmpty);
+      expect(SourceFilterSettings.qualities.value, isEmpty);
+    });
+
+    test('the old ranking is folded into the audio list, after the filter', () async {
+      // The ranking was its own key and its own list. It is the same list
+      // now, so a language that was ranked but not filtered on still belongs
+      // in it -- and appending keeps the ranking's own order intact.
+      SharedPreferences.setMockInitialValues({
+        'source_filter_audio_language': 'english',
+        'source_preferred_audio_languages': ['japanese', 'english'],
+      });
+
+      await SourceFilterSettings.initialize();
+
+      expect(SourceFilterSettings.audioLanguages.value, [
+        'english',
+        'japanese',
+      ]);
+    });
+
+    test('a language in both the filter and the ranking is not duplicated', () async {
+      SharedPreferences.setMockInitialValues({
+        'source_filter_audio_language': 'english',
+        'source_preferred_audio_languages': ['english', 'japanese'],
+      });
+
+      await SourceFilterSettings.initialize();
+
+      expect(SourceFilterSettings.audioLanguages.value, [
+        'english',
+        'japanese',
+      ]);
+    });
+
+    test('a new-style list wins over a stale single value', () async {
+      // Both keys present: the list is what this build writes, so it is the
+      // one that is current.
+      SharedPreferences.setMockInitialValues({
+        'source_filter_audio_language': ['french'],
+        'source_preferred_audio_languages': ['japanese'],
+      });
+
+      await SourceFilterSettings.initialize();
+
+      expect(SourceFilterSettings.audioLanguages.value, ['french', 'japanese']);
+    });
+  });
+
+  group('clearFilters and reset', () {
+    test('clearFilters empties both lists', () async {
+      SourceFilterSettings.audioLanguages.value = const ['spanish'];
+      SourceFilterSettings.qualities.value = const ['1080p'];
 
       await SourceFilterSettings.clearFilters();
 
-      expect(SourceFilterSettings.audioLanguage.value, 'all');
-      // Not a filter that can empty a list, so "clear filters" must not
-      // silently discard it.
-      expect(SourceFilterSettings.preferredAudioLanguages.value, ['spanish']);
+      expect(SourceFilterSettings.audioLanguages.value, isEmpty);
+      expect(SourceFilterSettings.qualities.value, isEmpty);
+    });
+
+    test('reset clears the values and what was stored', () async {
+      await SourceFilterSettings.toggleAudioLanguage('german');
+      await SourceFilterSettings.toggleQuality('720p');
+
+      await SourceFilterSettings.reset();
+
+      expect(SourceFilterSettings.audioLanguages.value, isEmpty);
+      expect(SourceFilterSettings.qualities.value, isEmpty);
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getStringList('source_filter_audio_language'), isNull);
+      expect(prefs.getStringList('source_filter_quality'), isNull);
+      expect(prefs.getStringList('source_preferred_audio_languages'), isNull);
     });
   });
 
@@ -164,8 +372,11 @@ void main() {
 
     test('4K covers 2160, 4k and uhd alike', () {
       for (final tag in ['2160p', '4K', 'UHD']) {
-        expect(_source('Movie $tag HDR').hasQuality('4K'), isTrue,
-            reason: '$tag should read as 4K');
+        expect(
+          _source('Movie $tag HDR').hasQuality('4K'),
+          isTrue,
+          reason: '$tag should read as 4K',
+        );
       }
     });
 
@@ -174,61 +385,9 @@ void main() {
       // treated as 480p.
       final s = _source('Some stream');
       expect(s.quality, isNull);
-      for (final key in kQualityFilterKeys.where((k) => k != 'all')) {
+      for (final key in kQualityFilterKeys) {
         expect(s.hasQuality(key), isFalse);
       }
-    });
-  });
-
-  group('SourceFilterSettings persistence', () {
-    test('a saved value is restored on the next initialize', () async {
-      await SourceFilterSettings.setAudioLanguage('spanish');
-      await SourceFilterSettings.setQuality('1080p');
-
-      // Simulate a fresh launch: the in-memory notifiers reset, the prefs
-      // stay.
-      SourceFilterSettings.audioLanguage.value = 'all';
-      SourceFilterSettings.quality.value = 'all';
-      await SourceFilterSettings.initialize();
-
-      expect(SourceFilterSettings.audioLanguage.value, 'spanish');
-      expect(SourceFilterSettings.quality.value, '1080p');
-    });
-
-    test('an unknown stored key is ignored, not applied', () async {
-      SharedPreferences.setMockInitialValues({
-        'source_filter_audio_language': 'klingon',
-        'source_filter_quality': '9000p',
-      });
-
-      await SourceFilterSettings.initialize();
-
-      // Applying these would filter the source list to nothing with no
-      // dropdown entry able to explain why.
-      expect(SourceFilterSettings.audioLanguage.value, 'all');
-      expect(SourceFilterSettings.quality.value, 'all');
-    });
-
-    test('reset clears both the value and what was stored', () async {
-      await SourceFilterSettings.setAudioLanguage('german');
-      await SourceFilterSettings.setQuality('720p');
-
-      await SourceFilterSettings.reset();
-
-      expect(SourceFilterSettings.audioLanguage.value, 'all');
-      expect(SourceFilterSettings.quality.value, 'all');
-
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('source_filter_audio_language'), isNull);
-      expect(prefs.getString('source_filter_quality'), isNull);
-    });
-
-    test('an unknown key passed to a setter is not stored', () async {
-      await SourceFilterSettings.setQuality('9000p');
-
-      expect(SourceFilterSettings.quality.value, 'all');
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('source_filter_quality'), isNull);
     });
   });
 }

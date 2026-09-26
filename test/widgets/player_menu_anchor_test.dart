@@ -20,7 +20,7 @@ void main() {
     ) async {
       // The regression this exists for: a bottom-anchored menu with no top
       // bound sent whatever height it did not have upward, out of the
-      // viewport, with nothing to clip or scroll it. The subtitle panel is
+      // viewport, with nothing to clip or scroll it. The subtitle menu is
       // the fixture now -- the speed menu shrank when its sleep timer moved
       // to settings, and no longer overflows a 400px screen on its own.
       tester.view.physicalSize = const Size(880, 400);
@@ -31,16 +31,12 @@ void main() {
         wrap(
           PlayerMenuAnchor(
             child: PlayerSubtitleMenu(
-              groups: const [],
               isSubtitleEnabled: false,
-              movieTitle: 'A Movie',
-              delaySec: 0,
               onSelectVariant: (_) {},
               onSelectEmbedded: (_) {},
-              onToggleOff: () {},
+              onEnable: () {},
+              onDisable: () {},
               onOpenSyncBar: () {},
-              onAutoPick: () {},
-              onClose: () {},
             ),
           ),
         ),
