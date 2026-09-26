@@ -55,8 +55,14 @@ final RegExp _hearingImpairedMarker = RegExp(
 );
 
 /// Whether a subtitle's title marks it as a forced-narrative track.
+///
+/// English "forced" plus the Spanish and Portuguese spellings: a muxer
+/// writing "Español (Forzados)" means exactly what "English (Forced)"
+/// means, and matching only the English word left every Spanish forced
+/// track without its badge and outside the Forced filter.
 bool titleSaysForced(String title) {
-  return RegExp(r'\bforced\b', caseSensitive: false).hasMatch(title);
+  return RegExp(r'\bforced\b|\bforzad[oa]s?\b|\bforçad[oa]s?\b', caseSensitive: false)
+      .hasMatch(title);
 }
 
 class SubtitleLanguageGroup {

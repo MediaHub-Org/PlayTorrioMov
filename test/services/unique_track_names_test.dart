@@ -15,15 +15,16 @@ void main() {
       );
     });
 
-    test('names duplicates from their own titles when the titles say', () {
-      // The case that matters: a file with both Spanish dubs. The titles are
-      // what tell them apart, and a region is a better label than a number.
+    test('names duplicates with region and number', () {
+      // The case that matters: a file with both Spanish dubs. Each takes a
+      // region from its own title, and the group still numbers throughout --
+      // a second "Spanish (ES)" would otherwise collide with the first.
       expect(
         uniqueTrackLanguageNames(
           ['spa', 'spa'],
           ['Spanish (Castilian)', 'Spanish (Latin America)'],
         ),
-        ['Spanish (ES)', 'Spanish (LATAM)'],
+        ['Spanish (ES) #1', 'Spanish (LATAM) #2'],
       );
     });
 
@@ -47,24 +48,23 @@ void main() {
       );
     });
 
-    test('a region in one title numbers the whole group', () {
-      // Regions are used throughout or not at all. "Spanish (LATAM)" beside
-      // "Spanish #1" reads as two different kinds of thing when they are the
-      // same kind of thing, and the number says nothing a viewer can act on.
-      // One title naming no region means the group is numbered.
+    test('a region shows where known, and the group still numbers', () {
+      // One title naming no region does not hide the other's: the region
+      // shows where the track states it, and the number keeps every row
+      // unique either way.
       expect(
         uniqueTrackLanguageNames(
           ['spa', 'spa'],
           ['Spanish (Latin America)', 'Spanish'],
         ),
-        ['Spanish #1', 'Spanish #2'],
+        ['Spanish (LATAM) #1', 'Spanish #2'],
       );
     });
 
     test('a bracketed region code is read too', () {
       expect(
         uniqueTrackLanguageNames(['spa', 'spa'], ['Spanish [ES]', 'Spanish [MX]']),
-        ['Spanish (ES)', 'Spanish (MX)'],
+        ['Spanish (ES) #1', 'Spanish (MX) #2'],
       );
     });
 

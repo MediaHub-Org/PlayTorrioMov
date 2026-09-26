@@ -66,11 +66,16 @@ rather than files, and the sleep timer can wait for the video to end.
   one, and a second control with the same name in a different menu was a
   coin flip. Subtitle sync is unchanged.
 - **Two tracks in one language are told apart.** A file with both Spanish
-  dubs listed "Spanish" twice, so the choice between them was invisible. Each
-  now takes a region from its own title where the title names one --
-  `Spanish (ES)`, `Spanish (LATAM)` -- and a number where it does not, as
-  `Spanish #1`. Numbering is the honest answer there: the tracks really are
-  indistinguishable from their metadata.
+  dubs listed "Spanish" twice, so the choice between them was invisible.
+  Duplicates read `Language (Region) #number` now -- `Spanish (ES) #1`,
+  `Spanish (LATAM) #2` -- with the region shown where the track's own title
+  names one and the number keeping every row unique either way. A region
+  without a number would still collide when two tracks name the same
+  region.
+- **Spanish and Portuguese forced tracks are recognized.** Only the English
+  word "forced" was matched, so a track titled "Espanol (Forzados)" got no
+  badge and sat outside the Forced filter. The Spanish and Portuguese
+  spellings count too.
 - **Online subtitles with no language are not offered.** A result whose
   language field is empty or an unknown code cannot be listed -- the row
   would have no name -- and cannot be chosen deliberately, because there is

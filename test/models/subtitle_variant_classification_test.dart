@@ -34,6 +34,20 @@ void main() {
       expect(v('Release Forced').isForced, isTrue);
     });
 
+    test('Spanish and Portuguese forced markers count too', () {
+      // A muxer writing "Español (Forzados)" means what "English (Forced)"
+      // means. Matching only the English word left every Spanish forced
+      // track without its badge and outside the Forced filter.
+      for (final title in [
+        'Español (Forzados)',
+        'Subs Forzados',
+        'Forzado',
+        'Legenda Forçados',
+      ]) {
+        expect(v(title).isForced, isTrue, reason: title);
+      }
+    });
+
     test('title sniffing is word-boundary, not substring', () {
       // "White.House" and "Childhood" both contain "hi"; neither is a
       // hearing-impaired marker. This is the bug the old code had.

@@ -357,14 +357,12 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 ///
 /// A file with two Spanish subtitle tracks -- one Castilian, one Latin
 /// American -- rendered both as "Spanish", so the list showed the same word
-/// twice and the choice between them was invisible. This makes each name
-/// unique, in the order that costs the least information:
-///
-///  1. A region the track's own title names, as `Spanish (ES)`.
-///  2. A number, as `Spanish #1`, when the titles say nothing to tell them
-///     apart. Numbering is the honest answer there: the tracks really are
-///     indistinguishable from their metadata, and a viewer picking between
-///     them is picking by trial.
+/// twice and the choice between them was invisible. Duplicates are numbered
+/// throughout, in file order, and each takes a region from its own title
+/// where the title names one: `Spanish (ES) #1`, `Spanish (LATAM) #2`,
+/// `Spanish #3`. A region without a number would still collide when two
+/// tracks name the same region, and a number without a region hides a region
+/// the track does state.
 ///
 /// Tracks whose language is unknown are left alone -- there is nothing to
 /// disambiguate, and numbering "Track 3" would invent a language.
@@ -382,21 +380,6 @@ List<String> uniqueTrackLanguageNames(
     totals[name] = (totals[name] ?? 0) + 1;
   }
 
-  // Whether every track sharing a name names a region in its own title.
-  //
-  // A region is the better label, but only when it is available for all of
-  // them. "Spanish (LATAM)" beside "Spanish #1" reads as two different
-  // kinds of thing when they are the same kind of thing, and the number
-  // says nothing a viewer can act on. So the group either uses regions
-  // throughout or numbers throughout.
-  final everyTrackHasRegion = <String, bool>{};
-  for (var i = 0; i < names.length; i++) {
-    final name = names[i];
-    if (name.isEmpty || totals[name]! < 2) continue;
-    final has = _regionFromTitle(titles[i]) != null;
-    everyTrackHasRegion[name] = (everyTrackHasRegion[name] ?? true) && has;
-  }
-
   final seen = <String, int>{};
   return [
     for (var i = 0; i < names.length; i++)
@@ -404,13 +387,10 @@ List<String> uniqueTrackLanguageNames(
         final name = names[i];
         if (name.isEmpty || totals[name]! < 2) return name;
 
-        if (everyTrackHasRegion[name] == true) {
-          final region = _regionFromTitle(titles[i]);
-          if (region != null) return '$name ($region)';
-        }
-
+        final region = _regionFromTitle(titles[i]);
+        final labeled = region != null ? '$name ($region)' : name;
         final n = seen[name] = (seen[name] ?? 0) + 1;
-        return '$name #$n';
+        return '$labeled #$n';
       }(),
   ];
 }
