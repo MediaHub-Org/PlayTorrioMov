@@ -81,16 +81,26 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                 children: [
                   Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
                   const SizedBox(width: 10),
-                  Text(
-                    context.l10n.playerCastToDevice.toUpperCase(),
-                    style: const TextStyle(
-                      color: PlayerTheme.ink,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
+                  // Expanded, not Text + Spacer. Laid out flat the title
+                  // demanded its natural width and pushed the close button
+                  // past the edge -- 321px of overflow at 3x text scale, and
+                  // this string is translated, so a longer language narrows
+                  // the margin before any accessibility setting is involved.
+                  // Taking the Spacer's job means the title gives way first,
+                  // which is the same fix the Continue Watching header needed.
+                  Expanded(
+                    child: Text(
+                      context.l10n.playerCastToDevice.toUpperCase(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: PlayerTheme.ink,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.8,
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   PlayerIconButton(
                     size: 28,
                     iconSize: 14,

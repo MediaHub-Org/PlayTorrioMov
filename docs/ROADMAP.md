@@ -167,10 +167,30 @@ generic `Desktop/Mobile` fallback goes through the ARB. The Keyboard
 Shortcuts page's key column (`Space`, `J`, `Esc`) is the same idea — those
 are the physical keys.
 
-**No RTL layout audit has been done for Arabic.** Flutter's `Directionality`
-follows the locale automatically for standard Material widgets, but no custom
-`Row`/icon-direction assumptions elsewhere in the app have been checked
-against it.
+**The RTL audit is half done, and the half a test can hold is held.**
+`Row`, `ListView` and the Material widgets flip themselves under
+`Directionality`. Physical padding does not, and 37 sites across 21 files were
+using it: `EdgeInsets.only(left:)` is still the left edge in Arabic. All are
+`EdgeInsetsDirectional.only(start:/end:)` now, and
+`test/rtl_directional_padding_test.dart` fails if one comes back. Two were
+visible rather than cosmetic — `iptv_search_page` and `watch_history_page`
+applied the *page inset* with `left:`, so in Arabic the whole page hugged the
+wrong edge — and two were the hardcoded-Arabic anime pages.
+
+What is left needs eyes on a device, because it is about meaning rather than
+geometry:
+
+- **~87 `Alignment.centerLeft`-style constants.** Unlike the padding these
+  are not all wrong: some are genuinely physical (a gradient, a badge pinned
+  to a corner of artwork). Converting them wholesale would be a sweep with no
+  test behind it. They need reading one at a time, asking "leading, or left?"
+- **Icon direction.** A back chevron, a "next episode" arrow and the source
+  rail's scroll buttons all point somewhere. Flutter does not mirror
+  `Icons.arrow_forward_ios` for you; `Icons.arrow_forward` has a
+  `matchTextDirection` sibling and these do not use it.
+- **The player transport.** Seek-forward and seek-back are physical controls
+  over a timeline, and a timeline in Arabic is a genuine design question, not
+  a bug to fix blind.
 
 **Catalog descriptions are not a TMDB free win, if anyone reaches for that
 next.** Synopsis and genre text comes from the Stremio addon (Cinemeta by
@@ -222,9 +242,17 @@ unaudited.** Twenty-five high-traffic boxes are fixed so far, the settings
 pages among them. What is left is the long tail, in rough order of how many
 people meet it:
 
-1. **Live TV's portal browser** — a modal with its own toolbars.
-2. **The player's own overlays** — the cast sheet and the episode picker.
-   (The subtitle style editor is probed.)
+1. **Live TV's portal browser** — a modal with its own toolbars. The only
+   named target left.
+
+The player's overlays are done and probed: the subtitle style editor, the
+episode picker (which passed untouched — its rows already flex) and the cast
+sheet, whose header was 321px past the edge at 3x. That header is worth
+remembering as a pattern rather than a one-off: `Text` + `Spacer` + button in
+a flat `Row` means the title takes its natural width and shoves the button
+off. It is the third time this exact shape has been the bug — the Continue
+Watching header and the catalogue cards' metadata rows were the other two.
+`Expanded` on the text, taking the `Spacer`'s job, is the fix each time.
 
 The details-page rails are done, and one of the three never needed doing:
 
