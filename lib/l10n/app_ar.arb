@@ -43,6 +43,8 @@
   "sourceFilterPreferredUp": "تحريك لأعلى",
   "sourceFilterPreferredDown": "تحريك لأسفل",
   "sourceFilterNoneSelected": "الكل",
+  "sourceFilterAnyAudio": "أي صوت",
+  "sourceFilterAnyQuality": "أي جودة",
   "sourceFilterSelectedCount": "{count} محدَّد",
   "@sourceFilterSelectedCount": {
     "placeholders": { "count": { "type": "int" } }
@@ -181,6 +183,10 @@
   },
   "playerSubtitleCount": "{count} ملفات",
   "@playerSubtitleCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "playerSubtitleShowAll": "عرض كل اللغات ({count})",
+  "@playerSubtitleShowAll": {
     "placeholders": { "count": { "type": "int" } }
   },
   "playerAudioDefaultStream": "يتم تشغيل المسار الصوتي الافتراضي.",

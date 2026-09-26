@@ -62,6 +62,73 @@ rather than files, and the sleep timer can wait for the video to end.
 - **Audio sync is gone.** The only sync a viewer reaches for is the subtitle
   one, and a second control with the same name in a different menu was a
   coin flip. Subtitle sync is unchanged.
+- **Two tracks in one language are told apart.** A file with both Spanish
+  dubs listed "Spanish" twice, so the choice between them was invisible. Each
+  now takes a region from its own title where the title names one --
+  `Spanish (ES)`, `Spanish (LATAM)` -- and a number where it does not, as
+  `Spanish #1`. Numbering is the honest answer there: the tracks really are
+  indistinguishable from their metadata.
+- **Online subtitles with no language are not offered.** A result whose
+  language field is empty or an unknown code cannot be listed -- the row
+  would have no name -- and cannot be chosen deliberately, because there is
+  nothing to choose it by.
+- **The subtitle file count is gone.** The row picks the best file for the
+  language, the way Netflix and Disney+ do, so "5 files" was a number about
+  an implementation the viewer never sees, beside a choice that is always
+  one.
+- **Bold and Italic are two small icon toggles.** They were full-width tiles
+  with a switch each, for one bit of state apiece. A B and an I that light up
+  is what every text editor uses, and it takes a quarter of the height.
+
+### Fixed
+- **A file's own subtitles actually render now.** The previous fix was
+  self-defeating: it turned libass on and then called
+  `applySubtitleStyling`, which honours the `useLibass` preference -- off by
+  default -- and turned it straight back off. The styling call now takes a
+  `forceLibass` flag for embedded tracks, which have no other way to reach
+  the screen. The scale slider had the same problem and is fixed with it.
+- **The online subtitle list is fifteen languages, not two hundred.** A
+  provider search returns a couple of hundred languages, most with a single
+  file. The list is now sorted by how many files each language has -- the
+  ones a provider actually has coverage for -- and capped, with a "Show all"
+  row at the end.
+- **A language's other files are reachable.** One tap picks the best file,
+  the way Netflix and Disney+ do, and opens the rest at the same time, so a
+  wrong pick is visible without a second gesture to discover. Tapping the
+  open row again collapses it. The file rows are labelled by provider and
+  format, which is the only thing that tells two files for one language
+  apart.
+- **A file's own subtitles load when playback starts.** They did not appear
+  at all: an embedded ASS/SSA track is rendered by libass and never emitted
+  as text, and the default `useLibass: false` turned mpv's own rendering off
+  in favour of a Flutter overlay that had nothing to draw. An embedded track
+  now turns libass on, because it has no other way to reach the screen.
+- **A file's own subtitles are turned on automatically.** A file that ships
+  subtitles ships them for a reason, and a viewer should not have to open a
+  menu to find out they were there. The track chosen matches the language
+  being heard, then the file's own default, then the first. Once only, so a
+  viewer who turned them off is not overruled by a later track update.
+- **Embedded tracks are listed alphabetically**, after the file's own
+  default. The order was the muxer's, which is arbitrary -- a twelve-track
+  disc put its languages in whatever order they were authored, so the list
+  looked shuffled.
+- **An audio track with no language tag is no longer called "Audio".** A P2P
+  stream often tags none, and the fallback chain is now the container's own
+  title, then the codec, then "Audio" -- each one says more than the last.
+- **The audio and quality pills say "Any Audio" and "Any Quality"** when
+  nothing is selected, matching "All Sizes" beside them rather than a bare
+  "Any" that could belong to either.
+- **A multi-select filter's checkmark appears on the first tap.** The menu's
+  items were built once, when the dialog opened, so the tick only showed
+  after closing and reopening it.
+- **"More options" in the subtitle appearance editor is reachable.** The
+  panel sets its own height and the anchor bounds it; when the card asked for
+  more than the anchor could give, the two became nested scrollables and the
+  bottom of the panel could not be scrolled to. The card is clamped to the
+  room it actually has.
+- **The "More options" row has a visible tap ripple.** The glass card paints
+  its background with a `DecoratedBox`, and a `ListTile` under one has
+  nowhere to draw its ink.
 
 ### Changed
 - **The source filters are multi-select.** Audio language and video quality

@@ -79,6 +79,20 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   _SubtitleFilter _filter = _SubtitleFilter.all;
 
+  /// How many languages the online list shows before "Show all".
+  ///
+  /// A provider search returns a couple of hundred languages, most with a
+  /// single file. The fifteen with the most files are the ones a provider
+  /// actually has coverage for, and they are what a viewer is looking for.
+  static const int _onlineCap = 15;
+
+  /// Whether the viewer asked for the whole online list.
+  bool _showAllOnline = false;
+
+  /// The language whose files are open, if any. One at a time: two open
+  /// lists at once would push the rest of the languages off the panel.
+  String? _expandedLanguage;
+
   void _setAppearance(bool open) {
     setState(() => _showAppearance = open);
     widget.onAppearanceOpenChanged?.call(open);
@@ -104,7 +118,15 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     // appearance editor opened, which slid the whole thing up the screen
     // under the viewer's cursor -- and the editor's own `Expanded` rows need
     // a bounded height anyway, so the fixed height is doing two jobs.
-    final cardHeight = (screen.height - 160).clamp(280.0, 460.0);
+    //
+    // Clamped to what the anchor can actually give it. A card taller than
+    // that overflows the anchor's own scroll view, and the result is two
+    // nested scrollables where the outer one cannot be reached: the wheel
+    // goes to the inner list, and the bottom of the panel -- which is where
+    // "More options" expands to -- is unreachable.
+    final roomForCard = PlayerMenuAnchor.availableHeight(context);
+    final preferred = (screen.height - 160).clamp(280.0, 460.0);
+    final cardHeight = preferred < roomForCard ? preferred : roomForCard;
 
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
@@ -297,8 +319,18 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     final rows = <Widget>[];
 
     if (_source == _SubtitleSource.embedded) {
+      // The file's own default first, then alphabetical by language.
+      //
+      // File order is the muxer's, which is arbitrary to a viewer -- a
+      // twelve-track disc put its languages in whatever order they were
+      // authored, so the list looked shuffled. Alphabetical is the order
+      // someone scanning for "Spanish" can actually use, and the default
+      // stays on top because it is the one the file itself recommends.
       final embedded = [...widget.embeddedSubtitles]
-        ..sort((a, b) => (b.isDefault ? 1 : 0).compareTo(a.isDefault ? 1 : 0));
+        ..sort((a, b) {
+          if (a.isDefault != b.isDefault) return a.isDefault ? -1 : 1;
+          return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+        });
       for (final track in embedded) {
         if (!_passesFilter(
           isForced: track.isForced,
@@ -323,26 +355,83 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         );
       }
     } else {
-      for (final group in widget.groups) {
-        if (group.variants.isEmpty) continue;
+      // Most files first. A language with twelve files is one a provider
+      // actually has coverage for; the long tail of one-file languages is
+      // where the junk lives, and it is also what made this list 200 rows.
+      final groups = widget.groups
+          .where((g) => g.variants.isNotEmpty)
+          .where(
+            (g) => _passesFilter(
+              isForced: g.variants.first.isForced,
+              isHearingImpaired: g.variants.first.isHearingImpaired,
+            ),
+          )
+          .toList()
+        ..sort((a, b) => b.variants.length.compareTo(a.variants.length));
+
+      final visible = _showAllOnline ? groups : groups.take(_onlineCap).toList();
+
+      for (final group in visible) {
         final best = group.variants.first;
-        if (!_passesFilter(
-          isForced: best.isForced,
-          isHearingImpaired: best.isHearingImpaired,
-        )) {
-          continue;
-        }
+        final isExpanded = _expandedLanguage == group.language;
         rows.add(
           PlayerMenuRow(
             leading: LanguageFlag(group.language, height: 13),
             title: group.language,
+            // The count is back, but as a reason to tap rather than a fact
+            // about the implementation: it says there is more than one file
+            // here, which is what the chevron opens.
             badges: [
               if (group.variants.length > 1)
                 context.l10n.playerSubtitleCount(group.variants.length),
             ],
             isSelected: widget.isSubtitleEnabled &&
                 widget.selectedVariant?.downloadUrl == best.downloadUrl,
-            onTap: () => widget.onSelectVariant(best),
+            trailing: group.variants.length > 1
+                ? Icon(
+                    isExpanded
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
+                    size: 16,
+                    color: PlayerTheme.inkSubtle,
+                  )
+                : null,
+            // One tap picks the best file, the way Netflix and Disney+ do.
+            // A second tap on the same row opens the rest, for when the
+            // first one is wrong -- which is the only reason to want them.
+            onTap: () {
+              if (group.variants.length > 1 && isExpanded) {
+                setState(() => _expandedLanguage = null);
+                return;
+              }
+              widget.onSelectVariant(best);
+              if (group.variants.length > 1) {
+                setState(() => _expandedLanguage = group.language);
+              }
+            },
+          ),
+        );
+
+        if (isExpanded) {
+          for (final variant in group.variants) {
+            rows.add(
+              PlayerMenuRow(
+                leading: const SizedBox(width: 0),
+                title: _variantLabel(context, variant),
+                isSelected: widget.isSubtitleEnabled &&
+                    widget.selectedVariant?.downloadUrl == variant.downloadUrl,
+                onTap: () => widget.onSelectVariant(variant),
+              ),
+            );
+          }
+        }
+      }
+
+      if (!_showAllOnline && groups.length > _onlineCap) {
+        rows.add(
+          _ShowAllRow(
+            label: context.l10n.playerSubtitleShowAll(groups.length),
+            onTap: () => setState(() => _showAllOnline = true),
           ),
         );
       }
@@ -352,6 +441,22 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       rows.add(PlayerMenuEmptyRow(context.l10n.playerNoSubtitlesForStream));
     }
     return rows;
+  }
+
+  /// What one file in an expanded language is called.
+  ///
+  /// The provider and the release tags, which are the only things that tell
+  /// two files for one language apart. They are hidden until the row is
+  /// opened, because at the top level they are noise -- but once a viewer is
+  /// choosing between files, they are the whole basis for the choice.
+  String _variantLabel(BuildContext context, SubtitleVariant variant) {
+    final parts = <String>[
+      if (variant.providerName.isNotEmpty) variant.providerName,
+      if (variant.format.isNotEmpty) variant.format.toUpperCase(),
+      if (variant.isHearingImpaired) context.l10n.subsSdhShort,
+      if (variant.isForced) context.l10n.subsForced,
+    ];
+    return parts.isEmpty ? variant.title : parts.join(' · ');
   }
 
   /// Whether a track survives the active filter. `all` passes everything.
@@ -370,6 +475,47 @@ enum _SubtitleSource { embedded, online }
 
 /// Which tracks the list is narrowed to.
 enum _SubtitleFilter { all, sdh, forced }
+
+/// The row that lifts the online list's cap.
+///
+/// A row rather than a button: it sits at the end of the list it extends, so
+/// it reads as "there is more below" rather than as a control somewhere else.
+class _ShowAllRow extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _ShowAllRow({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(9),
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 36),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(color: PlayerTheme.edgeSoft),
+            ),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: PlayerTheme.inkSubtle,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 /// One of the Embedded / Online tabs.
 class _TabButton extends StatelessWidget {

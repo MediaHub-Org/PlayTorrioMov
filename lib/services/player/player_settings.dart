@@ -863,11 +863,22 @@ abstract final class PlayerSettings {
   }
 
   /// Live-applies all subtitle appearance properties directly to the underlying libmpv instance.
-  static Future<void> applySubtitleStyling(Player player) async {
+  ///
+  /// [forceLibass] is for an *embedded* track, and it is not a preference.
+  /// The Flutter overlay draws text from `player.stream.subtitle`, which mpv
+  /// only emits for subtitles it decodes into its own text stream; an
+  /// embedded ASS/SSA track is rendered by libass and never emitted. So with
+  /// `useLibass` off -- the default -- an embedded track has no way to reach
+  /// the screen at all, and every call here would turn its rendering back
+  /// off. The player passes true when it has selected one.
+  static Future<void> applySubtitleStyling(
+    Player player, {
+    bool forceLibass = false,
+  }) async {
     try {
       final dynamic platform = player.platform;
       if (platform != null) {
-        if (useLibass.value) {
+        if (useLibass.value || forceLibass) {
           // Ensure subtitle visibility and libass engine are activated in libmpv
           await platform.setProperty('sub-visibility', 'yes');
           await platform.setProperty('sub-ass', 'yes');
@@ -1206,11 +1217,17 @@ abstract final class PlayerSettings {
     _notify();
   }
 
-  static Future<void> setSubScale(double scale, {Player? player}) async {
+  static Future<void> setSubScale(
+    double scale, {
+    Player? player,
+    bool forceLibass = false,
+  }) async {
     subScale.value = (scale.clamp(0.5, 3.0) * 100).round() / 100.0;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_keySubScale, subScale.value);
-    if (player != null) applySubtitleStyling(player);
+    if (player != null) {
+      await applySubtitleStyling(player, forceLibass: forceLibass);
+    }
     _notify();
   }
 

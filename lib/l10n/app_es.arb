@@ -43,6 +43,8 @@
   "sourceFilterPreferredUp": "Subir",
   "sourceFilterPreferredDown": "Bajar",
   "sourceFilterNoneSelected": "Cualquiera",
+  "sourceFilterAnyAudio": "Cualquier audio",
+  "sourceFilterAnyQuality": "Cualquier calidad",
   "sourceFilterSelectedCount": "{count} seleccionados",
   "@sourceFilterSelectedCount": {
     "placeholders": { "count": { "type": "int" } }
@@ -181,6 +183,10 @@
   },
   "playerSubtitleCount": "{count} archivos",
   "@playerSubtitleCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "playerSubtitleShowAll": "Mostrar los {count} idiomas",
+  "@playerSubtitleShowAll": {
     "placeholders": { "count": { "type": "int" } }
   },
   "playerAudioDefaultStream": "Reproduciendo el audio predeterminado.",

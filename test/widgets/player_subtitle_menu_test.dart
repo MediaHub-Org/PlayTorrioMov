@@ -70,8 +70,81 @@ void main() {
       );
       await tester.pump();
 
+      // One row, not four. The count is a reason to tap -- it says there is
+      // more than one file here -- rather than a fact about the
+      // implementation.
       expect(find.text('Arabic'), findsOneWidget);
       expect(find.text('4 files'), findsOneWidget);
+    });
+
+    testWidgets('tapping the row picks the best file and opens the rest', (
+      tester,
+    ) async {
+      SubtitleVariant? picked;
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'best'), variant('Arabic', 'worse')],
+            ),
+          ],
+          onVariant: (v) => picked = v,
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Arabic'));
+      await tester.pump();
+
+      // One tap does both: it picks the best file, the way Netflix and
+      // Disney+ do, and opens the rest so a wrong pick is visible without a
+      // second gesture to discover.
+      expect(picked?.downloadUrl, 'best');
+      expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
+      expect(find.textContaining('test'), findsWidgets);
+    });
+
+    testWidgets('tapping the open row again collapses it', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'best'), variant('Arabic', 'worse')],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Arabic'));
+      await tester.pump();
+      await tester.tap(find.text('Arabic'));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.expand_more_rounded), findsOneWidget);
+      expect(find.textContaining('test'), findsNothing);
+    });
+
+    testWidgets('a single-file language has no chevron and no sub-list', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              variants: [variant('Arabic', 'only')],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      // Nothing to open, so nothing offers to.
+      expect(find.byIcon(Icons.expand_more_rounded), findsNothing);
+      expect(find.textContaining('files'), findsNothing);
     });
 
     testWidgets('the per-file tags are not shown at all', (tester) async {

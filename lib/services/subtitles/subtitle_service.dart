@@ -55,6 +55,11 @@ class SubtitleService {
     final seenVariants = <String>{};
     for (final variant in allVariants) {
       final language = canonicalLanguageGroup(variant.language);
+      // A variant with no language is not offered. It cannot be listed --
+      // the row would have no name -- and it cannot be chosen deliberately,
+      // because there is nothing to choose it by. Providers do send these:
+      // a result whose language field is empty or a code the table does not
+      // know. Dropping them is better than a row reading "Unknown".
       if (language.isEmpty) continue;
 
       final cleaned = _cleanVariant(variant, movieName, language);

@@ -200,25 +200,34 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                       ..._vposItems(),
                       const SizedBox(height: 8),
 
-                      Theme(
-                        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                        child: ExpansionTile(
-                          tilePadding: EdgeInsets.zero,
-                          childrenPadding: EdgeInsets.zero,
-                          iconColor: PlayerTheme.inkMuted,
-                          collapsedIconColor: PlayerTheme.inkMuted,
-                          title: Text(
-                            context.l10n.subStyleMore,
-                            style: const TextStyle(color: PlayerTheme.ink, fontSize: 13.5, fontWeight: FontWeight.w700),
+                      // Material, not a bare Theme: the glass card paints its
+                      // background with a DecoratedBox, and a ListTile under
+                      // one has nowhere to draw its ink -- Flutter asserts
+                      // about it, and the row's tap ripple was invisible.
+                      // A transparent Material gives it the surface it wants
+                      // without changing what is on screen.
+                      Material(
+                        type: MaterialType.transparency,
+                        child: Theme(
+                          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                          child: ExpansionTile(
+                            tilePadding: EdgeInsets.zero,
+                            childrenPadding: EdgeInsets.zero,
+                            iconColor: PlayerTheme.inkMuted,
+                            collapsedIconColor: PlayerTheme.inkMuted,
+                            title: Text(
+                              context.l10n.subStyleMore,
+                              style: const TextStyle(color: PlayerTheme.ink, fontSize: 13.5, fontWeight: FontWeight.w700),
+                            ),
+                            children: [
+                              const SizedBox(height: 6),
+                              ..._fontFamilyItems(),
+                              ..._scaleItems(),
+                              ..._shadowItems(),
+                              ..._marginItems(),
+                              ..._advancedItems(),
+                            ],
                           ),
-                          children: [
-                            const SizedBox(height: 6),
-                            ..._fontFamilyItems(),
-                            ..._scaleItems(),
-                            ..._shadowItems(),
-                            ..._marginItems(),
-                            ..._advancedItems(),
-                          ],
                         ),
                       ),
                     ],
@@ -372,25 +381,27 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
 
   List<Widget> _boldItems() {
     return [
-        // Bold and Italic Toggles
+        // Bold and Italic, as two small icon toggles rather than two
+        // full-width tiles with a switch each. They are one bit of state
+        // apiece, and a switch is a control for a setting with a
+        // consequence; a B and an I that light up is what every text editor
+        // uses, and it takes a quarter of the height.
         Row(
           children: [
-            Expanded(
-              child: _buildToggleTile(
-                title: context.l10n.subStyleBold,
-                icon: Icons.format_bold_rounded,
-                value: PlayerSettings.subBold.value,
-                onChanged: (val) => PlayerSettings.setSubBold(val, player: widget.player),
-              ),
+            _buildStyleToggle(
+              tooltip: context.l10n.subStyleBold,
+              icon: Icons.format_bold_rounded,
+              value: PlayerSettings.subBold.value,
+              onChanged: (val) =>
+                  PlayerSettings.setSubBold(val, player: widget.player),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildToggleTile(
-                title: context.l10n.subStyleItalic,
-                icon: Icons.format_italic_rounded,
-                value: PlayerSettings.subItalic.value,
-                onChanged: (val) => PlayerSettings.setSubItalic(val, player: widget.player),
-              ),
+            const SizedBox(width: 8),
+            _buildStyleToggle(
+              tooltip: context.l10n.subStyleItalic,
+              icon: Icons.format_italic_rounded,
+              value: PlayerSettings.subItalic.value,
+              onChanged: (val) =>
+                  PlayerSettings.setSubItalic(val, player: widget.player),
             ),
           ],
         ),
@@ -787,46 +798,48 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     );
   }
 
-  Widget _buildToggleTile({
-    required String title,
+  /// A small square toggle for one bit of text styling.
+  ///
+  /// The icon is the label: a B and an I are understood without a word
+  /// beside them, and the tooltip carries the name for anyone who wants it.
+  /// Lit when on, so the state is the button's own appearance rather than a
+  /// switch sitting next to it.
+  Widget _buildStyleToggle({
+    required String tooltip,
     required IconData icon,
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: PlayerTheme.raised,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: PlayerTheme.edgeSoft),
-      ),
-      child: Row(
-        children: [
-          // Expanded, with the title free to wrap: two of these tiles share a
-          // row, so on a 360px phone each is under 170px wide and the fixed
-          // icon + title + switch came to more than that, in English too.
-          Expanded(
-            child: Row(
-              children: [
-                Icon(icon, size: 18, color: Colors.white70),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(9),
+          onTap: () => onChanged(!value),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 40,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: value
+                  ? PlayerTheme.accent.withValues(alpha: 0.22)
+                  : PlayerTheme.raised,
+              borderRadius: BorderRadius.circular(9),
+              border: Border.all(
+                color: value
+                    ? PlayerTheme.accent.withValues(alpha: 0.6)
+                    : PlayerTheme.edgeSoft,
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 17,
+              color: value ? PlayerTheme.accent : PlayerTheme.inkSubtle,
             ),
           ),
-          Switch.adaptive(
-            value: value,
-            activeColor: PlayerTheme.accent,
-            onChanged: onChanged,
-          ),
-        ],
+        ),
       ),
     );
   }

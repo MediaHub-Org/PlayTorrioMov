@@ -1240,6 +1240,7 @@ class _WatchScreenState extends State<WatchScreen>
   void _showFilterMenu({
     required BuildContext buttonContext,
     required List<Widget> items,
+    Listenable? listenable,
   }) {
     final RenderBox button = buttonContext.findRenderObject() as RenderBox;
     final RenderBox overlay =
@@ -1319,7 +1320,24 @@ class _WatchScreenState extends State<WatchScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: items,
+                            // A multi-select menu stays open across taps, so
+                            // its items have to be rebuilt when the setting
+                            // changes. Without this the list was built once,
+                            // when the dialog opened, and a checkmark only
+                            // appeared after closing and reopening the menu.
+                            children: listenable == null
+                                ? items
+                                : [
+                                    ListenableBuilder(
+                                      listenable: listenable,
+                                      builder: (context, _) => Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: items,
+                                      ),
+                                    ),
+                                  ],
                           ),
                         ),
                       ),
@@ -1443,6 +1461,7 @@ class _WatchScreenState extends State<WatchScreen>
         context.l10n,
         _selectedQualityFilters,
         qualityFilterLabel,
+        emptyLabel: context.l10n.sourceFilterAnyQuality,
       ),
       icon: Icons.high_quality_rounded,
     );
@@ -1463,6 +1482,7 @@ class _WatchScreenState extends State<WatchScreen>
             ),
           )
           .toList(),
+      listenable: SourceFilterSettings.qualities,
     );
   }
 
@@ -1473,6 +1493,7 @@ class _WatchScreenState extends State<WatchScreen>
         context.l10n,
         _selectedAudioFilters,
         audioFilterLabel,
+        emptyLabel: context.l10n.sourceFilterAnyAudio,
       ),
       icon: Icons.language_rounded,
     );
@@ -1482,6 +1503,7 @@ class _WatchScreenState extends State<WatchScreen>
     _showFilterMenu(
       buttonContext: buttonContext,
       items: kAudioFilterKeys.map(_buildAudioDropdownItem).toList(),
+      listenable: SourceFilterSettings.audioLanguages,
     );
   }
 
@@ -1498,14 +1520,16 @@ class _WatchScreenState extends State<WatchScreen>
   /// One selection is named outright, because that is the common case and
   /// the name is more useful than a count. More than one becomes a count:
   /// the button is a fixed-width pill in a scrolling row, and three language
-  /// names would push the other pills off the edge. None is "Any", which is
-  /// the same word the settings page uses for an empty selection.
+  /// names would push the other pills off the edge. None is [emptyLabel],
+  /// which names what the pill filters -- "Any Audio" beside "All Sizes"
+  /// rather than a bare "Any" that could belong to either.
   String _multiFilterLabel(
     AppLocalizations l10n,
     List<String> selected,
-    String Function(AppLocalizations, String) label,
-  ) {
-    if (selected.isEmpty) return l10n.sourceFilterNoneSelected;
+    String Function(AppLocalizations, String) label, {
+    required String emptyLabel,
+  }) {
+    if (selected.isEmpty) return emptyLabel;
     if (selected.length == 1) return label(l10n, selected.first);
     return l10n.sourceFilterSelectedCount(selected.length);
   }

@@ -28,6 +28,9 @@ class PlayerMenuRow extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  /// Drawn after the badges. A chevron, where a row opens something.
+  final Widget? trailing;
+
   const PlayerMenuRow({
     super.key,
     required this.leading,
@@ -35,6 +38,7 @@ class PlayerMenuRow extends StatelessWidget {
     this.badges = const [],
     required this.isSelected,
     required this.onTap,
+    this.trailing,
   });
 
   @override
@@ -98,6 +102,10 @@ class PlayerMenuRow extends StatelessWidget {
                 for (final badge in rest) ...[
                   const SizedBox(width: 5),
                   _MiniBadge(badge),
+                ],
+                if (trailing != null) ...[
+                  const SizedBox(width: 4),
+                  trailing!,
                 ],
               ],
             ),

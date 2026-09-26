@@ -268,6 +268,92 @@ String subtitleTrackLanguageName(String? rawLanguage) {
   return subtitleLanguageName(raw);
 }
 
+/// Display names for a set of tracks that may share a language.
+///
+/// A file with two Spanish subtitle tracks -- one Castilian, one Latin
+/// American -- rendered both as "Spanish", so the list showed the same word
+/// twice and the choice between them was invisible. This makes each name
+/// unique, in the order that costs the least information:
+///
+///  1. A region the track's own title names, as `Spanish (ES)`.
+///  2. A number, as `Spanish #1`, when the titles say nothing to tell them
+///     apart. Numbering is the honest answer there: the tracks really are
+///     indistinguishable from their metadata, and a viewer picking between
+///     them is picking by trial.
+///
+/// Tracks whose language is unknown are left alone -- there is nothing to
+/// disambiguate, and numbering "Track 3" would invent a language.
+List<String> uniqueTrackLanguageNames(
+  List<String?> rawLanguages,
+  List<String?> titles,
+) {
+  final names = <String>[
+    for (final raw in rawLanguages) subtitleTrackLanguageName(raw),
+  ];
+
+  final totals = <String, int>{};
+  for (final name in names) {
+    if (name.isEmpty) continue;
+    totals[name] = (totals[name] ?? 0) + 1;
+  }
+
+  final seen = <String, int>{};
+  return [
+    for (var i = 0; i < names.length; i++)
+      () {
+        final name = names[i];
+        if (name.isEmpty || totals[name]! < 2) return name;
+
+        // A region in the title is the better label, so it is tried first.
+        final region = _regionFromTitle(titles[i]);
+        if (region != null) return '$name ($region)';
+
+        final n = seen[name] = (seen[name] ?? 0) + 1;
+        return '$name #$n';
+      }(),
+  ];
+}
+
+/// A region code read out of a track's own title, or null when it names none.
+///
+/// Deliberately narrow: it looks for the region words and codes that appear
+/// in real track titles, and returns nothing rather than guessing. A wrong
+/// region here would label a track as a variant it is not, which is worse
+/// than the number it falls back to.
+String? _regionFromTitle(String? title) {
+  if (title == null || title.trim().isEmpty) return null;
+  final text = title.toLowerCase();
+  const regions = <String, String>{
+    'latin america': 'LATAM',
+    'latino': 'LATAM',
+    'latam': 'LATAM',
+    'castilian': 'ES',
+    'castellano': 'ES',
+    'spain': 'ES',
+    'españa': 'ES',
+    'brazil': 'BR',
+    'brasil': 'BR',
+    'portugal': 'PT',
+    'united states': 'US',
+    'united kingdom': 'UK',
+    'australia': 'AU',
+    'canada': 'CA',
+    'mexico': 'MX',
+    'argentina': 'AR',
+    'taiwan': 'TW',
+    'hong kong': 'HK',
+    'simplified': 'Simplified',
+    'traditional': 'Traditional',
+  };
+  for (final entry in regions.entries) {
+    if (text.contains(entry.key)) return entry.value;
+  }
+  // A bracketed or parenthesised two-letter code, e.g. "Spanish [ES]".
+  final code = RegExp(r'[\[(]([a-z]{2})[\])]').firstMatch(text);
+  if (code != null) return code.group(1)!.toUpperCase();
+  return null;
+}
+
 /// The canonical group a language belongs to, so the same language arriving
 /// under different labels lands in one group rather than several.
 ///

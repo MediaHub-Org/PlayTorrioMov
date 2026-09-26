@@ -162,6 +162,11 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// be undone by a later track update, so the ranking only fires on the
   /// first non-empty track list.
   bool _audioPreferenceApplied = false;
+
+  /// Whether the file's own subtitle track has already been turned on
+  /// automatically. Same one-shot rule as the audio ranking: a viewer who
+  /// turned subtitles off must not have them come back on a track update.
+  bool _embeddedSubtitleAutoLoaded = false;
   bool _showAudioHud = false;
   String _audioHudText = '';
   Timer? _audioHudTimer;
@@ -813,27 +818,47 @@ class _PlayerScreenState extends State<PlayerScreen>
   void _updateMediaTracks(Tracks tracks) {
     if (!mounted) return;
     final audioList = tracks.audio;
-    final audioTracks = <PlayerAudioTrack>[];
-    for (int i = 0; i < audioList.length; i++) {
-      final t = audioList[i];
+    // The tracks that survive the filter below, kept whole so each can be
+    // named from its own title.
+    final keptAudio = <AudioTrack>[];
+    for (final t in audioList) {
       if (t.id == 'no' || t.id == 'auto') continue;
-      final lang = t.language;
-      // The clean language name, not the raw tag and not the container's
-      // own title. A track titled "English [DD+ 5.1]" or "JPN 2ch" is
-      // offering codec and channel detail in the one field a viewer uses to
-      // answer "which language is this", and the codec/channels are already
-      // shown as their own line under it. Falls back to the raw tag only
-      // when the name is unknown, so nothing ever renders blank.
-      final cleaned = subtitleTrackLanguageName(lang);
+      keptAudio.add(t);
+    }
+
+    // The same unique-naming the subtitle tracks get: a language, with a
+    // region or a number only when two tracks would otherwise read the same.
+    final audioNames = uniqueTrackLanguageNames(
+      keptAudio.map((t) => t.language).toList(growable: false),
+      keptAudio.map((t) => t.title).toList(growable: false),
+    );
+
+    final audioTracks = <PlayerAudioTrack>[];
+    for (var i = 0; i < keptAudio.length; i++) {
+      final t = keptAudio[i];
+      final cleaned = audioNames[i];
+      // No "Track 3". That number came from the loop index, which counted
+      // the `no` and `auto` entries this loop skips -- so a file with one
+      // audio track reported it as the third.
+      //
+      // The fallback chain, in order of how much it tells the viewer: the
+      // language, then the container's own title, then the codec, then a
+      // plain "Audio". A P2P stream often tags no language at all, and
+      // "Audio" alone is the least useful of the four -- the codec at least
+      // says something about the track.
       final title = cleaned.isNotEmpty
           ? cleaned
-          : (t.title ?? 'Track ${i + 1}');
+          : (t.title?.trim().isNotEmpty == true
+                ? t.title!.trim()
+                : (t.codec?.trim().isNotEmpty == true
+                      ? t.codec!.trim().toUpperCase()
+                      : 'Audio'));
       final idx = int.tryParse(t.id) ?? (i + 1);
       audioTracks.add(
         PlayerAudioTrack(
           index: idx,
           title: title,
-          language: lang,
+          language: t.language,
           codec: t.codec,
           channels: int.tryParse(t.channels?.toString() ?? ''),
         ),
@@ -842,14 +867,27 @@ class _PlayerScreenState extends State<PlayerScreen>
 
     final subList = tracks.subtitle;
     final embeddedSubs = <PlayerEmbeddedSubtitle>[];
-    for (int i = 0; i < subList.length; i++) {
-      final t = subList[i];
+    // The tracks that survive the filters below, kept whole so each can be
+    // named from its own title.
+    final keptSubs = <SubtitleTrack>[];
+    for (final t in subList) {
       if (t.id == 'no' || t.id == 'auto') continue;
-      final lang = t.language;
-      if (lang?.trim().toLowerCase() == 'spl') continue;
-      // The normalized name, not the raw tag: an untitled `mon` track would
-      // otherwise be labeled "MON".
-      final language = subtitleTrackLanguageName(lang);
+      if (t.language?.trim().toLowerCase() == 'spl') continue;
+      keptSubs.add(t);
+    }
+
+    // Two Spanish tracks both rendered as "Spanish", so the list showed the
+    // same word twice and the choice between them was invisible. This gives
+    // each a unique name -- a region from its own title where the title
+    // names one, a number where it does not.
+    final uniqueNames = uniqueTrackLanguageNames(
+      keptSubs.map((t) => t.language).toList(growable: false),
+      keptSubs.map((t) => t.title).toList(growable: false),
+    );
+
+    for (var i = 0; i < keptSubs.length; i++) {
+      final t = keptSubs[i];
+      final language = uniqueNames[i];
       // The language name leads, with the container's own title only as a
       // fallback. A container title is written by whoever muxed the file and
       // is routinely technical noise -- "eng", "[Full] SDH", "English (US)
@@ -919,6 +957,31 @@ class _PlayerScreenState extends State<PlayerScreen>
       }
     });
     _markDefaultSubtitleTracks();
+    _autoLoadEmbeddedSubtitle();
+  }
+
+  /// Turns on the file's own subtitle track when playback starts.
+  ///
+  /// A file that ships subtitles ships them for a reason, and a viewer who
+  /// wants them should not have to open a menu to find out they were there.
+  /// The track chosen is the one matching the language being heard, then the
+  /// file's own default, then the first -- the same order [_pickBestSubtitle]
+  /// uses, so the automatic choice and the manual one agree.
+  ///
+  /// Only once, and only when nothing is on yet: a viewer who turned
+  /// subtitles off, or picked a track, must not have that undone by a later
+  /// track update.
+  void _autoLoadEmbeddedSubtitle() {
+    if (_embeddedSubtitleAutoLoaded) return;
+    if (_embeddedSubtitles.isEmpty) return;
+    if (_isSubtitleEnabled) return;
+    _embeddedSubtitleAutoLoaded = true;
+
+    final auto = SubtitleAutoPick.embedded(
+      _embeddedSubtitles,
+      audioLanguage: _selectedAudioLanguage,
+    );
+    if (auto != null) _selectEmbeddedSubtitle(auto);
   }
 
   /// Switches to the ranked track libmpv reported, mirroring what a tap in
@@ -1161,7 +1224,15 @@ class _PlayerScreenState extends State<PlayerScreen>
       ),
     );
     _setSubtitleScale(_subtitleScale);
-    PlayerSettings.applySubtitleStyling(_player);
+    // libass, always, for an embedded track.
+    //
+    // The Flutter overlay draws text from `player.stream.subtitle`, which
+    // mpv only emits for subtitles it decodes into its own text stream. An
+    // embedded ASS/SSA track is rendered *by libass* and never emitted, so
+    // with the overlay in charge and `sub-visibility` off -- which is what
+    // the default `useLibass: false` sets -- an embedded track was invisible
+    // both ways. That is why a file's own subtitles "did not load".
+    _enableLibassForEmbedded();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1170,6 +1241,26 @@ class _PlayerScreenState extends State<PlayerScreen>
           duration: const Duration(seconds: 2),
         ),
       );
+    }
+  }
+
+  /// Turns mpv's own subtitle rendering on, for an embedded track.
+  ///
+  /// Deliberately not routed through [PlayerSettings.applySubtitleStyling]:
+  /// that honours the `useLibass` preference, and this is not a preference.
+  /// An embedded ASS track has no other way to reach the screen.
+  void _enableLibassForEmbedded() {
+    try {
+      final dynamic platform = _player.platform;
+      if (platform == null) return;
+      platform.setProperty('sub-visibility', 'yes');
+      platform.setProperty('sub-ass', 'yes');
+      // forceLibass, because the preference is off by default and this is
+      // not a preference: without it this call would set
+      // `sub-visibility=no` and undo the two lines above.
+      PlayerSettings.applySubtitleStyling(_player, forceLibass: true);
+    } catch (e) {
+      debugPrint('[PlayerScreen] could not enable libass for embedded subs: $e');
     }
   }
 
@@ -1365,11 +1456,24 @@ class _PlayerScreenState extends State<PlayerScreen>
     return Uri.file(pathOrUrl).toString();
   }
 
+  /// Whether the selected subtitle is one of the file's own tracks.
+  ///
+  /// An embedded track is rendered by libass and never emitted as text, so
+  /// every call that applies subtitle styling has to know to keep libass on
+  /// -- otherwise the scale slider, or any appearance change, silently turns
+  /// the subtitles back off.
+  bool get _isEmbeddedSubtitleSelected =>
+      _selectedEmbeddedSubtitleIndex != null;
+
   void _setSubtitleScale(double scale) {
     if (!mounted) return;
     final clamped = scale.clamp(0.5, 3.0);
     setState(() => _subtitleScale = clamped);
-    PlayerSettings.setSubScale(clamped, player: _player);
+    PlayerSettings.setSubScale(
+      clamped,
+      player: _player,
+      forceLibass: _isEmbeddedSubtitleSelected,
+    );
   }
 
   Future<void> _applyLiveDelay(double delaySec) async {
