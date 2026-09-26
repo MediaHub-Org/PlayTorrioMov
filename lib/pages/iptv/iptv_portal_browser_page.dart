@@ -165,6 +165,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                       ),
                       const Spacer(),
                       IconButton(
+                        tooltip: context.l10n.commonClose,
                         icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 20),
                         onPressed: () => Navigator.pop(ctx),
                       ),
@@ -701,6 +702,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             prefixIcon: Icon(Icons.search_rounded, color: AppColors.inkSubtle, size: 18),
                             suffixIcon: _catSearchQuery.isNotEmpty
                                 ? IconButton(
+                                    tooltip: context.l10n.commonClose,
                                     icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
                                     onPressed: () {
                                       _catSearchCtrl.clear();
@@ -879,6 +881,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             prefixIcon: Icon(Icons.search_rounded, color: palette.primaryColor, size: 18),
                             suffixIcon: _searchQuery.isNotEmpty
                                 ? IconButton(
+                                    tooltip: context.l10n.commonClose,
                                     icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
                                     onPressed: () {
                                       _searchCtrl.clear();
@@ -953,6 +956,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     Row(
                       children: [
                         IconButton(
+                          tooltip: context.l10n.commonBack,
                           icon: Icon(Icons.arrow_back_rounded, color: AppColors.ink, size: 22),
                           onPressed: () => Navigator.pop(context),
                         ),
@@ -1102,6 +1106,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 18),
                             suffixIcon: _searchQuery.isNotEmpty
                                 ? IconButton(
+                                    tooltip: context.l10n.commonClose,
                                     icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
                                     onPressed: () {
                                       _searchCtrl.clear();
@@ -1164,6 +1169,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                                   prefixIcon: Icon(Icons.filter_list_rounded, color: AppColors.inkSubtle, size: 18),
                                                   suffixIcon: _catSearchQuery.isNotEmpty
                                                       ? IconButton(
+                                                          tooltip: context.l10n.commonClose,
                                                           icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
                                                           onPressed: () {
                                                             _catSearchCtrl.clear();
@@ -2509,6 +2515,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: context.l10n.commonClose,
                   icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                   onPressed: () => Navigator.pop(context),
                 ),

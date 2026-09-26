@@ -1644,6 +1644,7 @@ class _WatchScreenState extends State<WatchScreen>
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: IconButton(
+        tooltip: context.l10n.commonBack,
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
           size: 18,

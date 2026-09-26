@@ -98,6 +98,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
               prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 20),
               suffixIcon: _query.isNotEmpty
                   ? IconButton(
+                      tooltip: context.l10n.commonClose,
                       icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 18),
                       onPressed: () {
                         _searchCtrl.clear();

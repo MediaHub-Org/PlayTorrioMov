@@ -217,6 +217,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                         ),
                       ),
                       IconButton(
+                        tooltip: context.l10n.commonClose,
                         icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 20),
                         onPressed: () => Navigator.pop(ctx),
                       ),
@@ -355,6 +356,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                         onPressed: () => _openModalCustomizer(context),
                       ),
                       IconButton(
+                        tooltip: context.l10n.commonClose,
                         icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                         onPressed: () => Navigator.pop(context),
                       ),

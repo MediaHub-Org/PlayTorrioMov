@@ -7,6 +7,7 @@ import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/source_badges.dart';
 import '../player/player_screen.dart';
 import '../../services/theme/app_colors.dart';
+import '../../l10n/l10n.dart';
 
 class AnimeArabicStreamSheet extends StatefulWidget {
   final ArabicAnimeDetails details;
@@ -216,6 +217,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                 ),
               ),
               IconButton(
+                tooltip: context.l10n.commonClose,
                 onPressed: () => Navigator.pop(context),
                 icon: Icon(Icons.close_rounded, color: AppColors.inkAlpha(0.60)),
               ),

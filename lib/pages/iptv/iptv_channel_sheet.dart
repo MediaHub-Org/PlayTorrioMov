@@ -287,6 +287,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
                     // Close Button
                     IconButton(
+                      tooltip: context.l10n.commonClose,
                       icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                       onPressed: () => Navigator.pop(context),
                     ),
@@ -329,6 +330,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
+                                tooltip: context.l10n.commonClose,
                                 icon: Icon(Icons.close_rounded, color: AppColors.inkMuted, size: 18),
                                 onPressed: () {
                                   _searchController.clear();

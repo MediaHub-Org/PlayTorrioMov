@@ -218,6 +218,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: context.l10n.commonClose,
                   icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                   onPressed: () => Navigator.pop(context),
                 ),

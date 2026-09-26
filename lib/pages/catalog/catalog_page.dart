@@ -343,6 +343,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                       hintStyle: TextStyle(color: AppColors.inkAlpha(0.4)),
                                       border: InputBorder.none,
                                       suffixIcon: IconButton(
+                                        tooltip: context.l10n.commonClose,
                                         icon: const Icon(Icons.close_rounded, size: 20),
                                         color: AppColors.inkMuted,
                                         onPressed: _clearSearch,

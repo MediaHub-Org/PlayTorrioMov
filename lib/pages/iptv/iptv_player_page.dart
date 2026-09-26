@@ -1368,6 +1368,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                               ),
                               const SizedBox(width: 6),
                               IconButton(
+                                tooltip: context.l10n.commonClose,
                                 icon: const Icon(
                                   Icons.close_rounded,
                                   color: Colors.white54,

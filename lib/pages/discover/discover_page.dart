@@ -808,6 +808,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               ),
                               border: InputBorder.none,
                               suffixIcon: IconButton(
+                                tooltip: context.l10n.commonClose,
                                 icon: Icon(Icons.close_rounded, size: 18, color: AppColors.inkMuted),
                                 onPressed: _clearSearch,
                               ),

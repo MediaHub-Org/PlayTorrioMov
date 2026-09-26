@@ -1,12 +1,10 @@
 {
   "@@locale": "es",
-
   "navMovies": "Películas",
   "navSeries": "Series",
   "navAnime": "Anime",
   "navLiveTv": "TV en vivo",
   "navLibrary": "Biblioteca",
-
   "settingsTitle": "Ajustes",
   "settingsCategoryAddons": "Complementos",
   "settingsCategoryAppearance": "Apariencia e interfaz",
@@ -18,7 +16,6 @@
   "settingsCategoryVideoPlayback": "Reproducción de video",
   "settingsCategorySources": "Fuentes y filtros",
   "settingsCategoryAbout": "Acerca de {appName}",
-
   "sourceFilterTitle": "Fuentes y filtros",
   "sourceFilterIntro": "Elige los idiomas de audio y las calidades de vídeo con los que se abre la lista de fuentes. Puedes cambiarlos en la pantalla de fuentes cuando quieras; la última elección hecha en cualquier sitio es la que se recuerda.",
   "sourceFilterAudioSection": "IDIOMA DE AUDIO",
@@ -47,7 +44,11 @@
   "sourceFilterAnyQuality": "Cualquier calidad",
   "sourceFilterSelectedCount": "{count} seleccionados",
   "@sourceFilterSelectedCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "sourcePreferredArabic": "🇸🇦 Árabe",
   "sourcePreferredChinese": "🇨🇳 Chino",
@@ -61,7 +62,6 @@
   "settingsBadgeActive": "Activo",
   "settingsBadgeOffline": "Sin conexión",
   "settingsBadgeConnectedCount": "{count}/2 conectados",
-
   "appearanceTitle": "Apariencia e interfaz",
   "appearanceSubtitle": "Ajusta la atmósfera visual, las paletas de colores y los diseños de la interfaz.",
   "appearanceThemeTitle": "Tema",
@@ -77,32 +77,26 @@
   "appearanceLanguageTitle": "Idioma de la app",
   "appearanceLanguageSubtitle": "Traduce los menús y botones de la app. Los títulos de películas y series son un ajuste aparte.",
   "appearanceLanguageSystem": "Predeterminado del sistema",
-
   "libraryTabCollections": "Colecciones",
   "libraryTabContinue": "Continuar",
   "libraryTabDownloads": "Descargas",
-
   "libraryShelfLiked": "Favoritos",
   "libraryShelfWatchlist": "Por ver",
   "libraryShelfWatched": "Vistos",
-
   "libraryEmptyLikedTitle": "Aún no hay favoritos",
   "libraryEmptyLikedSubtitle": "Toca el corazón en cualquier título y aparecerá aquí.",
   "libraryEmptyWatchlistTitle": "Tu lista de pendientes está vacía",
   "libraryEmptyWatchlistSubtitle": "Añade algo para ver más tarde y aparecerá aquí.",
   "libraryEmptyWatchedTitle": "Aún no has marcado nada como visto",
   "libraryEmptyWatchedSubtitle": "Marca algo como visto y aparecerá aquí.",
-
   "libraryFilterMovies": "Películas",
   "libraryFilterSeries": "Series",
   "libraryFilterAnime": "Anime",
   "libraryFilterLiveTv": "TV en vivo",
-
   "librarySortBy": "Ordenar por",
   "librarySortRecent": "Añadidos recientemente",
   "librarySortTitle": "Título (A-Z)",
   "librarySortYear": "Año de estreno",
-
   "libraryReorder": "Reordenar",
   "libraryReorderDone": "Listo",
   "libraryCollectionOptions": "Opciones de la colección",
@@ -118,7 +112,6 @@
   "libraryEmptyCollectionTitle": "Aquí todavía no hay nada",
   "libraryNoLikedChannelsTitle": "Aún no hay canales favoritos",
   "libraryNoMatchingItems": "No hay resultados",
-
   "detailsPlayMovie": "Reproducir película",
   "detailsPlayEpisodes": "Reproducir episodios",
   "detailsPlayFirstMovie": "Reproducir la primera película",
@@ -179,15 +172,27 @@
   "playerSleepOffShort": "Cancelar temporizador",
   "playerMinutesShort": "{minutes} min",
   "@playerMinutesShort": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleCount": "{count} archivos",
   "@playerSubtitleCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleShowAll": "Mostrar los {count} idiomas",
   "@playerSubtitleShowAll": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleNoneMatchFilter": "Ningún subtítulo coincide con este filtro",
   "playerAudioDefaultStream": "Reproduciendo el audio predeterminado.",
@@ -328,7 +333,13 @@
   "downloadSourceDebrid": "Debrid",
   "downloadSourceHttp": "HTTP",
   "downloadPeers": "{count} pares",
-  "@downloadPeers": {"placeholders": {"count": {"type": "int"}}},
+  "@downloadPeers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "downloadStatusQueued": "En cola",
   "downloadStatusDownloading": "Descargando",
   "downloadStatusPaused": "En pausa",
@@ -963,5 +974,7 @@
   "subPresetNightModeSoft": "Modo nocturno cálido",
   "subPresetNightModeSoftBody": "Texto crema suave con fondo translúcido al 40 %",
   "subPresetCustom": "Personalizado",
-  "subPresetCustomBody": "Estilos de subtítulo personalizados por el usuario"
+  "subPresetCustomBody": "Estilos de subtítulo personalizados por el usuario",
+  "commonClose": "Cerrar",
+  "commonBack": "Atrás"
 }

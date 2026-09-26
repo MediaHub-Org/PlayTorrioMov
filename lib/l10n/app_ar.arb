@@ -1,12 +1,10 @@
 {
   "@@locale": "ar",
-
   "navMovies": "أفلام",
   "navSeries": "مسلسلات",
   "navAnime": "أنمي",
   "navLiveTv": "البث المباشر",
   "navLibrary": "المكتبة",
-
   "settingsTitle": "الإعدادات",
   "settingsCategoryAddons": "الإضافات",
   "settingsCategoryAppearance": "المظهر والواجهة",
@@ -18,7 +16,6 @@
   "settingsCategoryVideoPlayback": "تشغيل الفيديو",
   "settingsCategorySources": "المصادر والفلاتر",
   "settingsCategoryAbout": "حول {appName}",
-
   "sourceFilterTitle": "المصادر والفلاتر",
   "sourceFilterIntro": "اختر لغات الصوت وجودات الفيديو التي تُفتح بها قائمة المصادر. ما زال بإمكانك تغيير أيٍّ منها من شاشة المصادر؛ وآخر اختيار في أي مكان هو الذي يُحتفَظ به.",
   "sourceFilterAudioSection": "لغة الصوت",
@@ -47,7 +44,11 @@
   "sourceFilterAnyQuality": "أي جودة",
   "sourceFilterSelectedCount": "{count} محدَّد",
   "@sourceFilterSelectedCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "sourcePreferredArabic": "🇸🇦 العربية",
   "sourcePreferredChinese": "🇨🇳 الصينية",
@@ -61,7 +62,6 @@
   "settingsBadgeActive": "نشط",
   "settingsBadgeOffline": "غير متصل",
   "settingsBadgeConnectedCount": "{count}/2 متصل",
-
   "appearanceTitle": "المظهر والواجهة",
   "appearanceSubtitle": "اضبط الأجواء المرئية ولوحات الألوان وتخطيطات الواجهة.",
   "appearanceThemeTitle": "المظهر",
@@ -77,32 +77,26 @@
   "appearanceLanguageTitle": "لغة التطبيق",
   "appearanceLanguageSubtitle": "يترجم قوائم التطبيق وأزراره. عناوين الأفلام والمسلسلات إعداد منفصل.",
   "appearanceLanguageSystem": "افتراضي النظام",
-
   "libraryTabCollections": "المجموعات",
   "libraryTabContinue": "متابعة",
   "libraryTabDownloads": "التنزيلات",
-
   "libraryShelfLiked": "المفضلة",
   "libraryShelfWatchlist": "قائمة المشاهدة",
   "libraryShelfWatched": "المشاهدة",
-
   "libraryEmptyLikedTitle": "لا توجد مفضلات بعد",
   "libraryEmptyLikedSubtitle": "اضغط على القلب في أي عنوان وسيظهر هنا.",
   "libraryEmptyWatchlistTitle": "قائمة المشاهدة فارغة",
   "libraryEmptyWatchlistSubtitle": "أضف شيئًا لمشاهدته لاحقًا وسيظهر هنا.",
   "libraryEmptyWatchedTitle": "لم تُعلّم أي شيء كمشاهد بعد",
   "libraryEmptyWatchedSubtitle": "علّم أي شيء كمشاهد وسيظهر هنا.",
-
   "libraryFilterMovies": "أفلام",
   "libraryFilterSeries": "مسلسلات",
   "libraryFilterAnime": "أنمي",
   "libraryFilterLiveTv": "بث مباشر",
-
   "librarySortBy": "ترتيب حسب",
   "librarySortRecent": "أُضيف حديثًا",
   "librarySortTitle": "العنوان (أ-ي)",
   "librarySortYear": "سنة الإصدار",
-
   "libraryReorder": "إعادة الترتيب",
   "libraryReorderDone": "تم",
   "libraryCollectionOptions": "خيارات المجموعة",
@@ -118,7 +112,6 @@
   "libraryEmptyCollectionTitle": "لا يوجد شيء هنا بعد",
   "libraryNoLikedChannelsTitle": "لا توجد قنوات مفضلة بعد",
   "libraryNoMatchingItems": "لا توجد نتائج",
-
   "detailsPlayMovie": "تشغيل الفيلم",
   "detailsPlayEpisodes": "تشغيل الحلقات",
   "detailsPlayFirstMovie": "تشغيل الفيلم الأول",
@@ -179,15 +172,27 @@
   "playerSleepOffShort": "إلغاء المؤقّت",
   "playerMinutesShort": "{minutes} دقيقة",
   "@playerMinutesShort": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleCount": "{count} ملفات",
   "@playerSubtitleCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleShowAll": "عرض كل اللغات ({count})",
   "@playerSubtitleShowAll": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleNoneMatchFilter": "لا توجد ترجمات تطابق هذا الفلتر",
   "playerAudioDefaultStream": "يتم تشغيل المسار الصوتي الافتراضي.",
@@ -328,7 +333,13 @@
   "downloadSourceDebrid": "Debrid",
   "downloadSourceHttp": "HTTP",
   "downloadPeers": "{count} مصدر",
-  "@downloadPeers": {"placeholders": {"count": {"type": "int"}}},
+  "@downloadPeers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "downloadStatusQueued": "في الانتظار",
   "downloadStatusDownloading": "جارٍ التنزيل",
   "downloadStatusPaused": "متوقف مؤقتًا",
@@ -963,5 +974,7 @@
   "subPresetNightModeSoft": "وضع ليلي دافئ",
   "subPresetNightModeSoftBody": "نص كريمي ناعم بخلفية شبه شفافة بنسبة 40%",
   "subPresetCustom": "مخصّص",
-  "subPresetCustomBody": "أنماط ترجمة مخصّصة يضبطها المستخدم"
+  "subPresetCustomBody": "أنماط ترجمة مخصّصة يضبطها المستخدم",
+  "commonClose": "إغلاق",
+  "commonBack": "رجوع"
 }

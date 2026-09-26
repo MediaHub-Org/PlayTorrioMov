@@ -1,17 +1,25 @@
 {
   "@@locale": "en",
-
   "navMovies": "Films",
-  "@navMovies": {"description": "Hub bottom tab / section label"},
+  "@navMovies": {
+    "description": "Hub bottom tab / section label"
+  },
   "navSeries": "Series",
-  "@navSeries": {"description": "Hub bottom tab / section label"},
+  "@navSeries": {
+    "description": "Hub bottom tab / section label"
+  },
   "navAnime": "Anime",
-  "@navAnime": {"description": "Hub bottom tab / section label"},
+  "@navAnime": {
+    "description": "Hub bottom tab / section label"
+  },
   "navLiveTv": "Live TV",
-  "@navLiveTv": {"description": "Hub bottom tab / section label"},
+  "@navLiveTv": {
+    "description": "Hub bottom tab / section label"
+  },
   "navLibrary": "Library",
-  "@navLibrary": {"description": "Hub bottom tab / section label"},
-
+  "@navLibrary": {
+    "description": "Hub bottom tab / section label"
+  },
   "settingsTitle": "Settings",
   "settingsCategoryAddons": "Addons",
   "settingsCategoryAppearance": "Appearance & Interface",
@@ -24,9 +32,12 @@
   "settingsCategorySources": "Sources & Filters",
   "settingsCategoryAbout": "About {appName}",
   "@settingsCategoryAbout": {
-    "placeholders": {"appName": {"type": "String"}}
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
   },
-
   "sourceFilterTitle": "Sources & Filters",
   "sourceFilterIntro": "Pick the audio languages and video qualities the source list opens with. You can still change either on the sources screen; the last choice made anywhere is the one remembered.",
   "sourceFilterAudioSection": "AUDIO LANGUAGE",
@@ -55,7 +66,11 @@
   "sourceFilterAnyQuality": "Any Quality",
   "sourceFilterSelectedCount": "{count} selected",
   "@sourceFilterSelectedCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "sourcePreferredArabic": "🇸🇦 Arabic",
   "sourcePreferredChinese": "🇨🇳 Chinese",
@@ -70,9 +85,12 @@
   "settingsBadgeOffline": "Offline",
   "settingsBadgeConnectedCount": "{count}/2 Connected",
   "@settingsBadgeConnectedCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "appearanceTitle": "Appearance & Interface",
   "appearanceSubtitle": "Fine-tune the visual atmosphere, color palettes, and interface layouts.",
   "appearanceThemeTitle": "Theme",
@@ -86,47 +104,65 @@
   "appearanceTextSizeDefault": "Default — follows your device's own text size setting",
   "appearanceTextSizePercent": "{percent}% of default, on top of your device's own setting",
   "@appearanceTextSizePercent": {
-    "placeholders": {"percent": {"type": "int"}}
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "appearanceLanguageTitle": "App Language",
   "appearanceLanguageSubtitle": "Translates the app's own menus and buttons. Movie and show titles are a separate setting.",
   "appearanceLanguageSystem": "System default",
-
   "libraryTabCollections": "Collections",
-  "@libraryTabCollections": {"description": "Library tab: saved titles and the user's own collections"},
+  "@libraryTabCollections": {
+    "description": "Library tab: saved titles and the user's own collections"
+  },
   "libraryTabContinue": "Continue",
-  "@libraryTabContinue": {"description": "Library tab: part-watched titles"},
+  "@libraryTabContinue": {
+    "description": "Library tab: part-watched titles"
+  },
   "libraryTabDownloads": "Downloads",
-  "@libraryTabDownloads": {"description": "Library tab: titles available offline"},
-
+  "@libraryTabDownloads": {
+    "description": "Library tab: titles available offline"
+  },
   "libraryShelfLiked": "Liked",
-  "@libraryShelfLiked": {"description": "Built-in shelf card: favourited titles"},
+  "@libraryShelfLiked": {
+    "description": "Built-in shelf card: favourited titles"
+  },
   "libraryShelfWatchlist": "Watchlist",
-  "@libraryShelfWatchlist": {"description": "Built-in shelf card: kept to watch later"},
+  "@libraryShelfWatchlist": {
+    "description": "Built-in shelf card: kept to watch later"
+  },
   "libraryShelfWatched": "Watched",
-  "@libraryShelfWatched": {"description": "Built-in shelf card: already seen"},
-
+  "@libraryShelfWatched": {
+    "description": "Built-in shelf card: already seen"
+  },
   "libraryEmptyLikedTitle": "Nothing liked yet",
   "libraryEmptyLikedSubtitle": "Tap the heart on anything and it lands here.",
   "libraryEmptyWatchlistTitle": "Nothing on your watchlist",
   "libraryEmptyWatchlistSubtitle": "Add something to watch later and it lands here.",
   "libraryEmptyWatchedTitle": "Nothing marked watched yet",
   "libraryEmptyWatchedSubtitle": "Mark something watched and it lands here.",
-
   "libraryFilterMovies": "Movies",
-  "@libraryFilterMovies": {"description": "Library type filter chip"},
+  "@libraryFilterMovies": {
+    "description": "Library type filter chip"
+  },
   "libraryFilterSeries": "Series",
-  "@libraryFilterSeries": {"description": "Library type filter chip"},
+  "@libraryFilterSeries": {
+    "description": "Library type filter chip"
+  },
   "libraryFilterAnime": "Anime",
-  "@libraryFilterAnime": {"description": "Library type filter chip"},
+  "@libraryFilterAnime": {
+    "description": "Library type filter chip"
+  },
   "libraryFilterLiveTv": "Live TV",
-  "@libraryFilterLiveTv": {"description": "Library type filter chip"},
-
+  "@libraryFilterLiveTv": {
+    "description": "Library type filter chip"
+  },
   "librarySortBy": "Sort by",
   "librarySortRecent": "Recently Added",
   "librarySortTitle": "Title (A-Z)",
   "librarySortYear": "Release Year",
-
   "libraryReorder": "Reorder",
   "libraryReorderDone": "Done",
   "libraryCollectionOptions": "Collection options",
@@ -140,75 +176,140 @@
   "libraryDeleteCollectionConfirm": "Delete {name}?",
   "@libraryDeleteCollectionConfirm": {
     "description": "Confirmation title when deleting a collection",
-    "placeholders": {"name": {"type": "String"}}
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "libraryCollectionGoneTitle": "Collection gone",
   "libraryEmptyCollectionTitle": "Nothing in here yet",
   "libraryNoLikedChannelsTitle": "No liked channels yet",
   "libraryNoMatchingItems": "No matching items",
-
   "detailsPlayMovie": "Play Movie",
-  "@detailsPlayMovie": {"description": "Primary action on a movie's details page"},
+  "@detailsPlayMovie": {
+    "description": "Primary action on a movie's details page"
+  },
   "detailsPlayEpisodes": "Play Episodes",
-  "@detailsPlayEpisodes": {"description": "Primary action on a series' details page"},
+  "@detailsPlayEpisodes": {
+    "description": "Primary action on a series' details page"
+  },
   "detailsPlayFirstMovie": "Play First Movie",
-  "@detailsPlayFirstMovie": {"description": "Primary action on a collection's details page"},
+  "@detailsPlayFirstMovie": {
+    "description": "Primary action on a collection's details page"
+  },
   "detailsPlayEp": "Play Ep {number}",
   "@detailsPlayEp": {
     "description": "Primary action on an anime's details page when nothing has been watched yet",
-    "placeholders": {"number": {"type": "int"}}
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
   },
   "detailsResumeEp": "Resume Ep {number}",
   "@detailsResumeEp": {
     "description": "Primary action on an anime's details page, resuming the last watched episode",
-    "placeholders": {"number": {"type": "int"}}
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
   },
   "detailsGoBack": "Go Back",
   "detailsEpisodes": "Episodes",
-  "@detailsEpisodes": {"description": "Section heading listing a series' or anime's episodes"},
+  "@detailsEpisodes": {
+    "description": "Section heading listing a series' or anime's episodes"
+  },
   "detailsCast": "Cast",
   "detailsDirector": "Director",
   "detailsStaff": "Staff",
-  "@detailsStaff": {"description": "Section heading for an anime's production staff"},
+  "@detailsStaff": {
+    "description": "Section heading for an anime's production staff"
+  },
   "detailsMoreLikeThis": "More Like This",
   "detailsSimilarContent": "Similar Content",
   "detailsCastCrew": "Cast & Crew",
   "detailsCharactersCast": "Characters & Cast",
   "detailsFranchiseRelations": "Franchise & Relations",
   "playerBack": "Back",
-  "@playerBack": {"description": "Tooltip on the player screen's back button"},
+  "@playerBack": {
+    "description": "Tooltip on the player screen's back button"
+  },
   "playerMute": "Mute",
   "playerUnmute": "Unmute",
   "playerSleepTimer": "Sleep timer",
-  "@playerSleepTimer": {"description": "Name of the timer that pauses playback after a set time"},
+  "@playerSleepTimer": {
+    "description": "Name of the timer that pauses playback after a set time"
+  },
   "playerSleepTimerLeft": "Sleep timer: {minutes} min left",
-  "@playerSleepTimerLeft": {"description": "Tooltip on the sleep timer button while it counts down", "placeholders": {"minutes": {"type": "int"}}},
+  "@playerSleepTimerLeft": {
+    "description": "Tooltip on the sleep timer button while it counts down",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "playerDownload": "Download",
-  "@playerDownload": {"description": "Player top bar button that downloads the source being played"},
+  "@playerDownload": {
+    "description": "Player top bar button that downloads the source being played"
+  },
   "playerCast": "Cast",
   "playerCopyStreamUrl": "Copy Stream URL",
   "playerStreamUrlCopied": "Stream URL copied to clipboard",
   "playerSlower": "Slower",
-  "@playerSlower": {"description": "Playback speed menu: one step slower"},
+  "@playerSlower": {
+    "description": "Playback speed menu: one step slower"
+  },
   "playerFaster": "Faster",
-  "@playerFaster": {"description": "Playback speed menu: one step faster"},
+  "@playerFaster": {
+    "description": "Playback speed menu: one step faster"
+  },
   "playerSleepCustom": "Custom",
-  "@playerSleepCustom": {"description": "Label on the sleep timer's custom-duration row"},
+  "@playerSleepCustom": {
+    "description": "Label on the sleep timer's custom-duration row"
+  },
   "playerFewerMinutes": "Fewer minutes",
   "playerMoreMinutes": "More minutes",
   "playerSetCustomTimer": "Set custom timer",
   "playerSleepPausesAt": "{minutes} min -- pauses at {time}",
-  "@playerSleepPausesAt": {"description": "A sleep timer preset: its length, and the clock time playback will pause", "placeholders": {"minutes": {"type": "int"}, "time": {"type": "String"}}},
+  "@playerSleepPausesAt": {
+    "description": "A sleep timer preset: its length, and the clock time playback will pause",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "playerSleepOff": "Off (cancel -- {minutes} min left)",
-  "@playerSleepOff": {"description": "Sleep timer row that cancels a running timer", "placeholders": {"minutes": {"type": "int"}}},
+  "@playerSleepOff": {
+    "description": "Sleep timer row that cancels a running timer",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "downloadAlreadyInProgress": "Download already in progress in background.",
   "downloadAlreadyDone": "This media is already downloaded.",
   "downloadStarted": "Download started in background. Track progress in Downloads tab.",
   "downloadFailedToStart": "Download failed to start: {error}",
-  "@downloadFailedToStart": {"placeholders": {"error": {"type": "String"}}},
+  "@downloadFailedToStart": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "playerBackToSettings": "Back to settings",
   "playerAspectOriginal": "Original (keeps the source shape)",
-  "@playerAspectOriginal": {"description": "Aspect ratio menu row: show the picture the way it was shot"},
+  "@playerAspectOriginal": {
+    "description": "Aspect ratio menu row: show the picture the way it was shot"
+  },
   "playerAspectFill": "Fill screen (crops the edges)",
   "playerAspectStretch": "Stretch to fill (distorts)",
   "playerAspect169": "Force 16:9 (widescreen)",
@@ -231,38 +332,69 @@
   "playerSleepOffShort": "Cancel timer",
   "playerMinutesShort": "{minutes} min",
   "@playerMinutesShort": {
-    "placeholders": { "minutes": { "type": "int" } }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleCount": "{count} files",
   "@playerSubtitleCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleShowAll": "Show all {count} languages",
   "@playerSubtitleShowAll": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "playerSubtitleNoneMatchFilter": "No subtitles match this filter",
-  "@playerSubtitleNoneMatchFilter": {"description": "Shown when the CC/SDH or Forced filter empties the subtitle list"},
-  "@playerAudioTracks": {"description": "Heading of the audio track menu"},
+  "@playerSubtitleNoneMatchFilter": {
+    "description": "Shown when the CC/SDH or Forced filter empties the subtitle list"
+  },
+  "@playerAudioTracks": {
+    "description": "Heading of the audio track menu"
+  },
   "playerAudioDefaultStream": "Default audio stream playing.",
   "playerAudioSyncOffset": "Audio Sync Offset",
   "playerChannelsShort": "{count} ch",
-  "@playerChannelsShort": {"description": "Audio channel count on an audio track row, e.g. \"2 ch\"", "placeholders": {"count": {"type": "int"}}},
+  "@playerChannelsShort": {
+    "description": "Audio channel count on an audio track row, e.g. \"2 ch\"",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "subsBackToSubtitles": "Back to subtitles",
   "subsAppearance": "Appearance",
-  "@subsAppearance": {"description": "Heading of the subtitle appearance editor inside the subtitle menu"},
+  "@subsAppearance": {
+    "description": "Heading of the subtitle appearance editor inside the subtitle menu"
+  },
   "subsRefreshOnline": "Refresh Online Subtitles",
   "subsSyncBar": "Subtitle Sync Bar",
   "subsAppearanceTooltip": "Subtitle Appearance",
   "subsAuto": "Auto",
-  "@subsAuto": {"description": "Subtitle menu pill that picks the best track automatically"},
+  "@subsAuto": {
+    "description": "Subtitle menu pill that picks the best track automatically"
+  },
   "subsEmbedded": "Embedded",
   "subsOnline": "Online",
-  "@subsEmbedded": {"description": "Subtitle tracks stored inside the video file"},
+  "@subsEmbedded": {
+    "description": "Subtitle tracks stored inside the video file"
+  },
   "subsLanguages": "Languages",
   "subsAllLanguages": "All Languages",
   "subsForced": "Forced",
-  "@subsForced": {"description": "Subtitles shown only for foreign-language dialogue"},
+  "@subsForced": {
+    "description": "Subtitles shown only for foreign-language dialogue"
+  },
   "subsSearching": "Searching subtitles...",
   "subsNone": "No subtitles available.",
   "subsSearchProviders": "Search Online Providers",
@@ -270,24 +402,48 @@
   "playerClose": "Close",
   "playerBackToEpisodes": "Back to Episodes",
   "playerEpisodeN": "Episode {number}",
-  "@playerEpisodeN": {"description": "Fallback title for an untitled episode", "placeholders": {"number": {"type": "int"}}},
+  "@playerEpisodeN": {
+    "description": "Fallback title for an untitled episode",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "playerNoStreams": "No streams found for this episode",
   "playerNoStreamsHint": "Try going back to episodes and choosing another episode or provider.",
   "playerRescrape": "Rescrape Sources",
   "playerScrapingMore": "Scraping additional sources...",
   "playerStreamSourceFallback": "Stream Source",
-  "@playerStreamSourceFallback": {"description": "Name shown for a source that carries none of its own"},
+  "@playerStreamSourceFallback": {
+    "description": "Name shown for a source that carries none of its own"
+  },
   "playerMagnetCopied": "Magnet link copied to clipboard",
   "playerSeasonN": "Season {number}",
-  "@playerSeasonN": {"placeholders": {"number": {"type": "int"}}},
+  "@playerSeasonN": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "playerScrollUp": "Scroll Up",
   "playerScrollDown": "Scroll Down",
   "playerPreviousSeasons": "Previous Seasons",
   "playerNextSeasons": "Next Seasons",
   "playerEpShort": "EP {number}",
-  "@playerEpShort": {"description": "Short episode badge on an episode card", "placeholders": {"number": {"type": "int"}}},
+  "@playerEpShort": {
+    "description": "Short episode badge on an episode card",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "playerPlaying": "Playing",
-  "@playerPlaying": {"description": "Badge on the episode that is playing now"},
+  "@playerPlaying": {
+    "description": "Badge on the episode that is playing now"
+  },
   "playerSelectSources": "Select Sources",
   "playerCastToDevice": "Cast to device",
   "playerCastLooking": "Looking for Cast devices on your network...",
@@ -297,42 +453,113 @@
   "playerBack30": "Back 30 seconds",
   "playerForward30": "Forward 30 seconds",
   "playerSecondsN": "{seconds} seconds",
-  "@playerSecondsN": {"description": "Seek feedback bubble, e.g. \"10 seconds\"", "placeholders": {"seconds": {"type": "int"}}},
+  "@playerSecondsN": {
+    "description": "Seek feedback bubble, e.g. \"10 seconds\"",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "playerDismiss": "Dismiss (✕)",
-  "@playerDismiss": {"description": "Tooltip on the skip button's dismiss cross"},
+  "@playerDismiss": {
+    "description": "Tooltip on the skip button's dismiss cross"
+  },
   "playerEpisodeCount": "{count} Episodes",
-  "@playerEpisodeCount": {"description": "Episode count under the episodes panel heading, after the season name", "placeholders": {"count": {"type": "int"}}},
+  "@playerEpisodeCount": {
+    "description": "Episode count under the episodes panel heading, after the season name",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerStatusInitializing": "Initializing...",
-  "@playerStatusInitializing": {"description": "Loading-screen status while the player starts"},
+  "@playerStatusInitializing": {
+    "description": "Loading-screen status while the player starts"
+  },
   "playerStatusUsing": "Using {service} for files...",
-  "@playerStatusUsing": {"placeholders": {"service": {"type": "String"}}},
+  "@playerStatusUsing": {
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
   "playerStatusGathering": "Gathering metadata & peers...",
   "playerStatusBuffering": "Buffering {title}...",
-  "@playerStatusBuffering": {"placeholders": {"title": {"type": "String"}}},
+  "@playerStatusBuffering": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "playerStatusRetrying": "Retrying...",
   "playerPlaybackError": "Playback error: {error}",
-  "@playerPlaybackError": {"placeholders": {"error": {"type": "String"}}},
+  "@playerPlaybackError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "playerErrorGeneric": "Error: {error}",
-  "@playerErrorGeneric": {"placeholders": {"error": {"type": "String"}}},
+  "@playerErrorGeneric": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "playerMediaOpenError": "Media Open Error: Stream server quota exceeded or invalid media format.\nPlease select another stream.",
   "playerSourceFailed": "Source failed to play. Please select another source below.",
   "playerTryAgain": "Try again",
   "playerPickAnotherSource": "Pick another source",
   "playerSources": "Sources",
-  "@playerSources": {"description": "Action on the cast-unreachable message that opens the sources panel"},
+  "@playerSources": {
+    "description": "Action on the cast-unreachable message that opens the sources panel"
+  },
   "playerCastUnreachable": "This source is served from this device, so a Cast receiver cannot reach it. Sources hosted elsewhere -- direct links, debrid, or a torrent server on another machine -- cast fine.",
   "playerSubSwitchedEmbedded": "Switched to embedded subtitle: {title}",
-  "@playerSubSwitchedEmbedded": {"placeholders": {"title": {"type": "String"}}},
+  "@playerSubSwitchedEmbedded": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "playerNoSubtitlesForStream": "No subtitles available for this stream",
   "playerNoForcedSubtitles": "No forced subtitles for this stream",
   "playerSubDownloading": "Downloading {language} subtitle...",
-  "@playerSubDownloading": {"placeholders": {"language": {"type": "String"}}},
+  "@playerSubDownloading": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
   "playerSubDownloadFailed": "Failed to download subtitle",
   "playerSubLoaded": "{language} subtitle loaded ({count} lines)",
-  "@playerSubLoaded": {"placeholders": {"language": {"type": "String"}, "count": {"type": "int"}}},
+  "@playerSubLoaded": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "playerSubSyncSaved": "Subtitle timing synchronized and saved!",
   "playerSubLoadFailed": "Could not load subtitle: {error}",
-  "@playerSubLoadFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@playerSubLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "playerSubSyncEmbeddedUnsupported": "Subtitle sync is not supported for embedded subtitles.",
   "commonTryAgain": "Try again",
   "commonUnknownError": "Unknown error",
@@ -340,7 +567,9 @@
   "commonDetails": "Details",
   "commonSearchEllipsis": "Search...",
   "playerNowPlaying": "Now Playing",
-  "@playerNowPlaying": {"description": "Mini player title when nothing names the track"},
+  "@playerNowPlaying": {
+    "description": "Mini player title when nothing names the track"
+  },
   "playerPrevious": "Previous",
   "playerPause": "Pause",
   "playerPlay": "Play",
@@ -353,15 +582,33 @@
   "catalogNewest": "Newest",
   "catalogOldest": "Oldest",
   "catalogNoTitlesForGenre": "No titles found for {genre}.",
-  "@catalogNoTitlesForGenre": {"placeholders": {"genre": {"type": "String"}}},
+  "@catalogNoTitlesForGenre": {
+    "placeholders": {
+      "genre": {
+        "type": "String"
+      }
+    }
+  },
   "catalogNoTitlesInDecade": "No titles in the {decade}s.",
-  "@catalogNoTitlesInDecade": {"placeholders": {"decade": {"type": "int"}}},
+  "@catalogNoTitlesInDecade": {
+    "placeholders": {
+      "decade": {
+        "type": "int"
+      }
+    }
+  },
   "catalogCouldNotLoad": "Could not load this catalog",
   "catalogNoItems": "No items found",
   "commonOk": "OK",
   "updateAvailable": "Update available",
   "updateVersion": "Version {version}",
-  "@updateVersion": {"placeholders": {"version": {"type": "String"}}},
+  "@updateVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "updateCurrent": "Current",
   "updateLatest": "Latest",
   "updateWhatsNew": "What's new",
@@ -370,23 +617,55 @@
   "updateLater": "Later",
   "updateNow": "Update Now",
   "updatePermission": "Please enable \"Install unknown apps\" permission for {app} in Android settings.",
-  "@updatePermission": {"placeholders": {"app": {"type": "String"}}},
+  "@updatePermission": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
   "updateFailed": "Update failed: {error}",
-  "@updateFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@updateFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "updateDownloadFailed": "Download failed: {error}",
-  "@updateDownloadFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@updateDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "updateDownloadComplete": "Download Complete",
   "updateDownloadedTo": "Update downloaded to:",
   "updateReinstallBundle": "Reinstall the bundle to update:",
   "updateCloseAndRun": "Close {app} and run the installer to update.",
-  "@updateCloseAndRun": {"placeholders": {"app": {"type": "String"}}},
+  "@updateCloseAndRun": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
   "updateMakeExecutable": "Make the file executable and run it:\nchmod +x \"{file}\"\n./{file}",
-  "@updateMakeExecutable": {"placeholders": {"file": {"type": "String"}}},
+  "@updateMakeExecutable": {
+    "placeholders": {
+      "file": {
+        "type": "String"
+      }
+    }
+  },
   "updateCommandCopied": "Command copied to clipboard",
   "updateCopyCommand": "Copy Command",
   "updateOpenFolder": "Open Folder",
   "p2pAdvisoryBadge": "Privacy & network advisory",
-  "@p2pAdvisoryBadge": {"description": "Badge on the P2P torrent warning dialog"},
+  "@p2pAdvisoryBadge": {
+    "description": "Badge on the P2P torrent warning dialog"
+  },
   "p2pTitle": "P2P Torrent Streaming Notice",
   "p2pExit": "Exit",
   "p2pBody": "P2P (peer-to-peer torrent) streaming connects directly to public torrent swarms to download and seed video pieces. In certain countries and regions, unencrypted torrent activity may be monitored and could result in warning letters or notices from your Internet Service Provider (ISP).",
@@ -400,7 +679,14 @@
   "p2pTurnedOff": "P2P torrent source turned off. PlayTorrioHTTP will be used.",
   "p2pTurnOff": "Yes, Turn Off P2P",
   "libraryTitleCount": "{count, plural, =1{1 title} other{{count} titles}}",
-  "@libraryTitleCount": {"description": "How many titles a library shelf or collection holds", "placeholders": {"count": {"type": "int"}}},
+  "@libraryTitleCount": {
+    "description": "How many titles a library shelf or collection holds",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "libraryNothingInProgress": "Nothing in progress",
   "libraryNothingInProgressHint": "Start something and it will wait for you here.",
   "libraryNoDownloads": "No Downloads",
@@ -416,7 +702,14 @@
   "downloadSourceDebrid": "Debrid",
   "downloadSourceHttp": "HTTP",
   "downloadPeers": "{count} peers",
-  "@downloadPeers": {"description": "Peer count on a P2P download row", "placeholders": {"count": {"type": "int"}}},
+  "@downloadPeers": {
+    "description": "Peer count on a P2P download row",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "downloadStatusQueued": "Queued",
   "downloadStatusDownloading": "Downloading",
   "downloadStatusPaused": "Paused",
@@ -428,23 +721,66 @@
   "libraryNewCollection": "New collection",
   "libraryCreate": "Create",
   "commonNoResultsFor": "No results for \"{query}\"",
-  "@commonNoResultsFor": {"placeholders": {"query": {"type": "String"}}},
+  "@commonNoResultsFor": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "discoverNoCatalogs": "No catalogs available for \"{type}\"",
-  "@discoverNoCatalogs": {"placeholders": {"type": {"type": "String"}}},
+  "@discoverNoCatalogs": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
   "discoverNoTitles": "No titles found in this catalog",
   "discoverSelectRequired": "Select Required Filter",
   "discoverRequiresSelecting": "This catalog requires selecting {names} before loading titles.",
-  "@discoverRequiresSelecting": {"placeholders": {"names": {"type": "String"}}},
+  "@discoverRequiresSelecting": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
   "discoverSelectExtra": "Select {name}",
-  "@discoverSelectExtra": {"description": "A catalog filter the addon calls {name} (genre, year...), as a button", "placeholders": {"name": {"type": "String"}}},
+  "@discoverSelectExtra": {
+    "description": "A catalog filter the addon calls {name} (genre, year...), as a button",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "discoverEnterExtra": "Enter {name}",
-  "@discoverEnterExtra": {"placeholders": {"name": {"type": "String"}}},
+  "@discoverEnterExtra": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "discoverTypeHere": "Type {name} here...",
-  "@discoverTypeHere": {"placeholders": {"name": {"type": "String"}}},
+  "@discoverTypeHere": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "discoverApply": "Apply",
   "discoverTitle": "Discover",
   "discoverSearchWithin": "Search within {catalog}...",
-  "@discoverSearchWithin": {"placeholders": {"catalog": {"type": "String"}}},
+  "@discoverSearchWithin": {
+    "placeholders": {
+      "catalog": {
+        "type": "String"
+      }
+    }
+  },
   "discoverSearchCatalog": "Search catalog",
   "discoverContentType": "Content Type",
   "discoverCustom": "Custom",
@@ -452,32 +788,73 @@
   "discoverEnter": "Enter",
   "discoverCouldNotLoadResults": "Could not load these results",
   "discoverGenreTitle": "Genre: {query}",
-  "@discoverGenreTitle": {"placeholders": {"query": {"type": "String"}}},
+  "@discoverGenreTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "discoverSearchTitle": "Search: {query}",
-  "@discoverSearchTitle": {"placeholders": {"query": {"type": "String"}}},
+  "@discoverSearchTitle": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "catalogAllOf": "All {name}",
-  "@catalogAllOf": {"description": "A catalog filter with nothing chosen, e.g. \"All genre\"", "placeholders": {"name": {"type": "String"}}},
+  "@catalogAllOf": {
+    "description": "A catalog filter with nothing chosen, e.g. \"All genre\"",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "searchFromAniList": "From AniList",
   "searchAnimeFilters": "Anime filters",
   "searchScopeAll": "movies, series and anime",
-  "@searchScopeAll": {"description": "Fills {scope} in the search prompts; reads inside a sentence"},
+  "@searchScopeAll": {
+    "description": "Fills {scope} in the search prompts; reads inside a sentence"
+  },
   "searchScopeMovies": "movies",
   "searchScopeSeries": "series",
   "searchScopeAnime": "anime",
   "searchPrompt": "Search {scope}",
-  "@searchPrompt": {"placeholders": {"scope": {"type": "String"}}},
+  "@searchPrompt": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
   "searchPromptOrPaste": "Search {scope}, or paste a magnet or stream link",
-  "@searchPromptOrPaste": {"placeholders": {"scope": {"type": "String"}}},
+  "@searchPromptOrPaste": {
+    "placeholders": {
+      "scope": {
+        "type": "String"
+      }
+    }
+  },
   "animeAllGenres": "All Genres",
   "animeLangEnglish": "English",
-  "@animeLangEnglish": {"description": "Catalog language switch on the anime page"},
+  "@animeLangEnglish": {
+    "description": "Catalog language switch on the anime page"
+  },
   "animeLangArabic": "Arabic",
   "animeLoadFailed": "Failed to load the Anime catalog.",
   "animeArabicLoadFailed": "Failed to load Arabic Anime catalog. Check your internet connection.",
   "animeTrendingTitle": "Trending Anime",
   "animeTrendingSub": "Top popular and trending series",
   "animeSeasonTitle": "Popular This Season ({season})",
-  "@animeSeasonTitle": {"placeholders": {"season": {"type": "String"}}},
+  "@animeSeasonTitle": {
+    "placeholders": {
+      "season": {
+        "type": "String"
+      }
+    }
+  },
   "animeSeasonSub": "Currently airing hits",
   "animeTopTitle": "All-Time Masterpieces",
   "animeTopSub": "Critically acclaimed top rated anime",
@@ -499,7 +876,13 @@
   "animeNoMatch": "No anime found matching your criteria",
   "animeNoMatchHint": "Try different keywords or clearing filters",
   "animeResultsCount": "{count, plural, =1{1 Result} other{{count} Results}}",
-  "@animeResultsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@animeResultsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "animeTvSeries": "Anime TV Series",
   "animeMovies": "Anime Movies",
   "animeOvas": "OVAs, ONAs & Specials",
@@ -510,7 +893,13 @@
   "animeSortTopRated": "Top Rated",
   "animeSortFavorited": "Most Favorited",
   "animeSortLabel": "Sort: {sort}",
-  "@animeSortLabel": {"placeholders": {"sort": {"type": "String"}}},
+  "@animeSortLabel": {
+    "placeholders": {
+      "sort": {
+        "type": "String"
+      }
+    }
+  },
   "animeGenre": "Genre",
   "animeYear": "Year",
   "animeSeason": "Season",
@@ -526,13 +915,38 @@
   "animeStatusCancelled": "Cancelled",
   "animeStatusHiatus": "Hiatus",
   "iptvRemovedPortals": "{count, plural, =1{Removed 1 portal} other{Removed {count} portals}}",
-  "@iptvRemovedPortals": {"description": "Snack bar after deleting the selected Live TV portals", "placeholders": {"count": {"type": "int"}}},
+  "@iptvRemovedPortals": {
+    "description": "Snack bar after deleting the selected Live TV portals",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvRemovedAllPortals": "Removed all {count} portals",
-  "@iptvRemovedAllPortals": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvRemovedAllPortals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvRemovedPlaylists": "{count, plural, =1{Removed 1 playlist} other{Removed {count} playlists}}",
-  "@iptvRemovedPlaylists": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvRemovedPlaylists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvRemovedAllPlaylists": "Removed all {count} playlists",
-  "@iptvRemovedAllPlaylists": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvRemovedAllPlaylists": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvCustomizeModalTitle": "Customize Portals Modal",
   "iptvCardDisplayStyle": "Card Display Style",
   "iptvShowExpiry": "Show Portal Expiry Date",
@@ -541,13 +955,31 @@
   "iptvModalTitle": "IPTV Portals & Playlists",
   "iptvCustomizeModalTooltip": "Customize Modal Style",
   "iptvTabXtream": "Xtream Panels ({count})",
-  "@iptvTabXtream": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvTabXtream": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvTabM3u": "M3U Playlists ({count})",
-  "@iptvTabM3u": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvTabM3u": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvXtreamPanels": "Xtream Panels",
   "iptvM3uPlaylists": "M3U Playlists",
   "iptvFinding": "Finding {source}…",
-  "@iptvFinding": {"placeholders": {"source": {"type": "String"}}},
+  "@iptvFinding": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "iptvGeneratePortals": "Generate Portals",
   "iptvChooseSource": "Choose Portal Source",
   "iptvCloudVaultDesc": "High-speed cloud database with 9,000+ live IPTV servers",
@@ -558,7 +990,13 @@
   "iptvSelectAll": "Select All",
   "iptvDeselectAll": "Deselect All",
   "iptvDeleteCount": "Delete ({count})",
-  "@iptvDeleteCount": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvDeleteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvDeleteAll": "Delete All",
   "iptvAddXtreamTitle": "Add Xtream Codes Portal",
   "iptvServerUrl": "Server URL (e.g. http://example.com:8080)",
@@ -566,14 +1004,41 @@
   "iptvPassword": "Password",
   "iptvVerifySave": "Verify & Save",
   "iptvNoVerified": "No verified portals. Tap \"Generate Portals\" ({source}) to auto-discover.",
-  "@iptvNoVerified": {"placeholders": {"source": {"type": "String"}}},
+  "@iptvNoVerified": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "iptvExpiry": "Exp: {date}",
-  "@iptvExpiry": {"placeholders": {"date": {"type": "String"}}},
+  "@iptvExpiry": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "iptvConnections": "Conn: {active}/{max}",
-  "@iptvConnections": {"placeholders": {"active": {"type": "String"}, "max": {"type": "String"}}},
+  "@iptvConnections": {
+    "placeholders": {
+      "active": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "iptvCopyLogin": "Copy Login (url:username:password)",
   "iptvCopied": "Copied: {text}",
-  "@iptvCopied": {"placeholders": {"text": {"type": "String"}}},
+  "@iptvCopied": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "iptvAddM3uUrl": "Add M3U URL",
   "iptvAddM3uTitle": "Add M3U Playlist Subscription",
   "iptvPlaylistName": "Playlist Name",
@@ -590,69 +1055,192 @@
   "iptvStreamLayoutMode": "Channel Stream Layout Mode",
   "iptvSelectCategory": "Select Category",
   "iptvCategoriesTotal": "{count} total",
-  "@iptvCategoriesTotal": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvCategoriesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvExpiryLong": "Expiry: {date}",
-  "@iptvExpiryLong": {"placeholders": {"date": {"type": "String"}}},
+  "@iptvExpiryLong": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "iptvConnectionsLong": "Connections: {active}/{max}",
-  "@iptvConnectionsLong": {"placeholders": {"active": {"type": "String"}, "max": {"type": "String"}}},
+  "@iptvConnectionsLong": {
+    "placeholders": {
+      "active": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "iptvConnAndExpiry": "Conn: {active}/{max} • {date}",
-  "@iptvConnAndExpiry": {"placeholders": {"active": {"type": "String"}, "max": {"type": "String"}, "date": {"type": "String"}}},
+  "@iptvConnAndExpiry": {
+    "placeholders": {
+      "active": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "iptvNothingPinned": "Nothing pinned yet",
   "iptvPinHint": "Pin a stream to keep it at hand while you browse this portal.",
   "iptvLive": "Live",
-  "@iptvLive": {"description": "Badge and tab for live channels"},
+  "@iptvLive": {
+    "description": "Badge and tab for live channels"
+  },
   "iptvNowPlaying": "NOW: {title}",
-  "@iptvNowPlaying": {"description": "EPG line: the program on now", "placeholders": {"title": {"type": "String"}}},
+  "@iptvNowPlaying": {
+    "description": "EPG line: the program on now",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "iptvNextPlaying": "NEXT: {title}",
-  "@iptvNextPlaying": {"description": "EPG line: the program that follows", "placeholders": {"title": {"type": "String"}}},
+  "@iptvNextPlaying": {
+    "description": "EPG line: the program that follows",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "iptvLiveFeed": "Live Stream Feed",
   "iptvAllCategories": "All Categories",
   "iptvPinned": "Pinned",
   "iptvLoadFailed": "Failed to load content: {error}",
-  "@iptvLoadFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@iptvLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "iptvFilterCategories": "Filter categories…",
   "iptvSearchChannels": "Search channels…",
   "iptvStopChecking": "Stop ({checked}/{total})",
-  "@iptvStopChecking": {"placeholders": {"checked": {"type": "int"}, "total": {"type": "int"}}},
+  "@iptvStopChecking": {
+    "placeholders": {
+      "checked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "iptvCheckHealth": "Check Health",
   "iptvCustomizeLayoutTooltip": "Customize Portal Browser Layout",
   "iptvCustomize": "Customize",
   "iptvSearchInCategory": "Search in this category…",
   "iptvNoStreamsMatching": "No streams matching \"{query}\"",
-  "@iptvNoStreamsMatching": {"placeholders": {"query": {"type": "String"}}},
+  "@iptvNoStreamsMatching": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "iptvNoStreamsInCategory": "No streams available in this category.",
   "iptvPortalFallback": "IPTV Portal",
-  "@iptvPortalFallback": {"description": "Name shown for a portal that has none of its own"},
+  "@iptvPortalFallback": {
+    "description": "Name shown for a portal that has none of its own"
+  },
   "iptvTvSeries": "TV Series",
   "iptvLiveChannels": "Live Channels",
   "iptvRemovedFeeds": "{count, plural, =1{Removed 1 stream feed} other{Removed {count} stream feeds}}",
-  "@iptvRemovedFeeds": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvRemovedFeeds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvDeleteChannel": "Delete this channel",
   "iptvSearchFeeds": "Search {count} channels (e.g. 1080p, 4K, feed name)...",
-  "@iptvSearchFeeds": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvSearchFeeds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvFoundFeeds": "Found {found} of {total} feeds",
-  "@iptvFoundFeeds": {"placeholders": {"found": {"type": "int"}, "total": {"type": "int"}}},
+  "@iptvFoundFeeds": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "iptvFeedsAvailable": "{count} live stream feeds available",
-  "@iptvFeedsAvailable": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvFeedsAvailable": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvStop": "Stop",
   "iptvScanningPortals": "Scanning all verified portals in parallel…",
   "iptvNoAlive": "No alive streams discovered yet.",
   "iptvScanHint": "Tap \"Scan More Portals\" to discover fresh feeds.",
   "iptvNoFeedsMatch": "No feeds match \"{query}\"",
-  "@iptvNoFeedsMatch": {"placeholders": {"query": {"type": "String"}}},
+  "@iptvNoFeedsMatch": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
   "iptvClearSearch": "Clear Search",
   "iptvServerN": "Server {number}",
-  "@iptvServerN": {"placeholders": {"number": {"type": "int"}}},
+  "@iptvServerN": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "iptvWatchLive": "Watch Live",
   "iptvScanMore": "Scan More",
   "iptvCategoryChannels": "Category Channels",
   "iptvAlternativeFeeds": "Alternative Feeds",
   "iptvMultiView": "Multi-View",
   "iptvWatchCount": "Watch ({count})",
-  "@iptvWatchCount": {"placeholders": {"count": {"type": "int"}}},
+  "@iptvWatchCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "iptvMultiViewEmpty": "No channels ready yet. Watch a few channels normally first -- multi-view reuses their already-found streams.",
   "iptvPickUpTo": "Pick up to {max} channels to watch at once",
-  "@iptvPickUpTo": {"placeholders": {"max": {"type": "int"}}},
+  "@iptvPickUpTo": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "iptvSearchLiveHint": "Search 60+ live channels, leagues, networks…",
   "iptvNoChannelsMatch": "No channels match your search.",
   "iptvLikedSub": "Channels you keep, most recent first",
@@ -677,7 +1265,13 @@
   "liveTvAutoRotateSub": "Automatically cycle through featured live events",
   "liveTvRotationInterval": "Rotation Interval",
   "liveTvSecondsN": "{seconds} seconds",
-  "@liveTvSecondsN": {"placeholders": {"seconds": {"type": "int"}}},
+  "@liveTvSecondsN": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "liveTvCardSize": "Channel Card Size",
   "liveTvHoverZoom": "Card Hover Scale Zoom",
   "liveTvShowHdBadge": "Show LIVE / HD Stream Badge",
@@ -692,7 +1286,13 @@
   "liveTvShowConnTagSub": "Display current and max concurrent streaming connections",
   "liveTvGridColumns": "Grid Stream Columns",
   "liveTvColumnsN": "{count} Columns",
-  "@liveTvColumnsN": {"placeholders": {"count": {"type": "int"}}},
+  "@liveTvColumnsN": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "liveTvSidebarWidth": "Category Sidebar Width",
   "liveTvShowLogos": "Show Channel Stream Logos",
   "liveTvShowLogosSub": "Display channel poster and logos in stream rows",
@@ -711,14 +1311,27 @@
   "playerSkipCredits": "Skip Credits",
   "playerSkipPreview": "Skip Preview",
   "playerSkipOther": "Skip {segment}",
-  "@playerSkipOther": {"description": "Skip button for a segment type with no name of its own", "placeholders": {"segment": {"type": "String"}}},
+  "@playerSkipOther": {
+    "description": "Skip button for a segment type with no name of its own",
+    "placeholders": {
+      "segment": {
+        "type": "String"
+      }
+    }
+  },
   "playerSkipSegment": "Segment",
   "syncHintSection": "Tap first & last line of section, then tap line playing now and \"Sync from here\".",
   "syncHintFirst": "Tap the line you hear right now, then tap \"Sync from here\".",
   "syncHintOnePoint": "Point 1 set. If subtitles drift later on, tap \"Sync from here\" at a later line.",
   "syncHintTwoPoints": "Drift correction active (2 anchor points). Fine-tune with buttons.",
   "syncSaveError": "Error saving sync: {error}",
-  "@syncSaveError": {"placeholders": {"error": {"type": "String"}}},
+  "@syncSaveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "syncFixSection": "Fix section",
   "syncSubtitleTiming": "Subtitle timing",
   "syncSelectRange": "Select Range & Sync",
@@ -734,7 +1347,9 @@
   "commonSearch": "Search",
   "commonSeeAll": "See All",
   "continueWatchingSeeAll": "See all",
-  "@continueWatchingSeeAll": {"description": "Button on the Continue Watching row; the section headers use commonSeeAll"},
+  "@continueWatchingSeeAll": {
+    "description": "Button on the Continue Watching row; the section headers use commonSeeAll"
+  },
   "watchSources": "Watch Sources",
   "libraryAddToCollection": "Add to collection",
   "libraryInCollection": "In a collection",
@@ -744,37 +1359,94 @@
   "magnetNoMatch": "No files match filter",
   "upNext": "Up Next",
   "upNextCountdown": "Playing next episode in {seconds} seconds...",
-  "@upNextCountdown": {"placeholders": {"seconds": {"type": "int"}}},
+  "@upNextCountdown": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "animeCascading": "Cascading native anime extractors...",
   "animeExtracting": "Extracting MegaPlay, VidWish, AllAnime & Miruro streams...",
   "animeRetryScraping": "Retry Scraping",
   "animeNoStreamsForEpisode": "No playable streams found for Episode {number}.",
-  "@animeNoStreamsForEpisode": {"placeholders": {"number": {"type": "int"}}},
+  "@animeNoStreamsForEpisode": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
   "subStyleFontFamily": "Font family",
   "subStyleBackgroundOpacity": "Background opacity: {percent}%",
-  "@subStyleBackgroundOpacity": {"description": "Slider label; 0% is no background box behind the subtitle, 100% is solid", "placeholders": {"percent": {"type": "int"}}},
+  "@subStyleBackgroundOpacity": {
+    "description": "Slider label; 0% is no background box behind the subtitle, 100% is solid",
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "subStyleFontDefault": "Default",
-  "@subStyleFontDefault": {"description": "First entry of the subtitle font list: the font the app ships with"},
+  "@subStyleFontDefault": {
+    "description": "First entry of the subtitle font list: the font the app ships with"
+  },
   "subStyleBaseFontSize": "Base font size ({size}pt)",
-  "@subStyleBaseFontSize": {"placeholders": {"size": {"type": "int"}}},
+  "@subStyleBaseFontSize": {
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
   "subStyleScale": "Scale multiplier ({percent}%)",
-  "@subStyleScale": {"placeholders": {"percent": {"type": "int"}}},
+  "@subStyleScale": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "subStyleBold": "Bold Text",
   "subStyleItalic": "Italic Text",
   "subStyleTextColor": "Subtitle text color",
   "subStyleOutlineColor": "Outline / border color",
   "subStyleOutlineThickness": "Outline thickness ({size}px)",
-  "@subStyleOutlineThickness": {"placeholders": {"size": {"type": "String"}}},
+  "@subStyleOutlineThickness": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "subStyleShadowOffset": "Drop shadow offset ({size}px)",
-  "@subStyleShadowOffset": {"placeholders": {"size": {"type": "String"}}},
+  "@subStyleShadowOffset": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "subStyleHAlign": "Horizontal alignment",
   "subStyleLeft": "Left",
   "subStyleCenter": "Center",
   "subStyleRight": "Right",
   "subStyleBottomMargin": "Bottom margin / offset ({px}px)",
-  "@subStyleBottomMargin": {"placeholders": {"px": {"type": "int"}}},
+  "@subStyleBottomMargin": {
+    "placeholders": {
+      "px": {
+        "type": "int"
+      }
+    }
+  },
   "subStyleVPosition": "Vertical position ({percent}%)",
-  "@subStyleVPosition": {"placeholders": {"percent": {"type": "int"}}},
+  "@subStyleVPosition": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "subStyleAssMode": "SSA / ASS fansub script override mode",
   "subStyleWhite": "White",
   "subStyleCinemaYellow": "Cinema Yellow",
@@ -797,30 +1469,53 @@
   "subStyleTop": "Top",
   "subStyleBottom": "Bottom",
   "subStyleAssApply": "Use my style on styled subtitles",
-  "@subStyleAssApply": {"description": "Switch for SSA/ASS (anime, fansub) subtitles, which carry their own styling"},
+  "@subStyleAssApply": {
+    "description": "Switch for SSA/ASS (anime, fansub) subtitles, which carry their own styling"
+  },
   "subStyleAssApplyDesc": "Anime and fansub subtitles (SSA/ASS) bring their own fonts, colors and positions. Off keeps them as their authors made them; on colors them with your choices.",
   "subStyleNativeEngine": "Native subtitle engine (libass)",
   "subStyleNativeEngineDesc": "Lets the video engine draw subtitles instead of the app. Only needed for complex effects in styled subtitles; the sample preview does not apply.",
   "subSampleTitle": "Testing subtitles…",
-  "@subSampleTitle": {"description": "First line of the sample subtitle shown while adjusting appearance"},
+  "@subSampleTitle": {
+    "description": "First line of the sample subtitle shown while adjusting appearance"
+  },
   "subSampleBody": "This is how your subtitles will look.",
   "subsHearingImpaired": "CC / SDH",
-  "@subsHearingImpaired": {"description": "Subtitles for the deaf and hard of hearing; the abbreviation is the same in most languages"},
+  "@subsHearingImpaired": {
+    "description": "Subtitles for the deaf and hard of hearing; the abbreviation is the same in most languages"
+  },
   "subsHearingImpairedTip": "Also describes sounds and who is speaking, for viewers who are deaf or hard of hearing",
   "subsForcedTip": "Only translates foreign-language dialogue and on-screen text",
   "subsInThisVideo": "In this video",
-  "@subsInThisVideo": {"description": "Heading of the row of subtitle tracks stored inside the video file"},
+  "@subsInThisVideo": {
+    "description": "Heading of the row of subtitle tracks stored inside the video file"
+  },
   "subsDefaultBadge": "Default",
-  "@subsDefaultBadge": {"description": "Badge on the subtitle track the video file marks as its default"},
+  "@subsDefaultBadge": {
+    "description": "Badge on the subtitle track the video file marks as its default"
+  },
   "subsLoadedBadge": "Loaded",
-  "@subsLoadedBadge": {"description": "Badge on the online subtitle that is currently on"},
+  "@subsLoadedBadge": {
+    "description": "Badge on the online subtitle that is currently on"
+  },
   "subsStandardTitle": "Standard",
-  "@subsStandardTitle": {"description": "Title of an online subtitle whose provider gave no release name, only an id"},
+  "@subsStandardTitle": {
+    "description": "Title of an online subtitle whose provider gave no release name, only an id"
+  },
   "subsAutoTranslated": "Auto-translated",
-  "@subsAutoTranslated": {"description": "Badge on a subtitle a machine translated from another language"},
+  "@subsAutoTranslated": {
+    "description": "Badge on a subtitle a machine translated from another language"
+  },
   "subsAutoTranslatedTip": "Machine-translated, so expect mistakes. A human-made one is usually better.",
   "subsDownloadsTip": "{count} downloads",
-  "@subsDownloadsTip": {"description": "Tooltip on the download count of an online subtitle; the count is already abbreviated, like 1.2k", "placeholders": {"count": {"type": "String"}}},
+  "@subsDownloadsTip": {
+    "description": "Tooltip on the download count of an online subtitle; the count is already abbreviated, like 1.2k",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "commonSettings": "Settings",
   "iptvHdLive": "HD Live",
   "iptvLiveBroadcast": "Live Broadcast",
@@ -841,12 +1536,20 @@
   "detailsTotalEpisodes": "({count} total)",
   "@detailsTotalEpisodes": {
     "description": "Episode count beside the Episodes heading",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "detailsSub": "SUB",
-  "@detailsSub": {"description": "Subbed audio toggle on an anime's details page; kept short as it is a compact control"},
+  "@detailsSub": {
+    "description": "Subbed audio toggle on an anime's details page; kept short as it is a compact control"
+  },
   "detailsDub": "DUB",
-  "@detailsDub": {"description": "Dubbed audio toggle on an anime's details page; kept short as it is a compact control"},
+  "@detailsDub": {
+    "description": "Dubbed audio toggle on an anime's details page; kept short as it is a compact control"
+  },
   "detailsSubtitleSizeScale": "Subtitle Size Scale",
   "detailsJumpToEpisode": "Jump to ep #",
   "detailsAudioTrack": "Audio track",
@@ -876,7 +1579,14 @@
   "builtinProvidersActiveCount": "{on} of {total} active",
   "@builtinProvidersActiveCount": {
     "description": "Provider counter under the Built-in Providers header",
-    "placeholders": {"on": {"type": "int"}, "total": {"type": "int"}}
+    "placeholders": {
+      "on": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
   },
   "builtinProvidersEnableAll": "Enable all",
   "builtinProvidersDisableAll": "Disable all",
@@ -888,7 +1598,11 @@
   "addonsInstalledSuccess": "{name} installed successfully!",
   "@addonsInstalledSuccess": {
     "description": "Snackbar after installing a Stremio addon; {name} is the addon's own name and is not translated",
-    "placeholders": {"name": {"type": "String"}}
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "addonsAddDialogTitle": "Add Stremio Addon",
   "addonsAddDialogBody": "Paste the Stremio addon manifest.json URL to install catalogs, metadata, streams, or subtitles.",
@@ -897,7 +1611,11 @@
   "addonsRemoveConfirm": "Remove {name}?",
   "@addonsRemoveConfirm": {
     "description": "Confirmation title when removing an addon; {name} is the addon's own name and is not translated",
-    "placeholders": {"name": {"type": "String"}}
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "addonsRemoveConfirmBody": "Its catalogs and metadata will be removed from your home page.",
   "addonsRemove": "Remove",
@@ -906,14 +1624,22 @@
   "addonsTotalBadge": "{count} Total",
   "@addonsTotalBadge": {
     "description": "Badge next to the installed-addons header",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "addonsEmptyTitle": "No Addons Installed",
   "addonsEmptyBody": "Click \"Add Addon\" above to install a Stremio manifest URL.",
   "addonsFeatureCatalogCount": "{count, plural, =1{1 catalog} other{{count} catalogs}}",
   "@addonsFeatureCatalogCount": {
     "description": "Catalog count on an addon card, e.g. '3 catalogs'",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "addonsFeatureSubtitlesProvider": "Subtitles Provider",
   "addonsFeatureSubtitles": "Subtitles",
@@ -927,12 +1653,20 @@
   "aboutUpToDate": "{appName} is up to date!",
   "@aboutUpToDate": {
     "description": "Snackbar when the update check finds nothing newer",
-    "placeholders": {"appName": {"type": "String"}}
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
   },
   "aboutUpdateError": "Error checking updates: {error}",
   "@aboutUpdateError": {
     "description": "Snackbar when the update check throws; {error} is the raw exception text",
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "aboutTaglineTitle": "One app for streaming media",
   "aboutTaglineBody": "Movies, Series, Anime and Live TV, plus your Library. The same search, library and playback surface serves every section.",
@@ -955,7 +1689,14 @@
   "aboutVersionBuild": "Version {version} · build {build}",
   "@aboutVersionBuild": {
     "description": "Version line under the app name on the About screen",
-    "placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
   },
   "aboutChecking": "Checking...",
   "aboutCheckForUpdates": "Check for Updates",
@@ -965,17 +1706,29 @@
   "aboutCouldNotOpen": "Could not open {url}",
   "@aboutCouldNotOpen": {
     "description": "Snackbar when a link on the About screen fails to open",
-    "placeholders": {"url": {"type": "String"}}
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
   },
   "backupSavedTo": "Backup saved to {path}",
   "@backupSavedTo": {
     "description": "Snackbar after exporting a backup; {path} is a filesystem path",
-    "placeholders": {"path": {"type": "String"}}
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
   },
   "backupFailed": "Backup failed: {error}",
   "@backupFailed": {
     "description": "Snackbar when exporting a backup throws",
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "backupRestoreConfirmTitle": "Restore backup?",
   "backupRestoreConfirmBody": "Pick a backup file to restore. This overwrites your current library, settings and addon config, and cannot be undone.",
@@ -984,12 +1737,20 @@
   "backupRestored": "Restored {count} settings — restart the app to see all changes.",
   "@backupRestored": {
     "description": "Snackbar after a restore; {count} is how many settings were written",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "backupRestoreFailed": "Restore failed: {error}",
   "@backupRestoreFailed": {
     "description": "Snackbar when a restore throws",
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "backupWebdavTitle": "Connect WebDAV",
   "backupWebdavBody": "Point this at a WebDAV endpoint on your own server (Nextcloud, etc.) — the full URL of the file to write, e.g. https://cloud.example.com/remote.php/dav/files/you/playtorrio_backup.json",
@@ -1001,7 +1762,11 @@
   "backupUploadFailed": "Upload failed: {error}",
   "@backupUploadFailed": {
     "description": "Snackbar when a cloud upload throws",
-    "placeholders": {"error": {"type": "String"}}
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "backupCloudRestoreConfirmTitle": "Restore from cloud?",
   "backupCloudRestoreConfirmBody": "This overwrites your current library, settings and addon config with the backup stored on your WebDAV server. This cannot be undone.",
@@ -1026,12 +1791,20 @@
   "syncInProgress": "Syncing with {provider}...",
   "@syncInProgress": {
     "description": "Snackbar while a provider sync runs; {provider} is a product name and is not translated",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "syncComplete": "{provider} sync complete!",
   "@syncComplete": {
     "description": "Snackbar when a provider sync finishes; {provider} is a product name and is not translated",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "syncTraktPairingHint": "Enter this activation code at trakt.tv/activate:",
   "syncTraktOpenVerify": "Open trakt.tv/activate",
@@ -1069,12 +1842,20 @@
   "debridNoKeyFor": "{provider} has no API key saved. Please enter and save your key below.",
   "@debridNoKeyFor": {
     "description": "Warning when the active debrid provider has no key; {provider} is a product name and is not translated",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "debridActivatedVia": "Debrid streaming activated via {provider}",
   "@debridActivatedVia": {
     "description": "Confirmation when debrid streaming is switched on",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "debridDisabled": "Debrid streaming disabled. Using local engine.",
   "debridActiveProviderHeader": "ACTIVE PROVIDER",
@@ -1084,23 +1865,39 @@
   "debridSelectedNoKey": "{provider} selected, but has no API key saved yet. Please enter and save your key below.",
   "@debridSelectedNoKey": {
     "description": "Warning when picking a provider that has no key yet",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "debridActiveSetTo": "Active Debrid service set to {provider}",
   "@debridActiveSetTo": {
     "description": "Confirmation when the active provider changes",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "debridCredentialsHeader": "PROVIDER CREDENTIALS",
   "debridLoggedInAs": "Logged in as {user}",
   "@debridLoggedInAs": {
     "description": "Provider card subtitle when the account name is known",
-    "placeholders": {"user": {"type": "String"}}
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "debridAccount": "Account: {user}",
   "@debridAccount": {
     "description": "Provider card subtitle when the account name is known",
-    "placeholders": {"user": {"type": "String"}}
+    "placeholders": {
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "debridAccountConnected": "Account: Connected",
   "debridGetTokenRealDebrid": "Get token from real-debrid.com/apitoken",
@@ -1118,17 +1915,32 @@
   "debridKeyVerified": "{provider} key verified ({user}) & set as active provider!",
   "@debridKeyVerified": {
     "description": "Snackbar after a key is saved and the provider confirms the account",
-    "placeholders": {"provider": {"type": "String"}, "user": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      },
+      "user": {
+        "type": "String"
+      }
+    }
   },
   "debridKeySaved": "{provider} key saved & set as active provider!",
   "@debridKeySaved": {
     "description": "Snackbar after a key is saved without a verified account name",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "debridKeyCleared": "{provider} key cleared.",
   "@debridKeyCleared": {
     "description": "Snackbar after a provider key is removed",
-    "placeholders": {"provider": {"type": "String"}}
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
   },
   "debridPastedKey": "Pasted key from clipboard",
   "debridDismiss": "Dismiss",
@@ -1144,7 +1956,11 @@
   "videoEngineTitle": "{platform} Video Engine",
   "@videoEngineTitle": {
     "description": "Device status card title; {platform} is a product name and is not translated",
-    "placeholders": {"platform": {"type": "String"}}
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
   },
   "videoCrashFreeBadge": "Crash-Free Fallback",
   "videoEngineBody": "libmpv hardware accelerated pipeline with auto software failover.",
@@ -1154,7 +1970,11 @@
   "videoDecoderPresetHeader": "DECODER PRESET ({platform})",
   "@videoDecoderPresetHeader": {
     "description": "Header above the decoder preset list; {platform} is uppercased and not translated",
-    "placeholders": {"platform": {"type": "String"}}
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
   },
   "videoPresetHardwareAutoTitle": "Hardware Accelerated (Auto)",
   "videoPresetHardwareAutoBody": "Fastest performance, GPU hardware decoded with automatic software fallback.",
@@ -1180,7 +2000,11 @@
   "videoThreadsCount": "{count, plural, =1{1 Thread} other{{count} Threads}}",
   "@videoThreadsCount": {
     "description": "Decoder worker thread count in the dropdown",
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "videoDiskCacheTitle": "Disk Stream Buffer Cache",
   "videoDiskCacheBody": "Smoothly caches media chunks into the OS temporary directory to eliminate RAM pressure.",
@@ -1214,7 +2038,20 @@
   "videoSubtitlePresetLine": "Preset: {preset} • {font} ({size}pt / {scale}%)",
   "@videoSubtitlePresetLine": {
     "description": "Summary line under the subtitle card title; {preset} and {font} are names, {size} and {scale} are numbers",
-    "placeholders": {"preset": {"type": "String"}, "font": {"type": "String"}, "size": {"type": "int"}, "scale": {"type": "int"}}
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      },
+      "font": {
+        "type": "String"
+      },
+      "size": {
+        "type": "int"
+      },
+      "scale": {
+        "type": "int"
+      }
+    }
   },
   "videoSubtitleDone": "Done",
   "videoSubtitleCustomize": "Customize",
@@ -1224,14 +2061,22 @@
   "videoResetConfirmBody": "This will restore all video decoding, fast-decode optimizations, caching, buffering, and sync settings to recommended defaults for {platform}.",
   "@videoResetConfirmBody": {
     "description": "Reset confirmation body; {platform} is a product name and is not translated",
-    "placeholders": {"platform": {"type": "String"}}
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
   },
   "videoCancel": "Cancel",
   "videoReset": "Reset",
   "videoResetDone": "Video settings reset to {platform} defaults.",
   "@videoResetDone": {
     "description": "Snackbar after resetting; {platform} is a product name and is not translated",
-    "placeholders": {"platform": {"type": "String"}}
+    "placeholders": {
+      "platform": {
+        "type": "String"
+      }
+    }
   },
   "videoResetButton": "Reset Video Engine to Platform Defaults",
   "videoCustomChainTitle": "Custom Decoder Chain",
@@ -1253,5 +2098,13 @@
   "subPresetNightModeSoft": "Night Mode Warm",
   "subPresetNightModeSoftBody": "Soft cream text with 40% translucent background",
   "subPresetCustom": "Custom",
-  "subPresetCustomBody": "User configured custom subtitle styles"
+  "subPresetCustomBody": "User configured custom subtitle styles",
+  "commonClose": "Close",
+  "@commonClose": {
+    "description": "Tooltip for an icon-only close button"
+  },
+  "commonBack": "Back",
+  "@commonBack": {
+    "description": "Tooltip for an icon-only back button"
+  }
 }
