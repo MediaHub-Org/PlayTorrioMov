@@ -145,10 +145,10 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
           ),
         ],
       ),
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         top: 16,
-        left: 20,
-        right: 20,
+        start: 20,
+        end: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(

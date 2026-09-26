@@ -293,10 +293,10 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
 
   Widget _buildHeader(int sNum, int eNum, bool isCompact) {
     return Container(
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         top: MediaQuery.paddingOf(context).top + 12,
-        left: isCompact ? 12 : 16,
-        right: isCompact ? 12 : 16,
+        start: isCompact ? 12 : 16,
+        end: isCompact ? 12 : 16,
         bottom: 12,
       ),
       color: const Color(0x66000000),

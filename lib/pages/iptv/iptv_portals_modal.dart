@@ -915,7 +915,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   Container(
                                     width: 24,
                                     height: 24,
-                                    margin: const EdgeInsets.only(right: 12),
+                                    margin: const EdgeInsetsDirectional.only(end: 12),
                                     decoration: BoxDecoration(
                                       color: isSelected ? palette.primaryColor : Colors.transparent,
                                       shape: BoxShape.circle,
@@ -1343,7 +1343,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   Container(
                                     width: 24,
                                     height: 24,
-                                    margin: const EdgeInsets.only(right: 12),
+                                    margin: const EdgeInsetsDirectional.only(end: 12),
                                     decoration: BoxDecoration(
                                       color: isSelected ? palette.primaryColor : Colors.transparent,
                                       shape: BoxShape.circle,

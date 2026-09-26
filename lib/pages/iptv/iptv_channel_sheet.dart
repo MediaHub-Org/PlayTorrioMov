@@ -653,7 +653,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                               ),
                                               const SizedBox(height: 2),
                                               Padding(
-                                                padding: const EdgeInsets.only(left: 13),
+                                                padding: const EdgeInsetsDirectional.only(start: 13),
                                                 child: Text(
                                                   hit.portal.portal.username.isNotEmpty
                                                       ? hit.portal.portal.username

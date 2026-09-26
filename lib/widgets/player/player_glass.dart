@@ -273,9 +273,9 @@ class PlayerMenuHeader extends StatelessWidget {
                 ),
               Flexible(
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    left: back != null ? 4 : 8,
-                    right: 8,
+                  padding: EdgeInsetsDirectional.only(
+                    start: back != null ? 4 : 8,
+                    end: 8,
                     top: 4,
                     bottom: 4,
                   ),

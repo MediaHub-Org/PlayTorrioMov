@@ -78,7 +78,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
         // IconButton, and a narrower slot clamps it into an ellipse.
         leadingWidth: AppSpacing.pageInset(context) + 48,
         leading: Padding(
-          padding: EdgeInsets.only(left: AppSpacing.pageInset(context)),
+          padding: EdgeInsetsDirectional.only(start: AppSpacing.pageInset(context)),
           child: const Center(child: GlassBackButton()),
         ),
         title: Container(

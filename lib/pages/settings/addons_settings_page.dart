@@ -548,7 +548,7 @@ class _AddonCard extends StatelessWidget {
             children: [
               ...m.types.map(
                 (type) => Padding(
-                  padding: const EdgeInsets.only(right: 6),
+                  padding: const EdgeInsetsDirectional.only(end: 6),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 9,

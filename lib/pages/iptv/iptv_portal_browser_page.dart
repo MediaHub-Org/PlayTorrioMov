@@ -2007,7 +2007,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
 
                     if (widget.isAlive)
                       Container(
-                        margin: const EdgeInsets.only(right: 6),
+                        margin: const EdgeInsetsDirectional.only(end: 6),
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                         decoration: BoxDecoration(
                           color: Colors.greenAccent.withValues(alpha: 0.15),
@@ -2175,7 +2175,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                 ),
                 if (widget.isAlive) ...[
                   Container(
-                    margin: const EdgeInsets.only(right: 8),
+                    margin: const EdgeInsetsDirectional.only(end: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                     decoration: BoxDecoration(
                       color: Colors.greenAccent.withValues(alpha: 0.15),

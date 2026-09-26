@@ -331,7 +331,7 @@ class _CatalogPageState extends State<CatalogPage> {
                             if (_isSearching)
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(right: 16),
+                                  padding: const EdgeInsetsDirectional.only(end: 16),
                                   child: TextField(
                                     controller: _searchController,
                                     autofocus: true,

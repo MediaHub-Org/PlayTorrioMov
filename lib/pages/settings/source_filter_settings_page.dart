@@ -150,7 +150,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
+      padding: const EdgeInsetsDirectional.only(start: 4),
       child: Text(
         title,
         style: TextStyle(

@@ -192,7 +192,7 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                   children: [
                     if (isBoosting)
                       Padding(
-                        padding: const EdgeInsets.only(right: 2),
+                        padding: const EdgeInsetsDirectional.only(end: 2),
                         child: Icon(
                           Icons.bolt_rounded,
                           size: 13,

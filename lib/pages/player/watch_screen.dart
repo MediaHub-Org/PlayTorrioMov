@@ -429,10 +429,10 @@ class _WatchScreenState extends State<WatchScreen>
       child: FadeTransition(
         opacity: _fadeAnim,
         child: Padding(
-          padding: const EdgeInsets.only(
+          padding: const EdgeInsetsDirectional.only(
             top: 60,
-            left: 48,
-            right: 0,
+            start: 48,
+            end: 0,
             bottom: 24,
           ),
           child: Row(
@@ -452,7 +452,7 @@ class _WatchScreenState extends State<WatchScreen>
               Expanded(
                 flex: 4,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 24),
+                  padding: const EdgeInsetsDirectional.only(end: 24),
                   child: _buildSourcesPanel(isDesktop: true),
                 ),
               ),
@@ -982,7 +982,7 @@ class _WatchScreenState extends State<WatchScreen>
 
         return Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: link == links.last ? 0 : _S.sm),
+            padding: EdgeInsetsDirectional.only(end: link == links.last ? 0 : _S.sm),
             child: _buildActionButton(
               icon,
               link.name,
