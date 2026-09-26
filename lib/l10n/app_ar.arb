@@ -980,5 +980,26 @@
   "iptvAddFavorite": "إضافة إلى المفضلة",
   "iptvRemoveFavorite": "إزالة من المفضلة",
   "iptvDeletePortal": "حذف هذه البوابة",
-  "iptvDeletePlaylist": "حذف قائمة التشغيل هذه"
+  "iptvDeletePlaylist": "حذف قائمة التشغيل هذه",
+
+  "animeNoGenreResults": "لا يوجد أنمي من نوع {genre}.",
+  "animeSourcesFound": "تم العثور على {count} مصدرًا",
+  "animeNoCategorySources": "لا توجد مصادر من {category}.",
+  "animeEpsShort": "{count} حلقة",
+  "detailsSeasonCount": "{count, plural, =1{موسم واحد} =2{موسمان} few{{count} مواسم} many{{count} موسمًا} other{{count} موسم}}",
+  "discoverAllOf": "الكل: {name}",
+  "playerPlayNext": "تشغيل التالي",
+  "playerThisSourceFailed": "فشل تشغيل هذا المصدر",
+  "playerProviderName": "المزوّد: {name}",
+  "playerScrapingFrom": "جارٍ البحث عن المصادر ({name})...",
+  "watchNoSourcesFound": "لم يتم العثور على مصادر",
+  "watchNoSourcesBody": "لم يتم العثور على أي بث. ثبّت المزيد من الإضافات من الإعدادات أو جرّب عنوانًا آخر.",
+  "watchInstallAddons": "تثبيت الإضافات",
+  "libraryNoCollectionsYet": "لا توجد مجموعات بعد. أنشئ واحدة أعلاه وسيُضاف هذا العنوان إليها مباشرة.",
+  "homeCalendar": "التقويم",
+  "syncNowBadge": "الآن",
+  "magnetNonVideo": "ليس فيديو",
+  "iptvCloudVaultTitle": "Cloud Vault (9k+)",
+  "iptvPortalsBadge": "أكثر من 9,600 بوابة",
+  "iptvChannelsCount": "{count} قناة"
 }

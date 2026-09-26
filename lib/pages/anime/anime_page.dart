@@ -333,7 +333,7 @@ class _AnimePageState extends State<AnimePage> {
     if (_genreResults.isEmpty) {
       return Center(
         child: Text(
-          'No $_genreFilter anime found.',
+          context.l10n.animeNoGenreResults(_genreFilter),
           style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
         ),
       );
@@ -764,7 +764,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${anime.totalEpisodes} Episodes',
+                          context.l10n.playerEpisodeCount(anime.totalEpisodes),
                           style: TextStyle(
                             fontSize: 15,
                             color: AppColors.onAccent.withValues(alpha: 0.55),

@@ -206,7 +206,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                             ),
                           ] else
                             Text(
-                              '${_allSources.length} sources found',
+                              context.l10n.animeSourcesFound(
+                                _allSources.length,
+                              ),
                               style: TextStyle(
                                 color: AppColors.inkSubtle,
                                 fontSize: 12,
@@ -295,7 +297,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                         ? Padding(
                             padding: const EdgeInsets.all(32),
                             child: Text(
-                              'No ${_selectedCategory.toUpperCase()} sources found.',
+                              context.l10n.animeNoCategorySources(
+                                _selectedCategory.toUpperCase(),
+                              ),
                               style: TextStyle(
                                   color: AppColors.inkSubtle, fontSize: 13),
                             ),

@@ -980,5 +980,26 @@
   "iptvAddFavorite": "Adicionar aos favoritos",
   "iptvRemoveFavorite": "Remover dos favoritos",
   "iptvDeletePortal": "Excluir este portal",
-  "iptvDeletePlaylist": "Excluir esta playlist"
+  "iptvDeletePlaylist": "Excluir esta playlist",
+
+  "animeNoGenreResults": "Nenhum anime de {genre} encontrado.",
+  "animeSourcesFound": "{count} fontes encontradas",
+  "animeNoCategorySources": "Nenhuma fonte de {category} encontrada.",
+  "animeEpsShort": "{count} EPS",
+  "detailsSeasonCount": "{count, plural, =1{1 temporada} other{{count} temporadas}}",
+  "discoverAllOf": "Todos: {name}",
+  "playerPlayNext": "Reproduzir próximo",
+  "playerThisSourceFailed": "Esta fonte não reproduziu",
+  "playerProviderName": "Provedor: {name}",
+  "playerScrapingFrom": "Buscando fontes ({name})...",
+  "watchNoSourcesFound": "Nenhuma fonte encontrada",
+  "watchNoSourcesBody": "Nenhum stream encontrado. Instale mais addons em Configurações ou tente outro título.",
+  "watchInstallAddons": "Instalar addons",
+  "libraryNoCollectionsYet": "Nenhuma coleção ainda. Crie uma acima e este título vai direto para ela.",
+  "homeCalendar": "Calendário",
+  "syncNowBadge": "AGORA",
+  "magnetNonVideo": "Não é vídeo",
+  "iptvCloudVaultTitle": "Cloud Vault (9k+)",
+  "iptvPortalsBadge": "9.600+ portais",
+  "iptvChannelsCount": "{count} canais"
 }

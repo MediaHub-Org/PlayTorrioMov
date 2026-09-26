@@ -516,7 +516,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   Text(
-                                    'Cloud Vault (9k+)',
+                                    context.l10n.iptvCloudVaultTitle,
                                     style: TextStyle(
                                       color: AppColors.ink,
                                       fontWeight: FontWeight.bold,
@@ -534,9 +534,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       ).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
-                                      '9,600+ Portals',
-                                      style: TextStyle(
+                                    child: Text(
+                                      context.l10n.iptvPortalsBadge,
+                                      style: const TextStyle(
                                         color: Color(0xFF00E5FF),
                                         fontSize: 9.5,
                                         fontWeight: FontWeight.w800,
@@ -1375,7 +1375,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                         style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: 13.5),
                                       ),
                                       Text(
-                                        '${pl.channels.length} channels ${pl.sourceUrl != null ? '· ${pl.sourceUrl!}' : ''}',
+                                        '${context.l10n.iptvChannelsCount(pl.channels.length)}'
+                                        '${pl.sourceUrl != null ? ' · ${pl.sourceUrl!}' : ''}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 11),

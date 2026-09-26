@@ -479,7 +479,10 @@ class _CatalogPageState extends State<CatalogPage> {
               if (!extra.isRequired)
                 PopupMenuItem<String?>(
                   value: null,
-                  child: Text('All', style: TextStyle(color: AppColors.ink)),
+                  child: Text(
+                    context.l10n.commonAll,
+                    style: TextStyle(color: AppColors.ink),
+                  ),
                 ),
               ...extra.options.map(
                 (opt) => PopupMenuItem<String?>(

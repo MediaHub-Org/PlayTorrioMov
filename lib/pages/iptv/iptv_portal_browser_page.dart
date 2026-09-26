@@ -213,8 +213,8 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Grid Stream Columns', style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w600)),
-                                  Text('$cols Cols', style: TextStyle(color: palette.primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  Text(context.l10n.liveTvGridColumns, style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w600)),
+                                  Text(context.l10n.liveTvColumnsN(cols), style: TextStyle(color: palette.primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               SliderTheme(
@@ -245,7 +245,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     builder: (context, showLogos, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: Text('Show Channel Stream Logos', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
+                        title: Text(context.l10n.liveTvShowLogos, style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showLogos,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowStreamLogos(val),
@@ -258,7 +258,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     builder: (context, showEpg, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: Text('Show EPG "Now Playing" Snippet', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
+                        title: Text(context.l10n.liveTvShowEpg, style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showEpg,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowEpgSnippet(val),
@@ -271,7 +271,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     builder: (context, showCount, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: Text('Show Category Stream Counts', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
+                        title: Text(context.l10n.liveTvShowCounts, style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showCount,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowCategoryCount(val),
@@ -2041,7 +2041,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.4)),
                         ),
-                        child: const Text('LIVE', style: TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
+                        child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
                       ),
 
                     GestureDetector(
@@ -2208,7 +2208,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                       color: Colors.greenAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text('LIVE', style: TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
+                    child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
                   ),
                 ],
                 GestureDetector(

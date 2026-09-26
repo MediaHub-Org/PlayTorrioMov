@@ -721,14 +721,17 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                 elevation: 0,
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 18),
-              label: const Text(
-                'Play',
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+              label: Text(
+                context.l10n.playerPlay,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           else
             Text(
-              'Non-video',
+              context.l10n.magnetNonVideo,
               style: TextStyle(
                 fontSize: 11,
                 color: AppColors.inkAlpha(0.25),

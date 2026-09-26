@@ -693,9 +693,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                                 color: PlayerTheme.accent,
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
-                                              child: const Text(
-                                                'NOW',
-                                                style: TextStyle(
+                                              child: Text(
+                                                context.l10n.syncNowBadge,
+                                                style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 8.5,
                                                   fontWeight: FontWeight.w800,

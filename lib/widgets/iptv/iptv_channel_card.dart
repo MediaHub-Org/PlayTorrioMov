@@ -162,7 +162,7 @@ class IptvChannelCard extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          'LIVE',
+                                          context.l10n.iptvLive.toUpperCase(),
                                           style: TextStyle(
                                             color: AppColors.ink,
                                             fontSize: 9.5,

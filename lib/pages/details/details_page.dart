@@ -1104,7 +1104,7 @@ class _DetailsPageState extends State<DetailsPage>
       if (seasonCount > 0) {
         items.add(
           Text(
-            '$seasonCount Season${seasonCount > 1 ? "s" : ""}',
+            context.l10n.detailsSeasonCount(seasonCount),
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         );
@@ -1573,7 +1573,7 @@ class _DetailsPageState extends State<DetailsPage>
   Widget _buildSeasonSelector(MovieDetail meta) {
     final seasons = meta.videos
         .map((v) => v.season)
-        .where((s) => s != null)
+        .whereType<int>()
         .toSet()
         .toList();
     seasons.sort();
@@ -1623,7 +1623,7 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Text(
-                      'Season $season',
+                      context.l10n.playerSeasonN(season),
                       style: TextStyle(
                         color: isSelected ? Colors.black : AppColors.ink,
                         fontSize: 15,

@@ -1994,14 +1994,18 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
-            SizedBox(width: 8),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Color(0xFF10B981),
+              size: 18,
+            ),
+            const SizedBox(width: 8),
             Text(
-              'Magnet link copied to clipboard',
-              style: TextStyle(
+              context.l10n.playerMagnetCopied,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -2242,9 +2246,9 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'No sources found',
-            style: TextStyle(
+          Text(
+            context.l10n.watchNoSourcesFound,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -2253,10 +2257,10 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
           const SizedBox(height: 12),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 280),
-            child: const Text(
-              'No streams found. Install more addons from Settings or try another title.',
+            child: Text(
+              context.l10n.watchNoSourcesBody,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF9B9BA5),
                 fontSize: 14,
                 height: 1.5,
@@ -2298,18 +2302,18 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 child: AnimatedScale(
                   scale: _isHovering ? 1.05 : 1.0,
                   duration: const Duration(milliseconds: 200),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.extension_rounded,
                         color: Colors.white,
                         size: 18,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
-                        'Install Addons',
-                        style: TextStyle(
+                        context.l10n.watchInstallAddons,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,

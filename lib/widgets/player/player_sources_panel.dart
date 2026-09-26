@@ -367,7 +367,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Provider: ${widget.currentAddonName}',
+                  context.l10n.playerProviderName(widget.currentAddonName),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.50),
                     fontSize: 11.5,
@@ -443,7 +443,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Scraping sources (${widget.currentAddonName})...',
+            context.l10n.playerScrapingFrom(widget.currentAddonName),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.70),
               fontSize: 13,
