@@ -440,7 +440,66 @@ bool _isKnownCode(String token) =>
     _iso639ToDisplayName.containsKey(token) ||
     _mpvTagToDisplayName.containsKey(token);
 
-/// A region code read out of a track's own title, or null when it names none.
+/// What an embedded track with no language is called.
+///
+/// The container title first -- muxers write usable names there -- then the
+/// codec as a short label, then a bare number. A track with neither a tag
+/// nor a title cannot be named "Language (Region)", but "Track 17 · SRT"
+/// still tells a viewer picking by trial which row they tried, where three
+/// rows reading "SRT" would not.
+String embeddedFallbackTitle({
+  String? containerTitle,
+  String? codec,
+  required int index,
+}) {
+  final title = containerTitle?.trim() ?? '';
+  if (title.isNotEmpty) return title;
+  final label = _codecShortLabel(codec);
+  if (label != null) return 'Track $index · $label';
+  return 'Track $index';
+}
+
+/// A codec mpv reports, shortened for a row title. Unknown codecs yield
+/// nothing rather than a shouty technical string.
+String? _codecShortLabel(String? codec) {
+  switch (codec?.trim().toLowerCase()) {
+    case 'subrip':
+    case 'srt':
+      return 'SRT';
+    case 'ass':
+    case 'ssa':
+      return 'ASS';
+    case 'mov_text':
+      return 'MOV Text';
+    case 'webvtt':
+    case 'vtt':
+      return 'VTT';
+    case 'microdvd':
+      return 'MicroDVD';
+    case 'mpl2':
+      return 'MPL2';
+    case 'realtext':
+      return 'RealText';
+    case 'sami':
+      return 'SAMI';
+    case 'hdmv_pgs_subtitle':
+    case 'pgssub':
+      return 'PGS';
+    case 'dvd_subtitle':
+    case 'vobsub':
+      return 'VobSub';
+    case 'dvb_subtitle':
+    case 'dvb_sub':
+      return 'DVB';
+    case 'eia_608':
+    case 'cc_dec':
+      return 'CC';
+    case 'xsub':
+      return 'XSUB';
+    default:
+      return null;
+  }
+}
 ///
 /// Deliberately narrow: it looks for the region words and codes that appear
 /// in real track titles, and returns nothing rather than guessing. A wrong

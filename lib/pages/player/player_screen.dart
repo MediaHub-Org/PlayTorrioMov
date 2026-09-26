@@ -928,16 +928,22 @@ class _PlayerScreenState extends State<PlayerScreen>
     for (var i = 0; i < keptSubs.length; i++) {
       final t = keptSubs[i];
       final language = uniqueNames[i];
-      // The language name leads, with the container's own title only as a
-      // fallback. A container title is written by whoever muxed the file and
-      // is routinely technical noise -- "eng", "[Full] SDH", "English (US)
-      // PGS". The two things a title can say that a language name cannot,
-      // forced and hearing-impaired, are read off the title separately and
-      // shown as their own badges, so nothing is lost by preferring the
-      // name here.
+      // The language name leads, with [embeddedFallbackTitle] covering the
+      // rest: the container's own title, then the codec as a short label,
+      // then a bare number. A container title is written by whoever muxed
+      // the file and is routinely technical noise -- "eng", "[Full] SDH",
+      // "English (US) PGS" -- but for a track with no language it is the
+      // only name there is. The two things a title can say that a language
+      // name cannot, forced and hearing-impaired, are read off the title
+      // separately and shown as their own badges, so nothing is lost by
+      // preferring the name here.
       final title = language.isNotEmpty
           ? language
-          : (t.title ?? 'Track ${i + 1}');
+          : embeddedFallbackTitle(
+              containerTitle: t.title,
+              codec: t.codec,
+              index: i + 1,
+            );
       final idx = int.tryParse(t.id) ?? (i + 1);
       embeddedSubs.add(
         PlayerEmbeddedSubtitle(

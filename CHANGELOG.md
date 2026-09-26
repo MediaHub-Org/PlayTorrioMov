@@ -81,6 +81,10 @@ rather than files, and the sleep timer can wait for the video to end.
   would have no name -- and cannot be chosen deliberately, because there is
   nothing to choose it by. The menu enforces this itself now rather than
   trusting every search path to have filtered first.
+- **A track with no language shows its container title, then its format.**
+  Untagged, untitled tracks read "Track 17 \u00b7 SRT" now instead of a bare
+  number: the language cannot be known, but the format is still something a
+  viewer picking by trial can act on.
 - **Online subtitles break ties alphabetically.** The list leads with the
   language being heard, then orders by how many files each language has.
   Two languages with the same count used to fall wherever the providers

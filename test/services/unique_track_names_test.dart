@@ -97,6 +97,30 @@ void main() {
     test('a real tag beats whatever the title says', () {
       expect(uniqueTrackLanguageNames(['spa'], ['chi']), ['Spanish']);
     });
+  });
+
+  group('embeddedFallbackTitle', () {
+    // A track with no language cannot be named "Language (Region)", but it
+    // still needs a row a viewer picking by trial can tell apart.
+    test('the container title wins when there is one', () {
+      expect(
+        embeddedFallbackTitle(containerTitle: '[Full] SDH', index: 3),
+        '[Full] SDH',
+      );
+      expect(embeddedFallbackTitle(containerTitle: '  ', index: 3), 'Track 3');
+    });
+
+    test('the codec shortens to a label', () {
+      expect(
+        embeddedFallbackTitle(codec: 'hdmv_pgs_subtitle', index: 17),
+        'Track 17 \u00b7 PGS',
+      );
+      expect(
+        embeddedFallbackTitle(codec: 'subrip', index: 18),
+        'Track 18 \u00b7 SRT',
+      );
+      expect(embeddedFallbackTitle(codec: 'mystery', index: 19), 'Track 19');
+    });
 
     test('three of a kind number in order', () {
       expect(
