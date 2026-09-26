@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 
 import '../../models/collection/media_collection.dart';
 import '../../models/continue_watching/continue_watching_item.dart';
 import '../../models/download/download_task_model.dart';
-import '../../models/movie/movie.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/app_breakpoints.dart';
@@ -13,13 +14,14 @@ import '../../services/collections/media_collections_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/my_list/my_list_service.dart';
+import '../../services/subtitles/subtitle_languages.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/collection/collection_card.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
 import '../../widgets/home/continue_watching_slider.dart';
-import '../details/details_page.dart';
+import '../player/player_screen.dart';
 import 'library_shelf_page.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -312,127 +314,325 @@ class _CollectionPageState extends State<CollectionPage> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           itemCount: downloads.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final item = downloads[index];
-            final progress = item.totalBytes > 0
-                ? item.receivedBytes / item.totalBytes
-                : 0.0;
-            return InkWell(
-              borderRadius: BorderRadius.circular(14),
-              // Rows had no tap handler at all -- clicking one did nothing.
-              onTap: () => pushPage(
-                context,
-                DetailsPage(
-                  movie: Movie(
-                    id: item.mediaId,
-                    name: item.title,
-                    poster: item.posterUrl,
-                    year: item.year,
-                    type: item.type,
-                    addonBaseUrl: 'https://v3-cinemeta.strem.io',
-                  ),
-                ),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: AppColors.inkAlpha(0.08),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: item.posterUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: item.posterUrl!,
-                              width: 50,
-                              height: 75,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, __, ___) => Container(
-                                width: 50,
-                                height: 75,
-                                color: AppColors.inkAlpha(0.10),
-                                child: Icon(
-                                  Icons.movie_rounded,
-                                  color: AppColors.inkAlpha(0.30),
-                                ),
-                              ),
-                            )
-                          : Container(
-                              width: 50,
-                              height: 75,
-                              color: AppColors.inkAlpha(0.10),
-                              child: Icon(
-                                Icons.movie_rounded,
-                                color: AppColors.inkAlpha(0.30),
-                              ),
-                            ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 15,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (item.episodeTitle != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              item.episodeTitle!,
-                              style: TextStyle(
-                                color: AppColors.inkSubtle,
-                                fontSize: 12,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: progress > 0 ? progress : null,
-                            backgroundColor: AppColors.inkAlpha(0.10),
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.accent,
-                            ),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${item.status.name.toUpperCase()} • ${(progress * 100).toStringAsFixed(0)}%',
-                            style: TextStyle(
-                              color: AppColors.inkDisabled,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.delete_outline_rounded,
-                        color: Colors.redAccent,
-                      ),
-                      onPressed: () =>
-                          DownloadService.instance.deleteDownload(item.id),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+          itemBuilder: (context, index) =>
+              _DownloadRow(task: downloads[index]),
         );
       },
+    );
+  }
+}
+
+/// One download, with what it is, how far along it is, and what can be done
+/// with it.
+///
+/// The row used to be a poster, a title and a progress bar, and the only
+/// control was Delete -- so a paused download could not be resumed, a
+/// finished one could not be played, and nothing said what the file actually
+/// was. Everything here is read off the task, which is why the source's
+/// quality and audio languages are captured when the download starts: the
+/// source object is gone by the time this is drawn.
+class _DownloadRow extends StatelessWidget {
+  final DownloadTask task;
+
+  const _DownloadRow({required this.task});
+
+  /// Whether the file is on disk. A completed task whose file was deleted
+  /// outside the app would otherwise offer Play and then fail.
+  bool get _fileExists {
+    if (!task.isCompleted) return false;
+    final path = task.targetFilePath;
+    if (path.isEmpty) return false;
+    return File(path).existsSync();
+  }
+
+  String _statusLabel(BuildContext context) => switch (task.status) {
+    DownloadStatus.queued => context.l10n.downloadStatusQueued,
+    DownloadStatus.downloading => context.l10n.downloadStatusDownloading,
+    DownloadStatus.paused => context.l10n.downloadStatusPaused,
+    DownloadStatus.completed => context.l10n.downloadStatusCompleted,
+    DownloadStatus.failed => context.l10n.downloadStatusFailed,
+    DownloadStatus.canceled => context.l10n.downloadStatusCanceled,
+  };
+
+  String _sourceLabel(BuildContext context) => switch (task.sourceType) {
+    DownloadSourceType.p2p => context.l10n.downloadSourceP2p,
+    DownloadSourceType.debrid => context.l10n.downloadSourceDebrid,
+    DownloadSourceType.http => context.l10n.downloadSourceHttp,
+  };
+
+  /// The audio languages, as display names. `multi` is not a language, so it
+  /// is shown as its own word rather than run through the language table.
+  List<String> _audioLabels(BuildContext context) => task.audioLanguages
+      .map(
+        (key) => key == 'multi'
+            ? context.l10n.subsAllLanguages
+            : subtitleLanguageName(key),
+      )
+      .where((name) => name.isNotEmpty)
+      .toList();
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.downloadDeleteConfirm),
+        content: Text(context.l10n.downloadDeleteConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.l10n.downloadCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.l10n.downloadDelete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await DownloadService.instance.deleteDownload(task.id);
+    }
+  }
+
+  void _play(BuildContext context) {
+    pushPage(
+      context,
+      PlayerScreen(
+        title: task.title,
+        source: task.toLocalStreamSource(),
+        detail: null,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    final progress = task.totalBytes > 0
+        ? task.receivedBytes / task.totalBytes
+        : 0.0;
+    final audio = _audioLabels(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: task.posterUrl != null
+                ? CachedNetworkImage(
+                    imageUrl: task.posterUrl!,
+                    width: 50,
+                    height: 75,
+                    fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => _posterFallback(),
+                  )
+                : _posterFallback(),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  task.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (task.episodeTitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    task.episodeTitle!,
+                    style: TextStyle(
+                      color: AppColors.inkSubtle,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                const SizedBox(height: 6),
+                _facts(context, audio),
+                const SizedBox(height: 8),
+                if (task.isCompleted && !_fileExists)
+                  Text(
+                    context.l10n.downloadFileMissingHint,
+                    style: TextStyle(
+                      color: AppColors.inkDisabled,
+                      fontSize: 11,
+                    ),
+                  )
+                else ...[
+                  LinearProgressIndicator(
+                    value: task.isCompleted
+                        ? 1.0
+                        : (progress > 0 ? progress : null),
+                    backgroundColor: AppColors.inkAlpha(0.10),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      task.isFailed ? Colors.redAccent : AppColors.accent,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _progressLine(context, progress),
+                    style: TextStyle(
+                      color: AppColors.inkDisabled,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _actions(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _posterFallback() => Container(
+    width: 50,
+    height: 75,
+    color: AppColors.inkAlpha(0.10),
+    child: Icon(Icons.movie_rounded, color: AppColors.inkAlpha(0.30)),
+  );
+
+  /// Quality, source and audio, as one wrapping line of small chips.
+  ///
+  /// A `Wrap` rather than a `Row`: the audio list is variable-length, and a
+  /// file tagged with four languages would otherwise run off the card.
+  Widget _facts(BuildContext context, List<String> audio) {
+    final facts = <String>[
+      if (task.quality != null && task.quality!.isNotEmpty) task.quality!,
+      _sourceLabel(context),
+      ...audio,
+    ];
+    if (facts.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: [for (final fact in facts) _FactChip(label: fact)],
+    );
+  }
+
+  String _progressLine(BuildContext context, double progress) {
+    final parts = <String>[
+      _statusLabel(context),
+      if (task.totalBytes > 0)
+        '${(progress * 100).toStringAsFixed(0)}% · ${DownloadTask.formatBytes(task.totalBytes)}'
+      else if (task.isCompleted)
+        DownloadTask.formatBytes(task.receivedBytes),
+      if (task.isDownloading) task.speedLabel,
+      if (task.isDownloading && task.etaSeconds != null) task.etaLabel,
+      if (task.sourceType == DownloadSourceType.p2p && task.peers > 0)
+        context.l10n.downloadPeers(task.peers),
+    ];
+    return parts.join(' · ');
+  }
+
+  Widget _actions(BuildContext context) {
+    final buttons = <Widget>[];
+
+    if (task.isCompleted && _fileExists) {
+      buttons.add(
+        _ActionButton(
+          icon: Icons.play_arrow_rounded,
+          tooltip: context.l10n.downloadPlay,
+          onPressed: () => _play(context),
+        ),
+      );
+    } else if (task.isDownloading) {
+      buttons.add(
+        _ActionButton(
+          icon: Icons.pause_rounded,
+          tooltip: context.l10n.downloadPause,
+          onPressed: () => DownloadService.instance.pauseDownload(task.id),
+        ),
+      );
+    } else if (task.isPaused || task.isFailed || task.status == DownloadStatus.canceled) {
+      buttons.add(
+        _ActionButton(
+          icon: Icons.play_arrow_rounded,
+          tooltip: context.l10n.downloadResume,
+          onPressed: () => DownloadService.instance.resumeDownload(task.id),
+        ),
+      );
+    }
+
+    buttons.add(
+      _ActionButton(
+        icon: Icons.delete_outline_rounded,
+        tooltip: context.l10n.downloadDelete,
+        color: Colors.redAccent,
+        onPressed: () => _confirmDelete(context),
+      ),
+    );
+
+    return Column(mainAxisSize: MainAxisSize.min, children: buttons);
+  }
+}
+
+/// A small label on a download row: quality, source, or an audio language.
+class _FactChip extends StatelessWidget {
+  final String label;
+
+  const _FactChip({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: AppColors.inkAlpha(0.06),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: AppColors.inkMuted,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+
+/// An icon button sized for a download row.
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+  final Color? color;
+
+  const _ActionButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    return IconButton(
+      icon: Icon(icon, color: color ?? AppColors.inkMuted),
+      tooltip: tooltip,
+      visualDensity: VisualDensity.compact,
+      onPressed: onPressed,
     );
   }
 }

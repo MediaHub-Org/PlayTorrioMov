@@ -219,6 +219,14 @@ class DownloadService {
       infoHash: infoHash,
       fileIdx: source.fileIdx,
       headers: source.headers,
+      // Read off the source now, because the source object is gone by the
+      // time the Downloads row is drawn -- and these are the two things a
+      // viewer wants to know about a file they already have: how good it is
+      // and what language it is in.
+      quality: source.quality,
+      audioLanguages: source
+          .getAudioLanguages(mediaTitle: title)
+          .toList(growable: false),
       targetFilePath: targetPath,
       status: DownloadStatus.queued,
       createdAt: now,

@@ -37,6 +37,17 @@ class DownloadTask {
   final int? fileIdx;
   final Map<String, String>? headers;
 
+  /// The resolution the source advertised, as `StreamSource.quality` reads
+  /// it -- '4K', '1080p', '720p', '480p', or null when the release name
+  /// says nothing. Read once when the download starts, because the source
+  /// object is gone by the time the row is drawn.
+  final String? quality;
+
+  /// The audio languages the source advertised, as `StreamSource`
+  /// `getAudioLanguages` reads them -- 'english', 'spanish_latino', 'multi'
+  /// and so on. Empty when the release name names none.
+  final List<String> audioLanguages;
+
   // Filesystem target
   final String targetFilePath;
 
@@ -72,6 +83,8 @@ class DownloadTask {
     this.infoHash,
     this.fileIdx,
     this.headers,
+    this.quality,
+    this.audioLanguages = const [],
     required this.targetFilePath,
     this.status = DownloadStatus.queued,
     this.receivedBytes = 0,
@@ -171,6 +184,8 @@ class DownloadTask {
       infoHash: infoHash ?? this.infoHash,
       fileIdx: fileIdx,
       headers: headers,
+      quality: quality,
+      audioLanguages: audioLanguages,
       targetFilePath: targetFilePath ?? this.targetFilePath,
       status: status ?? this.status,
       receivedBytes: receivedBytes ?? this.receivedBytes,
@@ -204,6 +219,8 @@ class DownloadTask {
       'infoHash': infoHash,
       'fileIdx': fileIdx,
       'headers': headers,
+      'quality': quality,
+      'audioLanguages': audioLanguages,
       'targetFilePath': targetFilePath,
       'status': status.name,
       'receivedBytes': receivedBytes,
@@ -239,6 +256,12 @@ class DownloadTask {
       headers: (json['headers'] as Map<String, dynamic>?)?.map(
         (k, v) => MapEntry(k, v.toString()),
       ),
+      quality: json['quality'] as String?,
+      audioLanguages:
+          (json['audioLanguages'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
       targetFilePath: json['targetFilePath'] as String? ?? '',
       status: DownloadStatus.values.firstWhere(
         (e) => e.name == json['status'],

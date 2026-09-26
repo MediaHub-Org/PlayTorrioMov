@@ -80,6 +80,21 @@ rather than files, and the sleep timer can wait for the video to end.
   with a switch each, for one bit of state apiece. A B and an I that light up
   is what every text editor uses, and it takes a quarter of the height.
 
+### Added
+- **Downloads can be played, paused and resumed.** The row's only control was
+  Delete, so a paused download could not be restarted and a finished one
+  could not be watched -- the file was on the device with no way to open it.
+  A finished download now has Play, a running one has Pause, and a paused,
+  failed or canceled one has Resume. Delete asks first, because it removes
+  the file.
+- **A download says what it is.** Quality, source (P2P / Debrid / HTTP) and
+  the audio languages, as small chips under the title. The quality and the
+  languages are read off the source when the download starts and stored on
+  the task, because the source object is gone by the time the row is drawn.
+  A P2P row also shows its peer count while it runs.
+- **A completed download whose file is gone says so.** It would otherwise
+  offer Play and then fail.
+
 ### Fixed
 - **The online subtitle list no longer marks every row as selected.** The
   comparison was `selectedVariant?.downloadUrl == variant.downloadUrl`, and

@@ -4,6 +4,72 @@ import 'package:playtorriomov/utils/platform/storage_space_helper.dart';
 
 void main() {
   group('Download Task System Tests', () {
+    test('quality and audio languages survive a round-trip', () {
+      // They are read off the source when the download starts, because the
+      // source object is gone by the time the Downloads row is drawn. If
+      // they do not persist, a restart loses what the file is.
+      final task = DownloadTask(
+        id: 'task_q',
+        title: 'Inception',
+        mediaId: 'tt1375666',
+        type: 'movie',
+        sourceType: DownloadSourceType.p2p,
+        sourceName: 'Torrent Galaxy 1080p',
+        targetFilePath: '/downloads/Inception.mkv',
+        quality: '1080p',
+        audioLanguages: const ['english', 'spanish_latino'],
+        createdAt: DateTime.now(),
+      );
+
+      final restored = DownloadTask.fromJson(task.toJson());
+
+      expect(restored.quality, '1080p');
+      expect(restored.audioLanguages, ['english', 'spanish_latino']);
+    });
+
+    test('a task saved before these fields existed still loads', () {
+      // The persisted JSON on an existing install has neither key. A missing
+      // one must not throw, or every old download disappears on upgrade.
+      final legacy = {
+        'id': 'old',
+        'title': 'Old Movie',
+        'mediaId': 'tt1',
+        'type': 'movie',
+        'sourceType': 'http',
+        'sourceName': 'Stream',
+        'targetFilePath': '/downloads/old.mp4',
+        'status': 'completed',
+        'createdAt': DateTime.now().millisecondsSinceEpoch,
+      };
+
+      final restored = DownloadTask.fromJson(legacy);
+
+      expect(restored.quality, isNull);
+      expect(restored.audioLanguages, isEmpty);
+    });
+
+    test('copyWith keeps the quality and audio languages', () {
+      // copyWith is called on every progress tick, so dropping them here
+      // would blank the row a second after it appeared.
+      final task = DownloadTask(
+        id: 'task_c',
+        title: 'Inception',
+        mediaId: 'tt1375666',
+        type: 'movie',
+        sourceType: DownloadSourceType.http,
+        sourceName: 'Stream',
+        targetFilePath: '/downloads/Inception.mp4',
+        quality: '4K',
+        audioLanguages: const ['english'],
+        createdAt: DateTime.now(),
+      );
+
+      final updated = task.copyWith(receivedBytes: 100);
+
+      expect(updated.quality, '4K');
+      expect(updated.audioLanguages, ['english']);
+    });
+
     test('DownloadTask serialization round-trip', () {
       final now = DateTime.now();
       final task = DownloadTask(
