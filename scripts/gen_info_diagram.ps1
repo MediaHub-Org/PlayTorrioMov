@@ -10,6 +10,13 @@ function New-Seed { $script:seed++; return $script:seed }
 $script:n = 0
 function New-Id { $script:n++; return "ptm$($script:n.ToString('D3'))" }
 
+# Excalidraw orders elements by a fractional index string, not by array
+# position. A null index is tolerated by the web app but is not what it
+# writes, and the VS Code plugin is stricter about it. Zero-padded so a
+# plain lexicographic sort is also the numeric one.
+$script:idx = 0
+function New-Index { $script:idx++; return "a$($script:idx.ToString('D4'))" }
+
 $elements = [System.Collections.Generic.List[object]]::new()
 
 # ── Palette ────────────────────────────────────────────────────────────────
@@ -35,7 +42,7 @@ function Add-Box {
     angle = 0; strokeColor = $Stroke; backgroundColor = $Fill
     fillStyle = 'solid'; strokeWidth = 2; strokeStyle = 'solid'
     roughness = 1; opacity = 100; groupIds = @(); frameId = $null
-    index = $null; roundness = [ordered]@{ type = 3 }
+    index = (New-Index); roundness = [ordered]@{ type = 3 }
     seed = (New-Seed); version = 1; versionNonce = (New-Seed)
     isDeleted = $false
     boundElements = @([ordered]@{ type = 'text'; id = $textId })
@@ -46,7 +53,7 @@ function Add-Box {
     angle = 0; strokeColor = $C.ink; backgroundColor = 'transparent'
     fillStyle = 'solid'; strokeWidth = 2; strokeStyle = 'solid'
     roughness = 1; opacity = 100; groupIds = @(); frameId = $null
-    index = $null; roundness = $null
+    index = (New-Index); roundness = $null
     seed = (New-Seed); version = 1; versionNonce = (New-Seed)
     isDeleted = $false; boundElements = @()
     updated = 1; link = $null; locked = $false
@@ -71,7 +78,7 @@ function Add-Arrow {
     fillStyle = 'solid'; strokeWidth = 2
     strokeStyle = $(if ($Dashed) { 'dashed' } else { 'solid' })
     roughness = 1; opacity = 100; groupIds = @(); frameId = $null
-    index = $null; roundness = [ordered]@{ type = 2 }
+    index = (New-Index); roundness = [ordered]@{ type = 2 }
     seed = (New-Seed); version = 1; versionNonce = (New-Seed)
     isDeleted = $false; boundElements = @()
     updated = 1; link = $null; locked = $false
@@ -88,7 +95,7 @@ function Add-Arrow {
       angle = 0; strokeColor = '#868e96'; backgroundColor = 'transparent'
       fillStyle = 'solid'; strokeWidth = 2; strokeStyle = 'solid'
       roughness = 1; opacity = 100; groupIds = @(); frameId = $null
-      index = $null; roundness = $null
+      index = (New-Index); roundness = $null
       seed = (New-Seed); version = 1; versionNonce = (New-Seed)
       isDeleted = $false; boundElements = @()
       updated = 1; link = $null; locked = $false
@@ -108,7 +115,7 @@ function Add-Title {
     angle = 0; strokeColor = $C.ink; backgroundColor = 'transparent'
     fillStyle = 'solid'; strokeWidth = 2; strokeStyle = 'solid'
     roughness = 1; opacity = 100; groupIds = @(); frameId = $null
-    index = $null; roundness = $null
+    index = (New-Index); roundness = $null
     seed = (New-Seed); version = 1; versionNonce = (New-Seed)
     isDeleted = $false; boundElements = @()
     updated = 1; link = $null; locked = $false
@@ -119,62 +126,147 @@ function Add-Title {
   })
 }
 
+function Add-BandLabel {
+  param([double]$X, [double]$Y, [string]$Text)
+  $elements.Add([ordered]@{
+    id = (New-Id); type = 'text'; x = $X; y = $Y; width = 500; height = 20
+    angle = 0; strokeColor = '#868e96'; backgroundColor = 'transparent'
+    fillStyle = 'solid'; strokeWidth = 2; strokeStyle = 'solid'
+    roughness = 1; opacity = 100; groupIds = @(); frameId = $null
+    index = (New-Index); roundness = $null
+    seed = (New-Seed); version = 1; versionNonce = (New-Seed)
+    isDeleted = $false; boundElements = @()
+    updated = 1; link = $null; locked = $false
+    fontSize = 13; fontFamily = 1; text = $Text
+    textAlign = 'left'; verticalAlign = 'top'
+    containerId = $null; originalText = $Text; lineHeight = 1.25
+    baseline = 12
+  })
+}
+
 # ── Layout ─────────────────────────────────────────────────────────────────
-# Five bands, top to bottom: entry, where content comes from, the source
-# list, playback, and what playback pulls in. Arrows only ever point down,
-# so the reading order is the flow.
+# Eight bands, top to bottom: entry, the hub's sections, where content comes
+# from, the source list, playback, the player's own menus, the services
+# playback pulls in, and persistence. Arrows only ever point down, so the
+# reading order is the flow and no arrow has to be followed backwards.
+#
+# Every line of box text is kept inside its box. Excalidraw renders bound
+# text at its natural width -- it does not wrap to the container -- so a line
+# longer than the box spills out of both sides. At fontSize 16 the hand-drawn
+# font averages about 8.6px per character, so a 420-wide box holds ~48 and a
+# 300-wide box at fontSize 14 holds ~40. The lines below are written to those
+# budgets, and check_info_diagram.ps1 is what catches it when one is not.
 
 Add-Title -X 60 -Y 40 -Text 'PlayTorrioMov — how it works' -Size 30
 
+# Legend, in a row under the title. The colours are the only thing in the
+# diagram that is not self-explanatory, so they are named once here rather
+# than guessed at from the boxes.
+Add-Box -Id (New-Id) -X 60 -Y 95 -W 200 -H 32 -Fill $C.entry -FontSize 13 `
+  -Text 'entry / shell'
+Add-Box -Id (New-Id) -X 280 -Y 95 -W 200 -H 32 -Fill $C.source -FontSize 13 `
+  -Text 'where content comes from'
+Add-Box -Id (New-Id) -X 500 -Y 95 -W 200 -H 32 -Fill $C.play -FontSize 13 `
+  -Text 'browsing and playback'
+Add-Box -Id (New-Id) -X 720 -Y 95 -W 200 -H 32 -Fill $C.support -FontSize 13 `
+  -Text 'services playback pulls in'
+Add-Box -Id (New-Id) -X 940 -Y 95 -W 200 -H 32 -Fill $C.store -FontSize 13 `
+  -Text 'persistence'
+
 # Band 1: entry
-Add-Box -Id (New-Id) -X 380 -Y 110 -W 260 -H 70 -Fill $C.entry `
-  -Text "main.dart`ninitialises every service, then HubPage"
-Add-Box -Id (New-Id) -X 380 -Y 220 -W 260 -H 60 -Fill $C.entry `
-  -Text 'HubPage — nav shell (Movies / Series / Anime / Live TV)'
-Add-Arrow -X1 510 -Y1 180 -X2 510 -Y2 220
+Add-BandLabel -X 60 -Y 154 -Text 'STARTUP'
+Add-Box -Id (New-Id) -X 460 -Y 180 -W 420 -H 90 -Fill $C.entry `
+  -Text "main.dart`nWidgetsFlutterBinding · MediaKit`n~20 services initialised in parallel"
+Add-Box -Id (New-Id) -X 460 -Y 310 -W 420 -H 80 -Fill $C.entry `
+  -Text "HubPage`nAdaptiveNavShell + MediaHub`none nested Navigator"
+Add-Arrow -X1 670 -Y1 270 -X2 670 -Y2 310
 
-# Band 2: content sources
-Add-Box -Id (New-Id) -X 60 -Y 340 -W 250 -H 90 -Fill $C.source `
-  -Text "Addons (Stremio-compatible)`ncatalog + stream add-ons"
-Add-Box -Id (New-Id) -X 385 -Y 340 -W 250 -H 90 -Fill $C.source `
-  -Text "Built-in scrapers (~50 sites)`nScraperManager -> StreamService"
-Add-Box -Id (New-Id) -X 710 -Y 340 -W 250 -H 90 -Fill $C.source `
-  -Text "Live TV`nXtream portals + M3U playlists"
+# Band 2: the hub's sections
+Add-BandLabel -X 60 -Y 414 -Text 'SECTIONS'
+Add-Box -Id (New-Id) -X 60 -Y 440 -W 210 -H 60 -Fill $C.entry -Text 'Movies'
+Add-Box -Id (New-Id) -X 300 -Y 440 -W 210 -H 60 -Fill $C.entry -Text 'Series'
+Add-Box -Id (New-Id) -X 540 -Y 440 -W 210 -H 60 -Fill $C.entry -Text 'Anime'
+Add-Box -Id (New-Id) -X 780 -Y 440 -W 210 -H 60 -Fill $C.entry -Text 'Live TV'
+Add-Box -Id (New-Id) -X 1020 -Y 440 -W 210 -H 60 -Fill $C.entry -Text 'Library'
 
-Add-Arrow -X1 510 -Y1 280 -X2 185 -Y2 340
-Add-Arrow -X1 510 -Y1 280 -X2 510 -Y2 340
-Add-Arrow -X1 510 -Y1 280 -X2 835 -Y2 340
+Add-Arrow -X1 670 -Y1 390 -X2 165 -Y2 440
+Add-Arrow -X1 670 -Y1 390 -X2 405 -Y2 440
+Add-Arrow -X1 670 -Y1 390 -X2 645 -Y2 440
+Add-Arrow -X1 670 -Y1 390 -X2 885 -Y2 440
+Add-Arrow -X1 670 -Y1 390 -X2 1125 -Y2 440
 
-# Band 3: the source list
-Add-Box -Id (New-Id) -X 380 -Y 490 -W 260 -H 70 -Fill $C.play `
-  -Text "WatchScreen`nsource list, filters, quality / audio"
-Add-Arrow -X1 185 -Y1 430 -X2 440 -Y2 490
-Add-Arrow -X1 510 -Y1 430 -X2 510 -Y2 490
-Add-Arrow -X1 835 -Y1 430 -X2 580 -Y2 490
+# Band 3: where content comes from
+Add-BandLabel -X 60 -Y 548 -Text 'CONTENT SOURCES'
+Add-Box -Id (New-Id) -X 60 -Y 580 -W 300 -H 100 -Fill $C.source -FontSize 14 `
+  -Text "Addons`nStremio-compatible`ncatalog + stream add-ons"
+Add-Box -Id (New-Id) -X 380 -Y 580 -W 300 -H 100 -Fill $C.source -FontSize 14 `
+  -Text "Built-in scrapers`n~50 sites`nScraperManager -> StreamService"
+Add-Box -Id (New-Id) -X 700 -Y 580 -W 300 -H 100 -Fill $C.source -FontSize 14 `
+  -Text "Live TV`nXtream portals`n+ M3U playlists"
+Add-Box -Id (New-Id) -X 1020 -Y 580 -W 300 -H 100 -Fill $C.source -FontSize 14 `
+  -Text "Anime`nAniList · Anime Arabic"
 
-# Band 4: playback
-Add-Box -Id (New-Id) -X 380 -Y 620 -W 260 -H 70 -Fill $C.play `
-  -Text "PlayerScreen`nmedia_kit / libmpv"
-Add-Arrow -X1 510 -Y1 560 -X2 510 -Y2 620
+Add-Arrow -X1 165 -Y1 500 -X2 210 -Y2 580
+Add-Arrow -X1 405 -Y1 500 -X2 530 -Y2 580
+Add-Arrow -X1 645 -Y1 500 -X2 530 -Y2 580
+Add-Arrow -X1 885 -Y1 500 -X2 850 -Y2 580
+Add-Arrow -X1 1125 -Y1 500 -X2 1170 -Y2 580
 
-# Band 5: what playback pulls in
-Add-Box -Id (New-Id) -X 60 -Y 760 -W 250 -H 100 -Fill $C.support `
-  -Text "P2P`nTorrServer + libtorrent`n(magnet -> HTTP stream)"
-Add-Box -Id (New-Id) -X 385 -Y 760 -W 250 -H 100 -Fill $C.support `
+# Band 4: the source list
+Add-BandLabel -X 60 -Y 718 -Text 'BROWSING'
+Add-Box -Id (New-Id) -X 460 -Y 750 -W 420 -H 100 -Fill $C.play `
+  -Text "WatchScreen`nsource list · filter pills`nsort · multi-select"
+Add-Arrow -X1 210 -Y1 680 -X2 560 -Y2 750
+Add-Arrow -X1 530 -Y1 680 -X2 640 -Y2 750
+Add-Arrow -X1 850 -Y1 680 -X2 700 -Y2 750
+Add-Arrow -X1 1170 -Y1 680 -X2 780 -Y2 750
+
+# Band 5: playback
+Add-BandLabel -X 60 -Y 888 -Text 'PLAYBACK'
+Add-Box -Id (New-Id) -X 460 -Y 920 -W 420 -H 100 -Fill $C.play `
+  -Text "PlayerScreen`nmedia_kit / libmpv · transport`nkeyboard shortcuts"
+Add-Arrow -X1 670 -Y1 850 -X2 670 -Y2 920
+
+# Band 6: the player's own menus
+Add-BandLabel -X 60 -Y 1058 -Text 'PLAYER MENUS'
+Add-Box -Id (New-Id) -X 60 -Y 1090 -W 300 -H 90 -Fill $C.play -FontSize 14 `
+  -Text "Audio & Subtitles`ntrack pickers · sync · style"
+Add-Box -Id (New-Id) -X 380 -Y 1090 -W 300 -H 90 -Fill $C.play -FontSize 14 `
+  -Text "Speed & Aspect`nplayback rate · crop / scale"
+Add-Box -Id (New-Id) -X 700 -Y 1090 -W 300 -H 90 -Fill $C.play -FontSize 14 `
+  -Text "Sources & Episodes`nswitch source · next episode"
+Add-Box -Id (New-Id) -X 1020 -Y 1090 -W 300 -H 90 -Fill $C.play -FontSize 14 `
+  -Text "Sleep timer & Cast`n10-60 min · end of video · DLNA"
+
+Add-Arrow -X1 670 -Y1 1020 -X2 210 -Y2 1090
+Add-Arrow -X1 670 -Y1 1020 -X2 530 -Y2 1090
+Add-Arrow -X1 670 -Y1 1020 -X2 850 -Y2 1090
+Add-Arrow -X1 670 -Y1 1020 -X2 1170 -Y2 1090
+
+# Band 7: what playback pulls in
+Add-BandLabel -X 60 -Y 1228 -Text 'SERVICES'
+Add-Box -Id (New-Id) -X 60 -Y 1260 -W 300 -H 100 -Fill $C.support -FontSize 14 `
+  -Text "P2P`nTorrServer + libtorrent`nmagnet -> HTTP stream"
+Add-Box -Id (New-Id) -X 380 -Y 1260 -W 300 -H 100 -Fill $C.support -FontSize 14 `
   -Text "Subtitles`nembedded (libass)`n+ online providers"
-Add-Box -Id (New-Id) -X 710 -Y 760 -W 250 -H 100 -Fill $C.support `
-  -Text "Metadata`nTMDB / Simkl / Trakt`nAniList (anime)"
+Add-Box -Id (New-Id) -X 700 -Y 1260 -W 300 -H 100 -Fill $C.support -FontSize 14 `
+  -Text "Metadata`nTMDB · Simkl · Trakt`nAniList (anime)"
+Add-Box -Id (New-Id) -X 1020 -Y 1260 -W 300 -H 100 -Fill $C.support -FontSize 14 `
+  -Text "Debrid & Downloads`nReal-Debrid and friends`noffline files"
 
-Add-Arrow -X1 440 -Y1 690 -X2 185 -Y2 760
-Add-Arrow -X1 510 -Y1 690 -X2 510 -Y2 760
-Add-Arrow -X1 580 -Y1 690 -X2 835 -Y2 760
+Add-Arrow -X1 210 -Y1 1180 -X2 210 -Y2 1260
+Add-Arrow -X1 530 -Y1 1180 -X2 530 -Y2 1260
+Add-Arrow -X1 850 -Y1 1180 -X2 850 -Y2 1260
+Add-Arrow -X1 1170 -Y1 1180 -X2 1170 -Y2 1260
 
-# Band 6: persistence, fed by everything
-Add-Box -Id (New-Id) -X 380 -Y 920 -W 260 -H 70 -Fill $C.store `
-  -Text "Storage`nSharedPreferences + sqflite"
-Add-Arrow -X1 185 -Y1 860 -X2 440 -Y2 920 -Dashed $true
-Add-Arrow -X1 510 -Y1 860 -X2 510 -Y2 920 -Dashed $true
-Add-Arrow -X1 835 -Y1 860 -X2 580 -Y2 920 -Dashed $true
+# Band 8: persistence, fed by everything above it
+Add-BandLabel -X 60 -Y 1398 -Text 'PERSISTENCE'
+Add-Box -Id (New-Id) -X 460 -Y 1430 -W 420 -H 90 -Fill $C.store `
+  -Text "Storage`nSharedPreferences + sqflite`nsettings · library · history"
+Add-Arrow -X1 210 -Y1 1360 -X2 560 -Y2 1430 -Dashed $true
+Add-Arrow -X1 530 -Y1 1360 -X2 640 -Y2 1430 -Dashed $true
+Add-Arrow -X1 850 -Y1 1360 -X2 700 -Y2 1430 -Dashed $true
+Add-Arrow -X1 1170 -Y1 1360 -X2 780 -Y2 1430 -Dashed $true
 
 # ── Write ──────────────────────────────────────────────────────────────────
 $doc = [ordered]@{
