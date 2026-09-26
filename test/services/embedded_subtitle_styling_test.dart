@@ -1,7 +1,7 @@
 // An embedded track must survive an appearance change.
 //
 // `applySubtitleStyling` used to take a `forceLibass` flag, and every
-// appearance setter -- font, size, colour, position, and twenty more --
+// appearance setter -- font, size, color, position, and twenty more --
 // called it without the flag. So changing the font size while an embedded
 // track was on turned that track back off: the styling call honoured the
 // `useLibass` preference, which is off by default, and set

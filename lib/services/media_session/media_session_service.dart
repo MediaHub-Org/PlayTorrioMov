@@ -29,7 +29,7 @@ abstract final class MediaSessionService {
   static bool _initialising = false;
 
   /// Whether a media session is running. False on platforms where one is not
-  /// offered, and false if initialisation failed.
+  /// offered, and false if initialization failed.
   static bool get isActive => _handler != null;
 
   /// Platforms with a system media session worth publishing to.

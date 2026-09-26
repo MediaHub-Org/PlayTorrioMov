@@ -8,7 +8,7 @@ import '../../services/player/player_settings.dart';
 /// The main player's subtitle text, drawn by the app rather than by media_kit's
 /// own `SubtitleView`.
 ///
-/// `SubtitleView` pins its text to the bottom centre and has no notion of a
+/// `SubtitleView` pins its text to the bottom center and has no notion of a
 /// horizontal side or a vertical position, so the Left / Center / Right
 /// buttons and the vertical-position slider changed a setting that nothing
 /// drew. Drawing it here makes every appearance control do something: the

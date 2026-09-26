@@ -163,6 +163,13 @@ is `favourites`, and its status enum value is `CANCELLED`; those stay exactly
 as the API spells them, because renaming them breaks the wire format. When a
 British spelling is load-bearing, it is a quoted API token, not prose.
 
+`test/american_spelling_test.dart` holds this, over `lib/`, `test/` and
+`docs/` alike, with the API tokens allowed per file. Two forms are outside it
+on purpose: `grey` is Flutter's own name (`Colors.grey`), and the
+doubled-consonant forms (`cancelled`, `labelled`) are current in American
+English and used by Flutter's API, so a guard on them would fight the
+framework.
+
 ---
 
 ## 3. Functions

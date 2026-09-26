@@ -73,7 +73,7 @@ enum LibrarySection {
 /// Simkl. A collection has none of those constraints. They share a card shape
 /// because they are both "a list you can open", and nothing more.
 enum LibraryShelf {
-  /// Favourited. Independent of watch progress, so something can be both
+  /// Favorited. Independent of watch progress, so something can be both
   /// watched and liked. The only state a Live TV channel can be in.
   liked(
     'Liked',

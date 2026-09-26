@@ -7,7 +7,7 @@
 // writing through to the shared list -- the page silently reverts to asking
 // the same question twice.
 //
-// The service's own behaviour is covered in
+// The service's own behavior is covered in
 // `test/services/source_filter_settings_test.dart`. What is tested here is
 // the page: which blocks it draws, and that a tap on a chip reaches the
 // shared state rather than a local copy.
@@ -119,12 +119,12 @@ void main() {
       expect(SourceFilterSettings.audioLanguages.value, ['german']);
     });
 
-    testWidgets('a selected language leaves the catalogue row', (tester) async {
+    testWidgets('a selected language leaves the catalog row', (tester) async {
       useTallSurface(tester);
       await tester.pumpWidget(wrap());
       await tester.pump(const Duration(milliseconds: 350));
 
-      // German is offered twice by design only if it is in the catalogue
+      // German is offered twice by design only if it is in the catalog
       // while also being ranked; the page removes it from the bottom row so
       // one language never appears with two meanings.
       expect(chipWithText('🇩🇪 German'), findsOneWidget);

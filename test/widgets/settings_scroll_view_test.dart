@@ -86,7 +86,7 @@ void main() {
     ) async {
       expect(SettingsScrollView.gutterFor(800), 16);
       expect(SettingsScrollView.gutterFor(832), 16);
-      // The first width where centring beats the minimum.
+      // The first width where centering beats the minimum.
       expect(SettingsScrollView.gutterFor(833), greaterThan(16));
     });
 

@@ -2556,7 +2556,7 @@ class _FilterPillRailState extends State<FilterPillRail> {
     );
   }
 
-  /// One end's indicator: a gradient into the panel colour, plus a tappable
+  /// One end's indicator: a gradient into the panel color, plus a tappable
   /// chevron button on desktop platforms. Tapping nudges the row, so a tap
   /// or a drag both work. [enabled] is false at an end with nothing further
   /// to scroll; the button stays in place, dimmed and inert.

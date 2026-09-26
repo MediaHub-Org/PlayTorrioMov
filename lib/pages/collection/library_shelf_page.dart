@@ -639,7 +639,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
   // ── Live TV ───────────────────────────────────────────────────────────────
 
-  /// Favourited channels newest-first ("recent") or alphabetically ("title");
+  /// Favorited channels newest-first ("recent") or alphabetically ("title");
   /// "year" does not apply to a channel, so it falls back to recent.
   List<HardcodedChannel> _sortedFavoriteChannels(
     List<FavoriteChannel> favorites,
@@ -676,7 +676,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
         // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
-        // favourited channel looks the same size and shape here as it does in
+        // favorited channel looks the same size and shape here as it does in
         // Live TV's own rows.
         childAspectRatio: 0.58,
         crossAxisSpacing: 16,

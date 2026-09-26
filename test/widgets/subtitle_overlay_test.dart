@@ -83,8 +83,8 @@ void main() {
 
     testWidgets('Left, Center and Right move the text', (tester) async {
       await pumpOverlay(tester, controller.stream, initial: ['Hi']);
-      final centre = tester.getCenter(find.text('Hi')).dx;
-      expect(centre, closeTo(400, 2));
+      final center = tester.getCenter(find.text('Hi')).dx;
+      expect(center, closeTo(400, 2));
 
       await PlayerSettings.setSubAlignX('left');
       await tester.pump();

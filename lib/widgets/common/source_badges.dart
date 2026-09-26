@@ -15,7 +15,7 @@ const Color _kStalled = Color(0xFFFF6B6B);
 /// The thresholds are deliberately blunt -- the useful question in a source
 /// list is "will this start, or should I pick the one under it", not the
 /// exact number. Under ten seeds a stream regularly never buffers at all,
-/// which is the case worth colouring red.
+/// which is the case worth coloring red.
 Color seedHealthColor(int seeders) {
   if (seeders >= 50) return _kHealthy;
   if (seeders >= 10) return _kThin;

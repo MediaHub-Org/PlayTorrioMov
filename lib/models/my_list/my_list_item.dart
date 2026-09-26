@@ -14,7 +14,7 @@ class MyListItem {
   final bool isWatchlist;
   final bool isWatched;
 
-  /// Favourited, independent of watch progress -- unlike Watchlist/Watched,
+  /// Favorited, independent of watch progress -- unlike Watchlist/Watched,
   /// which are mutually exclusive, something can be both Watched and Liked
   /// at once. Local-only: neither Trakt nor Simkl has a "liked" concept to
   /// sync against.

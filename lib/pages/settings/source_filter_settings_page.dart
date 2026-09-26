@@ -164,7 +164,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
     );
   }
 
-  /// The audio list: the ranked selection on top, the rest of the catalogue
+  /// The audio list: the ranked selection on top, the rest of the catalog
   /// below it.
   ///
   /// Two blocks rather than one, because the two do different jobs: the top
