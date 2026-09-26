@@ -1034,6 +1034,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   },
                                 ),
                                 IconButton(
+                                  tooltip: isFav
+                                      ? context.l10n.iptvRemoveFavorite
+                                      : context.l10n.iptvAddFavorite,
                                   icon: Icon(
                                     isFav ? Icons.star_rounded : Icons.star_outline_rounded,
                                     color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
@@ -1042,6 +1045,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   onPressed: () => _ctrl.toggleFavoritePortal(p.key),
                                 ),
                                 IconButton(
+                                  tooltip: context.l10n.iptvDeletePortal,
                                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                                   onPressed: () => _ctrl.deletePortalsByKeys({p.key}),
                                 ),
@@ -1397,6 +1401,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   },
                                 ),
                                 IconButton(
+                                  tooltip: context.l10n.iptvDeletePlaylist,
                                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                                   onPressed: () => _ctrl.deleteM3uPlaylist(pl.id),
                                 ),

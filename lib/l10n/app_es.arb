@@ -966,5 +966,19 @@
   "subPresetCustomBody": "Estilos de subtítulo personalizados por el usuario",
 
   "commonClose": "Cerrar",
-  "commonBack": "Atrás"
+  "commonBack": "Atrás",
+
+  "commonLike": "Favorito",
+  "commonLiked": "En favoritos",
+  "commonAddToLiked": "Añadir a favoritos",
+  "commonRemoveFromLiked": "Quitar de favoritos",
+  "libraryAddToWatchlist": "Añadir a Por ver",
+  "libraryRemoveFromWatchlist": "Quitar de Por ver",
+  "libraryMarkWatched": "Marcar como visto",
+  "libraryMarkUnwatched": "Marcar como no visto",
+  "detailsGoToEpisode": "Ir al episodio",
+  "iptvAddFavorite": "Añadir a favoritos",
+  "iptvRemoveFavorite": "Quitar de favoritos",
+  "iptvDeletePortal": "Eliminar este portal",
+  "iptvDeletePlaylist": "Eliminar esta lista"
 }

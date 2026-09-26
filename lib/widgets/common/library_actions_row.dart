@@ -77,12 +77,15 @@ class LibraryActionsRow extends StatelessWidget {
         final isWatched = entry?.isWatched ?? false;
         final isLiked = entry?.isLiked ?? false;
 
+        final l10n = context.l10n;
         final buttons = <Widget>[
           _StatusButton(
             icon: isWatchlist
                 ? Icons.bookmark_added_rounded
                 : Icons.bookmark_add_outlined,
-            label: isWatchlist ? 'Remove from watchlist' : 'Add to watchlist',
+            label: isWatchlist
+                ? l10n.libraryRemoveFromWatchlist
+                : l10n.libraryAddToWatchlist,
             active: isWatchlist,
             color: AppColors.accent,
             onTap: () => _apply(MyListService.setWatchlist),
@@ -91,7 +94,9 @@ class LibraryActionsRow extends StatelessWidget {
             icon: isWatched
                 ? Icons.check_circle_rounded
                 : Icons.check_circle_outline_rounded,
-            label: isWatched ? 'Mark as unwatched' : 'Mark as watched',
+            label: isWatched
+                ? l10n.libraryMarkUnwatched
+                : l10n.libraryMarkWatched,
             active: isWatched,
             color: const Color(0xFF00D294),
             onTap: () => _apply(MyListService.setWatched),
@@ -115,7 +120,9 @@ class LibraryActionsRow extends StatelessWidget {
                 icon: inAny
                     ? Icons.playlist_add_check_rounded
                     : Icons.playlist_add_rounded,
-                label: inAny ? context.l10n.libraryInCollection : context.l10n.libraryAddToCollection,
+                label: inAny
+                    ? l10n.libraryInCollection
+                    : l10n.libraryAddToCollection,
                 active: inAny,
                 color: AppColors.accent,
                 onTap: () =>
@@ -178,34 +185,42 @@ class _StatusButtonState extends State<_StatusButton> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return Tooltip(
-      message: widget.label,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovering = true),
-        onExit: (_) => setState(() => _hovering = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedScale(
-            scale: _hovering ? 1.08 : 1.0,
-            duration: const Duration(milliseconds: 150),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: widget.active
-                    ? widget.color.withValues(alpha: 0.18)
-                    : AppColors.inkAlpha(0.08),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
+    // The Tooltip is the pointer affordance; the Semantics is what a screen
+    // reader reads, and it carries the toggle state as well as the label --
+    // matching the LikeButton sitting beside it in this same row.
+    return Semantics(
+      button: true,
+      toggled: widget.active,
+      label: widget.label,
+      child: Tooltip(
+        message: widget.label,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovering = true),
+          onExit: (_) => setState(() => _hovering = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedScale(
+              scale: _hovering ? 1.08 : 1.0,
+              duration: const Duration(milliseconds: 150),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
                   color: widget.active
-                      ? widget.color.withValues(alpha: 0.35)
-                      : AppColors.inkAlpha(0.14),
+                      ? widget.color.withValues(alpha: 0.18)
+                      : AppColors.inkAlpha(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: widget.active
+                        ? widget.color.withValues(alpha: 0.35)
+                        : AppColors.inkAlpha(0.14),
+                  ),
                 ),
-              ),
-              child: Icon(
-                widget.icon,
-                color: widget.active ? widget.color : AppColors.ink,
-                size: 22,
+                child: Icon(
+                  widget.icon,
+                  color: widget.active ? widget.color : AppColors.ink,
+                  size: 22,
+                ),
               ),
             ),
           ),

@@ -355,6 +355,7 @@ class _CatalogPageState extends State<CatalogPage> {
                             if (!_isSearching && widget.section.catalog.supportsSearch)
                               IconButton(
                                 icon: const Icon(Icons.search_rounded),
+                                tooltip: context.l10n.commonSearch,
                                 color: AppColors.inkMuted,
                                 onPressed: () {
                                   setState(() {

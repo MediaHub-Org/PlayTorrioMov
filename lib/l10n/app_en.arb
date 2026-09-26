@@ -1258,5 +1258,21 @@
   "commonClose": "Close",
   "@commonClose": {"description": "Tooltip on an icon-only close button"},
   "commonBack": "Back",
-  "@commonBack": {"description": "Tooltip on an icon-only back button"}
+  "@commonBack": {"description": "Tooltip on an icon-only back button"},
+
+  "commonLike": "Like",
+  "commonLiked": "Liked",
+  "commonAddToLiked": "Add to liked",
+  "@commonAddToLiked": {"description": "Semantics label and tooltip on the heart toggle when nothing is liked yet"},
+  "commonRemoveFromLiked": "Remove from liked",
+  "libraryAddToWatchlist": "Add to watchlist",
+  "libraryRemoveFromWatchlist": "Remove from watchlist",
+  "libraryMarkWatched": "Mark as watched",
+  "libraryMarkUnwatched": "Mark as unwatched",
+  "detailsGoToEpisode": "Go to episode",
+  "@detailsGoToEpisode": {"description": "Tooltip on the arrow that submits the jump-to-episode box"},
+  "iptvAddFavorite": "Add to favorites",
+  "iptvRemoveFavorite": "Remove from favorites",
+  "iptvDeletePortal": "Delete this portal",
+  "iptvDeletePlaylist": "Delete this playlist"
 }

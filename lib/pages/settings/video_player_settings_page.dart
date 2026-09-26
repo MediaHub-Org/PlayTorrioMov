@@ -470,6 +470,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                         ),
                         if (isCustom)
                           IconButton(
+                            tooltip: context.l10n.videoCustomChainTitle,
                             icon: Icon(
                               Icons.tune_rounded,
                               size: 18,

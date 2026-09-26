@@ -966,5 +966,19 @@
   "subPresetCustomBody": "أنماط ترجمة مخصّصة يضبطها المستخدم",
 
   "commonClose": "إغلاق",
-  "commonBack": "رجوع"
+  "commonBack": "رجوع",
+
+  "commonLike": "تفضيل",
+  "commonLiked": "مفضَّل",
+  "commonAddToLiked": "إضافة إلى المفضلة",
+  "commonRemoveFromLiked": "إزالة من المفضلة",
+  "libraryAddToWatchlist": "إضافة إلى قائمة المشاهدة",
+  "libraryRemoveFromWatchlist": "إزالة من قائمة المشاهدة",
+  "libraryMarkWatched": "تحديد كمشاهَد",
+  "libraryMarkUnwatched": "تحديد كغير مشاهَد",
+  "detailsGoToEpisode": "الانتقال إلى الحلقة",
+  "iptvAddFavorite": "إضافة إلى المفضلة",
+  "iptvRemoveFavorite": "إزالة من المفضلة",
+  "iptvDeletePortal": "حذف هذه البوابة",
+  "iptvDeletePlaylist": "حذف قائمة التشغيل هذه"
 }

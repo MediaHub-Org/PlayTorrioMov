@@ -966,5 +966,19 @@
   "subPresetCustomBody": "Estilos de legenda personalizados pelo usuário",
 
   "commonClose": "Fechar",
-  "commonBack": "Voltar"
+  "commonBack": "Voltar",
+
+  "commonLike": "Favoritar",
+  "commonLiked": "Favoritado",
+  "commonAddToLiked": "Adicionar aos favoritos",
+  "commonRemoveFromLiked": "Remover dos favoritos",
+  "libraryAddToWatchlist": "Adicionar a Assistir depois",
+  "libraryRemoveFromWatchlist": "Remover de Assistir depois",
+  "libraryMarkWatched": "Marcar como assistido",
+  "libraryMarkUnwatched": "Marcar como não assistido",
+  "detailsGoToEpisode": "Ir para o episódio",
+  "iptvAddFavorite": "Adicionar aos favoritos",
+  "iptvRemoveFavorite": "Remover dos favoritos",
+  "iptvDeletePortal": "Excluir este portal",
+  "iptvDeletePlaylist": "Excluir esta playlist"
 }

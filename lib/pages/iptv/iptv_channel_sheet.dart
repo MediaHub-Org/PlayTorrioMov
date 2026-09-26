@@ -696,6 +696,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
                                         // Favorite Pin
                                         IconButton(
+                                          tooltip: isFav
+                                              ? context.l10n.iptvRemoveFavorite
+                                              : context.l10n.iptvAddFavorite,
                                           icon: Icon(
                                             isFav ? Icons.star_rounded : Icons.star_outline_rounded,
                                             color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
