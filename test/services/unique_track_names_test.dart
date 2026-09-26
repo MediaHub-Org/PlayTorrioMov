@@ -97,6 +97,44 @@ void main() {
     });
   });
 
+  group('uniqueTrackLanguageNames without numbers', () {
+    // Embedded lists turn numbering off: a handful of tracks are told apart
+    // by trial, and numbers beside regions read as two different kinds of
+    // thing. The audio menu keeps the default.
+    test('duplicates take regions, bare otherwise', () {
+      expect(
+        uniqueTrackLanguageNames(
+          ['spa', 'spa', 'spa'],
+          ['Spanish (Castilian)', 'Spanish (Latin America)', 'Spanish'],
+          numberDuplicates: false,
+        ),
+        ['Spanish (ES)', 'Spanish (LATAM)', 'Spanish'],
+      );
+    });
+
+    test('same-region duplicates collide rather than number', () {
+      expect(
+        uniqueTrackLanguageNames(
+          ['spa', 'spa'],
+          ['Spanish (Castilian)', 'Spanish (ES)'],
+          numberDuplicates: false,
+        ),
+        ['Spanish (ES)', 'Spanish (ES)'],
+      );
+    });
+
+    test('singletons are untouched either way', () {
+      expect(
+        uniqueTrackLanguageNames(
+          ['eng', 'spa'],
+          ['English', 'Spanish'],
+          numberDuplicates: false,
+        ),
+        ['English', 'Spanish'],
+      );
+    });
+  });
+
   group('language codes a provider actually sends', () {
     test('Norwegian is recognized from nb, not rendered as "NB"', () {
       // `nb` is Bokmål, which is what a provider means by "Norwegian". It

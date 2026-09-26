@@ -915,12 +915,14 @@ class _PlayerScreenState extends State<PlayerScreen>
     }
 
     // Two Spanish tracks both rendered as "Spanish", so the list showed the
-    // same word twice and the choice between them was invisible. This gives
-    // each a unique name -- a region from its own title where the title
-    // names one, a number where it does not.
+    // same word twice and the choice between them was invisible. Each takes
+    // a region from its own title where the title names one -- no numbers:
+    // a handful of embedded tracks are told apart by trial, and numbering
+    // them reads as two different kinds of thing next to the regions.
     final uniqueNames = uniqueTrackLanguageNames(
       keptSubs.map((t) => t.language).toList(growable: false),
       keptSubs.map((t) => t.title).toList(growable: false),
+      numberDuplicates: false,
     );
 
     for (var i = 0; i < keptSubs.length; i++) {

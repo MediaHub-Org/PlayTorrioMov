@@ -6,11 +6,15 @@ PlayerEmbeddedSubtitle track(
   String? language,
   String title = '',
   bool isDefault = false,
+  bool isForcedTrack = false,
+  String? containerTitle,
 }) => PlayerEmbeddedSubtitle(
   index: index,
   title: title,
   language: language,
+  containerTitle: containerTitle,
   isDefault: isDefault,
+  isForcedTrack: isForcedTrack,
 );
 
 SubtitleVariant variant(String language) => SubtitleVariant(
@@ -271,6 +275,51 @@ void main() {
       SubtitleAutoPick.embeddedForDisplay(tracks, audioLanguage: 'spa');
 
       expect(namesOf(tracks), ['Spanish', 'Arabic']);
+    });
+  });
+
+  group('SubtitleAutoPick.forced', () {
+    // Forced subtitles cover the dialogue the audio leaves out, so unlike a
+    // full translation they may turn on unasked -- but only a forced track.
+    test('no forced track means no answer', () {
+      expect(
+        SubtitleAutoPick.forced([track(0, language: 'Spanish')]),
+        isNull,
+      );
+      expect(SubtitleAutoPick.forced([]), isNull);
+    });
+
+    test('the forced track matching the audio wins', () {
+      final picked = SubtitleAutoPick.forced(
+        [
+          track(0, language: 'English', isForcedTrack: true),
+          track(1, language: 'Spanish', isForcedTrack: true),
+        ],
+        audioLanguage: 'spa',
+      );
+
+      expect(picked!.index, 1);
+    });
+
+    test('without an audio match the first forced track wins', () {
+      final picked = SubtitleAutoPick.forced(
+        [
+          track(0, language: 'English'),
+          track(1, language: 'Spanish', isForcedTrack: true),
+        ],
+        audioLanguage: 'fre',
+      );
+
+      expect(picked!.index, 1);
+    });
+
+    test('a forced title counts when the file flags nothing', () {
+      final picked = SubtitleAutoPick.forced(
+        [track(0, language: 'Spanish', containerTitle: 'Español (Forzados)')],
+        audioLanguage: 'spa',
+      );
+
+      expect(picked!.index, 0);
     });
   });
 }

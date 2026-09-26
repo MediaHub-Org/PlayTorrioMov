@@ -266,6 +266,33 @@ abstract final class SubtitleAutoPick {
     return [...matching, ...rest];
   }
 
+  /// The forced-narrative track to show without being asked, if any.
+  ///
+  /// Forced subtitles are not a translation choice: they cover the bits of
+  /// dialogue not in the audio's language -- alien speech, signs, background
+  /// announcements -- which is why every player shows them by default. The
+  /// forced track matching the language being heard wins, since a forced
+  /// track in another language is for another audience; otherwise the first
+  /// forced track. A file with no forced track yields nothing: full
+  /// translations never turn on unasked.
+  static PlayerEmbeddedSubtitle? forced(
+    List<PlayerEmbeddedSubtitle> tracks, {
+    String? audioLanguage,
+  }) {
+    final forcedTracks = tracks.where((t) => t.isForced).toList();
+    if (forcedTracks.isEmpty) return null;
+    final spoken = languageKey(audioLanguage);
+    if (spoken != null) {
+      for (final track in forcedTracks) {
+        if (languageKey(track.language) == spoken ||
+            languageKey(track.title) == spoken) {
+          return track;
+        }
+      }
+    }
+    return forcedTracks.first;
+  }
+
   /// The downloadable subtitle to fall back on when there is no embedded
   /// track, taken from whatever a search has already turned up. Never
   /// starts a new search: a toggle should not leave the user waiting on the

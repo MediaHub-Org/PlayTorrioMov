@@ -357,19 +357,24 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 ///
 /// A file with two Spanish subtitle tracks -- one Castilian, one Latin
 /// American -- rendered both as "Spanish", so the list showed the same word
-/// twice and the choice between them was invisible. Duplicates are numbered
-/// throughout, in file order, and each takes a region from its own title
-/// where the title names one: `Spanish (ES) #1`, `Spanish (LATAM) #2`,
-/// `Spanish #3`. A region without a number would still collide when two
-/// tracks name the same region, and a number without a region hides a region
-/// the track does state.
+/// twice and the choice between them was invisible. Duplicates take a region
+/// from their own title where the title names one -- `Spanish (ES)`,
+/// `Spanish (LATAM)` -- and, unless [numberDuplicates] is off, a number
+/// where they do not, as `Spanish #1`. Numbering is the honest answer there:
+/// the tracks really are indistinguishable from their metadata.
+///
+/// Embedded lists turn numbering off: a handful of tracks are told apart by
+/// trial, and "Spanish #1" next to "Spanish (LATAM)" reads as two different
+/// kinds of thing. The audio menu keeps it on, where identical rows would
+/// otherwise collide with no recourse.
 ///
 /// Tracks whose language is unknown are left alone -- there is nothing to
 /// disambiguate, and numbering "Track 3" would invent a language.
 List<String> uniqueTrackLanguageNames(
   List<String?> rawLanguages,
-  List<String?> titles,
-) {
+  List<String?> titles, {
+  bool numberDuplicates = true,
+}) {
   final names = <String>[
     for (final raw in rawLanguages) subtitleTrackLanguageName(raw),
   ];
@@ -387,8 +392,12 @@ List<String> uniqueTrackLanguageNames(
         final name = names[i];
         if (name.isEmpty || totals[name]! < 2) return name;
 
+        // A region where the track states one, so "Spanish (LATAM)" never
+        // reads as a duplicate of "Spanish (ES)".
         final region = _regionFromTitle(titles[i]);
         final labeled = region != null ? '$name ($region)' : name;
+        if (!numberDuplicates) return labeled;
+
         final n = seen[name] = (seen[name] ?? 0) + 1;
         return '$labeled #$n';
       }(),
