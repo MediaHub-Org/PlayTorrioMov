@@ -147,6 +147,32 @@ rather than files, and the sleep timer can wait for the video to end.
   rather than a guessed one.
 
 ### Fixed
+- **The Cast sheet scrolls, and its title no longer pushes the close button off
+  the edge.** Two separate faults in the same sheet. The title, the `Spacer`
+  and the close button sat in one flat row with no flex on the title, so the
+  title took its natural width -- 321px past the edge at a large text size.
+  And the sheet had no scrollable at all, so any content taller than the modal
+  allows painted past the bottom. That second one is not only an accessibility
+  problem: a viewer with several Cast devices on the network hits it at
+  ordinary text size, which nobody had seen because the sheet has never been
+  opened with devices actually listed in it (#28 is still unconfirmed against
+  a receiver). #69
+- **Arabic lays out on the correct side.** `Row` and the Material widgets
+  mirror themselves for a right-to-left locale; `EdgeInsets.only(left:)` does
+  not -- it is still the left edge in Arabic. 37 paddings across 21 files were
+  physical, and two of them applied a whole *page* inset that way, so Live
+  TV's search page and the watch-history page hugged the wrong edge entirely.
+  Two more were the Arabic anime pages themselves. English rendering is
+  unchanged. #68
+- **Text no longer runs outside its box at large accessibility sizes** in the
+  cast and Similar rails on a details page, and in the four search fields of
+  Live TV's portal browser. Each is a box whose height is fixed by the layout
+  around it rather than by its own text. #69
+
+### Accessibility
+- **Icon-only Close and Back buttons announce themselves.** 34 buttons had no
+  tooltip and so no label for a screen reader, and no hover hint for a
+  pointer. Both labels are translated. #68 #69
 - **The online subtitle list no longer marks every row as selected.** The
   comparison was `selectedVariant?.downloadUrl == variant.downloadUrl`, and
   when both sides were empty every row matched -- so the whole list drew with

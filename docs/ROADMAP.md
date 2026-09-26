@@ -251,7 +251,7 @@ sheet, whose header was 321px past the edge at 3x. That header is worth
 remembering as a pattern rather than a one-off: `Text` + `Spacer` + button in
 a flat `Row` means the title takes its natural width and shoves the button
 off. It is the third time this exact shape has been the bug — the Continue
-Watching header and the catalogue cards' metadata rows were the other two.
+Watching header and the catalog cards' metadata rows were the other two.
 `Expanded` on the text, taking the `Spacer`'s job, is the fix each time.
 
 The details-page rails are done, and one of the three never needed doing:
