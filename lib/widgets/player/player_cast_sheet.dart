@@ -73,145 +73,153 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: PlayerGlassCard(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
-                  const SizedBox(width: 10),
-                  // Expanded, not Text + Spacer. Laid out flat the title
-                  // demanded its natural width and pushed the close button
-                  // past the edge -- 321px of overflow at 3x text scale, and
-                  // this string is translated, so a longer language narrows
-                  // the margin before any accessibility setting is involved.
-                  // Taking the Spacer's job means the title gives way first,
-                  // which is the same fix the Continue Watching header needed.
-                  Expanded(
-                    child: Text(
-                      context.l10n.playerCastToDevice.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: PlayerTheme.ink,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.8,
+          // The sheet had no scrollable at all: a Column(min) straight into
+          // the card. Its height is decided by the modal, not by its content,
+          // so a long device list or a large text setting simply painted past
+          // the bottom -- 567px at 3x. Scrolling rather than clamping, because
+          // the content genuinely needs the room and a viewer who asked for 3x
+          // text should get it (#69).
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
+                    const SizedBox(width: 10),
+                    // Expanded, not Text + Spacer. Laid out flat the title
+                    // demanded its natural width and pushed the close button
+                    // past the edge -- 321px of overflow at 3x text scale, and
+                    // this string is translated, so a longer language narrows
+                    // the margin before any accessibility setting is involved.
+                    // Taking the Spacer's job means the title gives way first,
+                    // which is the same fix the Continue Watching header needed.
+                    Expanded(
+                      child: Text(
+                        context.l10n.playerCastToDevice.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: PlayerTheme.ink,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.8,
+                        ),
                       ),
                     ),
-                  ),
-                  PlayerIconButton(
-                    size: 28,
-                    iconSize: 14,
-                    icon: const Icon(Icons.close_rounded),
-                    tooltip: context.l10n.playerClose,
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              StreamBuilder<GoogleCastSession?>(
-                stream: CastService.sessionStream,
-                builder: (context, sessionSnapshot) {
-                  final connected = CastService.isConnected;
-                  return StreamBuilder<List<GoogleCastDevice>>(
-                    stream: CastService.devicesStream,
-                    builder: (context, snapshot) {
-                      final devices = snapshot.data ?? const [];
-                      if (devices.isEmpty) {
-                        // A real scan is running behind this now, so it gets
-                        // a spinner. Before, the same words sat there
-                        // motionless forever because nothing was searching.
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: PlayerTheme.accent,
+                    PlayerIconButton(
+                      size: 28,
+                      iconSize: 14,
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: context.l10n.playerClose,
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                StreamBuilder<GoogleCastSession?>(
+                  stream: CastService.sessionStream,
+                  builder: (context, sessionSnapshot) {
+                    final connected = CastService.isConnected;
+                    return StreamBuilder<List<GoogleCastDevice>>(
+                      stream: CastService.devicesStream,
+                      builder: (context, snapshot) {
+                        final devices = snapshot.data ?? const [];
+                        if (devices.isEmpty) {
+                          // A real scan is running behind this now, so it gets
+                          // a spinner. Before, the same words sat there
+                          // motionless forever because nothing was searching.
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: PlayerTheme.accent,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 14),
-                              Text(
-                                context.l10n.playerCastLooking,
-                                style: const TextStyle(
-                                  color: PlayerTheme.inkSubtle,
-                                  fontSize: 13,
+                                const SizedBox(height: 14),
+                                Text(
+                                  context.l10n.playerCastLooking,
+                                  style: const TextStyle(
+                                    color: PlayerTheme.inkSubtle,
+                                    fontSize: 13,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                context.l10n.playerCastSameWifi,
-                                style: const TextStyle(
-                                  color: PlayerTheme.inkSubtle,
-                                  fontSize: 11,
+                                const SizedBox(height: 6),
+                                Text(
+                                  context.l10n.playerCastSameWifi,
+                                  style: const TextStyle(
+                                    color: PlayerTheme.inkSubtle,
+                                    fontSize: 11,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: devices.map((device) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(10),
-                              onTap: () async {
-                                Navigator.pop(context);
-                                await CastService.connect(device);
-                                await CastService.loadMedia(
-                                  url: widget.streamUrl,
-                                  isLive: widget.isLive,
-                                  title: widget.title,
-                                  posterUrl: widget.posterUrl,
-                                );
-                              },
-                              child: Container(
-                                height: 48,
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      connected
-                                          ? Icons.cast_connected_rounded
-                                          : Icons.tv_rounded,
-                                      size: 20,
-                                      color: PlayerTheme.inkMuted,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        device.friendlyName,
-                                        style: const TextStyle(
-                                          color: PlayerTheme.ink,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ),
                           );
-                        }).toList(),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+                        }
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: devices.map((device) {
+                            return Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () async {
+                                  Navigator.pop(context);
+                                  await CastService.connect(device);
+                                  await CastService.loadMedia(
+                                    url: widget.streamUrl,
+                                    isLive: widget.isLive,
+                                    title: widget.title,
+                                    posterUrl: widget.posterUrl,
+                                  );
+                                },
+                                child: Container(
+                                  height: 48,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        connected
+                                            ? Icons.cast_connected_rounded
+                                            : Icons.tv_rounded,
+                                        size: 20,
+                                        color: PlayerTheme.inkMuted,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          device.friendlyName,
+                                          style: const TextStyle(
+                                            color: PlayerTheme.ink,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            )
           ),
         ),
       ),
