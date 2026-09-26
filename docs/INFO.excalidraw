@@ -42,7 +42,8 @@
                          "containerId":  null,
                          "originalText":  "PlayTorrioMov — how it works",
                          "lineHeight":  1.25,
-                         "baseline":  27
+                         "baseline":  27,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm002",
@@ -50,7 +51,7 @@
                          "x":  60,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -87,7 +88,7 @@
                          "x":  60,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -120,7 +121,8 @@
                          "containerId":  "ptm002",
                          "originalText":  "entry / shell",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm003",
@@ -128,7 +130,7 @@
                          "x":  280,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#b2f2bb",
@@ -165,7 +167,7 @@
                          "x":  280,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -198,7 +200,8 @@
                          "containerId":  "ptm003",
                          "originalText":  "where content comes from",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm004",
@@ -206,7 +209,7 @@
                          "x":  500,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -243,7 +246,7 @@
                          "x":  500,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -276,7 +279,8 @@
                          "containerId":  "ptm004",
                          "originalText":  "browsing and playback",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm005",
@@ -284,7 +288,7 @@
                          "x":  720,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#d0bfff",
@@ -321,7 +325,7 @@
                          "x":  720,
                          "y":  95,
                          "width":  200,
-                         "height":  32,
+                         "height":  27,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -354,7 +358,8 @@
                          "containerId":  "ptm005",
                          "originalText":  "services playback pulls in",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm006",
@@ -432,7 +437,8 @@
                          "containerId":  "ptm006",
                          "originalText":  "persistence",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm007",
@@ -473,7 +479,8 @@
                          "containerId":  null,
                          "originalText":  "STARTUP",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm008",
@@ -481,7 +488,7 @@
                          "x":  460,
                          "y":  180,
                          "width":  420,
-                         "height":  90,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -518,7 +525,7 @@
                          "x":  460,
                          "y":  180,
                          "width":  420,
-                         "height":  90,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -551,7 +558,8 @@
                          "containerId":  "ptm008",
                          "originalText":  "main.dart\nWidgetsFlutterBinding · MediaKit\n~20 services initialised in parallel",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm009",
@@ -559,7 +567,7 @@
                          "x":  460,
                          "y":  310,
                          "width":  420,
-                         "height":  80,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -596,7 +604,7 @@
                          "x":  460,
                          "y":  310,
                          "width":  420,
-                         "height":  80,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -629,7 +637,8 @@
                          "containerId":  "ptm009",
                          "originalText":  "HubPage\nAdaptiveNavShell + MediaHub\none nested Navigator",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm010",
@@ -719,7 +728,8 @@
                          "containerId":  null,
                          "originalText":  "SECTIONS",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm012",
@@ -727,7 +737,7 @@
                          "x":  60,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -764,7 +774,7 @@
                          "x":  60,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -797,7 +807,8 @@
                          "containerId":  "ptm012",
                          "originalText":  "Movies",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm013",
@@ -805,7 +816,7 @@
                          "x":  300,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -842,7 +853,7 @@
                          "x":  300,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -875,7 +886,8 @@
                          "containerId":  "ptm013",
                          "originalText":  "Series",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm014",
@@ -883,7 +895,7 @@
                          "x":  540,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -920,7 +932,7 @@
                          "x":  540,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -953,7 +965,8 @@
                          "containerId":  "ptm014",
                          "originalText":  "Anime",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm015",
@@ -961,7 +974,7 @@
                          "x":  780,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -998,7 +1011,7 @@
                          "x":  780,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -1031,7 +1044,8 @@
                          "containerId":  "ptm015",
                          "originalText":  "Live TV",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm016",
@@ -1039,7 +1053,7 @@
                          "x":  1020,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#a5d8ff",
@@ -1076,7 +1090,7 @@
                          "x":  1020,
                          "y":  440,
                          "width":  210,
-                         "height":  60,
+                         "height":  30,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -1109,7 +1123,8 @@
                          "containerId":  "ptm016",
                          "originalText":  "Library",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm017",
@@ -1395,7 +1410,8 @@
                          "containerId":  null,
                          "originalText":  "CONTENT SOURCES",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm023",
@@ -1403,7 +1419,7 @@
                          "x":  60,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#b2f2bb",
@@ -1440,7 +1456,7 @@
                          "x":  60,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -1473,7 +1489,8 @@
                          "containerId":  "ptm023",
                          "originalText":  "Addons\nStremio-compatible\ncatalog + stream add-ons",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm024",
@@ -1481,7 +1498,7 @@
                          "x":  380,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#b2f2bb",
@@ -1518,7 +1535,7 @@
                          "x":  380,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -1551,7 +1568,8 @@
                          "containerId":  "ptm024",
                          "originalText":  "Built-in scrapers\n~50 sites\nScraperManager -\u003e StreamService",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm025",
@@ -1559,7 +1577,7 @@
                          "x":  700,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#b2f2bb",
@@ -1596,7 +1614,7 @@
                          "x":  700,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -1629,7 +1647,8 @@
                          "containerId":  "ptm025",
                          "originalText":  "Live TV\nXtream portals\n+ M3U playlists",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm026",
@@ -1637,7 +1656,7 @@
                          "x":  1020,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#b2f2bb",
@@ -1674,7 +1693,7 @@
                          "x":  1020,
                          "y":  580,
                          "width":  300,
-                         "height":  100,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -1707,7 +1726,8 @@
                          "containerId":  "ptm026",
                          "originalText":  "Anime\nAniList · Anime Arabic",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm027",
@@ -1993,7 +2013,8 @@
                          "containerId":  null,
                          "originalText":  "BROWSING",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm033",
@@ -2001,7 +2022,7 @@
                          "x":  460,
                          "y":  750,
                          "width":  420,
-                         "height":  100,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -2038,7 +2059,7 @@
                          "x":  460,
                          "y":  750,
                          "width":  420,
-                         "height":  100,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -2071,7 +2092,8 @@
                          "containerId":  "ptm033",
                          "originalText":  "WatchScreen\nsource list · filter pills\nsort · multi-select",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm034",
@@ -2308,7 +2330,8 @@
                          "containerId":  null,
                          "originalText":  "PLAYBACK",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm039",
@@ -2316,7 +2339,7 @@
                          "x":  460,
                          "y":  920,
                          "width":  420,
-                         "height":  100,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -2353,7 +2376,7 @@
                          "x":  460,
                          "y":  920,
                          "width":  420,
-                         "height":  100,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -2386,7 +2409,8 @@
                          "containerId":  "ptm039",
                          "originalText":  "PlayerScreen\nmedia_kit / libmpv · transport\nkeyboard shortcuts",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm040",
@@ -2476,7 +2500,8 @@
                          "containerId":  null,
                          "originalText":  "PLAYER MENUS",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm042",
@@ -2484,7 +2509,7 @@
                          "x":  60,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -2521,7 +2546,7 @@
                          "x":  60,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -2554,7 +2579,8 @@
                          "containerId":  "ptm042",
                          "originalText":  "Audio \u0026 Subtitles\ntrack pickers · sync · style",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm043",
@@ -2562,7 +2588,7 @@
                          "x":  380,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -2599,7 +2625,7 @@
                          "x":  380,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -2632,7 +2658,8 @@
                          "containerId":  "ptm043",
                          "originalText":  "Speed \u0026 Aspect\nplayback rate · crop / scale",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm044",
@@ -2640,7 +2667,7 @@
                          "x":  700,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -2677,7 +2704,7 @@
                          "x":  700,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -2710,7 +2737,8 @@
                          "containerId":  "ptm044",
                          "originalText":  "Sources \u0026 Episodes\nswitch source · next episode",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm045",
@@ -2718,7 +2746,7 @@
                          "x":  1020,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffd8a8",
@@ -2755,7 +2783,7 @@
                          "x":  1020,
                          "y":  1090,
                          "width":  300,
-                         "height":  90,
+                         "height":  45,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -2788,7 +2816,8 @@
                          "containerId":  "ptm045",
                          "originalText":  "Sleep timer \u0026 Cast\n10-60 min · end of video · DLNA",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm046",
@@ -3025,7 +3054,8 @@
                          "containerId":  null,
                          "originalText":  "SERVICES",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm051",
@@ -3033,7 +3063,7 @@
                          "x":  60,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#d0bfff",
@@ -3070,7 +3100,7 @@
                          "x":  60,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -3103,7 +3133,8 @@
                          "containerId":  "ptm051",
                          "originalText":  "P2P\nTorrServer + libtorrent\nmagnet -\u003e HTTP stream",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm052",
@@ -3111,7 +3142,7 @@
                          "x":  380,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#d0bfff",
@@ -3148,7 +3179,7 @@
                          "x":  380,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -3181,7 +3212,8 @@
                          "containerId":  "ptm052",
                          "originalText":  "Subtitles\nembedded (libass)\n+ online providers",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm053",
@@ -3189,7 +3221,7 @@
                          "x":  700,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#d0bfff",
@@ -3226,7 +3258,7 @@
                          "x":  700,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -3259,7 +3291,8 @@
                          "containerId":  "ptm053",
                          "originalText":  "Metadata\nTMDB · Simkl · Trakt\nAniList (anime)",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm054",
@@ -3267,7 +3300,7 @@
                          "x":  1020,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#d0bfff",
@@ -3304,7 +3337,7 @@
                          "x":  1020,
                          "y":  1260,
                          "width":  300,
-                         "height":  100,
+                         "height":  63,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -3337,7 +3370,8 @@
                          "containerId":  "ptm054",
                          "originalText":  "Debrid \u0026 Downloads\nReal-Debrid and friends\noffline files",
                          "lineHeight":  1.25,
-                         "baseline":  13
+                         "baseline":  13,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm055",
@@ -3574,7 +3608,8 @@
                          "containerId":  null,
                          "originalText":  "PERSISTENCE",
                          "lineHeight":  1.25,
-                         "baseline":  12
+                         "baseline":  12,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm060",
@@ -3582,7 +3617,7 @@
                          "x":  460,
                          "y":  1430,
                          "width":  420,
-                         "height":  90,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "#ffec99",
@@ -3619,7 +3654,7 @@
                          "x":  460,
                          "y":  1430,
                          "width":  420,
-                         "height":  90,
+                         "height":  70,
                          "angle":  0,
                          "strokeColor":  "#1e1e1e",
                          "backgroundColor":  "transparent",
@@ -3652,7 +3687,8 @@
                          "containerId":  "ptm060",
                          "originalText":  "Storage\nSharedPreferences + sqflite\nsettings · library · history",
                          "lineHeight":  1.25,
-                         "baseline":  14
+                         "baseline":  14,
+                         "autoResize":  true
                      },
                      {
                          "id":  "ptm061",
