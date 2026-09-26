@@ -85,7 +85,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
       ? _SubtitleSource.embedded
       : _SubtitleSource.online;
 
-  _SubtitleFilter _filter = _SubtitleFilter.all;
+  _SubtitleFilter _filter = _SubtitleFilter.subtitles;
 
   /// How many languages the online list shows before "Show all".
   ///
@@ -305,7 +305,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             onTap: () => setState(() {
               _source = _SubtitleSource.forced;
               if (_filter == _SubtitleFilter.forced) {
-                _filter = _SubtitleFilter.all;
+                _filter = _SubtitleFilter.subtitles;
               }
             }),
           ),
@@ -329,32 +329,51 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             sum + group.variants.where((v) => v.isForced).length,
       );
 
-  /// All / CC-SDH / Forced, filtering whichever pill is showing. On Forced
-  /// the last chip is hidden: the whole view is forced files, so a chip for
-  /// it would change nothing and read as broken.
+  /// Subtitles / CC-SDH / Forced: three independent kinds, not a filter
+  /// with an All. "All" could never say whether forced tracks were in or
+  /// out, so every view mixed back in what the pills separate out. Plain
+  /// translations, hearing-impaired ones, and forced ones each get their
+  /// own chip; tapping the active chip falls back to Subtitles. On Forced
+  /// only the CC-SDH chip shows: the view is forced files already, and a
+  /// Subtitles chip there would promise plain translations it cannot list.
   Widget _buildFilterChips(BuildContext context) {
-    return Row(
-      children: [
-        _FilterChip(
-          label: context.l10n.subsAll,
-          isSelected: _filter == _SubtitleFilter.all,
-          onTap: () => setState(() => _filter = _SubtitleFilter.all),
-        ),
-        const SizedBox(width: 6),
+    void pick(_SubtitleFilter next) => setState(() {
+      _filter = _filter == next && next != _SubtitleFilter.subtitles
+          ? _SubtitleFilter.subtitles
+          : next;
+    });
+
+    return SingleChildScrollView(
+      // Sideways, like every other pill rail: "Subtitles" outgrew the "All"
+      // it replaced, and on a phone-width panel the three chips no longer
+      // fit side by side. A Wrap would stack a filter control onto a second
+      // line; scrolling keeps one line that reads as one control.
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+        if (_source != _SubtitleSource.forced)
+          _FilterChip(
+            label: context.l10n.detailsSubtitles,
+            isSelected: _filter == _SubtitleFilter.subtitles,
+            onTap: () => pick(_SubtitleFilter.subtitles),
+          ),
+        if (_source != _SubtitleSource.forced) const SizedBox(width: 6),
         _FilterChip(
           label: context.l10n.subsSdhShort,
           isSelected: _filter == _SubtitleFilter.sdh,
-          onTap: () => setState(() => _filter = _SubtitleFilter.sdh),
+          onTap: () => pick(_SubtitleFilter.sdh),
         ),
         if (_source != _SubtitleSource.forced) ...[
           const SizedBox(width: 6),
           _FilterChip(
             label: context.l10n.subsForced,
             isSelected: _filter == _SubtitleFilter.forced,
-            onTap: () => setState(() => _filter = _SubtitleFilter.forced),
+            onTap: () => pick(_SubtitleFilter.forced),
           ),
         ],
-      ],
+        ],
+      ),
     );
   }
 
@@ -572,17 +591,19 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     }
 
     if (rows.isEmpty) {
-      // A filter that matched nothing is not the same as a stream with no
+      // A chip that matched nothing is not the same as a stream with no
       // subtitles, and saying the latter would be wrong -- the tracks are
-      // there, the filter is hiding them. Forced gets its own line for the
+      // there, the chip is hiding them. Forced gets its own line for the
       // same reason: non-forced tracks being there does not mean a forced
       // one is.
+      final hasAny = widget.embeddedSubtitles.isNotEmpty ||
+          widget.groups.any((g) => g.variants.isNotEmpty);
       late final String message;
-      if (_source == _SubtitleSource.forced &&
+      if (!hasAny) {
+        message = context.l10n.playerNoSubtitlesForStream;
+      } else if (_source == _SubtitleSource.forced &&
           _filter != _SubtitleFilter.sdh) {
         message = context.l10n.playerNoForcedSubtitles;
-      } else if (_filter == _SubtitleFilter.all) {
-        message = context.l10n.playerNoSubtitlesForStream;
       } else {
         message = context.l10n.playerSubtitleNoneMatchFilter;
       }
@@ -618,22 +639,31 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     return parts.isEmpty ? variant.title : parts.join(' · ');
   }
 
-  /// Whether a track survives the active filter. `all` passes everything.
+  /// Whether a track survives the active chip. Each chip names one kind --
+  /// plain translations, hearing-impaired ones, forced ones -- so there is
+  /// no "everything" state for forced tracks to leak back through. On Forced
+  /// the pill already narrowed to forced files, so only the CC-SDH chip
+  /// narrows further there.
   bool _passesFilter({
     required bool isForced,
     required bool isHearingImpaired,
-  }) => switch (_filter) {
-    _SubtitleFilter.all => true,
-    _SubtitleFilter.sdh => isHearingImpaired,
-    _SubtitleFilter.forced => isForced,
-  };
+  }) {
+    if (_source == _SubtitleSource.forced) {
+      return _filter != _SubtitleFilter.sdh || isHearingImpaired;
+    }
+    return switch (_filter) {
+      _SubtitleFilter.subtitles => !isForced && !isHearingImpaired,
+      _SubtitleFilter.sdh => isHearingImpaired,
+      _SubtitleFilter.forced => isForced,
+    };
+  }
 }
 
 /// Which list the panel is showing.
 enum _SubtitleSource { embedded, online, forced }
 
 /// Which tracks the list is narrowed to.
-enum _SubtitleFilter { all, sdh, forced }
+enum _SubtitleFilter { subtitles, sdh, forced }
 
 /// The row that lifts the online list's cap.
 ///

@@ -817,4 +817,86 @@ void main() {
       expect(find.text('Forced'), findsOneWidget);
     });
   });
+
+  group('the filter chips', () {
+    PlayerEmbeddedSubtitle track(int index, String language, {String? title, bool forced = false}) =>
+        PlayerEmbeddedSubtitle(
+          index: index,
+          title: title ?? language,
+          language: language,
+          containerTitle: title,
+          isForcedTrack: forced,
+        );
+
+    // The header reads SUBTITLES uppercased, so the exact-case "Subtitles"
+    // below is the chip alone.
+    testWidgets('Subtitles is the default and hides forced tracks', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          embedded: [
+            track(1, 'English'),
+            track(2, 'Spanish (ES)', forced: true),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('Subtitles'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('Spanish (ES)'), findsNothing);
+    });
+
+    testWidgets('the Forced chip shows forced tracks, tapping again clears', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          embedded: [
+            track(1, 'English'),
+            track(2, 'Spanish (ES)', forced: true),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      // First match: the chip precedes the list, whose forced badge
+      // reads the same word.
+      await tester.tap(find.text('Forced').first);
+      await tester.pump();
+      expect(find.text('Spanish (ES)'), findsOneWidget);
+      expect(find.text('English'), findsNothing);
+
+      await tester.tap(find.text('Forced').first);
+      await tester.pump();
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('Spanish (ES)'), findsNothing);
+    });
+
+    testWidgets('the CC chip shows hearing-impaired tracks, tapping again clears', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          embedded: [
+            track(1, 'English'),
+            track(2, 'French', title: 'French (SDH)'),
+          ],
+        ),
+      );
+      await tester.pump();
+      expect(find.text('French'), findsNothing);
+
+      await tester.tap(find.text('CC / SDH').first);
+      await tester.pump();
+      expect(find.text('French'), findsOneWidget);
+      expect(find.text('English'), findsNothing);
+
+      await tester.tap(find.text('CC / SDH').first);
+      await tester.pump();
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('French'), findsNothing);
+    });
+  });
 }

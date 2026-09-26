@@ -259,7 +259,6 @@
   "subsEmbedded": "Embedded",
   "subsOnline": "Online",
   "@subsEmbedded": {"description": "Subtitle tracks stored inside the video file"},
-  "subsAll": "All",
   "subsLanguages": "Languages",
   "subsAllLanguages": "All Languages",
   "subsForced": "Forced",
