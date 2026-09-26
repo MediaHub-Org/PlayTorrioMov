@@ -159,18 +159,25 @@ class SubtitleService {
   ///
   /// A provider can return the same release several times -- SubtitleCat
   /// lists a file once per language it has been translated into, and the
-  /// translations share a title. Those are one choice, not four. The key is
-  /// everything the row shows -- provider, title, format and flags -- and
-  /// nothing it does not: files that read identically give a viewer nothing
-  /// to choose between them by, so numbering them "#1" and "#2" only listed
-  /// the same choice twice. Anything that differs in something visible stays
-  /// separate, and the same title from two providers stays two choices --
-  /// they are different downloads from different hosts.
+  /// translations share a title and a URL. Those are one choice, not four.
+  /// Two things collapse: the same download link under different titles, and
+  /// different links that read identically (provider, title, format and
+  /// flags -- everything the row shows and nothing it does not). Files that
+  /// read identically give a viewer nothing to choose between them by, so
+  /// numbering them "#1" and "#2" only listed the same choice twice.
+  /// Anything that differs in something visible stays separate, and the same
+  /// title from two providers stays two choices -- they are different
+  /// downloads from different hosts.
   @visibleForTesting
   static List<SubtitleVariant> dedupeVariants(List<SubtitleVariant> variants) {
-    final seen = <String>{};
+    final seenUrls = <String>{};
+    final seenVisible = <String>{};
     final kept = <SubtitleVariant>[];
     for (final variant in variants) {
+      // The same download, however titled: one file is one choice, and
+      // leaving two rows for it also ticked both when either was picked.
+      final url = variant.downloadUrl.trim();
+      if (url.isNotEmpty && !seenUrls.add(url)) continue;
       final key = [
         variant.providerName.toLowerCase().trim(),
         variant.title.toLowerCase().trim(),
@@ -179,7 +186,7 @@ class SubtitleService {
         variant.isForced,
         variant.extraData['isTranslate'] == true,
       ].join('|');
-      if (!seen.add(key)) continue;
+      if (!seenVisible.add(key)) continue;
       kept.add(variant);
     }
     return kept;

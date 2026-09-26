@@ -13,12 +13,14 @@ PlayerEmbeddedSubtitle track({
   String title = 'Spanish',
   String? language = 'Spanish',
   String? containerTitle,
+  String? codec,
   bool isForcedTrack = false,
 }) => PlayerEmbeddedSubtitle(
   index: 1,
   title: title,
   language: language,
   containerTitle: containerTitle,
+  codec: codec,
   isForcedTrack: isForcedTrack,
 );
 
@@ -100,6 +102,41 @@ void main() {
       expect(flagged.containerTitle, 'Spanish (Forced)');
       expect(flagged.isForced, isTrue);
       expect(flagged.isDefault, isTrue);
+    });
+  });
+
+  group('an embedded track names the engine that draws it', () {
+    // Only ASS goes through libass: its tags are rendering instructions,
+    // so the overlay would show raw markup beside the styled line. Text
+    // tracks use the overlay, bitmap tracks mpv's OSD -- and sending every
+    // track through libass is what silenced the text ones.
+    test('ASS and SSA need libass', () {
+      expect(track(codec: 'ass').needsLibass, isTrue);
+      expect(track(codec: 'SSA').needsLibass, isTrue);
+      expect(track(codec: null, containerTitle: 'English [ASS]').needsLibass, isTrue);
+    });
+
+    test('text tracks do not', () {
+      for (final codec in ['subrip', 'mov_text', 'webvtt', 'microdvd', null]) {
+        expect(
+          track(codec: codec, containerTitle: null, title: 'English').needsLibass,
+          isFalse,
+          reason: '$codec',
+        );
+      }
+    });
+
+    test('a word containing "ass" is not ASS', () {
+      // Track titles are free text: "Bass Audio" must not take the libass
+      // path because it contains those three letters.
+      expect(track(codec: null, title: 'Bass Audio').needsLibass, isFalse);
+    });
+
+    test('bitmap tracks render through the OSD', () {
+      expect(track(codec: 'hdmv_pgs_subtitle').isImageSubtitle, isTrue);
+      expect(track(codec: null, containerTitle: 'English (US) PGS').isImageSubtitle, isTrue);
+      expect(track(codec: 'subrip').isImageSubtitle, isFalse);
+      expect(track(codec: 'ass').isImageSubtitle, isFalse);
     });
   });
 }

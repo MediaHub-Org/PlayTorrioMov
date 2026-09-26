@@ -113,6 +113,52 @@ class PlayerEmbeddedSubtitle {
   String get displayName =>
       (language?.isNotEmpty ?? false) ? language! : title;
 
+  /// The codec mpv reports, lowercased, with the container title as a
+  /// fallback. Muxers routinely write the format into the title --
+  /// "English (US) PGS" -- while leaving the codec field empty, so a track
+  /// whose codec is unknown is not automatically a text track.
+  String get _formatHint {
+    final codecName = codec?.trim().toLowerCase() ?? '';
+    if (codecName.isNotEmpty) return codecName;
+    return '${containerTitle ?? ''} $title'.toLowerCase();
+  }
+
+  /// A whole word in the format hint: without this, "bass" would read as
+  /// ASS and "pass" as... also ASS. Track titles are free text, so only a
+  /// standalone token names a format.
+  bool _formatWord(String word) => RegExp(
+    '(?:^|[^a-z])${RegExp.escape(word)}(?:[^a-z]|\$)',
+  ).hasMatch(_formatHint);
+
+  /// Whether this track needs libass (mpv's own rendering) rather than the
+  /// Flutter overlay.
+  ///
+  /// Only ASS/SSA does: its `{\...}` tags are rendering instructions, so the
+  /// overlay would show raw markup beside libass's styled line -- the
+  /// double-draw. Every other text track is drawn from the text mpv emits,
+  /// which is also what older releases did; image tracks emit no text at
+  /// all and render through mpv's OSD instead (see [isImageSubtitle]).
+  bool get needsLibass =>
+      _formatHint == 'ass' ||
+      _formatHint == 'ssa' ||
+      _formatWord('ass') ||
+      _formatWord('ssa');
+
+  /// Whether this track is a bitmap subtitle (PGS, VobSub, DVB, XSUB).
+  ///
+  /// There is no text to emit and libass cannot draw it, so the Flutter
+  /// overlay has nothing to show and the track renders through mpv's OSD --
+  /// which means mpv's own visibility must stay on for it, unlike a text
+  /// track whose OSD would double the overlay's line.
+  bool get isImageSubtitle =>
+      _formatWord('pgs') ||
+      _formatWord('pgssub') ||
+      _formatWord('vobsub') ||
+      _formatWord('xsub') ||
+      _formatHint.contains('dvd_sub') ||
+      _formatHint.contains('dvb_sub') ||
+      _formatHint.contains('pgs_subtitle');
+
   PlayerEmbeddedSubtitle withFlags({
     required bool isDefault,
     required bool isForcedTrack,

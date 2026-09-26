@@ -625,6 +625,44 @@ void main() {
       expect(titles, contains('French'));
     });
 
+    testWidgets('expanding the playing language moves the tick to the file', (
+      tester,
+    ) async {
+      // Collapsed, the group row ticks. Open, the tick moves down to the
+      // file -- the group staying ticked beside it read as two selections.
+      // Either way exactly one radio is ever marked.
+      final files = [variant('Chinese', 'zh1'), variant('Chinese', 'zh2')];
+      Future<List<PlayerMenuRow>> tickedRows() async {
+        await tester.pump();
+        return tester
+            .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+            .where((r) => r.isSelected)
+            .toList();
+      }
+
+      await tester.pumpWidget(
+        menu(
+          enabled: true,
+          selected: files.first,
+          groups: [
+            SubtitleLanguageGroup(language: 'Chinese', variants: files),
+            SubtitleLanguageGroup(
+              language: 'English',
+              variants: [variant('English', 'en1')],
+            ),
+          ],
+        ),
+      );
+      var ticked = await tickedRows();
+      expect(ticked.length, 1);
+      expect(ticked.single.title, 'Chinese');
+
+      await tester.tap(find.text('Chinese'));
+      ticked = await tickedRows();
+      expect(ticked.length, 1);
+      expect(ticked.single.title, isNot('Chinese'));
+    });
+
     testWidgets('one file shared by two languages ticks exactly one row', (
       tester,
     ) async {

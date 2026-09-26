@@ -156,13 +156,24 @@ rather than files, and the sleep timer can wait for the video to end.
 - **Exactly one online subtitle row is ever marked.** The mark compared the
   download URL alone, and one provider lists the same file under every
   language it was translated into -- so picking it ticked a row in each
-  language. The row's own language must match too, which names one group.
+  language. The row's own language must match too, which names one group,
+  and an open language moves its tick down to the file instead of showing
+  two. The same download link under different titles is one row now, for
+  the same reason.
 - **Selecting a file's own subtitle cannot silence itself anymore.** The
   selection call was awaited bare, so a throw skipped the libass call below
   it: the overlay was already off because of the selected state, libass was
   never turned on, and the track rendered nowhere. The call is guarded and
   libass is enabled either way, which is the last release's behavior -- the
   styling ran regardless, because the call was fired and forgotten.
+- **A file's own subtitles take the engine that fits them.** Sending every
+  embedded track through libass silenced the text ones: the overlay was
+  hidden for a renderer that only draws ASS. Only ASS goes through libass
+  now; other text tracks are drawn from the text mpv emits, which is what
+  older releases did, with mpv's own rendering off so the line is not drawn
+  twice; bitmap tracks (PGS) render through mpv's OSD with visibility left
+  on, since they emit no text at all. The codec decides, falling back to
+  the container title muxers write it into.
 - **The Forced and CC/SDH filters work on a file's own subtitles.** Both are
   read off a track's *title* -- "forced" and "SDH" are words a muxer writes
   there, and there is no other place they appear. But the player overwrote

@@ -429,9 +429,15 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
       final visible = _showAllOnline ? groups : groups.take(_onlineCap).toList();
 
+      // A radio list marks one row. The group and its open files would each
+      // match the playing file on their own, so without this the expanded
+      // language showed two ticks: one on the group, one on the file.
+      var markedSelected = false;
       for (final group in visible) {
         final best = group.variants.first;
         final isExpanded = _expandedLanguage == group.language;
+        final groupTicked = _isSelectedGroup(group);
+        if (groupTicked && !isExpanded) markedSelected = true;
         rows.add(
           PlayerMenuRow(
             leading: LanguageFlag(group.language, height: 13),
@@ -443,7 +449,9 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
               if (group.variants.length > 1)
                 context.l10n.playerSubtitleCount(group.variants.length),
             ],
-            isSelected: _isSelectedGroup(group),
+            // While the files are open the tick moves down to the file:
+            // the group staying ticked beside it read as two selections.
+            isSelected: groupTicked && !isExpanded,
             trailing: group.variants.length > 1                ? Icon(
                     isExpanded
                         ? Icons.expand_less_rounded
@@ -470,11 +478,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
         if (isExpanded) {
           for (final variant in group.variants) {
+            // First match only: duplicate links that survived dedupe share
+            // the playing file's URL, and each would tick on its own.
+            final fileTicked =
+                !markedSelected && _isSelectedVariant(variant);
+            if (fileTicked) markedSelected = true;
             rows.add(
               PlayerMenuRow(
                 leading: const SizedBox(width: 0),
                 title: _variantLabel(context, variant),
-                isSelected: _isSelectedVariant(variant),
+                isSelected: fileTicked,
                 onTap: () => widget.onSelectVariant(variant),
               ),
             );

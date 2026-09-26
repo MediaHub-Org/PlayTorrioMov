@@ -214,8 +214,18 @@ void main() {
 
     test('leaves distinct titles alone', () {
       final kept = SubtitleService.dedupeVariants([
-        variant(provider: 'SubDL', language: 'English', title: 'BluRay'),
-        variant(provider: 'SubDL', language: 'English', title: 'WEB-DL'),
+        variant(
+          provider: 'SubDL',
+          language: 'English',
+          title: 'BluRay',
+          url: 'https://x/bluray.srt',
+        ),
+        variant(
+          provider: 'SubDL',
+          language: 'English',
+          title: 'WEB-DL',
+          url: 'https://x/webdl.srt',
+        ),
       ]);
 
       expect(kept.map((v) => v.title), ['BluRay', 'WEB-DL']);
@@ -240,11 +250,44 @@ void main() {
       // Different downloads from different hosts, even when they read the
       // same. Only a provider's own identical rows collapse.
       final kept = SubtitleService.dedupeVariants([
-        variant(provider: 'SubtitleCat', language: 'English', title: 'Standard'),
-        variant(provider: 'OpenSubtitles', language: 'English', title: 'Standard'),
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://cat/x.srt',
+        ),
+        variant(
+          provider: 'OpenSubtitles',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://os/x.srt',
+        ),
       ]);
 
       expect(kept.map((v) => v.title), ['Standard', 'Standard']);
+    });
+
+    test('the same download under different titles is one choice', () {
+      // One provider lists the same file twice with different release
+      // names. One file is one choice -- and leaving both rows also ticked
+      // both when either was picked.
+      final kept = SubtitleService.dedupeVariants([
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Movie.2024.WEB-DL',
+          url: 'https://x/same.srt',
+        ),
+        variant(
+          provider: 'SubtitleCat',
+          language: 'English',
+          title: 'Standard',
+          url: 'https://x/same.srt',
+        ),
+      ]);
+
+      expect(kept.length, 1);
+      expect(kept.single.title, 'Movie.2024.WEB-DL');
     });
   });
 }

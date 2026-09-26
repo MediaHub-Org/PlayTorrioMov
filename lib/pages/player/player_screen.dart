@@ -946,6 +946,10 @@ class _PlayerScreenState extends State<PlayerScreen>
           // picker read as noise. See subtitle_languages.dart for what each
           // means.
           language: language,
+          // The codec decides how the track reaches the screen -- libass
+          // for ASS, the overlay for text, mpv's OSD for bitmaps -- so it
+          // rides along rather than being re-read later.
+          codec: t.codec,
           // The container's own title, kept because it is the only place a
           // forced or hearing-impaired marker lives. `title` above is the
           // display name and prefers the language, so sniffing it meant
@@ -1225,46 +1229,47 @@ class _PlayerScreenState extends State<PlayerScreen>
     });
 
     // The state is set *before* the track is selected, and the selection is
-    // awaited before anything styles it.
+    // guarded: `setSubtitleTrack` is asynchronous and can throw, and
+    // awaiting it bare once meant a throw skipped everything below and the
+    // track rendered nowhere.
     //
-    // Both halves are the fix for "selecting an embedded track shows
-    // nothing". `setSubtitleTrack` is asynchronous -- it issues `sub-add`
-    // and `select` to mpv -- and it used to be fired and forgotten, so the
-    // styling call below could run first and set `sub-visibility=no` for a
-    // track that had not been added yet. Setting the state first means every
-    // styling call in between keeps libass on rather than turning it back
-    // off, which is the same self-defeating shape the `forceLibass` flag was
-    // removed to fix.
-    PlayerSettings.embeddedSubtitleActive.value = true;
-
-    // Guarded, and libass is enabled whether the selection reports success
-    // or not. `setSubtitleTrack` is asynchronous and can throw after the
-    // state above has already hidden the Flutter overlay; awaiting it bare
-    // meant a throw skipped the styling below and the track rendered
-    // nowhere -- the overlay off because of the state, libass off because
-    // the call that turns it on never ran. The call used to be fired and
-    // forgotten, so the styling always ran, which is why this worked in the
-    // last release and broke after the await was added.
+    // How the track reaches the screen depends on what it is. Only ASS goes
+    // through libass: its tags are rendering instructions, so the overlay
+    // would show raw markup beside libass's styled line. Every other text
+    // track is drawn from the text mpv emits -- which is what older releases
+    // did, and why this worked there -- with mpv's own rendering off so the
+    // line is not drawn twice. A bitmap track emits no text at all, so it
+    // renders through mpv's OSD with visibility left on.
     try {
-      await _player.setSubtitleTrack(
-        SubtitleTrack(
-          embedded.index.toString(),
-          embedded.title,
-          embedded.language,
-        ),
-      );
+      if (embedded.needsLibass) {
+        PlayerSettings.embeddedSubtitleActive.value = true;
+        await _player.setSubtitleTrack(
+          SubtitleTrack(
+            embedded.index.toString(),
+            embedded.title,
+            embedded.language,
+          ),
+        );
+        await _enableLibassForEmbedded();
+      } else {
+        PlayerSettings.embeddedSubtitleActive.value = false;
+        await _player.setSubtitleTrack(
+          SubtitleTrack(
+            embedded.index.toString(),
+            embedded.title,
+            embedded.language,
+          ),
+        );
+        if (embedded.isImageSubtitle) {
+          final dynamic platform = _player.platform;
+          await platform?.setProperty('sub-visibility', 'yes');
+        } else {
+          await PlayerSettings.applySubtitleStyling(_player);
+        }
+      }
     } catch (e) {
       debugPrint('[PlayerScreen] could not select embedded subtitle: $e');
     }
-    // libass, always, for an embedded track.
-    //
-    // The Flutter overlay draws text from `player.stream.subtitle`, which
-    // mpv only emits for subtitles it decodes into its own text stream. An
-    // embedded ASS/SSA track is rendered *by libass* and never emitted, so
-    // with the overlay in charge and `sub-visibility` off -- which is what
-    // the default `useLibass: false` sets -- an embedded track was invisible
-    // both ways. That is why a file's own subtitles "did not load".
-    await _enableLibassForEmbedded();
     _setSubtitleScale(_subtitleScale);
     _logSubtitleDiagnostics(embedded);
 
@@ -1326,8 +1331,10 @@ class _PlayerScreenState extends State<PlayerScreen>
     }
   }
 
-  /// Turns mpv's own subtitle rendering on, for an embedded track.
+  /// Turns mpv's own subtitle rendering on, for an embedded ASS track.
   ///
+  /// Only ASS takes this path (see [_selectEmbeddedSubtitle]): its tags need
+  /// libass, while text tracks use the overlay and bitmap tracks use the OSD.
   /// The state is set first, because [PlayerSettings.applySubtitleStyling]
   /// reads it rather than taking a flag -- see
   /// [PlayerSettings.embeddedSubtitleActive] for why.
