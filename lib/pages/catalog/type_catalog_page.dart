@@ -32,12 +32,10 @@ enum _CatalogSort { yearNewest, yearOldest }
 /// Used by the Media hub's "Movies" and "Series" sections.
 class TypeCatalogPage extends StatefulWidget {
   final String type; // 'movie' | 'series'
-  final String title;
 
   const TypeCatalogPage({
     super.key,
     required this.type,
-    required this.title,
   });
 
   @override
@@ -264,9 +262,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final label = widget.type == 'series'
+        ? context.l10n.navSeries
+        : context.l10n.navMovies;
     if (_error != null) {
       return ErrorView(
-        title: 'Could not load ${widget.type == 'series' ? 'series' : 'movies'}',
+        title: context.l10n.catalogCouldNotLoadWhat(label),
         error: _error,
         onRetry: _load,
       );
@@ -277,7 +278,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     // those rows stop being the right shape and it becomes one grid.
     if (!_isFiltered) {
       return BrowseScaffold<Movie>(
-        contentLabel: widget.type == 'series' ? 'series' : 'movies',
+        contentLabel: label,
         header: _buildHeader(context),
         belowHero: ContinueWatchingSlider(typeFilter: widget.type),
         // Sizes the hero to the rest of the viewport, so Continue Watching

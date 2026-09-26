@@ -2549,7 +2549,9 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
                               ),
                             ),
                             title: Text(
-                              ep.title.isNotEmpty ? ep.title : 'Episode ${ep.episode}',
+                              ep.title.isNotEmpty
+                                  ? ep.title
+                                  : context.l10n.playerEpisodeN(ep.episode),
                               style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                             ),
                             trailing: Icon(Icons.play_circle_fill_rounded, color: AppColors.accent),

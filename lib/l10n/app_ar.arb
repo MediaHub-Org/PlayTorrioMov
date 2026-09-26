@@ -987,7 +987,6 @@
   "animeNoCategorySources": "لا توجد مصادر من {category}.",
   "animeEpsShort": "{count} حلقة",
   "detailsSeasonCount": "{count, plural, =1{موسم واحد} =2{موسمان} few{{count} مواسم} many{{count} موسمًا} other{{count} موسم}}",
-  "discoverAllOf": "الكل: {name}",
   "playerPlayNext": "تشغيل التالي",
   "playerThisSourceFailed": "فشل تشغيل هذا المصدر",
   "playerProviderName": "المزوّد: {name}",
@@ -1001,5 +1000,15 @@
   "magnetNonVideo": "ليس فيديو",
   "iptvCloudVaultTitle": "Cloud Vault (9k+)",
   "iptvPortalsBadge": "أكثر من 9,600 بوابة",
-  "iptvChannelsCount": "{count} قناة"
+  "iptvChannelsCount": "{count} قناة",
+
+  "homeViewDetails": "عرض التفاصيل",
+  "homeRemoveFromContinue": "إزالة من متابعة المشاهدة",
+  "magnetFilterFiles": "تصفية الملفات بالاسم...",
+  "playerTitleEpisode": "{title} - الحلقة {number}",
+
+  "catalogCouldNotLoadWhat": "تعذّر تحميل {what}",
+
+  "animeStreamsLoadFailed": "تعذّر تحميل البث: {error}",
+  "animeDetailsLoadFailed": "تعذّر تحميل تفاصيل الأنمي: {error}"
 }

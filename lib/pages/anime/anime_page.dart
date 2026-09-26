@@ -333,7 +333,7 @@ class _AnimePageState extends State<AnimePage> {
     if (_genreResults.isEmpty) {
       return Center(
         child: Text(
-          context.l10n.animeNoGenreResults(_genreFilter),
+          context.l10n.animeNoGenreResults(_genreFilter ?? ''),
           style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
         ),
       );
@@ -530,7 +530,7 @@ class _AnimePageState extends State<AnimePage> {
                 : _buildGenreGrid(),
           )
         : BrowseScaffold<AnimeMedia>(
-            contentLabel: 'anime',
+            contentLabel: context.l10n.navAnime,
             header: pillHeader,
             belowHero: ContinueWatchingSlider(
               typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',

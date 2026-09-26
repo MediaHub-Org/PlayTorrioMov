@@ -250,7 +250,7 @@ class _IptvPageState extends State<IptvPage> {
     ];
 
     final content = BrowseScaffold<HardcodedChannel>(
-      contentLabel: 'Live TV channels',
+      contentLabel: context.l10n.navLiveTv,
       // Spotlight off, or nothing featured, means no hero -- the scaffold
       // then falls back to a fixed header band, which is what this page did
       // unconditionally before.

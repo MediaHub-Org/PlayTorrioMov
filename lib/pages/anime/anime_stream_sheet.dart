@@ -128,11 +128,15 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     // Close the sheet, then push onto the ROOT navigator -- see the same
     // note in anime_arabic_stream_sheet: replacing the root's top route
     // tore down the hub underneath and made Back exit the app.
+    final playerTitle = context.l10n.playerTitleEpisode(
+      widget.anime.displayTitle,
+      widget.episodeNumber,
+    );
     Navigator.pop(context);
     pushFullscreenPage(
       PlayerScreen(
         source: source,
-        title: '${widget.anime.displayTitle} - Episode ${widget.episodeNumber}',
+        title: playerTitle,
         backdropUrl: widget.anime.backdropUrl,
         detail: detail,
         episode: video,

@@ -987,7 +987,6 @@
   "animeNoCategorySources": "No se encontraron fuentes de {category}.",
   "animeEpsShort": "{count} EPS",
   "detailsSeasonCount": "{count, plural, =1{1 temporada} other{{count} temporadas}}",
-  "discoverAllOf": "Todos: {name}",
   "playerPlayNext": "Reproducir siguiente",
   "playerThisSourceFailed": "Esta fuente no se pudo reproducir",
   "playerProviderName": "Proveedor: {name}",
@@ -1001,5 +1000,15 @@
   "magnetNonVideo": "No es vídeo",
   "iptvCloudVaultTitle": "Cloud Vault (9k+)",
   "iptvPortalsBadge": "9.600+ portales",
-  "iptvChannelsCount": "{count} canales"
+  "iptvChannelsCount": "{count} canales",
+
+  "homeViewDetails": "Ver detalles",
+  "homeRemoveFromContinue": "Quitar de Seguir viendo",
+  "magnetFilterFiles": "Filtrar archivos por nombre...",
+  "playerTitleEpisode": "{title} - Episodio {number}",
+
+  "catalogCouldNotLoadWhat": "No se pudo cargar {what}",
+
+  "animeStreamsLoadFailed": "No se pudieron cargar los streams: {error}",
+  "animeDetailsLoadFailed": "No se pudieron cargar los detalles del anime: {error}"
 }

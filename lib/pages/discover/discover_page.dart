@@ -1009,7 +1009,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               if (!isReq)
                                 PopupMenuItem<String?>(
                                   value: null,
-                                  child: Text(context.l10n.discoverAllOf(extra.name), style: TextStyle(color: AppColors.ink)),
+                                  child: Text(context.l10n.catalogAllOf(extra.name), style: TextStyle(color: AppColors.ink)),
                                 ),
                               ...extra.options.map(
                                 (opt) => PopupMenuItem<String?>(

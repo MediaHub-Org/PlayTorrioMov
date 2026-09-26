@@ -134,7 +134,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'Failed to load anime details: $e';
+          _error = context.l10n.animeDetailsLoadFailed('$e');
         });
       }
     }

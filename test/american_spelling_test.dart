@@ -22,6 +22,10 @@ import 'package:flutter_test/flutter_test.dart';
 /// out as well. Both spellings are current in American English, Flutter's own
 /// API uses the doubled ones, and a guard that fights the framework is a
 /// guard someone turns off.
+///
+/// The scan covers `lib/`, `test/` and `docs/` -- source and the living docs.
+/// `CHANGELOG.md` is outside it on purpose: a released entry is a record of
+/// what shipped and when, not a document that gets corrected afterwards.
 void main() {
   /// British spelling to the American one this codebase uses.
   const spellings = <String, String>{

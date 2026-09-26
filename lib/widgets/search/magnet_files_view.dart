@@ -559,7 +559,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
             style: TextStyle(color: AppColors.ink, fontSize: 13),
             onChanged: (val) => setState(() => _searchFilter = val),
             decoration: InputDecoration(
-              hintText: 'Filter files by name...',
+              hintText: context.l10n.magnetFilterFiles,
               hintStyle: TextStyle(color: AppColors.inkAlpha(0.3), fontSize: 13),
               prefixIcon: Icon(Icons.filter_list_rounded, size: 16, color: AppColors.inkAlpha(0.4)),
               border: InputBorder.none,
