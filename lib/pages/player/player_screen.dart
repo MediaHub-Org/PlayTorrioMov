@@ -1233,6 +1233,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     // the default `useLibass: false` sets -- an embedded track was invisible
     // both ways. That is why a file's own subtitles "did not load".
     _enableLibassForEmbedded();
+    _logSubtitleDiagnostics(embedded);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1261,6 +1262,54 @@ class _PlayerScreenState extends State<PlayerScreen>
       PlayerSettings.applySubtitleStyling(_player, forceLibass: true);
     } catch (e) {
       debugPrint('[PlayerScreen] could not enable libass for embedded subs: $e');
+    }
+  }
+
+  /// Logs what mpv actually reports about the subtitle state, after an
+  /// embedded track has been selected.
+  ///
+  /// This exists because three fixes have been made to this path by reading
+  /// the code, and none was confirmed against a file -- so the bug has
+  /// survived three plausible fixes. The five values below separate the three
+  /// possible causes in one run:
+  ///
+  ///  * `sid` is `no` or `auto` -- the selection never reached mpv, and the
+  ///    fault is in the selection call rather than in the styling.
+  ///  * `sid` is right but `sub-visibility` is `no` -- something turned it
+  ///    back off after it was set. Every appearance setter calls
+  ///    `applySubtitleStyling`, which honours the `useLibass` preference.
+  ///  * everything correct and still nothing on screen -- the video surface
+  ///    is covering it, or libass is drawing off-screen. A rendering fault,
+  ///    not a state one.
+  ///
+  /// `sub-text` being empty is *expected* for an ASS track: libass draws it
+  /// and mpv never emits it as text, which is the whole reason the Flutter
+  /// overlay cannot show an embedded track.
+  ///
+  /// Deliberately read-only. It changes no property and no state, so it can
+  /// be removed without touching anything else.
+  Future<void> _logSubtitleDiagnostics(PlayerEmbeddedSubtitle embedded) async {
+    try {
+      final dynamic platform = _player.platform;
+      if (platform == null) return;
+      Future<String> read(String property) async =>
+          (await platform.getProperty(property) as String?) ?? '<null>';
+
+      final sid = await read('sid');
+      final visibility = await read('sub-visibility');
+      final ass = await read('sub-ass');
+      final text = await read('sub-text');
+      final selected = await read('track-list/${embedded.index}/selected');
+
+      debugPrint(
+        '[SubDiag] selected embedded #${embedded.index} '
+        '(${embedded.language ?? embedded.title}) | '
+        'sid=$sid sub-visibility=$visibility sub-ass=$ass '
+        'track-list/${embedded.index}/selected=$selected '
+        'sub-text=${text.isEmpty ? '<empty>' : '"$text"'}',
+      );
+    } catch (e) {
+      debugPrint('[SubDiag] could not read subtitle state: $e');
     }
   }
 
