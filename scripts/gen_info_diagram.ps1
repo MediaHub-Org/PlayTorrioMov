@@ -19,6 +19,14 @@ function New-Index { $script:idx++; return "a$($script:idx.ToString('D4'))" }
 
 $elements = [System.Collections.Generic.List[object]]::new()
 
+# Every box's geometry, by id. Arrows are placed from this rather than from
+# hard-coded coordinates: a box that changes height moves its own edges, and
+# an arrow written against the old height ends up floating in the gap. That
+# is exactly what happened when the Excalidraw plugin shrank every box to fit
+# its text -- eleven of the twenty-eight arrows came away from the boxes they
+# were meant to join, and nothing in the file said so.
+$script:geom = @{}
+
 # ── Palette ────────────────────────────────────────────────────────────────
 $C = @{
   entry   = '#a5d8ff'   # blue    -- entry / shell
@@ -63,6 +71,8 @@ function Add-Box {
     baseline = [int]($FontSize * 0.9)
     autoResize = $true
   })
+  $script:geom[$Id] = @{ x = $X; y = $Y; w = $W; h = $H }
+  return $Id
 }
 
 function Add-Arrow {
@@ -129,6 +139,32 @@ function Add-Title {
   })
 }
 
+# An arrow from one box to another, placed from the boxes' own geometry.
+#
+# $FromEdge and $ToEdge name the side the arrow leaves and arrives on, so the
+# endpoints follow a box that changes size. $FromOffset and $ToOffset slide
+# the endpoint along that side, which is how five arrows leave one box
+# without all landing on the same pixel.
+function Add-ArrowBetween {
+  param(
+    [string]$From, [string]$To,
+    [string]$FromEdge = 'bottom', [string]$ToEdge = 'top',
+    [double]$FromOffset = 0.5, [double]$ToOffset = 0.5,
+    [bool]$Dashed = $false
+  )
+  $a = $script:geom[$From]
+  $b = $script:geom[$To]
+  if (-not $a) { throw "Add-ArrowBetween: no box '$From'" }
+  if (-not $b) { throw "Add-ArrowBetween: no box '$To'" }
+
+  $x1 = if ($FromEdge -eq 'left') { $a.x } elseif ($FromEdge -eq 'right') { $a.x + $a.w } else { $a.x + $a.w * $FromOffset }
+  $y1 = if ($FromEdge -eq 'top') { $a.y } elseif ($FromEdge -eq 'bottom') { $a.y + $a.h } else { $a.y + $a.h * $FromOffset }
+  $x2 = if ($ToEdge -eq 'left') { $b.x } elseif ($ToEdge -eq 'right') { $b.x + $b.w } else { $b.x + $b.w * $ToOffset }
+  $y2 = if ($ToEdge -eq 'top') { $b.y } elseif ($ToEdge -eq 'bottom') { $b.y + $b.h } else { $b.y + $b.h * $ToOffset }
+
+  Add-Arrow -X1 $x1 -Y1 $y1 -X2 $x2 -Y2 $y2 -Dashed $Dashed
+}
+
 function Add-BandLabel {
   param([double]$X, [double]$Y, [string]$Text)
   $elements.Add([ordered]@{
@@ -176,110 +212,110 @@ Add-Title -X 60 -Y 40 -Text 'PlayTorrioMov — how it works' -Size 30
 # diagram that is not self-explanatory, so they are named once here rather
 # than guessed at from the boxes.
 Add-Box -Id (New-Id) -X 60 -Y 95 -W 200 -H 27 -Fill $C.entry -FontSize 13 `
-  -Text 'entry / shell'
+  -Text 'entry / shell' | Out-Null
 Add-Box -Id (New-Id) -X 280 -Y 95 -W 200 -H 27 -Fill $C.source -FontSize 13 `
-  -Text 'where content comes from'
+  -Text 'where content comes from' | Out-Null
 Add-Box -Id (New-Id) -X 500 -Y 95 -W 200 -H 27 -Fill $C.play -FontSize 13 `
-  -Text 'browsing and playback'
+  -Text 'browsing and playback' | Out-Null
 Add-Box -Id (New-Id) -X 720 -Y 95 -W 200 -H 27 -Fill $C.support -FontSize 13 `
-  -Text 'services playback pulls in'
+  -Text 'services playback pulls in' | Out-Null
 Add-Box -Id (New-Id) -X 940 -Y 95 -W 200 -H 32 -Fill $C.store -FontSize 13 `
-  -Text 'persistence'
+  -Text 'persistence' | Out-Null
 
 # Band 1: entry
 Add-BandLabel -X 60 -Y 154 -Text 'STARTUP'
-Add-Box -Id (New-Id) -X 460 -Y 180 -W 420 -H 70 -Fill $C.entry `
+$main = Add-Box -Id (New-Id) -X 460 -Y 180 -W 420 -H 70 -Fill $C.entry `
   -Text "main.dart`nWidgetsFlutterBinding · MediaKit`n~20 services initialised in parallel"
-Add-Box -Id (New-Id) -X 460 -Y 310 -W 420 -H 70 -Fill $C.entry `
+$hub = Add-Box -Id (New-Id) -X 460 -Y 310 -W 420 -H 70 -Fill $C.entry `
   -Text "HubPage`nAdaptiveNavShell + MediaHub`none nested Navigator"
-Add-Arrow -X1 670 -Y1 270 -X2 670 -Y2 310
+Add-ArrowBetween -From $main -To $hub
 
 # Band 2: the hub's sections
 Add-BandLabel -X 60 -Y 414 -Text 'SECTIONS'
-Add-Box -Id (New-Id) -X 60 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Movies'
-Add-Box -Id (New-Id) -X 300 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Series'
-Add-Box -Id (New-Id) -X 540 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Anime'
-Add-Box -Id (New-Id) -X 780 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Live TV'
-Add-Box -Id (New-Id) -X 1020 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Library'
+$movies = Add-Box -Id (New-Id) -X 60 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Movies'
+$series = Add-Box -Id (New-Id) -X 300 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Series'
+$anime = Add-Box -Id (New-Id) -X 540 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Anime'
+$live = Add-Box -Id (New-Id) -X 780 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Live TV'
+$library = Add-Box -Id (New-Id) -X 1020 -Y 440 -W 210 -H 30 -Fill $C.entry -Text 'Library'
 
-Add-Arrow -X1 670 -Y1 390 -X2 165 -Y2 440
-Add-Arrow -X1 670 -Y1 390 -X2 405 -Y2 440
-Add-Arrow -X1 670 -Y1 390 -X2 645 -Y2 440
-Add-Arrow -X1 670 -Y1 390 -X2 885 -Y2 440
-Add-Arrow -X1 670 -Y1 390 -X2 1125 -Y2 440
+Add-ArrowBetween -From $hub -To $movies
+Add-ArrowBetween -From $hub -To $series
+Add-ArrowBetween -From $hub -To $anime
+Add-ArrowBetween -From $hub -To $live
+Add-ArrowBetween -From $hub -To $library
 
 # Band 3: where content comes from
 Add-BandLabel -X 60 -Y 548 -Text 'CONTENT SOURCES'
-Add-Box -Id (New-Id) -X 60 -Y 580 -W 300 -H 63 -Fill $C.source -FontSize 14 `
+$addons = Add-Box -Id (New-Id) -X 60 -Y 580 -W 300 -H 63 -Fill $C.source -FontSize 14 `
   -Text "Addons`nStremio-compatible`ncatalog + stream add-ons"
-Add-Box -Id (New-Id) -X 380 -Y 580 -W 300 -H 63 -Fill $C.source -FontSize 14 `
+$scrapers = Add-Box -Id (New-Id) -X 380 -Y 580 -W 300 -H 63 -Fill $C.source -FontSize 14 `
   -Text "Built-in scrapers`n~50 sites`nScraperManager -> StreamService"
-Add-Box -Id (New-Id) -X 700 -Y 580 -W 300 -H 63 -Fill $C.source -FontSize 14 `
+$iptv = Add-Box -Id (New-Id) -X 700 -Y 580 -W 300 -H 63 -Fill $C.source -FontSize 14 `
   -Text "Live TV`nXtream portals`n+ M3U playlists"
-Add-Box -Id (New-Id) -X 1020 -Y 580 -W 300 -H 45 -Fill $C.source -FontSize 14 `
+$animeSrc = Add-Box -Id (New-Id) -X 1020 -Y 580 -W 300 -H 45 -Fill $C.source -FontSize 14 `
   -Text "Anime`nAniList · Anime Arabic"
 
-Add-Arrow -X1 165 -Y1 500 -X2 210 -Y2 580
-Add-Arrow -X1 405 -Y1 500 -X2 530 -Y2 580
-Add-Arrow -X1 645 -Y1 500 -X2 530 -Y2 580
-Add-Arrow -X1 885 -Y1 500 -X2 850 -Y2 580
-Add-Arrow -X1 1125 -Y1 500 -X2 1170 -Y2 580
+Add-ArrowBetween -From $movies -To $addons
+Add-ArrowBetween -From $series -To $scrapers
+Add-ArrowBetween -From $anime -To $scrapers
+Add-ArrowBetween -From $live -To $iptv
+Add-ArrowBetween -From $library -To $animeSrc
 
 # Band 4: the source list
 Add-BandLabel -X 60 -Y 718 -Text 'BROWSING'
-Add-Box -Id (New-Id) -X 460 -Y 750 -W 420 -H 70 -Fill $C.play `
+$watch = Add-Box -Id (New-Id) -X 460 -Y 750 -W 420 -H 70 -Fill $C.play `
   -Text "WatchScreen`nsource list · filter pills`nsort · multi-select"
-Add-Arrow -X1 210 -Y1 680 -X2 560 -Y2 750
-Add-Arrow -X1 530 -Y1 680 -X2 640 -Y2 750
-Add-Arrow -X1 850 -Y1 680 -X2 700 -Y2 750
-Add-Arrow -X1 1170 -Y1 680 -X2 780 -Y2 750
+Add-ArrowBetween -From $addons -To $watch
+Add-ArrowBetween -From $scrapers -To $watch
+Add-ArrowBetween -From $iptv -To $watch
+Add-ArrowBetween -From $animeSrc -To $watch
 
 # Band 5: playback
 Add-BandLabel -X 60 -Y 888 -Text 'PLAYBACK'
-Add-Box -Id (New-Id) -X 460 -Y 920 -W 420 -H 70 -Fill $C.play `
+$player = Add-Box -Id (New-Id) -X 460 -Y 920 -W 420 -H 70 -Fill $C.play `
   -Text "PlayerScreen`nmedia_kit / libmpv · transport`nkeyboard shortcuts"
-Add-Arrow -X1 670 -Y1 850 -X2 670 -Y2 920
+Add-ArrowBetween -From $watch -To $player
 
 # Band 6: the player's own menus
 Add-BandLabel -X 60 -Y 1058 -Text 'PLAYER MENUS'
-Add-Box -Id (New-Id) -X 60 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
+$menuAudio = Add-Box -Id (New-Id) -X 60 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
   -Text "Audio & Subtitles`ntrack pickers · sync · style"
-Add-Box -Id (New-Id) -X 380 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
+$menuSpeed = Add-Box -Id (New-Id) -X 380 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
   -Text "Speed & Aspect`nplayback rate · crop / scale"
-Add-Box -Id (New-Id) -X 700 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
+$menuSources = Add-Box -Id (New-Id) -X 700 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
   -Text "Sources & Episodes`nswitch source · next episode"
-Add-Box -Id (New-Id) -X 1020 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
+$menuSleep = Add-Box -Id (New-Id) -X 1020 -Y 1090 -W 300 -H 45 -Fill $C.play -FontSize 14 `
   -Text "Sleep timer & Cast`n10-60 min · end of video · DLNA"
 
-Add-Arrow -X1 670 -Y1 1020 -X2 210 -Y2 1090
-Add-Arrow -X1 670 -Y1 1020 -X2 530 -Y2 1090
-Add-Arrow -X1 670 -Y1 1020 -X2 850 -Y2 1090
-Add-Arrow -X1 670 -Y1 1020 -X2 1170 -Y2 1090
+Add-ArrowBetween -From $player -To $menuAudio
+Add-ArrowBetween -From $player -To $menuSpeed
+Add-ArrowBetween -From $player -To $menuSources
+Add-ArrowBetween -From $player -To $menuSleep
 
 # Band 7: what playback pulls in
 Add-BandLabel -X 60 -Y 1228 -Text 'SERVICES'
-Add-Box -Id (New-Id) -X 60 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
+$p2p = Add-Box -Id (New-Id) -X 60 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
   -Text "P2P`nTorrServer + libtorrent`nmagnet -> HTTP stream"
-Add-Box -Id (New-Id) -X 380 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
+$subs = Add-Box -Id (New-Id) -X 380 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
   -Text "Subtitles`nembedded (libass)`n+ online providers"
-Add-Box -Id (New-Id) -X 700 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
+$meta = Add-Box -Id (New-Id) -X 700 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
   -Text "Metadata`nTMDB · Simkl · Trakt`nAniList (anime)"
-Add-Box -Id (New-Id) -X 1020 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
+$debrid = Add-Box -Id (New-Id) -X 1020 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
   -Text "Debrid & Downloads`nReal-Debrid and friends`noffline files"
 
-Add-Arrow -X1 210 -Y1 1180 -X2 210 -Y2 1260
-Add-Arrow -X1 530 -Y1 1180 -X2 530 -Y2 1260
-Add-Arrow -X1 850 -Y1 1180 -X2 850 -Y2 1260
-Add-Arrow -X1 1170 -Y1 1180 -X2 1170 -Y2 1260
+Add-ArrowBetween -From $menuAudio -To $p2p
+Add-ArrowBetween -From $menuSpeed -To $subs
+Add-ArrowBetween -From $menuSources -To $meta
+Add-ArrowBetween -From $menuSleep -To $debrid
 
 # Band 8: persistence, fed by everything above it
 Add-BandLabel -X 60 -Y 1398 -Text 'PERSISTENCE'
-Add-Box -Id (New-Id) -X 460 -Y 1430 -W 420 -H 70 -Fill $C.store `
+$storage = Add-Box -Id (New-Id) -X 460 -Y 1430 -W 420 -H 70 -Fill $C.store `
   -Text "Storage`nSharedPreferences + sqflite`nsettings · library · history"
-Add-Arrow -X1 210 -Y1 1360 -X2 560 -Y2 1430 -Dashed $true
-Add-Arrow -X1 530 -Y1 1360 -X2 640 -Y2 1430 -Dashed $true
-Add-Arrow -X1 850 -Y1 1360 -X2 700 -Y2 1430 -Dashed $true
-Add-Arrow -X1 1170 -Y1 1360 -X2 780 -Y2 1430 -Dashed $true
+Add-ArrowBetween -From $p2p -To $storage -Dashed $true
+Add-ArrowBetween -From $subs -To $storage -Dashed $true
+Add-ArrowBetween -From $meta -To $storage -Dashed $true
+Add-ArrowBetween -From $debrid -To $storage -Dashed $true
 
 # ── Write ──────────────────────────────────────────────────────────────────
 $doc = [ordered]@{

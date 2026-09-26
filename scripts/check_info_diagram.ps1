@@ -66,6 +66,13 @@ for ($i = 0; $i -lt $boxes.Count; $i++) {
 }
 
 # An arrow's own x/y is its start; the end is start + the last point.
+#
+# Both ends are checked against the boxes, not just the end. An arrow that
+# starts in mid-air is the failure mode this diagram actually had: the boxes
+# were shrunk to fit their text and eleven arrows were left floating in the
+# gap, because their coordinates had been written against the old heights.
+# Nothing in the file said so -- it just looked wrong.
+$tolerance = 2
 foreach ($arrow in $arrows) {
   $endX = $arrow.x + $arrow.points[-1][0]
   $endY = $arrow.y + $arrow.points[-1][1]
@@ -74,6 +81,22 @@ foreach ($arrow in $arrows) {
     $insideY = $endY -gt $box.y -and $endY -lt ($box.y + $box.height)
     if ($insideX -and $insideY) {
       "ARROW ENDS INSIDE A BOX  $($arrow.id) -> $($box.id) at [$endX,$endY]"
+      $problems++
+    }
+  }
+
+  foreach ($end in @(
+    @{ name = 'start'; x = $arrow.x; y = $arrow.y },
+    @{ name = 'end'; x = $endX; y = $endY }
+  )) {
+    $touches = $false
+    foreach ($box in $boxes) {
+      $nearX = $end.x -ge ($box.x - $tolerance) -and $end.x -le ($box.x + $box.width + $tolerance)
+      $nearY = $end.y -ge ($box.y - $tolerance) -and $end.y -le ($box.y + $box.height + $tolerance)
+      if ($nearX -and $nearY) { $touches = $true; break }
+    }
+    if (-not $touches) {
+      "ARROW $($end.name.ToUpper()) IS DETACHED  $($arrow.id) at [$($end.x),$($end.y)]"
       $problems++
     }
   }
