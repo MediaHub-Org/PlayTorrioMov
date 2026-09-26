@@ -1104,7 +1104,7 @@ class _DetailsPageState extends State<DetailsPage>
       if (seasonCount > 0) {
         items.add(
           Text(
-            '$seasonCount Season${seasonCount > 1 ? "s" : ""}',
+            context.l10n.detailsSeasonCount(seasonCount),
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         );
@@ -1523,11 +1523,19 @@ class _DetailsPageState extends State<DetailsPage>
             child: _buildPersonAvatar(credit.profileUrl, name: credit.name),
           ),
           const SizedBox(height: 6),
+          // The rail is a fixed SizedBox(height: 148) and the column is
+          // avatar + 6 + name + 2 + role(12, already capped at 1.0). At 3x
+          // this 12px name alone wants ~43px and the column asks ~151 of a
+          // 148 box. Capped like its sibling rather than the whole rail,
+          // because the avatar above it should keep its size (#69).
           Text(
             credit.name,
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            textScaler: MediaQuery.textScalerOf(
+              context,
+            ).clamp(maxScaleFactor: 1.3),
             style: TextStyle(
               color: AppColors.ink,
               fontSize: 12,
@@ -1565,7 +1573,7 @@ class _DetailsPageState extends State<DetailsPage>
   Widget _buildSeasonSelector(MovieDetail meta) {
     final seasons = meta.videos
         .map((v) => v.season)
-        .where((s) => s != null)
+        .whereType<int>()
         .toSet()
         .toList();
     seasons.sort();
@@ -1615,7 +1623,7 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Text(
-                      'Season $season',
+                      context.l10n.playerSeasonN(season),
                       style: TextStyle(
                         color: isSelected ? Colors.black : AppColors.ink,
                         fontSize: 15,
@@ -2094,11 +2102,20 @@ class _DetailsPageState extends State<DetailsPage>
                                 ],
                               ),
                               const SizedBox(height: 8),
+                              // cardHeight is `cardWidth * 1.5 + 64` and the
+                              // poster takes the 1.5, so these two lines get
+                              // a flat 64px. They want ~39 at 1.0 and ~96 at
+                              // 3x, which is 32px past the card. Capped, the
+                              // same way the Continue Watching card's title
+                              // block is, for the same reason (#69).
                               // Title
                               Text(
                                 item.title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                textScaler: MediaQuery.textScalerOf(
+                                  context,
+                                ).clamp(maxScaleFactor: 1.3),
                                 style: TextStyle(
                                   color: AppColors.ink,
                                   fontSize: 13,
@@ -2106,7 +2123,8 @@ class _DetailsPageState extends State<DetailsPage>
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              // Year + genre
+                              // Year + genre -- the second of the two lines
+                              // sharing that 64px, capped with the first.
                               Text(
                                 [
                                   if (item.year != null) '${item.year}',
@@ -2115,6 +2133,9 @@ class _DetailsPageState extends State<DetailsPage>
                                 ].join(' · '),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
+                                textScaler: MediaQuery.textScalerOf(
+                                  context,
+                                ).clamp(maxScaleFactor: 1.3),
                                 style: TextStyle(
                                   color: AppColors.inkDisabled,
                                   fontSize: 12,

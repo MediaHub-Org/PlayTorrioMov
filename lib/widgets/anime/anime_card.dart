@@ -2,6 +2,7 @@ import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
@@ -283,7 +284,7 @@ class _AnimePosterFrame extends StatelessWidget {
                     borderRadius: BorderRadius.circular(7),
                   ),
                   child: Text(
-                    '${anime.totalEpisodes} EPS',
+                    context.l10n.animeEpsShort(anime.totalEpisodes),
                     style: TextStyle(
                       fontSize: 9.5,
                       fontWeight: FontWeight.bold,

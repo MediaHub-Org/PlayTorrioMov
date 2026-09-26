@@ -27,7 +27,7 @@ SERVICES     P2P · subtitles · metadata · debrid/downloads
 PERSISTENCE  SharedPreferences + sqflite
 ```
 
-The colours are the only thing in the diagram that is not self-explanatory,
+The colors are the only thing in the diagram that is not self-explanatory,
 so it carries a legend: blue is entry and shell, green is where content comes
 from, orange is browsing and playback, purple is a service playback pulls in,
 yellow is persistence.
@@ -77,7 +77,7 @@ which fans a title out to all of them and merges the results into
 allowed to hold the list.
 
 **Live TV** is Xtream portals and M3U playlists, with its own controller,
-favourites and custom channels. It is the area this fork has diverged
+favorites and custom channels. It is the area this fork has diverged
 furthest in.
 
 **Anime** is AniList for metadata and its own scraper path, plus a separate

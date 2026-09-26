@@ -559,7 +559,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
             style: TextStyle(color: AppColors.ink, fontSize: 13),
             onChanged: (val) => setState(() => _searchFilter = val),
             decoration: InputDecoration(
-              hintText: 'Filter files by name...',
+              hintText: context.l10n.magnetFilterFiles,
               hintStyle: TextStyle(color: AppColors.inkAlpha(0.3), fontSize: 13),
               prefixIcon: Icon(Icons.filter_list_rounded, size: 16, color: AppColors.inkAlpha(0.4)),
               border: InputBorder.none,
@@ -721,14 +721,17 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                 elevation: 0,
               ),
               icon: const Icon(Icons.play_arrow_rounded, size: 18),
-              label: const Text(
-                'Play',
-                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold),
+              label: Text(
+                context.l10n.playerPlay,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             )
           else
             Text(
-              'Non-video',
+              context.l10n.magnetNonVideo,
               style: TextStyle(
                 fontSize: 11,
                 color: AppColors.inkAlpha(0.25),

@@ -429,10 +429,10 @@ class _WatchScreenState extends State<WatchScreen>
       child: FadeTransition(
         opacity: _fadeAnim,
         child: Padding(
-          padding: const EdgeInsets.only(
+          padding: const EdgeInsetsDirectional.only(
             top: 60,
-            left: 48,
-            right: 0,
+            start: 48,
+            end: 0,
             bottom: 24,
           ),
           child: Row(
@@ -452,7 +452,7 @@ class _WatchScreenState extends State<WatchScreen>
               Expanded(
                 flex: 4,
                 child: Padding(
-                  padding: const EdgeInsets.only(right: 24),
+                  padding: const EdgeInsetsDirectional.only(end: 24),
                   child: _buildSourcesPanel(isDesktop: true),
                 ),
               ),
@@ -982,7 +982,7 @@ class _WatchScreenState extends State<WatchScreen>
 
         return Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: link == links.last ? 0 : _S.sm),
+            padding: EdgeInsetsDirectional.only(end: link == links.last ? 0 : _S.sm),
             child: _buildActionButton(
               icon,
               link.name,
@@ -1644,6 +1644,7 @@ class _WatchScreenState extends State<WatchScreen>
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: IconButton(
+        tooltip: context.l10n.commonBack,
         icon: const Icon(
           Icons.arrow_back_ios_new_rounded,
           size: 18,
@@ -1993,14 +1994,18 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Row(
+        content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
-            SizedBox(width: 8),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Color(0xFF10B981),
+              size: 18,
+            ),
+            const SizedBox(width: 8),
             Text(
-              'Magnet link copied to clipboard',
-              style: TextStyle(
+              context.l10n.playerMagnetCopied,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -2241,9 +2246,9 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'No sources found',
-            style: TextStyle(
+          Text(
+            context.l10n.watchNoSourcesFound,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w500,
@@ -2252,10 +2257,10 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
           const SizedBox(height: 12),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 280),
-            child: const Text(
-              'No streams found. Install more addons from Settings or try another title.',
+            child: Text(
+              context.l10n.watchNoSourcesBody,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Color(0xFF9B9BA5),
                 fontSize: 14,
                 height: 1.5,
@@ -2297,18 +2302,18 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 child: AnimatedScale(
                   scale: _isHovering ? 1.05 : 1.0,
                   duration: const Duration(milliseconds: 200),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.extension_rounded,
                         color: Colors.white,
                         size: 18,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
-                        'Install Addons',
-                        style: TextStyle(
+                        context.l10n.watchInstallAddons,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -2555,7 +2560,7 @@ class _FilterPillRailState extends State<FilterPillRail> {
     );
   }
 
-  /// One end's indicator: a gradient into the panel colour, plus a tappable
+  /// One end's indicator: a gradient into the panel color, plus a tappable
   /// chevron button on desktop platforms. Tapping nudges the row, so a tap
   /// or a drag both work. [enabled] is false at an end with nothing further
   /// to scroll; the button stays in place, dimmed and inert.

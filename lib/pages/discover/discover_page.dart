@@ -808,6 +808,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               ),
                               border: InputBorder.none,
                               suffixIcon: IconButton(
+                                tooltip: context.l10n.commonClose,
                                 icon: Icon(Icons.close_rounded, size: 18, color: AppColors.inkMuted),
                                 onPressed: _clearSearch,
                               ),
@@ -903,7 +904,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             final hasReq = entry.catalog.hasRequiredExtra;
 
                             return Padding(
-                              padding: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsetsDirectional.only(end: 8),
                               child: GestureDetector(
                                 onTap: () => _onCatalogChanged(entry),
                                 child: AnimatedContainer(
@@ -994,7 +995,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       // Dropdown for extras with predefined options
                       if (extra.options.isNotEmpty) {
                         return Padding(
-                          padding: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsetsDirectional.only(end: 8),
                           child: PopupMenuButton<String?>(
                             tooltip: extra.name,
                             constraints: const BoxConstraints(maxHeight: 360),
@@ -1008,7 +1009,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               if (!isReq)
                                 PopupMenuItem<String?>(
                                   value: null,
-                                  child: Text('All ${extra.name}', style: TextStyle(color: AppColors.ink)),
+                                  child: Text(context.l10n.catalogAllOf(extra.name), style: TextStyle(color: AppColors.ink)),
                                 ),
                               ...extra.options.map(
                                 (opt) => PopupMenuItem<String?>(
@@ -1069,7 +1070,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
                       // Text input chip for freeform extras (or search if isRequired)
                       return Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsetsDirectional.only(end: 8),
                         child: GestureDetector(
                           onTap: () => _showCustomExtraDialog(extra.name),
                           child: Container(
@@ -1164,10 +1165,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
                 child: Container(
                   height: kToolbarHeight + topPadding,
-                  padding: EdgeInsets.only(
+                  padding: EdgeInsetsDirectional.only(
                     top: topPadding,
-                    left: AppSpacing.pageInset(context),
-                    right: AppSpacing.pageInset(context),
+                    start: AppSpacing.pageInset(context),
+                    end: AppSpacing.pageInset(context),
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.canvas.withValues(alpha: 0.6),

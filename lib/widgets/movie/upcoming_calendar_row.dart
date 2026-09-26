@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../models/movie/movie.dart';
 import '../../models/trakt/trakt_calendar_entry.dart';
 import '../../pages/details/details_page.dart';
@@ -95,7 +96,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18),
             child: Text(
-              'Calendar',
+              context.l10n.homeCalendar,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,

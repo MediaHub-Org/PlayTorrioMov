@@ -963,5 +963,52 @@
   "subPresetNightModeSoft": "Modo noturno quente",
   "subPresetNightModeSoftBody": "Texto creme suave com fundo translúcido em 40%",
   "subPresetCustom": "Personalizado",
-  "subPresetCustomBody": "Estilos de legenda personalizados pelo usuário"
+  "subPresetCustomBody": "Estilos de legenda personalizados pelo usuário",
+
+  "commonClose": "Fechar",
+  "commonBack": "Voltar",
+
+  "commonLike": "Favoritar",
+  "commonLiked": "Favoritado",
+  "commonAddToLiked": "Adicionar aos favoritos",
+  "commonRemoveFromLiked": "Remover dos favoritos",
+  "libraryAddToWatchlist": "Adicionar a Assistir depois",
+  "libraryRemoveFromWatchlist": "Remover de Assistir depois",
+  "libraryMarkWatched": "Marcar como assistido",
+  "libraryMarkUnwatched": "Marcar como não assistido",
+  "detailsGoToEpisode": "Ir para o episódio",
+  "iptvAddFavorite": "Adicionar aos favoritos",
+  "iptvRemoveFavorite": "Remover dos favoritos",
+  "iptvDeletePortal": "Excluir este portal",
+  "iptvDeletePlaylist": "Excluir esta playlist",
+
+  "animeNoGenreResults": "Nenhum anime de {genre} encontrado.",
+  "animeSourcesFound": "{count} fontes encontradas",
+  "animeNoCategorySources": "Nenhuma fonte de {category} encontrada.",
+  "animeEpsShort": "{count} EPS",
+  "detailsSeasonCount": "{count, plural, =1{1 temporada} other{{count} temporadas}}",
+  "playerPlayNext": "Reproduzir próximo",
+  "playerThisSourceFailed": "Esta fonte não reproduziu",
+  "playerProviderName": "Provedor: {name}",
+  "playerScrapingFrom": "Buscando fontes ({name})...",
+  "watchNoSourcesFound": "Nenhuma fonte encontrada",
+  "watchNoSourcesBody": "Nenhum stream encontrado. Instale mais addons em Configurações ou tente outro título.",
+  "watchInstallAddons": "Instalar addons",
+  "libraryNoCollectionsYet": "Nenhuma coleção ainda. Crie uma acima e este título vai direto para ela.",
+  "homeCalendar": "Calendário",
+  "syncNowBadge": "AGORA",
+  "magnetNonVideo": "Não é vídeo",
+  "iptvCloudVaultTitle": "Cloud Vault (9k+)",
+  "iptvPortalsBadge": "9.600+ portais",
+  "iptvChannelsCount": "{count} canais",
+
+  "homeViewDetails": "Ver detalhes",
+  "homeRemoveFromContinue": "Remover de Continuar assistindo",
+  "magnetFilterFiles": "Filtrar arquivos por nome...",
+  "playerTitleEpisode": "{title} - Episódio {number}",
+
+  "catalogCouldNotLoadWhat": "Não foi possível carregar {what}",
+
+  "animeStreamsLoadFailed": "Não foi possível carregar os streams: {error}",
+  "animeDetailsLoadFailed": "Não foi possível carregar os detalhes do anime: {error}"
 }

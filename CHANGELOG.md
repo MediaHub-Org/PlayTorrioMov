@@ -132,10 +132,10 @@ rather than files, and the sleep timer can wait for the video to end.
   on the next episode. Auto-select is only defensible with a remembered
   preference, and there is not one yet. The list is still there, still leads
   with the language being heard, and the viewer picks.
-- **Changing the subtitle font, size, colour or position no longer turns an
+- **Changing the subtitle font, size, color or position no longer turns an
   embedded track off.** `applySubtitleStyling` took a `forceLibass` flag, and
   every appearance setter called it without the flag -- so the styling call
-  honoured the `useLibass` preference, which is off by default, and set
+  honored the `useLibass` preference, which is off by default, and set
   `sub-visibility=no`. The flag is gone; whether libass is used is now one
   piece of state, set in one place and read in one place, so no call site can
   forget it.
@@ -147,6 +147,50 @@ rather than files, and the sleep timer can wait for the video to end.
   rather than a guessed one.
 
 ### Fixed
+- **The Cast sheet scrolls, and its title no longer pushes the close button off
+  the edge.** Two separate faults in the same sheet. The title, the `Spacer`
+  and the close button sat in one flat row with no flex on the title, so the
+  title took its natural width -- 321px past the edge at a large text size.
+  And the sheet had no scrollable at all, so any content taller than the modal
+  allows painted past the bottom. That second one is not only an accessibility
+  problem: a viewer with several Cast devices on the network hits it at
+  ordinary text size, which nobody had seen because the sheet has never been
+  opened with devices actually listed in it (#28 is still unconfirmed against
+  a receiver). #69
+- **Arabic lays out on the correct side.** `Row` and the Material widgets
+  mirror themselves for a right-to-left locale; `EdgeInsets.only(left:)` does
+  not -- it is still the left edge in Arabic. 37 paddings across 21 files were
+  physical, and two of them applied a whole *page* inset that way, so Live
+  TV's search page and the watch-history page hugged the wrong edge entirely.
+  Two more were the Arabic anime pages themselves. English rendering is
+  unchanged. #68
+- **Text no longer runs outside its box at large accessibility sizes** in the
+  cast and Similar rails on a details page, and in the four search fields of
+  Live TV's portal browser. Each is a box whose height is fixed by the layout
+  around it rather than by its own text. #69
+- **Forty-two more strings are translated into Spanish, Arabic and
+  Portuguese.** Live TV's portal browser carried its own English copies of
+  four settings rows the settings page already translates; the empty-sources
+  screen, the "source failed to play" screen, the Play Next prompt, the
+  Calendar row's heading, the collections picker's empty state, the anime
+  genre and source-count lines, the sources panel's provider and scraping
+  lines, and the sync overlay's NOW badge were all English. A third needed no
+  new key -- they duplicated one that already existed. #68
+- **"1 Season" and "3 Seasons" read correctly**, and will in every language.
+  It was `Season${count > 1 ? "s" : ""}`, which is the construction that
+  cannot survive translation; it is a plural in the message file now. #68
+
+### Accessibility
+- **Icon-only Close and Back buttons announce themselves.** 34 buttons had no
+  tooltip and so no label for a screen reader, and no hover hint for a
+  pointer. Both labels are translated. #68 #69
+- **Every remaining icon-only button announces itself too.** The seven that
+  were left -- the catalog search, the two favorite stars, the two deletes in
+  the portals modal, the custom-decoder button and the jump-to-episode arrow
+  -- have labels, and the watchlist, watched and collection buttons on a
+  details page now report their *state* as well as their name, which a
+  tooltip alone does not do. A screen reader could not previously say whether
+  Watched was on. #69
 - **The online subtitle list no longer marks every row as selected.** The
   comparison was `selectedVariant?.downloadUrl == variant.downloadUrl`, and
   when both sides were empty every row matched -- so the whole list drew with

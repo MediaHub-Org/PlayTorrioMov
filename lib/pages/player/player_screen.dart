@@ -789,9 +789,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                     _autoNextDialogVisible = false;
                     _playNextEpisode();
                   },
-                  child: const Text(
-                    'Play Next',
-                    style: TextStyle(
+                  child: Text(
+                    context.l10n.playerPlayNext,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -1753,10 +1753,10 @@ class _PlayerScreenState extends State<PlayerScreen>
               size: 44,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'This source failed to play',
+            Text(
+              context.l10n.playerThisSourceFailed,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

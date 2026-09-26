@@ -321,7 +321,10 @@ class P2pWarningDialog extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             foregroundColor: AppColors.inkAlpha(0.60),
           ),
-          child: const Text('Exit', style: TextStyle(fontWeight: FontWeight.w600)),
+          child: Text(
+            context.l10n.p2pExit,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
         const Spacer(),
 
@@ -440,7 +443,10 @@ class P2pWarningDialog extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 foregroundColor: AppColors.inkAlpha(0.60),
               ),
-              child: const Text('Exit', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                context.l10n.p2pExit,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
           ],
         ),

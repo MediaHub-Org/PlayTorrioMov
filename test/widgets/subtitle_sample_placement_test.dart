@@ -1,7 +1,7 @@
 // test/widgets/subtitle_sample_placement_test.dart
 //
 // Opening Subtitle Appearance must not move the panel, and the sample it shows
-// must sit where real subtitles will -- the exact centre of the picture for
+// must sit where real subtitles will -- the exact center of the picture for
 // "center" -- even when the panel, over on the right, covers part of it.
 import 'dart:io';
 
@@ -114,7 +114,7 @@ void main() {
   };
 
   for (final entry in sizes.entries) {
-    testWidgets('${entry.key}: the panel stays put and the sample is centred',
+    testWidgets('${entry.key}: the panel stays put and the sample is centered',
         (tester) async {
       final r = await openAppearance(tester, entry.value);
 
@@ -122,7 +122,7 @@ void main() {
       expect(
         r.text.center.dx,
         closeTo(entry.value.width / 2, 0.5),
-        reason: 'the sample is off the centre of the picture',
+        reason: 'the sample is off the center of the picture',
       );
     });
   }

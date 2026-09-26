@@ -7,6 +7,7 @@ import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/source_badges.dart';
 import '../player/player_screen.dart';
 import '../../services/theme/app_colors.dart';
+import '../../l10n/l10n.dart';
 
 class AnimeArabicStreamSheet extends StatefulWidget {
   final ArabicAnimeDetails details;
@@ -64,7 +65,9 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
       if (hits.isEmpty) {
         setState(() {
           _isScraping = false;
-          _error = 'No playable Arabic streams found for Episode ${widget.episode.number}.';
+          _error = context.l10n.animeNoStreamsForEpisode(
+            widget.episode.number,
+          );
         });
         return;
       }
@@ -87,7 +90,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
       if (mounted) {
         setState(() {
           _isScraping = false;
-          _error = 'Failed to load Arabic streams: $e';
+          _error = context.l10n.animeStreamsLoadFailed('$e');
         });
       }
     }
@@ -114,11 +117,15 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
     // navigator, so the root stack is just [HubPage] -- replacing its top
     // route tore the hub down, and backing out of the player then popped
     // an empty root and exited the app.
+    final playerTitle = context.l10n.playerTitleEpisode(
+      widget.details.title,
+      widget.episode.number,
+    );
     Navigator.pop(context);
     pushFullscreenPage(
       PlayerScreen(
         source: source,
-        title: '${widget.details.title} - Episode ${widget.episode.number}',
+        title: playerTitle,
         backdropUrl: widget.details.displayBanner,
         detail: movieDetail,
         episode: video,
@@ -145,10 +152,10 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
           ),
         ],
       ),
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         top: 16,
-        left: 20,
-        right: 20,
+        start: 20,
+        end: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: Column(
@@ -216,6 +223,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
                 ),
               ),
               IconButton(
+                tooltip: context.l10n.commonClose,
                 onPressed: () => Navigator.pop(context),
                 icon: Icon(Icons.close_rounded, color: AppColors.inkAlpha(0.60)),
               ),

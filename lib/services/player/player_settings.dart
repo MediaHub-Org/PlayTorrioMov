@@ -224,7 +224,7 @@ abstract final class PlayerSettings {
   ///
   /// This is not a preference, and it is deliberately not a parameter.
   /// `applySubtitleStyling` used to take a `forceLibass` flag, and every
-  /// appearance setter -- font, size, colour, position, and twenty more --
+  /// appearance setter -- font, size, color, position, and twenty more --
   /// called it without the flag. So changing the font size while an embedded
   /// track was on turned that track back off, because the styling call
   /// honoured the `useLibass` preference, which is off by default, and set

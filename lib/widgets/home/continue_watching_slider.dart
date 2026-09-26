@@ -563,7 +563,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           children: [
                             // Details Button
                             Tooltip(
-                              message: 'View Details',
+                              message: context.l10n.homeViewDetails,
                               child: GestureDetector(
                                 onTap: () => _openDetails(context),
                                 child: Container(
@@ -589,7 +589,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             const SizedBox(width: 6),
                             // Dismiss / Remove Button
                             Tooltip(
-                              message: 'Remove from Continue Watching',
+                              message: context.l10n.homeRemoveFromContinue,
                               child: GestureDetector(
                                 onTap: widget.onRemove,
                                 child: Container(

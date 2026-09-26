@@ -1153,6 +1153,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         ),
                         suffixIcon: IconButton(
                           padding: EdgeInsets.zero,
+                          tooltip: context.l10n.detailsGoToEpisode,
                           icon: Icon(
                             Icons.arrow_forward_rounded,
                             color: _Palette.accent,

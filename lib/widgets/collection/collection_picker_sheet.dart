@@ -121,8 +121,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                         child: Text(
-                          'No collections yet. Create one above and this title '
-                          'goes straight into it.',
+                          context.l10n.libraryNoCollectionsYet,
                           style: TextStyle(
                             color: AppColors.inkSubtle,
                             fontSize: 13,

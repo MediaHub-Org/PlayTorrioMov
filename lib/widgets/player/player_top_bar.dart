@@ -43,10 +43,10 @@ class PlayerTopBar extends StatelessWidget {
     final gap = SizedBox(width: isCompact ? 6 : 8);
 
     return Container(
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         top: MediaQuery.paddingOf(context).top + 12,
-        left: isCompact ? 14 : 24,
-        right: isCompact ? 14 : 24,
+        start: isCompact ? 14 : 24,
+        end: isCompact ? 14 : 24,
         bottom: 24,
       ),
       decoration: BoxDecoration(

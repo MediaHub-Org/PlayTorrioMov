@@ -134,7 +134,7 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'Failed to load anime details: $e';
+          _error = context.l10n.animeDetailsLoadFailed('$e');
         });
       }
     }
@@ -326,8 +326,8 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
                               if (_details != null && _details!.related.isNotEmpty)
                                 SliverToBoxAdapter(
                                   child: Padding(
-                                    padding: EdgeInsets.only(
-                                      left: isDesktop ? _Space.xxl : _Space.lg,
+                                    padding: EdgeInsetsDirectional.only(
+                                      start: isDesktop ? _Space.xxl : _Space.lg,
                                       bottom: 60,
                                     ),
                                     child: _buildRelatedSection(),
@@ -352,11 +352,11 @@ class _AnimeArabicDetailsPageState extends State<AnimeArabicDetailsPage>
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
                 child: Container(
-                  padding: EdgeInsets.only(
+                  padding: EdgeInsetsDirectional.only(
                     top: AppSpacing.floatingTopInset(context),
                     bottom: 12,
-                    left: AppSpacing.pageInset(context),
-                    right: AppSpacing.pageInset(context),
+                    start: AppSpacing.pageInset(context),
+                    end: AppSpacing.pageInset(context),
                   ),
                   decoration: BoxDecoration(
                     color: _Palette.bg.withValues(alpha: 0.65),

@@ -262,7 +262,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
               .map((preset) {
             final isSelected = activePreset == preset;
             return Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsetsDirectional.only(end: 8),
               child: InkWell(
                 onTap: () => PlayerSettings.setSubStylePreset(preset, player: widget.player),
                 borderRadius: BorderRadius.circular(10),
@@ -282,7 +282,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                       Container(
                         width: 10,
                         height: 10,
-                        margin: const EdgeInsets.only(right: 6),
+                        margin: const EdgeInsetsDirectional.only(end: 6),
                         decoration: BoxDecoration(
                           color: _parseColorFromHex(preset.textColor),
                           shape: BoxShape.circle,

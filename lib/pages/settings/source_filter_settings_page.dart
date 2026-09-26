@@ -64,6 +64,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
         backgroundColor: AppColors.bar.withValues(alpha: 0.85),
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
+          tooltip: context.l10n.commonBack,
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
@@ -150,7 +151,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4),
+      padding: const EdgeInsetsDirectional.only(start: 4),
       child: Text(
         title,
         style: TextStyle(
@@ -163,7 +164,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
     );
   }
 
-  /// The audio list: the ranked selection on top, the rest of the catalogue
+  /// The audio list: the ranked selection on top, the rest of the catalog
   /// below it.
   ///
   /// Two blocks rather than one, because the two do different jobs: the top
@@ -298,6 +299,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
                 : () => SourceFilterSettings.demoteAudioLanguage(key),
           ),
           IconButton(
+            tooltip: context.l10n.commonClose,
             icon: const Icon(Icons.close_rounded, size: 18),
             onPressed: () => SourceFilterSettings.toggleAudioLanguage(key),
           ),

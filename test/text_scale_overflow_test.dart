@@ -29,6 +29,8 @@ import 'package:playtorriomov/widgets/common/pill_tab_row.dart';
 import 'package:playtorriomov/widgets/common/section_header.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
+import 'package:playtorriomov/widgets/player/player_cast_sheet.dart';
+import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_sources_panel.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
@@ -657,4 +659,85 @@ void main() {
       },
     );
   }
+
+  testWidgets(
+    'the episode picker does not overflow at 3x text scale',
+    (tester) async {
+      // #69's remaining target. The panel is hosted in a Positioned.fill over
+      // the player -- see player_screen.dart -- so it gets the whole screen,
+      // which is what this reproduces. Long episode titles on purpose: the
+      // row is where a translated or verbose title would bite.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              const ColoredBox(color: Colors.black),
+              Positioned.fill(
+                child: PlayerEpisodesPanel(
+                  videos: [
+                    for (var i = 1; i <= 12; i++)
+                      Video(
+                        id: 'tt1:1:$i',
+                        title: 'Episode $i - A Rather Long Episode Title',
+                        season: 1,
+                        episode: i,
+                      ),
+                  ],
+                  onEpisodeSelected: (_) {},
+                  onClose: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'the episode rows and the season/batch controls above them sit '
+            'in fixed-height boxes',
+      );
+    },
+  );
+
+  testWidgets(
+    'the cast sheet does not overflow at 3x text scale',
+    (tester) async {
+      // Shown through showModalBottomSheet in production, which caps the
+      // sheet at a fraction of the screen -- pumping it loose would give it
+      // unbounded height and prove nothing. CastService.startDiscovery is a
+      // no-op off-device (it returns early unless isSupported && _initialized),
+      // so initState is safe here.
+      await pumpAtScale(
+        tester,
+        settle: false,
+        child: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: ElevatedButton(
+                onPressed: () => PlayerCastSheet.show(
+                  context,
+                  title: 'A Film With A Fairly Long Title',
+                  streamUrl: 'https://example.invalid/a.mp4',
+                ),
+                child: const Text('cast'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('cast'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'the empty state, the title row and the device rows all sit in '
+            'a sheet whose height the modal decides, not their content',
+      );
+    },
+  );
 }

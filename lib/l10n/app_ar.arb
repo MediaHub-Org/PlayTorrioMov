@@ -963,5 +963,52 @@
   "subPresetNightModeSoft": "وضع ليلي دافئ",
   "subPresetNightModeSoftBody": "نص كريمي ناعم بخلفية شبه شفافة بنسبة 40%",
   "subPresetCustom": "مخصّص",
-  "subPresetCustomBody": "أنماط ترجمة مخصّصة يضبطها المستخدم"
+  "subPresetCustomBody": "أنماط ترجمة مخصّصة يضبطها المستخدم",
+
+  "commonClose": "إغلاق",
+  "commonBack": "رجوع",
+
+  "commonLike": "تفضيل",
+  "commonLiked": "مفضَّل",
+  "commonAddToLiked": "إضافة إلى المفضلة",
+  "commonRemoveFromLiked": "إزالة من المفضلة",
+  "libraryAddToWatchlist": "إضافة إلى قائمة المشاهدة",
+  "libraryRemoveFromWatchlist": "إزالة من قائمة المشاهدة",
+  "libraryMarkWatched": "تحديد كمشاهَد",
+  "libraryMarkUnwatched": "تحديد كغير مشاهَد",
+  "detailsGoToEpisode": "الانتقال إلى الحلقة",
+  "iptvAddFavorite": "إضافة إلى المفضلة",
+  "iptvRemoveFavorite": "إزالة من المفضلة",
+  "iptvDeletePortal": "حذف هذه البوابة",
+  "iptvDeletePlaylist": "حذف قائمة التشغيل هذه",
+
+  "animeNoGenreResults": "لا يوجد أنمي من نوع {genre}.",
+  "animeSourcesFound": "تم العثور على {count} مصدرًا",
+  "animeNoCategorySources": "لا توجد مصادر من {category}.",
+  "animeEpsShort": "{count} حلقة",
+  "detailsSeasonCount": "{count, plural, =1{موسم واحد} =2{موسمان} few{{count} مواسم} many{{count} موسمًا} other{{count} موسم}}",
+  "playerPlayNext": "تشغيل التالي",
+  "playerThisSourceFailed": "فشل تشغيل هذا المصدر",
+  "playerProviderName": "المزوّد: {name}",
+  "playerScrapingFrom": "جارٍ البحث عن المصادر ({name})...",
+  "watchNoSourcesFound": "لم يتم العثور على مصادر",
+  "watchNoSourcesBody": "لم يتم العثور على أي بث. ثبّت المزيد من الإضافات من الإعدادات أو جرّب عنوانًا آخر.",
+  "watchInstallAddons": "تثبيت الإضافات",
+  "libraryNoCollectionsYet": "لا توجد مجموعات بعد. أنشئ واحدة أعلاه وسيُضاف هذا العنوان إليها مباشرة.",
+  "homeCalendar": "التقويم",
+  "syncNowBadge": "الآن",
+  "magnetNonVideo": "ليس فيديو",
+  "iptvCloudVaultTitle": "Cloud Vault (9k+)",
+  "iptvPortalsBadge": "أكثر من 9,600 بوابة",
+  "iptvChannelsCount": "{count} قناة",
+
+  "homeViewDetails": "عرض التفاصيل",
+  "homeRemoveFromContinue": "إزالة من متابعة المشاهدة",
+  "magnetFilterFiles": "تصفية الملفات بالاسم...",
+  "playerTitleEpisode": "{title} - الحلقة {number}",
+
+  "catalogCouldNotLoadWhat": "تعذّر تحميل {what}",
+
+  "animeStreamsLoadFailed": "تعذّر تحميل البث: {error}",
+  "animeDetailsLoadFailed": "تعذّر تحميل تفاصيل الأنمي: {error}"
 }

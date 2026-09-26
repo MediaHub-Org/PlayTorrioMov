@@ -69,7 +69,7 @@ class PlayerMenuRow extends StatelessWidget {
               children: [
                 // A radio mark, not a filled row: which one of these is on is
                 // the question the list answers, and a tick says it without
-                // leaning on the accent colour to carry the meaning alone.
+                // leaning on the accent color to carry the meaning alone.
                 Icon(
                   isSelected
                       ? Icons.radio_button_checked_rounded
@@ -116,7 +116,7 @@ class PlayerMenuRow extends StatelessWidget {
   }
 }
 
-/// The Original badge: the one coloured thing in an audio row, so it is what
+/// The Original badge: the one colored thing in an audio row, so it is what
 /// the eye lands on when scanning a list of eight for the track the release
 /// is built around.
 class PlayerOriginalBadge extends StatelessWidget {

@@ -362,7 +362,7 @@ class _SearchPageState extends State<SearchPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 16),
+                      padding: const EdgeInsetsDirectional.only(end: 16),
                       child: Container(
                         height: 42,
                         decoration: BoxDecoration(
@@ -399,6 +399,7 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                             suffixIcon: _searchController.text.isNotEmpty
                                 ? IconButton(
+                                    tooltip: context.l10n.commonClose,
                                     icon: const Icon(Icons.close_rounded, size: 18),
                                     color: AppColors.inkAlpha(0.60),
                                     onPressed: () {

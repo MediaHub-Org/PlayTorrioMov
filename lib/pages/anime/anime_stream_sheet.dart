@@ -128,11 +128,15 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     // Close the sheet, then push onto the ROOT navigator -- see the same
     // note in anime_arabic_stream_sheet: replacing the root's top route
     // tore down the hub underneath and made Back exit the app.
+    final playerTitle = context.l10n.playerTitleEpisode(
+      widget.anime.displayTitle,
+      widget.episodeNumber,
+    );
     Navigator.pop(context);
     pushFullscreenPage(
       PlayerScreen(
         source: source,
-        title: '${widget.anime.displayTitle} - Episode ${widget.episodeNumber}',
+        title: playerTitle,
         backdropUrl: widget.anime.backdropUrl,
         detail: detail,
         episode: video,
@@ -206,7 +210,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                             ),
                           ] else
                             Text(
-                              '${_allSources.length} sources found',
+                              context.l10n.animeSourcesFound(
+                                _allSources.length,
+                              ),
                               style: TextStyle(
                                 color: AppColors.inkSubtle,
                                 fontSize: 12,
@@ -218,6 +224,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: context.l10n.commonClose,
                   icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -294,7 +301,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                         ? Padding(
                             padding: const EdgeInsets.all(32),
                             child: Text(
-                              'No ${_selectedCategory.toUpperCase()} sources found.',
+                              context.l10n.animeNoCategorySources(
+                                _selectedCategory.toUpperCase(),
+                              ),
                               style: TextStyle(
                                   color: AppColors.inkSubtle, fontSize: 13),
                             ),

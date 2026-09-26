@@ -293,10 +293,10 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
 
   Widget _buildHeader(int sNum, int eNum, bool isCompact) {
     return Container(
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         top: MediaQuery.paddingOf(context).top + 12,
-        left: isCompact ? 12 : 16,
-        right: isCompact ? 12 : 16,
+        start: isCompact ? 12 : 16,
+        end: isCompact ? 12 : 16,
         bottom: 12,
       ),
       color: const Color(0x66000000),
@@ -367,7 +367,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Provider: ${widget.currentAddonName}',
+                  context.l10n.playerProviderName(widget.currentAddonName),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.50),
                     fontSize: 11.5,
@@ -443,7 +443,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Scraping sources (${widget.currentAddonName})...',
+            context.l10n.playerScrapingFrom(widget.currentAddonName),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.70),
               fontSize: 13,

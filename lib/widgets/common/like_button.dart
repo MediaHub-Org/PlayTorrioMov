@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 
 /// Red used for every "liked" state in the app.
@@ -70,8 +71,10 @@ class _LikeButtonState extends State<LikeButton> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    final label = widget.isLiked ? 'Liked' : 'Like';
-    final semantics = widget.isLiked ? 'Remove from liked' : 'Add to liked';
+    final l10n = context.l10n;
+    final label = widget.isLiked ? l10n.commonLiked : l10n.commonLike;
+    final semantics =
+        widget.isLiked ? l10n.commonRemoveFromLiked : l10n.commonAddToLiked;
 
     final child = switch (widget.style) {
       LikeButtonStyle.pill => _buildPill(label),

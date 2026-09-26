@@ -49,7 +49,7 @@ class WatchHistoryPage extends StatelessWidget {
         // narrower slot clamps the 48x48 button into an ellipse.
         leadingWidth: inset + 48,
         leading: Padding(
-          padding: EdgeInsets.only(left: inset),
+          padding: EdgeInsetsDirectional.only(start: inset),
           child: const Center(child: GlassBackButton()),
         ),
         title: Text(

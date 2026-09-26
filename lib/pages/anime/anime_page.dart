@@ -333,7 +333,7 @@ class _AnimePageState extends State<AnimePage> {
     if (_genreResults.isEmpty) {
       return Center(
         child: Text(
-          'No $_genreFilter anime found.',
+          context.l10n.animeNoGenreResults(_genreFilter ?? ''),
           style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
         ),
       );
@@ -530,7 +530,7 @@ class _AnimePageState extends State<AnimePage> {
                 : _buildGenreGrid(),
           )
         : BrowseScaffold<AnimeMedia>(
-            contentLabel: 'anime',
+            contentLabel: context.l10n.navAnime,
             header: pillHeader,
             belowHero: ContinueWatchingSlider(
               typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',
@@ -764,7 +764,7 @@ class _AnimeHeroSlide extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${anime.totalEpisodes} Episodes',
+                          context.l10n.playerEpisodeCount(anime.totalEpisodes),
                           style: TextStyle(
                             fontSize: 15,
                             color: AppColors.onAccent.withValues(alpha: 0.55),

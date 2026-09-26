@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// A token read into a variable is read exactly once.
 ///
-/// Dart initialises a top-level or `static` variable lazily, on its first
+/// Dart initializes a top-level or `static` variable lazily, on its first
 /// read, and never re-evaluates it. So `static Color accent =
 /// AppColors.accent;` captures whichever palette and brightness happened to
 /// be active the first time that screen was opened, and keeps them through
@@ -13,13 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 /// everywhere except this one screen", and only on screens you happened to
 /// open before switching.
 ///
-/// `final` does not help: it is the same lazy-once initialisation. The fix
+/// `final` does not help: it is the same lazy-once initialization. The fix
 /// is always the same shape, `Color get x => AppColors.x`, so this rule is
 /// mechanical enough to enforce rather than remember.
 void main() {
   test('theme tokens are read through getters, never stored in variables', () {
     // A declaration (top-level or static, var or final, typed or inferred)
-    // whose initialiser reads AppColors. `=>` is what a getter uses, so the
+    // whose initializer reads AppColors. `=>` is what a getter uses, so the
     // negative lookahead is what separates the correct form from the bug.
     final frozen = RegExp(
       r'^[ \t]*(?:static[ \t]+)?(?:final[ \t]+|const[ \t]+)?'

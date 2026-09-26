@@ -64,7 +64,7 @@ class SettingsScrollView extends StatefulWidget {
     this.maxContentWidth = 800,
   }) : children = null;
 
-  /// The side padding that centres [maxContentWidth] in [windowWidth],
+  /// The side padding that centers [maxContentWidth] in [windowWidth],
   /// never narrower than [minGutter].
   ///
   /// Exposed so a page that builds its own scrollable -- one with a pinned

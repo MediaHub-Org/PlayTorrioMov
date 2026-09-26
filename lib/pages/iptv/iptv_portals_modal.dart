@@ -217,6 +217,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                         ),
                       ),
                       IconButton(
+                        tooltip: context.l10n.commonClose,
                         icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 20),
                         onPressed: () => Navigator.pop(ctx),
                       ),
@@ -355,6 +356,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                         onPressed: () => _openModalCustomizer(context),
                       ),
                       IconButton(
+                        tooltip: context.l10n.commonClose,
                         icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                         onPressed: () => Navigator.pop(context),
                       ),
@@ -514,7 +516,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
                                   Text(
-                                    'Cloud Vault (9k+)',
+                                    context.l10n.iptvCloudVaultTitle,
                                     style: TextStyle(
                                       color: AppColors.ink,
                                       fontWeight: FontWeight.bold,
@@ -532,9 +534,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                       ).withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: const Text(
-                                      '9,600+ Portals',
-                                      style: TextStyle(
+                                    child: Text(
+                                      context.l10n.iptvPortalsBadge,
+                                      style: const TextStyle(
                                         color: Color(0xFF00E5FF),
                                         fontSize: 9.5,
                                         fontWeight: FontWeight.w800,
@@ -915,7 +917,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   Container(
                                     width: 24,
                                     height: 24,
-                                    margin: const EdgeInsets.only(right: 12),
+                                    margin: const EdgeInsetsDirectional.only(end: 12),
                                     decoration: BoxDecoration(
                                       color: isSelected ? palette.primaryColor : Colors.transparent,
                                       shape: BoxShape.circle,
@@ -1032,6 +1034,9 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   },
                                 ),
                                 IconButton(
+                                  tooltip: isFav
+                                      ? context.l10n.iptvRemoveFavorite
+                                      : context.l10n.iptvAddFavorite,
                                   icon: Icon(
                                     isFav ? Icons.star_rounded : Icons.star_outline_rounded,
                                     color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
@@ -1040,6 +1045,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   onPressed: () => _ctrl.toggleFavoritePortal(p.key),
                                 ),
                                 IconButton(
+                                  tooltip: context.l10n.iptvDeletePortal,
                                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                                   onPressed: () => _ctrl.deletePortalsByKeys({p.key}),
                                 ),
@@ -1343,7 +1349,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   Container(
                                     width: 24,
                                     height: 24,
-                                    margin: const EdgeInsets.only(right: 12),
+                                    margin: const EdgeInsetsDirectional.only(end: 12),
                                     decoration: BoxDecoration(
                                       color: isSelected ? palette.primaryColor : Colors.transparent,
                                       shape: BoxShape.circle,
@@ -1369,7 +1375,8 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                         style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700, fontSize: 13.5),
                                       ),
                                       Text(
-                                        '${pl.channels.length} channels ${pl.sourceUrl != null ? '· ${pl.sourceUrl!}' : ''}',
+                                        '${context.l10n.iptvChannelsCount(pl.channels.length)}'
+                                        '${pl.sourceUrl != null ? ' · ${pl.sourceUrl!}' : ''}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 11),
@@ -1395,6 +1402,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                                   },
                                 ),
                                 IconButton(
+                                  tooltip: context.l10n.iptvDeletePlaylist,
                                   icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
                                   onPressed: () => _ctrl.deleteM3uPlaylist(pl.id),
                                 ),

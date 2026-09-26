@@ -352,10 +352,10 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
 
   Widget _buildHeader(int episodeCount, bool isCompact) {
     return Container(
-      padding: EdgeInsets.only(
+      padding: EdgeInsetsDirectional.only(
         top: MediaQuery.paddingOf(context).top + 12,
-        left: isCompact ? 14 : 20,
-        right: isCompact ? 14 : 18,
+        start: isCompact ? 14 : 20,
+        end: isCompact ? 14 : 18,
         bottom: 12,
       ),
       color: const Color(0x66000000),
@@ -427,7 +427,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
           // Desktop Left Season Arrow
           if (showArrows)
             Padding(
-              padding: const EdgeInsets.only(left: 4, right: 2),
+              padding: const EdgeInsetsDirectional.only(start: 4, end: 2),
               child: _buildSeasonArrowButton(
                 icon: Icons.chevron_left_rounded,
                 tooltip: context.l10n.playerPreviousSeasons,
@@ -497,7 +497,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
           // Desktop Right Season Arrow
           if (showArrows)
             Padding(
-              padding: const EdgeInsets.only(left: 2, right: 4),
+              padding: const EdgeInsetsDirectional.only(start: 2, end: 4),
               child: _buildSeasonArrowButton(
                 icon: Icons.chevron_right_rounded,
                 tooltip: context.l10n.playerNextSeasons,
@@ -696,7 +696,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                               if (isCurrentPlaying) ...[
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  margin: const EdgeInsets.only(right: 6),
+                                  margin: const EdgeInsetsDirectional.only(end: 6),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF10B981).withValues(alpha: 0.20),
                                     borderRadius: BorderRadius.circular(5),

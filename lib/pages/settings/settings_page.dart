@@ -27,6 +27,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
+import '../../l10n/l10n.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -159,6 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: AppColors.bar.withValues(alpha: 0.85),
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
+          tooltip: context.l10n.commonBack,
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),

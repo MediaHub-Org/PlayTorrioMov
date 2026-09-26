@@ -797,7 +797,7 @@ class _FilterChip extends StatelessWidget {
   }
 }
 
-/// The on/off control. One button whose label and colour follow the state,
+/// The on/off control. One button whose label and color follow the state,
 /// rather than two chips where one is always inert.
 class _SubtitleToggleButton extends StatelessWidget {
   final bool isEnabled;

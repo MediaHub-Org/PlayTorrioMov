@@ -287,6 +287,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
                     // Close Button
                     IconButton(
+                      tooltip: context.l10n.commonClose,
                       icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                       onPressed: () => Navigator.pop(context),
                     ),
@@ -329,6 +330,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                         ),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
+                                tooltip: context.l10n.commonClose,
                                 icon: Icon(Icons.close_rounded, color: AppColors.inkMuted, size: 18),
                                 onPressed: () {
                                   _searchController.clear();
@@ -653,7 +655,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                               ),
                                               const SizedBox(height: 2),
                                               Padding(
-                                                padding: const EdgeInsets.only(left: 13),
+                                                padding: const EdgeInsetsDirectional.only(start: 13),
                                                 child: Text(
                                                   hit.portal.portal.username.isNotEmpty
                                                       ? hit.portal.portal.username
@@ -694,6 +696,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
                                         // Favorite Pin
                                         IconButton(
+                                          tooltip: isFav
+                                              ? context.l10n.iptvRemoveFavorite
+                                              : context.l10n.iptvAddFavorite,
                                           icon: Icon(
                                             isFav ? Icons.star_rounded : Icons.star_outline_rounded,
                                             color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,

@@ -207,7 +207,7 @@ class PlayerMenuAnchor extends StatelessWidget {
       right: side,
       child: Align(
         // Wide enough to have a corner to sit in, it sits in it; a narrow
-        // screen has no spare width, so the card centres over the full span.
+        // screen has no spare width, so the card centers over the full span.
         alignment: isNarrow ? Alignment.bottomCenter : Alignment.bottomRight,
         child: SingleChildScrollView(
           physics: const ClampingScrollPhysics(),
@@ -273,9 +273,9 @@ class PlayerMenuHeader extends StatelessWidget {
                 ),
               Flexible(
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    left: back != null ? 4 : 8,
-                    right: 8,
+                  padding: EdgeInsetsDirectional.only(
+                    start: back != null ? 4 : 8,
+                    end: 8,
                     top: 4,
                     bottom: 4,
                   ),

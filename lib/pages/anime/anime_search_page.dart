@@ -448,7 +448,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   }) {
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
     return Padding(
-      padding: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsetsDirectional.only(end: 8),
       child: Material(
         color: active
             ? primaryColor.withValues(alpha: 0.22)
@@ -577,7 +577,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsetsDirectional.only(end: 8),
                             child: Container(
                               height: 42,
                               decoration: BoxDecoration(
@@ -612,6 +612,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                   ),
                                   suffixIcon: _searchController.text.isNotEmpty
                                       ? IconButton(
+                                          tooltip: context.l10n.commonClose,
                                           icon: const Icon(Icons.close_rounded, size: 18),
                                           color: AppColors.inkAlpha(0.60),
                                           onPressed: () {
@@ -632,7 +633,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
 
                         // Language Switcher Pill (General vs Arabic Anime)
                         Padding(
-                          padding: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsetsDirectional.only(end: 8),
                           child: GestureDetector(
                             onTap: () {
                               setState(() {
@@ -682,7 +683,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                         // 18+ Adult Toggle Pill (only in general mode)
                         if (!_isArabicMode)
                           Padding(
-                            padding: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsetsDirectional.only(end: 8),
                             child: GestureDetector(
                               onTap: () => _toggleAdult(!_allowAdult),
                               child: AnimatedContainer(
@@ -813,7 +814,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                         // Reset Button
                         if (_hasActiveFilters)
                           Padding(
-                            padding: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsetsDirectional.only(end: 8),
                             child: Material(
                               color: AppColors.inkAlpha(0.05),
                               borderRadius: BorderRadius.circular(20),

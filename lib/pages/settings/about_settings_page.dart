@@ -94,6 +94,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
         backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
+          tooltip: context.l10n.commonBack,
           icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
           onPressed: () => Navigator.pop(context),
         ),

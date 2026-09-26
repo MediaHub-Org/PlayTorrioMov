@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../movie/movie_card.dart';
@@ -89,10 +90,13 @@ class BrowseScaffold<T> extends StatefulWidget {
   /// to show anything) — unlike [belowHero], not gated on [heroItems].
   final Widget? afterRows;
 
-  /// What this page lists, as it should read in a sentence: "anime",
-  /// "movies", "Live TV channels". Only the error heading uses it, but that
-  /// heading used to be a default reading "movies" for every section, so
-  /// Anime failed with a message about films.
+  /// What this page lists, as it should read in a sentence: "Anime",
+  /// "Films", "Live TV". Only the error heading uses it, but that heading used
+  /// to be a default reading "movies" for every section, so Anime failed with
+  /// a message about films.
+  ///
+  /// Pass it already translated -- `context.l10n.navAnime`, not `'anime'` --
+  /// because it lands inside a translated sentence (#68).
   final String contentLabel;
 
   final bool isLoading;
@@ -254,7 +258,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     Widget content;
     if (widget.error != null) {
       content = ErrorView(
-        title: 'Could not load ${widget.contentLabel}',
+        title: context.l10n.catalogCouldNotLoadWhat(widget.contentLabel),
         error: widget.error,
         onRetry: widget.onRetry ?? () {},
       );

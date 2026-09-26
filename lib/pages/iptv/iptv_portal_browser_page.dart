@@ -15,6 +15,7 @@ import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
 import '../../widgets/common/setting_choice_chip.dart';
+import '../../widgets/common/clamped_text_scale.dart';
 
 class IptvPortalBrowserPage extends StatefulWidget {
   final VerifiedPortal? portal;
@@ -164,6 +165,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                       ),
                       const Spacer(),
                       IconButton(
+                        tooltip: context.l10n.commonClose,
                         icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 20),
                         onPressed: () => Navigator.pop(ctx),
                       ),
@@ -211,8 +213,8 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Grid Stream Columns', style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w600)),
-                                  Text('$cols Cols', style: TextStyle(color: palette.primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  Text(context.l10n.liveTvGridColumns, style: TextStyle(color: AppColors.ink, fontSize: 13, fontWeight: FontWeight.w600)),
+                                  Text(context.l10n.liveTvColumnsN(cols), style: TextStyle(color: palette.primaryColor, fontSize: 12, fontWeight: FontWeight.bold)),
                                 ],
                               ),
                               SliderTheme(
@@ -243,7 +245,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     builder: (context, showLogos, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: Text('Show Channel Stream Logos', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
+                        title: Text(context.l10n.liveTvShowLogos, style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showLogos,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowStreamLogos(val),
@@ -256,7 +258,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     builder: (context, showEpg, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: Text('Show EPG "Now Playing" Snippet', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
+                        title: Text(context.l10n.liveTvShowEpg, style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showEpg,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowEpgSnippet(val),
@@ -269,7 +271,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     builder: (context, showCount, _) {
                       return SwitchListTile.adaptive(
                         contentPadding: EdgeInsets.zero,
-                        title: Text('Show Category Stream Counts', style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
+                        title: Text(context.l10n.liveTvShowCounts, style: TextStyle(color: AppColors.ink, fontSize: 13.5)),
                         value: showCount,
                         activeColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowCategoryCount(val),
@@ -680,37 +682,43 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                   const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Container(
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.raised,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.raised),
-                      ),
-                      child: TextField(
-                        controller: _catSearchCtrl,
-                        style: TextStyle(color: AppColors.ink, fontSize: 13),
-                        decoration: InputDecoration(
-                          hintText: context.l10n.iptvFilterCategories,
-                          hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12.5),
-                          prefixIcon: Icon(Icons.search_rounded, color: AppColors.inkSubtle, size: 18),
-                          suffixIcon: _catSearchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
-                                  onPressed: () {
-                                    _catSearchCtrl.clear();
-                                    setState(() => _catSearchQuery = '');
-                                    setSheetState(() {});
-                                  },
-                                )
-                              : null,
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                    child: ClampedTextScale(
+                      // A search pill is a fixed height by design, and a 13px
+                      // field wants ~47px at 3x. The input caps; the box keeps
+                      // the shape the rest of the toolbar is built around (#69).
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppColors.raised,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.raised),
                         ),
-                        onChanged: (v) {
-                          setState(() => _catSearchQuery = v);
-                          setSheetState(() {});
-                        },
+                        child: TextField(
+                          controller: _catSearchCtrl,
+                          style: TextStyle(color: AppColors.ink, fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: context.l10n.iptvFilterCategories,
+                            hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12.5),
+                            prefixIcon: Icon(Icons.search_rounded, color: AppColors.inkSubtle, size: 18),
+                            suffixIcon: _catSearchQuery.isNotEmpty
+                                ? IconButton(
+                                    tooltip: context.l10n.commonClose,
+                                    icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
+                                    onPressed: () {
+                                      _catSearchCtrl.clear();
+                                      setState(() => _catSearchQuery = '');
+                                      setSheetState(() {});
+                                    },
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onChanged: (v) {
+                            setState(() => _catSearchQuery = v);
+                            setSheetState(() {});
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -857,38 +865,44 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     ],
 
                     // Search Bar
-                    SizedBox(
-                      width: 240,
-                      height: 40,
-                      child: TextField(
-                        controller: _searchCtrl,
-                        style: TextStyle(color: AppColors.ink, fontSize: 13),
-                        decoration: InputDecoration(
-                          hintText: context.l10n.iptvSearchChannels,
-                          hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 12.5),
-                          prefixIcon: Icon(Icons.search_rounded, color: palette.primaryColor, size: 18),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
-                                  onPressed: () {
-                                    _searchCtrl.clear();
-                                    setState(() => _searchQuery = '');
-                                  },
-                                )
-                              : null,
-                          filled: true,
-                          fillColor: AppColors.raised,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: AppColors.raised),
+                    ClampedTextScale(
+                      // A search pill is a fixed height by design, and a 13px
+                      // field wants ~47px at 3x. The input caps; the box keeps
+                      // the shape the rest of the toolbar is built around (#69).
+                      child: SizedBox(
+                        width: 240,
+                        height: 40,
+                        child: TextField(
+                          controller: _searchCtrl,
+                          style: TextStyle(color: AppColors.ink, fontSize: 13),
+                          decoration: InputDecoration(
+                            hintText: context.l10n.iptvSearchChannels,
+                            hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 12.5),
+                            prefixIcon: Icon(Icons.search_rounded, color: palette.primaryColor, size: 18),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    tooltip: context.l10n.commonClose,
+                                    icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
+                                    onPressed: () {
+                                      _searchCtrl.clear();
+                                      setState(() => _searchQuery = '');
+                                    },
+                                  )
+                                : null,
+                            filled: true,
+                            fillColor: AppColors.raised,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: AppColors.raised),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: palette.primaryColor, width: 1.4),
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: palette.primaryColor, width: 1.4),
-                          ),
+                          onChanged: (v) => setState(() => _searchQuery = v),
                         ),
-                        onChanged: (v) => setState(() => _searchQuery = v),
                       ),
                     ),
 
@@ -942,6 +956,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     Row(
                       children: [
                         IconButton(
+                          tooltip: context.l10n.commonBack,
                           icon: Icon(Icons.arrow_back_rounded, color: AppColors.ink, size: 22),
                           onPressed: () => Navigator.pop(context),
                         ),
@@ -1071,33 +1086,39 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     const SizedBox(height: 8),
 
                     // Search Input
-                    Container(
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: AppColors.raised,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppColors.raised),
-                      ),
-                      child: TextField(
-                        controller: _searchCtrl,
-                        style: TextStyle(color: AppColors.ink, fontSize: 12.5),
-                        decoration: InputDecoration(
-                          hintText: context.l10n.iptvSearchInCategory,
-                          hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
-                          prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 18),
-                          suffixIcon: _searchQuery.isNotEmpty
-                              ? IconButton(
-                                  icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
-                                  onPressed: () {
-                                    _searchCtrl.clear();
-                                    setState(() => _searchQuery = '');
-                                  },
-                                )
-                              : null,
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    ClampedTextScale(
+                      // A search pill is a fixed height by design, and a 13px
+                      // field wants ~47px at 3x. The input caps; the box keeps
+                      // the shape the rest of the toolbar is built around (#69).
+                      child: Container(
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: AppColors.raised,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.raised),
                         ),
-                        onChanged: (v) => setState(() => _searchQuery = v),
+                        child: TextField(
+                          controller: _searchCtrl,
+                          style: TextStyle(color: AppColors.ink, fontSize: 12.5),
+                          decoration: InputDecoration(
+                            hintText: context.l10n.iptvSearchInCategory,
+                            hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
+                            prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 18),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? IconButton(
+                                    tooltip: context.l10n.commonClose,
+                                    icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
+                                    onPressed: () {
+                                      _searchCtrl.clear();
+                                      setState(() => _searchQuery = '');
+                                    },
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          ),
+                          onChanged: (v) => setState(() => _searchQuery = v),
+                        ),
                       ),
                     ),
                   ],
@@ -1128,33 +1149,39 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                         // Categories Search Filter
                                         Padding(
                                           padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
-                                          child: Container(
-                                            height: 38,
-                                            decoration: BoxDecoration(
-                                              color: AppColors.raised,
-                                              borderRadius: BorderRadius.circular(8),
-                                              border: Border.all(color: AppColors.raised),
-                                            ),
-                                            child: TextField(
-                                              controller: _catSearchCtrl,
-                                              style: TextStyle(color: AppColors.ink, fontSize: 12.5),
-                                              decoration: InputDecoration(
-                                                hintText: context.l10n.iptvFilterCategories,
-                                                hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
-                                                prefixIcon: Icon(Icons.filter_list_rounded, color: AppColors.inkSubtle, size: 18),
-                                                suffixIcon: _catSearchQuery.isNotEmpty
-                                                    ? IconButton(
-                                                        icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
-                                                        onPressed: () {
-                                                          _catSearchCtrl.clear();
-                                                          setState(() => _catSearchQuery = '');
-                                                        },
-                                                      )
-                                                    : null,
-                                                border: InputBorder.none,
-                                                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                          child: ClampedTextScale(
+                                            // A search pill is a fixed height by design, and a 13px
+                                            // field wants ~47px at 3x. The input caps; the box keeps
+                                            // the shape the rest of the toolbar is built around (#69).
+                                            child: Container(
+                                              height: 38,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.raised,
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(color: AppColors.raised),
                                               ),
-                                              onChanged: (v) => setState(() => _catSearchQuery = v),
+                                              child: TextField(
+                                                controller: _catSearchCtrl,
+                                                style: TextStyle(color: AppColors.ink, fontSize: 12.5),
+                                                decoration: InputDecoration(
+                                                  hintText: context.l10n.iptvFilterCategories,
+                                                  hintStyle: TextStyle(color: AppColors.inkAlpha(0.35), fontSize: 12),
+                                                  prefixIcon: Icon(Icons.filter_list_rounded, color: AppColors.inkSubtle, size: 18),
+                                                  suffixIcon: _catSearchQuery.isNotEmpty
+                                                      ? IconButton(
+                                                          tooltip: context.l10n.commonClose,
+                                                          icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 16),
+                                                          onPressed: () {
+                                                            _catSearchCtrl.clear();
+                                                            setState(() => _catSearchQuery = '');
+                                                          },
+                                                        )
+                                                      : null,
+                                                  border: InputBorder.none,
+                                                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                                ),
+                                                onChanged: (v) => setState(() => _catSearchQuery = v),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -2007,14 +2034,14 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
 
                     if (widget.isAlive)
                       Container(
-                        margin: const EdgeInsets.only(right: 6),
+                        margin: const EdgeInsetsDirectional.only(end: 6),
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                         decoration: BoxDecoration(
                           color: Colors.greenAccent.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.4)),
                         ),
-                        child: const Text('LIVE', style: TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
+                        child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
                       ),
 
                     GestureDetector(
@@ -2175,13 +2202,13 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                 ),
                 if (widget.isAlive) ...[
                   Container(
-                    margin: const EdgeInsets.only(right: 8),
+                    margin: const EdgeInsetsDirectional.only(end: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                     decoration: BoxDecoration(
                       color: Colors.greenAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text('LIVE', style: TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
+                    child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
                   ),
                 ],
                 GestureDetector(
@@ -2488,6 +2515,7 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
                   ),
                 ),
                 IconButton(
+                  tooltip: context.l10n.commonClose,
                   icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -2521,7 +2549,9 @@ class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
                               ),
                             ),
                             title: Text(
-                              ep.title.isNotEmpty ? ep.title : 'Episode ${ep.episode}',
+                              ep.title.isNotEmpty
+                                  ? ep.title
+                                  : context.l10n.playerEpisodeN(ep.episode),
                               style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
                             ),
                             trailing: Icon(Icons.play_circle_fill_rounded, color: AppColors.accent),

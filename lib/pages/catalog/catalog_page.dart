@@ -331,7 +331,7 @@ class _CatalogPageState extends State<CatalogPage> {
                             if (_isSearching)
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.only(right: 16),
+                                  padding: const EdgeInsetsDirectional.only(end: 16),
                                   child: TextField(
                                     controller: _searchController,
                                     autofocus: true,
@@ -343,6 +343,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                       hintStyle: TextStyle(color: AppColors.inkAlpha(0.4)),
                                       border: InputBorder.none,
                                       suffixIcon: IconButton(
+                                        tooltip: context.l10n.commonClose,
                                         icon: const Icon(Icons.close_rounded, size: 20),
                                         color: AppColors.inkMuted,
                                         onPressed: _clearSearch,
@@ -354,6 +355,7 @@ class _CatalogPageState extends State<CatalogPage> {
                             if (!_isSearching && widget.section.catalog.supportsSearch)
                               IconButton(
                                 icon: const Icon(Icons.search_rounded),
+                                tooltip: context.l10n.commonSearch,
                                 color: AppColors.inkMuted,
                                 onPressed: () {
                                   setState(() {
@@ -477,7 +479,10 @@ class _CatalogPageState extends State<CatalogPage> {
               if (!extra.isRequired)
                 PopupMenuItem<String?>(
                   value: null,
-                  child: Text('All', style: TextStyle(color: AppColors.ink)),
+                  child: Text(
+                    context.l10n.commonAll,
+                    style: TextStyle(color: AppColors.ink),
+                  ),
                 ),
               ...extra.options.map(
                 (opt) => PopupMenuItem<String?>(
