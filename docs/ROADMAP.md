@@ -7,7 +7,7 @@ the release process is in [RELEASES.md](RELEASES.md), and item numbers
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-25**, on `v1.8.11+44`.
+Last reconciled: **2026-09-26**, on `v1.8.11+44`.
 
 ---
 
@@ -57,6 +57,40 @@ multi-audio file that defaults to a dub.
 key to give the panel once `C` became a toggle. Keyboard-only users reach it
 only through the transport bar, which needs a pointer. Deliverable trade made
 deliberately; revisit if a key frees up.
+
+**Embedded subtitles render on the automatic path only.** Reported from a
+local build on 2026-09-26: a file's own subtitles appear when playback starts
+and picks a track itself, and **do not** appear when a track is chosen by
+hand, nor from the online providers. So the feature works in exactly one of
+the three ways a viewer can reach it, and the one that works is the one
+nobody chose.
+
+This is not explained by the code, which is why it is written down rather
+than fixed. `_selectEmbeddedSubtitle` -- the handler behind a tap in the
+subtitle menu -- calls `_enableLibassForEmbedded()` on its last line, the
+same call the automatic path makes, so the manual route looks correct on
+paper. Either something between the tap and that call undoes it, or the
+report is about a different step than it appears to be.
+
+What to check first, in this order:
+
+1. **Does the menu show the embedded track as selected after tapping it?**
+   That separates "the tap never reached the handler" from "the handler ran
+   and the picture did not change".
+2. **Does the online path fail the same way, or differently?** An online
+   subtitle is a downloaded file played through the Flutter overlay, not
+   libass, so it shares no code with the embedded path -- two failures with
+   one cause would be a coincidence, and two with different causes is the
+   likelier reading.
+3. **Does the scale slider still kill an embedded track?** `_setSubtitleScale`
+   passes `forceLibass: _isEmbeddedSubtitleSelected`, and that getter reads
+   `_selectedEmbeddedSubtitleIndex`, which the manual path sets inside
+   `setState` immediately before the call. If the ordering is wrong the
+   slider would turn the track off again -- the same self-defeating shape as
+   the bug this was meant to fix.
+
+The automatic path is the one to keep working while the other two are
+investigated: it is the one a viewer meets without asking for anything.
 
 **#74's pill rail has not been seen on screen.** #73 was confirmed in a local
 temp build; the rail was not. What to look at: a source list too short to
