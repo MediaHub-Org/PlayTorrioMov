@@ -50,7 +50,7 @@ void main() {
       // recordings -- a viewer who wants Spanish (LATAM) does not want
       // Spanish (ES) -- so collapsing them hid the choice rather than
       // simplifying it.
-      expect(canonicalLanguageGroup('Spanish'), 'Spanish');
+      expect(canonicalLanguageGroup('Spanish'), 'Spanish (ES)');
       expect(canonicalLanguageGroup('Spanish (ES)'), 'Spanish (ES)');
       expect(canonicalLanguageGroup('Spanish (LATAM)'), 'Spanish (LATAM)');
       expect(canonicalLanguageGroup('Portuguese (BR)'), 'Portuguese (BR)');
@@ -188,10 +188,11 @@ void main() {
       expect(collapsed.length, 1);
     });
 
-    test('numbers what is left when the names are identical', () {
-      // Four rows reading "SubtitleCat" give a viewer nothing to choose
-      // between them by.
-      final numbered = SubtitleService.dedupeVariants([
+    test('collapses identical rows to the first instead of numbering', () {
+      // Two files that read identically give a viewer nothing to choose
+      // between them by, so listing both as "#1" and "#2" only listed the
+      // same choice twice.
+      final kept = SubtitleService.dedupeVariants([
         variant(
           provider: 'SubtitleCat',
           language: 'English',
@@ -206,7 +207,9 @@ void main() {
         ),
       ]);
 
-      expect(numbered.map((v) => v.title), ['Standard #1', 'Standard #2']);
+      expect(kept.length, 1);
+      expect(kept.single.title, 'Standard');
+      expect(kept.single.downloadUrl, 'https://x/1.srt');
     });
 
     test('leaves distinct titles alone', () {
@@ -233,9 +236,9 @@ void main() {
       expect(kept.length, 2);
     });
 
-    test('numbering does not leak across providers', () {
-      // Each provider's own duplicates are numbered from one, so two
-      // providers each offering one file do not become "#1" and "#2".
+    test('the same title from two providers stays two choices', () {
+      // Different downloads from different hosts, even when they read the
+      // same. Only a provider's own identical rows collapse.
       final kept = SubtitleService.dedupeVariants([
         variant(provider: 'SubtitleCat', language: 'English', title: 'Standard'),
         variant(provider: 'OpenSubtitles', language: 'English', title: 'Standard'),

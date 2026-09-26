@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../../models/subtitle/subtitle_model.dart';
+import '../../services/subtitles/subtitle_languages.dart';
 import 'language_flag.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
@@ -337,8 +338,22 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   /// The language row is marked when the language is on, not only when its
   /// *best* file is. Picking the second file for Arabic left the Arabic row
   /// unmarked, which read as "nothing is selected" while a subtitle played.
-  bool _isSelectedGroup(SubtitleLanguageGroup group) =>
-      group.variants.any(_isSelectedVariant);
+  ///
+  /// The group must match too, not just the URL: one provider lists the same
+  /// file under every language it was translated into, so the URL alone
+  /// ticked a row in each of them. The selected file went through the same
+  /// grouping on its way in, so mapping it back names exactly one group --
+  /// and a radio list never shows two.
+  bool _isSelectedGroup(SubtitleLanguageGroup group) {
+    final selected = widget.selectedVariant;
+    if (!widget.isSubtitleEnabled || selected == null) return false;
+    final url = selected.downloadUrl;
+    if (url.isEmpty) return false;
+    if (canonicalLanguageGroup(selected.language) != group.language) {
+      return false;
+    }
+    return group.variants.any((v) => v.downloadUrl == url);
+  }
 
   List<Widget> _buildRows(BuildContext context) {
     final rows = <Widget>[];

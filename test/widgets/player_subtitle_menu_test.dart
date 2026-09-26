@@ -624,5 +624,61 @@ void main() {
       expect(titles, isNot(contains('')));
       expect(titles, contains('French'));
     });
+
+    testWidgets('one file shared by two languages ticks exactly one row', (
+      tester,
+    ) async {
+      // A provider lists the same file under every language it was
+      // translated into, so the URL alone matched a row in each group and
+      // the radio list showed several. The selected file went through the
+      // same grouping on its way in, so mapping it back names one group.
+      const sharedUrl = 'https://x/shared.srt';
+      await tester.pumpWidget(
+        menu(
+          enabled: true,
+          selected: SubtitleVariant(
+            providerName: 'SubtitleCat',
+            language: 'Spanish (ES)',
+            title: 'Standard',
+            downloadUrl: sharedUrl,
+            format: 'srt',
+          ),
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Spanish (ES)',
+              variants: [
+                SubtitleVariant(
+                  providerName: 'SubtitleCat',
+                  language: 'Spanish (ES)',
+                  title: 'Standard',
+                  downloadUrl: sharedUrl,
+                  format: 'srt',
+                ),
+              ],
+            ),
+            SubtitleLanguageGroup(
+              language: 'English',
+              variants: [
+                SubtitleVariant(
+                  providerName: 'SubtitleCat',
+                  language: 'English',
+                  title: 'Standard',
+                  downloadUrl: sharedUrl,
+                  format: 'srt',
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      final rows = tester
+          .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+          .toList();
+      final ticked = rows.where((r) => r.isSelected).toList();
+      expect(ticked.length, 1);
+      expect(ticked.single.title, 'Spanish (ES)');
+    });
   });
 }

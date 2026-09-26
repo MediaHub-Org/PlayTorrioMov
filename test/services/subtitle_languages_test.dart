@@ -98,8 +98,11 @@ void main() {
     });
 
     test('a bare code still groups with its own language', () {
-      expect(canonicalLanguageGroup('Spanish'), 'Spanish');
-      expect(canonicalLanguageGroup('es'), 'Spanish');
+      // Untagged provider Spanish is Castilian until it says otherwise, so
+      // it joins the ES group rather than sitting beside it. LATAM-tagged
+      // results keep their own group.
+      expect(canonicalLanguageGroup('Spanish'), 'Spanish (ES)');
+      expect(canonicalLanguageGroup('es'), 'Spanish (ES)');
     });
 
     test('does not expose signs-only mpv tracks as a language', () {

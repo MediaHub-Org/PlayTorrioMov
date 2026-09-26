@@ -476,5 +476,10 @@ String canonicalLanguageGroup(String? rawLanguage) {
   // Script variants collapse to one Chinese group; the row still says which
   // script it is.
   if (name.startsWith('Chinese')) return 'Chinese';
+  // A bare "Spanish" from a provider is Castilian until it says otherwise,
+  // so it joins "Spanish (ES)" instead of sitting beside it as a
+  // near-duplicate. Region-tagged results keep their own group -- LATAM
+  // below stays apart -- so this only names the untagged one.
+  if (name == 'Spanish') return 'Spanish (ES)';
   return name;
 }

@@ -1237,13 +1237,25 @@ class _PlayerScreenState extends State<PlayerScreen>
     // removed to fix.
     PlayerSettings.embeddedSubtitleActive.value = true;
 
-    await _player.setSubtitleTrack(
-      SubtitleTrack(
-        embedded.index.toString(),
-        embedded.title,
-        embedded.language,
-      ),
-    );
+    // Guarded, and libass is enabled whether the selection reports success
+    // or not. `setSubtitleTrack` is asynchronous and can throw after the
+    // state above has already hidden the Flutter overlay; awaiting it bare
+    // meant a throw skipped the styling below and the track rendered
+    // nowhere -- the overlay off because of the state, libass off because
+    // the call that turns it on never ran. The call used to be fired and
+    // forgotten, so the styling always ran, which is why this worked in the
+    // last release and broke after the await was added.
+    try {
+      await _player.setSubtitleTrack(
+        SubtitleTrack(
+          embedded.index.toString(),
+          embedded.title,
+          embedded.language,
+        ),
+      );
+    } catch (e) {
+      debugPrint('[PlayerScreen] could not select embedded subtitle: $e');
+    }
     // libass, always, for an embedded track.
     //
     // The Flutter overlay draws text from `player.stream.subtitle`, which

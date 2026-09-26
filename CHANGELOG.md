@@ -48,9 +48,12 @@ rather than files, and the sleep timer can wait for the video to end.
 - **Regional subtitle variants are separate languages.** Spanish (ES) and
   Spanish (LATAM) are different recordings, not two spellings of one label,
   and they used to collapse into a single "Spanish" group -- so the choice
-  was hidden rather than simplified. The same for Portuguese (BR) and (PT),
-  and for English (US) and (UK). Only the Chinese *script* split still
-  collapses, because Simplified and Traditional are the same audio.
+  was hidden rather than simplified. An *untagged* "Spanish" joins the ES
+  group now instead of sitting beside it as a near-duplicate: a provider
+  that names no region means Castilian until it says otherwise. The same
+  for Portuguese (BR) and (PT), and for English (US) and (UK). Only the
+  Chinese *script* split still collapses, because Simplified and
+  Traditional are the same audio.
 - **Every player menu is the same width.** They were 280, 320 and 330, so
   the panel moved sideways as a viewer switched between them, and grouping
   any two under one icon would have been a layout change rather than a
@@ -142,12 +145,24 @@ rather than files, and the sleep timer can wait for the video to end.
   ignored the provider, so the survivor was whichever answered first -- a
   SubtitleCat file could be dropped in favour of an OpenSubtitles one with no
   way to tell. They are different downloads from different hosts.
-- **A provider's own identical rows are collapsed and numbered.** SubtitleCat
+- **A provider's own identical rows are collapsed.** SubtitleCat
   lists a file once per language it has been translated into, and the
-  translations share a title and a URL: those are one choice, not four. What
-  is left after collapsing is numbered per provider, so four rows reading
-  "SubtitleCat" become #1, #2, #3 rather than giving a viewer nothing to
-  choose between them by.
+  translations share a title and a URL: those are one choice, not four.
+  Rows that read identically -- same provider, title, format and flags --
+  keep the first rather than numbering "#1" and "#2", because a number on
+  the same choice twice is still the same choice twice. Anything that
+  differs in something visible stays separate, and the same title from two
+  providers stays two choices.
+- **Exactly one online subtitle row is ever marked.** The mark compared the
+  download URL alone, and one provider lists the same file under every
+  language it was translated into -- so picking it ticked a row in each
+  language. The row's own language must match too, which names one group.
+- **Selecting a file's own subtitle cannot silence itself anymore.** The
+  selection call was awaited bare, so a throw skipped the libass call below
+  it: the overlay was already off because of the selected state, libass was
+  never turned on, and the track rendered nowhere. The call is guarded and
+  libass is enabled either way, which is the last release's behavior -- the
+  styling ran regardless, because the call was fired and forgotten.
 - **The Forced and CC/SDH filters work on a file's own subtitles.** Both are
   read off a track's *title* -- "forced" and "SDH" are words a muxer writes
   there, and there is no other place they appear. But the player overwrote
