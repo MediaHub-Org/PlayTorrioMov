@@ -77,6 +77,27 @@ void main() {
       );
     });
 
+    test('a bare code for a title names the track', () {
+      // Muxers leave the tag blank and write "chi" as the title. Without
+      // this those tracks fell back to "Track N".
+      expect(uniqueTrackLanguageNames([null], ['chi']), ['Chinese']);
+      expect(uniqueTrackLanguageNames([null], ['eng']), ['English']);
+      expect(
+        uniqueTrackLanguageNames([null], ['English (US) PGS']),
+        ['English'],
+      );
+    });
+
+    test('free text is never guessed from', () {
+      // "Full" and "SDH" are not languages. A wrong guess here would
+      // mislabel the track, so these stay blank for the "Track N" fallback.
+      expect(uniqueTrackLanguageNames([null], ['[Full] SDH']), ['']);
+    });
+
+    test('a real tag beats whatever the title says', () {
+      expect(uniqueTrackLanguageNames(['spa'], ['chi']), ['Spanish']);
+    });
+
     test('three of a kind number in order', () {
       expect(
         uniqueTrackLanguageNames(

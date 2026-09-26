@@ -179,6 +179,15 @@ rather than files, and the sleep timer can wait for the video to end.
   twice; bitmap tracks (PGS) render through mpv's OSD with visibility left
   on, since they emit no text at all. The codec decides, falling back to
   the container title muxers write it into.
+- **Untagged tracks named by a bare code are labeled.** A file that tags no
+  language but titles a track "chi" shows Chinese now instead of "Track N".
+  Only a known code or an outright display name counts -- free text is never
+  guessed from, because a wrong guess mislabels the track.
+- **A rejected subtitle selection says so.** The player's property set never
+  throws, so a bad track id failed silently with the menu showing selected
+  and mpv on nothing. The id is read back and retried once, the picker
+  reports a miss honestly, and the diagnostics dump every subtitle entry
+  mpv knows, so an id mismatch shows itself in one paste.
 - **The Forced and CC/SDH filters work on a file's own subtitles.** Both are
   read off a track's *title* -- "forced" and "SDH" are words a muxer writes
   there, and there is no other place they appear. But the player overwrote

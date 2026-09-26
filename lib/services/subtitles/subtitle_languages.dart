@@ -368,15 +368,18 @@ String subtitleTrackLanguageName(String? rawLanguage) {
 /// kinds of thing. The audio menu keeps it on, where identical rows would
 /// otherwise collide with no recourse.
 ///
-/// Tracks whose language is unknown are left alone -- there is nothing to
-/// disambiguate, and numbering "Track 3" would invent a language.
+/// A track whose tag is empty but whose title is a bare code ("chi") is
+/// named for the code -- see [_guessLanguageFromTitle]. Tracks whose
+/// language is unknown even then are left alone: numbering "Track 3" would
+/// invent a language.
 List<String> uniqueTrackLanguageNames(
   List<String?> rawLanguages,
   List<String?> titles, {
   bool numberDuplicates = true,
 }) {
   final names = <String>[
-    for (final raw in rawLanguages) subtitleTrackLanguageName(raw),
+    for (var i = 0; i < rawLanguages.length; i++)
+      _namedOrGuessed(rawLanguages[i], i < titles.length ? titles[i] : null),
   ];
 
   final totals = <String, int>{};
@@ -403,6 +406,39 @@ List<String> uniqueTrackLanguageNames(
       }(),
   ];
 }
+
+/// The language when the tag is empty but the title is explicit.
+///
+/// Muxers leave the language field blank and write "chi" or "eng" as the
+/// title; without this those tracks fell back to "Track N". Only something
+/// unambiguous counts: a known code, an mpv tag, or a bare display name
+/// straight from the table. Free text is never guessed from -- "Full" is
+/// not a language, and a wrong guess here mislabels the track.
+String _namedOrGuessed(String? raw, String? title) {
+  final named = subtitleTrackLanguageName(raw);
+  if (named.isNotEmpty) return named;
+  final text = title?.trim().toLowerCase() ?? '';
+  if (text.isEmpty) return '';
+  if (_isKnownCode(text)) return subtitleTrackLanguageName(text);
+  for (final entry in _iso639ToDisplayName.entries) {
+    if (entry.value.toLowerCase() == text) return entry.value;
+  }
+  for (final token in text.split(RegExp(r'[^a-z]+'))) {
+    if (token.isEmpty) continue;
+    if (_isKnownCode(token)) return subtitleTrackLanguageName(token);
+    for (final entry in _iso639ToDisplayName.entries) {
+      if (entry.value.toLowerCase() == token) return entry.value;
+    }
+  }
+  return '';
+}
+
+/// A token the table actually knows: an ISO code or an mpv tag. Anything
+/// else falls through to the plain-text rendering, which is noise rather
+/// than a language.
+bool _isKnownCode(String token) =>
+    _iso639ToDisplayName.containsKey(token) ||
+    _mpvTagToDisplayName.containsKey(token);
 
 /// A region code read out of a track's own title, or null when it names none.
 ///

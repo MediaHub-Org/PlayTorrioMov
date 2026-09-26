@@ -1230,10 +1230,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       _currentCues = [];
     });
 
-    // The state is set *before* the track is selected, and the selection is
-    // guarded: `setSubtitleTrack` is asynchronous and can throw, and
-    // awaiting it bare once meant a throw skipped everything below and the
-    // track rendered nowhere.
+    // The state is set *before* the track is selected.
     //
     // How the track reaches the screen depends on what it is. Only ASS goes
     // through libass: its tags are rendering instructions, so the overlay
@@ -1242,35 +1239,28 @@ class _PlayerScreenState extends State<PlayerScreen>
     // did, and why this worked there -- with mpv's own rendering off so the
     // line is not drawn twice. A bitmap track emits no text at all, so it
     // renders through mpv's OSD with visibility left on.
-    try {
+    //
+    // The selection itself is verified, not assumed: the player's property
+    // set never throws -- it only logs -- so a rejected track id used to
+    // fail silently, with the menu showing selected and mpv on `no`.
+    final selected = await _selectEmbeddedTrack(embedded);
+    if (selected) {
       if (embedded.needsLibass) {
         PlayerSettings.embeddedSubtitleActive.value = true;
-        await _player.setSubtitleTrack(
-          SubtitleTrack(
-            embedded.index.toString(),
-            embedded.title,
-            embedded.language,
-          ),
-        );
         await _enableLibassForEmbedded();
       } else {
         PlayerSettings.embeddedSubtitleActive.value = false;
-        await _player.setSubtitleTrack(
-          SubtitleTrack(
-            embedded.index.toString(),
-            embedded.title,
-            embedded.language,
-          ),
-        );
         if (embedded.isImageSubtitle) {
           final dynamic platform = _player.platform;
-          await platform?.setProperty('sub-visibility', 'yes');
+          try {
+            await platform?.setProperty('sub-visibility', 'yes');
+          } catch (e) {
+            debugPrint('[PlayerScreen] could not show OSD subtitles: $e');
+          }
         } else {
           await PlayerSettings.applySubtitleStyling(_player);
         }
       }
-    } catch (e) {
-      debugPrint('[PlayerScreen] could not select embedded subtitle: $e');
     }
     _setSubtitleScale(_subtitleScale);
     _logSubtitleDiagnostics(embedded);
@@ -1278,33 +1268,70 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.playerSubSwitchedEmbedded(embedded.title)),
+          content: Text(
+            selected
+                ? context.l10n.playerSubSwitchedEmbedded(embedded.title)
+                : context.l10n.playerSubLoadFailed(embedded.title),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
     }
   }
 
+  /// Selects the embedded track in mpv and reports whether it stuck.
+  ///
+  /// Reads `sid` back because the property set below it never throws: a
+  /// rejected id fails silently, and without this the menu claimed a track
+  /// mpv had never heard of. One retry, for the transient case; a second
+  /// miss is logged by the diagnostics call that follows and left alone.
+  Future<bool> _selectEmbeddedTrack(PlayerEmbeddedSubtitle embedded) async {
+    final wanted = embedded.index.toString();
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        await _player.setSubtitleTrack(
+          SubtitleTrack(
+            wanted,
+            embedded.title,
+            embedded.language,
+          ),
+        );
+      } catch (e) {
+        debugPrint('[PlayerScreen] could not select embedded subtitle: $e');
+        return false;
+      }
+      try {
+        final dynamic platform = _player.platform;
+        final sid = await platform?.getProperty('sid') as String?;
+        if (sid == wanted) return true;
+        debugPrint(
+          '[PlayerScreen] sid stuck at $sid, wanted $wanted '
+          '(attempt $attempt)',
+        );
+      } catch (e) {
+        debugPrint('[PlayerScreen] could not read sid back: $e');
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// Logs what mpv actually reports about the subtitle state, after an
   /// embedded track has been selected.
   ///
-  /// This exists because three fixes have been made to this path by reading
-  /// the code, and none was confirmed against a file -- so the bug has
-  /// survived three plausible fixes. The five values below separate the three
-  /// possible causes in one run:
+  /// This exists because fixes have been made to this path by reading the
+  /// code, and the bug survived them -- so the guesswork stops here. One run
+  /// separates the causes:
   ///
-  ///  * `sid` is `no` or `auto` -- the selection never reached mpv, and the
-  ///    fault is in the selection call rather than in the styling.
-  ///  * `sid` is right but `sub-visibility` is `no` -- something turned it
-  ///    back off after it was set. Every appearance setter calls
-  ///    `applySubtitleStyling`, which honours the `useLibass` preference.
-  ///  * everything correct and still nothing on screen -- the video surface
-  ///    is covering it, or libass is drawing off-screen. A rendering fault,
-  ///    not a state one.
+  ///  * `sid` is `no` -- the selection never reached mpv. The property set
+  ///    never throws, so without the read-back in [_selectEmbeddedTrack]
+  ///    this failed silently.
+  ///  * `sid` is right but nothing renders -- the roster below says what the
+  ///    track is (codec, language, title) and which renderer owns it, so a
+  ///    wrong engine choice shows itself instead of being reasoned about.
   ///
-  /// `sub-text` being empty is *expected* for an ASS track: libass draws it
-  /// and mpv never emits it as text, which is the whole reason the Flutter
-  /// overlay cannot show an embedded track.
+  /// `sub-text` being empty proves nothing on its own: at any instant there
+  /// may simply be no dialogue, and a libass track never emits text anyway.
   ///
   /// Deliberately read-only. It changes no property and no state, so it can
   /// be removed without touching anything else.
@@ -1319,14 +1346,30 @@ class _PlayerScreenState extends State<PlayerScreen>
       final visibility = await read('sub-visibility');
       final ass = await read('sub-ass');
       final text = await read('sub-text');
-      final selected = await read('track-list/${embedded.index}/selected');
+      // Every subtitle entry mpv knows, so an id-mapping mismatch shows
+      // itself: the menu's index must be a track-list id, and a flat
+      // `track-list/N/selected` read cannot say that -- N is a position in
+      // the interleaved video/audio/subtitle array, not an id.
+      final roster = <String>[];
+      final count = int.tryParse(await read('track-list/count')) ?? 0;
+      for (var i = 0; i < count; i++) {
+        if (await read('track-list/$i/type') != 'sub') continue;
+        roster.add(
+          '[${await read('track-list/$i/id')}'
+          ':${await read('track-list/$i/lang')}'
+          ':${await read('track-list/$i/codec')}'
+          ':${await read('track-list/$i/title')}'
+          ':${await read('track-list/$i/selected')}]',
+        );
+      }
 
       debugPrint(
         '[SubDiag] selected embedded #${embedded.index} '
-        '(${embedded.language ?? embedded.title}) | '
+        '(${embedded.language ?? embedded.title}) '
+        'codec=${embedded.codec} | '
         'sid=$sid sub-visibility=$visibility sub-ass=$ass '
-        'track-list/${embedded.index}/selected=$selected '
-        'sub-text=${text.isEmpty ? '<empty>' : '"$text"'}',
+        'sub-text=${text.isEmpty ? '<empty>' : '"$text"'} | '
+        'roster=${roster.join(' ')}',
       );
     } catch (e) {
       debugPrint('[SubDiag] could not read subtitle state: $e');
