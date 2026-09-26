@@ -336,6 +336,8 @@ An answer means the feature is possible. A refusal closes it for good.
 | Offline tests for the page **scraping** (script tags, slug matching) | Its input is one host's markup on one day, so a fixture pins that day rather than a contract. The payload ciphers and response *formats* are covered; this is a smaller claim and not a reason to hold a release                                            |
 | Cast from Windows                                                    | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. Would mean a different protocol (DLNA/UPnP) — a feature, not a fix                                                                                        |
 | Sponsor/monetization, keyboard aspect-cycle HUD (upstream)           | Out of scope; and Mov already has an aspect control in the player settings                                                                                                                                                                                  |
+| Single-select audio-language filter                                  | "English or Spanish" is not expressible with one choice, and the multi-select checkmark delay was a stale-rows bug, now fixed by rebuilding the menu from the setting on every change — the control was never the problem                                                   |
+| Pure-alphabetical online subtitle order                              | The list leads with the language being heard because that is the track a viewer is most likely to want. A Spanish-first tie with ten files each is that rule working, not a sort bug; identical counts now tie-break alphabetically, covered by a test                          |
 
 ---
 

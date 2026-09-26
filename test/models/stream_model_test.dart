@@ -37,6 +37,24 @@ void main() {
         expect(source.codec, anyOf('AVC', 'H.264', 'x264'));
       });
     });
+    group('container detection', () {
+      test('reads MKV off the release name', () {
+        final source = StreamSource(addonName: 'TestAddon', name: 'Test', title: 'Movie.2024.1080p.WEB-DL.mkv', url: 'https://x.com/file');
+        expect(source.containerLabel, 'MKV');
+      });
+      test('reads MP4 off the URL', () {
+        final source = StreamSource(addonName: 'TestAddon', name: 'Test', title: 'Movie 2024 1080p', url: 'https://x.com/video.mp4');
+        expect(source.containerLabel, 'MP4');
+      });
+      test('reads HLS off an m3u8 URL', () {
+        final source = StreamSource(addonName: 'TestAddon', name: 'Test', title: 'VixSrc Master', url: 'https://x.com/master.m3u8');
+        expect(source.containerLabel, 'HLS');
+      });
+      test('a magnet with no extension gets no guess', () {
+        final source = StreamSource(addonName: 'TestAddon', name: 'Test', title: 'Movie 2024 1080p BluRay', url: 'magnet:?xt=urn:btih:abc123');
+        expect(source.containerLabel, isNull);
+      });
+    });
     group('qualityRank', () {
       test('4K ranks higher than 1080p', () {
         final fourK = StreamSource(addonName: 'TestAddon', name: 'A', title: '4K.Movie.mkv\nA', url: '');

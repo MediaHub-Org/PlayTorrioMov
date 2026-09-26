@@ -521,4 +521,108 @@ void main() {
       expect(rows.every((r) => !r.isSelected), isTrue);
     });
   });
+
+  group('online ordering and filtering', () {
+    List<SubtitleLanguageGroup> tenEach() => [
+      SubtitleLanguageGroup(
+        language: 'Spanish',
+        variants: [for (var i = 0; i < 10; i++) variant('Spanish', 'es$i')],
+      ),
+      SubtitleLanguageGroup(
+        language: 'Chinese',
+        variants: [for (var i = 0; i < 10; i++) variant('Chinese', 'zh$i')],
+      ),
+    ];
+
+    Future<List<String>> rowTitles(WidgetTester tester) async {
+      await tester.pump();
+      return tester
+          .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+          .map((r) => r.title)
+          .toList();
+    }
+
+    testWidgets('identical file counts fall back to alphabetical', (
+      tester,
+    ) async {
+      // Spanish before Chinese with ten files each is only correct when
+      // the audio is Spanish. With no spoken match the tie breaks
+      // alphabetically, so Chinese leads.
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Center(
+              child: PlayerSubtitleMenu(
+                groups: tenEach(),
+                embeddedSubtitles: const [],
+                selectedVariant: null,
+                selectedEmbeddedIndex: null,
+                isSubtitleEnabled: false,
+                audioLanguage: 'English',
+                onSelectVariant: (_) {},
+                onSelectEmbedded: (_) {},
+                onEnable: () {},
+                onDisable: () {},
+                onOpenSyncBar: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final titles = await rowTitles(tester);
+      expect(titles.indexOf('Chinese'), lessThan(titles.indexOf('Spanish')));
+    });
+
+    testWidgets('the language being heard still leads on a tie', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Center(
+              child: PlayerSubtitleMenu(
+                groups: tenEach(),
+                embeddedSubtitles: const [],
+                selectedVariant: null,
+                selectedEmbeddedIndex: null,
+                isSubtitleEnabled: false,
+                audioLanguage: 'Spanish',
+                onSelectVariant: (_) {},
+                onSelectEmbedded: (_) {},
+                onEnable: () {},
+                onDisable: () {},
+                onOpenSyncBar: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      final titles = await rowTitles(tester);
+      expect(titles.indexOf('Spanish'), lessThan(titles.indexOf('Chinese')));
+    });
+
+    testWidgets('a language with no name is not offered', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: '',
+              variants: [variant('', 'noname')],
+            ),
+            SubtitleLanguageGroup(
+              language: 'French',
+              variants: [variant('French', 'f')],
+            ),
+          ],
+        ),
+      );
+      final titles = await rowTitles(tester);
+      expect(titles, isNot(contains('')));
+      expect(titles, contains('French'));
+    });
+  });
 }

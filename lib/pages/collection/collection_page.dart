@@ -513,10 +513,18 @@ class _DownloadRow extends StatelessWidget {
   ///
   /// A `Wrap` rather than a `Row`: the audio list is variable-length, and a
   /// file tagged with four languages would otherwise run off the card.
+  /// The scraper that produced the source rides along too: the delivery
+  /// word (P2P / Debrid / HTTP) says how it arrived, not where it came
+  /// from, and two rows that both read "1080p · HTTP" are otherwise
+  /// indistinguishable.
   Widget _facts(BuildContext context, List<String> audio) {
+    final scraper = task.addonName?.trim().isNotEmpty == true
+        ? task.addonName!.trim()
+        : task.sourceName.trim();
     final facts = <String>[
       if (task.quality != null && task.quality!.isNotEmpty) task.quality!,
       _sourceLabel(context),
+      if (scraper.isNotEmpty) scraper,
       ...audio,
     ];
     if (facts.isEmpty) return const SizedBox.shrink();

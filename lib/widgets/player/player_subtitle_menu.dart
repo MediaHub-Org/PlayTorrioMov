@@ -378,11 +378,22 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         );
       }
     } else {
-      // Most files first. A language with twelve files is one a provider
-      // actually has coverage for; the long tail of one-file languages is
-      // where the junk lives, and it is also what made this list 200 rows.
+      // The language being heard first, then most files first.
+      //
+      // Audio-first for the same reason the embedded list leads with it: it
+      // is the language a viewer is most likely to want, and a viewer whose
+      // audio is Spanish should not have to read past Chinese to find it.
+      // After that, a language with twelve files is one a provider actually
+      // has coverage for; the long tail of one-file languages is where the
+      // junk lives, and it is also what made this list 200 rows. Alphabetical
+      // breaks a tie, so the order is stable rather than whatever the
+      // providers happened to answer in.
+      final spoken = SubtitleAutoPick.languageKey(widget.audioLanguage);
       final groups = widget.groups
           .where((g) => g.variants.isNotEmpty)
+          // A result with no language has no row name and nothing to
+          // choose it by, so it is not offered rather than listed blank.
+          .where((g) => g.language.trim().isNotEmpty)
           .where(
             (g) => _passesFilter(
               isForced: g.variants.first.isForced,
@@ -390,7 +401,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             ),
           )
           .toList()
-        ..sort((a, b) => b.variants.length.compareTo(a.variants.length));
+        ..sort((a, b) {
+          final aSpoken =
+              spoken != null && SubtitleAutoPick.languageKey(a.language) == spoken;
+          final bSpoken =
+              spoken != null && SubtitleAutoPick.languageKey(b.language) == spoken;
+          if (aSpoken != bSpoken) return aSpoken ? -1 : 1;
+          final byCount = b.variants.length.compareTo(a.variants.length);
+          if (byCount != 0) return byCount;
+          return a.language.compareTo(b.language);
+        });
 
       final visible = _showAllOnline ? groups : groups.take(_onlineCap).toList();
 

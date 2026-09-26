@@ -811,6 +811,26 @@ class _PlayerScreenState extends State<PlayerScreen>
     widget.onNextEpisode?.call();
   }
 
+  /// The release name's single detected audio language, or null.
+  ///
+  /// Read off the source rather than the track list, for a file whose own
+  /// tags say nothing. `multi` is excluded: it names no language, so it
+  /// would only replace one unhelpful label with another.
+  String? _singleSourceAudioLanguage() {
+    try {
+      final langs = widget.source
+          .getAudioLanguages(mediaTitle: widget.title)
+          .where((lang) => lang != 'multi')
+          .toList();
+      if (langs.length != 1) return null;
+      final name = subtitleLanguageName(langs.single);
+      return name.isEmpty ? null : name;
+    } catch (_) {
+      // Release-name sniffing must never break track listing.
+      return null;
+    }
+  }
+
   void _updateMediaTracks(Tracks tracks) {
     if (!mounted) return;
     final audioList = tracks.audio;
@@ -830,6 +850,16 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
 
     final audioTracks = <PlayerAudioTrack>[];
+    // What the release name says the file carries, for the common HTTP
+    // case of one untagged track: mpv reports no language and often no
+    // title either, so the chain below would fall through to the codec
+    // and the row would read "AAC". A single detected language from the
+    // source says more than a codec ever does. Only for one track and
+    // only one detected language: anything else would be guessing which
+    // of several tracks this row is.
+    final sourceAudioHint = keptAudio.length == 1
+        ? _singleSourceAudioLanguage()
+        : null;
     for (var i = 0; i < keptAudio.length; i++) {
       final t = keptAudio[i];
       final cleaned = audioNames[i];
@@ -838,17 +868,24 @@ class _PlayerScreenState extends State<PlayerScreen>
       // audio track reported it as the third.
       //
       // The fallback chain, in order of how much it tells the viewer: the
-      // language, then the container's own title, then the codec, then a
-      // plain "Audio". A P2P stream often tags no language at all, and
-      // "Audio" alone is the least useful of the four -- the codec at least
-      // says something about the track.
+      // language, then the container's own title, then what the release
+      // name detected for a single-track file, then the codec, then a
+      // plain "Audio". A P2P or HTTP stream often tags no language at
+      // all, and "Audio" alone is the least useful of the five -- while
+      // the codec ("AAC") says something, it never answers which
+      // language is being heard.
+      final containerTitle = t.title?.trim().isNotEmpty == true
+          ? t.title!.trim()
+          : null;
+      final codecLabel = t.codec?.trim().isNotEmpty == true
+          ? t.codec!.trim().toUpperCase()
+          : null;
       final title = cleaned.isNotEmpty
           ? cleaned
-          : (t.title?.trim().isNotEmpty == true
-                ? t.title!.trim()
-                : (t.codec?.trim().isNotEmpty == true
-                      ? t.codec!.trim().toUpperCase()
-                      : 'Audio'));
+          : (containerTitle ??
+                sourceAudioHint ??
+                codecLabel ??
+                'Audio');
       final idx = int.tryParse(t.id) ?? (i + 1);
       audioTracks.add(
         PlayerAudioTrack(
@@ -1172,7 +1209,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     });
   }
 
-  void _selectEmbeddedSubtitle(PlayerEmbeddedSubtitle embedded) {
+  Future<void> _selectEmbeddedSubtitle(PlayerEmbeddedSubtitle embedded) async {
     setState(() {
       _selectedEmbeddedSubtitleIndex = embedded.index;
       _currentSubtitleVariant = SubtitleVariant(
@@ -1187,14 +1224,26 @@ class _PlayerScreenState extends State<PlayerScreen>
       _currentCues = [];
     });
 
-    _player.setSubtitleTrack(
+    // The state is set *before* the track is selected, and the selection is
+    // awaited before anything styles it.
+    //
+    // Both halves are the fix for "selecting an embedded track shows
+    // nothing". `setSubtitleTrack` is asynchronous -- it issues `sub-add`
+    // and `select` to mpv -- and it used to be fired and forgotten, so the
+    // styling call below could run first and set `sub-visibility=no` for a
+    // track that had not been added yet. Setting the state first means every
+    // styling call in between keeps libass on rather than turning it back
+    // off, which is the same self-defeating shape the `forceLibass` flag was
+    // removed to fix.
+    PlayerSettings.embeddedSubtitleActive.value = true;
+
+    await _player.setSubtitleTrack(
       SubtitleTrack(
         embedded.index.toString(),
         embedded.title,
         embedded.language,
       ),
     );
-    _setSubtitleScale(_subtitleScale);
     // libass, always, for an embedded track.
     //
     // The Flutter overlay draws text from `player.stream.subtitle`, which
@@ -1203,7 +1252,8 @@ class _PlayerScreenState extends State<PlayerScreen>
     // with the overlay in charge and `sub-visibility` off -- which is what
     // the default `useLibass: false` sets -- an embedded track was invisible
     // both ways. That is why a file's own subtitles "did not load".
-    _enableLibassForEmbedded();
+    await _enableLibassForEmbedded();
+    _setSubtitleScale(_subtitleScale);
     _logSubtitleDiagnostics(embedded);
 
     if (mounted) {
@@ -1269,14 +1319,14 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// The state is set first, because [PlayerSettings.applySubtitleStyling]
   /// reads it rather than taking a flag -- see
   /// [PlayerSettings.embeddedSubtitleActive] for why.
-  void _enableLibassForEmbedded() {
+  Future<void> _enableLibassForEmbedded() async {
     try {
       PlayerSettings.embeddedSubtitleActive.value = true;
       final dynamic platform = _player.platform;
       if (platform == null) return;
-      platform.setProperty('sub-visibility', 'yes');
-      platform.setProperty('sub-ass', 'yes');
-      PlayerSettings.applySubtitleStyling(_player);
+      await platform.setProperty('sub-visibility', 'yes');
+      await platform.setProperty('sub-ass', 'yes');
+      await PlayerSettings.applySubtitleStyling(_player);
     } catch (e) {
       debugPrint('[PlayerScreen] could not enable libass for embedded subs: $e');
     }

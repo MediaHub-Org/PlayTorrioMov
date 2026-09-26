@@ -398,6 +398,24 @@ class StreamSource {
     return _cachedCodec = null;
   }
 
+  String? _cachedContainer;
+  bool _containerComputed = false;
+  /// The file type off the URL or the release name: MKV, MP4, AVI, WEBM
+  /// or HLS. Null when neither names one -- a magnet whose name carries
+  /// no extension gets no guess, because a wrong MKV on an MP4 is worse
+  /// than no label at all.
+  String? get containerLabel {
+    if (_containerComputed) return _cachedContainer;
+    _containerComputed = true;
+    final text = '${url ?? ''} ${title ?? ''} ${name ?? ''}'.toLowerCase();
+    if (text.contains('.m3u8')) return _cachedContainer = 'HLS';
+    if (text.contains('.mkv')) return _cachedContainer = 'MKV';
+    if (text.contains('.mp4')) return _cachedContainer = 'MP4';
+    if (text.contains('.avi')) return _cachedContainer = 'AVI';
+    if (text.contains('.webm')) return _cachedContainer = 'WEBM';
+    return _cachedContainer = null;
+  }
+
   String? _cachedFileSize;
   bool _fileSizeComputed = false;
   /// Extract file size string if mentioned in title, name, or description.

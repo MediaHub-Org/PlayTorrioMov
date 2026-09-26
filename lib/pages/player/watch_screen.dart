@@ -1239,7 +1239,7 @@ class _WatchScreenState extends State<WatchScreen>
   /// sharing.
   void _showFilterMenu({
     required BuildContext buttonContext,
-    required List<Widget> items,
+    required List<Widget> Function() itemBuilder,
     Listenable? listenable,
   }) {
     final RenderBox button = buttonContext.findRenderObject() as RenderBox;
@@ -1321,12 +1321,13 @@ class _WatchScreenState extends State<WatchScreen>
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             // A multi-select menu stays open across taps, so
-                            // its items have to be rebuilt when the setting
-                            // changes. Without this the list was built once,
-                            // when the dialog opened, and a checkmark only
-                            // appeared after closing and reopening the menu.
+                            // its items are rebuilt from [itemBuilder] on
+                            // every setting change. Building the rows once,
+                            // when the dialog opened, captured `selected`
+                            // then and a checkmark only appeared after
+                            // closing and reopening the menu.
                             children: listenable == null
-                                ? items
+                                ? itemBuilder()
                                 : [
                                     ListenableBuilder(
                                       listenable: listenable,
@@ -1334,7 +1335,7 @@ class _WatchScreenState extends State<WatchScreen>
                                         mainAxisSize: MainAxisSize.min,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: items,
+                                        children: itemBuilder(),
                                       ),
                                     ),
                                   ],
@@ -1392,7 +1393,7 @@ class _WatchScreenState extends State<WatchScreen>
   void _showSizeGlassDropdown(BuildContext buttonContext) {
     _showFilterMenu(
       buttonContext: buttonContext,
-      items: [
+      itemBuilder: () => [
         _buildSizeDropdownItem('All Sizes', null),
         _buildFilterMenuDivider(),
         _buildSizeDropdownItem('< 1 GB', '<1gb'),
@@ -1433,7 +1434,7 @@ class _WatchScreenState extends State<WatchScreen>
   void _showAddonGlassDropdown(BuildContext buttonContext, List<String> addons) {
     _showFilterMenu(
       buttonContext: buttonContext,
-      items: [
+      itemBuilder: () => [
         _buildAddonDropdownItem('All Sources', null),
         _buildFilterMenuDivider(),
         ...addons.map((a) => _buildAddonDropdownItem(a, a)),
@@ -1470,7 +1471,7 @@ class _WatchScreenState extends State<WatchScreen>
   void _showQualityGlassDropdown(BuildContext buttonContext) {
     _showFilterMenu(
       buttonContext: buttonContext,
-      items: kQualityFilterKeys
+      itemBuilder: () => kQualityFilterKeys
           .map(
             (key) => _buildFilterMenuItem(
               title: qualityFilterLabel(context.l10n, key),
@@ -1502,7 +1503,10 @@ class _WatchScreenState extends State<WatchScreen>
   void _showAudioGlassDropdown(BuildContext buttonContext) {
     _showFilterMenu(
       buttonContext: buttonContext,
-      items: kAudioFilterKeys.map(_buildAudioDropdownItem).toList(),
+      // Built fresh on every rebuild, so `selected` reflects the tap that
+      // just happened rather than the state when the dialog opened.
+      itemBuilder: () =>
+          kAudioFilterKeys.map(_buildAudioDropdownItem).toList(),
       listenable: SourceFilterSettings.audioLanguages,
     );
   }

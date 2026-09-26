@@ -71,7 +71,13 @@ rather than files, and the sleep timer can wait for the video to end.
 - **Online subtitles with no language are not offered.** A result whose
   language field is empty or an unknown code cannot be listed -- the row
   would have no name -- and cannot be chosen deliberately, because there is
-  nothing to choose it by.
+  nothing to choose it by. The menu enforces this itself now rather than
+  trusting every search path to have filtered first.
+- **Online subtitles break ties alphabetically.** The list leads with the
+  language being heard, then orders by how many files each language has.
+  Two languages with the same count used to fall wherever the providers
+  happened to answer, so Spanish could sit above Chinese with ten files
+  each. The tie now breaks alphabetically, which is stable.
 - **The subtitle file count is gone.** The row picks the best file for the
   language, the way Netflix and Disney+ do, so "5 files" was a number about
   an implementation the viewer never sees, beside a choice that is always
@@ -92,8 +98,33 @@ rather than files, and the sleep timer can wait for the video to end.
   languages are read off the source when the download starts and stored on
   the task, because the source object is gone by the time the row is drawn.
   A P2P row also shows its peer count while it runs.
+- **A download names its scraper.** The delivery word (P2P / Debrid / HTTP)
+  says how a file arrived, not where it came from, so two rows reading
+  "1080p · HTTP" were indistinguishable. The chip reads off the stored
+  source name, preferring the add-on's own short name.
 - **A completed download whose file is gone says so.** It would otherwise
   offer Play and then fail.
+
+### Changed
+- **A file's own subtitles are no longer turned on by themselves.** The
+  choice was made per file, from scratch, every time -- so it surprised the
+  viewer and could not learn: someone who turned subtitles off got them back
+  on the next episode. Auto-select is only defensible with a remembered
+  preference, and there is not one yet. The list is still there, still leads
+  with the language being heard, and the viewer picks.
+- **Changing the subtitle font, size, colour or position no longer turns an
+  embedded track off.** `applySubtitleStyling` took a `forceLibass` flag, and
+  every appearance setter called it without the flag -- so the styling call
+  honoured the `useLibass` preference, which is off by default, and set
+  `sub-visibility=no`. The flag is gone; whether libass is used is now one
+  piece of state, set in one place and read in one place, so no call site can
+  forget it.
+- **A source row reads scraper, quality and container.** It read the full
+  release name -- audio tags, codec, size, group and all -- as a paragraph
+  in a 12px row. Rows read "VixSrc · 1080p · HLS" now. Delivery (P2P / HTTP)
+  and seed health already have their own badges above the title, so nothing
+  is lost. A magnet whose name carries no extension gets no container
+  rather than a guessed one.
 
 ### Fixed
 - **The online subtitle list no longer marks every row as selected.** The
@@ -196,7 +227,18 @@ rather than files, and the sleep timer can wait for the video to end.
   looked shuffled.
 - **An audio track with no language tag is no longer called "Audio".** A P2P
   stream often tags none, and the fallback chain is now the container's own
-  title, then the codec, then "Audio" -- each one says more than the last.
+  title, then -- for a file with a single track -- the language the release
+  name detects, then the codec, then "Audio". An untagged lone track used
+  to read "AAC", which never answers which language is being heard; the
+  release name usually does. The container's own title still wins when it
+  says something, and several untagged tracks still fall back to the codec
+  rather than guessing which row is which language.
+- **A multi-select filter's checkmark appears on the first tap.** The menu's
+  items were captured when the dialog opened, so the tick only showed
+  after closing and reopening it. The rows are rebuilt from the setting on
+  every change now, which also keeps the filters multi-select: picking
+  "English or Spanish" stays expressible without reopening the menu
+  between taps.
 - **The audio and quality pills say "Any Audio" and "Any Quality"** when
   nothing is selected, matching "All Sizes" beside them rather than a bare
   "Any" that could belong to either.
