@@ -218,14 +218,27 @@ people search and recognize things.
 ### Text scale and accessibility (#69)
 
 **~46 of the ~68 files in `lib/` with a fixed `height:` are still
-unaudited.** Twenty-two high-traffic boxes are fixed so far, the settings
+unaudited.** Twenty-five high-traffic boxes are fixed so far, the settings
 pages among them. What is left is the long tail, in rough order of how many
 people meet it:
 
-1. **The remaining details-page rails** — cast, related, similar.
-2. **Live TV's portal browser** — a modal with its own toolbars.
-3. **The player's own overlays** — the subtitle style editor's inner rows,
-   the cast sheet, the episode picker.
+1. **Live TV's portal browser** — a modal with its own toolbars.
+2. **The player's own overlays** — the cast sheet and the episode picker.
+   (The subtitle style editor is probed.)
+
+The details-page rails are done, and one of the three never needed doing:
+
+| Rail | Fixed box | Verdict |
+|:--|:--|:--|
+| Cast | `SizedBox(height: 148)` | Name capped at 1.3. The column is avatar + 6 + name + 2 + role, and the role was already capped at 1.0; the 12px name alone wanted ~43px at 3x, asking ~151 of a 148 box |
+| Similar | `cardWidth * 1.5 + 64` | Both lines capped at 1.3. The poster takes the 1.5, so the title and year/genre share a flat 64px — they want ~39 at 1.0 and ~96 at 3x |
+| Related | `cardWidth * 1.5 + 8` | **Nothing to do.** The item is a bare poster in an `AspectRatio(2/3)` with no `Text` anywhere, so no text scale can move it. Listed here as a target for three revisions on the assumption it looked like the other two |
+
+Those three are reasoned from the arithmetic rather than probed, and that is
+a real gap: `DetailsPage` fetches its own data over the network and its rails
+are private builders, so there is nothing a test can construct. Making them
+probeable means extracting the credit card and the similar card as public
+widgets — worth doing, not done here.
 
 The method is settled and does not need rediscovering:
 
