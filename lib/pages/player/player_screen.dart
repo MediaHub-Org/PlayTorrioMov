@@ -163,10 +163,6 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// first non-empty track list.
   bool _audioPreferenceApplied = false;
 
-  /// Whether the file's own subtitle track has already been turned on
-  /// automatically. Same one-shot rule as the audio ranking: a viewer who
-  /// turned subtitles off must not have them come back on a track update.
-  bool _embeddedSubtitleAutoLoaded = false;
   bool _showAudioHud = false;
   String _audioHudText = '';
   Timer? _audioHudTimer;
@@ -967,31 +963,6 @@ class _PlayerScreenState extends State<PlayerScreen>
       }
     });
     _markDefaultSubtitleTracks();
-    _autoLoadEmbeddedSubtitle();
-  }
-
-  /// Turns on the file's own subtitle track when playback starts.
-  ///
-  /// A file that ships subtitles ships them for a reason, and a viewer who
-  /// wants them should not have to open a menu to find out they were there.
-  /// The track chosen is the one matching the language being heard, then the
-  /// file's own default, then the first -- the same order [_pickBestSubtitle]
-  /// uses, so the automatic choice and the manual one agree.
-  ///
-  /// Only once, and only when nothing is on yet: a viewer who turned
-  /// subtitles off, or picked a track, must not have that undone by a later
-  /// track update.
-  void _autoLoadEmbeddedSubtitle() {
-    if (_embeddedSubtitleAutoLoaded) return;
-    if (_embeddedSubtitles.isEmpty) return;
-    if (_isSubtitleEnabled) return;
-    _embeddedSubtitleAutoLoaded = true;
-
-    final auto = SubtitleAutoPick.embedded(
-      _embeddedSubtitles,
-      audioLanguage: _selectedAudioLanguage,
-    );
-    if (auto != null) _selectEmbeddedSubtitle(auto);
   }
 
   /// Switches to the ranked track libmpv reported, mirroring what a tap in
@@ -1245,26 +1216,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     }
   }
 
-  /// Turns mpv's own subtitle rendering on, for an embedded track.
-  ///
-  /// Deliberately not routed through [PlayerSettings.applySubtitleStyling]:
-  /// that honours the `useLibass` preference, and this is not a preference.
-  /// An embedded ASS track has no other way to reach the screen.
-  void _enableLibassForEmbedded() {
-    try {
-      final dynamic platform = _player.platform;
-      if (platform == null) return;
-      platform.setProperty('sub-visibility', 'yes');
-      platform.setProperty('sub-ass', 'yes');
-      // forceLibass, because the preference is off by default and this is
-      // not a preference: without it this call would set
-      // `sub-visibility=no` and undo the two lines above.
-      PlayerSettings.applySubtitleStyling(_player, forceLibass: true);
-    } catch (e) {
-      debugPrint('[PlayerScreen] could not enable libass for embedded subs: $e');
-    }
-  }
-
   /// Logs what mpv actually reports about the subtitle state, after an
   /// embedded track has been selected.
   ///
@@ -1310,6 +1261,26 @@ class _PlayerScreenState extends State<PlayerScreen>
       );
     } catch (e) {
       debugPrint('[SubDiag] could not read subtitle state: $e');
+    }
+  }
+
+  /// Turns mpv's own subtitle rendering on, for an embedded track.
+  ///
+  /// Deliberately not routed through [PlayerSettings.applySubtitleStyling]:
+  /// that honours the `useLibass` preference, and this is not a preference.
+  /// An embedded ASS track has no other way to reach the screen.
+  void _enableLibassForEmbedded() {
+    try {
+      final dynamic platform = _player.platform;
+      if (platform == null) return;
+      platform.setProperty('sub-visibility', 'yes');
+      platform.setProperty('sub-ass', 'yes');
+      // forceLibass, because the preference is off by default and this is
+      // not a preference: without it this call would set
+      // `sub-visibility=no` and undo the two lines above.
+      PlayerSettings.applySubtitleStyling(_player, forceLibass: true);
+    } catch (e) {
+      debugPrint('[PlayerScreen] could not enable libass for embedded subs: $e');
     }
   }
 
