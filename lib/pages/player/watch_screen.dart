@@ -19,6 +19,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/stream/stream_model.dart';
 import './player_screen.dart';
 import '../../services/app_breakpoints.dart';
+import '../../services/scraper/stream_scraper.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/download/download_launcher.dart';
@@ -1863,12 +1864,16 @@ class _SourceCardState extends State<_SourceCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // One title: scraper, quality and container. The raw
-                        // release name and description repeated the same long
-                        // string twice, and every fact in it already reads as
-                        // a badge below.
+                        // One title: the site behind the source, then quality
+                        // and container. The raw release name and description
+                        // repeated the same long string twice, and every fact
+                        // in it already reads as a badge below. The site comes
+                        // from the registered roster, not the delivery label
+                        // most scrapers stamp.
                         Text(
-                          s.compactTitle,
+                          s.compactTitleFor(
+                            ScraperManager.instance.providerDisplayName(s),
+                          ),
                           style: const TextStyle(
                             color: _C.textPrimary,
                             fontSize: 13,

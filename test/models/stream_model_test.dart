@@ -72,6 +72,11 @@ void main() {
         final source = StreamSource(addonName: 'VixSrc', name: 'VixSrc', title: 'Movie.2024.1080p.WEB-DL.mkv', url: 'https://x.com/f');
         expect(source.compactTitle, 'VixSrc • 1080p • MKV');
       });
+      test('takes a resolved provider instead of the delivery label', () {
+        final source = StreamSource(addonName: 'PlayTorrioHTTP', name: 'HindMoviez • 1080p', title: 'Movie.2024.1080p.WEB-DL.mkv', url: 'https://x.com/f');
+        expect(source.compactTitle, 'PlayTorrioHTTP • 1080p • MKV');
+        expect(source.compactTitleFor('HindMoviez'), 'HindMoviez • 1080p • MKV');
+      });
       test('falls back to the full title when nothing is known', () {
         final source = StreamSource(addonName: '', name: 'Test', title: 'Some Release', url: '');
         expect(source.compactTitle, 'Some Release');

@@ -93,6 +93,51 @@ class ScraperManager {
   /// from) Settings with no second list to update.
   List<StreamScraper> get scrapers => List.unmodifiable(_scrapers);
 
+  /// The site behind a source, for card titles and download rows.
+  ///
+  /// Most built-in scrapers stamp every source with the same delivery label
+  /// (`PlayTorrioHTTP`), so the add-on name says how a source arrives, not
+  /// where it came from. The site's own name rides in front of the source
+  /// name instead ("HindMoviez • 1080p"), and this matches that head against
+  /// the registered roster. Anything unmatched -- a Stremio addon's release
+  /// title, a numeric file id -- falls back to the add-on name, which for a
+  /// Stremio source already is the provider.
+  String providerDisplayName(StreamSource source) => resolveProviderName(
+        source.addonName,
+        source.name,
+        _scrapers.map((s) => s.displayName),
+      );
+
+  /// The matching itself, static so a test can drive it without registering
+  /// scrapers into the singleton.
+  @visibleForTesting
+  static String resolveProviderName(
+    String addonName,
+    String? sourceName,
+    Iterable<String> registered,
+  ) {
+    final head =
+        (sourceName ?? '').split(RegExp(r'\s*[•·|]\s*|\s+-\s+')).first.trim();
+    if (head.isNotEmpty) {
+      for (final registeredName in registered) {
+        if (registeredName.toLowerCase() == head.toLowerCase()) {
+          return registeredName;
+        }
+      }
+    }
+    // Same roster, for an add-on name that only differs in case.
+    final fallback = addonName.trim();
+    if (fallback.isNotEmpty) {
+      for (final registeredName in registered) {
+        if (registeredName.toLowerCase() == fallback.toLowerCase()) {
+          return registeredName;
+        }
+      }
+      return fallback;
+    }
+    return 'Unknown';
+  }
+
   void registerScraper(StreamScraper scraper) {
     if (!_scrapers.any((s) => s.runtimeType == scraper.runtimeType)) {
       _scrapers.add(scraper);

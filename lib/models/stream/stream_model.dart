@@ -532,10 +532,15 @@ class StreamSource {
   /// its facts already read as badges beside the row. Falls back to the
   /// full title when none of the three is known, which is better than an
   /// empty row no one can act on.
-  String get compactTitle {
-    final scraper = addonName.trim();
+  String get compactTitle => compactTitleFor(addonName.trim());
+
+  /// [compactTitle], with the provider resolved through the scraper roster
+  /// first. Most built-ins stamp `PlayTorrioHTTP` on everything they yield,
+  /// so the raw add-on name would title every row alike; pass
+  /// `ScraperManager.instance.providerDisplayName(source)` for the site.
+  String compactTitleFor(String provider) {
     final parts = [
-      if (scraper.isNotEmpty) scraper,
+      if (provider.isNotEmpty) provider,
       if (quality != null && quality!.isNotEmpty) quality!,
       if (containerLabel != null) containerLabel!,
     ];

@@ -20,6 +20,10 @@ rather than files, and the sleep timer can wait for the video to end.
   delivery with seed health, container (MKV/MP4), release source
   (REMUX/BluRay/WEB-DL), codec, size and audio languages. A numeric file id
   shows the scraper instead.
+- **Provider names come from the registered roster.** Most built-in scrapers
+  stamp every source `PlayTorrioHTTP`, so cards and download rows resolve the
+  site behind a source ("HindMoviez") through the scraper list instead. A
+  Stremio release title matches nothing and keeps its manifest name.
 - **Continue Watching badges, season parts and the Arabic sheet's status
   lines follow the app language.** Source-type and countdown badges, the
   `Movie` type label and collection `Part N` are keys now. `S01E01` shapes

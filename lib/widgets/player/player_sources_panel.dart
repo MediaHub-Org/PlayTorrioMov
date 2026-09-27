@@ -7,6 +7,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/stream/stream_service.dart';
+import '../../services/scraper/stream_scraper.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/anime_arabic/anime_arabic_extractor.dart';
@@ -557,11 +558,14 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
   ) {
     // Scraper, quality and container only: the release name's facts already
     // read as badges, so the full string would repeat them as a paragraph.
-    // See StreamSource.compactTitle, which falls back to the full title
-    // when none of the three is known.
+    // The site comes from the registered roster (see
+    // ScraperManager.providerDisplayName); the raw add-on name is a
+    // delivery label most scrapers share.
     final title = (source.title == null && source.name == null)
         ? context.l10n.playerStreamSourceFallback
-        : source.compactTitle;
+        : source.compactTitleFor(
+            ScraperManager.instance.providerDisplayName(source),
+          );
     // StreamSource.isMagnet, not a bare infoHash check: a magnet: URL
     // with no separate infoHash field is still a torrent, and the icon
     // has to agree with the P2P/HTTP badge next to it.
@@ -657,10 +661,11 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                           // same wherever it is listed.
                           ...sourceDeliveryBadges(source),
 
-                          // The scraper's own short name -- never a bare file
-                          // id. See StreamSource.displayProvider.
+                          // The site behind the source, resolved through the
+                          // registered roster -- never a bare file id or a
+                          // shared delivery label.
                           Text(
-                            source.displayProvider,
+                            ScraperManager.instance.providerDisplayName(source),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.50),
                               fontSize: 11,
