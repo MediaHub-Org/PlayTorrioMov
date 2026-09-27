@@ -691,3 +691,20 @@ something obvious that runs per frame, measure it.
 - [ ] `flutter analyze --fatal-infos` clean.
 - [ ] `flutter test --exclude-tags network` green.
 - [ ] `CHANGELOG.md` updated if user-visible.
+
+---
+
+## 12. Out of scope
+
+Settled product decisions, kept here so they stop being re-litigated. None
+of these is a task; proposing one of them again needs a reason the row does
+not already answer.
+
+| What | Why not |
+|:--|:--|
+| Merge `megasource` / `nova` (50 shared windows) | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common |
+| Offline tests for page **scraping** (script tags, slug matching) | Fixtures would pin one host's markup on one day rather than a contract; the payload ciphers and response *formats* are covered |
+| Cast from Windows | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. Would mean DLNA/UPnP -- a feature, not a fix |
+| Sponsor/monetization, keyboard aspect-cycle HUD (upstream) | Out of scope; and Mov already has an aspect control in the player settings |
+| Single-select audio-language filter | "English or Spanish" is not expressible with one choice |
+| Pure-alphabetical online subtitle order | The list leads with the language being heard because that is the track a viewer is most likely to want; ties break alphabetically |

@@ -61,6 +61,9 @@ navigator is what lets a Details page be pushed *inside* a section, so
 switching section from the pills or the bottom bar pops back to that
 section's root instead of leaving the Details page on top of the switch.
 
+Phones show sections in the bottom tab bar; tablet and desktop show them as
+a chip row under the top bar. Search stays an icon, not a section.
+
 ---
 
 ## Where content comes from
