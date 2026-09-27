@@ -673,7 +673,7 @@
   "liveTvSecSpotlight": "Live Spotlight & Hero Banner",
   "liveTvSecCards": "Channel Cards & Poster Density",
   "liveTvSecSections": "Sections & Category Manager",
-  "liveTvSecPortalsModal": "Portals & Playlists Modal",
+  "liveTvSecPortalsModal": "Portals & Playlists",
   "liveTvSecBrowser": "Portal Browser & Channel Guide",
   "liveTvShowSpotlight": "Show Live Spotlight Banner",
   "liveTvShowSpotlightSub": "Featured championship matches and top broadcast channels at the top",
@@ -1285,6 +1285,8 @@
   "iptvAddFavorite": "Add to favorites",
   "iptvRemoveFavorite": "Remove from favorites",
   "iptvDeletePortal": "Delete this portal",
+  "iptvRemoveSourceTitle": "Remove this source?",
+  "iptvRemoveSourceBody": "Its channels leave Live TV. This cannot be undone.",
   "iptvDeletePlaylist": "Delete this playlist",
 
   "animeNoGenreResults": "No {genre} anime found.",

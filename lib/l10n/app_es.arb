@@ -537,7 +537,7 @@
   "liveTvSecSpotlight": "Destacados en vivo y banner principal",
   "liveTvSecCards": "Tarjetas de canales y densidad de carteles",
   "liveTvSecSections": "Gestor de secciones y categorías",
-  "liveTvSecPortalsModal": "Ventana de portales y listas",
+  "liveTvSecPortalsModal": "Portales y listas",
   "liveTvSecBrowser": "Navegador de portales y guía de canales",
   "liveTvShowSpotlight": "Mostrar el banner de destacados en vivo",
   "liveTvShowSpotlightSub": "Partidos de campeonato destacados y los mejores canales, arriba del todo",
@@ -991,6 +991,8 @@
   "iptvAddFavorite": "Añadir a favoritos",
   "iptvRemoveFavorite": "Quitar de favoritos",
   "iptvDeletePortal": "Eliminar este portal",
+  "iptvRemoveSourceTitle": "¿Eliminar esta fuente?",
+  "iptvRemoveSourceBody": "Sus canales saldrán de Live TV. Esta acción no se puede deshacer.",
   "iptvDeletePlaylist": "Eliminar esta lista",
 
   "animeNoGenreResults": "No se encontró anime de {genre}.",

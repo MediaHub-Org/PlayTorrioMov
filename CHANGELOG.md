@@ -6,6 +6,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Live TV sources are a page.** Portals and playlists moved out of the
+  modal into a Sources page with an add form, discovery, favorites and a
+  remove-all per section. Deleting asks first now; the modal's multi-select
+  edit mode is gone with it.
+
+### Removed
+- **The Portals & Playlists modal.** Two tabs, two edit modes and its own
+  copy of every display preference settings already owns.
+- **Movies and Series tabs in the portal browser.** A portal's VOD is not
+  live, and the tabs rebuilt Films/Series navigation inside a source
+  browser. Portals open live channels only now.
+
+### Changed
+- **Live TV settings link to Sources.** The Portals section keeps the row
+  display preferences and gains the way in; management happens on the page.
 - **Live TV speaks Spanish, German, Russian and Chinese.** La 1, La 2, 24h
   and Teledeporte; Das Erste, ZDF, RTL, n-tv and WELT; Channel One Russia,
   Rossiya 1, NTV and RT; CCTV-1, CCTV-4, CCTV News and CGTN -- each on its

@@ -20,7 +20,7 @@ import '../../widgets/iptv/iptv_slider_section.dart' show IptvCardSizing;
 import 'iptv_channel_sheet.dart';
 import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
-import 'iptv_portals_modal.dart';
+import 'iptv_sources_page.dart';
 import 'iptv_search_page.dart';
 
 class IptvPage extends StatefulWidget {
@@ -236,7 +236,7 @@ class _IptvPageState extends State<IptvPage> {
 
     final pillHeader = _IptvGlassAppBar(
       onSearchTap: _navigateToSearch,
-      onSourcesTap: () => IptvPortalsModal.show(context),
+      onSourcesTap: () => pushPage(context, const IptvSourcesPage()),
       onMultiViewTap: _navigateToMultiView,
       categoryFilter: _categoryFilter,
       categories: [

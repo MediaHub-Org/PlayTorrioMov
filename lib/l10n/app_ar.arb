@@ -537,7 +537,7 @@
   "liveTvSecSpotlight": "الأضواء المباشرة واللافتة الرئيسية",
   "liveTvSecCards": "بطاقات القنوات وكثافة الملصقات",
   "liveTvSecSections": "مدير الأقسام والفئات",
-  "liveTvSecPortalsModal": "نافذة البوابات وقوائم التشغيل",
+  "liveTvSecPortalsModal": "البوابات وقوائم التشغيل",
   "liveTvSecBrowser": "متصفح البوابات ودليل القنوات",
   "liveTvShowSpotlight": "إظهار لافتة الأضواء المباشرة",
   "liveTvShowSpotlightSub": "مباريات البطولات المميزة وأفضل قنوات البث في الأعلى",
@@ -991,6 +991,8 @@
   "iptvAddFavorite": "إضافة إلى المفضلة",
   "iptvRemoveFavorite": "إزالة من المفضلة",
   "iptvDeletePortal": "حذف هذه البوابة",
+  "iptvRemoveSourceTitle": "إزالة هذا المصدر؟",
+  "iptvRemoveSourceBody": "ستغادر قنواته Live TV. لا يمكن التراجع عن هذا.",
   "iptvDeletePlaylist": "حذف قائمة التشغيل هذه",
 
   "animeNoGenreResults": "لا يوجد أنمي من نوع {genre}.",
