@@ -5,6 +5,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Removed
+- **The Live TV category pill.** The cards already tag their category and
+  every portal carries its own categories -- the header filter repeated
+  both without adding a way to browse.
+
 ### Added
 - **A Music row on Live TV.** MTV, VH1 and Trace, completing the genre
   shelves beside Movies, News, Kids and Documentaries.

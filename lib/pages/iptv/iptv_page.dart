@@ -10,7 +10,6 @@ import '../../services/iptv/iptv_controller.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
-import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/header_pill_style.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
@@ -50,11 +49,6 @@ class _IptvPageState extends State<IptvPage> {
   List<HardcodedChannel> _russian = [];
   List<HardcodedChannel> _chinese = [];
 
-  /// The picked category pill, or null for every row. Like the Anime genre
-  /// pick, this swaps the curated rows for the one answer rather than
-  /// narrowing in place: rows are the page's shape, and a filter that kept
-  /// them would still show eleven shelves for one choice.
-  String? _categoryFilter;
 
   @override
   void initState() {
@@ -244,14 +238,6 @@ class _IptvPageState extends State<IptvPage> {
       onSearchTap: _navigateToSearch,
       onSourcesTap: () => pushPage(context, const IptvSourcesPage()),
       onMultiViewTap: _navigateToMultiView,
-      categoryFilter: _categoryFilter,
-      categories: [
-        for (final catName in visibleCategories)
-          if (categoryMap.containsKey(catName)) catName,
-      ],
-      onCategorySelected: (v) => setState(
-        () => _categoryFilter = (v == null || v.isEmpty) ? null : v,
-      ),
     );
     // Live TV now renders through the same scaffold as Movies, Series and
     // Anime, rather than hand-rolling a hero, a row list and a header band.
@@ -272,37 +258,26 @@ class _IptvPageState extends State<IptvPage> {
     final mine = CustomChannelsService.items.value;
 
     final rows = <BrowseRow<HardcodedChannel>>[
-      if (_categoryFilter == null) ...[
-        if (liked.isNotEmpty)
-          BrowseRow<HardcodedChannel>(
-            title: context.l10n.libraryShelfLiked,
-            subtitle: context.l10n.iptvLikedSub,
-            items: liked,
-          ),
-        if (mine.isNotEmpty)
-          BrowseRow<HardcodedChannel>(
-            title: context.l10n.iptvYourChannels,
-            subtitle: context.l10n.iptvYourChannelsSub,
-            items: mine,
-          ),
-      ],
-      if (_categoryFilter != null &&
-          categoryMap.containsKey(_categoryFilter) &&
-          categoryMap[_categoryFilter]!.$2.isNotEmpty)
+      if (liked.isNotEmpty)
         BrowseRow<HardcodedChannel>(
-          title: _categoryFilter!,
-          subtitle: categoryMap[_categoryFilter]!.$1,
-          items: categoryMap[_categoryFilter]!.$2,
+          title: context.l10n.libraryShelfLiked,
+          subtitle: context.l10n.iptvLikedSub,
+          items: liked,
         ),
-      if (_categoryFilter == null)
-        for (final catName in visibleCategories)
-          if (categoryMap.containsKey(catName) &&
-              categoryMap[catName]!.$2.isNotEmpty)
-            BrowseRow<HardcodedChannel>(
-              title: catName,
-              subtitle: categoryMap[catName]!.$1,
-              items: categoryMap[catName]!.$2,
-            ),
+      if (mine.isNotEmpty)
+        BrowseRow<HardcodedChannel>(
+          title: context.l10n.iptvYourChannels,
+          subtitle: context.l10n.iptvYourChannelsSub,
+          items: mine,
+        ),
+      for (final catName in visibleCategories)
+        if (categoryMap.containsKey(catName) &&
+            categoryMap[catName]!.$2.isNotEmpty)
+          BrowseRow<HardcodedChannel>(
+            title: catName,
+            subtitle: categoryMap[catName]!.$1,
+            items: categoryMap[catName]!.$2,
+          ),
     ];
 
     final content = BrowseScaffold<HardcodedChannel>(
@@ -361,19 +336,10 @@ class _IptvGlassAppBar extends StatelessWidget {
   final VoidCallback onSourcesTap;
   final VoidCallback onMultiViewTap;
 
-  /// The picked category, or null for all of them. Sentinels, not nulls:
-  /// a tap on a null-valued popup item never reaches `onSelected`.
-  final String? categoryFilter;
-  final List<String> categories;
-  final ValueChanged<String?> onCategorySelected;
-
   const _IptvGlassAppBar({
     required this.onSearchTap,
     required this.onSourcesTap,
     required this.onMultiViewTap,
-    required this.categoryFilter,
-    required this.categories,
-    required this.onCategorySelected,
   });
 
   @override
@@ -390,19 +356,6 @@ class _IptvGlassAppBar extends StatelessWidget {
         ),
       ],
       pills: [
-        FilterDropdown<String?>(
-          label: categoryFilter ?? context.l10n.iptvAllCategories,
-          icon: Icons.category_rounded,
-          items: [
-            PopupMenuItem(
-              value: '',
-              child: Text(context.l10n.iptvAllCategories),
-            ),
-            for (final c in categories)
-              PopupMenuItem(value: c, child: Text(c)),
-          ],
-          onSelected: onCategorySelected,
-        ),
         HeaderPillIconButton(
           icon: Icons.settings_input_antenna_rounded,
           tooltip: context.l10n.iptvManagePortals,
