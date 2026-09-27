@@ -10,6 +10,10 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **Details pages prefer the TMDB synopsis in your language.** The addon's
+  English text stays the fallback: without a configured key, or when TMDB
+  sends nothing, there is nothing to prefer. One cached request per title,
+  next to the credits fetch that already runs there.
 - **Live TV's hero is the same height as every other section.** The
   user-selectable banner style made this one carousel a different size for
   no reason a viewer could name, so the setting, its styles and its rows in

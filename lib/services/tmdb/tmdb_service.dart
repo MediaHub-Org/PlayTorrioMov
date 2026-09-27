@@ -165,6 +165,65 @@ abstract final class TmdbService {
   /// title re-issues the same failing lookup.
   static final Map<String, String?> _tmdbIdByImdbId = <String, String?>{};
 
+  /// Overviews by id, kind and language, including negative results from a
+  /// request that actually answered. A 200 with a blank overview will not
+  /// grow one; anything else stays retryable on the next open.
+  static final Map<String, String?> _overviewByKey = <String, String?>{};
+
+  /// The TMDB `language` tag for an app locale code. Regional where the app
+  /// is regional (pt-BR); bare where that is what TMDB covers (ar). Unknown
+  /// codes fall back to English rather than to whatever TMDB guesses.
+  @visibleForTesting
+  static String languageTagFor(String? localeCode) => switch (localeCode) {
+        'es' => 'es-ES',
+        'pt' => 'pt-BR',
+        'ar' => 'ar',
+        _ => 'en-US',
+      };
+
+  /// The `overview` off a `/movie/{id}` or `/tv/{id}` payload, or null when
+  /// it is missing or blank. Pure so it can be tested without the network.
+  @visibleForTesting
+  static String? parseOverview(Map<String, dynamic> json) {
+    final overview = json['overview']?.toString().trim() ?? '';
+    return overview.isEmpty ? null : overview;
+  }
+
+  /// Fetches a title's synopsis from TMDB in the viewer's language.
+  ///
+  /// Returns null when no key is configured, the id is empty, TMDB sends
+  /// nothing, or the request fails -- in every case the caller keeps the
+  /// addon's own synopsis. One request per id and language.
+  static Future<String?> fetchOverview({
+    required String tmdbId,
+    required bool isTvShow,
+    String? localeCode,
+  }) async {
+    final key = TmdbSettings.effectiveApiKey;
+    if (key == null || tmdbId.isEmpty) return null;
+    final language = languageTagFor(localeCode);
+    final cacheKey = '$tmdbId|${isTvShow ? 'tv' : 'movie'}|$language';
+    if (_overviewByKey.containsKey(cacheKey)) return _overviewByKey[cacheKey];
+    final kind = isTvShow ? 'tv' : 'movie';
+    final uri = Uri.parse('$_baseUrl/$kind/$tmdbId').replace(
+      queryParameters: {'api_key': key, 'language': language},
+    );
+    try {
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        _note(_describeStatus(response.statusCode));
+        return null;
+      }
+      final overview =
+          parseOverview(jsonDecode(response.body) as Map<String, dynamic>);
+      _overviewByKey[cacheKey] = overview;
+      return overview;
+    } catch (e) {
+      debugPrint('[TmdbService] fetchOverview failed: $e');
+      return null;
+    }
+  }
+
   /// Finds the TMDB id for an IMDb id (`tt0137523`), or null.
   ///
   /// This is what makes cast enrichment work at all. `MovieDetail.tmdbId` is
