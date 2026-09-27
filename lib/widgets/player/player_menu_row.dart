@@ -119,6 +119,16 @@ class PlayerMenuRow extends StatelessWidget {
 /// The Original badge: the one colored thing in an audio row, so it is what
 /// the eye lands on when scanning a list of eight for the track the release
 /// is built around.
+///
+/// **It is a guess, and an unverified one (#76).** There is no original-language
+/// flag to read: the media_kit fork this builds against exposes no `isDefault`
+/// or `original` marker on an audio track, and mpv's own track list carries
+/// none. So this badges the track the file *opens with*, on the reasoning that
+/// what a release ships first is its own statement of which one it is -- which
+/// means a release that defaults to the dub would badge the dub. Worth an eye
+/// on a multi-audio file that does exactly that. Nothing depends on it being
+/// right: the subtitle auto-match on `C` reads the *selected* audio language,
+/// which is always the language being heard.
 class PlayerOriginalBadge extends StatelessWidget {
   const PlayerOriginalBadge({super.key});
 

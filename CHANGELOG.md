@@ -179,11 +179,39 @@ rather than files, and the sleep timer can wait for the video to end.
 - **"1 Season" and "3 Seasons" read correctly**, and will in every language.
   It was `Season${count > 1 ? "s" : ""}`, which is the construction that
   cannot survive translation; it is a plural in the message file now. #68
+- **Titles can show in their own language.** A switch in Appearance →
+  Language. Off by default, because the original title is the one every source
+  agrees on and the one you would search for -- and because a translated title
+  is not a stable name: Spain and Latin America give the same film different
+  Spanish ones. It changes what you read and nothing else; your library, search
+  and matching keep using the English title, so a show saved with the switch on
+  is the same show saved with it off. Anime only for now: AniList sends four
+  titles per show, while a movie or series arrives with one. #68
+- **Arabic turns the scroll arrows around.** `Row` and `ListView` mirror
+  themselves in a right-to-left layout; an arrow's glyph does not, and neither
+  does a `Stack`, so a rail's "scroll back" button kept pointing left while the
+  list ran the other way -- and on the details page it sat on the wrong side of
+  the screen entirely. Hero titles and logos, side panels, trailing buttons and
+  a tab row now follow the reading direction too. The player's seek controls are
+  deliberately unchanged: whether a video timeline should mirror is a question
+  about the timeline, not the buttons. #68
 
 ### Accessibility
 - **Icon-only Close and Back buttons announce themselves.** 34 buttons had no
   tooltip and so no label for a screen reader, and no hover hint for a
   pointer. Both labels are translated. #68 #69
+- **Every icon-only control announces itself, button or not.** The thirteen
+  that were left are an `Icon` inside a `GestureDetector` rather than an
+  `IconButton` -- a scroll arrow, a pin, a download, play/pause, the subtitle
+  sync reset, the search-match arrows. A screen reader announced neither a name
+  nor that they were pressable. The rails' arrows read their label off their own
+  icon, so the label cannot drift from the glyph. #69
+- **Text stays inside its box in five more places at a large text size:** the
+  details page's credits and Similar cards, the error screen every failed load
+  lands on, the seek bar, the subtitle sync bar and the Calendar row. The two
+  cards were the long-standing gap -- their clamps were arithmetic nobody could
+  measure, because the page they lived on fetches over the network. They are
+  public widgets now, and measured. #69
 - **Every remaining icon-only button announces itself too.** The seven that
   were left -- the catalog search, the two favorite stars, the two deletes in
   the portals modal, the custom-decoder button and the jump-to-episode arrow

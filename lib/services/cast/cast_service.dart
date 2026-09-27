@@ -103,6 +103,22 @@ abstract final class CastService {
   /// through a debrid or a torrent server on another machine, and those
   /// URLs are as fetchable as any other. What makes a stream uncastable is
   /// where it lives, which is exactly what the host says.
+  ///
+  /// **Whether a torrent on *this* phone could ever be cast is still open, and
+  /// one command answers it.** Reading the code settled half: iOS is dead,
+  /// because the plugin's Go shim hardcodes
+  /// `net.Listen("tcp", "127.0.0.1:"+portStr)`; on Android the plugin is not
+  /// the obstacle, because it exposes `port` and the LAN URL could be built
+  /// from `NetworkInterface.list()`. What the shipped `libtorrserver.so`
+  /// actually binds is unproven. With a torrent playing on the phone, from a
+  /// laptop on the same Wi-Fi:
+  ///
+  /// ```
+  /// curl http://<phone-LAN-IP>:<port>/echo
+  /// ```
+  ///
+  /// An answer means the feature is possible and this test would need a
+  /// companion that accepts a LAN address. A refusal closes it for good.
   static bool canCastUrl(String? url) {
     if (url == null || url.isEmpty) return false;
     final uri = Uri.tryParse(url);

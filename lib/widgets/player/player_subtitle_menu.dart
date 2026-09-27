@@ -272,6 +272,15 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
   /// sat among a hundred downloads, and forced tracks hid among full
   /// translations they are not. Forced spans both sources, so it reads both
   /// lists narrowed to forced files.
+  ///
+  /// **Forced tracks have been seen listed and not seen rendering.** Embedded
+  /// selection itself is resolved: `_selectEmbeddedTrack` reads `sid` back and
+  /// retries once, because the player's property set never throws and a rejected
+  /// id used to fail silently with the menu showing selected. ASS renders
+  /// through libass, other text through the overlay, bitmaps through mpv's OSD.
+  /// What is unconfirmed is a forced track actually painting on a device. A
+  /// `[SubDiag]` line dumps the full subtitle roster on every manual pick, so a
+  /// mismatch shows itself in one paste.
   Widget _buildSourceTabs(BuildContext context) {
     final hasEmbedded = widget.embeddedSubtitles.isNotEmpty;
     return Row(

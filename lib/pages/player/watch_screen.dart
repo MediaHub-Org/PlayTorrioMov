@@ -2381,6 +2381,14 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
 /// platform split (button on desktop, fade alone on touch) is a decision
 /// worth locking down, and it cannot be reached through [WatchScreen]
 /// without a network-backed source list.
+///
+/// **Two things here have never been seen on a screen (#74).** On desktop, that
+/// a wheel over the rail does not also scroll the page behind it -- the pointer
+/// signal resolver exists to stop that and has not been watched doing it. On a
+/// phone, that the fade alone reads as "more this way", and that the first and
+/// last pill stay tappable to their edges. The case worth setting up either way
+/// is a row *just* wider than its frame, since the buttons are driven by
+/// `maxScrollExtent`.
 class FilterPillRail extends StatefulWidget {
   final List<Widget> children;
 

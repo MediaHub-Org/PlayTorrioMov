@@ -28,7 +28,14 @@ import 'package:playtorriomov/widgets/common/adaptive_nav_shell.dart';
 import 'package:playtorriomov/widgets/common/pill_tab_row.dart';
 import 'package:playtorriomov/models/details/credit.dart';
 import 'package:playtorriomov/services/metadata/bestsimilar_scraper.dart' show BSItem;
+import 'package:playtorriomov/models/trakt/trakt_calendar_entry.dart';
+import 'package:playtorriomov/services/trakt/trakt_calendar_service.dart';
+import 'package:playtorriomov/pages/player/watch_screen.dart' show FilterPillRail;
+import 'package:playtorriomov/widgets/common/error_view.dart';
 import 'package:playtorriomov/widgets/common/section_header.dart';
+import 'package:playtorriomov/widgets/movie/upcoming_calendar_row.dart';
+import 'package:playtorriomov/widgets/player/player_seek_bar.dart';
+import 'package:playtorriomov/widgets/player/sub_sync_bar.dart';
 import 'package:playtorriomov/widgets/details/credit_card.dart';
 import 'package:playtorriomov/widgets/details/similar_card.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
@@ -843,4 +850,129 @@ void main() {
       );
     },
   );
+
+  // Four more off #69's long tail. The tail is mostly *pages*, which fetch over
+  // the network and so cannot be constructed -- these are the widgets in it
+  // that can, picked for traffic rather than for being easy: a failed load, a
+  // playing video, a subtitle being nudged, and the rail over every source
+  // list.
+
+  testWidgets('an error view does not overflow at 3x text scale',
+      (tester) async {
+      // The most-seen fixed-height box in the app that nobody had probed: every
+      // failed catalog load lands here, and its message is a whole sentence.
+    await pumpAtScale(
+      tester,
+      child: ErrorView(
+        title: 'Could not load this catalog',
+        error: 'SocketException: Failed host lookup: '
+            "'v3-cinemeta.strem.io' (OS Error: No address associated with "
+            'hostname, errno = 7)',
+        onRetry: () {},
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the seek bar does not overflow at 3x text scale',
+      (tester) async {
+    // A 36px row holding two time labels. It is on screen for the whole of
+    // every video, which is what earns it a probe even though its alignment
+    // stays physical on purpose.
+    await pumpAtScale(
+      tester,
+      child: Scaffold(
+        body: Center(
+          child: PlayerSeekBar(
+            position: const Duration(hours: 1, minutes: 23, seconds: 45),
+            duration: const Duration(hours: 2, minutes: 30),
+            buffered: const Duration(hours: 1, minutes: 30),
+            onSeek: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the subtitle sync bar does not overflow at 3x text scale',
+      (tester) async {
+    // A 28px bar of stepper buttons around a signed offset, and the offset is
+    // the part that grows: "-12.50s" is wider than "0.00s".
+    await pumpAtScale(
+      tester,
+      child: Scaffold(
+        body: Center(
+          child: SubSyncBar(
+            delaySec: -12.5,
+            onDelayChanged: (_) {},
+            onClose: () {},
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the Calendar row does not overflow at 3x text scale',
+      (tester) async {
+    // A 92px card carrying a show title, an SxxExx code and an episode title.
+    // Constructible only because it already takes an injected fetcher, which is
+    // exactly what the rest of the tail lacks.
+    final now = DateTime.now();
+    await pumpAtScale(
+      tester,
+      child: Scaffold(
+        body: UpcomingCalendarRow(
+          isTraktAuthenticated: () async => true,
+          traktCalendar: TraktCalendarService.forTesting(
+            fetcher: (start, days) async => [
+              TraktCalendarEntry(
+                firstAired: now.add(const Duration(days: 1)).toIso8601String(),
+                firstAiredLocal: now.add(const Duration(days: 1)),
+                showTraktId: 1,
+                showTitle: 'A Show With A Name That Keeps Going',
+                seasonNumber: 12,
+                episodeNumber: 7,
+                episodeTitle: 'An Episode Title That Also Keeps Going',
+                imdbId: 'tt0000001',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the source filter rail does not overflow at 3x text scale',
+      (tester) async {
+    // Over every source list. Public for exactly this reason -- the rail cannot
+    // be reached through WatchScreen without a network-backed source list, so
+    // it was made constructible rather than left unprobed.
+    await pumpAtScale(
+      tester,
+      child: Scaffold(
+        body: Center(
+          child: FilterPillRail(
+            children: [
+              for (final label in ['1080p', 'Debrid only', 'English audio'])
+                Container(
+                  margin: const EdgeInsetsDirectional.only(end: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Text(label),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }

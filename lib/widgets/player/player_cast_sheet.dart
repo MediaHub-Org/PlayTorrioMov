@@ -8,6 +8,20 @@ import 'player_glass.dart';
 /// Device picker for Cast -- shown from the player's Cast button. Only ever
 /// opened when [CastService.isSupported] is true (mobile only); callers must
 /// guard that before showing this.
+///
+/// **Never seen with a device listed in it (#28).** A bug found by reading the
+/// plugin's source on 2026-09-15 explains the "searches forever" report
+/// exactly -- the picker subscribed to a device stream nothing had started
+/// producing -- but whether that was the only cause needs a receiver on the
+/// network. What to check, in order: that a device appears within a few
+/// seconds; that a movie from a direct or CDN source reaches the TV (a scraper
+/// source needing Referer or User-Agent will not, because the Cast SDK has no
+/// sender-side way to attach either); that a Live TV channel shows as live with
+/// no seek bar or phantom duration; and that disconnect returns playback
+/// cleanly.
+///
+/// The sheet's own layout is probed -- see `text_scale_overflow_test.dart`,
+/// which is how the 567px overflow in it was found without a receiver.
 class PlayerCastSheet extends StatefulWidget {
   final String title;
   final String? posterUrl;

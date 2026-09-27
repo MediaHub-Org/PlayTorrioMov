@@ -10,99 +10,56 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-26**, on `v1.8.11+44`.
+Last reconciled: **2026-09-27**, on `v1.8.11+44`.
 
 ---
 
 ## Pending
 
-Two kinds of work, and they need different things.
+**Nothing here needs a device.** Hardware checks are not tracked in this file
+any more: #28's Cast path, the phone-casts-a-torrent question, forced-subtitle
+rendering, #74's pill rail and the ORIGINAL audio badge were all
+"seen listed, not seen working", and a list of things only one person can look
+at is not a roadmap. Each is now a doc comment on the thing it is uncertain
+about, where whoever next opens that file will meet it:
+`PlayerCastSheet` (#28), `CastService.canCastUrl` (the torrent question, with
+the one `curl` that answers it), `PlayerOriginalBadge` (#76),
+`FilterPillRail` (#74), and `_buildSourceTabs` in the subtitle menu (forced
+tracks).
 
-**What a test already holds is not on this list.** Four invariants fail in CI
-rather than needing a re-audit: no `Text()` holds an English sentence, every
-icon-only button carries a label, no padding names a physical edge, one
-spelling of every word. What is below is what no test can decide.
+### What holds without anyone re-auditing it
 
-### Code — needs a judgment per site (#68, #69)
+Six invariants fail in CI rather than needing a pass over `lib/`:
 
-None of these is a research problem and none of them is a sweep. Each is a
-list of sites that have to be read one at a time, which is exactly why no test
-covers them.
+| Test | Invariant |
+|:--|:--|
+| `no_hardcoded_text_test` | No `Text()` holds an English sentence |
+| `icon_button_tooltip_test` | Every icon-only control carries a label, button or not |
+| `rtl_directional_padding_test` | No padding, and no content alignment, names a physical edge |
+| `american_spelling_test` | One spelling of every word, `.arb` files included |
+| `text_scale_overflow_test` | 26 widgets survive 3x text scale on a 360px view |
+| `arrow_affordance_test` | Every rail arrow turns around for Arabic, and the player transport does not |
 
-| What | Where it is | The judgment |
-|:--|:--|:--|
-| **~87 `Alignment.centerLeft`-style constants** | across `lib/` | "Leading, or left?" Not all are wrong — a gradient, or a badge pinned to a corner of artwork, is genuinely physical. Converting them wholesale would be a sweep with nothing behind it |
-| **Icon direction under RTL** | back chevrons, "next episode" arrows, the source rail's scroll buttons | Flutter does not mirror `Icons.arrow_forward_ios`. Some of these should mirror in Arabic and some should not, and the player's seek controls over a timeline are a design question rather than a bug |
-| **~46 of ~68 files with a fixed `height:`** | the long tail; no named target is left | Whether the box wraps its own text or is sized by the layout around it. Deliberately unranked: the one attempt to rank it by grepping `height:` returned 165 hits whose loudest were `height: 4` spacers |
-| **~24 icon-only `GestureDetector`s** | 15 files, most in the portal browser and the player overlays | Whether it already has a label. **This count is not reliable** — a `Tooltip` or `Semantics` on an *ancestor* labels the control just as well, and the scan cannot see one; the library action row and the Continue Watching card are both in the list and both already labelled |
-| **The details-page rails cannot be probed** | `DetailsPage`'s credit card and similar card are private builders | Their text-scale fixes are reasoned from arithmetic, not measured. `DetailsPage` fetches over the network, so nothing constructs them. Extracting the two cards as public widgets makes them probeable |
-| **The "show original titles" toggle** | does not exist yet | The decision is made and written down in CONVENTIONS (`displayTitle` is localizable, `canonicalTitle` never is). The setting itself was never built, so today every title is the original whether or not anyone chose that |
+### The long tail of fixed heights (#69)
 
-### Needs a device — yours to answer
+The one thing genuinely left, and it is a shape rather than a list: **~42 files
+in `lib/` set a fixed `height:` around text that nothing probes.** Four more
+came off it with the cards and the four widgets above; what remains is mostly
+*pages*, and that is the obstacle rather than the volume. A page fetches over
+the network, so a test cannot construct one, and every probe so far has needed
+the widget pulled out first -- which is what `CreditCard`, `SimilarCard`,
+`UpcomingCalendarRow` and `FilterPillRail` have in common.
 
-Nothing here can be advanced by reading or writing code. Each is one session
-with real hardware.
+So the work is not "audit 42 files". It is: when you next touch a page that
+sizes text with a constant, lift that piece into `widgets/` with the constant
+as a named `static` on it, and add a case to `text_scale_overflow_test.dart`.
+The two cards are the worked example.
 
-**Cast against a receiver (#28).** A bug was found and fixed by reading the
-plugin's source on 2026-09-15 — the picker subscribed to a device stream that
-nothing ever started producing, so it searched forever. That fix explains the
-reported symptom exactly, but it has never been confirmed against a receiver,
-and whether it was the only cause is what the next test decides.
-
-1. Does the Cast sheet **list a device** within a few seconds of opening?
-2. Does a **movie** from a direct/CDN source reach the TV and play? (Known
-   limit: the Cast SDK has no sender-side way to attach Referer/User-Agent, so
-   scraper sources needing them fail on the TV while playing fine locally.)
-3. Does a **Live TV channel** show as live — no seek bar, no phantom duration?
-4. Does **disconnect** return playback cleanly?
-
-**Whether a phone can cast a torrent.** The one open feature question. A
-torrent plays from TorrServer on the phone at `127.0.0.1`, and a receiver asked
-to fetch that address asks *itself*. Reading the code settled half of it: iOS
-is dead, because the plugin's Go shim hardcodes
-`net.Listen("tcp", "127.0.0.1:"+portStr)`; on Android the plugin is not the
-obstacle, because it exposes `port` and the LAN URL could be built here from
-`NetworkInterface.list()`. What the shipped `libtorrserver.so` actually binds
-is unproven, and one command decides it — with a torrent playing on the phone,
-from a laptop on the same Wi-Fi:
-
-```
-curl http://<phone-LAN-IP>:<port>/echo
-```
-
-An answer means the feature is possible. A refusal closes it for good.
-
-**Four things that have been seen listed but not seen working.**
-
-- **Forced subtitles.** Embedded selection is resolved — `_selectEmbeddedTrack`
-  reads `sid` back and retries once, because the player's property set never
-  throws and a rejected id used to fail silently with the menu showing
-  selected. ASS renders through libass, other text through the overlay,
-  bitmaps through mpv's OSD. Forced tracks appear in the list; whether they
-  *render* is unconfirmed. A `[SubDiag]` line dumps the full roster on every
-  manual pick, so a mismatch shows itself in one paste.
-- **#74's pill rail, on desktop.** The buttons are driven by
-  `maxScrollExtent`, so the case worth checking is a row *just* wider than its
-  frame: a short list (no buttons), a long one (a button at each end, the
-  spent one dimmed), and a scroll to the end (the other one dimmed). The part
-  genuinely unverified is the wheel — that a wheel over the rail does not also
-  scroll the page behind it, which the pointer signal resolver exists to
-  prevent.
-- **#74's pill rail, on a phone.** The fade is drawn on every platform and the
-  button only on desktop, because a tablet passes any width breakpoint and is
-  still a touch device where a button over the first and last pill would
-  swallow taps meant for them. What to check: that the fade reads as "more
-  this way" without a button, and that the first and last pill stay tappable
-  to their edges.
-- **The ORIGINAL audio badge, on a file that defaults to a dub.** #76 badges
-  the track the file *opens with*, because there is no original-language flag
-  to read — the media_kit fork exposes no `isDefault` or `original` marker and
-  mpv's track list carries none. What a release ships as its opening track is
-  its own statement of which one it is, but a release defaulting to the dub
-  would badge the dub. Related: #73 applies the preferred-audio ranking on the
-  first non-empty track list only, once, so a file whose tracks arrive in
-  stages keeps its own default — deliberate, so a manual switch is never
-  undone, but never observed on a device.
+Do not rank the remainder by grepping `height:`. It was tried: a span-based
+scan pairing each fixed height with the largest `fontSize` inside it returns
+165 hits whose loudest are `height: 4` spacers sitting in the same subtree as a
+`fontSize: 22` title. A static scan cannot tell "box that wraps this text" from
+"box that happens to be near it".
 
 ### Not doing, so it stays decided
 
