@@ -31,7 +31,6 @@ enum PortalBrowserLayout {
 abstract final class IptvSettings {
   // Live TV & Spotlight Keys
   static const _keyEnableSpotlight = 'iptv_enable_spotlight';
-  static const _keyHeroStyle = 'iptv_hero_style';
   static const _keyHeroAutoRotate = 'iptv_hero_auto_rotate';
   static const _keyHeroRotateSeconds = 'iptv_hero_rotate_seconds';
   static const _keyCardDensity = 'iptv_card_density';
@@ -71,8 +70,6 @@ abstract final class IptvSettings {
 
   // Live TV Values
   static final ValueNotifier<bool> enableSpotlight = ValueNotifier<bool>(true);
-  static final ValueNotifier<HeroStyle> heroStyle =
-      ValueNotifier<HeroStyle>(HeroStyle.immersive);
   static final ValueNotifier<bool> heroAutoRotate = ValueNotifier<bool>(true);
   static final ValueNotifier<int> heroRotateSeconds = ValueNotifier<int>(7);
   static final ValueNotifier<CardDensity> cardDensity =
@@ -106,12 +103,6 @@ abstract final class IptvSettings {
   static Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     enableSpotlight.value = prefs.getBool(_keyEnableSpotlight) ?? true;
-
-    final heroStr = prefs.getString(_keyHeroStyle);
-    heroStyle.value = HeroStyle.values.firstWhere(
-      (h) => h.name == heroStr,
-      orElse: () => HeroStyle.immersive,
-    );
 
     heroAutoRotate.value = prefs.getBool(_keyHeroAutoRotate) ?? true;
     heroRotateSeconds.value = prefs.getInt(_keyHeroRotateSeconds) ?? 7;
@@ -166,13 +157,6 @@ abstract final class IptvSettings {
     enableSpotlight.value = val;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyEnableSpotlight, val);
-    changeNotifier.value++;
-  }
-
-  static Future<void> setHeroStyle(HeroStyle style) async {
-    heroStyle.value = style;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyHeroStyle, style.name);
     changeNotifier.value++;
   }
 

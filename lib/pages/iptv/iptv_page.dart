@@ -7,7 +7,6 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/iptv_controller.dart';
-import '../../services/content_display_enums.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
@@ -211,9 +210,10 @@ class _IptvPageState extends State<IptvPage> {
     );
     // Live TV now renders through the same scaffold as Movies, Series and
     // Anime, rather than hand-rolling a hero, a row list and a header band.
-    // Its three hero settings survive the move: auto-rotate and its interval
-    // map onto `heroInterval`, and the style-driven height goes through the
-    // `heroHeightOf` hook added for exactly this.
+    // Auto-rotate and its interval map onto `heroInterval`. The hero takes
+    // the scaffold's own height like every other section: a separate
+    // user-selectable height made this carousel a different size from the
+    // rest for no reason a viewer could name.
     // Liked channels lead, because someone opening Live TV is usually going
     // back to a channel they already keep. They lived only in Library until
     // now, which is the wrong place: you go to Library to manage what you
@@ -269,7 +269,6 @@ class _IptvPageState extends State<IptvPage> {
       // Channel art is a logo or a banner, not a poster, so these rows keep
       // their own card shape rather than being forced into the 2:3 default.
       rowSizingOf: (width) => IptvCardSizing.fromWidth(width).toRowSizing(),
-      heroHeightOf: _heroHeight,
       heroInterval: IptvSettings.heroAutoRotate.value
           ? Duration(seconds: IptvSettings.heroRotateSeconds.value)
           : null,
@@ -278,10 +277,10 @@ class _IptvPageState extends State<IptvPage> {
       },
     );
 
-    // No scroll-track overlay here any more: BrowseScaffold floats its own
-    // over whatever it is scrolling. Keeping this page's copy would have
-    // left a second track driven by a controller no longer attached to any
-    // scroll view.
+    // No scroll-track overlay here: BrowseScaffold floats its own over
+    // whatever it is scrolling. Keeping this page's copy would have left a
+    // second track driven by a controller no longer attached to any scroll
+    // view.
     return Scaffold(
       backgroundColor: AppColors.canvas,
       body: Container(
@@ -289,20 +288,6 @@ class _IptvPageState extends State<IptvPage> {
         child: RepaintBoundary(child: content),
       ),
     );
-  }
-
-  /// Live TV's user-selectable hero height. Immersive is the default and is
-  /// the same formula [BrowseScaffold] uses for a desktop-width hero; the
-  /// other two are the shorter variants this section has always offered.
-  double _heroHeight(double screenWidth, double screenHeight) {
-    switch (IptvSettings.heroStyle.value) {
-      case HeroStyle.compact:
-        return (screenHeight * 0.38).clamp(300.0, 400.0);
-      case HeroStyle.minimalist:
-        return (screenHeight * 0.28).clamp(210.0, 260.0);
-      case HeroStyle.immersive:
-        return (screenHeight * 0.52).clamp(380.0, 560.0);
-    }
   }
 }
 

@@ -190,41 +190,6 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 Divider(color: AppColors.inkAlpha(0.06)),
                 const SizedBox(height: 12),
 
-                // Style Selection
-                Text(
-                  context.l10n.liveTvHeroStyle,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.inkAlpha(0.8),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<HeroStyle>(
-                  valueListenable: IptvSettings.heroStyle,
-                  builder: (context, currentStyle, _) {
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: HeroStyle.values.map((style) {
-                        final isSelected = style == currentStyle;
-                        return SettingChoiceChip(
-                          label: style.localizedLabel(context.l10n),
-                          selected: isSelected,
-                          onSelect: () {
-                            IptvSettings.setHeroStyle(style);
-                            setState(() {});
-                          },
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 16),
-                Divider(color: AppColors.inkAlpha(0.06)),
-                const SizedBox(height: 12),
-
                 // Auto Rotate
                 ValueListenableBuilder<bool>(
                   valueListenable: IptvSettings.heroAutoRotate,
@@ -386,14 +351,17 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      // Expanded: the label yields to the value beside it, the
+                      // same shape as the rotation row above. In Spanish the
+                      // label runs 490px in a 360px panel.
+                      Expanded(child: Text(
                         context.l10n.liveTvHoverZoom,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: AppColors.inkAlpha(0.8),
                         ),
-                      ),
+                      )),
                       Text(
                         '+$percent%',
                         style: TextStyle(

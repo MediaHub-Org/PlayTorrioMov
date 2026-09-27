@@ -49,6 +49,56 @@ class _CollectionPageState extends State<CollectionPage> {
     AnimeLibraryService.instance.init();
   }
 
+  /// Type pills for the Continue Watching and Downloads tabs: All, Films,
+  /// Series, Anime -- the same three kinds the shelf filter offers, so a
+  /// mixed list narrows the same way everywhere in the Library.
+  String _continueType = 'all';
+  String _downloadType = 'all';
+
+  Widget _buildTypePills(String current, ValueChanged<String> onPick) {
+    Widget chip(String label, String value) {
+      final selected = current == value;
+      return GestureDetector(
+        onTap: () => onPick(value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.accent : AppColors.raised,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? AppColors.ink : AppColors.inkAlpha(0.60),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            chip(l10n.commonAll, 'all'),
+            const SizedBox(width: 6),
+            chip(l10n.libraryFilterMovies, 'movie'),
+            const SizedBox(width: 6),
+            chip(l10n.libraryFilterSeries, 'series'),
+            const SizedBox(width: 6),
+            chip(l10n.libraryFilterAnime, 'anime'),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
@@ -244,6 +294,9 @@ class _CollectionPageState extends State<CollectionPage> {
           );
         }
 
+        final visible = _continueType == 'all'
+            ? items
+            : items.where((i) => i.type == _continueType).toList();
         final palette = AppThemeService.currentPalette.value;
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -261,28 +314,41 @@ class _CollectionPageState extends State<CollectionPage> {
                 (width - padding * 2 - spacing * (crossAxisCount - 1)) /
                 crossAxisCount;
 
-            return GridView.builder(
-              padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: spacing,
-                mainAxisSpacing: 16,
-                // The card's own art ratio plus its text block, straight off
-                // the slider, so a card is the same shape in both places.
-                mainAxisExtent: cardWidth * 0.62 + 60,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return ContinueWatchingCard(
-                  item: item,
-                  width: cardWidth,
-                  palette: palette,
-                  onTap: () =>
-                      ContinueWatchingService.resumePlayback(context, item),
-                  onRemove: () => ContinueWatchingService.removeItem(item),
-                );
-              },
+            return Column(
+              children: [
+                _buildTypePills(
+                  _continueType,
+                  (v) => setState(() => _continueType = v),
+                ),
+                Expanded(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: spacing,
+                      mainAxisSpacing: 16,
+                      // The card's own art ratio plus its text block, straight off
+                      // the slider, so a card is the same shape in both places.
+                      mainAxisExtent: cardWidth * 0.62 + 60,
+                    ),
+                    itemCount: visible.length,
+                    itemBuilder: (context, index) {
+                      final item = visible[index];
+                      return ContinueWatchingCard(
+                        item: item,
+                        width: cardWidth,
+                        palette: palette,
+                        onTap: () => ContinueWatchingService.resumePlayback(
+                          context,
+                          item,
+                        ),
+                        onRemove: () =>
+                            ContinueWatchingService.removeItem(item),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           },
         );
@@ -310,12 +376,25 @@ class _CollectionPageState extends State<CollectionPage> {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          itemCount: downloads.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) =>
-              _DownloadRow(task: downloads[index]),
+        final visible = _downloadType == 'all'
+            ? downloads
+            : downloads.where((t) => t.type == _downloadType).toList();
+        return Column(
+          children: [
+            _buildTypePills(
+              _downloadType,
+              (v) => setState(() => _downloadType = v),
+            ),
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                itemCount: visible.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, index) =>
+                    _DownloadRow(task: visible[index]),
+              ),
+            ),
+          ],
         );
       },
     );

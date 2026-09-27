@@ -10,6 +10,15 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **Live TV's hero is the same height as every other section.** The
+  user-selectable banner style made this one carousel a different size for
+  no reason a viewer could name, so the setting, its styles and its rows in
+  the settings page are gone.
+- **The Library's Continue Watching and Downloads tabs filter by type.**
+  All, Films, Series and Anime pills, matching the shelf filter.
+- **Films everywhere.** The section was Films while the Library filter chip
+  and collection titles still said Movies; only English disagreed, the other
+  three languages already said Films.
 - **The Arabic anime catalog is gone.** The separate Arabic feed, its
   English/Arabic mode pill and its details/stream sheets are removed; anime
   is AniList end to end, with the same genre pills and a new decade filter.
