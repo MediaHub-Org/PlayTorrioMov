@@ -1016,5 +1016,8 @@
   "commonNext": "Próximo",
   "commonScrollUp": "Rolar para cima",
   "commonScrollDown": "Rolar para baixo",
-  "commonClearSearch": "Limpar busca"
+  "commonClearSearch": "Limpar busca",
+
+  "appearanceNativeTitlesTitle": "Mostrar os títulos no idioma original",
+  "appearanceNativeTitlesSubtitle": "Somente para anime, e somente na exibição. A busca, a correspondência e a sua biblioteca continuam usando o título em inglês, que é o que todas as fontes compartilham."
 }

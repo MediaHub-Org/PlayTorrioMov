@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../../services/titles/title_display.dart';
 import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
 import '../../models/stream/stream_model.dart';
@@ -129,7 +130,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     // note in anime_arabic_stream_sheet: replacing the root's top route
     // tore down the hub underneath and made Back exit the app.
     final playerTitle = context.l10n.playerTitleEpisode(
-      widget.anime.displayTitle,
+      animeDisplayTitle(widget.anime),
       widget.episodeNumber,
     );
     Navigator.pop(context);
@@ -178,7 +179,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${widget.anime.displayTitle} • Ep ${widget.episodeNumber}',
+                        '${animeDisplayTitle(widget.anime)} • Ep ${widget.episodeNumber}',
                         style: TextStyle(
                           color: AppColors.ink,
                           fontSize: 16,

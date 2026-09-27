@@ -400,8 +400,9 @@ class _TextScaleSelector extends StatelessWidget {
 /// App-only language override (#68): translates this app's own chrome,
 /// independent of the device's system language and of which language
 /// scraped/catalog titles show in (that display-vs-canonical title
-/// question is a separate, larger decision -- see the Localization section of
-/// docs/CONVENTIONS.md; the toggle itself is still pending in the roadmap).
+/// question is its own setting, the switch at the bottom of this card -- see
+/// the Localization section of docs/CONVENTIONS.md for why the two titles must
+/// never merge).
 ///
 /// Shown in each language's own name, not translated into the currently
 /// active one -- someone who can't read the active language still needs to
@@ -479,6 +480,37 @@ class _LanguageSelector extends StatelessWidget {
                           onTap: () => AppThemeService.setLocale(locale),
                         ),
                     ],
+                  ),
+                  // In this card rather than its own: it is a question about
+                  // language, and the answer to the *other* language question
+                  // does not decide it. Someone reading the app in Spanish may
+                  // still want a show's English title, because that is the one
+                  // they will recognize and the one they would search for.
+                  const Divider(height: 26),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: AppThemeService.preferNativeTitles,
+                    builder: (context, native, _) => SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      value: native,
+                      activeColor: palette.primaryColor,
+                      onChanged: AppThemeService.setPreferNativeTitles,
+                      title: Text(
+                        l10n.appearanceNativeTitlesTitle,
+                        style: TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                          color: onSurface,
+                        ),
+                      ),
+                      subtitle: Text(
+                        l10n.appearanceNativeTitlesSubtitle,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.35,
+                          color: onSurface.withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../titles/title_display.dart';
 import '../../models/anime/anime_media.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
@@ -97,7 +98,7 @@ class AnimeScraperService {
                 StreamSource(
                   name: '⚡ MegaPlay • $catUpper',
                   title:
-                      '${anime.displayTitle} • Ep $episodeNumber [MegaPlay • $catUpper]',
+                      '${animeDisplayTitle(anime)} • Ep $episodeNumber [MegaPlay • $catUpper]',
                   description:
                       'MegaPlay • Master HLS • $catUpper$subLabel',
                   url: res.url,
@@ -142,7 +143,7 @@ class AnimeScraperService {
                 StreamSource(
                   name: '⚡ ReCloud • $catUpper',
                   title:
-                      '${anime.displayTitle} • Ep $episodeNumber [ReCloud • $catUpper]',
+                      '${animeDisplayTitle(anime)} • Ep $episodeNumber [ReCloud • $catUpper]',
                   description:
                       'ReCloud • Master HLS • $catUpper$subLabel',
                   url: res.url,
@@ -187,7 +188,7 @@ class AnimeScraperService {
                   StreamSource(
                     name: '⚡ TryEmbed • ${res.serverName} • $catUpper',
                     title:
-                        '${anime.displayTitle} • Ep $episodeNumber [TryEmbed • ${res.serverName} • $catUpper]',
+                        '${animeDisplayTitle(anime)} • Ep $episodeNumber [TryEmbed • ${res.serverName} • $catUpper]',
                     description:
                         'TryEmbed (${res.serverName}) • Master HLS • $catUpper$subLabel',
                     url: res.url,
@@ -231,7 +232,7 @@ class AnimeScraperService {
                   StreamSource(
                     name: '⚡ AniDB • $catUpper',
                     title:
-                        '${anime.displayTitle} • Ep $episodeNumber [AniDB • $catUpper]',
+                        '${animeDisplayTitle(anime)} • Ep $episodeNumber [AniDB • $catUpper]',
                     description:
                         'AniDB • Master HLS • $catUpper',
                     url: res.url,
@@ -267,7 +268,7 @@ class AnimeScraperService {
                   seenUrls,
                   StreamSource(
                     name: '⚡ AniHQ • $catUpper',
-                    title: '${anime.displayTitle} • Ep $episodeNumber [AniHQ • $catUpper]',
+                    title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [AniHQ • $catUpper]',
                     description: 'AniHQ (${res.server}) • ${res.quality} • $catUpper',
                     url: res.url,
                     addonName: 'AniHQ',
@@ -297,7 +298,7 @@ class AnimeScraperService {
                   seenUrls,
                   StreamSource(
                     name: '⚡ AniNeko • $catUpper',
-                    title: '${anime.displayTitle} • Ep $episodeNumber [AniNeko • $catUpper]',
+                    title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [AniNeko • $catUpper]',
                     description: 'AniNeko (${res.server}) • ${res.quality} • $catUpper',
                     url: res.url,
                     addonName: 'AniNeko',
@@ -331,7 +332,7 @@ class AnimeScraperService {
                 seenUrls,
                 StreamSource(
                   name: '⚡ AniPM • $catUpper',
-                  title: '${anime.displayTitle} • Ep $episodeNumber [AniPM • $catUpper]',
+                  title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [AniPM • $catUpper]',
                   description: 'AniPM (${res.server}) • ${res.quality} • $catUpper',
                   url: res.url,
                   addonName: 'AniPM',
@@ -355,7 +356,7 @@ class AnimeScraperService {
               seenUrls,
               StreamSource(
                 name: '⚡ Dulo • ${res.title}',
-                title: '${anime.displayTitle} • Ep $episodeNumber [Dulo]',
+                title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [Dulo]',
                 description: 'Dulo • ${res.quality}',
                 url: res.url,
                 addonName: 'Dulo',
@@ -382,7 +383,7 @@ class AnimeScraperService {
                 seenUrls,
                 StreamSource(
                   name: '⚡ Luna • ${res.server} • $catUpper',
-                  title: '${anime.displayTitle} • Ep $episodeNumber [Luna • ${res.server} • $catUpper]',
+                  title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [Luna • ${res.server} • $catUpper]',
                   description: 'Luna (${res.server}) • ${res.quality} • $catUpper',
                   url: res.url,
                   addonName: 'Luna',
@@ -409,7 +410,7 @@ class AnimeScraperService {
                 seenUrls,
                 StreamSource(
                   name: '⚡ 123Anime • ${res.server}',
-                  title: '${anime.displayTitle} • Ep $episodeNumber [123Anime • ${res.server}]',
+                  title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [123Anime • ${res.server}]',
                   description: '123Anime (${res.server}) • ${res.quality}',
                   url: res.url,
                   addonName: '123Anime',
@@ -437,7 +438,7 @@ class AnimeScraperService {
                 seenUrls,
                 StreamSource(
                   name: '⚡ VidNest • $catUpper',
-                  title: '${anime.displayTitle} • Ep $episodeNumber [VidNest • $catUpper]',
+                  title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [VidNest • $catUpper]',
                   description: 'VidNest (${res.server}) • ${res.quality} • $catUpper',
                   url: res.url,
                   addonName: 'VidNest',
@@ -471,7 +472,7 @@ class AnimeScraperService {
               controller.add(
                 StreamSource(
                   name: '⚡ WatchHentai',
-                  title: '${anime.displayTitle} • Ep $episodeNumber [WatchHentai]',
+                  title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [WatchHentai]',
                   description: 'WatchHentai • Direct MP4',
                   url: res.url,
                   addonName: 'WatchHentai',
@@ -497,7 +498,7 @@ class AnimeScraperService {
               controller.add(
                 StreamSource(
                   name: '⚡ Hentaini',
-                  title: '${anime.displayTitle} • Ep $episodeNumber [Hentaini]',
+                  title: '${animeDisplayTitle(anime)} • Ep $episodeNumber [Hentaini]',
                   description: 'Hentaini • Direct MP4',
                   url: res.url,
                   addonName: 'Hentaini',
@@ -1040,7 +1041,7 @@ class AnimeScraperService {
     return MovieDetail(
       id: 'anilist:${anime.id}',
       type: 'anime',
-      name: anime.displayTitle,
+      name: animeDisplayTitle(anime),
       poster: anime.coverUrl,
       background: anime.backdropUrl,
       description: anime.description,

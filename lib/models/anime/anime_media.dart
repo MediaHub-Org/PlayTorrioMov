@@ -69,12 +69,44 @@ class AnimeMedia {
     this.isArabic = false,
   });
 
-  String get displayTitle {
+  /// The title that never moves: what scrapers query, what a saved item's
+  /// identity falls back to, and what a filename is matched against.
+  ///
+  /// AniList sends four titles and this picks the one every provider is most
+  /// likely to agree on. It must not depend on any display preference --
+  /// localize it and the same show saved under one setting is a different
+  /// object from the same show saved under another, which takes collection
+  /// membership, Continue Watching dedupe and Trakt/Simkl matching with it.
+  /// The rule is written out in docs/CONVENTIONS.md.
+  String get canonicalTitle {
     if (titleEnglish.isNotEmpty) return titleEnglish;
     if (titleUserPreferred.isNotEmpty) return titleUserPreferred;
     if (titleRomaji.isNotEmpty) return titleRomaji;
     return titleNative;
   }
+
+  /// The title in its own language, for a reader who asked for that.
+  String get nativeTitle {
+    if (titleNative.isNotEmpty) return titleNative;
+    if (titleRomaji.isNotEmpty) return titleRomaji;
+    if (titleUserPreferred.isNotEmpty) return titleUserPreferred;
+    return titleEnglish;
+  }
+
+  /// What to show. Takes the preference rather than reading it, because a
+  /// model depends on nothing -- `animeDisplayTitle` in
+  /// `services/titles/title_display.dart` is what call sites use.
+  String titleFor({required bool native}) =>
+      native ? nativeTitle : canonicalTitle;
+
+  /// The canonical title under its old name.
+  ///
+  /// Deliberately *not* made switchable. Every call site was checked and moved
+  /// to `animeDisplayTitle`, and a getter that had quietly started honoring a
+  /// setting instead would have made a missed one impossible to spot -- it
+  /// would still read correctly and just be wrong for anyone who flipped the
+  /// switch. `test/anime_smoke_test.dart` asserts on this name.
+  String get displayTitle => canonicalTitle;
 
   String get coverUrl {
     if (coverImageExtraLarge.isNotEmpty) return coverImageExtraLarge;

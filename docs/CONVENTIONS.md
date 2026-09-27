@@ -466,15 +466,30 @@ Three things depend on a stable title, and each breaks differently:
    are English or original language. "El Caballero Oscuro" returns nothing,
    and it fails silently — the user sees no sources, not an error.
 3. **AniList already returns four titles** — `titleUserPreferred`,
-   `titleRomaji`, `titleEnglish`, `titleNative`. The app picks the first and
-   discards the rest, so the "which title do we show" decision already exists
-   here; it is simply not a setting yet.
+   `titleRomaji`, `titleEnglish`, `titleNative` — so the "which title do we
+   show" decision has always lived here.
 
 **Default: original/English titles even when the UI is translated**, with an
 opt-in toggle that affects display only. A translated title is not a stable
 identifier — Spain and Latin America give the same film different Spanish
 titles — while the original is the one string every provider agrees on, and it
 is what Stremio, Plex and Jellyfin default to.
+
+That toggle is `AppThemeService.preferNativeTitles`, in the Appearance
+settings' language card. Three pieces keep it honest, and the shape is the one
+to copy if a second media kind ever gains a second title:
+
+- `AnimeMedia.canonicalTitle` is what scrapers query and what identity falls
+  back to. It cannot move.
+- `AnimeMedia.titleFor(native:)` **takes** the preference rather than reading
+  it, because a model depends on nothing.
+- `animeDisplayTitle(anime)` in `services/titles/title_display.dart` reads the
+  setting and is what a widget calls. Anywhere a title is rendered, call that;
+  anywhere one is queried, matched or stored, use `canonicalTitle`.
+
+`test/services/title_display_test.dart` asserts the part that matters: a saved
+item's `uniqueKey` is identical with the setting on and off. The failure it
+prevents is not a wrong label but a *duplicate object*.
 
 Catalog descriptions are not a free win either, if anyone reaches for that
 next: synopsis and genre text comes from the Stremio addon (Cinemeta by

@@ -27,6 +27,7 @@ abstract final class AppThemeService {
   static const _modeStorageKey = 'app_theme_mode';
   static const _textScaleStorageKey = 'app_text_scale';
   static const _localeStorageKey = 'app_locale';
+  static const _nativeTitlesStorageKey = 'app_native_titles';
 
   /// UI languages with real translated content (#68) — not necessarily
   /// every language `AppLocalizations.supportedLocales` lists, if that ever
@@ -160,6 +161,23 @@ abstract final class AppThemeService {
   /// [MaterialApp.localeResolutionCallback] behavior with no override set.
   static final ValueNotifier<Locale?> locale = ValueNotifier<Locale?>(null);
 
+  /// Show a title in its own language instead of in English. Off by default,
+  /// and that default is the decision rather than an accident.
+  ///
+  /// A translated title is not a stable identifier -- Spain and Latin America
+  /// give the same film different Spanish titles -- while the original is the
+  /// one string every provider agrees on, and it is what Stremio, Plex and
+  /// Jellyfin default to. So this affects **display only**, never
+  /// `AnimeMedia.canonicalTitle`, which is what scrapers query and what
+  /// `MyListItem.uniqueKey` falls back to. See the Localization section of
+  /// docs/CONVENTIONS.md for why those two must never merge.
+  ///
+  /// It reaches anime today and nothing else: AniList returns four titles per
+  /// show, while a movie or series arrives from a Stremio addon with exactly
+  /// one, so for those there is no second title to switch to.
+  static final ValueNotifier<bool> preferNativeTitles =
+      ValueNotifier<bool>(false);
+
   static Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString(_storageKey);
@@ -175,6 +193,8 @@ abstract final class AppThemeService {
     if (storedScale != null) {
       textScale.value = storedScale.clamp(minTextScale, maxTextScale);
     }
+    preferNativeTitles.value =
+        prefs.getBool(_nativeTitlesStorageKey) ?? false;
     final storedLocale = prefs.getString(_localeStorageKey);
     if (storedLocale != null) {
       for (final candidate in supportedAppLocales) {
@@ -192,6 +212,13 @@ abstract final class AppThemeService {
     textScale.value = clamped;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_textScaleStorageKey, clamped);
+  }
+
+  static Future<void> setPreferNativeTitles(bool value) async {
+    if (preferNativeTitles.value == value) return;
+    preferNativeTitles.value = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_nativeTitlesStorageKey, value);
   }
 
   /// Pass null to go back to following the device's language.

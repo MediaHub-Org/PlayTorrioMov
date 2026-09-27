@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../services/titles/title_display.dart';
 import '../../l10n/l10n.dart';
 import '../../widgets/player/language_flag.dart';
 
@@ -219,7 +220,7 @@ class _AnimePageState extends State<AnimePage> {
           _arabicCards[anime.id] ??
           ArabicAnimeCard(
             slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
-            title: anime.displayTitle,
+            title: animeDisplayTitle(anime),
             cover: anime.coverUrl,
           );
       _arabicService.getDetails(card.slug).then((details) {
@@ -370,7 +371,7 @@ class _AnimePageState extends State<AnimePage> {
           _arabicCards[anime.id] ??
           ArabicAnimeCard(
             slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
-            title: anime.displayTitle,
+            title: animeDisplayTitle(anime),
             cover: anime.coverUrl,
           );
       final epNum =
@@ -797,7 +798,7 @@ class _AnimeHeroSlide extends StatelessWidget {
 
                   // Title
                   Text(
-                    anime.displayTitle,
+                    animeDisplayTitle(anime),
                     style: TextStyle(
                       fontSize: isCompact ? 30 : 44,
                       fontWeight: FontWeight.w900,

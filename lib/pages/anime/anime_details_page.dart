@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/titles/title_display.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../widgets/common/details_section_header.dart';
@@ -567,7 +568,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _anime.displayTitle,
+          animeDisplayTitle(_anime),
           style: TextStyle(
             fontSize: isDesktop ? 38 : 26,
             fontWeight: FontWeight.w900,
@@ -584,7 +585,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           ),
         ),
         if (_anime.titleNative.isNotEmpty &&
-            _anime.titleNative != _anime.displayTitle)
+            _anime.titleNative != animeDisplayTitle(_anime))
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
@@ -1531,7 +1532,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                rec.displayTitle,
+                                animeDisplayTitle(rec),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 13,
