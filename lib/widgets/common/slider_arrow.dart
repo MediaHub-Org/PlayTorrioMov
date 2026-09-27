@@ -73,7 +73,7 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
                       : [],
                 ),
                 child: Icon(
-                  widget.icon,
+                  readingOrderArrow(context, widget.icon),
                   color: AppColors.ink.withValues(alpha: _isHovered ? 1.0 : 0.7),
                   size: 20,
                 ),

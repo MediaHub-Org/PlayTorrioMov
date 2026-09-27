@@ -429,8 +429,8 @@ class _CatalogPageState extends State<CatalogPage> {
             ),
             if (isDesktop) ...[
               if (_canScrollGenresLeft)
-                Positioned(
-                  left: 0,
+                PositionedDirectional(
+                  start: 0,
                   top: 0,
                   bottom: 0,
                   child: _buildScrollArrow(
@@ -440,8 +440,8 @@ class _CatalogPageState extends State<CatalogPage> {
                   ),
                 ),
               if (_canScrollGenresRight)
-                Positioned(
-                  right: 0,
+                PositionedDirectional(
+                  end: 0,
                   top: 0,
                   bottom: 0,
                   child: _buildScrollArrow(
@@ -550,7 +550,11 @@ class _CatalogPageState extends State<CatalogPage> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.inkFaint),
               ),
-              child: Icon(icon, color: AppColors.ink, size: 16),
+              child: Icon(
+                readingOrderArrow(context, icon),
+                color: AppColors.ink,
+                size: 16,
+              ),
             ),
           ),
         ),

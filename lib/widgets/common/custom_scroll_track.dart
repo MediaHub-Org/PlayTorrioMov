@@ -241,7 +241,7 @@ class _HoverArrowState extends State<_HoverArrow> {
             border: Border.all(color: AppColors.inkAlpha(0.1), width: 1),
           ),
           child: Icon(
-            widget.icon,
+            readingOrderArrow(context, widget.icon),
             color: _isHovering ? AppColors.accent : AppColors.inkMuted,
             size: 22,
           ),

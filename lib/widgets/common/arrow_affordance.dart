@@ -84,3 +84,42 @@ class ArrowTooltip extends StatelessWidget {
     );
   }
 }
+
+/// The glyph that means the same thing in the other reading direction.
+///
+/// Swapping the glyph rather than mirroring it with a `Transform` is
+/// deliberate: these are asymmetric shapes with their own optical padding, and
+/// Material already ships the pair, so the flipped version is a real icon
+/// rather than a reflected one.
+const Map<IconData, IconData> _opposites = {
+  Icons.arrow_back_ios_new_rounded: Icons.arrow_forward_ios_rounded,
+  Icons.arrow_back_ios_rounded: Icons.arrow_forward_ios_rounded,
+  Icons.arrow_forward_ios_rounded: Icons.arrow_back_ios_new_rounded,
+  Icons.arrow_back_rounded: Icons.arrow_forward_rounded,
+  Icons.arrow_forward_rounded: Icons.arrow_back_rounded,
+  Icons.chevron_left_rounded: Icons.chevron_right_rounded,
+  Icons.chevron_right_rounded: Icons.chevron_left_rounded,
+  Icons.keyboard_arrow_left_rounded: Icons.keyboard_arrow_right_rounded,
+  Icons.keyboard_arrow_right_rounded: Icons.keyboard_arrow_left_rounded,
+};
+
+/// [icon] as it should render for the reading direction in scope.
+///
+/// Flutter mirrors `Row`, `ListView` and the Material widgets under
+/// `Directionality`. It does not mirror an `IconData`, so a rail's
+/// scroll-back button keeps pointing left in Arabic while the rail it scrolls
+/// runs the other way — the arrow ends up pointing at the content it moves
+/// away from (#68).
+///
+/// Only [ArrowSense.previous] and [ArrowSense.next] flip. Up and down have no
+/// reading order to follow, and **the player's seek controls are deliberately
+/// left alone**: whether a video timeline should mirror in Arabic is a
+/// question about the timeline, not a geometry bug in the button, and no
+/// answer to it has been settled. `Icons.replay_30_rounded` and
+/// `Icons.forward_30_rounded` are absent from the map above for that reason.
+IconData readingOrderArrow(BuildContext context, IconData icon) {
+  if (Directionality.of(context) == TextDirection.ltr) return icon;
+  final sense = arrowSenseOf(icon);
+  if (sense != ArrowSense.previous && sense != ArrowSense.next) return icon;
+  return _opposites[icon] ?? icon;
+}
