@@ -24,7 +24,6 @@ What is left is the part a test cannot hold:
 - Data strings stay English on purpose.
 - Unprobed fixed heights: lift on touch, probe, repeat.
 
-
 Six invariants fail in CI rather than needing a pass over `lib/`:
 
 | Test                           | Invariant                                                                   |
@@ -36,13 +35,11 @@ Six invariants fail in CI rather than needing a pass over `lib/`:
 | `text_scale_overflow_test`     | 26 widgets survive 3x text scale on a 360px view                            |
 | `arrow_affordance_test`        | Every rail arrow turns around for Arabic, and the player transport does not |
 
-### The long tail of fixed heights (#69)
-
-**Needs a device** — the torrent-cast question and a forced track. Nothing
-here can be advanced by reading or writing code; each is one test away from
-an answer. Cast issues go the same way: use it, and report what breaks.
-
 ### Device checks
+
+Nothing here can be advanced by reading or writing code; each is one test
+away from an answer. Cast issues go the same way: use it, and report what
+breaks.
 
 **A forced track picked by hand.** Forced shares the verified-selection path,
 and stays manual-only by decision -- but no forced render has been confirmed
