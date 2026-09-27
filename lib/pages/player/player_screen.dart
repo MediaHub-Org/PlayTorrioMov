@@ -2497,7 +2497,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     final episodeTitle = _currentEpisode?.title;
     final episodeSubtitle = _currentEpisode != null
         ? (isColl
-            ? 'Part ${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
+            ? '${context.l10n.playerEpisodePart(_currentEpisode!.episode ?? 1)}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
             : 'S${_currentEpisode!.season ?? 1}:E${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}')
         : widget.detail?.year;
 

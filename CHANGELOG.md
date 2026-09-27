@@ -10,6 +10,11 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **Continue Watching badges, season parts and the Arabic sheet's status
+  lines follow the app language.** Source-type and countdown badges, the
+  `Movie` type label and collection `Part N` are keys now. `S01E01` shapes
+  stay codes -- as universal as episode numbers -- and hardcoded Arabic
+  stays Arabic until a native review says otherwise.
 - **`C` toggles subtitles on and off.** It used to open the subtitle panel.
   Turning them on matches the language you are hearing, so an English audio
   track gets English subtitles rather than whatever the file happens to

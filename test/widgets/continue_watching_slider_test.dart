@@ -10,6 +10,8 @@ ContinueWatchingItem item({
   required String id,
   required String type,
   required String title,
+  bool isTorrent = false,
+  String? addonName,
 }) {
   return ContinueWatchingItem(
     id: id,
@@ -18,7 +20,8 @@ ContinueWatchingItem item({
     positionSeconds: 30,
     totalDurationSeconds: 100,
     lastWatchedAt: DateTime(2026, 1, 1),
-    isTorrent: false,
+    isTorrent: isTorrent,
+    addonName: addonName,
   );
 }
 
@@ -176,6 +179,56 @@ void main() {
 
       expect(find.text('A Series'), findsNothing);
       expect(find.byType(ContinueWatchingSlider), findsOneWidget);
+    });
+  });
+
+  group('ContinueWatching card labels', () {
+    // Badges and countdowns used to be hardcoded English. A bare-pumped
+    // test sees the English fallback, which is exactly what these assert.
+    setUp(() {
+      ContinueWatchingService.activeItems.value = [];
+    });
+
+    Future<void> pumpOne(WidgetTester tester, ContinueWatchingItem entry) async {
+      ContinueWatchingService.activeItems.value = [entry];
+      addTearDown(() => ContinueWatchingService.activeItems.value = []);
+      await tester.pumpWidget(
+        wrap(
+          const SingleChildScrollView(
+            child: ContinueWatchingSlider(typeFilter: 'movie'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a stream without an add-on name says Stream', (tester) async {
+      await pumpOne(tester, item(id: 'tt1', type: 'movie', title: 'A Movie'));
+      expect(find.text('Stream'), findsOneWidget);
+      expect(find.text('2m left'), findsOneWidget);
+      expect(find.text('Movie'), findsOneWidget);
+    });
+
+    testWidgets('a torrent without an add-on name says Torrent', (tester) async {
+      await pumpOne(
+        tester,
+        item(id: 'tt2', type: 'movie', title: 'A Torrent', isTorrent: true),
+      );
+      expect(find.text('Torrent'), findsOneWidget);
+    });
+
+    testWidgets('a known add-on name wins over the fallback', (tester) async {
+      await pumpOne(
+        tester,
+        item(
+          id: 'tt3',
+          type: 'movie',
+          title: 'Named',
+          addonName: 'PlayTorrioHTTP',
+        ),
+      );
+      expect(find.text('PlayTorrioHTTP'), findsOneWidget);
+      expect(find.text('Stream'), findsNothing);
     });
   });
 }

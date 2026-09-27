@@ -648,7 +648,9 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             const SizedBox(width: 4),
                             Text(
                               item.addonName ??
-                                  (item.isTorrent ? 'Torrent' : 'Stream'),
+                                  (item.isTorrent
+                                      ? context.l10n.continueTorrent
+                                      : context.l10n.continueStream),
                               style: const TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w600,
@@ -675,7 +677,9 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                         ),
                         child: Text(
                           item.remainingMinutes > 0
-                              ? '${item.remainingMinutes}m left'
+                              ? context.l10n.continueMinutesLeft(
+                                  item.remainingMinutes,
+                                )
                               : '${(progress * 100).toInt()}%',
                           style: const TextStyle(
                             fontSize: 10,
@@ -750,8 +754,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   item.episode != null
                               ? 'S${item.season!.toString().padLeft(2, '0')}:E${item.episode!.toString().padLeft(2, '0')}${item.episodeTitle != null ? ' • ${item.episodeTitle}' : ''}'
                               : (item.year != null
-                                    ? '${item.year} • Movie'
-                                    : 'Movie'),
+                                    ? '${item.year} • ${context.l10n.continueMovie}'
+                                    : context.l10n.continueMovie),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

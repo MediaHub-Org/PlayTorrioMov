@@ -32,11 +32,12 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
   final List<StreamSource> _allSources = [];
   bool _isScraping = true;
   String? _error;
-  String _statusLine = 'Resolving servers…';
+  late String _statusLine;
 
   @override
   void initState() {
     super.initState();
+    _statusLine = context.l10n.animeResolvingServers;
     _startScraping();
   }
 
@@ -45,7 +46,7 @@ class _AnimeArabicStreamSheetState extends State<AnimeArabicStreamSheet> {
       _allSources.clear();
       _isScraping = true;
       _error = null;
-      _statusLine = 'Cracking Arabic server map…';
+      _statusLine = context.l10n.animeCrackingServers;
     });
 
     try {

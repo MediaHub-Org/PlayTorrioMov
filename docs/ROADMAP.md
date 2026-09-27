@@ -69,33 +69,9 @@ on a device yet. Pick one and check the picture, not just the tick.
 
 ### Translation (#68)
 
-**Sites outside `Text(` need checking on touch.** Tooltips, hints and error
-text passed as named arguments or fields never reach the scan. The Continue
-Watching tooltips are done; still to check: a hint, the player's own title for
-an anime episode, the Arabic pages' error text, and the browse pages' error
-heading.
-
-**Catalog descriptions need Cinemeta's API to take a locale.** Synopsis text
-comes from the Stremio addon, not TMDB (cast/crew only here) — unstarted.
-
-### Whether a phone can cast a torrent
-
-The one open feature question. A torrent plays from TorrServer on the phone at
-`127.0.0.1`, and a receiver asked to fetch that address asks *itself* — so it
-would need the server bound to the LAN and handed the device's LAN address.
-
-Reading the code settled half of it: **iOS is dead** (the plugin's Go shim
-hardcodes `net.Listen("tcp", "127.0.0.1:"+portStr)`), and **on Android the
-plugin is not the obstacle** — it exposes `port`, so the LAN URL would be built
-here from `NetworkInterface.list()`.
-
-What the shipped `libtorrserver.so` actually binds is unproven. One command
-decides it, with a torrent playing on the phone, from a laptop on the same
-Wi-Fi:
-
-```
-curl http://<phone-LAN-IP>:<port>/echo
-```
-
-An answer means the feature is possible. A refusal closes it for good.
-
+**What is left outside `Text(` is hardcoded Arabic.** The English sites are
+keyed now -- Continue Watching badges, season-collection parts, the Arabic
+sheet's status lines -- and `S01E01` shapes stay codes, as universal as episode
+numbers. What remains is hardcoded Arabic across the Arabic anime pages:
+correct for their audience today, and needing a native review before gaining
+es/pt/en translations.

@@ -714,10 +714,10 @@ Fix flatpak suspend + shortcut focus loss; retry failed catalogs
 ### Keep the docs current
 
 - `CHANGELOG.md` — a `[Unreleased]` entry for anything user-visible.
-- `docs/ROADMAP.md` — **pending work only**, plus its "Not doing" table so
-  settled decisions stop being re-litigated. Anything that shipped belongs in
-  the changelog, and any rule for writing code belongs in this file. The
-  roadmap is a list of what is left, not a record of what happened.
+- `docs/ROADMAP.md` — **pending work only**. Anything that shipped belongs in
+  the changelog, any rule for writing code belongs in this file, and settled
+  scope decisions live under §12 below. The roadmap is a list of what is left,
+  not a record of what happened.
 
 ---
 
@@ -811,4 +811,5 @@ not already answer.
 | A size/sort filter under Sources & Filters | A size range and "largest first" are browsing choices for *this* title, not a standing preference, so they stay on the sources screen |
 | A keyboard shortcut for the subtitle panel | `A`, `S` and `R` are taken and `C` toggles; keyboard-only users reach the panel through the transport bar. Revisit if a key frees up |
 | Translating AniList's genres and formats | They are the API's own filter values; a display-name map per language would sit on top of every query |
+| Translating catalog descriptions | Cinemeta takes no locale parameter (`?language=` is silently ignored), so there is nothing to switch; a TMDB-backed metadata addon is a setup choice, not a code change |
 | Pure-alphabetical online subtitle order | The list leads with the language being heard because that is the track a viewer is most likely to want; ties break alphabetically |
