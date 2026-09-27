@@ -128,6 +128,7 @@ class ContinueWatchingService {
       case 'main':
         return !isAnime;
       case 'anime':
+      case 'general_anime':
         return isAnime;
       case 'movie':
         return item.type == 'movie';

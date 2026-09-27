@@ -14,6 +14,7 @@ import '../../widgets/common/reading_direction.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
+import '../../models/movie/movie_year.dart';
 import '../../models/movie/video.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/my_list/my_list_item.dart';
@@ -316,7 +317,7 @@ class _DetailsPageState extends State<DetailsPage>
     if (effectiveId.startsWith('bestsimilar_') ||
         effectiveBaseUrl.contains('bestsimilar')) {
       final yearNum = widget.movie.year != null
-          ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), ''))
+          ? startYearOf(widget.movie.year)
           : null;
       final resolved = await MetadataService.findMovieByTitle(
         title: widget.movie.name,
@@ -341,7 +342,7 @@ class _DetailsPageState extends State<DetailsPage>
     // If fetchMeta failed, try fallback search to resolve
     if (meta == null && !effectiveId.startsWith('tt')) {
       final yearNum = widget.movie.year != null
-          ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), ''))
+          ? startYearOf(widget.movie.year)
           : null;
       final resolved = await MetadataService.findMovieByTitle(
         title: widget.movie.name,
@@ -491,7 +492,7 @@ class _DetailsPageState extends State<DetailsPage>
       final title = _detail?.name ?? widget.movie.name;
       final yearStr = _detail?.year ?? widget.movie.year;
       final year = yearStr != null
-          ? int.tryParse(yearStr.replaceAll(RegExp(r'[^0-9]'), ''))
+          ? startYearOf(yearStr)
           : null;
       final isTv = _isSeries;
 
@@ -1104,7 +1105,7 @@ class _DetailsPageState extends State<DetailsPage>
     if (meta.year != null && meta.year!.isNotEmpty) {
       items.add(
         Text(
-          meta.year!,
+          displayYearRange(meta.year),
           style: const TextStyle(
             color: Colors.white,
             fontSize: 15,

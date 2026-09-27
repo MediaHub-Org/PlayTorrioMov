@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:playtorriomov/models/movie/movie_detail.dart';
 import 'package:playtorriomov/models/stream/stream_model.dart';
 import 'package:playtorriomov/services/continue_watching/continue_watching_service.dart';
+import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +63,40 @@ void main() {
       expect(ContinueWatchingService.getHistoryProgress('tt0137523'), isNull);
       // activeItems is a separate list, untouched by a history-only removal.
       expect(ContinueWatchingService.activeItems.value.length, 1);
+    });
+  });
+
+  group('matchesTypeFilter', () {
+    // The Anime section's Continue Watching row passes 'general_anime',
+    // which used to fall through to the default-true branch and list
+    // every movie beside the anime. One filter means one kind.
+    ContinueWatchingItem item(String id, String type) =>
+        ContinueWatchingItem(
+          id: id,
+          title: id,
+          type: type,
+          positionSeconds: 1,
+          totalDurationSeconds: 10,
+          lastWatchedAt: DateTime(2026),
+          isTorrent: false,
+        );
+
+    test('general_anime keeps anime out of movies and vice versa', () {
+      final movie = item('tt0137523', 'movie');
+      final anime = item('anilist:21', 'anime');
+
+      expect(
+        ContinueWatchingService.matchesTypeFilter(movie, 'general_anime'),
+        isFalse,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(anime, 'general_anime'),
+        isTrue,
+      );
+      expect(
+        ContinueWatchingService.matchesTypeFilter(movie, 'movie'),
+        isTrue,
+      );
     });
   });
 }

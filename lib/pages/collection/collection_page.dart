@@ -1,12 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
-
 import '../../models/collection/media_collection.dart';
 import '../../models/continue_watching/continue_watching_item.dart';
 import '../../models/download/download_task_model.dart';
+import '../../models/movie/movie_year.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/app_breakpoints.dart';
@@ -76,13 +75,9 @@ class _CollectionPageState extends State<CollectionPage> {
   }
 
   /// The leading four digits of a year string, or null when it carries
-  /// none. Years arrive as strings here (`2024`, sometimes `2024-03-01`),
-  /// and an unparseable one sorts with the unknowns rather than crashing
-  /// the sort.
-  static int? _yearOf(String? year) {
-    final match = RegExp(r'\d{4}').firstMatch(year ?? '');
-    return match == null ? null : int.parse(match.group(0)!);
-  }
+  /// none. Series arrive as ranges (`2022–`, `2020–2023`); sorting only
+  /// ever wants the start, which [startYearOf] reads.
+  static int? _yearOf(String? year) => startYearOf(year);
 
   Widget _buildTypePills(String current, ValueChanged<String> onPick) {
     Widget chip(String label, String value) {

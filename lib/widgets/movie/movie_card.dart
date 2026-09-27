@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
 import '../../models/movie/movie.dart';
+import '../../models/movie/movie_year.dart';
 import '../../pages/details/details_page.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
@@ -133,7 +134,7 @@ class MovieCard extends StatelessWidget {
                   // cell whatever scale it is handed.
                   Flexible(
                     child: Text(
-                      movie.year!,
+                      displayYearRange(movie.year),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(

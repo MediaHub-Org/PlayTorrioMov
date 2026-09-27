@@ -6,6 +6,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Series years read as ranges.** `2020–2023` renders `2020 - 2023` on
+  cards and details rows, and every numeric use -- title matching, similar
+  titles, Library sorting -- takes the start year. Stripping punctuation
+  had turned ranges into years like `20192023`.
+
+### Changed
+- **Anime Continue Watching holds anime only.** Its filter fell through to
+  a default-true branch and listed every movie beside the anime.
+
+### Added
 - **Continue and Downloads sort five ways.** Recent, title A-Z and Z-A,
   newest-first and oldest-first behind one Sort pill, the same orders the
   shelves already answer. Rating is honestly absent: no saved title
