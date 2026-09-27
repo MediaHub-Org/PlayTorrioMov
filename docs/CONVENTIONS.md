@@ -147,6 +147,17 @@ static const List<double> _points = [0.25, 0.5, 0.75, 1.0];
 const Map<String, String> _iso639ToDisplayName = { ... };
 ```
 
+### Titles
+
+A title is two fields, and they must never merge: `displayTitle` is what the
+user reads and is localizable; `canonicalTitle` feeds scraper queries,
+`uniqueKey`, Trakt/Simkl matching and filename parsing, and is never
+localized. Localizing the identifier forks identity — the same show saved
+under a Spanish UI becomes a different object from the one saved under
+English, taking collections membership, Continue Watching dedupe and
+Trakt/Simkl matching with it — and starves the 48 title-string scrapers,
+which fail silently on a translated title. See `MyListItem.uniqueKey`.
+
 ### Spelling: American English, everywhere
 
 One variant, not two. `color`, `behavior`, `catalog`, `center`, `gray`,
@@ -392,6 +403,41 @@ Two accessors, and the choice is deliberate:
 English is the fallback, so a missing key degrades rather than crashes. The
 reasoning is written out in `lib/l10n/l10n.dart`.
 
+### Adding a string
+
+1. Add a key to `lib/l10n/app_en.arb`, plus the three translated ARB files.
+2. Run `flutter gen-l10n`.
+3. Replace the literal with `context.l10n.yourKey`.
+
+A value inside the sentence is a placeholder — `detailsPlayEp` is
+`"Play Ep {number}"` — because word order differs per language. A missing
+key does not crash: `gen-l10n` silently emits the English string, so the
+screen looks fine and is quietly untranslated. The l10n test compares every
+ARB file to English in both directions, so add the key to all four files.
+
+Probe a newly translated widget in the longest language (Portuguese or
+Spanish) at a phone's width, not only in English: translation can expose an
+overflow the English hid. `test/no_hardcoded_text_test.dart` fails on the
+next literal `Text(` first argument that reads as prose; an entry in its
+allowlist is a decision that a string is not prose, not a deferral.
+
+### Labels that stay in English
+
+Some labels are identifiers, not prose. Debrid provider ids are persisted
+storage keys compared with `==`; platform names are product names; the
+keyboard shortcuts' keys are the physical keys; genre names and anime formats
+are AniList's own filter values, sent back to its API. Only the generic
+`Desktop/Mobile` fallback and the `None` debrid display go through the ARB.
+
+### A `const` enum cannot hold a translated string; give it a method
+
+Expose `title(l10n)` / `description(l10n)` / `label(l10n)` with an exhaustive
+switch, so a preset without a translation is a compile error rather than a
+blank row. `DecoderPreset`, `BufferResiliencePreset` and
+`SubtitleStylePreset` in `services/player/player_settings.dart` follow this;
+`HubSection.localizedLabel`, `LibrarySection.localizedLabel` and
+`LibraryShelf.localizedLabel` are the earlier hand-rolled versions.
+
 ---
 
 ## 6. Comments
@@ -507,6 +553,30 @@ be tagged, or CI becomes flaky for everyone.
 
 A started `Timer.periodic` is rejected at teardown. Cancel it in the test, or
 drive it with `fakeAsync`.
+
+### Text-scale overflows
+
+Probe, don't grep. `test/text_scale_overflow_test.dart` renders at 3.0
+scale on a 360px-wide view and asserts nothing reached the binding: Flutter
+reports an overflow as an exception with an exact pixel count, so a failure
+names the widget and the amount. Add a case per widget. A static scan pairing
+fixed heights with font sizes cannot tell "box that wraps this text" from
+"box that happens to be near it", so its ranking is noise.
+
+Fix with `Wrap` and `Expanded` deliberately, not interchangeably: a `Wrap`
+hands children unbounded width, so text inside one sizes to its natural width
+and runs off the card. Reach for `Wrap` for small children that can sit on a
+second line (a badge, a button); reach for `Expanded` for a block of text
+that should wrap internally. Clamp only what has nowhere to go, at 1.3, the
+established ceiling. Drive animated pages with `pumpAtScale(settle: false)` --
+`pumpAndSettle` times out on a looping animation -- and pump the widget where
+it actually lives: a bare pump reports overflows its production scaffolding
+cannot have.
+
+The recurring shape is `Text` + `Spacer` + button in a flat `Row`, where the
+title takes its natural width and shoves the button off. `Expanded` on the
+text, taking the `Spacer`'s job, is the fix -- the third time this shape was
+the bug.
 
 ---
 

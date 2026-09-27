@@ -99,21 +99,26 @@ void main() {
               f.path.endsWith('.dart') ||
               f.path.endsWith('.md') ||
               f.path.endsWith('.arb'))) {
+        // Forward slashes everywhere: on Windows listSync reports
+        // backslashes, and without this every lookup below misses -- the
+        // allowlist, the generated-output skip, and the self-skip, which is
+        // why this was green on Linux CI and red on a Windows checkout.
+        final path = file.path.replaceAll(r'\', '/');
         // `flutter gen-l10n` writes these from the ARB files; correcting a
         // copy would only hide the original.
-        if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+        if (path.startsWith('lib/l10n/app_localizations')) continue;
         // This file's own list is the list; skipping it whole rather than
         // word by word, since every entry would need allowing.
-        if (file.path == 'test/american_spelling_test.dart') continue;
+        if (path == 'test/american_spelling_test.dart') continue;
 
-        final exempt = allowed[file.path] ?? const <String>{};
+        final exempt = allowed[path] ?? const <String>{};
         final lines = file.readAsLinesSync();
         for (var i = 0; i < lines.length; i++) {
           for (final match in pattern.allMatches(lines[i])) {
             final word = match.group(0)!.toLowerCase();
             if (exempt.contains(word)) continue;
             offenders.add(
-              '${file.path}:${i + 1}: "${match.group(0)}" '
+              '$path:${i + 1}: "${match.group(0)}" '
               '-- write "${spellings[word]}"',
             );
           }

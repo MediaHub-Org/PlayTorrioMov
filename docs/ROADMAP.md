@@ -7,7 +7,7 @@ the release process is in [RELEASES.md](RELEASES.md), and item numbers
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-26**, on `v1.8.11+44`.
+Last reconciled: **2026-09-27**, on `v1.8.11+44`.
 
 ---
 
@@ -86,16 +86,6 @@ end, the left one dimmed), and a scroll to the end (the right one dimmed, the
 left one lit). The buttons are driven by `maxScrollExtent`, so the case worth
 checking is a row that is *just* wider than its frame.
 
-The rail's first version was reported as "not very visible, and only on the
-right", and both halves of that were real: the chevron was a bare 18px
-`textSecondary` glyph on a 28px fade whose gradient ran the wrong way, so it
-sat on the transparent end of its own fade; and the spent end was removed
-rather than dimmed, so the row looked lopsided and had no control at all at
-the far end of the scroll. Both are fixed. The wheel handling is the part
-still unverified on a real desktop -- in particular that a wheel over the
-rail does not also scroll the page behind it, which is what the pointer
-signal resolver is there to prevent.
-
 The rail is shared by the phone and desktop layouts, so the edge affordances
 are split by *platform*, not width: the fade is drawn everywhere, the button
 only on desktop. A tablet is wide enough to pass any breakpoint and is still
@@ -127,73 +117,6 @@ argument or a field instead of `Text(`, so the same scan cannot see them:
 two tooltips on the Continue Watching card, a hint, the player's own title for
 an anime episode, the Arabic pages' error text, and the browse pages' error
 heading.
-
-`test/no_hardcoded_text_test.dart` fails on the next one. A literal first
-argument to `Text(` with a run of three letters *outside* an interpolation is
-prose; `'S${season}E${episode}'`, `'${n} px'` and `'${pct}%'` are codes and
-units and do not trip it. Two literals are allowlisted by name -- a packet-count
-unit and a shell command someone pastes -- and an entry there is a decision
-that a string is not prose, not a way to defer translating it.
-
-What stays English is data rather than UI, and that is a decision rather than
-a gap. The 48 scrapers build a source's `title` and `description` from their
-own name and the release's quality ("VidRock · Alpha · 1080p"); those strings
-are how a source row is read and matched, not sentences. Channel names,
-provider names and a library's own error text are the same kind of thing.
-
-Genre names (Action, Slice of Life, ...) and anime formats (TV, OVA, ...) stay
-in English on purpose: they are AniList's own values, sent back to its API to
-filter, and would need a display-name map per language on top.
-
-Translating a menu can expose an overflow the English hid: the audio menu's
-"Default audio stream playing." and "Audio Sync Offset" rows were fixed-width
-Rows that a longer Portuguese string pushed 75px past the card. Probe each
-newly translated widget in the longest language (Portuguese or Spanish) at a
-phone's width, not only in English.
-
-The method, per string:
-
-1. Add a key to `lib/l10n/app_en.arb`, plus the three translated ARB files.
-2. Run `flutter gen-l10n`.
-3. Replace the literal with `context.l10n.yourKey`.
-
-A key that needs a value inside the sentence uses a placeholder —
-`detailsPlayEp` is `"Play Ep {number}"`, because word order differs in the
-other three languages and the number cannot be concatenated outside the
-translation.
-
-**A test compares every ARB file to English in both directions.** A missing
-key does not crash: `gen-l10n` silently emits the English string, so the
-app looks fine and one screen is quietly untranslated. Add the key to all
-four files or the test fails.
-
-**Use `context.l10n`, not `AppLocalizations.of(context)`.** The generated
-getter is `nullable-getter: false`, so it force-unwraps and *throws* when no
-delegate is registered — which is most existing widget tests, since they pump
-a bare `MaterialApp`. `lib/l10n/l10n.dart` wraps it with an English fallback,
-so a bare-pumped test sees exactly the string it saw before the widget was
-translated. Translating a widget without this breaks every test that renders
-it, and the failure looks like a null-check crash rather than a missing
-delegate.
-
-**A `const` enum cannot hold a translated string; give it a method.** This is
-the shape the settings pages settled on, and it is what to reach for next.
-`HubSection.localizedLabel` (in `lib/utils/hub_controller.dart`) is the
-earlier hand-rolled version; `LibrarySection.localizedLabel` and
-`LibraryShelf.localizedLabel` follow it. `DecoderPreset`,
-`BufferResiliencePreset` and `SubtitleStylePreset` in
-`services/player/player_settings.dart` now expose `title(l10n)` /
-`description(l10n)` / `label(l10n)` with exhaustive switches, so a preset
-without a translation is a compile error rather than a blank row.
-
-**Three things stay untranslated on purpose, and all are identifiers rather
-than labels.** The debrid provider ids (`'Real-Debrid'`, `'TorBox'`, …) are
-persisted and compared with `==` throughout `DebridService`, so only the
-display of `'None'` is translated, never the value. The platform names
-(`Android`, `Windows`, `macOS`, `iOS`, `Linux`) are product names; only the
-generic `Desktop/Mobile` fallback goes through the ARB. The Keyboard
-Shortcuts page's key column (`Space`, `J`, `Esc`) is the same idea — those
-are the physical keys.
 
 **The RTL audit is half done, and the half a test can hold is held.**
 `Row`, `ListView` and the Material widgets flip themselves under
@@ -228,40 +151,13 @@ cast/crew and scrapers' own IMDb→TMDB id matching. Translating catalog
 descriptions would mean checking whether Cinemeta's own API takes a locale, a
 separate and unstarted question.
 
-**The risk is not the UI. It is the titles**, and the rule is settled before
-anyone starts, because getting it wrong breaks things that look unrelated.
-
-> **A title is two fields, and they must never merge.**
->
-> |                  | Used for                                                             | Localizable |
-> |:-----------------|:---------------------------------------------------------------------|:------------|
-> | `displayTitle`   | What the user reads                                                  | Yes         |
-> | `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never**   |
-
-Three things depend on a stable title, and each breaks differently:
-
-1. **Identity falls back to the title.** `MyListItem.uniqueKey` returns
-   `title:$type:$clean:$year` when there is no IMDb, TMDB, Trakt or Simkl id
-   — and anime saved from AniList hits that branch *by design*, because
-   AniList ids are their own namespace. Localize `title` and the same show
-   saved under a Spanish UI is a different object from the one saved under
-   English. That takes collections membership, Continue Watching dedupe and
-   Trakt/Simkl matching with it.
-2. **All 48 scrapers search by title string** (`scrape({required String
-   title, ...})`). They index release names, which are English or original
-   language. "El Caballero Oscuro" returns nothing, and it fails silently —
-   the user sees no sources, not an error.
-3. **AniList already returns four titles** — `titleUserPreferred`,
-   `titleRomaji`, `titleEnglish`, `titleNative`. The app picks the first and
-   discards the rest. The "which title do we show" decision already exists
-   here; it is simply not a setting yet.
-
-**Default: show original/English titles even when the UI is translated**,
-with an opt-in toggle that affects display only. A translated title is not a
-stable identifier — Spain and Latin America give the same film different
-Spanish titles — while the original is the one string every provider agrees
-on. It is also what Stremio, Plex and Jellyfin default to, and titles are how
-people search and recognize things.
+**Still missing: show original titles.** The language picker ships
+(`AppThemeService.setLocale`, four locales in Appearance settings) but the
+opt-in display-only toggle does not: with a translated UI there is no way to
+keep original/English titles, which is what Stremio, Plex and Jellyfin
+default to. The rule it must obey lives in `docs/CONVENTIONS.md` under
+Naming/Titles -- a translated title is not a stable identifier, while the
+original is the one string every provider agrees on.
 
 ### Text scale and accessibility (#69)
 
@@ -272,15 +168,6 @@ was the last, and its four search pills are capped. What remains is the long
 tail, deliberately unranked: the one attempt to rank it by grepping `height:`
 returned 165 hits whose loudest were `height: 4` spacers, and a ranking that
 wrong is worse than none.
-
-The player's overlays are done and probed: the subtitle style editor, the
-episode picker (which passed untouched — its rows already flex) and the cast
-sheet, whose header was 321px past the edge at 3x. That header is worth
-remembering as a pattern rather than a one-off: `Text` + `Spacer` + button in
-a flat `Row` means the title takes its natural width and shoves the button
-off. It is the third time this exact shape has been the bug — the Continue
-Watching header and the catalog cards' metadata rows were the other two.
-`Expanded` on the text, taking the `Spacer`'s job, is the fix each time.
 
 The details-page rails are done, and one of the three never needed doing:
 
@@ -295,41 +182,6 @@ a real gap: `DetailsPage` fetches its own data over the network and its rails
 are private builders, so there is nothing a test can construct. Making them
 probeable means extracting the credit card and the similar card as public
 widgets — worth doing, not done here.
-
-The method is settled and does not need rediscovering:
-
-- **Probe, don't grep.** `test/text_scale_overflow_test.dart` renders at 3.0
-  scale on a 360px-wide view and asserts nothing reached the binding. Flutter
-  reports an overflow as an exception with an exact pixel count, so a failure
-  names the widget and the amount. Add a case per widget.
-- **Do not audit by grepping `height:`.** It was tried and it does not
-  survive contact: a span-based scan pairing each fixed height with the
-  largest `fontSize` inside it returns 165 hits, and the loudest are
-  `height: 4` spacers that merely sit in the same widget subtree as a
-  `fontSize: 22` title. A static scan cannot tell "box that wraps this text"
-  from "box that happens to be near it", so the ranking is noise.
-- **`Wrap` and `Expanded` are not interchangeable, and the settings pages
-  proved it.** A `Wrap` hands its children unbounded width, so a block of
-  text inside one sizes to its natural 3x width and runs off the card — that
-  is a 1310px overflow, not a fix. Reach for `Wrap` when the children are
-  small and can genuinely sit on a second line (a badge, a button); reach for
-  `Expanded` when one child is a block of text that should wrap internally.
-- **A clamp is not always enough.** The Episodes control strip still wanted
-  179px at 1.3, because the jump input and the batch dropdown are
-  fixed-width boxes with text inside them. It sits in a `Wrap`, so the box
-  could genuinely grow — and wrapping is the better answer where it can.
-  Clamp only what has nowhere to go. 1.3 is the established ceiling.
-- **A page with a looping animation never settles.** `pumpAndSettle` times
-  out on the details pages' ambient background rather than reporting anything
-  about layout. Overflow is raised during layout on the first frame, so
-  `pumpAtScale(settle: false)` is what those cases need.
-- **Pump it where it actually lives.** A bare pump of the player menu reported
-  a 1891px vertical overflow, and of `SectionHeader` a 790px one. Neither can
-  happen in production: `PlayerMenuAnchor` bounds and scrolls the card, and a
-  browse page is a scrollable. Both probes now wrap the widget in the
-  arrangement it really sits in. A probe that reports an overflow production
-  cannot have is not finding a bug — it is finding the test's own scaffolding,
-  and it wastes exactly the time it takes to work that out.
 
 **Semantics labels on icon-only buttons are done, for every `IconButton` and
 `PlayerIconButton` in `lib/`.** 46 went in with the Close/Back pass and seven
@@ -431,28 +283,13 @@ Re-fetched 2026-09-20: `v3/main` has not moved (still `39b736f`, and it is
 the default branch's only one), and the archived PlayTorrioMod's last commit is
 still 2026-09-05. Nothing new to review or port.
 
-Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
-`dl.google.com` apt source the runner image ships that periodically breaks
-`apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`.
+Taken: `db2a4b9` and `0343720` (Linux CI hardening), plus a scraper-lifecycle
+fix of our own that reading upstream surfaced: leaving a watch screen
+mid-search left every scraper issuing HTTP requests into a controller nobody
+was reading, because the cancel never reached `ScraperManager`. Fixed, with a
+test that fails without it.
 
-**The one real bug found in `39b736f`.** Upstream's commit message says "watch
-screen properly cancels all scrapers on dispose". Ours did not, and the
-reason is worth recording because it looked like it did: `ScraperManager.
-scrapeAll` has had `controller.onCancel` canceling every subscription and
-deadline since the per-scraper deadline work. But `StreamService.fetchStreams`
-wrapped that stream in a *second* controller with no `onCancel` of its own,
-so canceling the outer consumer never reached the manager. Leaving a watch
-screen mid-search left all forty-odd scrapers issuing HTTP requests into a
-controller nobody was reading. Fixed, with a test that fails without it.
-
-**Not taken, so they are not re-reviewed.** `39b736f`'s headline feature — a
-CloudStream extension system with a native Android bridge — is a whole plugin
-ecosystem (477 lines of Kotlin, a marketplace, repo management, extension
-loading) and a feature, not a fix. Its player coroutine collision is
-Kotlin-side, and this fork's player is Dart-side. `9616808` (blurred hero
-backdrop) fixes a problem we do not have: every hero here already uses
-`BoxFit.cover`. `29a4127` and `1da1940` (IPTV channels, search, storage) and
-`d2f8074` (portal manager responsiveness) are the area this fork has diverged
-furthest in — #45, #46 and the portal browser are ours — so they were read as
-ideas, not ported as patches. The reported overflows from `d2f8074` were
-hand-fixed in #40 instead: all four, not the two reported.
+**Not taken, so they are not re-reviewed:** the CloudStream extension system
+(a plugin ecosystem, and a feature rather than a fix), the blurred hero
+backdrop (every hero here already uses `BoxFit.cover`), and the IPTV/storage
+commits in the area this fork has diverged furthest in.
