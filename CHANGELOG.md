@@ -6,6 +6,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Live TV starts with six public playlists.** All Languages, English,
+  Español, España, Sports and News from iptv-org load on first run, in the
+  background, so the shelves are not empty before any portal is added. A
+  deleted default stays deleted.
+
+### Added
 - **Live TV sources are a page.** Portals and playlists moved out of the
   modal into a Sources page with an add form, discovery, favorites and a
   remove-all per section. Deleting asks first now; the modal's multi-select

@@ -38,6 +38,7 @@ abstract final class IptvSettings {
   static const _keyShowHdBadge = 'iptv_show_hd_badge';
   static const _keyShowCategoryTag = 'iptv_show_category_tag';
   static const _keyVisibleCategories = 'iptv_visible_categories';
+  static const _keyDefaultPlaylistsSeeded = 'iptv_default_playlists_seeded';
 
   // Portals Modal Keys
   static const _keyPortalCardStyle = 'iptv_portal_card_style';
@@ -92,6 +93,11 @@ abstract final class IptvSettings {
   static final ValueNotifier<int> defaultPortalTab = ValueNotifier<int>(0);
   static final ValueNotifier<CatalogSource> defaultScrapeSource =
       ValueNotifier<CatalogSource>(CatalogSource.cloudVault);
+
+  /// Whether the bundled playlists have been fetched at least once. A plain
+  /// bool rather than a notifier: nothing draws it, the seeder only reads
+  /// it, and a deleted default must stay deleted rather than re-seeding.
+  static bool defaultPlaylistsSeeded = false;
 
   // Portal Browser Values
   static final ValueNotifier<PortalBrowserLayout> browserLayout =
@@ -161,6 +167,7 @@ abstract final class IptvSettings {
     showEpgSnippet.value = prefs.getBool(_keyShowEpgSnippet) ?? true;
     showCategoryCount.value = prefs.getBool(_keyShowCategoryCount) ?? true;
     sidebarWidth.value = prefs.getDouble(_keySidebarWidth) ?? 260.0;
+    defaultPlaylistsSeeded = prefs.getBool(_keyDefaultPlaylistsSeeded) ?? false;
   }
 
   static Future<void> setEnableSpotlight(bool val) async {
@@ -320,6 +327,14 @@ abstract final class IptvSettings {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyShowCategoryCount, val);
     changeNotifier.value++;
+  }
+
+  /// Marks the bundled playlists as seeded. No notifier bump: nothing draws
+  /// this, and a rebuild of every settings listener would buy nothing.
+  static Future<void> setDefaultPlaylistsSeeded() async {
+    defaultPlaylistsSeeded = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyDefaultPlaylistsSeeded, true);
   }
 
   static Future<void> setSidebarWidth(double width) async {
