@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
+import 'arrow_affordance.dart';
 
 class SliderArrow extends StatefulWidget {
   final IconData icon;
@@ -26,7 +27,7 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
     // Dynamic scale based on interaction state
     final scale = _isPressed ? 0.90 : (_isHovered ? 1.08 : 1.0);
     
-    return MouseRegion(
+    final arrow = MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() {
         _isHovered = false;
@@ -82,5 +83,6 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
         ),
       ),
     );
+    return ArrowTooltip(icon: widget.icon, child: arrow);
   }
 }

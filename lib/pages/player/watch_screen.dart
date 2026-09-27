@@ -1910,20 +1910,23 @@ class _SourceCardState extends State<_SourceCard> {
                       color: _hovered
                           ? Colors.white.withValues(alpha: 0.1)
                           : Colors.white.withValues(alpha: 0.06),
-                      child: InkWell(
-                        onTap: () => startSourceDownload(
-                          context,
-                          detail: widget.detail,
-                          episode: widget.episode,
-                          source: s,
-                        ),
-                        child: const SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: Icon(
-                            Icons.download_rounded,
-                            color: _C.textTertiary,
-                            size: 18,
+                      child: Tooltip(
+                        message: context.l10n.playerDownload,
+                        child: InkWell(
+                          onTap: () => startSourceDownload(
+                            context,
+                            detail: widget.detail,
+                            episode: widget.episode,
+                            source: s,
+                          ),
+                          child: const SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Icon(
+                              Icons.download_rounded,
+                              color: _C.textTertiary,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),

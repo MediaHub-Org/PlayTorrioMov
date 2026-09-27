@@ -1010,5 +1010,11 @@
   "catalogCouldNotLoadWhat": "تعذّر تحميل {what}",
 
   "animeStreamsLoadFailed": "تعذّر تحميل البث: {error}",
-  "animeDetailsLoadFailed": "تعذّر تحميل تفاصيل الأنمي: {error}"
+  "animeDetailsLoadFailed": "تعذّر تحميل تفاصيل الأنمي: {error}",
+
+  "commonPrevious": "السابق",
+  "commonNext": "التالي",
+  "commonScrollUp": "التمرير لأعلى",
+  "commonScrollDown": "التمرير لأسفل",
+  "commonClearSearch": "مسح البحث"
 }

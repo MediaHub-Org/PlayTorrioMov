@@ -1317,5 +1317,12 @@
   "animeStreamsLoadFailed": "Failed to load streams: {error}",
   "@animeStreamsLoadFailed": {"placeholders": {"error": {"type": "String"}}},
   "animeDetailsLoadFailed": "Failed to load anime details: {error}",
-  "@animeDetailsLoadFailed": {"placeholders": {"error": {"type": "String"}}}
+  "@animeDetailsLoadFailed": {"placeholders": {"error": {"type": "String"}}},
+
+  "commonPrevious": "Previous",
+  "@commonPrevious": {"description": "Label on a rail's scroll-back arrow, read off the icon (see arrow_affordance.dart)"},
+  "commonNext": "Next",
+  "commonScrollUp": "Scroll up",
+  "commonScrollDown": "Scroll down",
+  "commonClearSearch": "Clear search"
 }

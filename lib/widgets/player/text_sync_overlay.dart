@@ -493,37 +493,46 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           ),
                           const SizedBox(width: 2),
                           if (_searchQuery.length >= 3) ...[
-                            InkWell(
-                              borderRadius: BorderRadius.circular(4),
-                              onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Icon(
-                                  Icons.keyboard_arrow_up_rounded,
-                                  size: 16,
-                                  color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                            Tooltip(
+                              message: context.l10n.commonPrevious,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(4),
+                                onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_up_rounded,
+                                    size: 16,
+                                    color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                                  ),
                                 ),
                               ),
                             ),
-                            InkWell(
-                              borderRadius: BorderRadius.circular(4),
-                              onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 16,
-                                  color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                            Tooltip(
+                              message: context.l10n.commonNext,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(4),
+                                onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    size: 16,
+                                    color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
-                          InkWell(
-                            borderRadius: BorderRadius.circular(4),
-                            onTap: () => _searchController.clear(),
-                            child: const Padding(
-                              padding: EdgeInsets.all(2),
-                              child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: 14),
+                          Tooltip(
+                            message: context.l10n.commonClearSearch,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(4),
+                              onTap: () => _searchController.clear(),
+                              child: const Padding(
+                                padding: EdgeInsets.all(2),
+                                child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: 14),
+                              ),
                             ),
                           ),
                         ],

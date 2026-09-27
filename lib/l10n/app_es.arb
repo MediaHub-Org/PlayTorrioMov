@@ -1010,5 +1010,11 @@
   "catalogCouldNotLoadWhat": "No se pudo cargar {what}",
 
   "animeStreamsLoadFailed": "No se pudieron cargar los streams: {error}",
-  "animeDetailsLoadFailed": "No se pudieron cargar los detalles del anime: {error}"
+  "animeDetailsLoadFailed": "No se pudieron cargar los detalles del anime: {error}",
+
+  "commonPrevious": "Anterior",
+  "commonNext": "Siguiente",
+  "commonScrollUp": "Desplazar hacia arriba",
+  "commonScrollDown": "Desplazar hacia abajo",
+  "commonClearSearch": "Borrar búsqueda"
 }

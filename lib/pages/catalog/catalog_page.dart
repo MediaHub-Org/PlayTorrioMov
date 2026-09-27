@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
+import '../../widgets/common/arrow_affordance.dart';
 
 import '../../services/app_spacing.dart';
 import '../../models/addon/addon.dart';
@@ -533,7 +534,7 @@ class _CatalogPageState extends State<CatalogPage> {
   }
 
   Widget _buildScrollArrow(IconData icon, VoidCallback onTap, bool isVisible) {
-    return Center(
+    final arrow = Center(
       child: AnimatedOpacity(
         opacity: isVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 200),
@@ -555,6 +556,7 @@ class _CatalogPageState extends State<CatalogPage> {
         ),
       ),
     );
+    return ArrowTooltip(icon: icon, child: arrow);
   }
 }
 
