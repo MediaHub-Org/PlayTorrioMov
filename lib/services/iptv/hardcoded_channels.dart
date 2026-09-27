@@ -729,6 +729,32 @@ class HardcodedChannels {
       iconUrl: 'https://media0106.elcinema.com/tvguide/1213_1.png',
     ),
 
+    // ── MUSIC TELEVISION ──
+    HardcodedChannel(
+      id: 'mtv',
+      name: 'MTV',
+      short: 'MTV',
+      category: 'Music',
+      keywords: ['mtv', 'mtv hd', 'mtv 00s', 'mtv 80s', 'mtv 90s', 'mtv hits'],
+      gradient: [Color(0xFFFF0099), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'vh1',
+      name: 'VH1',
+      short: 'VH1',
+      category: 'Music',
+      keywords: ['vh1', 'vh1 hd'],
+      gradient: [Color(0xFFFFD600), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'trace_tv',
+      name: 'Trace',
+      short: 'TRACE',
+      category: 'Music',
+      keywords: ['trace urban', 'trace vanilla', 'trace africa', 'trace'],
+      gradient: [Color(0xFFE91E63), Color(0xFF1A1A1A)],
+    ),
+
     // ── 24/7 GLOBAL NEWS ──
     HardcodedChannel(
       id: 'cnn',

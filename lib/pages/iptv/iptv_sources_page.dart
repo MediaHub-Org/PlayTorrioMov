@@ -678,13 +678,8 @@ class _PortalRow extends StatelessWidget {
 
     return _SourceRowShell(
       onOpen: onOpen,
-      leading: Container(
-        width: 8,
-        height: 8,
-        decoration: const BoxDecoration(
-          color: Colors.greenAccent,
-          shape: BoxShape.circle,
-        ),
+      leading: const _SourceIconTile(
+        icon: Icons.settings_input_antenna_rounded,
       ),
       title: p.name.isNotEmpty ? p.name : p.portal.url,
       subtitle: p.portal.url,
@@ -760,15 +755,10 @@ class _M3uRow extends StatelessWidget {
     AppColors.dependOn(context);
     final ctrl = IptvController.instance;
     final pl = ctrl.m3uPlaylists[index];
-    final palette = AppThemeService.currentPalette.value;
 
     return _SourceRowShell(
       onOpen: onOpen,
-      leading: Icon(
-        Icons.queue_music_rounded,
-        color: palette.primaryColor,
-        size: 20,
-      ),
+      leading: const _SourceIconTile(icon: Icons.queue_music_rounded),
       title: pl.name,
       subtitle:
           '${context.l10n.iptvChannelsCount(pl.channels.length)}'
@@ -794,6 +784,31 @@ class _M3uRow extends StatelessWidget {
           onDelete();
         }
       },
+    );
+  }
+}
+
+/// One fixed tile for every source row, so portals and playlists read as
+/// the same kind of thing. The row centers it against text of any height;
+/// the old green dot sat wherever the row's height put it, which moved
+/// with the badges below the title.
+class _SourceIconTile extends StatelessWidget {
+  final IconData icon;
+
+  const _SourceIconTile({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    final palette = AppThemeService.currentPalette.value;
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: palette.primaryColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Icon(icon, color: palette.primaryColor, size: 20),
     );
   }
 }

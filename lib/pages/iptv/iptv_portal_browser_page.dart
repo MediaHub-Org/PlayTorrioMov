@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
-import '../../widgets/common/arrow_affordance.dart';
 
 import '../../models/iptv/iptv_models.dart';
 import '../../models/iptv/m3u_models.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../widgets/common/filter_dropdown.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_network.dart';
 import '../../services/iptv/iptv_settings.dart';
@@ -32,6 +32,52 @@ class IptvPortalBrowserPage extends StatefulWidget {
   State<IptvPortalBrowserPage> createState() => _IptvPortalBrowserPageState();
 }
 
+/// The region a portal category belongs to, from the prefix portals file
+/// them under (`AR | Sports`, `UK: News`).
+///
+/// Portals shelve the same kinds per region, so without this the category
+/// list is one long run of near-duplicates. Null when the name carries no
+/// prefix -- those shelves are regionless and always shown.
+String? regionPrefixOf(String name) {
+  final match =
+      RegExp(r'^([A-Za-z]{2,3})\s*[|:\-–—]\s*.+').firstMatch(name.trim());
+  if (match == null) return null;
+  return match.group(1)!.toUpperCase();
+}
+
+/// One `(group, stream)` per group a playlist files a channel under.
+///
+/// iptv-org playlists tag a channel with several groups at once
+/// (`News;Public`), and keeping that as one category name put an ugly
+/// combined bucket in the list. Split on `;` so each group is its own
+/// shelf; a channel in two groups appears in both, the way a TV guide
+/// lists it twice. Ungrouped channels pool under `General`, as before.
+/// Pure and synchronous -- the playlist is already in memory.
+List<(String, IptvStream)> expandM3uGroups(M3uPlaylist pl) {
+  final entries = <(String, IptvStream)>[];
+  for (final c in pl.channels) {
+    final groups = c.group
+        .split(';')
+        .map((g) => g.trim())
+        .where((g) => g.isNotEmpty)
+        .toList();
+    for (final group in groups.isEmpty ? const ['General'] : groups) {
+      entries.add((
+        group,
+        IptvStream(
+          streamId: c.url,
+          name: c.name,
+          icon: c.logo,
+          categoryId: group,
+          containerExt: 'm3u8',
+          kind: 'live',
+        ),
+      ));
+    }
+  }
+  return entries;
+}
+
 class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   static const String favoritesCategoryId = '__favorites__';
 
@@ -51,12 +97,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   final ScrollController _categoryScrollController = ScrollController();
   final ScrollController _contentScrollController = ScrollController();
 
-  bool _isHoveringCategories = false;
-  bool _isHoveringContent = false;
-  bool _canScrollCatUp = false;
-  bool _canScrollCatDown = false;
-  bool _canScrollContentUp = false;
-  bool _canScrollContentDown = false;
 
   // Stream Health / Alive Checker State
   bool _isCheckingAlive = false;
@@ -67,6 +107,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
   // Favorited Streams in this Portal
   Set<String> _favoriteStreamIds = {};
+
+  /// The picked region prefix, or null for every region. Portals shelve the
+  /// same kinds per region (`AR | Sports`, `UK | Sports`), so picking one
+  /// narrows categories and streams together; regionless shelves belong to
+  /// no region to exclude and stay visible either way.
+  String? _regionFilter;
 
   String get _storageKey {
     if (widget.portal != null) {
@@ -83,8 +129,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   @override
   void initState() {
     super.initState();
-    _categoryScrollController.addListener(_updateCategoryScrollState);
-    _contentScrollController.addListener(_updateContentScrollState);
     IptvSettings.changeNotifier.addListener(_onSettingsChanged);
     AppThemeService.currentPalette.addListener(_onSettingsChanged);
     _loadFavorites();
@@ -123,8 +167,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     _cancelAlive = true;
     IptvSettings.changeNotifier.removeListener(_onSettingsChanged);
     AppThemeService.currentPalette.removeListener(_onSettingsChanged);
-    _categoryScrollController.removeListener(_updateCategoryScrollState);
-    _contentScrollController.removeListener(_updateContentScrollState);
     _categoryScrollController.dispose();
     _contentScrollController.dispose();
     _searchCtrl.dispose();
@@ -287,54 +329,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     );
   }
 
-  void _updateCategoryScrollState() {
-    if (!_categoryScrollController.hasClients) return;
-    final canUp = _categoryScrollController.position.pixels > 10;
-    final canDown = _categoryScrollController.position.pixels <
-        _categoryScrollController.position.maxScrollExtent - 10;
-    if (canUp != _canScrollCatUp || canDown != _canScrollCatDown) {
-      setState(() {
-        _canScrollCatUp = canUp;
-        _canScrollCatDown = canDown;
-      });
-    }
-  }
-
-  void _updateContentScrollState() {
-    if (!_contentScrollController.hasClients) return;
-    final canUp = _contentScrollController.position.pixels > 10;
-    final canDown = _contentScrollController.position.pixels <
-        _contentScrollController.position.maxScrollExtent - 10;
-    if (canUp != _canScrollContentUp || canDown != _canScrollContentDown) {
-      setState(() {
-        _canScrollContentUp = canUp;
-        _canScrollContentDown = canDown;
-      });
-    }
-  }
-
-  void _scrollCategories(double delta) {
-    if (!_categoryScrollController.hasClients) return;
-    final target = (_categoryScrollController.position.pixels + delta)
-        .clamp(0.0, _categoryScrollController.position.maxScrollExtent);
-    _categoryScrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _scrollContent(double delta) {
-    if (!_contentScrollController.hasClients) return;
-    final target = (_contentScrollController.position.pixels + delta)
-        .clamp(0.0, _contentScrollController.position.maxScrollExtent);
-    _contentScrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
   bool _isDesktop(BuildContext context) {
     return AppBreakpoints.of(context) == ScreenTier.desktop;
   }
@@ -390,32 +384,20 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         _loadSavedAliveSnapshot();
       } else if (widget.m3uPlaylist != null) {
         final pl = widget.m3uPlaylist!;
-        final groupNames = pl.channels
-            .map((c) => c.group.isNotEmpty ? c.group : 'General')
-            .toSet()
-            .toList();
 
-        final cats = groupNames
-            .map((g) => IptvCategory(id: g, name: g))
-            .toList();
-
-        final streams = pl.channels
-            .map((c) => IptvStream(
-                  streamId: c.url,
-                  name: c.name,
-                  icon: c.logo,
-                  categoryId: c.group.isNotEmpty ? c.group : 'General',
-                  containerExt: 'm3u8',
-                  kind: 'live',
-                ))
-            .toList();
+        final cats = <String>{};
+        final streams = <IptvStream>[];
+        for (final entry in expandM3uGroups(pl)) {
+          cats.add(entry.$1);
+          streams.add(entry.$2);
+        }
 
         if (!mounted) return;
         setState(() {
           _categories = [
             IptvCategory(id: '', name: l10n.iptvAllCategories),
             IptvCategory(id: favoritesCategoryId, name: l10n.iptvPinned),
-            ...cats,
+            ...cats.map((g) => IptvCategory(id: g, name: g)),
           ];
           _selectedCategoryId = '';
           _allStreams = streams;
@@ -429,11 +411,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         _errorMessage = l10n.iptvLoadFailed('$e');
       });
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateCategoryScrollState();
-      _updateContentScrollState();
-    });
   }
 
   Future<void> _loadSavedAliveSnapshot() async {
@@ -501,13 +478,50 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   List<IptvCategory> _filteredCategories() {
-    if (_catSearchQuery.trim().isEmpty) return _categories;
-    final q = _catSearchQuery.toLowerCase();
-    return _categories.where((c) => c.name.toLowerCase().contains(q)).toList();
+    final q = _catSearchQuery.trim().toLowerCase();
+    final region = _regionFilter;
+    return _categories.where((c) {
+      if (region != null &&
+          c.id.isNotEmpty &&
+          c.id != favoritesCategoryId) {
+        final prefix = regionPrefixOf(c.name);
+        if (prefix != null && prefix != region) return false;
+      }
+      if (q.isEmpty) return true;
+      return c.name.toLowerCase().contains(q);
+    }).toList();
+  }
+
+  /// Distinct region prefixes across the portal's own categories, sorted.
+  /// Empty when the portal files everything under plain names -- the
+  /// dropdown then has nothing to offer and stays out of the header.
+  List<String> get _regions {
+    final regions = <String>{};
+    for (final c in _categories) {
+      if (c.id.isEmpty || c.id == favoritesCategoryId) continue;
+      final prefix = regionPrefixOf(c.name);
+      if (prefix != null) regions.add(prefix);
+    }
+    return regions.toList()..sort();
+  }
+
+  String _categoryNameOf(String categoryId) {
+    for (final c in _categories) {
+      if (c.id == categoryId) return c.name;
+    }
+    return '';
+  }
+
+  bool _passesRegion(IptvStream s) {
+    final region = _regionFilter;
+    if (region == null) return true;
+    final prefix = regionPrefixOf(_categoryNameOf(s.categoryId));
+    return prefix == null || prefix == region;
   }
 
   List<IptvStream> _filteredStreams() {
     return _allStreams.where((s) {
+      if (!_passesRegion(s)) return false;
       if (_selectedCategoryId == favoritesCategoryId) {
         if (!_favoriteStreamIds.contains(s.streamId)) return false;
       } else if (_selectedCategoryId.isNotEmpty) {
@@ -519,11 +533,13 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   int _countForCategory(String catId) {
+    final streams =
+        _regionFilter == null ? _allStreams : _allStreams.where(_passesRegion);
     if (catId == favoritesCategoryId) {
-      return _allStreams.where((s) => _favoriteStreamIds.contains(s.streamId)).length;
+      return streams.where((s) => _favoriteStreamIds.contains(s.streamId)).length;
     }
-    if (catId.isEmpty) return _allStreams.length;
-    return _allStreams.where((s) => s.categoryId == catId).length;
+    if (catId.isEmpty) return streams.length;
+    return streams.where((s) => s.categoryId == catId).length;
   }
 
   void _playStream(IptvStream stream) {
@@ -741,6 +757,28 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     );
   }
 
+  /// The region pill. Absent unless the portal actually files shelves by
+  /// region -- a dropdown with one option is a control that does nothing.
+  Widget _regionDropdown() {
+    final regions = _regions;
+    if (regions.isEmpty) return const SizedBox.shrink();
+    return FilterDropdown<String?>(
+      label: _regionFilter ?? context.l10n.iptvAllRegions,
+      icon: Icons.language_rounded,
+      items: [
+        PopupMenuItem(value: '', child: Text(context.l10n.iptvAllRegions)),
+        for (final r in regions) PopupMenuItem(value: r, child: Text(r)),
+      ],
+      onSelected: (v) => setState(() {
+        _regionFilter = (v == null || v.isEmpty) ? null : v;
+        _selectedCategoryId = '';
+        if (_contentScrollController.hasClients) {
+          _contentScrollController.jumpTo(0);
+        }
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
@@ -826,6 +864,13 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     ),
 
                     const SizedBox(width: 16),
+
+                    // The region pill, when the portal files shelves by
+                    // region. Next to search, where filters live.
+                    if (_regions.isNotEmpty) ...[
+                      _regionDropdown(),
+                      const SizedBox(width: 12),
+                    ],
 
                     // Search Bar
                     ClampedTextScale(
@@ -1019,7 +1064,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                           ),
                         ),
 
-                        // The category chip takes the row on its own now.
+                        // The region pill shares the row on mobile, icon-only
+                        // like every other header pill at this width.
+                        if (_regions.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          _regionDropdown(),
+                        ],
                       ],
                     ),
 
@@ -1128,12 +1178,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                                         // Category List with Desktop Vertical Scroll Arrows
                                         Expanded(
-                                          child: MouseRegion(
-                                            onEnter: (_) => setState(() => _isHoveringCategories = true),
-                                            onExit: (_) => setState(() => _isHoveringCategories = false),
-                                            child: Stack(
-                                              children: [
-                                                ListView.builder(
+                                          child: ListView.builder(
                                                   controller: _categoryScrollController,
                                                   itemExtent: 46.0,
                                                   cacheExtent: 300.0,
@@ -1158,36 +1203,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                                   },
                                                 ),
 
-                                                // Desktop Category Scroll Up Arrow
-                                                if (_isHoveringCategories && _canScrollCatUp)
-                                                  Positioned(
-                                                    top: 6,
-                                                    left: 0,
-                                                    right: 0,
-                                                    child: Center(
-                                                      child: _VerticalScrollButton(
-                                                        icon: Icons.keyboard_arrow_up_rounded,
-                                                        onTap: () => _scrollCategories(-240),
-                                                      ),
-                                                    ),
-                                                  ),
-
-                                                // Desktop Category Scroll Down Arrow
-                                                if (_isHoveringCategories && _canScrollCatDown)
-                                                  Positioned(
-                                                    bottom: 6,
-                                                    left: 0,
-                                                    right: 0,
-                                                    child: Center(
-                                                      child: _VerticalScrollButton(
-                                                        icon: Icons.keyboard_arrow_down_rounded,
-                                                        onTap: () => _scrollCategories(240),
-                                                      ),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
                                         ),
                                       ],
                                     ),
@@ -1196,37 +1211,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                                 // ── RIGHT CONTENT PANEL ──
                                 Expanded(
-                                  child: MouseRegion(
-                                    onEnter: (_) => setState(() => _isHoveringContent = true),
-                                    onExit: (_) => setState(() => _isHoveringContent = false),
-                                    child: Stack(
-                                      children: [
-                                        _buildMainContent(),
-
-                                        // Desktop Content Scroll Up Arrow
-                                        if (_isHoveringContent && _canScrollContentUp)
-                                          Positioned(
-                                            top: 14,
-                                            right: 28,
-                                            child: _VerticalScrollButton(
-                                              icon: Icons.keyboard_arrow_up_rounded,
-                                              onTap: () => _scrollContent(-450),
-                                            ),
-                                          ),
-
-                                        // Desktop Content Scroll Down Arrow
-                                        if (_isHoveringContent && _canScrollContentDown)
-                                          Positioned(
-                                            bottom: 14,
-                                            right: 28,
-                                            child: _VerticalScrollButton(
-                                              icon: Icons.keyboard_arrow_down_rounded,
-                                              onTap: () => _scrollContent(450),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                  child: _buildMainContent(),
                                 ),
                               ],
                             )
@@ -2088,57 +2073,5 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
         ),
       ),
     );
-  }
-}
-
-class _VerticalScrollButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _VerticalScrollButton({required this.icon, required this.onTap});
-
-  @override
-  State<_VerticalScrollButton> createState() => _VerticalScrollButtonState();
-}
-
-class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    AppColors.dependOn(context);
-    final arrow = MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _hovered ? AppColors.accent : Colors.black87,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: _hovered ? AppColors.accent : AppColors.onAccent.withValues(alpha: 0.3),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: Icon(
-            widget.icon,
-            color: AppColors.onAccent,
-            size: 22,
-          ),
-        ),
-      ),
-    );
-    return ArrowTooltip(icon: widget.icon, child: arrow);
   }
 }

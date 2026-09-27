@@ -611,6 +611,7 @@
   "@iptvNextPlaying": {"description": "EPG line: the program that follows", "placeholders": {"title": {"type": "String"}}},
   "iptvLiveFeed": "Live Stream Feed",
   "iptvAllCategories": "All Categories",
+  "iptvAllRegions": "All Regions",
   "iptvPinned": "Pinned",
   "iptvLoadFailed": "Failed to load content: {error}",
   "@iptvLoadFailed": {"placeholders": {"error": {"type": "String"}}},

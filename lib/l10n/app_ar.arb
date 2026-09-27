@@ -487,6 +487,7 @@
   "iptvNextPlaying": "التالي: {title}",
   "iptvLiveFeed": "بث مباشر",
   "iptvAllCategories": "كل الفئات",
+  "iptvAllRegions": "كل المناطق",
   "iptvPinned": "المثبّتة",
   "iptvLoadFailed": "تعذر تحميل المحتوى: {error}",
   "iptvFilterCategories": "تصفية الفئات…",

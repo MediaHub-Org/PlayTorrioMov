@@ -40,6 +40,7 @@ class _IptvPageState extends State<IptvPage> {
   List<HardcodedChannel> _combat = [];
   List<HardcodedChannel> _racing = [];
   List<HardcodedChannel> _movies = [];
+  List<HardcodedChannel> _music = [];
   List<HardcodedChannel> _news = [];
   List<HardcodedChannel> _arabic = [];
   List<HardcodedChannel> _discovery = [];
@@ -126,6 +127,7 @@ class _IptvPageState extends State<IptvPage> {
     _combat = HardcodedChannels.byCategory('Combat');
     _racing = HardcodedChannels.byCategory('Racing');
     _movies = HardcodedChannels.byCategory('Movies');
+    _music = HardcodedChannels.byCategory('Music');
     _news = HardcodedChannels.byCategory('News');
     _arabic = HardcodedChannels.byCategory('Arabic');
     _discovery = HardcodedChannels.byCategory('Discovery');
@@ -199,6 +201,10 @@ class _IptvPageState extends State<IptvPage> {
       'Movies & Premium Networks': (
         'HBO, Showtime, Starz, Cinemax, Paramount & AMC',
         _movies,
+      ),
+      'Music Television': (
+        'MTV, VH1 & Trace hits',
+        _music,
       ),
       '24/7 Global News Networks': (
         'CNN, BBC World, Fox News, Sky News, Al Jazeera & Bloomberg',

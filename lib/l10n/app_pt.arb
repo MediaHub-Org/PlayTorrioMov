@@ -487,6 +487,7 @@
   "iptvNextPlaying": "A SEGUIR: {title}",
   "iptvLiveFeed": "Sinal ao vivo",
   "iptvAllCategories": "Todas as categorias",
+  "iptvAllRegions": "Todas as regiões",
   "iptvPinned": "Fixados",
   "iptvLoadFailed": "Falha ao carregar o conteúdo: {error}",
   "iptvFilterCategories": "Filtrar categorias…",

@@ -6,6 +6,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **A Music row on Live TV.** MTV, VH1 and Trace, completing the genre
+  shelves beside Movies, News, Kids and Documentaries.
+- **Portal browsers filter by region.** Shelves filed per region
+  (`AR | Sports`, `UK | News`) get a language pill that narrows categories
+  and streams together; regionless shelves stay either way.
+- **Combined playlist groups split apart.** `News;Public` was one ugly
+  bucket; each group is its own shelf now, with the channel listed under
+  both.
+
+### Changed
+- **Source rows share one icon tile.** Portals and playlists read as the
+  same kind of thing, centered against text of any height.
+- **No scroll arrows in the portal browser.** The wheel, the scrollbar and
+  the gesture move the lists; four floating buttons did nothing they do
+  not.
+
+### Added
 - **Live TV starts with six public playlists.** All Languages, English,
   Español, España, Sports and News from iptv-org load on first run, in the
   background, so the shelves are not empty before any portal is added. A

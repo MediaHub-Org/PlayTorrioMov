@@ -62,6 +62,13 @@ void main() {
       expect(resolve('RU | RUSSIA TODAY HD')?.id, 'rt_news');
     });
 
+    test('music portal names land on the right tile', () {
+      expect(HardcodedChannels.byCategory('Music').length, 3);
+      expect(resolve('MTV HD')?.id, 'mtv');
+      expect(resolve('VH1')?.id, 'vh1');
+      expect(resolve('TRACE URBAN HD')?.id, 'trace_tv');
+    });
+
     test('Chinese portal names land on the right tile', () {
       expect(resolve('CN | CCTV-1 HD')?.id, 'cctv1');
       expect(resolve('CN | CCTV-4 HD')?.id, 'cctv4');

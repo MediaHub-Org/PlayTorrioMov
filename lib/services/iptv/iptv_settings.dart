@@ -63,6 +63,7 @@ abstract final class IptvSettings {
     'Combat & Martial Arts',
     'Motorsport & Racing',
     'Movies & Premium Networks',
+    'Music Television',
     '24/7 Global News Networks',
     'Arabic & Regional Hub',
     'Discovery & Documentaries',
