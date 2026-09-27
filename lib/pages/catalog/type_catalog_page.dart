@@ -25,6 +25,27 @@ import 'latest_releases.dart';
 import 'top_rated.dart';
 import '../../services/theme/app_colors.dart';
 
+/// One title, one row.
+///
+/// Addon catalogs overlap heavily -- the same film is "Popular" in one and
+/// "Top" in another -- so without this every row repeats its neighbours and
+/// no row reads as its own shelf. The first row wins; a row left with
+/// nothing is dropped. Pure and synchronous, like the other helpers here.
+List<BrowseRow<Movie>> distinctBrowseRows(List<BrowseRow<Movie>> rows) {
+  final seen = <String>{};
+  final distinct = <BrowseRow<Movie>>[];
+  for (final row in rows) {
+    final fresh = row.items
+        .where((m) => seen.add('${m.type}:${m.id}'))
+        .toList();
+    if (fresh.isEmpty) continue;
+    distinct.add(
+      BrowseRow(title: row.title, subtitle: row.subtitle, items: fresh),
+    );
+  }
+  return distinct;
+}
+
 enum _CatalogSort { yearNewest, yearOldest }
 
 /// A simple catalog page that shows all content of a given type
@@ -289,7 +310,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         afterRows: widget.type == 'series' ? const UpcomingCalendarRow() : null,
         isLoading: _loading,
         heroItems: _heroItems,
-        rows: [
+        rows: distinctBrowseRows([
           // First: the catalog's most acclaimed titles, ranked by rating
           // rather than by the page's year sort -- acclaim is the point,
           // and re-sorting them by year would unrank them.
@@ -315,7 +336,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
               title: context.l10n.catalogLatestReleases,
               items: latestReleases(_items),
             ),
-        ],
+        ]),
         heroBuilder: _buildHeroSlide,
         itemBuilder: (context, movie) => MovieCard(movie: movie),
         onRefresh: _load,

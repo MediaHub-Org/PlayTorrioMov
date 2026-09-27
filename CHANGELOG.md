@@ -5,19 +5,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [1.8.12+45] - 2026-09-27
 
-Top Rated rows on Films, Series and Anime; the Library sorts both ways;
-and the subtitle menus list languages, survive large text, and no longer
-offer `mon`, `und` or `auto` as something to watch.
+Classic Masterpieces rows on Films, Series and Anime; the Library sorts
+both ways; and the subtitle menus list languages, survive large text, and
+no longer offer `mon`, `und` or `auto` as something to watch.
 
 Sources & Filters is two settings instead of three, and both take more than
 one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
-- **A Top Rated row on Films and Series, and Classics on Anime.** Ranked by
-  the catalog's own ratings, highest first, and skipped when there is
-  nothing acclaimed to show. Anime's classics are its all-time best that
-  are at least a decade old -- the series that defined what came after.
+- **A Classic Masterpieces row on Films and Series, and Classics on Anime.**
+  Ranked by the catalog's own ratings, highest first, and skipped when
+  there is nothing acclaimed to show. Anime's classics are its all-time
+  best that are at least a decade old -- the series that defined what
+  came after.
+- **One title, one row.** Addon catalogs overlap, so the same film showed
+  up under Popular, Top and Featured at once. The first row keeps it now,
+  and a row left with nothing is dropped.
 - **The Library shelf sorts both ways.** Title A-Z and Z-A, newest-first
   and oldest-first, beside the recent order that was already there. Live TV
   favorites follow the title directions; a year sort falls back to recent
