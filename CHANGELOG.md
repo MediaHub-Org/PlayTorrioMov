@@ -3,6 +3,28 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Live TV speaks Spanish, German, Russian and Chinese.** La 1, La 2, 24h
+  and Teledeporte; Das Erste, ZDF, RTL, n-tv and WELT; Channel One Russia,
+  Rossiya 1, NTV and RT; CCTV-1, CCTV-4, CCTV News and CGTN -- each on its
+  own row, off the same keyword matching the rest of the catalog uses.
+  Existing installs gain the rows automatically: a saved category list
+  keeps what it had and appends what it was missing.
+- **Live TV filters by category.** A pill beside the portal buttons narrows
+  the page to one shelf -- News, Sports, Spanish TV and the rest -- the way
+  the Anime genre pill does.
+- **Live TV has captions on/off.** Portal feeds that carry subtitles show
+  them now, styled by the shared subtitle settings, with a CC toggle on the
+  transport bar. There is no track menu: a live feed does not list tracks
+  the way a file does.
+
+### Removed
+- **The top-bar fullscreen button on Live TV.** The transport bar carries
+  it on desktop, and two buttons for one job crowded the channel title out
+  of its own bar.
+
 ## [1.8.12+45] - 2026-09-27
 
 Classic Masterpieces rows on Films, Series and Anime; the Library sorts

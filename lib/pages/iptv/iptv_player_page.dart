@@ -93,6 +93,13 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   bool _showVolumeHud = false;
   Timer? _volumeHudTimer;
 
+  /// Whether mpv may draw the feed's own captions. On for the same reason
+  /// every other player defaults that way: a portal stream that carries
+  /// subtitles should show them until asked not to. There is no track menu
+  /// here -- live feeds do not list tracks the way files do -- so this is
+  /// a toggle between mpv's automatic pick and nothing.
+  bool _subtitlesOn = true;
+
   // Stream watchdog metrics
   Duration _lastPosition = Duration.zero;
   DateTime _lastPositionChange = DateTime.now();
@@ -586,6 +593,23 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     _startHideControlsTimer();
   }
 
+  /// Flips mpv between its automatic subtitle pick and no subtitles. The
+  /// styling comes from the shared subtitle settings -- the `Video`
+  /// surface above already reads them -- so this only answers on or off.
+  void _toggleSubtitles() {
+    setState(() => _subtitlesOn = !_subtitlesOn);
+    try {
+      _player.setSubtitleTrack(
+        _subtitlesOn ? SubtitleTrack.auto() : SubtitleTrack.no(),
+      );
+    } catch (_) {
+      // A feed with nothing to select must not break the button; mpv
+      // keeps whatever it was doing and the toggle still reads honestly
+      // on the next press.
+    }
+    _startHideControlsTimer();
+  }
+
   @override
   Widget build(BuildContext context) {
     final ch = widget.channel;
@@ -1046,6 +1070,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         : _saveAsChannel,
                                   ),
                                 // Category Channels / Sources Drawer Toggle
+                                // No window-fullscreen button up here: the
+                                // transport bar below carries it on desktop,
+                                // and two buttons for one job crowded the
+                                // channel title out of its own bar.
                                 if (widget.hits.length > 1)
                                   PlayerIconButton(
                                     size: 40,
@@ -1062,35 +1090,6 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         : context.l10n.iptvAlternativeFeeds,
                                     onPressed: _openSourcesDrawer,
                                   ),
-                                if (Platform.isWindows ||
-                                    Platform.isLinux ||
-                                    Platform.isMacOS) ...[
-                                  const SizedBox(width: 4),
-                                  ValueListenableBuilder<bool>(
-                                    valueListenable: WindowService
-                                        .instance
-                                        .isFullscreenNotifier,
-                                    builder: (context, isFullscreen, _) {
-                                      return PlayerIconButton(
-                                        size: 40,
-                                        iconSize: 20,
-                                        backgroundColor: const Color(
-                                          0x22080C12,
-                                        ),
-                                        icon: Icon(
-                                          isFullscreen
-                                              ? Icons.fullscreen_exit_rounded
-                                              : Icons.fullscreen_rounded,
-                                        ),
-                                        tooltip: isFullscreen
-                                            ? 'Exit Fullscreen (F11)'
-                                            : 'Fullscreen (F11)',
-                                        onPressed: () => WindowService.instance
-                                            .toggleFullscreen(),
-                                      );
-                                    },
-                                  ),
-                                ],
                               ],
                             ),
                           ),
@@ -1200,6 +1199,32 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     ),
 
                                     const Spacer(),
+
+                                    // Captions on/off for the feed's own
+                                    // subtitles, styled by the shared
+                                    // subtitle settings. No track menu: a
+                                    // live feed does not list tracks the
+                                    // way a file does.
+                                    PlayerIconButton(
+                                      size: 40,
+                                      iconSize: 20,
+                                      icon: Icon(
+                                        _subtitlesOn
+                                            ? Icons.closed_caption_rounded
+                                            : Icons
+                                                  .closed_caption_disabled_rounded,
+                                      ),
+                                      tooltip: _subtitlesOn
+                                          ? context
+                                                .l10n
+                                                .playerSubtitleTurnOff
+                                          : context.l10n.playerSubtitleTurnOn,
+                                      active: _subtitlesOn,
+                                      backgroundColor: const Color(0x22080C12),
+                                      onPressed: _toggleSubtitles,
+                                    ),
+
+                                    const SizedBox(width: 8),
 
                                     // The same gear, in the same corner of
                                     // the same bar, as Movies/Series/Anime.

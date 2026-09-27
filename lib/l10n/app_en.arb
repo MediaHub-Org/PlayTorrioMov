@@ -661,6 +661,7 @@
   "iptvNoChannelsMatch": "No channels match your search.",
   "iptvLikedSub": "Channels you keep, most recent first",
   "iptvYourChannels": "Your channels",
+  "iptvAllCategories": "All Categories",
   "iptvYourChannelsSub": "Built from a stream you found in a portal",
   "iptvChannelsBadge": "60+ channels",
   "iptvManagePortals": "Manage Portals & Playlists",

@@ -66,6 +66,10 @@ abstract final class IptvSettings {
     'Arabic & Regional Hub',
     'Discovery & Documentaries',
     'Kids & Family',
+    'Spanish TV',
+    'German TV',
+    'Russian TV',
+    'Chinese TV',
   ];
 
   // Live TV Values
@@ -119,7 +123,13 @@ abstract final class IptvSettings {
 
     final savedCats = prefs.getStringList(_keyVisibleCategories);
     if (savedCats != null && savedCats.isNotEmpty) {
-      visibleCategories.value = savedCats;
+      // Earlier installs saved the list before newer rows existed. Appending
+      // the missing defaults keeps those rows visible: a row that did not
+      // exist cannot be something the user chose to hide.
+      visibleCategories.value = [
+        ...savedCats,
+        ...defaultCategories.where((c) => !savedCats.contains(c)),
+      ];
     } else {
       visibleCategories.value = List.from(defaultCategories);
     }
