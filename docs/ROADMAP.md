@@ -31,9 +31,10 @@ An invariant with a test behind it does not need revisiting, so the four
 right-hand cells are the work. Each of them needs a judgment a test cannot
 make, which is why none of them is behind one.
 
-**Needs a device** — the Cast sheet, the torrent-cast question, the pill
-rail, a dub-default file, and a forced track. Nothing here can be advanced
-by reading or writing code; each is one test away from an answer.
+**Needs a device** — the torrent-cast question, the pill rail, a
+dub-default file, and a forced track. Nothing here can be advanced by reading
+or writing code; each is one test away from an answer. Cast issues go the
+same way: use it, and report what breaks.
 
 ### Device checks
 
@@ -110,24 +111,6 @@ the similar card as public widgets.
 unreliable count since an ancestor `Tooltip` labels just as well. Buttons are
 held by a test.
 
-### Cast, against a real receiver (#28)
-
-A bug was found and fixed by reading the plugin's source on 2026-09-15 — the
-picker subscribed to a device stream that nothing ever started producing, so
-it searched forever. **That fix has not been confirmed against a receiver.**
-It explains the reported symptom exactly, but whether it was the only cause is
-what the next device test decides.
-
-Still unverified, and each needing a receiver:
-
-1. Does the Cast sheet **list a device** within a few seconds of opening?
-2. Does a **movie** from a direct/CDN source reach the TV and play? (Known
-   limit: the Cast SDK has no sender-side way to attach Referer/User-Agent, so
-   scraper sources needing them fail on the TV while playing fine locally.)
-3. Does a **Live TV channel** show as live on the receiver — no seek bar, no
-   phantom duration?
-4. Does **disconnect** return playback cleanly?
-
 ### Whether a phone can cast a torrent
 
 The one open feature question. A torrent plays from TorrServer on the phone at
@@ -149,27 +132,3 @@ curl http://<phone-LAN-IP>:<port>/echo
 
 An answer means the feature is possible. A refusal closes it for good.
 
-## Reference
-
-### Upstream sync
-
-PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod`; that repo is
-**archived**, so Mov is the only active app in the family and the direct
-downstream of `ayman708-UX/PlayTorrioV3`.
-
-**Reviewed through `39b736f` (2026-09-16). Nothing outstanding.**
-
-Re-fetched 2026-09-20: `v3/main` has not moved (still `39b736f`, and it is
-the default branch's only one), and the archived PlayTorrioMod's last commit is
-still 2026-09-05. Nothing new to review or port.
-
-Taken: `db2a4b9` and `0343720` (Linux CI hardening), plus a scraper-lifecycle
-fix of our own that reading upstream surfaced: leaving a watch screen
-mid-search left every scraper issuing HTTP requests into a controller nobody
-was reading, because the cancel never reached `ScraperManager`. Fixed, with a
-test that fails without it.
-
-**Not taken, so they are not re-reviewed:** the CloudStream extension system
-(a plugin ecosystem, and a feature rather than a fix), the blurred hero
-backdrop (every hero here already uses `BoxFit.cover`), and the IPTV/storage
-commits in the area this fork has diverged furthest in.

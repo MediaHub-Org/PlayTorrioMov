@@ -182,3 +182,21 @@ and it fails silently. The full reasoning is in
 depends on nothing. This is what keeps the scrapers, the player and the
 catalog independently testable, and it is the rule most worth not breaking
 for a quick fix.
+
+---
+
+## Upstream
+
+PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod`; that repo is
+**archived**, so Mov is the only active app in the family and the direct
+downstream of `ayman708-UX/PlayTorrioV3`.
+
+**Reviewed through `39b736f` (2026-09-16). Nothing outstanding.** Re-fetched
+2026-09-20: `v3/main` has not moved, and the archived PlayTorrioMod's last
+commit is still 2026-09-05.
+
+Taken since: the Linux CI hardening (`db2a4b9`, `0343720`) and a
+scraper-lifecycle fix of our own (leaving a watch screen mid-search left
+every scraper issuing HTTP requests into a controller nobody was reading).
+Not taken, so not re-reviewed: the CloudStream extension system, the blurred
+hero backdrop, and the IPTV/storage commits in this fork's most-diverged area.

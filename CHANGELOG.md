@@ -1879,7 +1879,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 - 30 new torrent/stream scraper sites and 7 new anime extractors, ported
   from upstream `ayman708-UX/PlayTorrioV3` (commit `b0aecf5`) side by side
   with Mov's own existing, non-overlapping set — see
-  [ROADMAP.md](docs/ROADMAP.md#upstream-sync) for the full list and
+  [INFO.md](docs/INFO.md#upstream) for the full list and
   what was deliberately left out
 - `stream_model.dart` getters (`quality`, `isHDR`, `codec`, `fileSize`,
   `sizeBytes`, `qualityRank`) now memoized instead of recomputing regexes
