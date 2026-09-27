@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/models/anime/anime_media.dart';
 import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
@@ -40,12 +41,19 @@ import 'package:playtorriomov/widgets/details/credit_card.dart';
 import 'package:playtorriomov/widgets/details/similar_card.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
+import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
+import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
+import 'package:playtorriomov/models/download/download_task_model.dart';
+import 'package:playtorriomov/services/download/download_service.dart';
+import 'package:playtorriomov/pages/collection/collection_page.dart';
+import 'package:playtorriomov/pages/search/search_page.dart';
 import 'package:playtorriomov/widgets/player/player_cast_sheet.dart';
 import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_sources_panel.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_sub_style_modal.dart';
+import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 import 'package:playtorriomov/widgets/player/player_transport.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
@@ -975,4 +983,151 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'the player audio menu does not overflow at 3x text scale',
+    (tester) async {
+      // #69's remaining target, beside the subtitle menu below. The rows
+      // are languages in a fixed-width card; a long one has nowhere to go
+      // sideways when the text triples.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              PlayerMenuAnchor(
+                child: PlayerAudioMenu(
+                  audioTracks: const [
+                    PlayerAudioTrack(index: 1, title: 'English'),
+                    PlayerAudioTrack(index: 2, title: 'Spanish (LATAM)'),
+                    PlayerAudioTrack(index: 3, title: 'Portuguese (BR)'),
+                  ],
+                  selectedIndex: 1,
+                  onTrackSelected: (_) {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the player subtitle menu does not overflow at 3x text scale',
+    (tester) async {
+      // The same #69 target from the reading side. Embedded rows carry a
+      // flag, a language and up to two badges; the toggle, tabs and chips
+      // above them are all fixed-height rows of their own.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              PlayerMenuAnchor(
+                child: PlayerSubtitleMenu(
+                  embeddedSubtitles: const [
+                    PlayerEmbeddedSubtitle(index: 1, title: 'English'),
+                    PlayerEmbeddedSubtitle(
+                      index: 2,
+                      title: 'Spanish (LATAM)',
+                      containerTitle: 'Spanish (LATAM) Forced',
+                    ),
+                    PlayerEmbeddedSubtitle(
+                      index: 3,
+                      title: 'Portuguese (BR)',
+                      containerTitle: 'Portuguese (BR) SDH',
+                    ),
+                  ],
+                  audioLanguage: 'en',
+                  isSubtitleEnabled: true,
+                  selectedEmbeddedIndex: 1,
+                  onSelectVariant: (_) {},
+                  onSelectEmbedded: (_) {},
+                  onEnable: () {},
+                  onDisable: () {},
+                  onOpenSyncBar: () {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'a downloads row does not overflow at 3x text scale',
+    (tester) async {
+      // #69's remaining target on the Library side. The row is a poster, a
+      // text column with a wrapping chip line, and action buttons -- the
+      // chip line is the variable-length part, so this probes it with four
+      // audio languages and a long title. Determinate progress: an
+      // indeterminate bar animates forever and pumpAndSettle would time
+      // out rather than report anything about layout.
+      SharedPreferences.setMockInitialValues({});
+      DownloadService.instance.tasksNotifier.value = [
+        DownloadTask(
+          id: 't1',
+          title: 'The Lord of the Rings: The Return of the King Extended Edition',
+          mediaId: 'tt0167260',
+          type: 'movie',
+          sourceType: DownloadSourceType.p2p,
+          sourceName: 'Torrent Galaxy',
+          targetFilePath: '/downloads/lotr.mkv',
+          quality: '1080p',
+          audioLanguages: const ['english', 'spanish', 'german', 'french'],
+          status: DownloadStatus.downloading,
+          receivedBytes: 1000000000,
+          totalBytes: 4000000000,
+          createdAt: DateTime(2026),
+        ),
+      ];
+      addTearDown(() => DownloadService.instance.tasksNotifier.value = []);
+
+      await pumpAtScale(
+        tester,
+        child: const CollectionPage(initialTabIndex: 2),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the search page idle state does not overflow at 3x text scale',
+    (tester) async {
+      // #69's remaining target on the search side. No query is entered,
+      // so nothing fires -- the field row, the scope chips and the empty
+      // state are what is probed. Entering text would start the debounce
+      // timer and a network search, neither of which belongs in this file.
+      SharedPreferences.setMockInitialValues({});
+      await pumpAtScale(
+        tester,
+        child: const SearchPage(),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the library collections tab does not overflow at 3x text scale',
+    (tester) async {
+      // The shelf cards pair a square tile with a fixed-height label
+      // block; the grid sizes that block from the text scale, but only a
+      // probe says the arithmetic held.
+      SharedPreferences.setMockInitialValues({});
+      await pumpAtScale(
+        tester,
+        child: const CollectionPage(),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

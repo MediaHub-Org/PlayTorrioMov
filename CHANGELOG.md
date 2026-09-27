@@ -202,6 +202,13 @@ rather than files, and the sleep timer can wait for the video to end.
   rather than a guessed one.
 
 ### Fixed
+- **The subtitle menu no longer overflows at large text sizes.** Its toggle,
+  tabs and filter chips were fixed chrome above a scrolling list; at a large
+  accessibility scale they took the whole card and the list overflowed by
+  over a hundred pixels. They scroll with the rows now -- identical when
+  everything fits, reachable when it does not. Found by the 3x text-scale
+  probe (#69), which also covers the audio menu, the Downloads rows, the
+  search idle state and the Library collections tab.
 - **Embedded tracks tagged `mon`, `und` or `unknown` no longer fake a
   language.** `mon` (subtitles matching the audio) was never filtered in the
   player, so it surfaced as a fallback-titled row; `und`/`unknown` rendered

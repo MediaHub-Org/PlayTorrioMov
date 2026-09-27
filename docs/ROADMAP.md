@@ -22,9 +22,12 @@ the methods live in `docs/CONVENTIONS.md` and the tests hold the invariants.
 What is left is the part a test cannot hold:
 
 - Data strings stay English on purpose.
-- Unprobed fixed heights: lift on touch, probe, repeat.
+- Unprobed fixed heights: lift on touch, probe, repeat. Pages that fetch
+  on init (Details, Discover, the Watch cards) are out of scope -- their
+  skeletons need the network, and this is about fixed heights around real
+  text.
 
-Six invariants fail in CI rather than needing a pass over `lib/`:
+Six invariants are held by tests, not by passes over `lib/`:
 
 | Test                           | Invariant                                                                   |
 |:-------------------------------|:----------------------------------------------------------------------------|
@@ -32,7 +35,7 @@ Six invariants fail in CI rather than needing a pass over `lib/`:
 | `icon_button_tooltip_test`     | Every icon-only control carries a label, button or not                      |
 | `rtl_directional_padding_test` | No padding, and no content alignment, names a physical edge                 |
 | `american_spelling_test`       | One spelling of every word, `.arb` files included                           |
-| `text_scale_overflow_test`     | 26 widgets survive 3x text scale on a 360px view                            |
+| `text_scale_overflow_test`     | 31 probes hold at 3x text scale on a 360px view                            |
 | `arrow_affordance_test`        | Every rail arrow turns around for Arabic, and the player transport does not |
 
 ### Device checks

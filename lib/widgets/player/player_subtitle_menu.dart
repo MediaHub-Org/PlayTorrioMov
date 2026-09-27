@@ -228,32 +228,33 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         ),
         const SizedBox(height: 8),
 
-        // One button, two states. It reads "Turn subtitles off" while they
-        // are on and "Turn subtitles on" while they are off, so the label
-        // always names where a press takes you rather than where you are.
-        _SubtitleToggleButton(
-          isEnabled: widget.isSubtitleEnabled,
-          onPressed: widget.isSubtitleEnabled
-              ? widget.onDisable
-              : widget.onEnable,
-        ),
-
-        const SizedBox(height: 8),
-        _buildSourceTabs(context),
-        const SizedBox(height: 6),
-        _buildFilterChips(context),
-        const SizedBox(height: 6),
-        const Divider(color: PlayerTheme.edgeSoft, height: 1),
-        const SizedBox(height: 6),
-
-        // Expanded, not a bounded scroll box: the rows take whatever is left
-        // under the controls and scroll within it, so a one-language list
-        // does not leave a gap and a long one does not shorten the card.
+        // One scrollable under the header, not fixed chrome over a
+        // scrolling list. The toggle, tabs and chips are fixed-height rows
+        // whose labels grow with the text scale; at a large scale they no
+        // longer fit beside the rows in a fixed-height card, and the
+        // Expanded list below them got zero height and overflowed. Now
+        // they scroll with the rows -- identical when everything fits,
+        // reachable when it does not.
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _buildRows(context),
+              children: [
+                _SubtitleToggleButton(
+                  isEnabled: widget.isSubtitleEnabled,
+                  onPressed: widget.isSubtitleEnabled
+                      ? widget.onDisable
+                      : widget.onEnable,
+                ),
+                const SizedBox(height: 8),
+                _buildSourceTabs(context),
+                const SizedBox(height: 6),
+                _buildFilterChips(context),
+                const SizedBox(height: 6),
+                const Divider(color: PlayerTheme.edgeSoft, height: 1),
+                const SizedBox(height: 6),
+                ..._buildRows(context),
+              ],
             ),
           ),
         ),
