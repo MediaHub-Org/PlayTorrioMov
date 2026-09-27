@@ -60,8 +60,9 @@ rather than files, and the sleep timer can wait for the video to end.
   Spanish (LATAM) are different recordings, not two spellings of one label,
   and they used to collapse into a single "Spanish" group -- so the choice
   was hidden rather than simplified. An *untagged* "Spanish" joins the ES
-  group now instead of sitting beside it as a near-duplicate: a provider
-  that names no region means Castilian until it says otherwise. The same
+  group now instead of sitting beside it as a near-duplicate. Untagged
+  Spanish stays plain "Spanish": naming it Spanish (ES) would state a region
+  no metadata names, and a wrong region is worse than a bare language. The same
   for Portuguese (BR) and (PT), and for English (US) and (UK). Only the
   Chinese *script* split still collapses, because Simplified and
   Traditional are the same audio.
