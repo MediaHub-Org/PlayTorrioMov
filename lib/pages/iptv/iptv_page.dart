@@ -11,6 +11,7 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/header_pill_style.dart';
+import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
@@ -288,6 +289,12 @@ class _IptvPageState extends State<IptvPage> {
       heroItems: spotlightEnabled ? _featured : const [],
       rows: rows,
       header: pillHeader,
+      // The same viewport-filling hero the other sections get: without an
+      // extent the scaffold falls back to its shorter default and this
+      // carousel reads smaller than every sibling. No band widget rides
+      // along -- Live TV channels do not track Continue Watching, so there
+      // is nothing to show under it -- the extent only sizes the hero.
+      belowHeroExtent: ContinueWatchingSlider.bandHeight,
       heroBuilder: (context, channel) => IptvHeroSlide(
         channel: channel,
         onWatchNow: () => _watchChannelNow(channel),

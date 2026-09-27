@@ -6,6 +6,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Live TV's hero fills the viewport like every other section.** It used
+  the scaffold's shorter default; the same band extent Films, Series and
+  Anime pass now sizes it, with no band widget riding along.
+- **Sources show one list at a time.** Xtream Panels and M3U Playlists get
+  a view toggle on top instead of stacking both down the page.
+
+### Changed
+- **Library tabs sit in the middle.** The pills hugged the left edge while
+  the content below them centered; the row centers when it fits and still
+  scrolls when the labels outgrow a phone.
+
+### Added
 - **Library content centers on wide screens.** Collections, Continue
   Watching, Downloads and every shelf cap at the same width instead of
   sprawling across ultrawide windows.

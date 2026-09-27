@@ -8,6 +8,7 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/pill_tab_row.dart';
 import 'iptv_portal_browser_page.dart';
 
 /// Live TV's sources, as a page rather than a modal.
@@ -43,6 +44,11 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
 
   bool _showPortalForm = false;
   bool _showM3uForm = false;
+
+  /// Which list the page shows. One at a time: portals and playlists are
+  /// different kinds of source, and stacking both pushed whichever sat
+  /// second far down the page behind the first one's rows.
+  String _view = 'xtream';
 
   @override
   void dispose() {
@@ -147,11 +153,29 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
             physics: const BouncingScrollPhysics(),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildPortalSection(context),
-                const SizedBox(height: 28),
-                _buildM3uSection(context),
+                PillTabRow(
+                  tabs: [
+                    SubTab(
+                      id: 'xtream',
+                      label: context.l10n.iptvTabXtream(_ctrl.verified.length),
+                      icon: Icons.settings_input_antenna_rounded,
+                    ),
+                    SubTab(
+                      id: 'm3u',
+                      label: context.l10n.iptvTabM3u(_ctrl.m3uPlaylists.length),
+                      icon: Icons.queue_music_rounded,
+                    ),
+                  ],
+                  activeId: _view,
+                  onSelected: (id) => setState(() => _view = id),
+                ),
+                const SizedBox(height: 20),
+                if (_view == 'xtream')
+                  _buildPortalSection(context)
+                else
+                  _buildM3uSection(context),
               ],
             ),
           );
