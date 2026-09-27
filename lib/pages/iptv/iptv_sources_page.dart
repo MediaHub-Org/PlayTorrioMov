@@ -8,7 +8,6 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
-import '../../widgets/common/glass_back_button.dart';
 import 'iptv_portal_browser_page.dart';
 
 /// Live TV's sources, as a page rather than a modal.
@@ -134,7 +133,8 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
       appBar: AppBar(
         backgroundColor: AppColors.bar,
         surfaceTintColor: Colors.transparent,
-        leading: const GlassBackButton(),
+        // The framework back button, like the Library shelves: a custom
+        // glass circle here rendered oversized against the plain bar.
         title: Text(
           context.l10n.iptvManagePortals,
           style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
@@ -700,37 +700,35 @@ class _PortalRow extends StatelessWidget {
         if (p.portal.source.isNotEmpty)
           _Badge(text: p.portal.source, color: AppColors.inkMuted),
       ],
-      favoriteButton: IconButton(
-        tooltip: isFav
-            ? context.l10n.iptvRemoveFavorite
-            : context.l10n.iptvAddFavorite,
-        icon: Icon(
-          isFav ? Icons.star_rounded : Icons.star_outline_rounded,
-          color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
-          size: 20,
+      actions: [
+        IconButton(
+          tooltip: isFav
+              ? context.l10n.iptvRemoveFavorite
+              : context.l10n.iptvAddFavorite,
+          icon: Icon(
+            isFav ? Icons.star_rounded : Icons.star_outline_rounded,
+            color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
+            size: 20,
+          ),
+          onPressed: () => ctrl.toggleFavoritePortal(p.key),
         ),
-        onPressed: () => ctrl.toggleFavoritePortal(p.key),
-      ),
-      menuItems: [
-        PopupMenuItem(
-          value: 'copy',
-          child: Text(context.l10n.iptvCopyLogin),
-        ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Text(
-            context.l10n.iptvDeletePortal,
-            style: const TextStyle(color: Colors.redAccent),
+        IconButton(
+          tooltip: context.l10n.iptvCopyLogin,
+          icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: 18),
+          onPressed: () => onCopyLogin(
+            '${p.portal.url}:${p.portal.username}:${p.portal.password}',
           ),
         ),
+        IconButton(
+          tooltip: context.l10n.iptvDeletePortal,
+          icon: const Icon(
+            Icons.delete_outline_rounded,
+            color: Colors.redAccent,
+            size: 20,
+          ),
+          onPressed: onDelete,
+        ),
       ],
-      onMenuSelected: (value) {
-        if (value == 'copy') {
-          onCopyLogin('${p.portal.url}:${p.portal.username}:${p.portal.password}');
-        } else if (value == 'delete') {
-          onDelete();
-        }
-      },
     );
   }
 }
@@ -763,27 +761,25 @@ class _M3uRow extends StatelessWidget {
       subtitle:
           '${context.l10n.iptvChannelsCount(pl.channels.length)}'
           '${pl.sourceUrl != null ? ' · ${pl.sourceUrl!}' : ''}',
-      menuItems: [
-        PopupMenuItem(
-          value: 'copy',
-          child: Text(context.l10n.iptvCopyPlaylistUrl),
+      actions: [
+        IconButton(
+          tooltip: context.l10n.iptvCopyPlaylistUrl,
+          icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: 18),
+          onPressed: () {
+            final text = pl.sourceUrl ?? '';
+            if (text.isNotEmpty) onCopyUrl(text);
+          },
         ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Text(
-            context.l10n.iptvDeletePlaylist,
-            style: const TextStyle(color: Colors.redAccent),
+        IconButton(
+          tooltip: context.l10n.iptvDeletePlaylist,
+          icon: const Icon(
+            Icons.delete_outline_rounded,
+            color: Colors.redAccent,
+            size: 20,
           ),
+          onPressed: onDelete,
         ),
       ],
-      onMenuSelected: (value) {
-        if (value == 'copy') {
-          final text = pl.sourceUrl ?? '';
-          if (text.isNotEmpty) onCopyUrl(text);
-        } else if (value == 'delete') {
-          onDelete();
-        }
-      },
     );
   }
 }
@@ -814,17 +810,17 @@ class _SourceIconTile extends StatelessWidget {
 }
 
 /// The shared row both lists draw: a tap target that opens the source,
-/// a title with one subtitle line, optional badges, and an overflow menu
-/// for everything that is not opening it.
+/// a title with one subtitle line, optional badges, and one icon per
+/// action. The actions used to hide in an overflow menu, which buried the
+/// two taps every source needs -- copy the login, remove the source --
+/// behind a third tap that named neither.
 class _SourceRowShell extends StatelessWidget {
   final VoidCallback onOpen;
   final Widget? leading;
   final String title;
   final String subtitle;
   final List<Widget> badges;
-  final Widget? favoriteButton;
-  final List<PopupMenuEntry<String>> menuItems;
-  final ValueChanged<String> onMenuSelected;
+  final List<Widget> actions;
 
   const _SourceRowShell({
     required this.onOpen,
@@ -832,9 +828,7 @@ class _SourceRowShell extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.badges = const [],
-    this.favoriteButton,
-    required this.menuItems,
-    required this.onMenuSelected,
+    this.actions = const [],
   });
 
   @override
@@ -889,18 +883,7 @@ class _SourceRowShell extends StatelessWidget {
                   ],
                 ),
               ),
-              if (favoriteButton != null) favoriteButton!,
-              PopupMenuButton<String>(
-                tooltip: context.l10n.iptvManage,
-                icon: Icon(Icons.more_vert_rounded, color: AppColors.inkSubtle),
-                color: AppColors.raised,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: AppColors.inkAlpha(0.1)),
-                ),
-                onSelected: onMenuSelected,
-                itemBuilder: (context) => menuItems,
-              ),
+              ...actions,
             ],
           ),
         ),

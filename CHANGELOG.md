@@ -31,7 +31,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 - **Live TV sources are a page.** Portals and playlists moved out of the
   modal into a Sources page with an add form, discovery, favorites and a
-  remove-all per section. Deleting asks first now; the modal's multi-select
+  remove-all per section. Copy and delete sit on the row itself now, not
+  behind an overflow menu. Deleting asks first; the modal's multi-select
   edit mode is gone with it.
 
 ### Removed
