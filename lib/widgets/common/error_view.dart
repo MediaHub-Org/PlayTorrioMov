@@ -24,8 +24,15 @@ class ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    // A real failure's message is whatever the thrown exception's toString()
+    // is -- a nested SocketException, a server body, anything -- so its
+    // length is not this widget's to bound. Without a scrollable, a long one
+    // at a large text size pushed the retry button thousands of pixels off
+    // the bottom of the screen, the same shape of bug the cast sheet had:
+    // scroll rather than clamp when the content is prose whose length this
+    // widget does not control (#69).
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(26),
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -10,6 +10,7 @@ import '../../services/trakt/trakt_calendar_service.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_colors.dart';
+import '../common/clamped_text_scale.dart';
 
 /// Upcoming episodes for the user's synced shows, next 14 days. Series-only:
 /// Trakt/Simkl calendars are episode-shaped, movies have no equivalent
@@ -107,7 +108,14 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 92,
+            // 92 plus headroom: three text lines (title, episode, date) in a
+            // 12px-padded card were already tight at the system default, and
+            // ran 92px past this box at 3x with nothing capping them (#69).
+            // Clamped below, and given a bit more room besides -- nothing
+            // else on the page lines up against this row's exact height, so
+            // unlike the cast rail there is no reason to hold it to the
+            // original number.
+            height: 116,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -127,42 +135,44 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                         color: AppColors.inkAlpha(0.08),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          entry.showTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
+                    child: ClampedTextScale(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            entry.showTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'S${entry.seasonNumber.toString().padLeft(2, '0')}'
-                          'E${entry.episodeNumber.toString().padLeft(2, '0')}'
-                          ' • ${entry.episodeTitle}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.inkAlpha(0.55),
+                          const SizedBox(height: 4),
+                          Text(
+                            'S${entry.seasonNumber.toString().padLeft(2, '0')}'
+                            'E${entry.episodeNumber.toString().padLeft(2, '0')}'
+                            ' • ${entry.episodeTitle}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.inkAlpha(0.55),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${entry.firstAiredLocal.month}/${entry.firstAiredLocal.day}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.inkAlpha(0.4),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${entry.firstAiredLocal.month}/${entry.firstAiredLocal.day}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.inkAlpha(0.4),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
