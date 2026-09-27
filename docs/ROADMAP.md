@@ -42,8 +42,7 @@ same way: use it, and report what breaks.
 file opens with, because neither media_kit nor mpv exposes a default marker.
 Check it on a multi-audio file that defaults to a dub.
 
-**#74's pill rail has not been seen on screen.** #73 was confirmed in a local
-temp build; the rail was not. What to look at: a source list too short to
+**#74's pill rail has not been seen on screen.** What to look at: a source list too short to
 overflow (no buttons at all), one long enough to overflow (a button at each
 end, the left one dimmed), and a scroll to the end (the right one dimmed, the
 left one lit). The buttons are driven by `maxScrollExtent`, so the case worth
