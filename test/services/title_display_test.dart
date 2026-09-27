@@ -16,7 +16,7 @@ import 'package:playtorriomov/services/titles/title_display.dart';
 /// with the setting on stops matching the one saved with it off, which takes
 /// collection membership, Continue Watching dedupe and Trakt/Simkl matching
 /// with it.
-AnimeMedia anime() => AnimeMedia(
+AnimeMedia anime() => const AnimeMedia(
       id: 1,
       titleRomaji: 'Shingeki no Kyojin',
       titleEnglish: 'Attack on Titan',
