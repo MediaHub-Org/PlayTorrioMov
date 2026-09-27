@@ -10,6 +10,10 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **The ORIGINAL audio badge is gone.** It marked the track the file opened
+  with, which is not the same as the track the film was made in -- a release
+  defaulting to the dub badged the dub. The menu is languages and a tick now,
+  nothing else.
 - **Source rows read scraper, quality and container.** The watch-screen card
   printed the provider id ("111477"), then the same long release name twice
   as title and description. One compact title plus badges now: quality,

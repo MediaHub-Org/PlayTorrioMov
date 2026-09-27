@@ -42,10 +42,6 @@ class PlayerAudioMenu extends StatelessWidget {
   final List<PlayerAudioTrack> audioTracks;
   final int selectedIndex;
 
-  /// The track the file opens with, badged as the original. Null when it is
-  /// not known, which is better than badging a guess.
-  final int? primaryIndex;
-
   final ValueChanged<int> onTrackSelected;
 
   /// Back to the settings root, when this menu was stepped into from there.
@@ -56,7 +52,6 @@ class PlayerAudioMenu extends StatelessWidget {
     required this.audioTracks,
     required this.selectedIndex,
     required this.onTrackSelected,
-    this.primaryIndex,
     this.onBack,
   });
 
@@ -96,9 +91,6 @@ class PlayerAudioMenu extends StatelessWidget {
               PlayerMenuRow(
                 leading: LanguageFlag(track.language ?? '', height: 13),
                 title: track.title,
-                badges: [
-                  if (track.index == primaryIndex) 'original',
-                ],
                 isSelected: track.index == selectedIndex,
                 onTap: () => onTrackSelected(track.index),
               ),

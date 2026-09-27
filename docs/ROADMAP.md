@@ -38,16 +38,12 @@ Six invariants fail in CI rather than needing a pass over `lib/`:
 
 ### The long tail of fixed heights (#69)
 
-**Needs a device** — the torrent-cast question, the pill rail, a
-dub-default file, and a forced track. Nothing here can be advanced by reading
-or writing code; each is one test away from an answer. Cast issues go the
-same way: use it, and report what breaks.
+**Needs a device** — the torrent-cast question, the pill rail, and a forced
+track. Nothing here can be advanced by reading or writing code; each is one
+test away from an answer. Cast issues go the same way: use it, and report
+what breaks.
 
 ### Device checks
-
-**"ORIGINAL on a dub-default file (#76).** The badge marks whichever track the
-file opens with, because neither media_kit nor mpv exposes a default marker.
-Check it on a multi-audio file that defaults to a dub.
 
 **#74's pill rail has not been seen on screen.** What to look at: a source list too short to
 overflow (no buttons at all), one long enough to overflow (a button at each

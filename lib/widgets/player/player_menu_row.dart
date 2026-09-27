@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
 /// One selectable row in a player menu.
@@ -19,10 +18,6 @@ class PlayerMenuRow extends StatelessWidget {
 
   final String title;
 
-  /// Short labels after the title. The literal `'original'` is special: it
-  /// is drawn as the accent badge rather than a plain chip, because "this is
-  /// the track the release is built around" is a different kind of claim
-  /// from "this one has 4 files".
   final List<String> badges;
 
   final bool isSelected;
@@ -43,11 +38,6 @@ class PlayerMenuRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // `where` into a new list, never `remove` on the field: mutating it
-    // would edit the widget's own const list.
-    final isOriginal = badges.contains('original');
-    final rest = badges.where((b) => b != 'original').toList();
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 3),
       child: Material(
@@ -95,11 +85,7 @@ class PlayerMenuRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (isOriginal) ...[
-                  const SizedBox(width: 6),
-                  const PlayerOriginalBadge(),
-                ],
-                for (final badge in rest) ...[
+                for (final badge in badges) ...[
                   const SizedBox(width: 5),
                   _MiniBadge(badge),
                 ],
@@ -110,44 +96,6 @@ class PlayerMenuRow extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The Original badge: the one colored thing in an audio row, so it is what
-/// the eye lands on when scanning a list of eight for the track the release
-/// is built around.
-///
-/// **It is a guess, and an unverified one (#76).** There is no original-language
-/// flag to read: the media_kit fork this builds against exposes no `isDefault`
-/// or `original` marker on an audio track, and mpv's own track list carries
-/// none. So this badges the track the file *opens with*, on the reasoning that
-/// what a release ships first is its own statement of which one it is -- which
-/// means a release that defaults to the dub would badge the dub. Worth an eye
-/// on a multi-audio file that does exactly that. Nothing depends on it being
-/// right: the subtitle auto-match on `C` reads the *selected* audio language,
-/// which is always the language being heard.
-class PlayerOriginalBadge extends StatelessWidget {
-  const PlayerOriginalBadge({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: PlayerTheme.accent.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: PlayerTheme.accent.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        context.l10n.playerAudioOriginal,
-        style: TextStyle(
-          color: PlayerTheme.accent,
-          fontSize: 8.5,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
         ),
       ),
     );

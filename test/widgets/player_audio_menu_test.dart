@@ -26,7 +26,6 @@ PlayerAudioTrack track(
 Widget menu({
   List<PlayerAudioTrack> tracks = const [],
   int selected = 0,
-  int? primary,
   ValueChanged<int>? onSelected,
 }) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -36,7 +35,6 @@ Widget menu({
       child: PlayerAudioMenu(
         audioTracks: tracks,
         selectedIndex: selected,
-        primaryIndex: primary,
         onTrackSelected: onSelected ?? (_) {},
       ),
     ),
@@ -95,31 +93,6 @@ void main() {
           .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
           .toList();
       expect(rows.where((r) => r.isSelected).single.title, 'Italian');
-    });
-  });
-
-  group('the Original badge', () {
-    testWidgets('marks the primary track', (tester) async {
-      await tester.pumpWidget(
-        menu(
-          tracks: [track(1, 'English'), track(2, 'Italian')],
-          primary: 1,
-        ),
-      );
-      await tester.pump();
-
-      expect(find.text('ORIGINAL'), findsOneWidget);
-    });
-
-    testWidgets('nothing is badged when the primary is unknown', (
-      tester,
-    ) async {
-      await tester.pumpWidget(menu(tracks: [track(1, 'English')]));
-      await tester.pump();
-
-      // Better to badge nothing than to badge a guess: there is no original
-      // flag in the data, so an unknown primary must stay unmarked.
-      expect(find.text('ORIGINAL'), findsNothing);
     });
   });
 
