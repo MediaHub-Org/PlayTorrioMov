@@ -27,37 +27,22 @@ What is left is the part a test cannot hold:
 
 Six invariants fail in CI rather than needing a pass over `lib/`:
 
-| Test | Invariant |
-|:--|:--|
-| `no_hardcoded_text_test` | No `Text()` holds an English sentence |
-| `icon_button_tooltip_test` | Every icon-only control carries a label, button or not |
-| `rtl_directional_padding_test` | No padding, and no content alignment, names a physical edge |
-| `american_spelling_test` | One spelling of every word, `.arb` files included |
-| `text_scale_overflow_test` | 26 widgets survive 3x text scale on a 360px view |
-| `arrow_affordance_test` | Every rail arrow turns around for Arabic, and the player transport does not |
+| Test                           | Invariant                                                                   |
+|:-------------------------------|:----------------------------------------------------------------------------|
+| `no_hardcoded_text_test`       | No `Text()` holds an English sentence                                       |
+| `icon_button_tooltip_test`     | Every icon-only control carries a label, button or not                      |
+| `rtl_directional_padding_test` | No padding, and no content alignment, names a physical edge                 |
+| `american_spelling_test`       | One spelling of every word, `.arb` files included                           |
+| `text_scale_overflow_test`     | 26 widgets survive 3x text scale on a 360px view                            |
+| `arrow_affordance_test`        | Every rail arrow turns around for Arabic, and the player transport does not |
 
 ### The long tail of fixed heights (#69)
 
-**Needs a device** — the torrent-cast question, the pill rail, and a forced
-track. Nothing here can be advanced by reading or writing code; each is one
-test away from an answer. Cast issues go the same way: use it, and report
-what breaks.
+**Needs a device** — the torrent-cast question and a forced track. Nothing
+here can be advanced by reading or writing code; each is one test away from
+an answer. Cast issues go the same way: use it, and report what breaks.
 
 ### Device checks
-
-**#74's pill rail has not been seen on screen.** What to look at: a source list too short to
-overflow (no buttons at all), one long enough to overflow (a button at each
-end, the left one dimmed), and a scroll to the end (the right one dimmed, the
-left one lit). The buttons are driven by `maxScrollExtent`, so the case worth
-checking is a row that is *just* wider than its frame.
-
-The rail is shared by the phone and desktop layouts, so the edge affordances
-are split by *platform*, not width: the fade is drawn everywhere, the button
-only on desktop. A tablet is wide enough to pass any breakpoint and is still
-a touch device, where the row is dragged and a button over the first and last
-pill would swallow taps meant for them. **The phone layout has not been seen on a device either**; what to check is
-that the fade reads as "more this way" without a button, and that the first
-and last pill are tappable right to their edges.
 
 **A forced track picked by hand.** Forced shares the verified-selection path,
 and stays manual-only by decision -- but no forced render has been confirmed
