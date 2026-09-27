@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
 import '../../widgets/common/over_artwork.dart';
 import '../../l10n/l10n.dart';
+import '../../widgets/common/arrow_affordance.dart';
+import '../../widgets/common/reading_direction.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
@@ -1040,7 +1042,7 @@ class _DetailsPageState extends State<DetailsPage>
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
-          alignment: Alignment.bottomLeft,
+          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
           fit: BoxFit.contain,
           errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
         ),
@@ -1476,8 +1478,8 @@ class _DetailsPageState extends State<DetailsPage>
                 ),
                 if (_isDesktop()) ...[
                   if (_canScrollCastLeft)
-                    Positioned(
-                      left: 0,
+                    PositionedDirectional(
+                      start: 0,
                       top: 10,
                       bottom: 40,
                       child: _buildScrollArrow(
@@ -1487,8 +1489,8 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                   if (_canScrollCastRight)
-                    Positioned(
-                      right: 0,
+                    PositionedDirectional(
+                      end: 0,
                       top: 10,
                       bottom: 40,
                       child: _buildScrollArrow(
@@ -1638,8 +1640,8 @@ class _DetailsPageState extends State<DetailsPage>
             ),
             if (_isDesktop()) ...[
               if (_canScrollSeasonsLeft)
-                Positioned(
-                  left: 0,
+                PositionedDirectional(
+                  start: 0,
                   top: 0,
                   bottom: 0,
                   child: _buildScrollArrow(
@@ -1649,8 +1651,8 @@ class _DetailsPageState extends State<DetailsPage>
                   ),
                 ),
               if (_canScrollSeasonsRight)
-                Positioned(
-                  right: 0,
+                PositionedDirectional(
+                  end: 0,
                   top: 0,
                   bottom: 0,
                   child: _buildScrollArrow(
@@ -1690,8 +1692,8 @@ class _DetailsPageState extends State<DetailsPage>
                     : 0.95;
 
                 return LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
                   colors: [
                     _canScrollEpisodesLeft ? Colors.transparent : Colors.black,
                     Colors.black,
@@ -1728,16 +1730,16 @@ class _DetailsPageState extends State<DetailsPage>
             ),
             if (isDesktop) ...[
               if (_canScrollEpisodesLeft)
-                Positioned(
-                  left: 0,
+                PositionedDirectional(
+                  start: 0,
                   top: 0,
                   bottom: 0,
                   child: Container(
                     width: fadeWidth + 10,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
+                        begin: AlignmentDirectional.centerStart,
+                        end: AlignmentDirectional.centerEnd,
                         colors: [
                           _Palette.bg,
                           _Palette.bg.withValues(alpha: 0.0),
@@ -1745,7 +1747,7 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: AlignmentDirectional.centerStart,
                       child: _buildScrollArrow(
                         Icons.arrow_back_ios_new_rounded,
                         () => _scrollList(_episodeScrollController, -1),
@@ -1755,16 +1757,16 @@ class _DetailsPageState extends State<DetailsPage>
                   ),
                 ),
               if (_canScrollEpisodesRight)
-                Positioned(
-                  right: 0,
+                PositionedDirectional(
+                  end: 0,
                   top: 0,
                   bottom: 0,
                   child: Container(
                     width: fadeWidth + 10,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
+                        begin: AlignmentDirectional.centerEnd,
+                        end: AlignmentDirectional.centerStart,
                         colors: [
                           _Palette.bg,
                           _Palette.bg.withValues(alpha: 0.0),
@@ -1772,7 +1774,7 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: AlignmentDirectional.centerEnd,
                       child: _buildScrollArrow(
                         Icons.arrow_forward_ios_rounded,
                         () => _scrollList(_episodeScrollController, 1),
@@ -1817,8 +1819,8 @@ class _DetailsPageState extends State<DetailsPage>
                         : 0.95;
 
                     return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                      begin: AlignmentDirectional.centerStart,
+                      end: AlignmentDirectional.centerEnd,
                       colors: [
                         _canScrollRelatedLeft
                             ? Colors.transparent
@@ -1872,16 +1874,16 @@ class _DetailsPageState extends State<DetailsPage>
                 ),
                 if (isDesktop) ...[
                   if (_canScrollRelatedLeft)
-                    Positioned(
-                      left: 0,
+                    PositionedDirectional(
+                      start: 0,
                       top: 0,
                       bottom: 0,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                            begin: AlignmentDirectional.centerStart,
+                            end: AlignmentDirectional.centerEnd,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -1889,7 +1891,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           child: _buildScrollArrow(
                             Icons.arrow_back_ios_new_rounded,
                             () => _scrollList(_relatedScrollController, -1),
@@ -1899,16 +1901,16 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                   if (_canScrollRelatedRight)
-                    Positioned(
-                      right: 0,
+                    PositionedDirectional(
+                      end: 0,
                       top: 0,
                       bottom: 0,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerRight,
-                            end: Alignment.centerLeft,
+                            begin: AlignmentDirectional.centerEnd,
+                            end: AlignmentDirectional.centerStart,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -1916,7 +1918,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerRight,
+                          alignment: AlignmentDirectional.centerEnd,
                           child: _buildScrollArrow(
                             Icons.arrow_forward_ios_rounded,
                             () => _scrollList(_relatedScrollController, 1),
@@ -1962,8 +1964,8 @@ class _DetailsPageState extends State<DetailsPage>
                         : 0.95;
 
                     return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                      begin: AlignmentDirectional.centerStart,
+                      end: AlignmentDirectional.centerEnd,
                       colors: [
                         _canScrollSimilarLeft
                             ? Colors.transparent
@@ -2150,16 +2152,16 @@ class _DetailsPageState extends State<DetailsPage>
                 ),
                 if (isDesktop) ...[
                   if (_canScrollSimilarLeft)
-                    Positioned(
-                      left: 0,
+                    PositionedDirectional(
+                      start: 0,
                       top: 0,
                       bottom: 60,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                            begin: AlignmentDirectional.centerStart,
+                            end: AlignmentDirectional.centerEnd,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -2167,7 +2169,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           child: _buildScrollArrow(
                             Icons.arrow_back_ios_new_rounded,
                             () => _scrollList(_similarScrollController, -1),
@@ -2177,16 +2179,16 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                   if (_canScrollSimilarRight)
-                    Positioned(
-                      right: 0,
+                    PositionedDirectional(
+                      end: 0,
                       top: 0,
                       bottom: 60,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerRight,
-                            end: Alignment.centerLeft,
+                            begin: AlignmentDirectional.centerEnd,
+                            end: AlignmentDirectional.centerStart,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -2194,7 +2196,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerRight,
+                          alignment: AlignmentDirectional.centerEnd,
                           child: _buildScrollArrow(
                             Icons.arrow_forward_ios_rounded,
                             () => _scrollList(_similarScrollController, 1),
@@ -2213,7 +2215,12 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildScrollArrow(IconData icon, VoidCallback onTap, bool isVisible) {
-    return Center(
+    // All five rails route through here, which is the only reason ten arrows
+    // could be labelled and turned around in one place. They are built from
+    // `_HoverButton`, which takes its icon as a `child` -- so the icon is not
+    // lexically inside the gesture detector, and the scan that found the other
+    // unlabelled controls could not see these at all (#69).
+    final arrow = Center(
       child: AnimatedOpacity(
         opacity: isVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 200),
@@ -2233,7 +2240,11 @@ class _DetailsPageState extends State<DetailsPage>
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.ink.withOpacity(0.2)),
                   ),
-                  child: Icon(icon, color: AppColors.ink, size: 18),
+                  child: Icon(
+                    readingOrderArrow(context, icon),
+                    color: AppColors.ink,
+                    size: 18,
+                  ),
                 ),
               ),
             ),
@@ -2241,6 +2252,7 @@ class _DetailsPageState extends State<DetailsPage>
         ),
       ),
     );
+    return ArrowTooltip(icon: icon, child: arrow);
   }
 }
 

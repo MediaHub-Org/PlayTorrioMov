@@ -443,7 +443,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           ),
         ),
         Align(
-          alignment: Alignment.bottomLeft,
+          alignment: AlignmentDirectional.bottomStart,
           child: Padding(
             padding: EdgeInsets.fromLTRB(
               AppSpacing.pageInset(context),

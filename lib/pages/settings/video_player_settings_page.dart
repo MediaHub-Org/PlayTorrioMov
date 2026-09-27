@@ -250,7 +250,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                               Flexible(
                                 child: FittedBox(
                                   fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerLeft,
+                                  alignment: AlignmentDirectional.centerStart,
                                   child: Text(
                                     l10n.videoCrashFreeBadge,
                                     style: const TextStyle(

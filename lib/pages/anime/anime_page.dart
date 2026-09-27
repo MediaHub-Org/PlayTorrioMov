@@ -694,7 +694,7 @@ class _AnimeHeroSlide extends StatelessWidget {
           right: isCompact ? 20 : 48,
           bottom: isCompact ? 36 : 56,
           child: Align(
-            alignment: Alignment.bottomLeft,
+            alignment: AlignmentDirectional.bottomStart,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: isCompact ? double.infinity : 680.0,

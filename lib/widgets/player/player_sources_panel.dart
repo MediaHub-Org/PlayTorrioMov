@@ -242,20 +242,25 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     final sNum = widget.episode.season ?? 1;
     final eNum = widget.episode.episode ?? 1;
 
+    // See the note in player_episodes_panel: the drawer's edge line and shadow
+    // sit on whichever face is towards the content.
+    final towardsContent = Directionality.of(context) == TextDirection.rtl
+        ? const Offset(8, 0)
+        : const Offset(-8, 0);
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: Container(
         width: drawerWidth,
         height: double.infinity,
         decoration: BoxDecoration(
           color: const Color(0xF2080C14),
-          border: const Border(
-            left: BorderSide(color: Color(0x33FFFFFF), width: 1.2),
+          border: const BorderDirectional(
+            start: BorderSide(color: Color(0x33FFFFFF), width: 1.2),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.85),
-              offset: const Offset(-8, 0),
+              offset: towardsContent,
               blurRadius: 36,
             ),
           ],

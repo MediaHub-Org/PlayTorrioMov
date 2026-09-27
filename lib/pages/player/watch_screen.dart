@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
+import '../../widgets/common/reading_direction.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 
@@ -699,7 +700,7 @@ class _WatchScreenState extends State<WatchScreen>
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
-          alignment: Alignment.bottomLeft,
+          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
           fit: BoxFit.contain,
           errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
         ),

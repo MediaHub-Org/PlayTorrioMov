@@ -42,4 +42,69 @@ void main() {
           'does not flip for Arabic, so this inset lands on the wrong side',
     );
   });
+
+  test('no alignment places content by physical edge instead of reading order',
+      () {
+    // The harder half of the same question, and the reason it was left out of
+    // the first pass: unlike padding, not every physical `Alignment` is wrong.
+    // Reading all 94 of them split cleanly in three:
+    //
+    //  * **Content in reading order** — a hero's title block, a logo in its
+    //    corner, a trailing action button, a label in its own box, a side
+    //    drawer, a rail's scroll arrows and the fade behind them. 39 sites;
+    //    all `AlignmentDirectional` now.
+    //  * **Artwork** — a gradient's `begin:`/`end:`. A scrim over a poster
+    //    fades from an edge of the picture, and pictures do not mirror. Out of
+    //    scope here, which is why this looks only at `alignment:`.
+    //  * **A position along a value track** — the seek bar, the seek feedback,
+    //    a progress fill, the volume fill, the skip countdown. Allowed below,
+    //    because whether a video timeline runs right-to-left in Arabic is a
+    //    design question about the timeline and nobody has answered it. They
+    //    are one decision, not ten oversights, and they move together or not
+    //    at all.
+    final physical = RegExp(
+      r'alignment:.*\bAlignment\.'
+      r'(centerLeft|centerRight|topLeft|topRight|bottomLeft|bottomRight)\b',
+    );
+
+    // `mirroredIfRtl` is the escape hatch for a widget whose `alignment` is
+    // typed `Alignment` rather than `AlignmentGeometry`, so an
+    // `AlignmentDirectional` there is a type error rather than a fix --
+    // `CachedNetworkImage` is the one in this codebase, on three hero logos.
+    // It takes a physical alignment by design and mirrors it itself.
+    final mirrored = RegExp(r'mirroredIfRtl\(');
+
+    /// Files whose alignment marks a position along a value track.
+    const valueTracks = {
+      'lib/pages/iptv/iptv_player_page.dart',
+      'lib/pages/player/player_screen.dart',
+      'lib/widgets/home/continue_watching_slider.dart',
+      'lib/widgets/player/player_seek_bar.dart',
+      'lib/widgets/player/player_seek_feedback.dart',
+      'lib/widgets/player/player_skip_button.dart',
+      'lib/widgets/player/player_volume_control.dart',
+    };
+
+    final offenders = <String>[];
+    for (final file in Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))) {
+      if (valueTracks.contains(file.path)) continue;
+      final lines = file.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        if (physical.hasMatch(lines[i]) && !mirrored.hasMatch(lines[i])) {
+          offenders.add('${file.path}:${i + 1}: ${lines[i].trim()}');
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason: 'use AlignmentDirectional.centerStart/centerEnd — or add the '
+          'file above if this alignment marks a position along a track '
+          'rather than placing content',
+    );
+  });
 }
