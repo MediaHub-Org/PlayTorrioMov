@@ -75,3 +75,22 @@ sheet's status lines -- and `S01E01` shapes stay codes, as universal as episode
 numbers. What remains is hardcoded Arabic across the Arabic anime pages:
 correct for their audience today, and needing a native review before gaining
 es/pt/en translations.
+
+### Whether a phone can cast a torrent
+
+The one open feature question. A torrent plays from TorrServer on the phone at
+`127.0.0.1`, and a receiver asked to fetch that address asks *itself* — so it
+would need the server bound to the LAN and handed the device's LAN address.
+
+On Android the plugin is not the obstacle — it exposes `port`, so the LAN URL
+would be built here from `NetworkInterface.list()`.
+
+What the shipped `libtorrserver.so` actually binds is unproven. One command
+decides it, with a torrent playing on the phone, from a laptop on the same
+Wi-Fi:
+
+```
+curl http://<phone-LAN-IP>:<port>/echo
+```
+
+An answer means the feature is possible. A refusal closes it for good.
