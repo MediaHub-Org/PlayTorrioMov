@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
+import '../../widgets/common/reading_direction.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 
@@ -699,7 +700,7 @@ class _WatchScreenState extends State<WatchScreen>
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
-          alignment: Alignment.bottomLeft,
+          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
           fit: BoxFit.contain,
           errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
         ),
@@ -1910,20 +1911,23 @@ class _SourceCardState extends State<_SourceCard> {
                       color: _hovered
                           ? Colors.white.withValues(alpha: 0.1)
                           : Colors.white.withValues(alpha: 0.06),
-                      child: InkWell(
-                        onTap: () => startSourceDownload(
-                          context,
-                          detail: widget.detail,
-                          episode: widget.episode,
-                          source: s,
-                        ),
-                        child: const SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: Icon(
-                            Icons.download_rounded,
-                            color: _C.textTertiary,
-                            size: 18,
+                      child: Tooltip(
+                        message: context.l10n.playerDownload,
+                        child: InkWell(
+                          onTap: () => startSourceDownload(
+                            context,
+                            detail: widget.detail,
+                            episode: widget.episode,
+                            source: s,
+                          ),
+                          child: const SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: Icon(
+                              Icons.download_rounded,
+                              color: _C.textTertiary,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
@@ -2377,6 +2381,14 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
 /// platform split (button on desktop, fade alone on touch) is a decision
 /// worth locking down, and it cannot be reached through [WatchScreen]
 /// without a network-backed source list.
+///
+/// **Two things here have never been seen on a screen (#74).** On desktop, that
+/// a wheel over the rail does not also scroll the page behind it -- the pointer
+/// signal resolver exists to stop that and has not been watched doing it. On a
+/// phone, that the fade alone reads as "more this way", and that the first and
+/// last pill stay tappable to their edges. The case worth setting up either way
+/// is a row *just* wider than its frame, since the buttons are driven by
+/// `maxScrollExtent`.
 class FilterPillRail extends StatefulWidget {
   final List<Widget> children;
 

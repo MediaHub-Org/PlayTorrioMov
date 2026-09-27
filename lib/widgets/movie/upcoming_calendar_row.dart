@@ -10,6 +10,7 @@ import '../../services/trakt/trakt_calendar_service.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_colors.dart';
+import '../common/clamped_text_scale.dart';
 
 /// Upcoming episodes for the user's synced shows, next 14 days. Series-only:
 /// Trakt/Simkl calendars are episode-shaped, movies have no equivalent
@@ -107,7 +108,13 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 92,
+            // Three text lines in a 12px-padded card were already tight at
+            // the system default, and ran 92px past this box at 3x (#69).
+            // Nothing else on the page lines up against this row's exact
+            // height, so unlike the cast rail it gets room besides -- and the
+            // text inside is capped, because a fixed-height card cannot grow
+            // with the scale the way a page can.
+            height: 116,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -127,10 +134,11 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                         color: AppColors.inkAlpha(0.08),
                       ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                    child: ClampedTextScale(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                         Text(
                           entry.showTitle,
                           maxLines: 1,
@@ -162,7 +170,8 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                             color: AppColors.inkAlpha(0.4),
                           ),
                         ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );

@@ -65,6 +65,94 @@ void main() {
       );
     });
   }
+
+  test('every icon-only GestureDetector or InkWell carries a label', () {
+    // The other half of the same invariant. A `GestureDetector` wrapped around
+    // a bare `Icon` is a button to a user and nothing at all to a screen
+    // reader: no name, and no announcement that it is pressable. 13 of these
+    // were unlabelled when this was written.
+    //
+    // "Icon and no Text" is what makes a control icon-only. A control with a
+    // label beside the icon already reads, so it is not what this is for.
+    final control = RegExp(r'(?<![A-Za-z0-9_$.])(GestureDetector|InkWell)\(');
+    final icon = RegExp(r'(?<![A-Za-z0-9_$.])Icon\(');
+    final text = RegExp(r'(?<![A-Za-z0-9_$.])Text\(');
+    final labeller =
+        RegExp(r'(?<![A-Za-z0-9_$.])(Tooltip|Semantics|ArrowTooltip)\(');
+
+    final offenders = <String>[];
+    for (final file in Directory('lib')
+        .listSync(recursive: true)
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.dart'))) {
+      if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+      final source = file.readAsStringSync();
+
+      for (final match in control.allMatches(source)) {
+        final open = match.end - 1;
+        final close = _closeOf(source, open);
+        final body = source.substring(open, close + 1);
+
+        if (!body.contains('onTap')) continue;
+        if (!icon.hasMatch(body)) continue;
+        if (text.hasMatch(body)) continue;
+        if (labeller.hasMatch(body) || body.contains('semanticLabel')) continue;
+
+        // A label on any enclosing widget does the job just as well, and
+        // eleven of these turned out to have one -- which is why the raw count
+        // of "unlabelled" controls was almost twice the real number.
+        if (_hasLabellingAncestor(source, labeller, match.start, close)) {
+          continue;
+        }
+
+        // The other shape that labels a control: bind its tree to a local and
+        // wrap that local at the `return`. Five widgets do this, because
+        // wrapping a deep tree in place means reindenting all of it, and a
+        // diff that reindents fifty lines to add one hides what it changed.
+        // The wrapper is then *after* the control in source order, so the walk
+        // above cannot see it -- this looks for it by name instead.
+        if (_wrappedAtReturn(source, labeller, match.start)) continue;
+
+        final line = source.substring(0, match.start).split('\n').length;
+        offenders.add('${file.path}:$line');
+      }
+    }
+
+    expect(
+      offenders,
+      isEmpty,
+      reason: 'wrap it in a Tooltip, or in ArrowTooltip when it is an arrow '
+          '-- an Icon in a GestureDetector has no accessible name',
+    );
+  });
+}
+
+/// The index of the `)` matching the `(` at [open].
+int _closeOf(String source, int open) {
+  var depth = 0;
+  for (var i = open; i < source.length; i++) {
+    if (source[i] == '(') depth++;
+    if (source[i] == ')') {
+      depth--;
+      if (depth == 0) return i;
+    }
+  }
+  return source.length - 1;
+}
+
+/// Whether some `Tooltip`/`Semantics` in this file encloses [start]–[end].
+bool _hasLabellingAncestor(
+  String source,
+  RegExp labeller,
+  int start,
+  int end,
+) {
+  for (final match in labeller.allMatches(source)) {
+    final open = match.end - 1;
+    if (open >= start) break;
+    if (_closeOf(source, open) > end) return true;
+  }
+  return false;
 }
 
 /// The source of the argument list opening at [open], parens balanced, so a
@@ -79,4 +167,22 @@ String _argumentList(String source, int open) {
     }
   }
   return source.substring(open);
+}
+
+/// Whether the tree at [start] is assigned to a local that some `Tooltip` or
+/// `ArrowTooltip` later in the file passes as its `child`.
+bool _wrappedAtReturn(String source, RegExp labeller, int start) {
+  final statement = source.lastIndexOf('final ', start);
+  if (statement < 0) return false;
+  final assigned = RegExp(r'final\s+(\w+)\s*=')
+      .matchAsPrefix(source.substring(statement));
+  if (assigned == null) return false;
+  final name = assigned.group(1)!;
+
+  for (final match in labeller.allMatches(source)) {
+    if (match.end < start) continue;
+    final body = _argumentList(source, match.end - 1);
+    if (RegExp('child:\\s*$name[,)]').hasMatch(body)) return true;
+  }
+  return false;
 }

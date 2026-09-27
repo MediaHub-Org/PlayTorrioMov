@@ -256,20 +256,27 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     final drawerWidth = isCompact ? screenWidth : 440.0;
     final episodes = _seasonEpisodes[_selectedSeason] ?? [];
 
+    // The drawer slides in from the trailing edge, so its edge line and its
+    // shadow are on the leading face -- which is the left in English and the
+    // right in Arabic. `BoxShadow.offset` has no directional form, so the sign
+    // is read off the direction rather than written down (#68).
+    final towardsContent = Directionality.of(context) == TextDirection.rtl
+        ? const Offset(8, 0)
+        : const Offset(-8, 0);
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: Container(
         width: drawerWidth,
         height: double.infinity,
         decoration: BoxDecoration(
           color: const Color(0xF2080C14),
-          border: const Border(
-            left: BorderSide(color: Color(0x33FFFFFF), width: 1.2),
+          border: const BorderDirectional(
+            start: BorderSide(color: Color(0x33FFFFFF), width: 1.2),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.85),
-              offset: const Offset(-8, 0),
+              offset: towardsContent,
               blurRadius: 36,
             ),
           ],

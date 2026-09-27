@@ -324,23 +324,29 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
         ? (screenSize.width * 0.58).clamp(300.0, 440.0)
         : (screenSize.width * 0.90).clamp(280.0, 480.0);
 
+    // See the note in player_episodes_panel: the drawer's edge line and shadow
+    // sit on whichever face is towards the content, so this decoration stops
+    // being const.
+    final towardsContent = Directionality.of(context) == TextDirection.rtl
+        ? const Offset(8, 0)
+        : const Offset(-8, 0);
     return Align(
-      alignment: Alignment.centerRight,
+      alignment: AlignmentDirectional.centerEnd,
       child: Material(
         color: Colors.transparent,
         child: Container(
           width: panelWidth,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            color: Color(0xF4080C12),
-            border: Border(
-              left: BorderSide(color: PlayerTheme.edge),
+          decoration: BoxDecoration(
+            color: const Color(0xF4080C12),
+            border: const BorderDirectional(
+              start: BorderSide(color: PlayerTheme.edge),
             ),
             boxShadow: [
               BoxShadow(
-                color: Color(0xCC000000),
+                color: const Color(0xCC000000),
                 blurRadius: 36,
-                offset: Offset(-8, 0),
+                offset: towardsContent,
               ),
             ],
           ),
@@ -493,37 +499,46 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           ),
                           const SizedBox(width: 2),
                           if (_searchQuery.length >= 3) ...[
-                            InkWell(
-                              borderRadius: BorderRadius.circular(4),
-                              onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Icon(
-                                  Icons.keyboard_arrow_up_rounded,
-                                  size: 16,
-                                  color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                            Tooltip(
+                              message: context.l10n.commonPrevious,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(4),
+                                onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_up_rounded,
+                                    size: 16,
+                                    color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                                  ),
                                 ),
                               ),
                             ),
-                            InkWell(
-                              borderRadius: BorderRadius.circular(4),
-                              onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
-                              child: Padding(
-                                padding: const EdgeInsets.all(2),
-                                child: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 16,
-                                  color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                            Tooltip(
+                              message: context.l10n.commonNext,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(4),
+                                onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    size: 16,
+                                    color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                                  ),
                                 ),
                               ),
                             ),
                           ],
-                          InkWell(
-                            borderRadius: BorderRadius.circular(4),
-                            onTap: () => _searchController.clear(),
-                            child: const Padding(
-                              padding: EdgeInsets.all(2),
-                              child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: 14),
+                          Tooltip(
+                            message: context.l10n.commonClearSearch,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(4),
+                              onTap: () => _searchController.clear(),
+                              child: const Padding(
+                                padding: EdgeInsets.all(2),
+                                child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: 14),
+                              ),
                             ),
                           ),
                         ],

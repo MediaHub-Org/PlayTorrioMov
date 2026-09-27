@@ -199,7 +199,13 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
                 return ValueListenableBuilder<Locale?>(
                   valueListenable: AppThemeService.locale,
                   builder: (context, locale, _) {
-                    return MaterialApp(
+                    // Rebuilt on the title-language preference too: it changes
+                    // rendered text all over the app, and a setting that needs
+                    // a restart to show its effect reads as a setting that did
+                    // not work.
+                    return ValueListenableBuilder<bool>(
+                      valueListenable: AppThemeService.preferNativeTitles,
+                      builder: (context, _, __) => MaterialApp(
                       navigatorKey: navigatorKey,
                       title: AppInfo.name,
                       debugShowCheckedModeBanner: false,
@@ -245,6 +251,7 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
                         child: child!,
                       ),
                       home: const HubPage(),
+                      ),
                     );
                   },
                 );

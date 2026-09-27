@@ -263,10 +263,12 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   /// Embedded / Online, as two pills rather than one merged list.
   ///
+
   /// They are different questions: an embedded track is already in the file
   /// and plays instantly, an online one has to be fetched. Forced tracks
   /// live inside each side under the Forced chip rather than in a third
   /// pill of their own.
+
   Widget _buildSourceTabs(BuildContext context) {
     final hasEmbedded = widget.embeddedSubtitles.isNotEmpty;
     return Row(

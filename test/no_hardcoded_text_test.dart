@@ -70,7 +70,7 @@ void main() {
       offenders,
       isEmpty,
       reason: 'add a key to all four ARB files and read it with context.l10n '
-          '-- see the Translation section of docs/ROADMAP.md',
+          '-- see the Localization section of docs/CONVENTIONS.md',
     );
   });
 }

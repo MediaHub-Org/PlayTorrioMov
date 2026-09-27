@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/titles/title_display.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../widgets/common/details_section_header.dart';
@@ -567,7 +568,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _anime.displayTitle,
+          animeDisplayTitle(_anime),
           style: TextStyle(
             fontSize: isDesktop ? 38 : 26,
             fontWeight: FontWeight.w900,
@@ -584,7 +585,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           ),
         ),
         if (_anime.titleNative.isNotEmpty &&
-            _anime.titleNative != _anime.displayTitle)
+            _anime.titleNative != animeDisplayTitle(_anime))
           Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Text(
@@ -934,10 +935,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
 
               // Desktop Floating Scroll Arrows (Matching Home Page & Anime Slider)
               if (isDesktop) ...[
-                AnimatedPositioned(
+                AnimatedPositionedDirectional(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutCubic,
-                  left: _canScrollCastLeft && _isHoveringCast ? 10 : -60,
+                  start: _canScrollCastLeft && _isHoveringCast ? 10 : -60,
                   top: 0,
                   bottom: 0,
                   child: Center(
@@ -947,10 +948,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     ),
                   ),
                 ),
-                AnimatedPositioned(
+                AnimatedPositionedDirectional(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutCubic,
-                  right: _canScrollCastRight && _isHoveringCast ? 10 : -60,
+                  end: _canScrollCastRight && _isHoveringCast ? 10 : -60,
                   top: 0,
                   bottom: 0,
                   child: Center(
@@ -1424,10 +1425,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
 
               // Desktop Floating Scroll Arrows (Matching Home Page & Anime Slider)
               if (isDesktop) ...[
-                AnimatedPositioned(
+                AnimatedPositionedDirectional(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutCubic,
-                  left: _canScrollRelationsLeft && _isHoveringRelations ? 10 : -60,
+                  start: _canScrollRelationsLeft && _isHoveringRelations ? 10 : -60,
                   top: 0,
                   bottom: 0,
                   child: Center(
@@ -1437,10 +1438,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     ),
                   ),
                 ),
-                AnimatedPositioned(
+                AnimatedPositionedDirectional(
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOutCubic,
-                  right: _canScrollRelationsRight && _isHoveringRelations ? 10 : -60,
+                  end: _canScrollRelationsRight && _isHoveringRelations ? 10 : -60,
                   top: 0,
                   bottom: 0,
                   child: Center(
@@ -1531,7 +1532,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                rec.displayTitle,
+                                animeDisplayTitle(rec),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 13,
@@ -1564,10 +1565,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
 
                   // Desktop Floating Scroll Arrows (Matching Home Page & Anime Slider)
                   if (isDesktop) ...[
-                    AnimatedPositioned(
+                    AnimatedPositionedDirectional(
                       duration: const Duration(milliseconds: 250),
                       curve: Curves.easeOutCubic,
-                      left: _canScrollRecsLeft && _isHoveringRecs ? 10 : -60,
+                      start: _canScrollRecsLeft && _isHoveringRecs ? 10 : -60,
                       top: 0,
                       bottom: 0,
                       child: Center(
@@ -1577,10 +1578,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         ),
                       ),
                     ),
-                    AnimatedPositioned(
+                    AnimatedPositionedDirectional(
                       duration: const Duration(milliseconds: 250),
                       curve: Curves.easeOutCubic,
-                      right: _canScrollRecsRight && _isHoveringRecs ? 10 : -60,
+                      end: _canScrollRecsRight && _isHoveringRecs ? 10 : -60,
                       top: 0,
                       bottom: 0,
                       child: Center(

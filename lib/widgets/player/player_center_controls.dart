@@ -155,7 +155,7 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
+    final button = MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -188,6 +188,15 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
           ),
         ),
       ),
+    );
+    // The two seek buttons beside this one are told their label; this one
+    // reads the state it already has, so the label names where a press takes
+    // you rather than what is happening now.
+    return Tooltip(
+      message: widget.isPlaying
+          ? context.l10n.playerPause
+          : context.l10n.playerPlay,
+      child: button,
     );
   }
 }

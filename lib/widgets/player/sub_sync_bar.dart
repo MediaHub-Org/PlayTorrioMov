@@ -121,18 +121,21 @@ class _SubSyncBarState extends State<SubSyncBar> {
                         ),
                         if (isNonZero) ...[
                           const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () => _applyDelay(0.0),
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.replay_rounded,
-                                color: Colors.white,
-                                size: 11,
+                          Tooltip(
+                            message: context.l10n.syncResetTiming,
+                            child: GestureDetector(
+                              onTap: () => _applyDelay(0.0),
+                              child: Container(
+                                padding: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.replay_rounded,
+                                  color: Colors.white,
+                                  size: 11,
+                                ),
                               ),
                             ),
                           ),

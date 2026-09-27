@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
+import '../../services/titles/title_display.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
@@ -70,7 +71,7 @@ class _AnimeCardState extends State<AnimeCard> {
                   // Title
                   const SizedBox(height: 9),
                   Text(
-                    anime.displayTitle,
+                    animeDisplayTitle(anime),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

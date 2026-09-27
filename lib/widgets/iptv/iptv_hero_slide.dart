@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../common/reading_direction.dart';
 import '../../l10n/l10n.dart';
 
 import '../../services/iptv/hardcoded_channels.dart';
@@ -191,7 +192,7 @@ class IptvHeroSlide extends StatelessWidget {
                   ),
                   child: CachedNetworkImage(
                     imageUrl: channel.iconUrl!,
-                    alignment: Alignment.centerLeft,
+                    alignment: mirroredIfRtl(context, Alignment.centerLeft),
                     fit: BoxFit.contain,
                     memCacheWidth: 512,
                     errorWidget: (_, __, ___) => Text(

@@ -836,7 +836,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   ],
                   const SizedBox(height: 10),
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: AlignmentDirectional.centerEnd,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                       onPressed: _ctrl.isAdding ? null : _submitAddPortal,
@@ -1277,7 +1277,7 @@ class _IptvPortalsModalState extends State<IptvPortalsModal>
                   ),
                   const SizedBox(height: 10),
                   Align(
-                    alignment: Alignment.centerRight,
+                    alignment: AlignmentDirectional.centerEnd,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
                       onPressed: _ctrl.isM3uLoading ? null : _submitAddM3u,

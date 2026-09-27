@@ -1009,5 +1009,14 @@
   "catalogCouldNotLoadWhat": "Não foi possível carregar {what}",
 
   "animeStreamsLoadFailed": "Não foi possível carregar os streams: {error}",
-  "animeDetailsLoadFailed": "Não foi possível carregar os detalhes do anime: {error}"
+  "animeDetailsLoadFailed": "Não foi possível carregar os detalhes do anime: {error}",
+
+  "commonPrevious": "Anterior",
+  "commonNext": "Próximo",
+  "commonScrollUp": "Rolar para cima",
+  "commonScrollDown": "Rolar para baixo",
+  "commonClearSearch": "Limpar busca",
+
+  "appearanceNativeTitlesTitle": "Mostrar os títulos no idioma original",
+  "appearanceNativeTitlesSubtitle": "Somente para anime, e somente na exibição. A busca, a correspondência e a sua biblioteca continuam usando o título em inglês, que é o que todas as fontes compartilham."
 }

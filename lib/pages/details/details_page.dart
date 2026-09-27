@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
 import '../../widgets/common/over_artwork.dart';
 import '../../l10n/l10n.dart';
+import '../../widgets/common/arrow_affordance.dart';
+import '../../models/details/credit.dart';
+import '../../widgets/common/hover_button.dart';
+import '../../widgets/details/credit_card.dart';
+import '../../widgets/details/similar_card.dart';
+import '../../widgets/common/reading_direction.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
@@ -46,15 +52,6 @@ class _Palette {
   static const accent = Color(0xFFE50914);
   static const accentDim = Color(0xFF9A0710);
   static const gold = Color(0xFFFFC107);
-
-  static const avatarPairs = [
-    [Color(0xFF3A1C71), Color(0xFFD76D77)],
-    [Color(0xFF11998E), Color(0xFF38EF7D)],
-    [Color(0xFF1F4037), Color(0xFF99F2C8)],
-    [Color(0xFF2C3E50), Color(0xFF4CA1AF)],
-    [Color(0xFF614385), Color(0xFF516395)],
-    [Color(0xFF232526), Color(0xFF6E6E6E)],
-  ];
 }
 
 class DetailsPage extends StatefulWidget {
@@ -1040,7 +1037,7 @@ class _DetailsPageState extends State<DetailsPage>
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
-          alignment: Alignment.bottomLeft,
+          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
           fit: BoxFit.contain,
           errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
         ),
@@ -1179,7 +1176,7 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildPlayButton({required bool fullWidth}) {
-    return _HoverButton(
+    return HoverButton(
       onTap: () => _handlePlayAction(
         _currentSeasonEpisodes.isNotEmpty
             ? _currentSeasonEpisodes.first
@@ -1255,92 +1252,6 @@ class _DetailsPageState extends State<DetailsPage>
     return LibraryActionsRow(itemBuilder: _buildMyListItem, expanded: true);
   }
 
-  Widget _buildPersonAvatar(String? profileUrl, {required String name}) {
-    final initials = name.isNotEmpty
-        ? name
-            .trim()
-            .split(' ')
-            .map((e) => e.isNotEmpty ? e[0] : '')
-            .take(2)
-            .join('')
-            .toUpperCase()
-        : '?';
-    final pair = _Palette.avatarPairs[name.hashCode.abs() %
-        _Palette.avatarPairs.length];
-
-    return Container(
-      width: 76,
-      height: 76,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: profileUrl == null
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: pair,
-              )
-            : null,
-        border: Border.all(
-          color: AppColors.ink.withOpacity(0.1),
-          width: 1.5,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      alignment: Alignment.center,
-      child: profileUrl != null
-          ? CachedNetworkImage(
-              imageUrl: profileUrl,
-              width: 76,
-              height: 76,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: pair,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  initials,
-                  style: TextStyle(
-                    color: AppColors.ink,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              errorWidget: (_, __, ___) => Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: pair,
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  initials,
-                  style: TextStyle(
-                    color: AppColors.ink,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            )
-          : Text(
-              initials,
-              style: TextStyle(
-                color: AppColors.ink,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-    );
-  }
-
   Widget _buildSynopsis(String text) {
     const style = TextStyle(
       color: Colors.white70,
@@ -1414,7 +1325,7 @@ class _DetailsPageState extends State<DetailsPage>
   ///
   /// Crew leads because it is the shorter run and answers "whose film is
   /// this" before the reader starts scrolling through actors.
-  List<_Credit> _credits(MovieDetail meta) {
+  List<Credit> _credits(MovieDetail meta) {
     final crew = _enrichedCrew ??
         (meta.directorsList.isNotEmpty
             ? meta.directorsList
@@ -1434,9 +1345,9 @@ class _DetailsPageState extends State<DetailsPage>
 
     return [
       for (final c in crew)
-        _Credit(name: c.name, role: c.job, profileUrl: c.profileUrl),
+        Credit(name: c.name, role: c.job, profileUrl: c.profileUrl),
       for (final c in cast)
-        _Credit(
+        Credit(
           name: c.name,
           // The character they play, which is the whole reason a reader
           // scans a cast list. Left null when it is unknown: the card keeps
@@ -1472,12 +1383,21 @@ class _DetailsPageState extends State<DetailsPage>
                   physics: const BouncingScrollPhysics(),
                   itemCount: credits.length,
                   separatorBuilder: (_, __) => const SizedBox(width: _Space.lg),
-                  itemBuilder: (context, index) => _buildCreditCard(credits[index]),
+                  itemBuilder: (context, index) {
+                    final credit = credits[index];
+                    return CreditCard(
+                      credit: credit,
+                      onTap: () => pushPage(
+                        context,
+                        DiscoverPage(query: credit.name, isGenre: false),
+                      ),
+                    );
+                  },
                 ),
                 if (_isDesktop()) ...[
                   if (_canScrollCastLeft)
-                    Positioned(
-                      left: 0,
+                    PositionedDirectional(
+                      start: 0,
                       top: 10,
                       bottom: 40,
                       child: _buildScrollArrow(
@@ -1487,8 +1407,8 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                   if (_canScrollCastRight)
-                    Positioned(
-                      right: 0,
+                    PositionedDirectional(
+                      end: 0,
                       top: 10,
                       bottom: 40,
                       child: _buildScrollArrow(
@@ -1499,70 +1419,6 @@ class _DetailsPageState extends State<DetailsPage>
                     ),
                 ],
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// One person: avatar, their name, and what they did on this title.
-  Widget _buildCreditCard(_Credit credit) {
-    return SizedBox(
-      width: 88,
-      child: Column(
-        children: [
-          _HoverButton(
-            onTap: () {
-              pushPage(
-                context,
-                DiscoverPage(query: credit.name, isGenre: false),
-              );
-            },
-            scaleAmount: 1.05,
-            child: _buildPersonAvatar(credit.profileUrl, name: credit.name),
-          ),
-          const SizedBox(height: 6),
-          // The rail is a fixed SizedBox(height: 148) and the column is
-          // avatar + 6 + name + 2 + role(12, already capped at 1.0). At 3x
-          // this 12px name alone wants ~43px and the column asks ~151 of a
-          // 148 box. Capped like its sibling rather than the whole rail,
-          // because the avatar above it should keep its size (#69).
-          Text(
-            credit.name,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textScaler: MediaQuery.textScalerOf(
-              context,
-            ).clamp(maxScaleFactor: 1.3),
-            style: TextStyle(
-              color: AppColors.ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 2),
-          // Fixed height, not a conditional child: a card whose role is
-          // unknown has to occupy the same box as one whose role is known,
-          // or a single uncredited actor shortens their column and the
-          // whole row's avatars stop lining up. Capped at 1.0x (never
-          // grows, still shrinks with a smaller system setting) so a large
-          // accessibility text size cannot outgrow this fixed 12px (#69).
-          SizedBox(
-            height: 12,
-            child: Text(
-              credit.role ?? '',
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.0),
-              style: TextStyle(
-                color: AppColors.inkSubtle,
-                fontSize: 10.5,
-                height: 1.1,
-              ),
             ),
           ),
         ],
@@ -1596,7 +1452,7 @@ class _DetailsPageState extends State<DetailsPage>
               itemBuilder: (context, index) {
                 final season = seasons[index];
                 final isSelected = _selectedSeason == season;
-                return _HoverButton(
+                return HoverButton(
                   onTap: () {
                     if (_selectedSeason != season) {
                       setState(() {
@@ -1638,8 +1494,8 @@ class _DetailsPageState extends State<DetailsPage>
             ),
             if (_isDesktop()) ...[
               if (_canScrollSeasonsLeft)
-                Positioned(
-                  left: 0,
+                PositionedDirectional(
+                  start: 0,
                   top: 0,
                   bottom: 0,
                   child: _buildScrollArrow(
@@ -1649,8 +1505,8 @@ class _DetailsPageState extends State<DetailsPage>
                   ),
                 ),
               if (_canScrollSeasonsRight)
-                Positioned(
-                  right: 0,
+                PositionedDirectional(
+                  end: 0,
                   top: 0,
                   bottom: 0,
                   child: _buildScrollArrow(
@@ -1690,8 +1546,8 @@ class _DetailsPageState extends State<DetailsPage>
                     : 0.95;
 
                 return LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
                   colors: [
                     _canScrollEpisodesLeft ? Colors.transparent : Colors.black,
                     Colors.black,
@@ -1728,16 +1584,16 @@ class _DetailsPageState extends State<DetailsPage>
             ),
             if (isDesktop) ...[
               if (_canScrollEpisodesLeft)
-                Positioned(
-                  left: 0,
+                PositionedDirectional(
+                  start: 0,
                   top: 0,
                   bottom: 0,
                   child: Container(
                     width: fadeWidth + 10,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
+                        begin: AlignmentDirectional.centerStart,
+                        end: AlignmentDirectional.centerEnd,
                         colors: [
                           _Palette.bg,
                           _Palette.bg.withValues(alpha: 0.0),
@@ -1745,7 +1601,7 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: AlignmentDirectional.centerStart,
                       child: _buildScrollArrow(
                         Icons.arrow_back_ios_new_rounded,
                         () => _scrollList(_episodeScrollController, -1),
@@ -1755,16 +1611,16 @@ class _DetailsPageState extends State<DetailsPage>
                   ),
                 ),
               if (_canScrollEpisodesRight)
-                Positioned(
-                  right: 0,
+                PositionedDirectional(
+                  end: 0,
                   top: 0,
                   bottom: 0,
                   child: Container(
                     width: fadeWidth + 10,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.centerRight,
-                        end: Alignment.centerLeft,
+                        begin: AlignmentDirectional.centerEnd,
+                        end: AlignmentDirectional.centerStart,
                         colors: [
                           _Palette.bg,
                           _Palette.bg.withValues(alpha: 0.0),
@@ -1772,7 +1628,7 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: AlignmentDirectional.centerEnd,
                       child: _buildScrollArrow(
                         Icons.arrow_forward_ios_rounded,
                         () => _scrollList(_episodeScrollController, 1),
@@ -1817,8 +1673,8 @@ class _DetailsPageState extends State<DetailsPage>
                         : 0.95;
 
                     return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                      begin: AlignmentDirectional.centerStart,
+                      end: AlignmentDirectional.centerEnd,
                       colors: [
                         _canScrollRelatedLeft
                             ? Colors.transparent
@@ -1845,7 +1701,7 @@ class _DetailsPageState extends State<DetailsPage>
                       final item = related[index];
                       return SizedBox(
                         width: cardWidth,
-                        child: _HoverButton(
+                        child: HoverButton(
                           onTap: () {
                             pushReplacementPage(
                               context,
@@ -1872,16 +1728,16 @@ class _DetailsPageState extends State<DetailsPage>
                 ),
                 if (isDesktop) ...[
                   if (_canScrollRelatedLeft)
-                    Positioned(
-                      left: 0,
+                    PositionedDirectional(
+                      start: 0,
                       top: 0,
                       bottom: 0,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                            begin: AlignmentDirectional.centerStart,
+                            end: AlignmentDirectional.centerEnd,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -1889,7 +1745,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           child: _buildScrollArrow(
                             Icons.arrow_back_ios_new_rounded,
                             () => _scrollList(_relatedScrollController, -1),
@@ -1899,16 +1755,16 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                   if (_canScrollRelatedRight)
-                    Positioned(
-                      right: 0,
+                    PositionedDirectional(
+                      end: 0,
                       top: 0,
                       bottom: 0,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerRight,
-                            end: Alignment.centerLeft,
+                            begin: AlignmentDirectional.centerEnd,
+                            end: AlignmentDirectional.centerStart,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -1916,7 +1772,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerRight,
+                          alignment: AlignmentDirectional.centerEnd,
                           child: _buildScrollArrow(
                             Icons.arrow_forward_ios_rounded,
                             () => _scrollList(_relatedScrollController, 1),
@@ -1937,7 +1793,7 @@ class _DetailsPageState extends State<DetailsPage>
   Widget _buildSimilarRow() {
     final isDesktop = _isDesktop();
     final cardWidth = isDesktop ? 160.0 : 130.0;
-    final cardHeight = cardWidth * 1.5 + 64; // poster + text area
+    final cardHeight = SimilarCard.heightFor(cardWidth);
     final fadeWidth = isDesktop ? 60.0 : 40.0;
 
     return MouseRegion(
@@ -1962,8 +1818,8 @@ class _DetailsPageState extends State<DetailsPage>
                         : 0.95;
 
                     return LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                      begin: AlignmentDirectional.centerStart,
+                      end: AlignmentDirectional.centerEnd,
                       colors: [
                         _canScrollSimilarLeft
                             ? Colors.transparent
@@ -1988,178 +1844,26 @@ class _DetailsPageState extends State<DetailsPage>
                         const SizedBox(width: _Space.md),
                     itemBuilder: (context, index) {
                       final item = _similarItems[index];
-                      return SizedBox(
+                      return SimilarCard(
+                        item: item,
                         width: cardWidth,
-                        child: _HoverButton(
-                          onTap: () => _openSimilarItem(item),
-                          scaleAmount: 1.05,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Poster
-                              Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10),
-                                    child: AspectRatio(
-                                      aspectRatio: 2 / 3,
-                                      child: item.thumbUrl.isNotEmpty
-                                          ? CachedNetworkImage(
-                                              imageUrl: item.thumbUrl,
-                                              fit: BoxFit.cover,
-                                              errorWidget: (_, __, ___) =>
-                                                  Container(
-                                                    color: _Palette.surface,
-                                                    child: Center(
-                                                      child: Icon(
-                                                        Icons.movie_rounded,
-                                                        color: AppColors.inkFaint,
-                                                        size: 36,
-                                                      ),
-                                                    ),
-                                                  ),
-                                            )
-                                          : Container(
-                                              color: _Palette.surface,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.movie_rounded,
-                                                  color: AppColors.inkFaint,
-                                                  size: 36,
-                                                ),
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                  // Similarity badge
-                                  if (item.similarityPercent != null)
-                                    Positioned(
-                                      top: 6,
-                                      right: 6,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 7,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.75),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                          border: Border.all(
-                                            color: _Palette.accent.withOpacity(
-                                              0.6,
-                                            ),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          '${item.similarityPercent}%',
-                                          style: TextStyle(
-                                            color: AppColors.ink,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  // Rating badge
-                                  if (item.rating != null)
-                                    Positioned(
-                                      bottom: 6,
-                                      left: 6,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 3,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.75),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(
-                                              Icons.star_rounded,
-                                              color: _Palette.gold,
-                                              size: 13,
-                                            ),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              item.rating!.toStringAsFixed(1),
-                                              style: TextStyle(
-                                                color: AppColors.ink,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              // cardHeight is `cardWidth * 1.5 + 64` and the
-                              // poster takes the 1.5, so these two lines get
-                              // a flat 64px. They want ~39 at 1.0 and ~96 at
-                              // 3x, which is 32px past the card. Capped, the
-                              // same way the Continue Watching card's title
-                              // block is, for the same reason (#69).
-                              // Title
-                              Text(
-                                item.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textScaler: MediaQuery.textScalerOf(
-                                  context,
-                                ).clamp(maxScaleFactor: 1.3),
-                                style: TextStyle(
-                                  color: AppColors.ink,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              // Year + genre -- the second of the two lines
-                              // sharing that 64px, capped with the first.
-                              Text(
-                                [
-                                  if (item.year != null) '${item.year}',
-                                  if (item.genre != null)
-                                    item.genre!.split(',').first.trim(),
-                                ].join(' · '),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textScaler: MediaQuery.textScalerOf(
-                                  context,
-                                ).clamp(maxScaleFactor: 1.3),
-                                style: TextStyle(
-                                  color: AppColors.inkDisabled,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        onTap: () => _openSimilarItem(item),
                       );
                     },
                   ),
                 ),
                 if (isDesktop) ...[
                   if (_canScrollSimilarLeft)
-                    Positioned(
-                      left: 0,
+                    PositionedDirectional(
+                      start: 0,
                       top: 0,
                       bottom: 60,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                            begin: AlignmentDirectional.centerStart,
+                            end: AlignmentDirectional.centerEnd,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -2167,7 +1871,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerLeft,
+                          alignment: AlignmentDirectional.centerStart,
                           child: _buildScrollArrow(
                             Icons.arrow_back_ios_new_rounded,
                             () => _scrollList(_similarScrollController, -1),
@@ -2177,16 +1881,16 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                   if (_canScrollSimilarRight)
-                    Positioned(
-                      right: 0,
+                    PositionedDirectional(
+                      end: 0,
                       top: 0,
                       bottom: 60,
                       child: Container(
                         width: fadeWidth + 10,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            begin: Alignment.centerRight,
-                            end: Alignment.centerLeft,
+                            begin: AlignmentDirectional.centerEnd,
+                            end: AlignmentDirectional.centerStart,
                             colors: [
                               _Palette.bg,
                               _Palette.bg.withValues(alpha: 0.0),
@@ -2194,7 +1898,7 @@ class _DetailsPageState extends State<DetailsPage>
                           ),
                         ),
                         child: Align(
-                          alignment: Alignment.centerRight,
+                          alignment: AlignmentDirectional.centerEnd,
                           child: _buildScrollArrow(
                             Icons.arrow_forward_ios_rounded,
                             () => _scrollList(_similarScrollController, 1),
@@ -2213,13 +1917,18 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildScrollArrow(IconData icon, VoidCallback onTap, bool isVisible) {
-    return Center(
+    // All five rails route through here, which is the only reason ten arrows
+    // could be labelled and turned around in one place. They are built from
+    // `HoverButton`, which takes its icon as a `child` -- so the icon is not
+    // lexically inside the gesture detector, and the scan that found the other
+    // unlabelled controls could not see these at all (#69).
+    final arrow = Center(
       child: AnimatedOpacity(
         opacity: isVisible ? 1.0 : 0.0,
         duration: const Duration(milliseconds: 200),
         child: IgnorePointer(
           ignoring: !isVisible,
-          child: _HoverButton(
+          child: HoverButton(
             onTap: onTap,
             scaleAmount: 1.1,
             child: ClipOval(
@@ -2233,7 +1942,11 @@ class _DetailsPageState extends State<DetailsPage>
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.ink.withOpacity(0.2)),
                   ),
-                  child: Icon(icon, color: AppColors.ink, size: 18),
+                  child: Icon(
+                    readingOrderArrow(context, icon),
+                    color: AppColors.ink,
+                    size: 18,
+                  ),
                 ),
               ),
             ),
@@ -2241,29 +1954,12 @@ class _DetailsPageState extends State<DetailsPage>
         ),
       ),
     );
+    return ArrowTooltip(icon: icon, child: arrow);
   }
 }
 
 /// One credited person, flattened from either a [CastMember] or a
 /// [CrewMember] so the credits row has a single card shape to render.
-class _Credit {
-  final String name;
-
-  /// What they did: the character for cast, the job for crew. Null when
-  /// nobody told us -- an addon that sends bare name strings and a TMDB
-  /// lookup that did not land leave this empty.
-  ///
-  /// It used to fall back to the literal word "Cast", which read as a role
-  /// every actor happened to share rather than as the missing data it was.
-  /// The card reserves the line either way, so a blank one costs no
-  /// alignment.
-  final String? role;
-
-  final String? profileUrl;
-
-  const _Credit({required this.name, this.role, this.profileUrl});
-}
-
 class _EpisodeCard extends StatefulWidget {
   final Video episode;
   final String? fallbackImageUrl;
@@ -2444,46 +2140,3 @@ class _EpisodeCardState extends State<_EpisodeCard> {
   }
 }
 
-class _HoverButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onTap;
-  final double scaleAmount;
-
-  const _HoverButton({
-    required this.child,
-    required this.onTap,
-    this.scaleAmount = 1.04,
-  });
-
-  @override
-  State<_HoverButton> createState() => _HoverButtonState();
-}
-
-class _HoverButtonState extends State<_HoverButton> {
-  bool _isHovered = false;
-  bool _isPressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() {
-        _isHovered = false;
-        _isPressed = false;
-      }),
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _isPressed = true),
-        onTapUp: (_) => setState(() => _isPressed = false),
-        onTapCancel: () => setState(() => _isPressed = false),
-        onTap: widget.onTap,
-        child: AnimatedScale(
-          scale: _isPressed ? 0.96 : (_isHovered ? widget.scaleAmount : 1.0),
-          duration: const Duration(milliseconds: 150),
-          curve: Curves.easeOutCubic,
-          child: widget.child,
-        ),
-      ),
-    );
-  }
-}

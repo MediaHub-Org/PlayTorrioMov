@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
+import 'arrow_affordance.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Custom Scroll Track
@@ -225,7 +226,7 @@ class _HoverArrowState extends State<_HoverArrow> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return MouseRegion(
+    final arrow = MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
       child: GestureDetector(
@@ -240,12 +241,13 @@ class _HoverArrowState extends State<_HoverArrow> {
             border: Border.all(color: AppColors.inkAlpha(0.1), width: 1),
           ),
           child: Icon(
-            widget.icon,
+            readingOrderArrow(context, widget.icon),
             color: _isHovering ? AppColors.accent : AppColors.inkMuted,
             size: 22,
           ),
         ),
       ),
     );
+    return ArrowTooltip(icon: widget.icon, child: arrow);
   }
 }

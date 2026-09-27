@@ -72,6 +72,25 @@ void main() {
     'serialise': 'serialize',
     'serialised': 'serialized',
     'serialisation': 'serialization',
+    // Added after the scan passed over a `### Localisation` heading in
+    // CONVENTIONS.md: a word list only covers the words on it.
+    'localise': 'localize',
+    'localised': 'localized',
+    'localises': 'localizes',
+    'localisation': 'localization',
+    'localisations': 'localizations',
+    'optimise': 'optimize',
+    'optimised': 'optimized',
+    'optimisation': 'optimization',
+    'customise': 'customize',
+    'customised': 'customized',
+    'recognise': 'recognize',
+    'recognised': 'recognized',
+    'prioritise': 'prioritize',
+    'prioritised': 'prioritized',
+    'synchronise': 'synchronize',
+    'synchronised': 'synchronized',
+    'synchronisation': 'synchronization',
   };
 
   /// The words a given file is allowed to keep, and why.

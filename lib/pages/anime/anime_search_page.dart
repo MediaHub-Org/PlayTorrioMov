@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../services/titles/title_display.dart';
 import '../../l10n/l10n.dart';
 
 import '../../services/app_spacing.dart';
@@ -502,7 +503,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
       final card = _arabicCardsMap[anime.id] ??
           ArabicAnimeCard(
             slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
-            title: anime.displayTitle,
+            title: animeDisplayTitle(anime),
             cover: anime.coverUrl,
           );
       pushPage(context, AnimeArabicDetailsPage(anime: card));

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
+import '../../widgets/common/arrow_affordance.dart';
 
 import '../../models/iptv/iptv_models.dart';
 import '../../models/iptv/m3u_models.dart';
@@ -2044,14 +2045,21 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                         child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
                       ),
 
-                    GestureDetector(
-                      onTap: widget.onToggleFavorite,
-                      child: Icon(
-                        widget.isFavorite
-                            ? Icons.push_pin_rounded
-                            : Icons.push_pin_outlined,
-                        color: widget.isFavorite ? AppColors.ink : AppColors.inkAlpha(0.30),
-                        size: 19,
+                    Tooltip(
+                      message: widget.isFavorite
+                          ? context.l10n.iptvRemoveFavorite
+                          : context.l10n.iptvAddFavorite,
+                      child: GestureDetector(
+                        onTap: widget.onToggleFavorite,
+                        child: Icon(
+                          widget.isFavorite
+                              ? Icons.push_pin_rounded
+                              : Icons.push_pin_outlined,
+                          color: widget.isFavorite
+                              ? AppColors.ink
+                              : AppColors.inkAlpha(0.30),
+                          size: 19,
+                        ),
                       ),
                     ),
                   ],
@@ -2211,14 +2219,21 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                     child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
                   ),
                 ],
-                GestureDetector(
-                  onTap: widget.onToggleFavorite,
-                  child: Icon(
-                    widget.isFavorite
-                        ? Icons.push_pin_rounded
-                        : Icons.push_pin_outlined,
-                    color: widget.isFavorite ? AppColors.ink : AppColors.inkAlpha(0.30),
-                    size: 18,
+                Tooltip(
+                  message: widget.isFavorite
+                      ? context.l10n.iptvRemoveFavorite
+                      : context.l10n.iptvAddFavorite,
+                  child: GestureDetector(
+                    onTap: widget.onToggleFavorite,
+                    child: Icon(
+                      widget.isFavorite
+                          ? Icons.push_pin_rounded
+                          : Icons.push_pin_outlined,
+                      color: widget.isFavorite
+                          ? AppColors.ink
+                          : AppColors.inkAlpha(0.30),
+                      size: 18,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -2328,25 +2343,34 @@ class _VodSeriesCardState extends State<_VodSeriesCard> {
                             right: 8,
                             child: Material(
                               color: Colors.transparent,
-                              child: InkWell(
-                                onTap: widget.onToggleFavorite,
-                                borderRadius: BorderRadius.circular(16),
-                                child: Container(
-                                  padding: const EdgeInsets.all(5),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.75),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: widget.isFavorite ? AppColors.onAccent.withValues(alpha: 0.70) : AppColors.onAccent.withValues(alpha: 0.24),
-                                      width: 1.2,
+                              child: Tooltip(
+                                message: widget.isFavorite
+                                    ? context.l10n.iptvRemoveFavorite
+                                    : context.l10n.iptvAddFavorite,
+                                child: InkWell(
+                                  onTap: widget.onToggleFavorite,
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(alpha: 0.75),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: widget.isFavorite
+                                            ? AppColors.onAccent.withValues(alpha: 0.70)
+                                            : AppColors.onAccent.withValues(alpha: 0.24),
+                                        width: 1.2,
+                                      ),
                                     ),
-                                  ),
-                                  child: Icon(
-                                    widget.isFavorite
-                                        ? Icons.push_pin_rounded
-                                        : Icons.push_pin_outlined,
-                                    color: widget.isFavorite ? AppColors.onAccent : AppColors.onAccent.withValues(alpha: 0.70),
-                                    size: 16,
+                                    child: Icon(
+                                      widget.isFavorite
+                                          ? Icons.push_pin_rounded
+                                          : Icons.push_pin_outlined,
+                                      color: widget.isFavorite
+                                          ? AppColors.onAccent
+                                          : AppColors.onAccent.withValues(alpha: 0.70),
+                                      size: 16,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -2582,7 +2606,7 @@ class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return MouseRegion(
+    final arrow = MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -2614,5 +2638,6 @@ class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
         ),
       ),
     );
+    return ArrowTooltip(icon: widget.icon, child: arrow);
   }
 }

@@ -295,7 +295,7 @@ class _SyncCardChrome extends StatelessWidget {
           if (onUnavailableAction != null) ...[
             const SizedBox(height: 10),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               // Wrap: two labels in a translated language do not share a
               // phone-width row, and a Row would run off the card.
               child: Wrap(
