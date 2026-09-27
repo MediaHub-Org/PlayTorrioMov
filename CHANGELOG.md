@@ -10,6 +10,10 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **The backup file reads like a document now.** Indented with sorted keys,
+  so two exports diff to nothing and a file can be opened, read, and
+  hand-fixed on the day that matters. The envelope also names the release
+  that wrote it, for restores across versions.
 - **The ORIGINAL audio badge is gone.** It marked the track the file opened
   with, which is not the same as the track the film was made in -- a release
   defaulting to the dub badged the dub. The menu is languages and a tick now,

@@ -44,8 +44,31 @@ void main() {
 
     expect(envelope['version'], 1);
     expect(envelope['app'], isNotEmpty);
+    expect(envelope['appVersion'], isA<String>());
     expect(envelope['exportedAt'], isNotEmpty);
     expect(envelope['data'], isA<Map>());
+  });
+
+  test('the envelope is indented with sorted keys', () async {
+    final raw = await BackupService.buildEnvelopeJson();
+
+    // One line per entry: a dump nobody can open and read is a dump nobody
+    // can hand-fix on the day that matters.
+    expect(raw, contains('\n  "app"'));
+    // Sorted, so two exports of the same store diff to nothing.
+    final order = [
+      '"a_bool"',
+      '"a_double"',
+      '"a_list"',
+      '"a_string"',
+      '"an_int"',
+    ];
+    var at = 0;
+    for (final key in order) {
+      final found = raw.indexOf(key, at);
+      expect(found, isNot(-1), reason: key);
+      at = found;
+    }
   });
 
   test('a file that is not a backup is refused, not half-applied', () async {
