@@ -29,31 +29,62 @@ void main() {
       expect(result, Icons.arrow_back_ios_new_rounded);
     });
 
-    testWidgets('swaps a previous/next arrow in a right-to-left layout',
-        (tester) async {
-      final swapped = <IconData, IconData>{};
+    testWidgets('turns every previous/next arrow around in Arabic, one way '
+        'or the other', (tester) async {
+      // Two mechanisms, and which one applies is Flutter's call rather than
+      // ours. An `IconData` can declare `matchTextDirection`, and `Icon`
+      // reflects the glyph itself when it does -- the `arrow_back_ios*` family
+      // does. Swapping those for their opposite as well would turn them back,
+      // so `readingOrderArrow` leaves them and swaps only the rest.
+      //
+      // Asserting the split rather than a list of which is which: the answer
+      // belongs to the Flutter version in pubspec, and a list here would be a
+      // second copy of it to go stale. What must hold is that each arrow is
+      // handled exactly once.
+      const arrows = [
+        Icons.arrow_back_ios_new_rounded,
+        Icons.arrow_back_ios_rounded,
+        Icons.arrow_back_rounded,
+        Icons.arrow_forward_ios_rounded,
+        Icons.arrow_forward_rounded,
+        Icons.chevron_left_rounded,
+        Icons.chevron_right_rounded,
+        Icons.keyboard_arrow_left_rounded,
+        Icons.keyboard_arrow_right_rounded,
+      ];
+
+      final result = <IconData, IconData>{};
       await tester.pumpWidget(wrap(
         Builder(builder: (context) {
-          for (final icon in [
-            Icons.arrow_back_ios_new_rounded,
-            Icons.arrow_forward_ios_rounded,
-            Icons.chevron_left_rounded,
-            Icons.keyboard_arrow_right_rounded,
-          ]) {
-            swapped[icon] = readingOrderArrow(context, icon);
+          for (final icon in arrows) {
+            result[icon] = readingOrderArrow(context, icon);
           }
           return const SizedBox();
         }),
         direction: TextDirection.rtl,
       ));
 
-      expect(swapped[Icons.arrow_back_ios_new_rounded],
-          Icons.arrow_forward_ios_rounded);
-      expect(swapped[Icons.arrow_forward_ios_rounded],
-          Icons.arrow_back_ios_new_rounded);
-      expect(swapped[Icons.chevron_left_rounded], Icons.chevron_right_rounded);
-      expect(swapped[Icons.keyboard_arrow_right_rounded],
-          Icons.keyboard_arrow_left_rounded);
+      for (final icon in arrows) {
+        if (icon.matchTextDirection) {
+          expect(
+            result[icon],
+            icon,
+            reason: 'Icon already reflects this one, so swapping the glyph too '
+                'would point it back the wrong way',
+          );
+        } else {
+          expect(
+            result[icon],
+            isNot(icon),
+            reason: 'nothing else turns this one around, so the glyph has to',
+          );
+          expect(
+            arrowSenseOf(result[icon]!),
+            isNot(arrowSenseOf(icon)),
+            reason: 'the swap has to change the sense, not just the glyph',
+          );
+        }
+      }
     });
 
     testWidgets('leaves vertical arrows and non-arrows alone in Arabic',
@@ -106,22 +137,25 @@ void main() {
   });
 
   group('SliderArrow', () {
-    testWidgets('points the way its rail scrolls, in either direction',
-        (tester) async {
-      await tester.pumpWidget(wrap(
-        SliderArrow(icon: Icons.arrow_back_ios_new_rounded, onTap: () {}),
-      ));
-      expect(renderedIcon(tester), Icons.arrow_back_ios_new_rounded);
+    testWidgets('renders its arrow turned around for Arabic', (tester) async {
+      const back = Icons.arrow_back_ios_new_rounded;
+
+      await tester.pumpWidget(wrap(SliderArrow(icon: back, onTap: () {})));
+      expect(renderedIcon(tester), back);
 
       await tester.pumpWidget(wrap(
-        SliderArrow(icon: Icons.arrow_back_ios_new_rounded, onTap: () {}),
+        SliderArrow(icon: back, onTap: () {}),
         direction: TextDirection.rtl,
       ));
+      // A horizontal ListView reverses under RTL, so the button that scrolls
+      // back has to point the other way. Whether that happens by Flutter
+      // reflecting the glyph or by this swapping it depends on the icon, so the
+      // assertion is on the outcome the two share.
+      final rendered = renderedIcon(tester);
       expect(
-        renderedIcon(tester),
-        Icons.arrow_forward_ios_rounded,
-        reason: 'a horizontal ListView reverses under RTL, so the button that '
-            'scrolls back has to point the other way',
+        back.matchTextDirection || arrowSenseOf(rendered) == ArrowSense.next,
+        isTrue,
+        reason: 'either Icon reflects it or readingOrderArrow swaps it',
       );
     });
 

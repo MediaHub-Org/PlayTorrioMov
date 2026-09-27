@@ -20,7 +20,10 @@ enum ArrowSense {
 /// A map rather than a `switch` because the two sides of each entry are the
 /// whole content: an arrow's glyph and its meaning are one fact, and keeping
 /// them adjacent is what stops a new icon being added with the wrong label.
-const Map<IconData, ArrowSense> _senses = {
+///
+/// Not `const`: `IconData` overrides `==`, and a constant map's keys must have
+/// primitive equality. `final` at the top level is still created once.
+final Map<IconData, ArrowSense> _senses = {
   Icons.arrow_back_ios_new_rounded: ArrowSense.previous,
   Icons.arrow_back_ios_rounded: ArrowSense.previous,
   Icons.arrow_back_rounded: ArrowSense.previous,
@@ -85,13 +88,16 @@ class ArrowTooltip extends StatelessWidget {
   }
 }
 
-/// The glyph that means the same thing in the other reading direction.
+/// The glyph that means the same thing in the other reading direction, for the
+/// arrows Flutter does not already mirror.
 ///
-/// Swapping the glyph rather than mirroring it with a `Transform` is
-/// deliberate: these are asymmetric shapes with their own optical padding, and
-/// Material already ships the pair, so the flipped version is a real icon
-/// rather than a reflected one.
-const Map<IconData, IconData> _opposites = {
+/// Swapping the glyph rather than reflecting it with a `Transform` is
+/// deliberate where a swap is needed at all: these are asymmetric shapes with
+/// their own optical padding, and Material ships the pair, so the flipped
+/// version is a real icon rather than a reflected one.
+///
+/// Not `const`, for the same reason as [_senses].
+final Map<IconData, IconData> _opposites = {
   Icons.arrow_back_ios_new_rounded: Icons.arrow_forward_ios_rounded,
   Icons.arrow_back_ios_rounded: Icons.arrow_forward_ios_rounded,
   Icons.arrow_forward_ios_rounded: Icons.arrow_back_ios_new_rounded,
@@ -105,20 +111,24 @@ const Map<IconData, IconData> _opposites = {
 
 /// [icon] as it should render for the reading direction in scope.
 ///
-/// Flutter mirrors `Row`, `ListView` and the Material widgets under
-/// `Directionality`. It does not mirror an `IconData`, so a rail's
-/// scroll-back button keeps pointing left in Arabic while the rail it scrolls
-/// runs the other way — the arrow ends up pointing at the content it moves
-/// away from (#68).
+/// **Flutter mirrors more than the roadmap credited it with.** An `IconData`
+/// carries `matchTextDirection`, and `Icon` reflects the glyph itself when it
+/// is set -- which it is on the `arrow_back_ios*` family. Swapping those for
+/// their opposite as well would turn them back, so this leaves them alone and
+/// lets Flutter do it. Only an arrow that does *not* declare
+/// `matchTextDirection` is swapped here, and which arrows those are is read off
+/// the icon rather than written down, because it is Flutter's answer to give.
 ///
-/// Only [ArrowSense.previous] and [ArrowSense.next] flip. Up and down have no
-/// reading order to follow, and **the player's seek controls are deliberately
-/// left alone**: whether a video timeline should mirror in Arabic is a
-/// question about the timeline, not a geometry bug in the button, and no
-/// answer to it has been settled. `Icons.replay_30_rounded` and
-/// `Icons.forward_30_rounded` are absent from the map above for that reason.
+/// Only [ArrowSense.previous] and [ArrowSense.next] are candidates at all. Up
+/// and down have no reading order to follow, and **the player's seek controls
+/// are deliberately excluded**: whether a video timeline should run
+/// right-to-left in Arabic is a question about the timeline, not a geometry bug
+/// in the button, and no answer to it has been settled.
+/// `Icons.replay_30_rounded` and `Icons.forward_30_rounded` are absent from
+/// [_senses] for that reason.
 IconData readingOrderArrow(BuildContext context, IconData icon) {
   if (Directionality.of(context) == TextDirection.ltr) return icon;
+  if (icon.matchTextDirection) return icon;
   final sense = arrowSenseOf(icon);
   if (sense != ArrowSense.previous && sense != ArrowSense.next) return icon;
   return _opposites[icon] ?? icon;

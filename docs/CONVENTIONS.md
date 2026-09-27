@@ -496,9 +496,20 @@ which is a drop-in — `padding` and `margin` both take `EdgeInsetsGeometry`.
 inset that way, so Live TV's search page and the watch-history page hugged the
 wrong edge entirely.
 
-`Alignment.centerLeft` is the same question with no test behind it, because not
-every one is wrong: a gradient, or a badge pinned to the corner of artwork, is
-genuinely physical. Ask "leading, or left?" per site rather than sweeping.
+`Alignment` is the same question, and the answer splits three ways: content in
+reading order is `AlignmentDirectional`; a gradient over artwork stays physical,
+because pictures do not mirror; and an alignment that marks a position along a
+value track (a seek bar, a progress fill) belongs to the unanswered question of
+whether a timeline should mirror at all.
+`test/rtl_directional_padding_test.dart` holds the first and allowlists the
+third by file.
+
+**Check `matchTextDirection` before mirroring an icon.** An `IconData` can
+declare it, and `Icon` reflects the glyph itself when it does — the
+`arrow_back_ios*` family does, so swapping one for its opposite would turn it
+back. `readingOrderArrow` in `widgets/common/arrow_affordance.dart` reads the
+flag rather than keeping a list of which icons have it, because that answer
+belongs to the Flutter version in `pubspec.yaml`.
 
 ### Text scale: the box must be able to grow
 
