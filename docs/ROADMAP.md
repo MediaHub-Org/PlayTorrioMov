@@ -1,8 +1,11 @@
 # Roadmap — PlayTorrioMov
 
-**What is left to do.** Shipped work is in [CHANGELOG.md](../CHANGELOG.md),
-the release process is in [RELEASES.md](RELEASES.md), and item numbers
-(`#15`–`#74`) are indexed at the end of the changelog.
+**What is left to do, and nothing else.** Shipped work is in
+[CHANGELOG.md](../CHANGELOG.md), whose end indexes every item number
+(`#15`–`#76`). How to do the work — the translation method, the overflow
+probe, the RTL rules, the title-identity rule — is in
+[CONVENTIONS.md](CONVENTIONS.md). The release process is in
+[RELEASES.md](RELEASES.md).
 
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
@@ -13,375 +16,55 @@ Last reconciled: **2026-09-26**, on `v1.8.11+44`.
 
 ## Pending
 
-Two kinds of work are left, and they need different things from you.
+Two kinds of work, and they need different things.
 
-**Actionable now, no hardware** — #68 and #69. Neither is a research problem;
-each has a method below that has already been used. What is left of both is
-now the part a test cannot hold, which is worth being precise about:
+**What a test already holds is not on this list.** Four invariants fail in CI
+rather than needing a re-audit: no `Text()` holds an English sentence, every
+icon-only button carries a label, no padding names a physical edge, one
+spelling of every word. What is below is what no test can decide.
 
-| Held by a test | What that leaves |
-|:--|:--|
-| `no_hardcoded_text_test` — no `Text()` holds an English sentence | Strings built from data, which stay English on purpose |
-| `rtl_directional_padding_test` — no padding names a physical edge | ~87 `Alignment` constants and icon direction, which need judgment per site |
-| `icon_button_tooltip_test` — every icon-only *button* carries a label | Icon-only controls that are not buttons: ~24 candidates, and the count is unreliable |
-| `text_scale_overflow_test` — 19 widgets survive 3x on a 360px view | ~46 files with a fixed `height:` that nothing has probed |
+### Code — needs a judgment per site (#68, #69)
 
-An invariant with a test behind it does not need revisiting, so the four
-right-hand cells are the work. Each of them needs a judgment a test cannot
-make, which is why none of them is behind one.
+None of these is a research problem and none of them is a sweep. Each is a
+list of sites that have to be read one at a time, which is exactly why no test
+covers them.
 
-**Needs a device** — #28 and the torrent-cast question. Nothing here can be
-advanced by reading or writing code; each is one test away from an answer.
-
-### Open questions
-
-**Whether more belongs under Sources & Filters (#72).** #72 shipped the audio
-language and quality filters as a global default. #75 then merged the audio
-filter with the preferred-audio ranking and made both filters multi-select,
-which settled the page's shape: two blocks, one per media kind. The size /
-sort filter and the add-on filter on the sources screen are still
-per-episode. A size range and a "largest first" sort are browsing choices for
-*this* title, not a standing preference, so they stay on the sources screen —
-the question #72 left open is answered by leaving them where they are.
-
-**The preferred-audio ranking has no way to be scanned.** #73 applies the
-ranking on the first non-empty track list only, once. If a source's tracks
-arrive in stages, a late update will not re-apply it — deliberate, so a manual
-switch in the audio menu is never undone, but it means a file whose tracks
-arrive after the first frame keeps its own default. Not observed yet on a real
-device.
-
-**"Original" on an audio track is a guess, and it is labelled as one.** #76
-badges the track the file *opens with* as ORIGINAL, because there is no
-original-language flag to read: the media_kit fork this builds against
-exposes no `isDefault` or `original` marker on an audio track, and mpv's own
-track list carries none either. What a release ships as its opening track is
-its own statement of which one it is, which is what other players treat as
-primary -- but a release that defaults to the dub would badge the dub. The
-subtitle auto-match on `C` does not rely on it: it matches the *selected*
-audio language, which is always the language being heard. Worth checking on a
-multi-audio file that defaults to a dub.
-
-**The `C` key no longer opens the subtitle panel, and nothing else does.**
-`A`, `S` and `R` are the audio, speed and aspect menus, so there was no free
-key to give the panel once `C` became a toggle. Keyboard-only users reach it
-only through the transport bar, which needs a pointer. Deliverable trade made
-deliberately; revisit if a key frees up.
-
-**Embedded subtitles select by verified id, and render per format.** The
-2026-09-26 report behind this section -- tracks appear on the automatic path
-only -- is resolved rather than still open. `_selectEmbeddedTrack` reads
-`sid` back and retries once, because the player's property set never throws
-and a rejected id used to fail silently with the menu showing selected;
-ASS renders through libass, other text through the overlay, bitmaps through
-mpv's OSD. A `[SubDiag]` line dumps the full subtitle roster on every manual
-pick, so an id mismatch shows itself in one paste. Auto-select of full
-translations stays off deliberately; forced tracks are the open remainder --
-seen listed, rendering not yet confirmed on a device.
-
-**#74's pill rail has not been seen on screen.** #73 was confirmed in a local
-temp build; the rail was not. What to look at: a source list too short to
-overflow (no buttons at all), one long enough to overflow (a button at each
-end, the left one dimmed), and a scroll to the end (the right one dimmed, the
-left one lit). The buttons are driven by `maxScrollExtent`, so the case worth
-checking is a row that is *just* wider than its frame.
-
-The rail's first version was reported as "not very visible, and only on the
-right", and both halves of that were real: the chevron was a bare 18px
-`textSecondary` glyph on a 28px fade whose gradient ran the wrong way, so it
-sat on the transparent end of its own fade; and the spent end was removed
-rather than dimmed, so the row looked lopsided and had no control at all at
-the far end of the scroll. Both are fixed. The wheel handling is the part
-still unverified on a real desktop -- in particular that a wheel over the
-rail does not also scroll the page behind it, which is what the pointer
-signal resolver is there to prevent.
-
-The rail is shared by the phone and desktop layouts, so the edge affordances
-are split by *platform*, not width: the fade is drawn everywhere, the button
-only on desktop. A tablet is wide enough to pass any breakpoint and is still
-a touch device, where the row is dragged and a button over the first and last
-pill would swallow taps meant for them. The check reuses
-`isDesktopPlatform()` from `horizontal_slider_scroll.dart`, which the other
-horizontal rails already use -- it was a method on the mixin and is now a
-top-level function so a non-mixin widget can call it too. **The phone layout
-has not been seen on a device either**; what to check is that the fade reads
-as "more this way" without a button, and that the first and last pill are
-tappable right to their edges.
-
-### Translation (#68)
-
-**The hardcoded-string tail is closed, and a test holds it closed.**
-981 keys are translated into Spanish, Arabic and Portuguese-BR, covering the
-settings pages, the player (controls, menus, panels, the subtitle style
-editor, cast sheet, loading and error screens, snack bars), the Films, Series,
-Discover, Search, Anime browse and Library pages, the shared header buttons,
-the mini player, the P2P warning and update dialogs, and Live TV end to end.
-
-The tail was found by reading the *argument* to `Text(` rather than the line
-it sits on, which is what the previous note said a scan could no longer do.
-79 literal first arguments, 42 of them prose; a third needed no new key
-because one already existed -- the portal browser had its own English copies
-of four Live TV settings rows, and three badges duplicated `iptvLive`,
-`commonAll` and `playerSeasonN`. Eleven more reach the screen through a named
-argument or a field instead of `Text(`, so the same scan cannot see them:
-two tooltips on the Continue Watching card, a hint, the player's own title for
-an anime episode, the Arabic pages' error text, and the browse pages' error
-heading.
-
-`test/no_hardcoded_text_test.dart` fails on the next one. A literal first
-argument to `Text(` with a run of three letters *outside* an interpolation is
-prose; `'S${season}E${episode}'`, `'${n} px'` and `'${pct}%'` are codes and
-units and do not trip it. Two literals are allowlisted by name -- a packet-count
-unit and a shell command someone pastes -- and an entry there is a decision
-that a string is not prose, not a way to defer translating it.
-
-What stays English is data rather than UI, and that is a decision rather than
-a gap. The 48 scrapers build a source's `title` and `description` from their
-own name and the release's quality ("VidRock · Alpha · 1080p"); those strings
-are how a source row is read and matched, not sentences. Channel names,
-provider names and a library's own error text are the same kind of thing.
-
-Genre names (Action, Slice of Life, ...) and anime formats (TV, OVA, ...) stay
-in English on purpose: they are AniList's own values, sent back to its API to
-filter, and would need a display-name map per language on top.
-
-Translating a menu can expose an overflow the English hid: the audio menu's
-"Default audio stream playing." and "Audio Sync Offset" rows were fixed-width
-Rows that a longer Portuguese string pushed 75px past the card. Probe each
-newly translated widget in the longest language (Portuguese or Spanish) at a
-phone's width, not only in English.
-
-The method, per string:
-
-1. Add a key to `lib/l10n/app_en.arb`, plus the three translated ARB files.
-2. Run `flutter gen-l10n`.
-3. Replace the literal with `context.l10n.yourKey`.
-
-A key that needs a value inside the sentence uses a placeholder —
-`detailsPlayEp` is `"Play Ep {number}"`, because word order differs in the
-other three languages and the number cannot be concatenated outside the
-translation.
-
-**A test compares every ARB file to English in both directions.** A missing
-key does not crash: `gen-l10n` silently emits the English string, so the
-app looks fine and one screen is quietly untranslated. Add the key to all
-four files or the test fails.
-
-**Use `context.l10n`, not `AppLocalizations.of(context)`.** The generated
-getter is `nullable-getter: false`, so it force-unwraps and *throws* when no
-delegate is registered — which is most existing widget tests, since they pump
-a bare `MaterialApp`. `lib/l10n/l10n.dart` wraps it with an English fallback,
-so a bare-pumped test sees exactly the string it saw before the widget was
-translated. Translating a widget without this breaks every test that renders
-it, and the failure looks like a null-check crash rather than a missing
-delegate.
-
-**A `const` enum cannot hold a translated string; give it a method.** This is
-the shape the settings pages settled on, and it is what to reach for next.
-`HubSection.localizedLabel` (in `lib/utils/hub_controller.dart`) is the
-earlier hand-rolled version; `LibrarySection.localizedLabel` and
-`LibraryShelf.localizedLabel` follow it. `DecoderPreset`,
-`BufferResiliencePreset` and `SubtitleStylePreset` in
-`services/player/player_settings.dart` now expose `title(l10n)` /
-`description(l10n)` / `label(l10n)` with exhaustive switches, so a preset
-without a translation is a compile error rather than a blank row.
-
-**Three things stay untranslated on purpose, and all are identifiers rather
-than labels.** The debrid provider ids (`'Real-Debrid'`, `'TorBox'`, …) are
-persisted and compared with `==` throughout `DebridService`, so only the
-display of `'None'` is translated, never the value. The platform names
-(`Android`, `Windows`, `macOS`, `iOS`, `Linux`) are product names; only the
-generic `Desktop/Mobile` fallback goes through the ARB. The Keyboard
-Shortcuts page's key column (`Space`, `J`, `Esc`) is the same idea — those
-are the physical keys.
-
-**The RTL audit is half done, and the half a test can hold is held.**
-`Row`, `ListView` and the Material widgets flip themselves under
-`Directionality`. Physical padding does not, and 37 sites across 21 files were
-using it: `EdgeInsets.only(left:)` is still the left edge in Arabic. All are
-`EdgeInsetsDirectional.only(start:/end:)` now, and
-`test/rtl_directional_padding_test.dart` fails if one comes back. Two were
-visible rather than cosmetic — `iptv_search_page` and `watch_history_page`
-applied the *page inset* with `left:`, so in Arabic the whole page hugged the
-wrong edge — and two were the hardcoded-Arabic anime pages.
-
-What is left needs eyes on a device, because it is about meaning rather than
-geometry:
-
-- **~87 `Alignment.centerLeft`-style constants.** Unlike the padding these
-  are not all wrong: some are genuinely physical (a gradient, a badge pinned
-  to a corner of artwork). Converting them wholesale would be a sweep with no
-  test behind it. They need reading one at a time, asking "leading, or left?"
-- **Icon direction.** A back chevron, a "next episode" arrow and the source
-  rail's scroll buttons all point somewhere. Flutter does not mirror
-  `Icons.arrow_forward_ios` for you; `Icons.arrow_forward` has a
-  `matchTextDirection` sibling and these do not use it.
-- **The player transport.** Seek-forward and seek-back are physical controls
-  over a timeline, and a timeline in Arabic is a genuine design question, not
-  a bug to fix blind.
-
-**Catalog descriptions are not a TMDB free win, if anyone reaches for that
-next.** Synopsis and genre text comes from the Stremio addon (Cinemeta by
-default), read generically as `json['overview'] ?? json['description']` in
-`models/movie/video.dart` — not from TMDB, which this codebase only uses for
-cast/crew and scrapers' own IMDb→TMDB id matching. Translating catalog
-descriptions would mean checking whether Cinemeta's own API takes a locale, a
-separate and unstarted question.
-
-**The risk is not the UI. It is the titles**, and the rule is settled before
-anyone starts, because getting it wrong breaks things that look unrelated.
-
-> **A title is two fields, and they must never merge.**
->
-> |                  | Used for                                                             | Localizable |
-> |:-----------------|:---------------------------------------------------------------------|:------------|
-> | `displayTitle`   | What the user reads                                                  | Yes         |
-> | `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never**   |
-
-Three things depend on a stable title, and each breaks differently:
-
-1. **Identity falls back to the title.** `MyListItem.uniqueKey` returns
-   `title:$type:$clean:$year` when there is no IMDb, TMDB, Trakt or Simkl id
-   — and anime saved from AniList hits that branch *by design*, because
-   AniList ids are their own namespace. Localize `title` and the same show
-   saved under a Spanish UI is a different object from the one saved under
-   English. That takes collections membership, Continue Watching dedupe and
-   Trakt/Simkl matching with it.
-2. **All 48 scrapers search by title string** (`scrape({required String
-   title, ...})`). They index release names, which are English or original
-   language. "El Caballero Oscuro" returns nothing, and it fails silently —
-   the user sees no sources, not an error.
-3. **AniList already returns four titles** — `titleUserPreferred`,
-   `titleRomaji`, `titleEnglish`, `titleNative`. The app picks the first and
-   discards the rest. The "which title do we show" decision already exists
-   here; it is simply not a setting yet.
-
-**Default: show original/English titles even when the UI is translated**,
-with an opt-in toggle that affects display only. A translated title is not a
-stable identifier — Spain and Latin America give the same film different
-Spanish titles — while the original is the one string every provider agrees
-on. It is also what Stremio, Plex and Jellyfin default to, and titles are how
-people search and recognize things.
-
-### Text scale and accessibility (#69)
-
-**~46 of the ~68 files in `lib/` with a fixed `height:` are still
-unaudited.** Twenty-five high-traffic boxes are fixed so far, the settings
-pages among them, and **no named target is left** -- Live TV's portal browser
-was the last, and its four search pills are capped. What remains is the long
-tail, deliberately unranked: the one attempt to rank it by grepping `height:`
-returned 165 hits whose loudest were `height: 4` spacers, and a ranking that
-wrong is worse than none.
-
-The player's overlays are done and probed: the subtitle style editor, the
-episode picker (which passed untouched — its rows already flex) and the cast
-sheet, whose header was 321px past the edge at 3x. That header is worth
-remembering as a pattern rather than a one-off: `Text` + `Spacer` + button in
-a flat `Row` means the title takes its natural width and shoves the button
-off. It is the third time this exact shape has been the bug — the Continue
-Watching header and the catalog cards' metadata rows were the other two.
-`Expanded` on the text, taking the `Spacer`'s job, is the fix each time.
-
-The details-page rails are done, and one of the three never needed doing:
-
-| Rail | Fixed box | Verdict |
+| What | Where it is | The judgment |
 |:--|:--|:--|
-| Cast | `SizedBox(height: 148)` | Name capped at 1.3. The column is avatar + 6 + name + 2 + role, and the role was already capped at 1.0; the 12px name alone wanted ~43px at 3x, asking ~151 of a 148 box |
-| Similar | `cardWidth * 1.5 + 64` | Both lines capped at 1.3. The poster takes the 1.5, so the title and year/genre share a flat 64px — they want ~39 at 1.0 and ~96 at 3x |
-| Related | `cardWidth * 1.5 + 8` | **Nothing to do.** The item is a bare poster in an `AspectRatio(2/3)` with no `Text` anywhere, so no text scale can move it. Listed here as a target for three revisions on the assumption it looked like the other two |
+| **~87 `Alignment.centerLeft`-style constants** | across `lib/` | "Leading, or left?" Not all are wrong — a gradient, or a badge pinned to a corner of artwork, is genuinely physical. Converting them wholesale would be a sweep with nothing behind it |
+| **Icon direction under RTL** | back chevrons, "next episode" arrows, the source rail's scroll buttons | Flutter does not mirror `Icons.arrow_forward_ios`. Some of these should mirror in Arabic and some should not, and the player's seek controls over a timeline are a design question rather than a bug |
+| **~46 of ~68 files with a fixed `height:`** | the long tail; no named target is left | Whether the box wraps its own text or is sized by the layout around it. Deliberately unranked: the one attempt to rank it by grepping `height:` returned 165 hits whose loudest were `height: 4` spacers |
+| **~24 icon-only `GestureDetector`s** | 15 files, most in the portal browser and the player overlays | Whether it already has a label. **This count is not reliable** — a `Tooltip` or `Semantics` on an *ancestor* labels the control just as well, and the scan cannot see one; the library action row and the Continue Watching card are both in the list and both already labelled |
+| **The details-page rails cannot be probed** | `DetailsPage`'s credit card and similar card are private builders | Their text-scale fixes are reasoned from arithmetic, not measured. `DetailsPage` fetches over the network, so nothing constructs them. Extracting the two cards as public widgets makes them probeable |
+| **The "show original titles" toggle** | does not exist yet | The decision is made and written down in CONVENTIONS (`displayTitle` is localizable, `canonicalTitle` never is). The setting itself was never built, so today every title is the original whether or not anyone chose that |
 
-Those three are reasoned from the arithmetic rather than probed, and that is
-a real gap: `DetailsPage` fetches its own data over the network and its rails
-are private builders, so there is nothing a test can construct. Making them
-probeable means extracting the credit card and the similar card as public
-widgets — worth doing, not done here.
+### Needs a device — yours to answer
 
-The method is settled and does not need rediscovering:
+Nothing here can be advanced by reading or writing code. Each is one session
+with real hardware.
 
-- **Probe, don't grep.** `test/text_scale_overflow_test.dart` renders at 3.0
-  scale on a 360px-wide view and asserts nothing reached the binding. Flutter
-  reports an overflow as an exception with an exact pixel count, so a failure
-  names the widget and the amount. Add a case per widget.
-- **Do not audit by grepping `height:`.** It was tried and it does not
-  survive contact: a span-based scan pairing each fixed height with the
-  largest `fontSize` inside it returns 165 hits, and the loudest are
-  `height: 4` spacers that merely sit in the same widget subtree as a
-  `fontSize: 22` title. A static scan cannot tell "box that wraps this text"
-  from "box that happens to be near it", so the ranking is noise.
-- **`Wrap` and `Expanded` are not interchangeable, and the settings pages
-  proved it.** A `Wrap` hands its children unbounded width, so a block of
-  text inside one sizes to its natural 3x width and runs off the card — that
-  is a 1310px overflow, not a fix. Reach for `Wrap` when the children are
-  small and can genuinely sit on a second line (a badge, a button); reach for
-  `Expanded` when one child is a block of text that should wrap internally.
-- **A clamp is not always enough.** The Episodes control strip still wanted
-  179px at 1.3, because the jump input and the batch dropdown are
-  fixed-width boxes with text inside them. It sits in a `Wrap`, so the box
-  could genuinely grow — and wrapping is the better answer where it can.
-  Clamp only what has nowhere to go. 1.3 is the established ceiling.
-- **A page with a looping animation never settles.** `pumpAndSettle` times
-  out on the details pages' ambient background rather than reporting anything
-  about layout. Overflow is raised during layout on the first frame, so
-  `pumpAtScale(settle: false)` is what those cases need.
-- **Pump it where it actually lives.** A bare pump of the player menu reported
-  a 1891px vertical overflow, and of `SectionHeader` a 790px one. Neither can
-  happen in production: `PlayerMenuAnchor` bounds and scrolls the card, and a
-  browse page is a scrollable. Both probes now wrap the widget in the
-  arrangement it really sits in. A probe that reports an overflow production
-  cannot have is not finding a bug — it is finding the test's own scaffolding,
-  and it wastes exactly the time it takes to work that out.
-
-**Semantics labels on icon-only buttons are done, for every `IconButton` and
-`PlayerIconButton` in `lib/`.** 46 went in with the Close/Back pass and seven
-more after it; the earlier count of "twelve left" was wrong in a useful way --
-five of the twelve were `IconButton.styleFrom` or a wrapper class whose
-tooltip is required at the type level, which a grep cannot tell from a call.
-`test/icon_button_tooltip_test.dart` fails on the next one added without a
-tooltip, which is what Material turns into the label a screen reader reads.
-The details page's three status buttons also carry the *state* now
-(`Semantics(toggled:)`), because a tooltip gives a name and not an answer to
-"is Watched on?"
-
-What is left is the controls that are not buttons: an `Icon` inside a
-`GestureDetector`. A scan finds 24 candidates across 15 files, and **that
-number should not be trusted** -- a `Tooltip` or `Semantics` on an *ancestor*
-labels the control just as well, and the scan cannot see one. The library
-action row and the Continue Watching card both appear in the list and are both
-already labelled. These need reading one at a time, which is why they are not
-behind a test.
-
-### Cast, against a real receiver (#28)
-
-A bug was found and fixed by reading the plugin's source on 2026-09-15 — the
-picker subscribed to a device stream that nothing ever started producing, so
-it searched forever. **That fix has not been confirmed against a receiver.**
-It explains the reported symptom exactly, but whether it was the only cause is
-what the next device test decides.
-
-Still unverified, and each needing a receiver:
+**Cast against a receiver (#28).** A bug was found and fixed by reading the
+plugin's source on 2026-09-15 — the picker subscribed to a device stream that
+nothing ever started producing, so it searched forever. That fix explains the
+reported symptom exactly, but it has never been confirmed against a receiver,
+and whether it was the only cause is what the next test decides.
 
 1. Does the Cast sheet **list a device** within a few seconds of opening?
 2. Does a **movie** from a direct/CDN source reach the TV and play? (Known
    limit: the Cast SDK has no sender-side way to attach Referer/User-Agent, so
    scraper sources needing them fail on the TV while playing fine locally.)
-3. Does a **Live TV channel** show as live on the receiver — no seek bar, no
-   phantom duration?
+3. Does a **Live TV channel** show as live — no seek bar, no phantom duration?
 4. Does **disconnect** return playback cleanly?
 
-### Whether a phone can cast a torrent
-
-The one open feature question. A torrent plays from TorrServer on the phone at
-`127.0.0.1`, and a receiver asked to fetch that address asks *itself* — so it
-would need the server bound to the LAN and handed the device's LAN address.
-
-Reading the code settled half of it: **iOS is dead** (the plugin's Go shim
-hardcodes `net.Listen("tcp", "127.0.0.1:"+portStr)`), and **on Android the
-plugin is not the obstacle** — it exposes `port`, so the LAN URL would be built
-here from `NetworkInterface.list()`.
-
-What the shipped `libtorrserver.so` actually binds is unproven. One command
-decides it, with a torrent playing on the phone, from a laptop on the same
-Wi-Fi:
+**Whether a phone can cast a torrent.** The one open feature question. A
+torrent plays from TorrServer on the phone at `127.0.0.1`, and a receiver asked
+to fetch that address asks *itself*. Reading the code settled half of it: iOS
+is dead, because the plugin's Go shim hardcodes
+`net.Listen("tcp", "127.0.0.1:"+portStr)`; on Android the plugin is not the
+obstacle, because it exposes `port` and the LAN URL could be built here from
+`NetworkInterface.list()`. What the shipped `libtorrserver.so` actually binds
+is unproven, and one command decides it — with a torrent playing on the phone,
+from a laptop on the same Wi-Fi:
 
 ```
 curl http://<phone-LAN-IP>:<port>/echo
@@ -389,35 +72,56 @@ curl http://<phone-LAN-IP>:<port>/echo
 
 An answer means the feature is possible. A refusal closes it for good.
 
+**Four things that have been seen listed but not seen working.**
+
+- **Forced subtitles.** Embedded selection is resolved — `_selectEmbeddedTrack`
+  reads `sid` back and retries once, because the player's property set never
+  throws and a rejected id used to fail silently with the menu showing
+  selected. ASS renders through libass, other text through the overlay,
+  bitmaps through mpv's OSD. Forced tracks appear in the list; whether they
+  *render* is unconfirmed. A `[SubDiag]` line dumps the full roster on every
+  manual pick, so a mismatch shows itself in one paste.
+- **#74's pill rail, on desktop.** The buttons are driven by
+  `maxScrollExtent`, so the case worth checking is a row *just* wider than its
+  frame: a short list (no buttons), a long one (a button at each end, the
+  spent one dimmed), and a scroll to the end (the other one dimmed). The part
+  genuinely unverified is the wheel — that a wheel over the rail does not also
+  scroll the page behind it, which the pointer signal resolver exists to
+  prevent.
+- **#74's pill rail, on a phone.** The fade is drawn on every platform and the
+  button only on desktop, because a tablet passes any width breakpoint and is
+  still a touch device where a button over the first and last pill would
+  swallow taps meant for them. What to check: that the fade reads as "more
+  this way" without a button, and that the first and last pill stay tappable
+  to their edges.
+- **The ORIGINAL audio badge, on a file that defaults to a dub.** #76 badges
+  the track the file *opens with*, because there is no original-language flag
+  to read — the media_kit fork exposes no `isDefault` or `original` marker and
+  mpv's track list carries none. What a release ships as its opening track is
+  its own statement of which one it is, but a release defaulting to the dub
+  would badge the dub. Related: #73 applies the preferred-audio ranking on the
+  first non-empty track list only, once, so a file whose tracks arrive in
+  stages keeps its own default — deliberate, so a manual switch is never
+  undone, but never observed on a device.
+
 ### Not doing, so it stays decided
 
-| What                                                                 | Why not                                                                                                                                                                                                                                                     |
-|:---------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Merge `megasource` / `nova` (50 shared windows)                      | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction serving a duplication count rather than the code |
-| Offline tests for the page **scraping** (script tags, slug matching) | Its input is one host's markup on one day, so a fixture pins that day rather than a contract. The payload ciphers and response *formats* are covered; this is a smaller claim and not a reason to hold a release                                            |
-| Cast from Windows                                                    | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. Would mean a different protocol (DLNA/UPnP) — a feature, not a fix                                                                                        |
-| Sponsor/monetization, keyboard aspect-cycle HUD (upstream)           | Out of scope; and Mov already has an aspect control in the player settings                                                                                                                                                                                  |
-| Single-select audio-language filter                                  | "English or Spanish" is not expressible with one choice, and the multi-select checkmark delay was a stale-rows bug, now fixed by rebuilding the menu from the setting on every change — the control was never the problem                                                   |
-| Pure-alphabetical online subtitle order                              | The list leads with the language being heard because that is the track a viewer is most likely to want. A Spanish-first tie with ten files each is that rule working, not a sort bug; identical counts now tie-break alphabetically, covered by a test                          |
+| What | Why not |
+|:--|:--|
+| A size/sort filter under Sources & Filters (#72's open question) | A size range and "largest first" are browsing choices for *this* title, not a standing preference, so they stay on the sources screen. #75 settled the settings page's shape: two multi-select blocks, one per media kind |
+| A keyboard shortcut for the subtitle panel | `A`, `S` and `R` are the audio, speed and aspect menus, and `C` became the on/off toggle, so no key is free. Keyboard-only users reach the panel through the transport bar, which needs a pointer. Revisit if a key frees up |
+| Merge `megasource` / `nova` (50 shared windows) | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction serving a duplication count rather than the code |
+| Offline tests for the page **scraping** (script tags, slug matching) | Its input is one host's markup on one day, so a fixture pins that day rather than a contract. The payload ciphers and response *formats* are covered |
+| Cast from Windows | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. It would mean a different protocol (DLNA/UPnP) — a feature, not a fix |
+| Sponsor/monetization, keyboard aspect-cycle HUD (upstream) | Out of scope, and Mov already has an aspect control in the player settings |
+| Single-select audio-language filter | "English or Spanish" is not expressible with one choice, and the multi-select checkmark delay was a stale-rows bug, now fixed by rebuilding the menu from the setting on every change — the control was never the problem |
+| Pure-alphabetical online subtitle order | The list leads with the language being heard because that is the track a viewer most likely wants. Identical counts tie-break alphabetically, covered by a test |
+| Translating catalog descriptions | They come from the Stremio addon, not TMDB, and whether Cinemeta's API takes a locale is an unstarted question. See CONVENTIONS |
+| Translating AniList's genres and formats | They are AniList's own values, sent back to its API to filter, and would need a display-name map per language on top |
 
 ---
 
 ## Reference
-
-### Navigation
-
-One hub, five sections, the last always Library:
-
-| Section     | Content                     |
-|:------------|:----------------------------|
-| **Movies**  | TMDB-catalog movies         |
-| **Series**  | TMDB-catalog series         |
-| **Anime**   | Its own catalog and scraper |
-| **Live TV** | IPTV channels               |
-| **Library** | Everything you've saved     |
-
-Phones show sections in the bottom tab bar; tablet and desktop show them as a
-chip row under the top bar. Search stays an icon, not a section.
 
 ### Upstream sync
 
@@ -425,34 +129,26 @@ PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod`; that repo is
 **archived**, so Mov is the only active app in the family and the direct
 downstream of `ayman708-UX/PlayTorrioV3`.
 
-**Reviewed through `39b736f` (2026-09-16). Nothing outstanding.**
-
-Re-fetched 2026-09-20: `v3/main` has not moved (still `39b736f`, and it is
-the default branch's only one), and the archived PlayTorrioMod's last commit is
-still 2026-09-05. Nothing new to review or port.
+**Reviewed through `39b736f`. Nothing outstanding.** Re-fetched 2026-09-20:
+`v3/main` has not moved and the archived Mod's last commit is still
+2026-09-05.
 
 Taken: `db2a4b9` and `0343720`, both hardening the Linux CI job against a
 `dl.google.com` apt source the runner image ships that periodically breaks
-`apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`.
+`apt-get update` — ported to **both** `build.yml` and `pr-checks.yml`. Plus
+one real bug: upstream's "watch screen properly cancels all scrapers on
+dispose" was true of `ScraperManager.scrapeAll` here but not of
+`StreamService.fetchStreams`, which wrapped that stream in a second controller
+with no `onCancel` of its own — so leaving a watch screen mid-search left all
+forty-odd scrapers issuing requests into a controller nobody read. Fixed, with
+a test that fails without it.
 
-**The one real bug found in `39b736f`.** Upstream's commit message says "watch
-screen properly cancels all scrapers on dispose". Ours did not, and the
-reason is worth recording because it looked like it did: `ScraperManager.
-scrapeAll` has had `controller.onCancel` canceling every subscription and
-deadline since the per-scraper deadline work. But `StreamService.fetchStreams`
-wrapped that stream in a *second* controller with no `onCancel` of its own,
-so canceling the outer consumer never reached the manager. Leaving a watch
-screen mid-search left all forty-odd scrapers issuing HTTP requests into a
-controller nobody was reading. Fixed, with a test that fails without it.
-
-**Not taken, so they are not re-reviewed.** `39b736f`'s headline feature — a
-CloudStream extension system with a native Android bridge — is a whole plugin
-ecosystem (477 lines of Kotlin, a marketplace, repo management, extension
-loading) and a feature, not a fix. Its player coroutine collision is
-Kotlin-side, and this fork's player is Dart-side. `9616808` (blurred hero
-backdrop) fixes a problem we do not have: every hero here already uses
-`BoxFit.cover`. `29a4127` and `1da1940` (IPTV channels, search, storage) and
-`d2f8074` (portal manager responsiveness) are the area this fork has diverged
-furthest in — #45, #46 and the portal browser are ours — so they were read as
-ideas, not ported as patches. The reported overflows from `d2f8074` were
-hand-fixed in #40 instead: all four, not the two reported.
+**Not taken, so they are not re-reviewed.** `39b736f`'s headline feature is a
+CloudStream extension system with a native Android bridge — a plugin
+ecosystem, and a feature rather than a fix; its player coroutine collision is
+Kotlin-side and this fork's player is Dart-side. `9616808` (blurred hero
+backdrop) fixes a problem we do not have. `29a4127`, `1da1940` and `d2f8074`
+are in the area this fork has diverged furthest in — #45, #46 and the portal
+browser are ours — so they were read as ideas, not ported; the overflows
+`d2f8074` reported were hand-fixed in #40 instead, all four rather than the
+two reported.

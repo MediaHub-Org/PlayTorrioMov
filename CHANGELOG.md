@@ -2001,8 +2001,8 @@ history only.
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
 | #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them. Device-confirmed on a phone 2026-09-16 |
-| #68 | Translation (i18n) — infra + Spanish/Arabic/Portuguese-BR shipped for nav, settings and the Library (~64 of ~500-800 strings); the display/canonical title split is still just decided, not built |
-| #69 | Text scale and accessibility — ten high-traffic overflow fixes + in-app zoom shipped, capped at 1.3x; ~58 files still unaudited |
+| #68 | Translation (i18n) — Spanish/Arabic/Portuguese-BR across the app, 981 keys, with a test that fails on the next hardcoded sentence; RTL padding held by a test too. The `Alignment` constants, icon direction and the display/canonical title toggle are still open |
+| #69 | Text scale and accessibility — 25 high-traffic overflow fixes + in-app zoom, capped at 1.3x, with every icon-only button labelled and a test holding it; ~46 files still unaudited |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; confirmed on real speakers 2026-09-16 |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |
 | #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |

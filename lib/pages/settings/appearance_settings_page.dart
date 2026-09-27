@@ -400,8 +400,8 @@ class _TextScaleSelector extends StatelessWidget {
 /// App-only language override (#68): translates this app's own chrome,
 /// independent of the device's system language and of which language
 /// scraped/catalog titles show in (that display-vs-canonical title
-/// question is a separate, larger decision -- see docs/ROADMAP.md's
-/// Translation entry).
+/// question is a separate, larger decision -- see the Localization section of
+/// docs/CONVENTIONS.md; the toggle itself is still pending in the roadmap).
 ///
 /// Shown in each language's own name, not translated into the currently
 /// active one -- someone who can't read the active language still needs to

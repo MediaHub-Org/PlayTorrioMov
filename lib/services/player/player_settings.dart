@@ -616,7 +616,7 @@ abstract final class PlayerSettings {
           final tempDir = await getTemporaryDirectory();
           await platform.setProperty('demuxer-cache-dir', tempDir.path);
         } catch (_) {
-          // The demuxer cache directory is an optimisation. Without it mpv
+          // The demuxer cache directory is an optimization. Without it mpv
           // buffers in memory.
         }
       }

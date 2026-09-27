@@ -42,7 +42,7 @@ decodes, streams torrents, and runs on phones and TVs.
 
 But efficiency is satisfied by *evidence*, not by cleverness. "This is
 faster" is a claim; a profile, a benchmark, or a measurement is an argument.
-Unmeasured micro-optimisation is how clarity gets spent for nothing.
+Unmeasured micro-optimization is how clarity gets spent for nothing.
 
 ### Comfort is the output, not a vertex
 
@@ -329,7 +329,7 @@ lib/
   widgets/     reusable UI, grouped by area (player/, hub/, ...)
   pages/       routed screens, grouped by area
   utils/       small pure helpers
-  l10n/        generated localisations + the context.l10n accessor
+  l10n/        generated localizations + the context.l10n accessor
 ```
 
 ### Dependencies point inward
@@ -379,7 +379,7 @@ are closed. It is not justified as a way to avoid passing a parameter.
 `PlayerIconButton`, `PlayerToggleChip`, `FocusRing`, `PlayerStepSlider`. A
 player menu composes these; it does not re-implement a card or a button.
 
-### Localisation
+### Localization
 
 Two accessors, and the choice is deliberate:
 
@@ -390,7 +390,140 @@ Two accessors, and the choice is deliberate:
   worth failing on.
 
 English is the fallback, so a missing key degrades rather than crashes. The
-reasoning is written out in `lib/l10n/l10n.dart`.
+reasoning is written out in `lib/l10n/l10n.dart`. Reaching for the wrong one
+breaks every test that renders the widget, and the failure reads as a
+null-check crash rather than a missing delegate, so it costs more to diagnose
+than it should.
+
+**Adding a string, per string:**
+
+1. Add the key to `lib/l10n/app_en.arb` **and all three translations** —
+   `app_es.arb`, `app_ar.arb`, `app_pt.arb`. A test compares every file to
+   English in both directions, because a missing key does not crash:
+   `gen-l10n` emits the English string, so the app looks fine and one screen
+   is quietly untranslated.
+2. Run `flutter gen-l10n`. The generated `app_localizations*.dart` is
+   gitignored and CI regenerates it.
+3. Read it with `context.l10n.yourKey`.
+
+Append keys as text, in the file's own one-line-per-`@key` style. Rewriting an
+ARB through a JSON dump reformats every entry in it — that was +1049/−185 for
+two keys, and it breaks "do not reformat what you did not change."
+
+A value inside a sentence takes a placeholder, never concatenation:
+`detailsPlayEp` is `"Play Ep {number}"`, because word order differs in the
+other three languages. A count that changes the noun takes an ICU plural —
+`"{count, plural, =1{1 Season} other{{count} Seasons}}"` — and Arabic gets its
+own `=2` / `few` / `many` forms, which `libraryTitleCount` shows.
+
+Before adding a key, check whether one already says it. Of 42 strings found in
+the last sweep, a third needed no new key: the portal browser had its own
+English copies of four rows the settings page already translated, and
+`discoverAllOf` was added and then removed because `catalogAllOf` already read
+`"All {name}"` word for word.
+
+**A `const` enum cannot hold a translated string; give it a method.**
+`LibrarySection.localizedLabel` and `LibraryShelf.localizedLabel` are the
+shape to copy. `DecoderPreset`, `BufferResiliencePreset` and
+`SubtitleStylePreset` expose `title(l10n)` / `description(l10n)` with
+exhaustive switches, so a preset without a translation is a compile error
+rather than a blank row.
+
+**What stays English is data, not UI, and that is a decision rather than a
+gap.** The 48 scrapers build a source's `title` and `description` from their
+own name and the release's quality ("VidRock · Alpha · 1080p"): those strings
+are how a source row is read and matched, not sentences. Debrid provider ids
+are persisted and compared with `==`, so only the display of `'None'` is
+translated, never the value. Platform names and the Keyboard Shortcuts page's
+key column are product names and physical keys. AniList's genre and format
+values are sent back to its API to filter.
+
+**Translating a widget can expose an overflow the English hid.** A longer
+Portuguese string pushed the audio menu's rows 75px past the card. Probe a
+newly translated widget in the longest language at a phone's width, not only
+in English — see *Probing for overflow at 3x text scale*.
+
+#### A title is two fields, and they must never merge
+
+Localizing a *title* is not like localizing a label, and getting it wrong
+breaks things that look unrelated.
+
+|                  | Used for                                                             | Localizable |
+|:-----------------|:---------------------------------------------------------------------|:------------|
+| `displayTitle`   | What the user reads                                                  | Yes         |
+| `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never**   |
+
+Three things depend on a stable title, and each breaks differently:
+
+1. **Identity falls back to it.** `MyListItem.uniqueKey` returns
+   `title:$type:$clean:$year` when there is no IMDb, TMDB, Trakt or Simkl id —
+   and anime saved from AniList hits that branch *by design*, because AniList
+   ids are their own namespace. Localize `title` and the same show saved under
+   a Spanish UI is a different object from the one saved under English, which
+   takes collection membership, Continue Watching dedupe and Trakt/Simkl
+   matching with it.
+2. **All 48 scrapers search by title string.** They index release names, which
+   are English or original language. "El Caballero Oscuro" returns nothing,
+   and it fails silently — the user sees no sources, not an error.
+3. **AniList already returns four titles** — `titleUserPreferred`,
+   `titleRomaji`, `titleEnglish`, `titleNative`. The app picks the first and
+   discards the rest, so the "which title do we show" decision already exists
+   here; it is simply not a setting yet.
+
+**Default: original/English titles even when the UI is translated**, with an
+opt-in toggle that affects display only. A translated title is not a stable
+identifier — Spain and Latin America give the same film different Spanish
+titles — while the original is the one string every provider agrees on, and it
+is what Stremio, Plex and Jellyfin default to.
+
+Catalog descriptions are not a free win either, if anyone reaches for that
+next: synopsis and genre text comes from the Stremio addon (Cinemeta by
+default), read as `json['overview'] ?? json['description']` in
+`models/movie/video.dart` — not from TMDB, which this codebase uses only for
+cast/crew and scrapers' own IMDb→TMDB id matching. It would mean finding out
+whether Cinemeta's API takes a locale at all.
+
+### Right-to-left
+
+Arabic ships, so every layout in `lib/` renders right-to-left for some users.
+`Row`, `ListView` and the Material widgets flip themselves under
+`Directionality`. **Physical padding does not:** `EdgeInsets.only(left:)` is
+still the left edge in Arabic. Use `EdgeInsetsDirectional.only(start:/end:)`,
+which is a drop-in — `padding` and `margin` both take `EdgeInsetsGeometry`.
+
+`test/rtl_directional_padding_test.dart` fails if a physical edge comes back.
+37 sites across 21 files were wrong, and two of them applied a whole *page*
+inset that way, so Live TV's search page and the watch-history page hugged the
+wrong edge entirely.
+
+`Alignment.centerLeft` is the same question with no test behind it, because not
+every one is wrong: a gradient, or a badge pinned to the corner of artwork, is
+genuinely physical. Ask "leading, or left?" per site rather than sweeping.
+
+### Text scale: the box must be able to grow
+
+A reader can set text to 3x. Where a box's height is fixed by the layout around
+it rather than by its own text, that text runs outside it.
+
+- **`Wrap` and `Expanded` are not interchangeable**, and the settings pages
+  proved it. A `Wrap` hands its children unbounded width, so a block of text
+  inside one sizes to its natural 3x width and runs off the card — a 1310px
+  overflow, not a fix. Reach for `Wrap` when the children are small and can
+  genuinely sit on a second line; reach for `Expanded` when one child is a
+  block of text that should wrap internally.
+- **`Text` + `Spacer` + button in a flat `Row` is the recurring bug.** The
+  title takes its natural width and shoves the button off the edge — 321px in
+  the cast sheet's header. `Expanded` on the text, taking the `Spacer`'s job,
+  is the fix. This exact shape has been the bug three times: that header, the
+  Continue Watching header, and the catalog cards' metadata rows.
+- **Clamp only what has nowhere to go.** `ClampedTextScale` (default 1.3, the
+  established ceiling) is for a box that genuinely cannot grow. Where it can —
+  a control strip sitting in a `Wrap` — let it grow instead; the Episodes strip
+  still wanted 179px at 1.3 because its jump input and batch dropdown are
+  fixed-width boxes with text inside them.
+- **Scroll rather than clamp when the content is a list.** The cast sheet had
+  no scrollable at all, so anything taller than the modal painted past the
+  bottom — and that is not only a 3x problem.
 
 ---
 
@@ -508,6 +641,53 @@ be tagged, or CI becomes flaky for everyone.
 A started `Timer.periodic` is rejected at teardown. Cancel it in the test, or
 drive it with `fakeAsync`.
 
+### Probing for overflow at 3x text scale
+
+`test/text_scale_overflow_test.dart` renders a widget at scale 3.0 on a
+360px-wide view and asserts nothing reached the binding. Flutter raises an
+overflow as an exception carrying an exact pixel count, so a failure names the
+widget and the amount. Add a case per widget.
+
+**Do not audit by grepping `height:`.** It was tried and it does not survive
+contact: a span-based scan pairing each fixed height with the largest
+`fontSize` inside it returns 165 hits, and the loudest are `height: 4` spacers
+that merely sit in the same subtree as a `fontSize: 22` title. A static scan
+cannot tell "box that wraps this text" from "box that happens to be near it",
+so the ranking is noise.
+
+Two things the probe gets wrong if you let it:
+
+- **A page with a looping animation never settles.** `pumpAndSettle` times out
+  on the details pages' ambient background rather than reporting anything about
+  layout. Overflow is raised during layout on the first frame, so those cases
+  need `pumpAtScale(settle: false)`.
+- **Pump it where it actually lives.** A bare pump of the player menu reported
+  1891px of vertical overflow and `SectionHeader` 790px. Neither can happen in
+  production — `PlayerMenuAnchor` bounds and scrolls the card, and a browse
+  page is a scrollable. A probe that reports an overflow production cannot
+  have is not finding a bug; it is finding the test's own scaffolding, and it
+  costs exactly the time it takes to work that out.
+
+### Invariant tests that scan source
+
+Four tests read `lib/` as text instead of pumping it, because the code that
+stays wrong longest is on pages nothing can construct: the portals modal and
+the channel sheet both fetch over the network.
+
+| Test | Invariant |
+|:--|:--|
+| `no_hardcoded_text_test` | No `Text()` holds an English sentence |
+| `icon_button_tooltip_test` | Every icon-only button carries a tooltip |
+| `rtl_directional_padding_test` | No padding names a physical edge |
+| `american_spelling_test` | One spelling of every word |
+
+Each keeps an allowlist keyed by file, and an entry in one is a decision that
+the case is genuinely not what the test is looking for — a unit, an API token,
+a shell command — never a way to defer the fix. Each skips
+`lib/l10n/app_localizations*`, which is generated: the spelling scan learned
+that the hard way, passing over `lib/` while CI failed on a generated doc
+comment copied out of an ARB `@description`.
+
 ---
 
 ## 9. Tooling and the commit
@@ -545,8 +725,10 @@ Fix flatpak suspend + shortcut focus loss; retry failed catalogs
 ### Keep the docs current
 
 - `CHANGELOG.md` — a `[Unreleased]` entry for anything user-visible.
-- `docs/ROADMAP.md` — known-broken things, and decisions that are settled so
-  they stop being re-litigated.
+- `docs/ROADMAP.md` — **pending work only**, plus its "Not doing" table so
+  settled decisions stop being re-litigated. Anything that shipped belongs in
+  the changelog, and any rule for writing code belongs in this file. The
+  roadmap is a list of what is left, not a record of what happened.
 
 ---
 

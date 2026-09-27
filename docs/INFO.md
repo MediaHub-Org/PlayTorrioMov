@@ -83,6 +83,11 @@ furthest in.
 **Anime** is AniList for metadata and its own scraper path, plus a separate
 Arabic catalog.
 
+**One hub, five sections, Library always last.** Phones show them in the
+bottom tab bar; tablet and desktop show them as a chip row under the top bar.
+Search stays an icon rather than becoming a sixth section, because it is a way
+into the other five rather than a place of its own.
+
 ---
 
 ## Browsing
@@ -173,7 +178,7 @@ what `uniqueKey` hashes, and what Trakt and Simkl match on, and must never be
 translated. All 48 scrapers search by title string against release names,
 which are English or original-language — a translated title returns nothing,
 and it fails silently. The full reasoning is in
-[ROADMAP.md](ROADMAP.md#translation-68).
+[CONVENTIONS.md](CONVENTIONS.md#a-title-is-two-fields-and-they-must-never-merge).
 
 **Dependencies point inward.** `pages → widgets → services → models`. A model
 depends on nothing. This is what keeps the scrapers, the player and the
