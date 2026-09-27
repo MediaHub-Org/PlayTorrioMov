@@ -49,6 +49,9 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# Local backup exports (Settings > Backup & Data): user data, never source.
+playtorrio-backup*.json
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
