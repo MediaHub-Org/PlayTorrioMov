@@ -352,7 +352,16 @@ String subtitleTrackLanguageName(String? rawLanguage) {
   // `auto` is mpv's own pseudo-track, not a language. It reached the picker
   // as a row reading "Auto", which is not something anyone can choose
   // deliberately -- there is nothing to choose it by.
-  if (const {'spl', 'mon', 'auto'}.contains(raw.toLowerCase())) return '';
+  //
+  // `und` and `unknown` are the container's way of saying it does not know.
+  // Rendering them as "UND" both invents a language and blocks the
+  // title-guess below: [_namedOrGuessed] only consults the title when the
+  // tag names nothing, so a track tagged `und` but titled "English SDH"
+  // would otherwise never be found.
+  if (const {'spl', 'mon', 'auto', 'und', 'unknown'}
+      .contains(raw.toLowerCase())) {
+    return '';
+  }
   final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
   if (mpv != null) return mpv;
   return subtitleLanguageName(raw);

@@ -22,6 +22,7 @@ import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
 import '../details/details_page.dart';
 import 'latest_releases.dart';
+import 'top_rated.dart';
 import '../../services/theme/app_colors.dart';
 
 enum _CatalogSort { yearNewest, yearOldest }
@@ -289,6 +290,15 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         isLoading: _loading,
         heroItems: _heroItems,
         rows: [
+          // First: the catalog's most acclaimed titles, ranked by rating
+          // rather than by the page's year sort -- acclaim is the point,
+          // and re-sorting them by year would unrank them.
+          if (topRated(_items).isNotEmpty)
+            BrowseRow<Movie>(
+              title: '⭐ ${context.l10n.catalogTopRated}',
+              subtitle: context.l10n.catalogTopRatedSub,
+              items: topRated(_items),
+            ),
           for (final section in _sections)
             if (section.movies.isNotEmpty)
               BrowseRow<Movie>(

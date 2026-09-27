@@ -4,6 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/my_list/my_list_item.dart';
 import 'package:playtorriomov/pages/collection/library_shelf_page.dart';
 import 'package:playtorriomov/services/collections/media_collections_service.dart';
+import 'package:playtorriomov/services/my_list/my_list_service.dart';
+import 'package:playtorriomov/widgets/common/library_sections.dart';
+import 'package:playtorriomov/widgets/movie/movie_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Poster-less on purpose: a title with artwork renders a CachedNetworkImage,
@@ -140,6 +143,79 @@ void main() {
         MediaCollectionsService.byId(c.id)!.items.map((i) => i.title),
         ['Zulu', 'Alpha'],
       );
+    });
+  });
+
+  group('a built-in shelf sort', () {
+    // Poster-less on purpose, like the collection helper above: artwork
+    // would put a real fetch inside the test.
+    MyListItem liked(String title, int year, int month) => MyListItem(
+          title: title,
+          type: 'movie',
+          imdbId: 'tt-$title',
+          year: year,
+          isLiked: true,
+          addedAt: DateTime(2026, month),
+        );
+
+    Future<void> pumpLiked(WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: LibraryShelfPage.builtIn(LibraryShelf.liked)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    List<String> cardOrder(WidgetTester tester) => tester
+        .widgetList<MovieCard>(find.byType(MovieCard))
+        .map((c) => c.movie.name)
+        .toList();
+
+    Future<void> pickSort(WidgetTester tester, String option) async {
+      // The sort button is a PopupMenuButton whose closed face names the
+      // active sort; tapping it opens the menu in the overlay.
+      await tester.tap(find.byType(PopupMenuButton<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(option).last);
+      await tester.pumpAndSettle();
+    }
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      MyListService.items.value = [];
+      await MyListService.initialize();
+      MyListService.items.value = [
+        liked('Mike', 1999, 2),
+        liked('Zulu', 2010, 1),
+        liked('Alpha', 2001, 3),
+      ];
+    });
+
+    testWidgets('sorts A-Z and Z-A', (tester) async {
+      await pumpLiked(tester);
+
+      await pickSort(tester, 'Title (A-Z)');
+      expect(cardOrder(tester), ['Alpha', 'Mike', 'Zulu']);
+
+      await pickSort(tester, 'Title (Z-A)');
+      expect(cardOrder(tester), ['Zulu', 'Mike', 'Alpha']);
+    });
+
+    testWidgets('sorts newest-first and oldest-first', (tester) async {
+      await pumpLiked(tester);
+
+      await pickSort(tester, 'Newest First');
+      expect(cardOrder(tester), ['Zulu', 'Alpha', 'Mike']);
+
+      await pickSort(tester, 'Oldest First');
+      expect(cardOrder(tester), ['Mike', 'Alpha', 'Zulu']);
+    });
+
+    testWidgets('the button names the active sort', (tester) async {
+      await pumpLiked(tester);
+      expect(find.text('Recently Added'), findsOneWidget);
+
+      await pickSort(tester, 'Title (Z-A)');
+      expect(find.text('Title (Z-A)'), findsOneWidget);
     });
   });
 }

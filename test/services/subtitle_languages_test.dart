@@ -130,5 +130,19 @@ void main() {
       expect(subtitleTrackLanguageName('AUTO'), isEmpty);
       expect(subtitleTrackLanguageName(' auto '), isEmpty);
     });
+
+    test('does not render "und" and "unknown" as languages', () {
+      // The container saying it does not know is not a language, and
+      // rendering it as "UND" blocked the title-guess: the guess only
+      // consults the title when the tag names nothing.
+      expect(subtitleTrackLanguageName('und'), isEmpty);
+      expect(subtitleTrackLanguageName('UND'), isEmpty);
+      expect(subtitleTrackLanguageName('unknown'), isEmpty);
+      expect(
+        uniqueTrackLanguageNames(['und'], ['English SDH']),
+        ['English'],
+      );
+      expect(uniqueTrackLanguageNames(['und'], [null]), ['']);
+    });
   });
 }

@@ -357,6 +357,21 @@ class _AnimePageState extends State<AnimePage> {
   /// The curated rows below the hero, in the same order the page always
   /// showed them. [BrowseScaffold] already skips any row whose items are
   /// empty, so these don't need individual guards.
+  ///
+  /// The classics are carved out of the all-time top rated: old enough to
+  /// have shaped what came after (a decade or more), and scored high
+  /// enough to still be worth watching. Deriving them locally costs no new
+  /// fetch -- the top-rated answer is already in memory.
+  List<AnimeMedia> get _classics {
+    final cutoff = DateTime.now().year - 10;
+    final old = _topRated
+        .where((a) => a.seasonYear > 0 && a.seasonYear <= cutoff)
+        .toList()
+      ..sort((a, b) => b.averageScore.compareTo(a.averageScore));
+    if (old.length < 3) return const [];
+    return old.take(12).toList();
+  }
+
   List<BrowseRow<AnimeMedia>> get _rows {
     return [
       BrowseRow(
@@ -373,6 +388,11 @@ class _AnimePageState extends State<AnimePage> {
         title: '⭐ ${context.l10n.animeTopTitle}',
         subtitle: context.l10n.animeTopSub,
         items: _topRated,
+      ),
+      BrowseRow(
+        title: '🏛️ ${context.l10n.animeClassicsTitle}',
+        subtitle: context.l10n.animeClassicsSub,
+        items: _classics,
       ),
       BrowseRow(
         title: '🚀 ${context.l10n.animeUpcomingTitle}',

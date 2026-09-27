@@ -10,6 +10,17 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **A Top Rated row on Films and Series, and Classics on Anime.** Ranked by
+  the catalog's own ratings, highest first, and skipped when there is
+  nothing acclaimed to show. Anime's classics are its all-time best that
+  are at least a decade old -- the series that defined what came after.
+- **The Library shelf sorts both ways.** Title A-Z and Z-A, newest-first
+  and oldest-first, beside the recent order that was already there. Live TV
+  favorites follow the title directions; a year sort falls back to recent
+  for channels, which have no year.
+- **Watch Sources filters read Audio, Quality, Sources, Size.** The order a
+  viewer narrows a list in: what is heard, how it looks, where it comes
+  from, how big it is.
 - **Details pages prefer the TMDB synopsis in your language.** The addon's
   English text stays the fallback: without a configured key, or when TMDB
   sends nothing, there is nothing to prefer. One cached request per title,
@@ -191,6 +202,12 @@ rather than files, and the sleep timer can wait for the video to end.
   rather than a guessed one.
 
 ### Fixed
+- **Embedded tracks tagged `mon`, `und` or `unknown` no longer fake a
+  language.** `mon` (subtitles matching the audio) was never filtered in the
+  player, so it surfaced as a fallback-titled row; `und`/`unknown` rendered
+  as "UND" rows and blocked the title-guess that would have named them
+  ("English SDH"). The first is dropped, the other two fall back to the
+  container title like any untagged track.
 - **The Cast sheet scrolls, and its title no longer pushes the close button off
   the edge.** Two separate faults in the same sheet. The title, the `Spacer`
   and the close button sat in one flat row with no flex on the title, so the

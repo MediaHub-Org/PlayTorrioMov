@@ -900,7 +900,12 @@ class _PlayerScreenState extends State<PlayerScreen>
     final keptSubs = <SubtitleTrack>[];
     for (final t in subList) {
       if (t.id == 'no' || t.id == 'auto') continue;
-      if (t.language?.trim().toLowerCase() == 'spl') continue;
+      // mpv's own tags, not languages: `spl` is a signs-only track and
+      // `mon` marks subtitles matching the audio. Neither names something
+      // anyone can choose deliberately, so both are dropped rather than
+      // given a fallback title -- see subtitle_languages.dart.
+      final tag = t.language?.trim().toLowerCase();
+      if (tag == 'spl' || tag == 'mon') continue;
       // mpv's "auto" pseudo-track, arriving as the language or as the title.
       // It is not a language, and a row reading "Auto" cannot be chosen
       // deliberately -- there is nothing to choose it by.

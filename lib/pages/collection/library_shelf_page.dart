@@ -117,11 +117,19 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
     switch (_sortBy) {
       case 'title':
+      case 'title_az':
         filtered.sort(
           (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
         );
+      case 'title_za':
+        filtered.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
       case 'year':
+      case 'year_new':
         filtered.sort((a, b) => (b.year ?? 0).compareTo(a.year ?? 0));
+      case 'year_old':
+        filtered.sort((a, b) => (a.year ?? 99999).compareTo(b.year ?? 99999));
       default:
         filtered.sort((a, b) => b.addedAt.compareTo(a.addedAt));
     }
@@ -601,6 +609,15 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
   Widget _buildSortButton() {
     final l10n = context.l10n;
+    // The button names the active sort rather than showing the raw key:
+    // `title_za` is storage, "Title (Z-A)" is what a viewer reads.
+    final activeLabel = switch (_sortBy) {
+      'title' || 'title_az' => l10n.librarySortTitle,
+      'title_za' => l10n.librarySortTitleDesc,
+      'year' || 'year_new' => l10n.librarySortYearNewest,
+      'year_old' => l10n.librarySortYearOldest,
+      _ => l10n.librarySortRecent,
+    };
     return PopupMenuButton<String>(
       initialValue: _sortBy,
       tooltip: l10n.librarySortBy,
@@ -619,7 +636,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
             Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
             const SizedBox(width: 4),
             Text(
-              _sortBy.toUpperCase(),
+              activeLabel,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
@@ -631,27 +648,44 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       ),
       itemBuilder: (context) => [
         PopupMenuItem(value: 'recent', child: Text(l10n.librarySortRecent)),
-        PopupMenuItem(value: 'title', child: Text(l10n.librarySortTitle)),
-        PopupMenuItem(value: 'year', child: Text(l10n.librarySortYear)),
+        PopupMenuItem(value: 'title_az', child: Text(l10n.librarySortTitle)),
+        PopupMenuItem(
+          value: 'title_za',
+          child: Text(l10n.librarySortTitleDesc),
+        ),
+        PopupMenuItem(
+          value: 'year_new',
+          child: Text(l10n.librarySortYearNewest),
+        ),
+        PopupMenuItem(
+          value: 'year_old',
+          child: Text(l10n.librarySortYearOldest),
+        ),
       ],
     );
   }
 
   // ── Live TV ───────────────────────────────────────────────────────────────
 
-  /// Favorited channels newest-first ("recent") or alphabetically ("title");
-  /// "year" does not apply to a channel, so it falls back to recent.
+  /// Favorited channels newest-first ("recent") or alphabetically in either
+  /// direction; a year sort does not apply to a channel, so it falls back
+  /// to recent rather than promising an order with nothing behind it.
   List<HardcodedChannel> _sortedFavoriteChannels(
     List<FavoriteChannel> favorites,
   ) {
     final sorted = List<FavoriteChannel>.from(favorites);
-    if (_sortBy == 'title') {
+    if (_sortBy == 'title' || _sortBy == 'title_az' || _sortBy == 'title_za') {
+      final descending = _sortBy == 'title_za';
       final byId = {for (final f in sorted) f.channelId: f};
       return byId.values
           .map((f) => HardcodedChannels.byId(f.channelId))
           .whereType<HardcodedChannel>()
           .toList()
-        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        ..sort(
+          (a, b) => descending
+              ? b.name.toLowerCase().compareTo(a.name.toLowerCase())
+              : a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
     }
     sorted.sort((a, b) => b.addedAt.compareTo(a.addedAt));
     return sorted

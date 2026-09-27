@@ -1376,6 +1376,11 @@ class _WatchScreenState extends State<WatchScreen>
 
   /// The four filter pills, in the one scrollable frame both layouts use.
   ///
+  /// Ordered the way a viewer narrows a list: the language being heard
+  /// first, then the picture quality, then which provider it comes from,
+  /// then how big the file is. Size sorts as much as it filters, so it
+  /// goes last.
+  ///
   /// The add-on pill is dropped rather than added as an empty box when
   /// there is only one add-on: its dropdown would offer a single choice that
   /// is already the only thing shown.
@@ -1384,10 +1389,10 @@ class _WatchScreenState extends State<WatchScreen>
         _sources.map((e) => e.addonName).toSet().length > 1;
     return FilterPillRail(
       children: [
-        _buildSizeFilterDropdown(),
-        if (hasAddonChoice) _buildAddonFilterDropdown(),
-        _buildQualityFilterDropdown(),
         _buildAudioFilterDropdown(),
+        _buildQualityFilterDropdown(),
+        if (hasAddonChoice) _buildAddonFilterDropdown(),
+        _buildSizeFilterDropdown(),
       ],
     );
   }

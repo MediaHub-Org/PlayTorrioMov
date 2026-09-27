@@ -414,46 +414,11 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
         // Text Color Palette
         _buildSectionTitle(context.l10n.subStyleTextColor.toUpperCase()),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _textColorPalette.map((item) {
-            final isSelected = activeColor.toLowerCase() == (item['hex'] as String).toLowerCase();
-            return _buildChoiceChip(
-              selected: isSelected,
-              onTap: () => PlayerSettings.setSubColor(item['hex'], player: widget.player),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: item['color'] as Color,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white38, width: 0.8),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Flexible: at a large text scale the name is wider than
-                  // the panel, and a Row sizes its children to their natural
-                  // width unless one may give.
-                  Flexible(
-                    child: Text(
-                      _paletteName(context.l10n, item['name'] as String),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+        _colorDots(
+          palette: _textColorPalette,
+          activeHex: activeColor,
+          onPick: (hex) =>
+              PlayerSettings.setSubColor(hex, player: widget.player),
         ),
         const SizedBox(height: 18),
     ];
@@ -488,49 +453,61 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
         // Outline Color Selector
         _buildSectionTitle(context.l10n.subStyleOutlineColor.toUpperCase()),
         const SizedBox(height: 10),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _borderColorPalette.map((item) {
-            final isSelected = activeBorderColor.toLowerCase() == (item['hex'] as String).toLowerCase();
-            return _buildChoiceChip(
-              selected: isSelected,
-              onTap: () => PlayerSettings.setSubBorderColor(item['hex'], player: widget.player),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: item['color'] as Color,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white38, width: 0.8),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Flexible: at a large text scale the name is wider than
-                  // the panel, and a Row sizes its children to their natural
-                  // width unless one may give.
-                  Flexible(
-                    child: Text(
-                      _paletteName(context.l10n, item['name'] as String),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+        _colorDots(
+          palette: _borderColorPalette,
+          activeHex: activeBorderColor,
+          onPick: (hex) =>
+              PlayerSettings.setSubBorderColor(hex, player: widget.player),
         ),
         const SizedBox(height: 18),
     ];
+  }
+
+  /// A palette as dots, not pills. A dot's color is its own label -- the
+  /// translated name rides in the tooltip for anyone who wants it, the way
+  /// the B/I toggles below work. Fourteen named pills took most of the
+  /// panel; fourteen dots take two short rows.
+  Widget _colorDots({
+    required List<Map<String, dynamic>> palette,
+    required String activeHex,
+    required ValueChanged<String> onPick,
+  }) {
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: palette.map((item) {
+        final hex = item['hex'] as String;
+        final selected =
+            activeHex.toLowerCase() == hex.toLowerCase();
+        return Tooltip(
+          message: _paletteName(context.l10n, item['name'] as String),
+          child: InkWell(
+            onTap: () => onPick(hex),
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: item['color'] as Color,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? PlayerTheme.accent : Colors.white38,
+                  width: selected ? 2.5 : 0.8,
+                ),
+                boxShadow: selected
+                    ? const [
+                        BoxShadow(
+                          color: PlayerTheme.accentGlow,
+                          blurRadius: 6,
+                        ),
+                      ]
+                    : null,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
   }
 
   List<Widget> _thicknessItems() {
@@ -751,9 +728,20 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(color: PlayerTheme.ink, fontSize: 14.5, fontWeight: FontWeight.w800),
+          // Flexible: at a large text scale "BACKGROUND" outgrows the
+          // panel, and a Row sizes its children to their natural width
+          // unless one may give.
+          Flexible(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: PlayerTheme.ink,
+                fontSize: 14.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
           ),
         ],
       ),
