@@ -634,7 +634,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     };
     return PopupMenuButton<String>(
       initialValue: _sortBy,
-      tooltip: l10n.librarySortBy,
+      tooltip: '${l10n.librarySortBy}: $activeLabel',
       onSelected: (val) => setState(() => _sortBy = val),
       color: AppColors.raised,
       child: Container(
@@ -649,12 +649,20 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           children: [
             Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
             const SizedBox(width: 4),
-            Text(
-              activeLabel,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: AppColors.inkMuted,
+            // Capped like the tab sort pill: the name is a label, and at a
+            // large text scale it names its natural width whatever the row
+            // offers. The tooltip carries the full name.
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: Text(
+                activeLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.inkMuted,
+                ),
               ),
             ),
           ],

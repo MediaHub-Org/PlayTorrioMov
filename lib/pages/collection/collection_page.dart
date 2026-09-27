@@ -52,8 +52,37 @@ class _CollectionPageState extends State<CollectionPage> {
   /// Type pills for the Continue Watching and Downloads tabs: All, Films,
   /// Series, Anime -- the same three kinds the shelf filter offers, so a
   /// mixed list narrows the same way everywhere in the Library.
+  ///
+  /// One Sort pill beside them, not a pill per order: five orders as pills
+  /// would double the header, and the shelf page already answers this with
+  /// one popup. Same five answers here -- recent, title both ways, year
+  /// both ways -- so sorting reads the same everywhere in the Library.
+  /// Genres are out on purpose: these lists mix kinds, and a genre narrow
+  /// belongs to the browse pages that own genres.
   String _continueType = 'all';
   String _downloadType = 'all';
+  String _continueSort = 'recent';
+  String _downloadSort = 'recent';
+
+  String _sortLabel(String sort) {
+    final l10n = context.l10n;
+    return switch (sort) {
+      'title_az' => l10n.librarySortTitle,
+      'title_za' => l10n.librarySortTitleDesc,
+      'year_new' => l10n.librarySortYearNewest,
+      'year_old' => l10n.librarySortYearOldest,
+      _ => l10n.librarySortRecent,
+    };
+  }
+
+  /// The leading four digits of a year string, or null when it carries
+  /// none. Years arrive as strings here (`2024`, sometimes `2024-03-01`),
+  /// and an unparseable one sorts with the unknowns rather than crashing
+  /// the sort.
+  static int? _yearOf(String? year) {
+    final match = RegExp(r'\d{4}').firstMatch(year ?? '');
+    return match == null ? null : int.parse(match.group(0)!);
+  }
 
   Widget _buildTypePills(String current, ValueChanged<String> onPick) {
     Widget chip(String label, String value) {
@@ -79,24 +108,146 @@ class _CollectionPageState extends State<CollectionPage> {
     }
 
     final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        child: Row(
-          children: [
-            chip(l10n.commonAll, 'all'),
-            const SizedBox(width: 6),
-            chip(l10n.libraryFilterMovies, 'movie'),
-            const SizedBox(width: 6),
-            chip(l10n.libraryFilterSeries, 'series'),
-            const SizedBox(width: 6),
-            chip(l10n.libraryFilterAnime, 'anime'),
-          ],
-        ),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          chip(l10n.commonAll, 'all'),
+          const SizedBox(width: 6),
+          chip(l10n.libraryFilterMovies, 'movie'),
+          const SizedBox(width: 6),
+          chip(l10n.libraryFilterSeries, 'series'),
+          const SizedBox(width: 6),
+          chip(l10n.libraryFilterAnime, 'anime'),
+        ],
       ),
     );
+  }
+
+  /// Type pills plus the one Sort pill, on a single header line. The pills
+  /// take the room and scroll; the sort pill keeps its width, so it is
+  /// always reachable without chasing the row to its end.
+  Widget _buildTabHeader({
+    required String type,
+    required ValueChanged<String> onType,
+    required String sort,
+    required ValueChanged<String> onSort,
+  }) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Row(
+        children: [
+          Expanded(child: _buildTypePills(type, onType)),
+          const SizedBox(width: 8),
+          PopupMenuButton<String>(
+            tooltip: '${l10n.librarySortBy}: ${_sortLabel(sort)}',
+            onSelected: onSort,
+            color: AppColors.raised,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.raised,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.inkAlpha(0.08)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
+                  const SizedBox(width: 4),
+                  // Capped, not flexed: the name is a label, and at a large
+                  // text scale it names its natural width whatever the row
+                  // offers. The tooltip carries the full name.
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 120),
+                    child: Text(
+                      _sortLabel(sort),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.inkMuted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'recent',
+                child: Text(l10n.librarySortRecent),
+              ),
+              PopupMenuItem(
+                value: 'title_az',
+                child: Text(l10n.librarySortTitle),
+              ),
+              PopupMenuItem(
+                value: 'title_za',
+                child: Text(l10n.librarySortTitleDesc),
+              ),
+              PopupMenuItem(
+                value: 'year_new',
+                child: Text(l10n.librarySortYearNewest),
+              ),
+              PopupMenuItem(
+                value: 'year_old',
+                child: Text(l10n.librarySortYearOldest),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<ContinueWatchingItem> _sortedContinue(List<ContinueWatchingItem> items) {
+    final sorted = List.of(items);
+    switch (_continueSort) {
+      case 'title_az':
+        sorted.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+      case 'title_za':
+        sorted.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
+      case 'year_new':
+        sorted.sort((a, b) => (_yearOf(b.year) ?? 0).compareTo(_yearOf(a.year) ?? 0));
+      case 'year_old':
+        sorted.sort(
+          (a, b) => (_yearOf(a.year) ?? 99999).compareTo(_yearOf(b.year) ?? 99999),
+        );
+      default:
+        sorted.sort((a, b) => b.lastWatchedAt.compareTo(a.lastWatchedAt));
+    }
+    return sorted;
+  }
+
+  List<DownloadTask> _sortedDownloads(List<DownloadTask> tasks) {
+    final sorted = List.of(tasks);
+    switch (_downloadSort) {
+      case 'title_az':
+        sorted.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+      case 'title_za':
+        sorted.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
+      case 'year_new':
+        sorted.sort((a, b) => (_yearOf(b.year) ?? 0).compareTo(_yearOf(a.year) ?? 0));
+      case 'year_old':
+        sorted.sort(
+          (a, b) => (_yearOf(a.year) ?? 99999).compareTo(_yearOf(b.year) ?? 99999),
+        );
+      default:
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return sorted;
   }
 
   @override
@@ -304,9 +455,11 @@ class _CollectionPageState extends State<CollectionPage> {
           );
         }
 
-        final visible = _continueType == 'all'
-            ? items
-            : items.where((i) => i.type == _continueType).toList();
+        final visible = _sortedContinue(
+          _continueType == 'all'
+              ? items
+              : items.where((i) => i.type == _continueType).toList(),
+        );
         final palette = AppThemeService.currentPalette.value;
         return Center(
           child: ConstrainedBox(
@@ -329,9 +482,11 @@ class _CollectionPageState extends State<CollectionPage> {
 
             return Column(
               children: [
-                _buildTypePills(
-                  _continueType,
-                  (v) => setState(() => _continueType = v),
+                _buildTabHeader(
+                  type: _continueType,
+                  onType: (v) => setState(() => _continueType = v),
+                  sort: _continueSort,
+                  onSort: (v) => setState(() => _continueSort = v),
                 ),
                 Expanded(
                   child: GridView.builder(
@@ -391,17 +546,21 @@ class _CollectionPageState extends State<CollectionPage> {
           );
         }
 
-        final visible = _downloadType == 'all'
-            ? downloads
-            : downloads.where((t) => t.type == _downloadType).toList();
+        final visible = _sortedDownloads(
+          _downloadType == 'all'
+              ? downloads
+              : downloads.where((t) => t.type == _downloadType).toList(),
+        );
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: _maxContentWidth),
             child: Column(
               children: [
-                _buildTypePills(
-                  _downloadType,
-                  (v) => setState(() => _downloadType = v),
+                _buildTabHeader(
+                  type: _downloadType,
+                  onType: (v) => setState(() => _downloadType = v),
+                  sort: _downloadSort,
+                  onSort: (v) => setState(() => _downloadSort = v),
                 ),
                 Expanded(
                   child: ListView.separated(

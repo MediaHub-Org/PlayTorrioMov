@@ -1,8 +1,14 @@
 // test/widgets/library_shelf_page_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
+import 'package:playtorriomov/models/download/download_task_model.dart';
 import 'package:playtorriomov/models/my_list/my_list_item.dart';
+import 'package:playtorriomov/pages/collection/collection_page.dart';
 import 'package:playtorriomov/pages/collection/library_shelf_page.dart';
+import 'package:playtorriomov/services/continue_watching/continue_watching_service.dart';
+import 'package:playtorriomov/services/download/download_service.dart';
+import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/services/collections/media_collections_service.dart';
 import 'package:playtorriomov/services/my_list/my_list_service.dart';
 import 'package:playtorriomov/widgets/common/library_sections.dart';
@@ -216,6 +222,96 @@ void main() {
 
       await pickSort(tester, 'Title (Z-A)');
       expect(find.text('Title (Z-A)'), findsOneWidget);
+    });
+  });
+
+  group('the library tabs sort', () {
+    // Continue and Downloads carry the same five orders as the shelves,
+    // behind one Sort pill rather than five pills: the header is already
+    // a row of type pills, and doubling it would push the sort off the
+    // edge it needs to stay on.
+    ContinueWatchingItem watching(
+      String title,
+      int year,
+      int month,
+    ) =>
+        ContinueWatchingItem(
+          id: 'tt-$title',
+          title: title,
+          type: 'movie',
+          year: '$year',
+          isTorrent: false,
+          positionSeconds: 30,
+          totalDurationSeconds: 100,
+          lastWatchedAt: DateTime(2026, month),
+        );
+
+    DownloadTask download(String title, int month) => DownloadTask(
+          id: 'dl-$title',
+          title: title,
+          mediaId: 'tt-$title',
+          type: 'movie',
+          sourceType: DownloadSourceType.p2p,
+          sourceName: 'Scraper',
+          targetFilePath: '/downloads/$title.mkv',
+          // Determinate progress: an indeterminate bar animates forever
+          // and pumpAndSettle would time out rather than test the sort.
+          status: DownloadStatus.downloading,
+          receivedBytes: 100,
+          totalBytes: 1000,
+          createdAt: DateTime(2026, month),
+        );
+
+    Future<void> pumpTabs(WidgetTester tester, int tab) async {
+      await tester.pumpWidget(
+        MaterialApp(home: CollectionPage(initialTabIndex: tab)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> pickSort(WidgetTester tester, String option) async {
+      await tester.tap(find.byType(PopupMenuButton<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(option).last);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('continue sorts Z-A and oldest-first', (tester) async {
+      ContinueWatchingService.activeItems.value = [
+        watching('Mike', 1999, 2),
+        watching('Zulu', 2010, 1),
+        watching('Alpha', 2001, 3),
+      ];
+      addTearDown(() => ContinueWatchingService.activeItems.value = []);
+      await pumpTabs(tester, 1);
+
+      List<String> order() => tester
+          .widgetList<ContinueWatchingCard>(find.byType(ContinueWatchingCard))
+          .map((c) => c.item.title)
+          .toList();
+
+      await pickSort(tester, 'Title (Z-A)');
+      expect(order(), ['Zulu', 'Mike', 'Alpha']);
+
+      await pickSort(tester, 'Oldest First');
+      expect(order(), ['Mike', 'Alpha', 'Zulu']);
+    });
+
+    testWidgets('downloads sorts Z-A', (tester) async {
+      DownloadService.instance.tasksNotifier.value = [
+        download('Mike', 2),
+        download('Zulu', 1),
+        download('Alpha', 3),
+      ];
+      addTearDown(
+        () => DownloadService.instance.tasksNotifier.value = [],
+      );
+      await pumpTabs(tester, 2);
+
+      await pickSort(tester, 'Title (Z-A)');
+      final top = tester.getTopLeft(find.text('Zulu'));
+      final bottom = tester.getTopLeft(find.text('Alpha'));
+      expect(top.dy, lessThan(bottom.dy));
     });
   });
 }

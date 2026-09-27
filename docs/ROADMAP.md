@@ -38,6 +38,25 @@ Six invariants are held by tests, not by passes over `lib/`:
 | `text_scale_overflow_test`     | 40 probes hold at 3x text scale on a 360px view                             |
 | `arrow_affordance_test`        | Every rail arrow turns around for Arabic, and the player transport does not |
 
+### Xtream catalogs as parent sources (#77)
+
+A portal's movies and series stay out of Films, Series and Anime today:
+the portal browser is live-only on purpose, because folding VOD in means
+more than listing it. Doing it properly needs a pipeline, not a tab:
+
+- Match each entry to a catalog title (IMDb/TMDB id where the feed
+  carries one, guarded title-plus-year matching where it does not, and a
+  rule for what happens to the entries that match nothing).
+- Play through the existing details and player pages, so watch history,
+  Continue Watching and the library buttons treat portal and catalog
+  titles as the same thing rather than two copies.
+- Decide where unmatchable entries live: a portal shelf of their own, or
+  nowhere at all. A wrong match pushed into Films is worse than an
+  honest gap.
+
+Until that exists, portals provide Live TV only, and that boundary is
+load-bearing rather than temporary-looking.
+
 ### Device checks
 
 Nothing here can be advanced by reading or writing code; each is one test

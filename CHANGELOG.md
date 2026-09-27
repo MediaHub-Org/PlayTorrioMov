@@ -6,6 +6,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **Continue and Downloads sort five ways.** Recent, title A-Z and Z-A,
+  newest-first and oldest-first behind one Sort pill, the same orders the
+  shelves already answer. Rating is honestly absent: no saved title
+  carries one yet, so there is nothing to sort by.
+
+### Added
 - **Live TV's hero fills the viewport like every other section.** It used
   the scaffold's shorter default; the same band extent Films, Series and
   Anime pass now sizes it, with no band widget riding along.
