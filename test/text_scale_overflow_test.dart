@@ -47,6 +47,7 @@ import 'package:playtorriomov/models/download/download_task_model.dart';
 import 'package:playtorriomov/services/download/download_service.dart';
 import 'package:playtorriomov/pages/collection/collection_page.dart';
 import 'package:playtorriomov/pages/search/search_page.dart';
+import 'package:playtorriomov/pages/iptv/iptv_sources_page.dart';
 import 'package:playtorriomov/widgets/player/player_cast_sheet.dart';
 import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
@@ -1125,6 +1126,22 @@ void main() {
       await pumpAtScale(
         tester,
         child: const CollectionPage(),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the live tv sources page does not overflow at 3x text scale',
+    (tester) async {
+      // The page is new and its rows pair a fixed tile with wrapping
+      // badges; the controller starts empty here, so this probes the
+      // section chrome, the add buttons and the empty states rather than
+      // rows, which need a real portal behind them.
+      await pumpAtScale(
+        tester,
+        child: const Scaffold(body: IptvSourcesPage()),
       );
 
       expect(tester.takeException(), isNull);

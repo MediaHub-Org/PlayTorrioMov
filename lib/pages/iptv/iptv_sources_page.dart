@@ -570,12 +570,19 @@ class _ScrapeSourcePicker extends StatelessWidget {
                   : const Color(0xFFFF5722),
             ),
             const SizedBox(width: 6),
-            Text(
-              source == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit',
-              style: TextStyle(
-                color: AppColors.ink,
-                fontSize: 12.5,
-                fontWeight: FontWeight.w700,
+            // Flexible: at a large text scale the source name outgrows the
+            // rail, and a min-size Row sizes its children to their natural
+            // width unless one may give.
+            Flexible(
+              child: Text(
+                source == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: AppColors.ink,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
             const SizedBox(width: 4),

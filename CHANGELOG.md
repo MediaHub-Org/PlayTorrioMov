@@ -12,17 +12,6 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Anime genre filtering without leaving search.** A genre pill beside the
   Anime chip narrows results in place; season, format, status and sort stay
   one tap away on the Anime Filters page.
-
-### Changed
-- **Sub/Dub chips name their counts.** An empty category is dimmed and
-  inert rather than a tap leading to a "no sources" dead end.
-
-### Removed
-- **The Live TV category pill.** The cards already tag their category and
-  every portal carries its own categories -- the header filter repeated
-  both without adding a way to browse.
-
-### Added
 - **A Music row on Live TV.** MTV, VH1 and Trace, completing the genre
   shelves beside Movies, News, Kids and Documentaries.
 - **Portal browsers filter by region.** Shelves filed per region
@@ -31,35 +20,28 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Combined playlist groups split apart.** `News;Public` was one ugly
   bucket; each group is its own shelf now, with the channel listed under
   both.
-
-### Changed
-- **Source rows share one icon tile.** Portals and playlists read as the
-  same kind of thing, centered against text of any height.
-- **No scroll arrows in the portal browser.** The wheel, the scrollbar and
-  the gesture move the lists; four floating buttons did nothing they do
-  not.
-
-### Added
 - **Live TV starts with six public playlists.** All Languages, English,
   Español, España, Sports and News from iptv-org load on first run, in the
   background, so the shelves are not empty before any portal is added. A
   deleted default stays deleted.
-
-### Added
 - **Live TV sources are a page.** Portals and playlists moved out of the
   modal into a Sources page with an add form, discovery, favorites and a
   remove-all per section. Copy and delete sit on the row itself now, not
   behind an overflow menu. Deleting asks first; the modal's multi-select
   edit mode is gone with it.
-
-### Removed
-- **The Portals & Playlists modal.** Two tabs, two edit modes and its own
-  copy of every display preference settings already owns.
-- **Movies and Series tabs in the portal browser.** A portal's VOD is not
-  live, and the tabs rebuilt Films/Series navigation inside a source
-  browser. Portals open live channels only now.
+- **Live TV has captions on/off.** Portal feeds that carry subtitles show
+  them now, styled by the shared subtitle settings, with a CC toggle on the
+  transport bar. There is no track menu: a live feed does not list tracks
+  the way a file does.
 
 ### Changed
+- **Sub/Dub chips name their counts.** An empty category is dimmed and
+  inert rather than a tap leading to a "no sources" dead end.
+- **Source rows share one icon tile.** Portals and playlists read as the
+  same kind of thing, centered against text of any height.
+- **No scroll arrows in the portal browser.** The wheel, the scrollbar and
+  the gesture move the lists; four floating buttons did nothing they do
+  not.
 - **Live TV settings link to Sources.** The Portals section keeps the row
   display preferences and gains the way in; management happens on the page.
 - **Live TV speaks Spanish, German, Russian and Chinese.** La 1, La 2, 24h
@@ -68,18 +50,24 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   own row, off the same keyword matching the rest of the catalog uses.
   Existing installs gain the rows automatically: a saved category list
   keeps what it had and appends what it was missing.
-- **Live TV filters by category.** A pill beside the portal buttons narrows
-  the page to one shelf -- News, Sports, Spanish TV and the rest -- the way
-  the Anime genre pill does.
-- **Live TV has captions on/off.** Portal feeds that carry subtitles show
-  them now, styled by the shared subtitle settings, with a CC toggle on the
-  transport bar. There is no track menu: a live feed does not list tracks
-  the way a file does.
 
 ### Removed
+- **The Live TV category pill.** The cards already tag their category and
+  every portal carries its own categories -- the header filter repeated
+  both without adding a way to browse.
+- **The Portals & Playlists modal.** Two tabs, two edit modes and its own
+  copy of every display preference settings already owns.
+- **Movies and Series tabs in the portal browser.** A portal's VOD is not
+  live, and the tabs rebuilt Films/Series navigation inside a source
+  browser. Portals open live channels only now.
 - **The top-bar fullscreen button on Live TV.** The transport bar carries
   it on desktop, and two buttons for one job crowded the channel title out
   of its own bar.
+
+### Fixed
+- **The Sources page survives large text.** Its scrape-source pill named
+  its natural width and ran 156px past the panel at 3x scale. Found by the
+  3x probe (#69), which now holds 40 cases.
 
 ## [1.8.12+45] - 2026-09-27
 

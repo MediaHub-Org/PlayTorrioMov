@@ -35,7 +35,7 @@ Six invariants are held by tests, not by passes over `lib/`:
 | `icon_button_tooltip_test`     | Every icon-only control carries a label, button or not                      |
 | `rtl_directional_padding_test` | No padding, and no content alignment, names a physical edge                 |
 | `american_spelling_test`       | One spelling of every word, `.arb` files included                           |
-| `text_scale_overflow_test`     | 39 probes hold at 3x text scale on a 360px view                             |
+| `text_scale_overflow_test`     | 40 probes hold at 3x text scale on a 360px view                             |
 | `arrow_affordance_test`        | Every rail arrow turns around for Arabic, and the player transport does not |
 
 ### Device checks
