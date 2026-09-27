@@ -140,9 +140,9 @@ void main() {
 
   group('ContinueWatchingService.matchesTypeFilter', () {
     // Anime is not identifiable by `type` alone: entries arrive from the
-    // AniList catalog, the Arabic catalog, and addons reporting
-    // type == 'anime', and are told apart by id prefix and addon name. This
-    // lived inside the slider until the history view needed the same answer.
+    // AniList catalog and addons reporting type == 'anime', and are told
+    // apart by id prefix and addon name. This lived inside the slider until
+    // the history view needed the same answer.
     ContinueWatchingItem item({
       String id = 'tt1',
       String type = 'movie',
@@ -172,13 +172,11 @@ void main() {
       );
     });
 
-    test('"main" excludes anime from all three of its sources', () {
+    test('"main" excludes anime from both of its sources', () {
       expect(ContinueWatchingService.matchesTypeFilter(item(), 'main'), isTrue);
       for (final anime in [
         item(type: 'anime'),
         item(id: 'anilist:1535'),
-        item(id: 'arabic_anime:99'),
-        item(addonName: 'ArabicAnime'),
       ]) {
         expect(
           ContinueWatchingService.matchesTypeFilter(anime, 'main'),
@@ -188,12 +186,10 @@ void main() {
       }
     });
 
-    test('"anime" takes all three sources', () {
+    test('"anime" takes both sources', () {
       for (final anime in [
         item(type: 'anime'),
         item(id: 'anilist:1535'),
-        item(id: 'arabic_anime:99'),
-        item(addonName: 'ArabicAnime'),
       ]) {
         expect(
           ContinueWatchingService.matchesTypeFilter(anime, 'anime'),
@@ -202,28 +198,6 @@ void main() {
       }
       expect(
         ContinueWatchingService.matchesTypeFilter(item(), 'anime'),
-        isFalse,
-      );
-    });
-
-    test('arabic and general anime partition the anime set', () {
-      final arabic = item(id: 'arabic_anime:99');
-      final general = item(id: 'anilist:1535');
-
-      expect(
-        ContinueWatchingService.matchesTypeFilter(arabic, 'arabic_anime'),
-        isTrue,
-      );
-      expect(
-        ContinueWatchingService.matchesTypeFilter(general, 'arabic_anime'),
-        isFalse,
-      );
-      expect(
-        ContinueWatchingService.matchesTypeFilter(general, 'general_anime'),
-        isTrue,
-      );
-      expect(
-        ContinueWatchingService.matchesTypeFilter(arabic, 'general_anime'),
         isFalse,
       );
     });

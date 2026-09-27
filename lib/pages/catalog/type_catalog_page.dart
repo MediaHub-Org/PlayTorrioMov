@@ -325,6 +325,11 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   /// since the section pill/bottom-bar tab already says "Movies" or "Series".
   /// Shared by both views so the controls do not move when switching between
   /// rows and the grid.
+  ///
+  /// The "All" reset options carry `''` (genres) and `-1` (decades) rather
+  /// than null: a tap on a null-valued popup item never reaches `onSelected`
+  /// -- the framework reads a null route result as a dismissal -- so "All
+  /// Genres" reset nothing until the sentinels gave it a value that arrives.
   Widget _buildHeader(BuildContext context) {
     final decades = _items.map(_decadeOf).whereType<int>().toSet().toList()
       ..sort((a, b) => b.compareTo(a));
@@ -337,11 +342,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             label: _genreFilter ?? context.l10n.catalogAllGenres,
             icon: Icons.category_rounded,
             items: [
-              PopupMenuItem(value: null, child: Text(context.l10n.catalogAllGenres)),
+              PopupMenuItem(value: '', child: Text(context.l10n.catalogAllGenres)),
               for (final g in _availableGenres)
                 PopupMenuItem(value: g, child: Text(g)),
             ],
-            onSelected: _selectGenreFilter,
+            onSelected: (v) =>
+                _selectGenreFilter(v == null || v.isEmpty ? null : v),
           ),
           if (_loadingGenre)
             SizedBox(
@@ -358,11 +364,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             label: _decadeFilter == null ? context.l10n.catalogAllDecades : '${_decadeFilter}s',
             icon: Icons.calendar_today_rounded,
             items: [
-              PopupMenuItem(value: null, child: Text(context.l10n.catalogAllDecades)),
+              PopupMenuItem(value: -1, child: Text(context.l10n.catalogAllDecades)),
               for (final d in decades)
                 PopupMenuItem(value: d, child: Text('${d}s')),
             ],
-            onSelected: (v) => setState(() => _decadeFilter = v),
+            onSelected: (v) =>
+                setState(() => _decadeFilter = (v == null || v < 0) ? null : v),
           ),
         FilterDropdown<_CatalogSort>(
           label: switch (_sort) {

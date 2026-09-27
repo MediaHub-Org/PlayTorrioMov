@@ -31,7 +31,6 @@ class AnimeMedia {
   final List<AnimeRelation> relations;
   final List<AnimeMedia> recommendations;
   final String? slug;
-  final bool isArabic;
 
   const AnimeMedia({
     required this.id,
@@ -66,7 +65,6 @@ class AnimeMedia {
     this.relations = const [],
     this.recommendations = const [],
     this.slug,
-    this.isArabic = false,
   });
 
   /// The title that never moves: what scrapers query, what a saved item's

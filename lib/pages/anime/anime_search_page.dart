@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../services/titles/title_display.dart';
 import '../../l10n/l10n.dart';
 
 import '../../services/app_spacing.dart';
@@ -14,13 +13,9 @@ import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/glass_back_button.dart';
 import 'anime_details_page.dart';
 
-import '../../services/anime_arabic/anime_arabic_service.dart';
-import '../anime_arabic/anime_arabic_details_page.dart';
 import '../../services/theme/app_colors.dart';
 
 class AnimeSearchPage extends StatefulWidget {
-  final bool initialArabicMode;
-
   /// Pre-fills the field and searches straight away. Set when the unified
   /// search hands a query over here for its AniList filters, so the user
   /// does not have to type the same thing a second time.
@@ -28,7 +23,6 @@ class AnimeSearchPage extends StatefulWidget {
 
   const AnimeSearchPage({
     super.key,
-    this.initialArabicMode = false,
     this.initialQuery,
   });
 
@@ -40,12 +34,10 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  bool _isArabicMode = false;
   Timer? _debounce;
   bool _isLoading = false;
   bool _allowAdult = false;
   List<AnimeMedia> _allResults = [];
-  final Map<int, ArabicAnimeCard> _arabicCardsMap = {};
 
   // Filter selections
   String? _genre;
@@ -122,7 +114,6 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   @override
   void initState() {
     super.initState();
-    _isArabicMode = widget.initialArabicMode;
     _loadInitialSliders();
     final handover = widget.initialQuery?.trim() ?? '';
     if (handover.isNotEmpty) _searchController.text = handover;
@@ -153,31 +144,6 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   void _loadInitialSliders() async {
     setState(() => _loadingInitial = true);
     try {
-      if (_isArabicMode) {
-        final feed = await AnimeArabicService.instance.getHome();
-        if (mounted) {
-          setState(() {
-            _trendingList = (feed.trending.isNotEmpty ? feed.trending : feed.spotlight)
-                .map((c) {
-                  _arabicCardsMap[c.slug.hashCode.abs()] = c;
-                  return c.toAnimeMedia();
-                }).toList();
-            _popularSeasonList = feed.recentEpisodes
-                .map((c) {
-                  _arabicCardsMap[c.slug.hashCode.abs()] = c;
-                  return c.toAnimeMedia();
-                }).toList();
-            _topRatedList = (feed.topSeasonal.isNotEmpty ? feed.topSeasonal : feed.legendary)
-                .map((c) {
-                  _arabicCardsMap[c.slug.hashCode.abs()] = c;
-                  return c.toAnimeMedia();
-                }).toList();
-            _loadingInitial = false;
-          });
-        }
-        return;
-      }
-
       final results = await Future.wait([
         AnilistService.instance.fetchTrendingAnime(page: 1, perPage: 20),
         AnilistService.instance.fetchPopularThisSeason(page: 1, perPage: 20),
@@ -225,21 +191,6 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
     });
 
     try {
-      if (_isArabicMode) {
-        final cards = await AnimeArabicService.instance.search(q);
-        if (!mounted) return;
-        final list = <AnimeMedia>[];
-        for (final c in cards) {
-          _arabicCardsMap[c.slug.hashCode.abs()] = c;
-          list.add(c.toAnimeMedia());
-        }
-        setState(() {
-          _allResults = list;
-          _isLoading = false;
-        });
-        return;
-      }
-
       final results = await AnilistService.instance.searchAnime(
         q,
         genre: _genre,
@@ -499,17 +450,6 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   }
 
   void _openDetails(AnimeMedia anime) {
-    if (_isArabicMode || _arabicCardsMap.containsKey(anime.id)) {
-      final card = _arabicCardsMap[anime.id] ??
-          ArabicAnimeCard(
-            slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
-            title: animeDisplayTitle(anime),
-            cover: anime.coverUrl,
-          );
-      pushPage(context, AnimeArabicDetailsPage(anime: card));
-      return;
-    }
-
     pushPage(context, AnimeDetailsPage(anime: anime));
   }
 
@@ -632,58 +572,9 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                           ),
                         ),
 
-                        // Language Switcher Pill (General vs Arabic Anime)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 8),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isArabicMode = !_isArabicMode;
-                                _allResults.clear();
-                              });
-                              if (_searchController.text.trim().isNotEmpty) {
-                                _performSearch(_searchController.text.trim());
-                              } else {
-                                _loadInitialSliders();
-                              }
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                              decoration: BoxDecoration(
-                                color: _isArabicMode
-                                    ? palette.primaryColor.withValues(alpha: 0.25)
-                                    : AppColors.inkAlpha(0.06),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: _isArabicMode
-                                      ? palette.primaryColor
-                                      : AppColors.inkAlpha(0.12),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    _isArabicMode ? context.l10n.animeLangArabic : context.l10n.navAnime,
-                                    style: TextStyle(
-                                      color: _isArabicMode
-                                          ? palette.primaryColor
-                                          : AppColors.inkMuted,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
 
-                        // 18+ Adult Toggle Pill (only in general mode)
-                        if (!_isArabicMode)
-                          Padding(
+                        // 18+ Adult Toggle Pill
+                        Padding(
                             padding: const EdgeInsetsDirectional.only(end: 8),
                             child: GestureDetector(
                               onTap: () => _toggleAdult(!_allowAdult),

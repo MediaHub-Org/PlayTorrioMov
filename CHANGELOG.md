@@ -10,6 +10,14 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **The Arabic anime catalog is gone.** The separate Arabic feed, its
+  English/Arabic mode pill and its details/stream sheets are removed; anime
+  is AniList end to end, with the same genre pills and a new decade filter.
+  Arabic audio and subtitle support elsewhere is untouched.
+- **Resetting a genre or decade filter works again.** Tapping "All Genres"
+  or "All Decades" did nothing: a null menu value never reaches the picker,
+  so both reset options carry a value that arrives now. Anime gains the
+  decade filter Films and Series already had.
 - **The backup file reads like a document now.** Indented with sorted keys,
   so two exports diff to nothing and a file can be opened, read, and
   hand-fixed on the day that matters. The envelope also names the release

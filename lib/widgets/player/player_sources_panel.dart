@@ -9,8 +9,6 @@ import '../../models/stream/stream_model.dart';
 import '../../services/stream/stream_service.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/anime/anime_scraper_service.dart';
-import '../../services/anime_arabic/anime_arabic_service.dart';
-import '../../services/anime_arabic/anime_arabic_extractor.dart';
 import '../common/source_badges.dart';
 import 'player_glass.dart';
 
@@ -78,68 +76,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     final year = int.tryParse(detail?.year ?? '');
     final epNum = ep.episode ?? 1;
 
-    final isArabicAnime = id.startsWith('arabic_anime:') ||
-        (detail?.id.startsWith('arabic_anime:') ?? false) ||
-        widget.currentAddonName == 'ArabicAnime';
-
     _streamSub?.cancel();
-
-    if (isArabicAnime) {
-      String slug = '';
-      if (detail?.id.startsWith('arabic_anime:') == true) {
-        slug = detail!.id.replaceFirst('arabic_anime:', '');
-      } else if (id.startsWith('arabic_anime:')) {
-        final parts = id.split(':');
-        if (parts.length >= 2) slug = parts[1];
-      }
-
-      () async {
-        try {
-          if (slug.isEmpty && title.isNotEmpty) {
-            final searchResults = await AnimeArabicService.instance.search(title);
-            if (searchResults.isNotEmpty) {
-              slug = searchResults.first.slug;
-            }
-          }
-
-          if (slug.isNotEmpty) {
-            final arabicDetails = await AnimeArabicService.instance.getDetails(slug);
-            final targetEp = arabicDetails.episodes.firstWhere(
-              (e) => e.number == epNum,
-              orElse: () => ArabicEpisode(
-                number: epNum,
-                title: 'الحلقة $epNum',
-                encodedHref: '',
-                watchPath: '/e/$slug-$epNum#tok',
-              ),
-            );
-
-            final hits = await AnimeArabicExtractor.instance.resolveEpisode(targetEp);
-            final sources = AnimeArabicExtractor.toSources(
-              hits,
-              animeTitle: arabicDetails.title.isNotEmpty ? arabicDetails.title : title,
-              episodeNumber: epNum,
-            );
-
-            if (mounted) {
-              setState(() {
-                _sources.addAll(sources);
-                _isLoading = false;
-              });
-              widget.onSourcesLoaded(List.from(_sources));
-            }
-            return;
-          }
-        } catch (e) {
-          debugPrint('[PlayerSourcesPanel] Arabic anime scrape error: $e');
-        }
-
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
-      }();
-      return;
-    }
 
     final isAnime = type == 'anime' ||
         id.startsWith('anilist:') ||

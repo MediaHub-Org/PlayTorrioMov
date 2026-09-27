@@ -126,9 +126,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     final video =
         AnimeScraperService.toVideo(widget.anime, widget.episodeNumber);
 
-    // Close the sheet, then push onto the ROOT navigator -- see the same
-    // note in anime_arabic_stream_sheet: replacing the root's top route
-    // tore down the hub underneath and made Back exit the app.
+    // Close the sheet, then push onto the ROOT navigator: replacing the
+    // root's top route tore down the hub underneath and made Back exit
+    // the app.
     final playerTitle = context.l10n.playerTitleEpisode(
       animeDisplayTitle(widget.anime),
       widget.episodeNumber,

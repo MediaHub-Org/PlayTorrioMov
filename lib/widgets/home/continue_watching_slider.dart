@@ -9,8 +9,6 @@ import '../../models/movie/movie.dart';
 import '../../models/anime/anime_media.dart';
 import '../../pages/details/details_page.dart';
 import '../../pages/anime/anime_details_page.dart';
-import '../../pages/anime_arabic/anime_arabic_details_page.dart';
-import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../pages/history/watch_history_page.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -381,25 +379,6 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
 
   void _openDetails(BuildContext context) {
     final item = widget.item;
-    if (item.id.startsWith('arabic_anime:') ||
-        item.addonName == 'ArabicAnime') {
-      final slug = item.id.replaceAll('arabic_anime:', '');
-      final card = ArabicAnimeCard(
-        slug: slug,
-        title: item.title,
-        cover: item.posterUrl ?? item.backdropUrl,
-      );
-
-      pushPage(
-        context,
-        AnimeArabicDetailsPage(
-          anime: card,
-          initialEpisodeNumber: item.episode,
-        ),
-      );
-      return;
-    }
-
     if (item.type == 'anime' || item.id.startsWith('anilist:')) {
       final anilistId = int.tryParse(item.id.replaceAll('anilist:', '')) ?? 0;
       final anime = AnimeMedia(

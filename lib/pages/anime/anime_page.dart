@@ -3,12 +3,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../services/titles/title_display.dart';
 import '../../l10n/l10n.dart';
-import '../../widgets/player/language_flag.dart';
 
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
-import '../../services/anime_arabic/anime_arabic_service.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
@@ -22,9 +20,6 @@ import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
 import 'anime_stream_sheet.dart';
 import '../search/search_page.dart';
-import 'anime_search_page.dart';
-import '../anime_arabic/anime_arabic_details_page.dart';
-import '../anime_arabic/anime_arabic_stream_sheet.dart';
 import '../../services/theme/app_colors.dart';
 
 const _kAnimeGenres = [
@@ -53,9 +48,7 @@ class AnimePage extends StatefulWidget {
 class _AnimePageState extends State<AnimePage> {
   final AnilistService _anilistService = AnilistService.instance;
   final AnimeLibraryService _libraryService = AnimeLibraryService.instance;
-  final AnimeArabicService _arabicService = AnimeArabicService.instance;
 
-  bool _isArabicMode = false;
   bool _loading = true;
   String? _error;
 
@@ -72,10 +65,67 @@ class _AnimePageState extends State<AnimePage> {
   String? _genreFilter;
   List<AnimeMedia> _genreResults = [];
   bool _genreLoading = false;
+  int? _decadeFilter;
 
-  // Arabic Anime data
-  HomeFeed? _arabicFeed;
-  final Map<int, ArabicAnimeCard> _arabicCards = {};
+  /// Decades across every loaded section, newest first. AniList dates shows
+  /// with a season year; a 0 means the feed did not say, and those pool
+  /// under no decade rather than a wrong one.
+  List<int> get _decades {
+    final decades = <int>{};
+    for (final list in [
+      _trending,
+      _popularSeason,
+      _topRated,
+      _upcoming,
+      _actionAnime,
+      _romanceAnime,
+      _fantasyAnime,
+      _sciFiAnime,
+      _genreResults,
+    ]) {
+      for (final anime in list) {
+        if (anime.seasonYear > 0) {
+          decades.add(anime.seasonYear ~/ 10 * 10);
+        }
+      }
+    }
+    return decades.toList()..sort((a, b) => b.compareTo(a));
+  }
+
+  /// The pooled sections as one deduplicated list, for the decade filter.
+  /// A genre choice is answered server-side by AniList instead, so the pool
+  /// only feeds the decade view.
+  List<AnimeMedia> get _pooledSections {
+    final pool = <int, AnimeMedia>{};
+    for (final list in [
+      _trending,
+      _popularSeason,
+      _topRated,
+      _upcoming,
+      _actionAnime,
+      _romanceAnime,
+      _fantasyAnime,
+      _sciFiAnime,
+    ]) {
+      for (final anime in list) {
+        pool.putIfAbsent(anime.id, () => anime);
+      }
+    }
+    return pool.values.toList();
+  }
+
+  /// What the filtered grid shows: the genre answer narrowed by decade, or
+  /// the pooled sections narrowed by decade when no genre is chosen.
+  List<AnimeMedia> get _filteredItems {
+    final base = _genreFilter != null ? _genreResults : _pooledSections;
+    final decade = _decadeFilter;
+    if (decade == null) return base;
+    return base
+        .where((a) => a.seasonYear > 0 && a.seasonYear ~/ 10 * 10 == decade)
+        .toList();
+  }
+
+  bool get _isFiltered => _genreFilter != null || _decadeFilter != null;
 
   @override
   void initState() {
@@ -100,44 +150,6 @@ class _AnimePageState extends State<AnimePage> {
       _loading = true;
       _error = null;
     });
-
-    if (_isArabicMode) {
-      try {
-        final feed = await _arabicService.getHome();
-        _arabicCards.clear();
-        void registerCards(List<ArabicAnimeCard> list) {
-          for (final c in list) {
-            _arabicCards[c.slug.hashCode.abs()] = c;
-          }
-        }
-
-        registerCards(feed.spotlight);
-        registerCards(feed.recentEpisodes);
-        registerCards(feed.trending);
-        registerCards(feed.popularMovies);
-        registerCards(feed.topSeasonal);
-        registerCards(feed.seasonal);
-        registerCards(feed.legendary);
-        registerCards(feed.upcoming);
-
-        if (mounted) {
-          setState(() {
-            _arabicFeed = feed;
-            _loading = false;
-          });
-        }
-      } catch (e) {
-        debugPrint('Error loading Arabic Anime data: $e');
-        if (mounted) {
-          setState(() {
-            _error =
-                context.l10n.animeArabicLoadFailed;
-            _loading = false;
-          });
-        }
-      }
-      return;
-    }
 
     // Each section fetches independently: one bad/rate-limited/timed-out
     // AniList call shouldn't blank the whole page when the other 7 succeed.
@@ -181,8 +193,8 @@ class _AnimePageState extends State<AnimePage> {
   }
 
   /// Selecting a genre swaps the curated rows for a single filtered grid
-  /// fetched from AniList; picking "All Genres" (null) reverts to curated
-  /// rows. Purely additive over the homepage -- doesn't touch _trending/etc.
+  /// fetched from AniList; picking "All Genres" reverts to curated rows.
+  /// Purely additive over the homepage -- doesn't touch _trending/etc.
   Future<void> _selectGenre(String? genre) async {
     setState(() {
       _genreFilter = genre;
@@ -206,50 +218,7 @@ class _AnimePageState extends State<AnimePage> {
     }
   }
 
-  void _onModeChanged(bool arabic) {
-    if (_isArabicMode == arabic) return;
-    setState(() {
-      _isArabicMode = arabic;
-    });
-    _loadAnimeData();
-  }
-
   void _playEpisode(AnimeMedia anime, int episodeNumber) {
-    if (_isArabicMode || _arabicCards.containsKey(anime.id)) {
-      final card =
-          _arabicCards[anime.id] ??
-          ArabicAnimeCard(
-            slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
-            title: animeDisplayTitle(anime),
-            cover: anime.coverUrl,
-          );
-      _arabicService.getDetails(card.slug).then((details) {
-        if (!mounted) return;
-        final ep = details.episodes.firstWhere(
-          (e) => e.number == episodeNumber,
-          orElse: () => details.episodes.isNotEmpty
-              ? details.episodes.first
-              : ArabicEpisode(
-                  number: episodeNumber,
-                  title: 'الحلقة $episodeNumber',
-                  encodedHref: '',
-                  watchPath: '/e/${card.slug}-$episodeNumber#tok',
-                ),
-        );
-        showModalBottomSheet(
-          context: context,
-          backgroundColor: Colors.transparent,
-          isScrollControlled: true,
-          builder: (_) => AnimeArabicStreamSheet(
-            details: details,
-            episode: ep,
-            autoPlay: false,
-          ),
-        );
-      });
-      return;
-    }
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -262,10 +231,15 @@ class _AnimePageState extends State<AnimePage> {
     );
   }
 
-  /// The genre/language/search pill row. Built once per [build] and either
+  /// The genre/decade/search pill row. Built once per [build] and either
   /// nested inside the hero carousel (see its call sites) or placed inline
   /// above other content via [_withHeader] -- never a page-level floating
   /// overlay, so it always scrolls away with whatever it sits above.
+  ///
+  /// The "All" reset options carry `''` (genres) and `-1` (decades) rather
+  /// than null: a tap on a null-valued popup item never reaches `onSelected`
+  /// -- the framework reads a null route result as a dismissal -- so "All
+  /// Genres" reset nothing until the sentinels gave it a value that arrives.
   Widget _buildPillHeader() {
     return PillFilterHeaderBar(
       transparent: true,
@@ -274,41 +248,31 @@ class _AnimePageState extends State<AnimePage> {
           label: _genreFilter ?? context.l10n.animeAllGenres,
           icon: Icons.filter_list_rounded,
           items: [
-            PopupMenuItem(value: null, child: Text(context.l10n.animeAllGenres)),
+            PopupMenuItem(value: '', child: Text(context.l10n.animeAllGenres)),
             for (final g in _kAnimeGenres)
               PopupMenuItem(value: g, child: Text(g)),
           ],
-          onSelected: _selectGenre,
+          onSelected: (v) =>
+              _selectGenre(v == null || v.isEmpty ? null : v),
         ),
-        FilterDropdown<bool>(
-          label: _isArabicMode ? context.l10n.animeLangArabic : context.l10n.animeLangEnglish,
-          icon: Icons.language_rounded,
-          items: [
-            PopupMenuItem(
-              value: false,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const LanguageFlag('English', height: 14),
-                  const SizedBox(width: 10),
-                  Text(context.l10n.animeLangEnglish),
-                ],
+        if (_decades.isNotEmpty)
+          FilterDropdown<int?>(
+            label: _decadeFilter == null
+                ? context.l10n.catalogAllDecades
+                : '${_decadeFilter}s',
+            icon: Icons.calendar_today_rounded,
+            items: [
+              PopupMenuItem(
+                value: -1,
+                child: Text(context.l10n.catalogAllDecades),
               ),
+              for (final d in _decades)
+                PopupMenuItem(value: d, child: Text('${d}s')),
+            ],
+            onSelected: (v) => setState(
+              () => _decadeFilter = (v == null || v < 0) ? null : v,
             ),
-            PopupMenuItem(
-              value: true,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const LanguageFlag('Arabic', height: 14),
-                  const SizedBox(width: 10),
-                  Text(context.l10n.animeLangArabic),
-                ],
-              ),
-            ),
-          ],
-          onSelected: (arabic) => _onModeChanged(arabic ?? false),
-        ),
+          ),
         PageSearchButton(onTap: _navigateToSearch),
       ],
     );
@@ -330,11 +294,17 @@ class _AnimePageState extends State<AnimePage> {
     );
   }
 
-  Widget _buildGenreGrid() {
-    if (_genreResults.isEmpty) {
+  /// The filtered grid: the genre answer narrowed by decade, or the pooled
+  /// sections narrowed by decade when no genre is chosen. Same split
+  /// TypeCatalogPage uses between curated rows and one grid.
+  Widget _buildFilteredGrid() {
+    final items = _filteredItems;
+    if (items.isEmpty) {
       return Center(
         child: Text(
-          context.l10n.animeNoGenreResults(_genreFilter ?? ''),
+          _genreFilter != null
+              ? context.l10n.animeNoGenreResults(_genreFilter ?? '')
+              : context.l10n.catalogNoTitlesInDecade(_decadeFilter ?? 0),
           style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
         ),
       );
@@ -357,50 +327,23 @@ class _AnimePageState extends State<AnimePage> {
         crossAxisSpacing: 16,
         childAspectRatio: 0.62,
       ),
-      itemCount: _genreResults.length,
+      itemCount: items.length,
       itemBuilder: (context, index) => AnimeCard(
-        anime: _genreResults[index],
-        onTap: () => _openDetails(_genreResults[index]),
+        anime: items[index],
+        onTap: () => _openDetails(items[index]),
       ),
     );
   }
 
-  void _openDetails(AnimeMedia anime, [int? preferredEpisode]) {
-    if (_isArabicMode || _arabicCards.containsKey(anime.id)) {
-      final card =
-          _arabicCards[anime.id] ??
-          ArabicAnimeCard(
-            slug: anime.titleEnglish.toLowerCase().replaceAll(' ', '-'),
-            title: animeDisplayTitle(anime),
-            cover: anime.coverUrl,
-          );
-      final epNum =
-          preferredEpisode ??
-          (anime.totalEpisodes > 0 ? anime.totalEpisodes : null);
-      pushPage(
-        context,
-        AnimeArabicDetailsPage(
-          anime: card,
-          initialEpisodeNumber: epNum,
-        ),
-      );
-      return;
-    }
-
+  void _openDetails(AnimeMedia anime) {
     pushPage(context, AnimeDetailsPage(anime: anime));
   }
 
   /// AniList anime is searchable from the unified search page -- arriving
   /// from here pre-selects its Anime chip via [SearchScope], so the button
-  /// means the same thing it does on Movies and Series. Arabic mode keeps
-  /// its own page: the unified search has no source for that catalog.
+  /// means the same thing it does on Movies and Series.
   void _navigateToSearch() {
-    pushPage(
-      context,
-      _isArabicMode
-          ? const AnimeSearchPage(initialArabicMode: true)
-          : const SearchPage(),
-    );
+    pushPage(context, const SearchPage());
   }
 
   /// The hero carousel's items -- the same "newest first" slides both modes
@@ -408,62 +351,13 @@ class _AnimePageState extends State<AnimePage> {
   /// carousel chrome (arrows, dots, auto-rotation) that used to live in
   /// `_AnimeHeroCarousel`.
   List<AnimeMedia> get _heroItems {
-    if (_isArabicMode) {
-      final feed = _arabicFeed;
-      if (feed == null) return const [];
-      final source = feed.spotlight.isNotEmpty ? feed.spotlight : feed.trending;
-      return source.take(6).map((c) => c.toAnimeMedia()).toList();
-    }
     return _trending.take(6).toList();
   }
 
   /// The curated rows below the hero, in the same order the page always
   /// showed them. [BrowseScaffold] already skips any row whose items are
-  /// empty, so these don't need to be individually guarded the way the
-  /// Arabic rows used to be.
+  /// empty, so these don't need individual guards.
   List<BrowseRow<AnimeMedia>> get _rows {
-    if (_isArabicMode) {
-      final feed = _arabicFeed;
-      if (feed == null) return const [];
-      AnimeMedia toMedia(ArabicAnimeCard c) => c.toAnimeMedia();
-      return [
-        BrowseRow(
-          title: '⚡ آخر الحلقات المعروضة',
-          subtitle: 'أحدث الحلقات المضافة المترجمة للعربية',
-          items: feed.recentEpisodes.map(toMedia).toList(),
-        ),
-        BrowseRow(
-          title: '🔥 الأكثر شهرة وتداولاً',
-          subtitle: 'الأنميات الأكثر مشاهدة حالياً',
-          items: feed.trending.map(toMedia).toList(),
-        ),
-        BrowseRow(
-          title: '🎬 الأفلام الأكثر شعبية',
-          subtitle: 'أفلام الأنمي المميزة',
-          items: feed.popularMovies.map(toMedia).toList(),
-        ),
-        BrowseRow(
-          title: '👑 أفضل الأنميات',
-          subtitle: 'أنميات ذات تقييمات استثنائية',
-          items: feed.topSeasonal.map(toMedia).toList(),
-        ),
-        BrowseRow(
-          title: '🌟 أنميات موسمية',
-          subtitle: 'عروض الموسم الحالي',
-          items: feed.seasonal.map(toMedia).toList(),
-        ),
-        BrowseRow(
-          title: '⚔️ أنميات أسطورية',
-          subtitle: 'أعمال خالدة يجب ألا تفوتك',
-          items: feed.legendary.map(toMedia).toList(),
-        ),
-        BrowseRow(
-          title: '🚀 المنتظرة قريباً',
-          subtitle: 'أنميات قادمة قريباً',
-          items: feed.upcoming.map(toMedia).toList(),
-        ),
-      ];
-    }
     return [
       BrowseRow(
         title: '🔥 ${context.l10n.animeTrendingTitle}',
@@ -517,24 +411,24 @@ class _AnimePageState extends State<AnimePage> {
     // depending on whether the page happened to have a hero yet.
     final pillHeader = _buildPillHeader();
 
-    // A genre choice cannot be answered by rows of curated catalogs, so
-    // picking one switches the page to a single filtered grid -- same split
-    // TypeCatalogPage (Movies/Series) uses between BrowseScaffold and its own
-    // filtered grid.
-    final content = _genreFilter != null
+    // A genre or decade choice cannot be answered by rows of curated
+    // catalogs, so picking one switches the page to a single filtered grid
+    // -- same split TypeCatalogPage (Movies/Series) uses between
+    // BrowseScaffold and its own filtered grid.
+    final content = _isFiltered
         ? _withHeader(
             pillHeader,
             _genreLoading
                 ? Center(
                     child: CircularProgressIndicator(color: AppColors.accent),
                   )
-                : _buildGenreGrid(),
+                : _buildFilteredGrid(),
           )
         : BrowseScaffold<AnimeMedia>(
             contentLabel: context.l10n.navAnime,
             header: pillHeader,
             belowHero: ContinueWatchingSlider(
-              typeFilter: _isArabicMode ? 'arabic_anime' : 'general_anime',
+              typeFilter: 'general_anime',
               title: context.l10n.animeContinueWatching,
             ),
             belowHeroExtent: ContinueWatchingSlider.bandHeight,
