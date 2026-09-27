@@ -26,7 +26,11 @@ import 'package:playtorriomov/services/continue_watching/continue_watching_servi
 import 'package:playtorriomov/services/theme/app_theme_service.dart';
 import 'package:playtorriomov/widgets/common/adaptive_nav_shell.dart';
 import 'package:playtorriomov/widgets/common/pill_tab_row.dart';
+import 'package:playtorriomov/models/details/credit.dart';
+import 'package:playtorriomov/services/metadata/bestsimilar_scraper.dart' show BSItem;
 import 'package:playtorriomov/widgets/common/section_header.dart';
+import 'package:playtorriomov/widgets/details/credit_card.dart';
+import 'package:playtorriomov/widgets/details/similar_card.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_cast_sheet.dart';
@@ -737,6 +741,105 @@ void main() {
         isNull,
         reason: 'the empty state, the title row and the device rows all sit in '
             'a sheet whose height the modal decides, not their content',
+      );
+    },
+  );
+
+  testWidgets(
+    'a credits card stays inside the rail that sizes it, at 3x text scale',
+    (tester) async {
+      // The gap this closes: the cast rail's clamps were derived from
+      // arithmetic -- avatar + 6 + name + 2 + role against a fixed 148 -- and
+      // never measured, because `DetailsPage` fetches its own data and the card
+      // was a private builder on it. It is a public widget now, so the rail's
+      // box can be reproduced exactly rather than reasoned about.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: SizedBox(
+            height: CreditCard.railHeight,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                CreditCard(
+                  credit: const Credit(
+                    name: 'Benedict Cumberbatch',
+                    role: 'Doctor Stephen Strange',
+                    profileUrl: null,
+                  ),
+                  onTap: () {},
+                ),
+                // A credit with no role still has to occupy the same column,
+                // which is the reason that line is a fixed 12px box.
+                CreditCard(
+                  credit: const Credit(name: 'An Uncredited Person'),
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'the rail is a fixed ${CreditCard.railHeight}px and the avatar '
+            'keeps its size, so the two text lines are what has to give',
+      );
+    },
+  );
+
+  testWidgets(
+    'a similar card stays inside its 64px text budget at 3x text scale',
+    (tester) async {
+      // Same gap, same fix. The poster takes the 2:3, so the title and the
+      // year/genre line share a flat 64px however large the text gets.
+      const cardWidth = 130.0;
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: SizedBox(
+            height: SimilarCard.heightFor(cardWidth),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                SimilarCard(
+                  width: cardWidth,
+                  onTap: () {},
+                  // Every field is required on BSItem, and the ones this
+                  // card never reads are the tag lists and the story.
+                  item: BSItem(
+                    id: 1,
+                    slug: 'a-film',
+                    title: 'A Film With A Fairly Long Title',
+                    year: 2019,
+                    rating: 7.8,
+                    voteCount: '67K',
+                    thumbUrl: '',
+                    similarityPercent: 92,
+                    genre: 'Science Fiction, Adventure',
+                    country: 'US',
+                    duration: '128 min',
+                    story: null,
+                    styleTags: const [],
+                    plotTags: const [],
+                    audienceTags: const [],
+                    timeTags: const [],
+                    placeTags: const [],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'both lines are capped at 1.3 because the card height is set '
+            'by the rail and cannot grow with the text',
       );
     },
   );
