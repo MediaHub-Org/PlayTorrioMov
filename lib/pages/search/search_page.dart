@@ -12,6 +12,7 @@ import '../../services/anime/anilist_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/filter_dropdown.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/movie/movie_slider_section.dart';
@@ -51,8 +52,38 @@ class _SearchPageState extends State<SearchPage> {
     SearchScope.contentType,
   );
 
+  /// Inline AniList narrowing, so the common case never leaves this page.
+  /// Genre answers most anime searches; season, format, status and sort
+  /// stay one tap away on the Anime Filters page. (Sort is not offered
+  /// here on purpose: the service ranks text matches first whenever a
+  /// query is present, so a sort pill beside a search field would promise
+  /// an order it cannot give.) Changing the genre re-runs the query in
+  /// place -- the _searchSeq guard already covers a chip change racing a
+  /// keystroke.
+  String? _animeGenre;
+
   bool _isMagnetMode = false;
   String _magnetQuery = '';
+
+  /// The genres worth a pill here. The app's Anime section lists thirteen;
+  /// the search page carries the same thirteen rather than the filter
+  /// page's nineteen, because those six extra need the adult gate the full
+  /// page owns and this row must not open.
+  static const _animeGenres = [
+    'Action',
+    'Adventure',
+    'Comedy',
+    'Drama',
+    'Fantasy',
+    'Horror',
+    'Mystery',
+    'Romance',
+    'Sci-Fi',
+    'Slice of Life',
+    'Sports',
+    'Supernatural',
+    'Thriller',
+  ];
 
   static bool _isMagnetLink(String text) {
     final trimmed = text.trim();
@@ -183,7 +214,7 @@ class _SearchPageState extends State<SearchPage> {
         : Future<List<MovieSection>>.value(const []);
     final animeFuture = _typeFilter.searchesAnime
         ? AnilistService.instance
-              .searchAnime(trimmed)
+              .searchAnime(trimmed, genre: _animeGenre)
               .catchError((Object _) => <AnimeMedia>[])
         : Future<List<AnimeMedia>>.value(const []);
 
@@ -258,6 +289,28 @@ class _SearchPageState extends State<SearchPage> {
             _buildChoiceChip(filter),
             const SizedBox(width: 6),
           ],
+          if (_typeFilter == SearchFilter.anime)
+            FilterDropdown<String?>(
+              label: _animeGenre ?? context.l10n.animeAllGenres,
+              icon: Icons.category_rounded,
+              items: [
+                PopupMenuItem(
+                  value: '',
+                  child: Text(context.l10n.animeAllGenres),
+                ),
+                for (final g in _animeGenres)
+                  PopupMenuItem(value: g, child: Text(g)),
+              ],
+              // Null never arrives from a menu tap (it reads as a
+              // dismissal), so reset carries the empty sentinel like the
+              // other filter dropdowns.
+              onSelected: (v) {
+                final genre = (v == null || v.isEmpty) ? null : v;
+                if (genre == _animeGenre) return;
+                setState(() => _animeGenre = genre);
+                if (_lastQuery.isNotEmpty) _performSearch(_lastQuery);
+              },
+            ),
           if (_typeFilter == SearchFilter.anime)
             GestureDetector(
               onTap: _openAnimeFilters,

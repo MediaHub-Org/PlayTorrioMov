@@ -33,6 +33,15 @@ class AnimeStreamSheet extends StatefulWidget {
   State<AnimeStreamSheet> createState() => _AnimeStreamSheetState();
 }
 
+/// Whether an anime source is a dub. Scrapers stamp the category into the
+/// name (`MegaPlay • DUB`), so a word match is the whole signal -- kept in
+/// one place because the sheet filters, counts and badges off it, and three
+/// copies of a substring check is how they drift apart.
+bool isDubSource(StreamSource s) {
+  final haystack = '${s.name ?? ''} ${s.description ?? ''}'.toLowerCase();
+  return haystack.contains('dub');
+}
+
 class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
   final AnimeScraperService _scraper = AnimeScraperService.instance;
 
@@ -102,17 +111,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
 
   List<StreamSource> get _filteredSources {
     if (_selectedCategory == 'sub') {
-      return _allSources
-          .where((s) =>
-              !(s.description?.toLowerCase().contains('dub') ?? false) &&
-              !(s.name?.toLowerCase().contains('dub') ?? false))
-          .toList();
+      return _allSources.where((s) => !isDubSource(s)).toList();
     } else if (_selectedCategory == 'dub') {
-      return _allSources
-          .where((s) =>
-              (s.description?.toLowerCase().contains('dub') ?? false) ||
-              (s.name?.toLowerCase().contains('dub') ?? false))
-          .toList();
+      return _allSources.where(isDubSource).toList();
     }
     return _allSources;
   }
@@ -233,16 +234,26 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
             ),
           ),
 
-          // Sub / Dub Category Filter Pills
+          // Sub / Dub Category Filter Pills. Each names its count, and an
+          // empty one is dimmed and inert rather than a tap that leads to
+          // a "no sources" dead end -- most episodes ship no dub at all.
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Row(
               children: [
                 _buildFilterChip('All (${_allSources.length})', 'all'),
                 const SizedBox(width: 8),
-                _buildFilterChip('Sub', 'sub'),
+                _buildFilterChip(
+                  'Sub (${_allSources.where((s) => !isDubSource(s)).length})',
+                  'sub',
+                  enabled: _allSources.any((s) => !isDubSource(s)),
+                ),
                 const SizedBox(width: 8),
-                _buildFilterChip('Dub', 'dub'),
+                _buildFilterChip(
+                  'Dub (${_allSources.where(isDubSource).length})',
+                  'dub',
+                  enabled: _allSources.any(isDubSource),
+                ),
               ],
             ),
           ),
@@ -317,11 +328,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                 const SizedBox(height: 10),
                             itemBuilder: (context, index) {
                               final s = filtered[index];
-                              final isDub =
-                                  (s.description?.toLowerCase().contains('dub') ??
-                                          false) ||
-                                      (s.name?.toLowerCase().contains('dub') ??
-                                          false);
+                              final isDub = isDubSource(s);
 
                               return Material(
                                 color: Colors.transparent,
@@ -431,31 +438,37 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     );
   }
 
-  Widget _buildFilterChip(String label, String category) {
+  Widget _buildFilterChip(String label, String category, {bool enabled = true}) {
     final isSelected = _selectedCategory == category;
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedCategory = category),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? primaryColor
-              : AppColors.inkAlpha(0.08),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? primaryColor
-                : AppColors.inkAlpha(0.12),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? AppColors.ink : AppColors.inkMuted,
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+    return IgnorePointer(
+      ignoring: !enabled,
+      child: Opacity(
+        opacity: enabled ? 1.0 : 0.35,
+        child: GestureDetector(
+          onTap: () => setState(() => _selectedCategory = category),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? primaryColor
+                  : AppColors.inkAlpha(0.08),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isSelected
+                    ? primaryColor
+                    : AppColors.inkAlpha(0.12),
+              ),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppColors.ink : AppColors.inkMuted,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
           ),
         ),
       ),

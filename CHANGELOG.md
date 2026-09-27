@@ -5,6 +5,18 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Library content centers on wide screens.** Collections, Continue
+  Watching, Downloads and every shelf cap at the same width instead of
+  sprawling across ultrawide windows.
+- **Anime genre filtering without leaving search.** A genre pill beside the
+  Anime chip narrows results in place; season, format, status and sort stay
+  one tap away on the Anime Filters page.
+
+### Changed
+- **Sub/Dub chips name their counts.** An empty category is dimmed and
+  inert rather than a tap leading to a "no sources" dead end.
+
 ### Removed
 - **The Live TV category pill.** The cards already tag their category and
   every portal carries its own categories -- the header filter repeated

@@ -72,6 +72,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   String _sortBy = 'recent';
   bool _reordering = false;
 
+  /// Same cap as the Library tabs: shelf content centers past this instead
+  /// of sprawling, so a shelf looks like the tab that opened it.
+  static const double _maxContentWidth = 1200;
+
   // ── Titles ────────────────────────────────────────────────────────────────
 
   Movie _toMovie(MyListItem item) {
@@ -459,25 +463,30 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         : width < 1600
         ? 6
         : 7;
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.62,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return GestureDetector(
-          onLongPress: () => _removeTitle(item, collection),
-          child: MovieCard(
-            movie: _toMovie(item),
-            onTap: () => _openDetails(item),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.62,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 20,
           ),
-        );
-      },
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return GestureDetector(
+              onLongPress: () => _removeTitle(item, collection),
+              child: MovieCard(
+                movie: _toMovie(item),
+                onTap: () => _openDetails(item),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -486,7 +495,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   /// The grid is for browsing; this is for arranging, and they are different
   /// enough jobs to be different views of the same list.
   Widget _buildReorderList(MediaCollection collection) {
-    return ReorderableListView.builder(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       itemCount: collection.items.length,
       onReorder: (from, to) {
@@ -551,6 +563,8 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           ),
         );
       },
+        ),
+      ),
     );
   }
 
@@ -705,25 +719,30 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         : width < 1600
         ? 5
         : 6;
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
-        // favorited channel looks the same size and shape here as it does in
-        // Live TV's own rows.
-        childAspectRatio: 0.58,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 20,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
+            // favorited channel looks the same size and shape here as it does in
+            // Live TV's own rows.
+            childAspectRatio: 0.58,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 20,
+          ),
+          itemCount: channels.length,
+          itemBuilder: (context, index) {
+            final channel = channels[index];
+            return IptvChannelCard(
+              channel: channel,
+              onTap: () => IptvChannelSheet.show(context, channel),
+            );
+          },
+        ),
       ),
-      itemCount: channels.length,
-      itemBuilder: (context, index) {
-        final channel = channels[index];
-        return IptvChannelCard(
-          channel: channel,
-          onTap: () => IptvChannelSheet.show(context, channel),
-        );
-      },
     );
   }
 }

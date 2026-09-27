@@ -190,8 +190,16 @@ class _CollectionPageState extends State<CollectionPage> {
   /// than an aspect ratio because the label under a square is a fixed height,
   /// not a fixed fraction -- with a ratio the text would grow with the card
   /// on a wide window and clip on a narrow one.
+  /// How wide Library content may grow before it centers instead. Past
+  /// this the grids sprawled across ultrawide windows; capped, the column
+  /// counts inside each grid also settle instead of ramping forever.
+  static const double _maxContentWidth = 1200;
+
   Widget _buildCardGrid(List<Widget> cards) {
-    return LayoutBuilder(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: LayoutBuilder(
       builder: (context, constraints) {
         const spacing = 14.0;
         const padding = 16.0;
@@ -228,8 +236,10 @@ class _CollectionPageState extends State<CollectionPage> {
           itemCount: cards.length,
           itemBuilder: (context, index) => cards[index],
         );
-      },
-    );
+        },
+      ),
+    ),
+  );
   }
 
   Future<void> _createCollection() async {
@@ -298,7 +308,10 @@ class _CollectionPageState extends State<CollectionPage> {
             ? items
             : items.where((i) => i.type == _continueType).toList();
         final palette = AppThemeService.currentPalette.value;
-        return LayoutBuilder(
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            child: LayoutBuilder(
           builder: (context, constraints) {
             const spacing = 14.0;
             const padding = 16.0;
@@ -350,8 +363,10 @@ class _CollectionPageState extends State<CollectionPage> {
                 ),
               ],
             );
-          },
-        );
+            },
+          ),
+        ),
+      );
       },
     );
   }
@@ -379,22 +394,27 @@ class _CollectionPageState extends State<CollectionPage> {
         final visible = _downloadType == 'all'
             ? downloads
             : downloads.where((t) => t.type == _downloadType).toList();
-        return Column(
-          children: [
-            _buildTypePills(
-              _downloadType,
-              (v) => setState(() => _downloadType = v),
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            child: Column(
+              children: [
+                _buildTypePills(
+                  _downloadType,
+                  (v) => setState(() => _downloadType = v),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    itemCount: visible.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) =>
+                        _DownloadRow(task: visible[index]),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-                itemCount: visible.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, index) =>
-                    _DownloadRow(task: visible[index]),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );
