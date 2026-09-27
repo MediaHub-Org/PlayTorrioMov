@@ -555,14 +555,13 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     bool isHovered,
     bool isCompact,
   ) {
-    final rawTitle =
-        source.title ?? source.name ?? context.l10n.playerStreamSourceFallback;
-    // The release name carries everything (audio, codec, size, group),
-    // which reads as a paragraph in a 12.5px row. The row answers three
-    // questions -- where is this from, how sharp is it, what is the file
-    // -- so those are the title. Delivery (P2P / HTTP) and seeds already
-    // have their own badges above it.
-    final title = _compactSourceTitle(source, rawTitle);
+    // Scraper, quality and container only: the release name's facts already
+    // read as badges, so the full string would repeat them as a paragraph.
+    // See StreamSource.compactTitle, which falls back to the full title
+    // when none of the three is known.
+    final title = (source.title == null && source.name == null)
+        ? context.l10n.playerStreamSourceFallback
+        : source.compactTitle;
     // StreamSource.isMagnet, not a bare infoHash check: a magnet: URL
     // with no separate infoHash field is still a torrent, and the icon
     // has to agree with the P2P/HTTP badge next to it.
@@ -658,15 +657,16 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                           // same wherever it is listed.
                           ...sourceDeliveryBadges(source),
 
-                          if (source.name != null && source.name!.isNotEmpty)
-                            Text(
-                              source.name!,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.50),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          // The scraper's own short name -- never a bare file
+                          // id. See StreamSource.displayProvider.
+                          Text(
+                            source.displayProvider,
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.50),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
                             ),
+                          ),
                         ],
                       ),
 
@@ -781,29 +781,5 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
       default:
         return Colors.white.withValues(alpha: 0.20);
     }
-  }
-
-  /// Scraper, quality and container only ("VixSrc • 1080p • HLS").
-  ///
-  /// The full release name is detail for a details screen, not a list row.
-  /// [fallback] keeps the row from going blank when none of the three is
-  /// known, which is better than an empty title no one can act on.
-  String _compactSourceTitle(StreamSource source, String fallback) {
-    final scraper = source.addonName.trim();
-    final quality = source.quality ??
-        (() {
-          final parsed = _extractResolution(
-            '${source.title ?? ''} ${source.name ?? ''}',
-          );
-          return parsed.isEmpty ? null : parsed;
-        })();
-    final container = source.containerLabel;
-    final parts = [
-      if (scraper.isNotEmpty) scraper,
-      if (quality != null && quality.isNotEmpty) quality,
-      if (container != null) container,
-    ];
-    if (parts.isEmpty) return fallback;
-    return parts.join(' • ');
   }
 }

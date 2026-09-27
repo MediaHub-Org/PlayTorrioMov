@@ -55,6 +55,38 @@ void main() {
         expect(source.containerLabel, isNull);
       });
     });
+    group('release source detection', () {
+      test('reads REMUX, BLURAY, WEB-DL, WEBRIP and HDTV', () {
+        expect(StreamSource(addonName: 'A', title: 'Movie REMUX 1080p', url: '').releaseSource, 'REMUX');
+        expect(StreamSource(addonName: 'A', title: 'Movie BluRay x264', url: '').releaseSource, 'BLURAY');
+        expect(StreamSource(addonName: 'A', title: 'Movie WEB-DL', url: '').releaseSource, 'WEB-DL');
+        expect(StreamSource(addonName: 'A', title: 'Movie WEBRip', url: '').releaseSource, 'WEBRIP');
+        expect(StreamSource(addonName: 'A', title: 'Movie HDTV', url: '').releaseSource, 'HDTV');
+      });
+      test('a bare HD tag is not a source', () {
+        expect(StreamSource(addonName: 'A', title: 'Movie 720p HD', url: '').releaseSource, isNull);
+      });
+    });
+    group('compactTitle', () {
+      test('reads scraper, quality and container', () {
+        final source = StreamSource(addonName: 'VixSrc', name: 'VixSrc', title: 'Movie.2024.1080p.WEB-DL.mkv', url: 'https://x.com/f');
+        expect(source.compactTitle, 'VixSrc • 1080p • MKV');
+      });
+      test('falls back to the full title when nothing is known', () {
+        final source = StreamSource(addonName: '', name: 'Test', title: 'Some Release', url: '');
+        expect(source.compactTitle, 'Some Release');
+      });
+    });
+    group('displayProvider', () {
+      test('a numeric file id shows the scraper instead', () {
+        final source = StreamSource(addonName: 'MyScraper', name: '111477', title: 'Movie.mkv', url: '');
+        expect(source.displayProvider, 'MyScraper');
+      });
+      test('a real name is kept', () {
+        final source = StreamSource(addonName: 'MyScraper', name: 'HindMoviez • 1080p', title: 'Movie.mkv', url: '');
+        expect(source.displayProvider, 'HindMoviez • 1080p');
+      });
+    });
     group('qualityRank', () {
       test('4K ranks higher than 1080p', () {
         final fourK = StreamSource(addonName: 'TestAddon', name: 'A', title: '4K.Movie.mkv\nA', url: '');

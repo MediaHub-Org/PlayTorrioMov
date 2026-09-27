@@ -10,6 +10,12 @@ one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **Source rows read scraper, quality and container.** The watch-screen card
+  printed the provider id ("111477"), then the same long release name twice
+  as title and description. One compact title plus badges now: quality,
+  delivery with seed health, container (MKV/MP4), release source
+  (REMUX/BluRay/WEB-DL), codec, size and audio languages. A numeric file id
+  shows the scraper instead.
 - **Continue Watching badges, season parts and the Arabic sheet's status
   lines follow the app language.** Source-type and countdown badges, the
   `Movie` type label and collection `Part N` are keys now. `S01E01` shapes

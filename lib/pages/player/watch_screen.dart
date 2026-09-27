@@ -1716,6 +1716,12 @@ class _SourceCardState extends State<_SourceCard> {
     badges.addAll(sourceDeliveryBadges(s));
 
     if (s.isHDR) badges.add(_badge('HDR', const Color(0xFFFFD43B)));
+    if (s.containerLabel != null) {
+      badges.add(_badge(s.containerLabel!, _C.textTertiary));
+    }
+    if (s.releaseSource != null) {
+      badges.add(_badge(s.releaseSource!, _C.textTertiary));
+    }
     if (s.codec != null) badges.add(_badge(s.codec!, _C.textTertiary));
     if (s.fileSize != null) badges.add(_badge(s.fileSize!, _C.textTertiary));
 
@@ -1857,41 +1863,20 @@ class _SourceCardState extends State<_SourceCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // One title: scraper, quality and container. The raw
+                        // release name and description repeated the same long
+                        // string twice, and every fact in it already reads as
+                        // a badge below.
                         Text(
-                          s.name != null && s.name!.isNotEmpty
-                              ? s.name!
-                              : s.addonName,
+                          s.compactTitle,
                           style: const TextStyle(
                             color: _C.textPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (s.title != null && s.title!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            s.title!,
-                            style: const TextStyle(
-                              color: _C.textTertiary,
-                              fontSize: 12,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                        if (s.description != null &&
-                            s.description!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            s.description!,
-                            maxLines: 4,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: _C.textSecondary,
-                              fontSize: 12,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
                         if (badges.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Wrap(spacing: 4, runSpacing: 4, children: badges),

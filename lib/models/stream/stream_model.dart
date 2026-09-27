@@ -500,6 +500,60 @@ class StreamSource {
       (infoHash != null && infoHash!.isNotEmpty) ||
       (url != null && url!.startsWith('magnet:'));
 
+  /// The release source off the title or name: REMUX, BLURAY, WEB-DL,
+  /// WEBRIP or HDTV. Null when the release names none -- a bare `HD` or
+  /// quality tag is not a source, and guessing one would mislabel the row.
+  String? _cachedReleaseSource;
+  bool _releaseSourceComputed = false;
+  String? get releaseSource {
+    if (_releaseSourceComputed) return _cachedReleaseSource;
+    _releaseSourceComputed = true;
+    final text = '${title ?? ''} ${name ?? ''}'.toLowerCase();
+    if (text.contains('remux')) return _cachedReleaseSource = 'REMUX';
+    if (text.contains('bluray') ||
+        text.contains('blu-ray') ||
+        text.contains('brrip') ||
+        text.contains('bdrip')) {
+      return _cachedReleaseSource = 'BLURAY';
+    }
+    if (text.contains('web-dl') || text.contains('webdl')) {
+      return _cachedReleaseSource = 'WEB-DL';
+    }
+    if (text.contains('webrip') || text.contains('web-rip')) {
+      return _cachedReleaseSource = 'WEBRIP';
+    }
+    if (text.contains('hdtv')) return _cachedReleaseSource = 'HDTV';
+    return _cachedReleaseSource = null;
+  }
+
+  /// Scraper, quality and container only ("VixSrc · 1080p · HLS").
+  ///
+  /// The full release name is detail for a details screen, not a list row:
+  /// its facts already read as badges beside the row. Falls back to the
+  /// full title when none of the three is known, which is better than an
+  /// empty row no one can act on.
+  String get compactTitle {
+    final scraper = addonName.trim();
+    final parts = [
+      if (scraper.isNotEmpty) scraper,
+      if (quality != null && quality!.isNotEmpty) quality!,
+      if (containerLabel != null) containerLabel!,
+    ];
+    if (parts.isEmpty) return displayTitle;
+    return parts.join(' • ');
+  }
+
+  /// The provider name unless it is a bare id. Some providers send a numeric
+  /// file id (`111477`) as the name, which reads as noise next to the
+  /// scraper's own short name -- so the row shows the scraper instead.
+  String get displayProvider {
+    final label = name?.trim() ?? '';
+    if (label.isEmpty || RegExp(r'^\d+$').hasMatch(label)) {
+      return addonName;
+    }
+    return label;
+  }
+
   /// Formatted magnet link with tracker and display name parameters if available.
   String? get magnetUrl {
     if (url != null && url!.startsWith('magnet:')) {
