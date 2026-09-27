@@ -3,7 +3,11 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.13+46] - 2026-09-28
+
+Live TV grows up: sources become a page, portals go live-only, four new
+language rows, categories filter, seeded playlists and captions. The
+Library centers, sorts both ways and reads series years as ranges.
 
 ### Added
 - **Series years read as ranges.** `2020–2023` renders `2020 - 2023` on
