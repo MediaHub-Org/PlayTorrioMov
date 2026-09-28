@@ -644,7 +644,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                     style: TextStyle(
                       fontSize: TvType.scale(10),
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF00E5FF),
+                      color: const Color(0xFF00E5FF),
                     ),
                   ),
                 ),

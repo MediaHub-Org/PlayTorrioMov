@@ -257,7 +257,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                     style: TextStyle(
                                       fontSize: TvType.scale(10.5),
                                       fontWeight: FontWeight.w700,
-                                      color: Color(0xFF10B981),
+                                      color: const Color(0xFF10B981),
                                     ),
                                   ),
                                 ),
@@ -887,7 +887,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                         style: TextStyle(
                                           fontSize: TvType.scale(9.5),
                                           fontWeight: FontWeight.w800,
-                                          color: Color(0xFF10B981),
+                                          color: const Color(0xFF10B981),
                                         ),
                                       ),
                                     ),
