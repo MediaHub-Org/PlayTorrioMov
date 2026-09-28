@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
+
+/// The keys that activate a focused [LikeButton]. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
+/// a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 /// Red used for every "liked" state in the app.
 const Color kLikedColor = Color(0xFFE50914);
@@ -67,6 +78,14 @@ class LikeButton extends StatefulWidget {
 class _LikeButtonState extends State<LikeButton> {
   bool _hovered = false;
   bool _pressed = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +94,7 @@ class _LikeButtonState extends State<LikeButton> {
     final label = widget.isLiked ? l10n.commonLiked : l10n.commonLike;
     final semantics =
         widget.isLiked ? l10n.commonRemoveFromLiked : l10n.commonAddToLiked;
+    final hovered = _hovered || _focused;
 
     final child = switch (widget.style) {
       LikeButtonStyle.pill => _buildPill(label),
@@ -88,7 +108,10 @@ class _LikeButtonState extends State<LikeButton> {
       label: semantics,
       child: Tooltip(
         message: semantics,
-        child: MouseRegion(
+        child: Focus(
+          onFocusChange: (focused) => setState(() => _focused = focused),
+          onKeyEvent: _handleKey,
+          child: MouseRegion(
           cursor: SystemMouseCursors.click,
           onEnter: (_) => setState(() => _hovered = true),
           onExit: (_) => setState(() {
@@ -101,11 +124,12 @@ class _LikeButtonState extends State<LikeButton> {
             onTapCancel: () => setState(() => _pressed = false),
             onTap: widget.onTap,
             child: AnimatedScale(
-              scale: _pressed ? 0.94 : (_hovered ? 1.05 : 1.0),
+              scale: _pressed ? 0.94 : (hovered ? 1.05 : 1.0),
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeOutCubic,
               child: child,
             ),
+          ),
           ),
         ),
       ),

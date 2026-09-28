@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 
 import '../../models/collection/media_collection.dart';
@@ -157,6 +158,16 @@ class LibraryActionsRow extends StatelessWidget {
   }
 }
 
+/// The keys that activate a focused [_StatusButton]. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
+/// a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
+
 /// Icon-only with a hover [Tooltip] for the label: once three buttons share
 /// a details page's action row there is no width left for "Add to
 /// watchlist" as text, and an icon cannot overflow the way that label did.
@@ -181,10 +192,19 @@ class _StatusButton extends StatefulWidget {
 
 class _StatusButtonState extends State<_StatusButton> {
   bool _hovering = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final highlighted = _hovering || _focused;
     // The Tooltip is the pointer affordance; the Semantics is what a screen
     // reader reads, and it carries the toggle state as well as the label --
     // matching the LikeButton sitting beside it in this same row.
@@ -194,14 +214,17 @@ class _StatusButtonState extends State<_StatusButton> {
       label: widget.label,
       child: Tooltip(
         message: widget.label,
-        child: MouseRegion(
+        child: Focus(
+          onFocusChange: (focused) => setState(() => _focused = focused),
+          onKeyEvent: _handleKey,
+          child: MouseRegion(
           cursor: SystemMouseCursors.click,
           onEnter: (_) => setState(() => _hovering = true),
           onExit: (_) => setState(() => _hovering = false),
           child: GestureDetector(
             onTap: widget.onTap,
             child: AnimatedScale(
-              scale: _hovering ? 1.08 : 1.0,
+              scale: highlighted ? 1.08 : 1.0,
               duration: const Duration(milliseconds: 150),
               child: Container(
                 padding: const EdgeInsets.all(10),
@@ -223,6 +246,7 @@ class _StatusButtonState extends State<_StatusButton> {
                 ),
               ),
             ),
+          ),
           ),
         ),
       ),

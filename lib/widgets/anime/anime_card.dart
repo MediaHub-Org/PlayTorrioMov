@@ -1,6 +1,7 @@
 import '../common/clamped_text_scale.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
@@ -8,6 +9,16 @@ import '../../services/titles/title_display.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
+
+/// The keys that activate a focused [AnimeCard]. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
+/// a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 class AnimeCard extends StatefulWidget {
   final AnimeMedia anime;
@@ -28,16 +39,28 @@ class AnimeCard extends StatefulWidget {
 class _AnimeCardState extends State<AnimeCard> {
   bool _hovered = false;
   bool _pressed = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final anime = widget.anime;
+    final hovered = _hovered || _focused;
 
     // A grid cell is a fixed box; its text is not. Capped so a
     // large system scale cannot paint outside the cell.
     return ClampedTextScale(
-      child: MouseRegion(
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: _handleKey,
+        child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() {
@@ -52,11 +75,11 @@ class _AnimeCardState extends State<AnimeCard> {
           child: AnimatedScale(
             duration: const Duration(milliseconds: 170),
             curve: Curves.easeOutCubic,
-            scale: _pressed ? 0.97 : (_hovered ? 1.045 : 1.0),
+            scale: _pressed ? 0.97 : (hovered ? 1.045 : 1.0),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 170),
               curve: Curves.easeOutCubic,
-              transform: Matrix4.translationValues(0, _hovered ? -6 : 0, 0),
+              transform: Matrix4.translationValues(0, hovered ? -6 : 0, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -64,7 +87,7 @@ class _AnimeCardState extends State<AnimeCard> {
                   Expanded(
                     child: _AnimePosterFrame(
                       anime: anime,
-                      hovered: _hovered,
+                      hovered: hovered,
                     ),
                   ),
 
@@ -135,6 +158,7 @@ class _AnimeCardState extends State<AnimeCard> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

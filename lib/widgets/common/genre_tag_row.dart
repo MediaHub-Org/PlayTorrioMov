@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'over_artwork.dart';
+
+/// The keys that activate a focused genre tag. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
+/// a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 /// Icon for a genre/category tag, shared by every content-detail page so a
 /// given genre always reads the same way whether it's on a movie, a series,
@@ -112,22 +123,32 @@ class GenreTagRow extends StatelessWidget {
           final g = genres[index];
           return Tooltip(
             message: g,
-            child: MouseRegion(
-              cursor: onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
-              child: GestureDetector(
-                onTap: onTap == null ? null : () => onTap!(g),
-                child: Container(
-                  width: size,
-                  height: size,
-                  decoration: BoxDecoration(
-                    color: tint.withValues(alpha: 0.06),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: tint.withValues(alpha: 0.12)),
-                  ),
-                  child: Icon(
-                    genreTagIcon(g),
-                    color: tint.withValues(alpha: 0.70),
-                    size: size * 0.5,
+            child: Focus(
+              canRequestFocus: onTap != null,
+              onKeyEvent: (node, event) {
+                if (onTap == null) return KeyEventResult.ignored;
+                if (event is! KeyDownEvent) return KeyEventResult.ignored;
+                if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+                onTap!(g);
+                return KeyEventResult.handled;
+              },
+              child: MouseRegion(
+                cursor: onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
+                child: GestureDetector(
+                  onTap: onTap == null ? null : () => onTap!(g),
+                  child: Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: tint.withValues(alpha: 0.06),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: tint.withValues(alpha: 0.12)),
+                    ),
+                    child: Icon(
+                      genreTagIcon(g),
+                      color: tint.withValues(alpha: 0.70),
+                      size: size * 0.5,
+                    ),
                   ),
                 ),
               ),
