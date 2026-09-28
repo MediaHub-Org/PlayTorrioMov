@@ -13,6 +13,7 @@ import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
 /// Simkl and TMDB. Trakt/Simkl used to be the whole page (two nearly
@@ -188,7 +189,7 @@ class _SyncCardChrome extends StatelessWidget {
                                 ? l10n.syncConnected
                                 : l10n.syncDisconnected,
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: TvType.scale(10),
                               fontWeight: FontWeight.w800,
                               color: isAuthed
                                   ? const Color(0xFF10B981)

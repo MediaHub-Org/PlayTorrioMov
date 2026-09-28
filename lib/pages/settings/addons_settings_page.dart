@@ -6,6 +6,7 @@ import '../../services/addon/addon_manager.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 /// The keys that activate a focused [_FeatureToggleChip]. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
@@ -497,7 +498,7 @@ class _AddonCard extends StatelessWidget {
                       Text(
                         l10n.addonsFunctionsHeader,
                         style: TextStyle(
-                          fontSize: 10.5,
+                          fontSize: TvType.scale(10.5),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
                           color: AppColors.inkAlpha(0.45),

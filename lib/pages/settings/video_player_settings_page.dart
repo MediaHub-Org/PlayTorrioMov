@@ -9,6 +9,7 @@ import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_sub_style_modal.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class VideoPlayerSettingsPage extends StatefulWidget {
   const VideoPlayerSettingsPage({super.key});
@@ -253,8 +254,8 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                   alignment: AlignmentDirectional.centerStart,
                                   child: Text(
                                     l10n.videoCrashFreeBadge,
-                                    style: const TextStyle(
-                                      fontSize: 10.5,
+                                    style: TextStyle(
+                                      fontSize: TvType.scale(10.5),
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF10B981),
                                     ),
@@ -883,8 +884,8 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                       ),
                                       child: Text(
                                         l10n.videoRecommendedBadge,
-                                        style: const TextStyle(
-                                          fontSize: 9.5,
+                                        style: TextStyle(
+                                          fontSize: TvType.scale(9.5),
                                           fontWeight: FontWeight.w800,
                                           color: Color(0xFF10B981),
                                         ),

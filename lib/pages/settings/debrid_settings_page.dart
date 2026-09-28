@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class DebridSettingsPage extends StatefulWidget {
   const DebridSettingsPage({super.key});
@@ -640,8 +641,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                   ),
                   child: Text(
                     l10n.debridActiveBadge,
-                    style: const TextStyle(
-                      fontSize: 10,
+                    style: TextStyle(
+                      fontSize: TvType.scale(10),
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF00E5FF),
                     ),
@@ -659,7 +660,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                   child: Text(
                     statusBadge,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: TvType.scale(10),
                       fontWeight: FontWeight.w800,
                       color: badgeColor ?? const Color(0xFF10B981),
                     ),
