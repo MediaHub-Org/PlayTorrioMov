@@ -264,12 +264,19 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   /// Embedded / Online, as two pills rather than one merged list.
   ///
-
   /// They are different questions: an embedded track is already in the file
   /// and plays instantly, an online one has to be fetched. Forced tracks
   /// live inside each side under the Forced chip rather than in a third
   /// pill of their own.
-
+  ///
+  /// **Forced tracks have been seen listed and not seen rendering.** Embedded
+  /// selection itself is resolved: `_selectEmbeddedTrack` reads `sid` back and
+  /// retries once, because the player's property set never throws and a rejected
+  /// id used to fail silently with the menu showing selected. ASS renders
+  /// through libass, other text through the overlay, bitmaps through mpv's OSD.
+  /// What is unconfirmed is a forced track actually painting on a device. A
+  /// `[SubDiag]` line dumps the full subtitle roster on every manual pick, so a
+  /// mismatch shows itself in one paste.
   Widget _buildSourceTabs(BuildContext context) {
     final hasEmbedded = widget.embeddedSubtitles.isNotEmpty;
     return Row(

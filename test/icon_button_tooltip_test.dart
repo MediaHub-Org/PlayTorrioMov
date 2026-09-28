@@ -85,7 +85,11 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart'))) {
-      if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+      // Forward slashes everywhere: on Windows listSync reports backslashes,
+      // matching the same fix in the test above and in the other two
+      // source-scanning guards.
+      final path = file.path.replaceAll(r'\', '/');
+      if (path.startsWith('lib/l10n/app_localizations')) continue;
       final source = file.readAsStringSync();
 
       for (final match in control.allMatches(source)) {

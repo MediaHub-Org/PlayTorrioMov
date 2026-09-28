@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../widgets/common/reading_direction.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
 
@@ -30,6 +31,16 @@ import '../../widgets/common/source_badges.dart';
 import '../settings/settings_page.dart';
 import '../details/details_page.dart';
 import '../../utils/navigation/route_transitions.dart';
+
+/// The keys that activate the "no sources, install addons" button below.
+/// `final`, not `const`: `LogicalKeyboardKey` overrides `==`, and the
+/// analyzer rejects that inside a `const` set literal.
+final _settingsButtonActivators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -877,7 +888,8 @@ class _WatchScreenState extends State<WatchScreen>
 
             if (!painter.didExceedMaxLines) return const SizedBox.shrink();
 
-            return GestureDetector(
+            return HoverButton(
+              scaleAmount: 1.03,
               onTap: () =>
                   setState(() => _synopsisExpanded = !_synopsisExpanded),
               child: Text(
@@ -1007,7 +1019,8 @@ class _WatchScreenState extends State<WatchScreen>
     String label, {
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
+    return HoverButton(
+      scaleAmount: 1.03,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1141,7 +1154,8 @@ class _WatchScreenState extends State<WatchScreen>
   }) {
     return Builder(
       builder: (buttonContext) {
-        return GestureDetector(
+        return HoverButton(
+          scaleAmount: 1.03,
           onTap: () => onTap(buttonContext),
           child: DecoratedBox(
             decoration: const BoxDecoration(
@@ -2267,58 +2281,70 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
             ),
           ),
           const SizedBox(height: 32),
-          MouseRegion(
-            onEnter: (_) => setState(() => _isHovering = true),
-            onExit: (_) => setState(() => _isHovering = false),
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () {
-                pushPage(context, const SettingsPage());
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(32),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF7C5CFC), Color(0xFF5CFCB6)],
-                  ),
-                  boxShadow: _isHovering
-                      ? [
-                          BoxShadow(
-                            color: const Color(
-                              0xFF7C5CFC,
-                            ).withValues(alpha: 0.4),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                      : [],
-                ),
-                child: AnimatedScale(
-                  scale: _isHovering ? 1.05 : 1.0,
+          Focus(
+            onFocusChange: (focused) =>
+                setState(() => _isHovering = focused),
+            onKeyEvent: (node, event) {
+              if (event is! KeyDownEvent) return KeyEventResult.ignored;
+              if (!_settingsButtonActivators.contains(event.logicalKey)) {
+                return KeyEventResult.ignored;
+              }
+              pushPage(context, const SettingsPage());
+              return KeyEventResult.handled;
+            },
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _isHovering = true),
+              onExit: (_) => setState(() => _isHovering = false),
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  pushPage(context, const SettingsPage());
+                },
+                child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.extension_rounded,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        context.l10n.watchInstallAddons,
-                        style: const TextStyle(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF7C5CFC), Color(0xFF5CFCB6)],
+                    ),
+                    boxShadow: _isHovering
+                        ? [
+                            BoxShadow(
+                              color: const Color(
+                                0xFF7C5CFC,
+                              ).withValues(alpha: 0.4),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: AnimatedScale(
+                    scale: _isHovering ? 1.05 : 1.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.extension_rounded,
                           color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          size: 18,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Text(
+                          context.l10n.watchInstallAddons,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -2601,12 +2627,10 @@ class _FilterPillRailState extends State<FilterPillRail> {
         ),
         alignment: Alignment.center,
         child: showButton
-            ? MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () => _nudge(forward),
-                  child: _buildEdgeButton(forward),
-                ),
+            ? HoverButton(
+                scaleAmount: 1.1,
+                onTap: () => _nudge(forward),
+                child: _buildEdgeButton(forward),
               )
             : null,
       ),

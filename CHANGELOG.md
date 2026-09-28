@@ -3,6 +3,19 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **The app declares Android TV support, and the player transport and watch
+  screen respond to a D-pad or a keyboard (#78).** The manifest gained the
+  leanback feature and launcher category needed just to appear on a TV.
+  `PlayerIconButton` -- play/pause, seek, volume, every transport button --
+  now takes focus and shows the same `FocusRing` two of its neighbours
+  already used; `HoverButton`, the shared wrapper the details rails and
+  cards use, now does the same for everything else, reusing its hover lean
+  as the focus indicator. `watch_screen.dart` is fully converted; the rest
+  of `lib/` is not yet -- see the roadmap.
+
 ## [1.8.13+46] - 2026-09-28
 
 Live TV grows up: sources become a page, portals go live-only, four new
@@ -2203,9 +2216,8 @@ history only.
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
 | #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them. Device-confirmed on a phone 2026-09-16 |
-| #68 | Translation (i18n) — 981 keys in Spanish/Arabic/Portuguese-BR, tail/RTL/tooltips/probes held by tests; anime original-titles toggle shipped, movies and series carry one title; data strings stay English on purpose |
-| #69 | Text scale and accessibility — 25 high-traffic boxes plus overflow probes including the details cards, capped at 1.3x; the unprobed tail is deliberately unranked |
-
+| #68 | Translation (i18n) — Spanish/Arabic/Portuguese-BR, 994 keys, with tests holding the hardcoded-text tail, the RTL padding and alignment, the icon-only tooltips and the spelling; icon direction turns with the reading direction; anime carries a display/native title toggle, movies and series carry one title; data strings (catalog descriptions, AniList genres) stay English on purpose |
+| #69 | Text scale and accessibility — 32 high-traffic widgets (including the details-page cards) probed at 3x and capped at 1.3x, every icon-only control labelled button or not; the unprobed tail (mostly pages a test cannot construct) is deliberately unranked |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; confirmed on real speakers 2026-09-16 |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |
 | #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |

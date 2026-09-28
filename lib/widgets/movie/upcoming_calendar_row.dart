@@ -108,12 +108,13 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            // Three text lines in a 12px-padded card were already tight at
-            // the system default, and ran 92px past this box at 3x (#69).
-            // Nothing else on the page lines up against this row's exact
-            // height, so unlike the cast rail it gets room besides -- and the
-            // text inside is capped, because a fixed-height card cannot grow
-            // with the scale the way a page can.
+            // 92 plus headroom: three text lines (title, episode, date) in a
+            // 12px-padded card were already tight at the system default, and
+            // ran 92px past this box at 3x with nothing capping them (#69).
+            // Clamped below, and given a bit more room besides -- nothing
+            // else on the page lines up against this row's exact height, so
+            // unlike the cast rail there is no reason to hold it to the
+            // original number.
             height: 116,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
@@ -139,37 +140,37 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                        Text(
-                          entry.showTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.ink,
+                          Text(
+                            entry.showTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'S${entry.seasonNumber.toString().padLeft(2, '0')}'
-                          'E${entry.episodeNumber.toString().padLeft(2, '0')}'
-                          ' • ${entry.episodeTitle}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.inkAlpha(0.55),
+                          const SizedBox(height: 4),
+                          Text(
+                            'S${entry.seasonNumber.toString().padLeft(2, '0')}'
+                            'E${entry.episodeNumber.toString().padLeft(2, '0')}'
+                            ' • ${entry.episodeTitle}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.inkAlpha(0.55),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${entry.firstAiredLocal.month}/${entry.firstAiredLocal.day}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.inkAlpha(0.4),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${entry.firstAiredLocal.month}/${entry.firstAiredLocal.day}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.inkAlpha(0.4),
+                            ),
                           ),
-                        ),
                         ],
                       ),
                     ),

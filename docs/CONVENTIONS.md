@@ -149,17 +149,26 @@ const Map<String, String> _iso639ToDisplayName = { ... };
 
 ### Titles
 
-A title is two fields, and they must never merge: `displayTitle` is what the
-user reads and is localizable; `canonicalTitle` feeds scraper queries,
-`uniqueKey`, Trakt/Simkl matching and filename parsing, and is never
-localized. Localizing the identifier forks identity — the same show saved
-under a Spanish UI becomes a different object from the one saved under
-English, taking collections membership, Continue Watching dedupe and
-Trakt/Simkl matching with it — and starves the 48 title-string scrapers,
-which fail silently on a translated title. AniList already returns four
-titles per show, so the "which title do we show" decision is per media kind,
-opt-in, and display-only -- see `AppThemeService.preferNativeTitles` (anime
-today) and `MyListItem.uniqueKey`.
+A title is two fields on `AnimeMedia`, and they must never merge:
+`canonicalTitle` feeds scraper queries, `uniqueKey`, Trakt/Simkl matching and
+filename parsing, and is never localized; `nativeTitle` is the title in its
+own language. `titleFor({required bool native})` picks between them, and a
+model depends on nothing, so it takes the preference rather than reading
+it — `animeDisplayTitle()` in `services/titles/title_display.dart` is what
+every call site uses, reading `AppThemeService.preferNativeTitles`.
+
+Localizing the identifier forks identity — the same show saved under one
+setting becomes a different object from the one saved under another, taking
+collection membership, Continue Watching dedupe and Trakt/Simkl matching with
+it — and starves the title-string scrapers, which fail silently on a
+translated title. `displayTitle` still exists as a fixed alias of
+`canonicalTitle`, deliberately *not* made switchable: every call site was
+checked and moved to `animeDisplayTitle`, and a getter that had quietly
+started honoring the setting instead would have made a missed one impossible
+to spot in review.
+
+AniList sends four titles per show, so the toggle exists for anime today.
+Movies and series carry one title, with no per-viewer choice to make.
 
 ### Spelling: American English, everywhere
 
@@ -674,8 +683,6 @@ a shell command — never a way to defer the fix. Each skips
 `lib/l10n/app_localizations*`, which is generated: the spelling scan learned
 that the hard way, passing over `lib/` while CI failed on a generated doc
 comment copied out of an ARB `@description`.
->>>>>>> origin/claude/ptmov-roadmap-fixes-67ww13
-
 
 ---
 
@@ -792,24 +799,3 @@ something obvious that runs per frame, measure it.
 - [ ] `flutter analyze --fatal-infos` clean.
 - [ ] `flutter test --exclude-tags network` green.
 - [ ] `CHANGELOG.md` updated if user-visible.
-
----
-
-## 12. Out of scope
-
-Settled product decisions, kept here so they stop being re-litigated. None
-of these is a task; proposing one of them again needs a reason the row does
-not already answer.
-
-| What | Why not |
-|:--|:--|
-| Merge `megasource` / `nova` (50 shared windows) | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common |
-| Offline tests for page **scraping** (script tags, slug matching) | Fixtures would pin one host's markup on one day rather than a contract; the payload ciphers and response *formats* are covered |
-| Cast from Windows | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. Would mean DLNA/UPnP -- a feature, not a fix |
-| Sponsor/monetization, keyboard aspect-cycle HUD (upstream) | Out of scope; and Mov already has an aspect control in the player settings |
-| Single-select audio-language filter | "English or Spanish" is not expressible with one choice |
-| A size/sort filter under Sources & Filters | A size range and "largest first" are browsing choices for *this* title, not a standing preference, so they stay on the sources screen |
-| A keyboard shortcut for the subtitle panel | `A`, `S` and `R` are taken and `C` toggles; keyboard-only users reach the panel through the transport bar. Revisit if a key frees up |
-| Translating AniList's genres and formats | They are the API's own filter values; a display-name map per language would sit on top of every query |
-| Translating catalog descriptions | Cinemeta takes no locale parameter (`?language=` is silently ignored), so there is nothing to switch; a TMDB-backed metadata addon is a setup choice, not a code change |
-| Pure-alphabetical online subtitle order | The list leads with the language being heard because that is the track a viewer is most likely to want; ties break alphabetically |
