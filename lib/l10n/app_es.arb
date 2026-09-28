@@ -617,8 +617,6 @@
   "animeExtracting": "Extrayendo las transmisiones de MegaPlay, VidWish, AllAnime y Miruro...",
   "animeRetryScraping": "Reintentar la búsqueda",
   "animeNoStreamsForEpisode": "No se encontraron transmisiones reproducibles para el episodio {number}.",
-  "@animeResolvingServers": {"description": "Status line while the Arabic sheet looks for servers"},
-  "@animeCrackingServers": {"description": "Status line while the Arabic sheet maps its servers"},
   "subStyleFontFamily": "Familia de fuente",
   "subStyleBackgroundOpacity": "Opacidad del fondo: {percent} %",
   "subStyleFontDefault": "Predeterminada",

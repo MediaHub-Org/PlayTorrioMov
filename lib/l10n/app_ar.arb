@@ -617,8 +617,6 @@
   "animeExtracting": "جارٍ استخراج بثوث MegaPlay وVidWish وAllAnime وMiruro...",
   "animeRetryScraping": "إعادة محاولة البحث",
   "animeNoStreamsForEpisode": "لم يتم العثور على بثوث قابلة للتشغيل للحلقة {number}.",
-  "@animeResolvingServers": {"description": "Status line while the Arabic sheet looks for servers"},
-  "@animeCrackingServers": {"description": "Status line while the Arabic sheet maps its servers"},
   "subStyleFontFamily": "نوع الخط",
   "subStyleBackgroundOpacity": "شفافية الخلفية: {percent}٪",
   "subStyleFontDefault": "الافتراضي",
