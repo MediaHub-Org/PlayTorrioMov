@@ -28,6 +28,7 @@ class FocusRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     if (!visible) return child;
     return Container(
       decoration: BoxDecoration(
