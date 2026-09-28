@@ -372,6 +372,47 @@ by driving a device.
 
 All four phases of #80 are now done.
 
+### Library tab renamed to Profile; search moved to the top bar
+
+Decided 2026-09-28, at the user's request. Three questions, three answers:
+
+1. **What happens to the Library tab's existing content when it becomes
+   Profile?** Kept as-is and settings added on top, not replaced by it --
+   Watchlist/Watched/Liked, Continue Watching and Downloads get used far
+   more often than Settings, so burying them behind a settings-only tab
+   would demote the app's most-used feature for its least-used one. A
+   `SettingsIconButton` was added to the tab's own header (`CollectionPage`,
+   via `LibraryTabs`' existing `trailing` slot) instead, alongside the
+   global gear rather than replacing it -- two paths to the same
+   `SettingsPage`, one discoverable from wherever a Profile-style tab is
+   expected to hold account-adjacent things, one already muscle-memorized
+   from every other screen.
+2. **What to call it.** "Profile" over "Account"/"You"/"Me": it reads as
+   "your stuff + your account" the way Netflix/Disney+/Prime Video use the
+   word, which matches a tab that is still mostly saved content with
+   settings added, not the other way around. Only the display label and
+   icon (`Icons.account_circle_rounded`) changed -- `HubSection`'s internal
+   id stays `'collection'`, and the page's own class/file
+   (`CollectionPage`/`collection_page.dart`) was deliberately left
+   unrenamed, matching this app's existing practice of an internal id
+   outliving a display label (the same section's id was already
+   `'collection'` while showing "Library").
+3. **Where search goes.** Four separate `PageSearchButton`s -- one inlined
+   in each of Films/Series/Anime/Live TV's own header, repeating the same
+   icon, and absent from the Profile tab entirely -- became one
+   `SearchIconButton` in `TopBar`, next to the existing Settings gear, on
+   every tier. `HubPage` decides where it opens based on
+   `HubController.instance.mediaSection`: the unified `SearchPage`
+   everywhere, except Live TV, which keeps its own `IptvSearchPage` --
+   a keyword match against a portal's stream list, not a title-catalog
+   search, so it was never the same kind of result the unified page
+   returns. `PageSearchButton` is deleted; nothing else referenced it.
+
+Untested against a real device in this environment -- verified by reading
+each call site, `TopBar`, `AdaptiveNavShell` and `HubPage`'s wiring, plus
+the existing widget test suite (updated for the rename and extended for
+the new search icon), not by driving the app.
+
 ### Not doing, so it stays decided
 
 | What | Why not |

@@ -70,6 +70,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   rather than full-bleed content -- the dismiss gesture was the actual
   functional problem, and it's now solved either way. This closes out
   #80's phase 3; all four phases are complete.
+- **The Library tab is now Profile, search moved to the top bar, and
+  Settings is reachable from within it too.** The hub's fifth section kept
+  its content (Watchlist/Watched/Liked shelves, Continue Watching,
+  Downloads) but is now labeled Profile with an account icon, and gained a
+  Settings button in its own header -- alongside the existing global gear
+  in the top bar, not instead of it. Search used to be four separate
+  buttons, one embedded in each of Films/Series/Anime/Live TV's own header
+  (repeating the same icon, and invisible from Profile, which never had
+  one); it is now one `SearchIconButton` in the top bar next to Settings,
+  present on every section including Profile, opening the unified
+  `SearchPage` everywhere except Live TV, which keeps its own
+  keyword-in-portal search (`IptvSearchPage`) since it isn't a title
+  catalog. `PageSearchButton`, now unused, is deleted.
 
 ### Fixed
 - **A departing episode card could no longer steal focus mid-transition
