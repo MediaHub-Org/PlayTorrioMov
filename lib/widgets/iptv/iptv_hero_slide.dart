@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../common/hover_button.dart';
 import '../common/reading_direction.dart';
 import '../../l10n/l10n.dart';
 
@@ -239,11 +240,10 @@ class IptvHeroSlide extends StatelessWidget {
               Row(
                 children: [
                   // Primary Watch Live Button
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: onWatchNow,
-                      child: Container(
+                  HoverButton(
+                    scaleAmount: 1.04,
+                    onTap: onWatchNow,
+                    child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 24,
                           vertical: 12,
@@ -285,16 +285,14 @@ class IptvHeroSlide extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
 
                   const SizedBox(width: 14),
 
                   // Sources / Stream Selector Pill
-                  MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: onSourcesTap,
-                      child: Container(
+                  HoverButton(
+                    scaleAmount: 1.04,
+                    onTap: onSourcesTap,
+                    child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 18,
                           vertical: 12,
@@ -327,7 +325,6 @@ class IptvHeroSlide extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],
