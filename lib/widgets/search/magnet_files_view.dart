@@ -588,6 +588,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
     final isSelected = _activeCategory == category;
     return HoverButton(
       scaleAmount: 1.05,
+      showFocusRing: true,
       onTap: () => setState(() => _activeCategory = category),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),

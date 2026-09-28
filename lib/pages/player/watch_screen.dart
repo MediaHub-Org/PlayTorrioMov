@@ -890,6 +890,7 @@ class _WatchScreenState extends State<WatchScreen>
 
             return HoverButton(
               scaleAmount: 1.03,
+              showFocusRing: true,
               onTap: () =>
                   setState(() => _synopsisExpanded = !_synopsisExpanded),
               child: Text(

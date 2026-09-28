@@ -450,6 +450,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
         opacity: enabled ? 1.0 : 0.35,
         child: HoverButton(
           scaleAmount: 1.05,
+          showFocusRing: true,
           onTap: () => setState(() => _selectedCategory = category),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),

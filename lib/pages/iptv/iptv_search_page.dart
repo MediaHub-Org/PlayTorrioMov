@@ -131,6 +131,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
 
                 return HoverButton(
                   scaleAmount: 1.05,
+                  showFocusRing: true,
                   onTap: () => setState(() => _selectedCategory = cat),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),

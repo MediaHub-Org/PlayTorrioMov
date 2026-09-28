@@ -592,6 +592,7 @@ class _GenreChip extends StatelessWidget {
     AppColors.dependOn(context);
     return HoverButton(
       scaleAmount: 1.05,
+      showFocusRing: true,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

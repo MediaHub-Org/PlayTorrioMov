@@ -126,6 +126,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                 final entry = entries[index];
                 return HoverButton(
                   scaleAmount: 1.03,
+                  showFocusRing: true,
                   onTap: () => _openDetails(entry),
                   child: Container(
                     width: 220,

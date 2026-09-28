@@ -914,6 +914,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               padding: const EdgeInsetsDirectional.only(end: 8),
                               child: HoverButton(
                                 scaleAmount: 1.05,
+                                showFocusRing: true,
                                 onTap: () => _onCatalogChanged(entry),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),

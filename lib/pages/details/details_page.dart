@@ -1343,6 +1343,7 @@ class _DetailsPageState extends State<DetailsPage>
               const SizedBox(height: _Space.xs),
               HoverButton(
                 scaleAmount: 1.05,
+                showFocusRing: true,
                 onTap: () =>
                     setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
                 child: Text(
@@ -1502,6 +1503,7 @@ class _DetailsPageState extends State<DetailsPage>
                 final season = seasons[index];
                 final isSelected = _selectedSeason == season;
                 return HoverButton(
+                  showFocusRing: true,
                   onTap: () {
                     if (_selectedSeason != season) {
                       setState(() {
