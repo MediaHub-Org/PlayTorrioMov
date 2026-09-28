@@ -12,6 +12,16 @@ import '../../services/anime/anime_scraper_service.dart';
 import '../common/source_badges.dart';
 import 'player_glass.dart';
 
+/// The keys that activate a focused source card. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
+/// inside a `const` set literal.
+final _sourceCardActivators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
+
 /// Glassmorphic Sources Side Panel for selecting episode stream sources,
 /// with targeted scraping, episode caching, and error recovery banners.
 class PlayerSourcesPanel extends StatefulWidget {
@@ -47,6 +57,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
   bool _isLoading = false;
   StreamSubscription<StreamSource>? _streamSub;
   int? _hoveredIndex;
+  int? _focusedIndex;
 
   @override
   void initState() {
@@ -480,7 +491,9 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
         }
 
         final source = _sources[index];
-        final isHovered = _hoveredIndex == index;
+        // Focus reuses the hover styling below: a card taking focus should
+        // look at least as reachable as one under a pointer.
+        final isHovered = _hoveredIndex == index || _focusedIndex == index;
 
         return _buildSourceCard(source, index, isHovered, isCompact);
       },
@@ -509,7 +522,21 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     final isTorrent = source.isMagnet;
     final resolution = _extractResolution(title);
 
-    return MouseRegion(
+    return Focus(
+      onFocusChange: (focused) =>
+          setState(() => _focusedIndex = focused ? index : null),
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (!_sourceCardActivators.contains(event.logicalKey)) {
+          return KeyEventResult.ignored;
+        }
+        widget.onPlaySource(source, widget.episode);
+        return KeyEventResult.handled;
+      },
+      child: FocusRing(
+        visible: _focusedIndex == index,
+        borderRadius: 14,
+        child: MouseRegion(
       onEnter: (_) => setState(() => _hoveredIndex = index),
       onExit: (_) => setState(() => _hoveredIndex = null),
       cursor: SystemMouseCursors.click,
@@ -698,6 +725,8 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
               ],
             ),
           ),
+        ),
+      ),
         ),
       ),
     );

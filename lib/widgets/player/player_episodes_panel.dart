@@ -1,9 +1,20 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../models/movie/video.dart';
 import 'player_glass.dart';
+
+/// The keys that activate a focused episode card. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
+/// inside a `const` set literal.
+final _episodeCardActivators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 /// Ultra-responsive, glassmorphic Episodes Side Panel with season tabs,
 /// auto-scroll to current episode, animated card expansion, and high FPS rendering.
@@ -31,6 +42,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
   late int _selectedSeason;
   String? _selectedEpisodeId;
   int? _hoveredIndex;
+  int? _focusedIndex;
 
   List<int> _seasons = [];
   Map<int, List<Video>> _seasonEpisodes = {};
@@ -561,15 +573,32 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     final epNum = video.episode ?? (index + 1);
     final epTitle = video.title.isNotEmpty ? video.title : context.l10n.playerEpisodeN(epNum);
     final hasOverview = video.overview != null && video.overview!.trim().isNotEmpty;
-    final isHovered = _hoveredIndex == index;
+    // Focus reuses the hover styling below: a card taking focus should look
+    // at least as reachable as one under a pointer, not gain a second visual
+    // language on top of it.
+    final isHovered = _hoveredIndex == index || _focusedIndex == index;
 
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hoveredIndex = index),
-      onExit: (_) => setState(() => _hoveredIndex = null),
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () => _handleEpisodeTap(video),
-        child: AnimatedScale(
+    return Focus(
+      onFocusChange: (focused) =>
+          setState(() => _focusedIndex = focused ? index : null),
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (!_episodeCardActivators.contains(event.logicalKey)) {
+          return KeyEventResult.ignored;
+        }
+        _handleEpisodeTap(video);
+        return KeyEventResult.handled;
+      },
+      child: FocusRing(
+        visible: _focusedIndex == index,
+        borderRadius: 16,
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hoveredIndex = index),
+          onExit: (_) => setState(() => _hoveredIndex = null),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => _handleEpisodeTap(video),
+            child: AnimatedScale(
           scale: isSelected ? 1.0 : (isHovered ? 1.015 : 1.0),
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOutCubic,
@@ -849,6 +878,8 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               ],
             ),
           ),
+        ),
+      ),
         ),
       ),
     );

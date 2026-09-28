@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
+import '../common/hover_button.dart';
 import 'player_glass.dart';
 
 /// Floating glass toolbar for quick live subtitle delay adjustment.
@@ -123,7 +124,8 @@ class _SubSyncBarState extends State<SubSyncBar> {
                           const SizedBox(width: 6),
                           Tooltip(
                             message: context.l10n.syncResetTiming,
-                            child: GestureDetector(
+                            child: HoverButton(
+                              scaleAmount: 1.1,
                               onTap: () => _applyDelay(0.0),
                               child: Container(
                                 padding: const EdgeInsets.all(2),
