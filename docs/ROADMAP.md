@@ -427,6 +427,54 @@ each call site, `TopBar`, `AdaptiveNavShell` and `HubPage`'s wiring, plus
 the existing widget test suite (updated for the rename and extended for
 the new search icon), not by driving the app.
 
+### D-pad navigation, round two: what a real remote actually found
+
+Device-confirmed on a TV 2026-09-28. Every earlier phase of #80 was
+verified by reading code and the widget test suite, never by driving a
+D-pad -- this is the first pass done against feedback from an actual
+remote, and it found problems none of that reading caught:
+
+- **The player's screen-wide key handler claimed every arrow key for
+  volume/seek, unconditionally.** This was the loudest bug: it meant a
+  D-pad could never move focus onto anything in the player at all, since
+  arrowUp/Down/Left/Right never reached the framework's normal focus-
+  traversal machinery to begin with -- including making `PlayerVolumeControl`'s
+  own already-correct left/right-adjusts-it handling unreachable by D-pad,
+  exactly the "select it, then adjust with left/right" shape the report
+  asked for, which the code already had. Gated the arrow branches behind
+  `!TvModeService.isTv.value`; the hardware volume keys, J/K/L and OK
+  (`LogicalKeyboardKey.select`, added as a play/pause fallback alongside
+  Space/K) are unaffected either way.
+- **`SectionChips`' chips were the one interactive control in the app still
+  built on `InkWell`'s own default key handling** rather than the explicit
+  `Focus` + select/gameButtonA wiring every other control
+  (`HoverButton`, `InteractiveCardShell`, every player button) uses.
+  Rebuilt on the same pattern.
+- **`BrowseScaffold`'s `CustomScrollView` used Flutter's default 250px
+  cache extent**, so a row more than about one screen down had no
+  RenderObject at all yet -- directional focus traversal had nothing to
+  find there, which is what "only the first row is reachable" actually
+  was. Raised to 2000px, paired with `Scrollable.ensureVisible` on focus
+  in `HoverButton`/`InteractiveCardShell` so the viewport keeps advancing
+  (and laying out further rows) as focus moves, rather than staying wherever
+  it happened to be when the page loaded.
+- **Cards' only focus indicator was a ~4% hover-lean**, accepted during
+  earlier (non-device-tested) work as "already reads clearly". A real TV
+  said otherwise. `InteractiveCardShell` now also gets a `FocusRing`
+  border, matching every icon/text target.
+
+**Still open, deliberately not guessed at:** whether a D-pad can reach the
+top bar's section chips *from inside the content area* (as opposed to the
+chips correctly responding to OK once reached, which the fix above
+covers). The content area renders inside its own `Navigator`/`FocusScope`
+(`NestedNavigator`), and Flutter's default directional traversal policy
+gathers candidates from the nearest enclosing `FocusScope` -- if that scope
+boundary is what's blocking it, the fix is either a manual escape-hatch
+(request focus into the chip row when an arrow key reaches the app's outer
+key handler unhandled) or a `FocusTraversalPolicy` that spans both, and a
+wrong version of either risks breaking the in-content navigation the fixes
+above just repaired. Needs a device to isolate before attempting it.
+
 ### Not doing, so it stays decided
 
 | What | Why not |

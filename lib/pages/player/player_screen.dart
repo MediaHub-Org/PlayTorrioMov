@@ -38,6 +38,7 @@ import '../../widgets/player/player_speed_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/skip_segments_service.dart';
+import '../../services/tv_mode_service.dart';
 import '../../widgets/player/player_aspect_menu.dart' show PlayerAspectMenu;
 import '../../widgets/player/subtitle_overlay.dart';
 import '../../widgets/player/player_skip_button.dart';
@@ -2182,15 +2183,27 @@ class _PlayerScreenState extends State<PlayerScreen>
             }
 
             if (event is KeyDownEvent) {
-              if (event.logicalKey == LogicalKeyboardKey.arrowUp ||
-                  event.logicalKey == LogicalKeyboardKey.audioVolumeUp) {
+              // On a real TV the 4 arrows are the only way to move focus
+              // between controls (play/pause, seek, the volume slider, the
+              // transport bar) -- claiming arrowUp/Down/Left/Right here for
+              // volume/seek instead meant a D-pad could never reach anything
+              // but this one handler. Off TV they keep the desktop-player
+              // convention (arrows for seek/volume, same as most
+              // keyboard-driven players); a mouse-and-keyboard user never
+              // needs the arrows for focus movement the way a D-pad-only
+              // remote does. The hardware volume keys and J/K/L keep working
+              // everywhere either way -- they never meant "move focus".
+              final isTv = TvModeService.isTv.value;
+              if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
+                  (!isTv && event.logicalKey == LogicalKeyboardKey.arrowUp)) {
                 _applyVolume(
                   (_volume + 0.05).clamp(0.0, PlayerVolumeControl.maxVolume),
                   showHud: true,
                 );
                 return KeyEventResult.handled;
-              } else if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
-                  event.logicalKey == LogicalKeyboardKey.audioVolumeDown) {
+              } else if (event.logicalKey ==
+                      LogicalKeyboardKey.audioVolumeDown ||
+                  (!isTv && event.logicalKey == LogicalKeyboardKey.arrowDown)) {
                 _applyVolume(
                   (_volume - 0.05).clamp(0.0, PlayerVolumeControl.maxVolume),
                   showHud: true,
@@ -2200,15 +2213,25 @@ class _PlayerScreenState extends State<PlayerScreen>
                 _toggleMute(showHud: true);
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.space ||
-                  event.logicalKey == LogicalKeyboardKey.keyK) {
+                  event.logicalKey == LogicalKeyboardKey.keyK ||
+                  event.logicalKey == LogicalKeyboardKey.select ||
+                  event.logicalKey == LogicalKeyboardKey.gameButtonA) {
+                // The D-pad's OK/center button and a gamepad's A button, in
+                // addition to the existing desktop shortcuts. Only reached
+                // when nothing more specific already took the key (a
+                // focused button's own Focus handles it first), so this is
+                // the "OK does something sane" fallback for whenever this
+                // outer node still holds focus -- e.g. right after the
+                // player opens, before focus has moved anywhere.
                 _togglePlayPause();
                 return KeyEventResult.handled;
-              } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
-                  event.logicalKey == LogicalKeyboardKey.keyJ) {
+              } else if (event.logicalKey == LogicalKeyboardKey.keyJ ||
+                  (!isTv && event.logicalKey == LogicalKeyboardKey.arrowLeft)) {
                 _seekRelative(const Duration(seconds: -10));
                 return KeyEventResult.handled;
-              } else if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
-                  event.logicalKey == LogicalKeyboardKey.keyL) {
+              } else if (event.logicalKey == LogicalKeyboardKey.keyL ||
+                  (!isTv &&
+                      event.logicalKey == LogicalKeyboardKey.arrowRight)) {
                 _seekRelative(const Duration(seconds: 10));
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyF ||

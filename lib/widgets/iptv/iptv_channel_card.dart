@@ -38,6 +38,7 @@ class IptvChannelCard extends StatelessWidget {
     return ClampedTextScale(
       child: InteractiveCardShell(
         pressedScale: 0.96,
+        focusRingBorderRadius: 16,
         onTap: onTap,
         builder: (context, hovered, pressed) => RepaintBoundary(
           child: Column(

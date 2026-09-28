@@ -15,6 +15,57 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   wordmark in the icon's own two-purple gradient, and wired it up in the
   manifest.
 
+### Fixed
+- **A real remote could barely navigate the app at all (#80).** Device
+  testing of v1.9.0 on an actual TV found several D-pad problems the
+  earlier phases' testing (all done by reading code, not by using a
+  remote) had missed:
+  - **The player swallowed every arrow-key press for volume/seek.** A
+    screen-wide key handler claimed arrowUp/Down/Left/Right unconditionally
+    for volume and ±10s seek, so a D-pad could never move focus onto any of
+    the player's own buttons -- including the volume slider, which already
+    had its own correct left/right-to-adjust handling that this outer
+    handler never let a D-pad reach. Those four keys now fall through to
+    normal focus movement on an actual TV (`TvModeService.isTv`); off TV
+    they keep the existing desktop-player convention unchanged. The
+    hardware volume keys and J/K/L (VLC's seek/play keys) are unaffected
+    either way.
+  - **OK/center could not pause or play.** The same handler answered Space
+    and K for play/pause but never the D-pad's actual center-button key
+    (`LogicalKeyboardKey.select`) or a gamepad's A button. Added as a
+    fallback alongside the existing shortcuts.
+  - **The top bar's section chips didn't respond to OK.** Unlike every
+    other D-pad-activatable control in the app (`HoverButton`,
+    `InteractiveCardShell`, the player's own buttons), the chip switcher
+    relied on `InkWell`'s own default key handling instead of the explicit
+    select/gameButtonA wiring everything else uses. Rebuilt on the same
+    `Focus` + explicit key handling pattern as the rest of the app.
+  - **Only the first catalog row was reachable.** `BrowseScaffold`'s
+    `CustomScrollView` used Flutter's default 250px cache extent, so a row
+    more than about one screen down was not laid out at all yet -- nothing
+    for directional focus traversal to find there, regardless of which key
+    was pressed. Raised to 2000px, and `HoverButton`/`InteractiveCardShell`
+    now scroll a newly focused item into view
+    (`Scrollable.ensureVisible`) as focus moves, so the viewport keeps
+    advancing (and laying out further rows) as a D-pad user works down a
+    page instead of only ever seeing what was already on screen.
+  - **Cards were hard to tell apart from unfocused ones at a couch's
+    distance.** Every poster/channel card (`InteractiveCardShell`) relied
+    on a ~4% hover-lean alone as its focus indicator, judged enough during
+    earlier, non-device-tested work; real testing said otherwise. Cards now
+    also get the same `FocusRing` border every icon/text target already
+    uses.
+
+  **Not resolved by this pass, and flagged rather than guessed at:**
+  whether a D-pad can reach the top bar's section chips *from* the content
+  area (as opposed to the chips now correctly responding to OK once
+  reached) is still unconfirmed. The content area renders inside its own
+  `Navigator`/`FocusScope` (`NestedNavigator`), which may bound directional
+  focus traversal to that scope and prevent it from ever considering the
+  persistent chrome outside it as a candidate -- a real gap if so, but one
+  that needs a device to confirm before attempting a fix that could just as
+  easily make in-content navigation worse.
+
 ### Removed
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,

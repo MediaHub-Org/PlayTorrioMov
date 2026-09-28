@@ -329,6 +329,15 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
 
     final content = CustomScrollView(
       controller: _scrollController,
+      // The default cacheExtent (250px) means a row a couple of screens
+      // down is not laid out at all yet, so directional focus traversal has
+      // no candidate to find there -- pressing down just does nothing past
+      // whatever the default window already built. 2000px covers several
+      // rows' worth of look-ahead in both directions; combined with
+      // HoverButton/InteractiveCardShell scrolling a newly focused card
+      // into view, the viewport keeps advancing as focus does, so each
+      // press builds enough of the next row for the press after it.
+      cacheExtent: 2000,
       slivers: [
         if (widget.isLoading)
           SliverToBoxAdapter(
