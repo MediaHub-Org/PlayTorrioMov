@@ -11,6 +11,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/my_list/my_list_service.dart';
 import '../../services/theme/app_colors.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
@@ -600,7 +601,8 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
   Widget _buildChoiceChip(String label, String value, LibraryShelf shelf) {
     final isSelected = _typeFor(shelf) == value;
-    return GestureDetector(
+    return HoverButton(
+      scaleAmount: 1.05,
       onTap: () => setState(() => _filterType = value),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
