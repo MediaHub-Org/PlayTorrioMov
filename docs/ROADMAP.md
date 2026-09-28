@@ -308,7 +308,21 @@ mid-transition -- so its outgoing children are now wrapped in
 `ExcludeFocus`. `watch_screen.dart`'s only switches a single icon; nothing
 to exclude there.
 
-Still open in phase 4: a stronger `FocusRing` for text/icon-only targets.
+**`FocusRing` landed on text/icon-only targets, closing phase 4.** The
+player transport's `FocusRing` (a ring drawn just outside a focused widget)
+moved to `lib/widgets/common/focus_ring.dart` so it's no longer
+player-only. `HoverButton` -- whose focus cue was, by design, its existing
+hover-scale lean reused for focus, since a ring around an arbitrary child
+would have to guess at a shape the widget doesn't know -- gained an opt-in
+`showFocusRing` flag for call sites whose child *is* a known, plain shape:
+a bare icon, a short line of text, a pill. Set on all 37 such call sites
+(9 icon-only, 17 text-only, 11 icon+text), found via a full audit of every
+`HoverButton` use in `lib/`; left off the 5 remaining uses, which wrap a
+poster, a backdrop or another card with its own strong silhouette, where
+the lean alone already reads clearly.
+
+Phase 4 is done: starting focus, traversal order, and a real focus
+indicator for every kind of target.
 
 ### Not doing, so it stays decided
 

@@ -35,6 +35,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   search and portal browser, Anime and Anime Search results, and the
   multi-view channel picker. A D-pad or keyboard viewer opening any of
   these no longer has to hunt for the first navigable item.
+- **Small and plain focus targets get a real ring, not just a lean
+  (#80).** `HoverButton` reused its hover-scale as the focus cue by
+  design, but a ~4% lean is easy to miss on a bare icon or a short line of
+  text, especially at TV viewing distance. `FocusRing` (previously
+  player-only) moved to `lib/widgets/common/` and `HoverButton` gained an
+  opt-in `showFocusRing` flag, now set on all 37 icon-only, text-only and
+  icon+text `HoverButton` targets across the app -- scroll arrows,
+  favorite toggles, filter chips, the season selector, sub/dub and Play
+  buttons, and more. The 5 targets that wrap a poster, backdrop or other
+  card keep the lean alone, where it already reads clearly. This closes
+  out #80's phase 4.
 
 ### Fixed
 - **A departing episode card could no longer steal focus mid-transition
