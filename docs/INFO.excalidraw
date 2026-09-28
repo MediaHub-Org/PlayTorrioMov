@@ -3292,11 +3292,11 @@
       "locked": false,
       "fontSize": 14,
       "fontFamily": 1,
-      "text": "Metadata\nTMDB · Simkl · Trakt\nAniList (anime)",
+      "text": "Metadata\nStremio baseline + TMDB\nSimkl · Trakt · AniList",
       "textAlign": "center",
       "verticalAlign": "middle",
       "containerId": "ptm053",
-      "originalText": "Metadata\nTMDB · Simkl · Trakt\nAniList (anime)",
+      "originalText": "Metadata\nStremio baseline + TMDB\nSimkl · Trakt · AniList",
       "lineHeight": 1.25,
       "baseline": 13,
       "autoResize": true

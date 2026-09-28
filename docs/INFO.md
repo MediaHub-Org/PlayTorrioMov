@@ -68,7 +68,9 @@ section's root instead of leaving the Details page on top of the switch.
 Four sources, and they are not interchangeable.
 
 **Addons** are Stremio-compatible: a catalog add-on supplies the rows, a
-stream add-on supplies the sources. This is the only source that is
+stream add-on supplies the sources. The same catalog and meta responses
+supply titles, artwork, and baseline descriptions, defaulting to Cinemeta
+when a configured base URL is missing. This is the only source that is
 user-extensible without a code change.
 
 **Built-in scrapers** are ~50 site-specific parsers behind `ScraperManager`,
@@ -154,8 +156,12 @@ return a couple of hundred languages for a popular title. The list is sorted
 by how many files each language has and capped, because most of those
 languages have exactly one file.
 
-**Metadata** — TMDB for catalog and cast, Simkl and Trakt for sync, AniList
-for anime. AniList returns four titles per show and the app picks one.
+**Metadata** — Stremio/Cinemeta supplies catalog rows and baseline
+descriptions; TMDB supplies the details-page synopsis in the viewer's
+language plus cast enrichment when a key exists, falling back silently
+otherwise. Addons usually send `imdb_id`, so the page resolves it to a TMDB
+id and caches the result. Simkl and Trakt sync, AniList covers anime.
+AniList returns four titles per show and the app picks one.
 
 **Debrid & Downloads** — Real-Debrid and friends for cached sources, and
 offline files.
