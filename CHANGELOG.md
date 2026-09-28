@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **The app now has a proper Android TV banner (#78).** Device testing of
+  v1.9.0 found the app listed on a TV's home screen, as intended, but with
+  the square phone icon stretched into the banner slot instead of a real
+  wide card -- `android:banner` was never set. Added a generated
+  320x180-and-up banner at every density (`res/mipmap-*/banner.png`),
+  composited from the app icon plus a "PlayTorrioMov" / "Home for Cinema"
+  wordmark in the icon's own two-purple gradient, and wired it up in the
+  manifest.
+
 ### Removed
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,

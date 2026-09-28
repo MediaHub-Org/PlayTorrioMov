@@ -133,12 +133,18 @@ confirmed by reading the code rather than guessed:
   `PlayerIconButton`, the transport's actual buttons (play/pause, seek,
   volume), or to anything outside the player's menus.
 
-**Underway, not finished.** The manifest now declares both features
+**Underway, not finished.** The manifest declares both features
 required=false (`android.hardware.touchscreen` has to be there too, or
 Android TV's own install filter excludes the app before leanback ever
 matters) and the launch activity carries `LEANBACK_LAUNCHER`, so the app
-should at least appear in a TV launcher now -- unconfirmed on a device, and
-there is no banner image yet, so it falls back to the launcher icon.
+appears in a TV launcher. Confirmed on a device 2026-09-28, with one gap: it
+showed with the square phone icon stretched into the banner slot rather than
+a proper wide card, because `android:banner` wasn't set. A generated
+320x180-and-up banner (`res/mipmap-*/banner.png`, composited from the app
+icon plus the "PlayTorrioMov" / "Home for Cinema" wordmark, matching the
+icon's own two-purple gradient) is now wired up via `android:banner` on the
+`<application>` element -- still unconfirmed on a device whether the
+leanback launcher actually renders it as intended.
 
 Two primitives carry the fix, matching what each already looked like:
 
