@@ -6,11 +6,11 @@ import 'over_artwork.dart';
 Color headerPillTint(BuildContext context) => OverArtwork.tint(context);
 
 /// The one background/border every header pill control shares --
-/// [FilterDropdown]'s genre/decade/sort pills, [PageSearchButton], and
-/// [HeaderPillIconButton] -- so a plain icon action (like a bare search
-/// button) never reads as visually different from the dropdown pills it
-/// sits next to in the same row. Also used by Live TV's own header, which
-/// used to carry a completely different, bespoke "glass" look.
+/// [FilterDropdown]'s genre/decade/sort pills and [HeaderPillIconButton] --
+/// so a plain icon action never reads as visually different from the
+/// dropdown pills it sits next to in the same row. Also used by Live TV's
+/// own header, which used to carry a completely different, bespoke "glass"
+/// look.
 ///
 /// Built per call rather than held as a `const`: the tint follows both the
 /// active theme and whether this row floats over a hero, neither of which

@@ -12,7 +12,6 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/header_pill_style.dart';
 import '../../widgets/home/continue_watching_slider.dart';
-import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
 import '../../widgets/iptv/iptv_hero_slide.dart';
@@ -21,7 +20,6 @@ import 'iptv_channel_sheet.dart';
 import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
 import 'iptv_sources_page.dart';
-import 'iptv_search_page.dart';
 import '../../services/tv_type.dart';
 
 class IptvPage extends StatefulWidget {
@@ -155,10 +153,6 @@ class _IptvPageState extends State<IptvPage> {
     }
   }
 
-  void _navigateToSearch() {
-    pushPage(context, const IptvSearchPage());
-  }
-
   void _navigateToMultiView() {
     pushPage(context, const IptvMultiViewPage());
   }
@@ -237,7 +231,6 @@ class _IptvPageState extends State<IptvPage> {
     };
 
     final pillHeader = _IptvGlassAppBar(
-      onSearchTap: _navigateToSearch,
       onSourcesTap: () => pushPage(context, const IptvSourcesPage()),
       onMultiViewTap: _navigateToMultiView,
     );
@@ -338,14 +331,12 @@ class _IptvPageState extends State<IptvPage> {
 /// controls sat a few pixels off from Movies', Series' and Anime's.
 ///
 /// The title and channel-count pills are the bar's [leading] run; the
-/// three actions are its trailing pills.
+/// two actions are its trailing pills.
 class _IptvGlassAppBar extends StatelessWidget {
-  final VoidCallback onSearchTap;
   final VoidCallback onSourcesTap;
   final VoidCallback onMultiViewTap;
 
   const _IptvGlassAppBar({
-    required this.onSearchTap,
     required this.onSourcesTap,
     required this.onMultiViewTap,
   });
@@ -374,7 +365,6 @@ class _IptvGlassAppBar extends StatelessWidget {
           tooltip: context.l10n.iptvMultiViewTooltip,
           onTap: onMultiViewTap,
         ),
-        PageSearchButton(onTap: onSearchTap),
       ],
     );
   }

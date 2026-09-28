@@ -15,7 +15,6 @@ import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/error_view.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
-import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
@@ -414,7 +413,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           ],
           onSelected: (v) => setState(() => _sort = v!),
         ),
-        const PageSearchButton(),
       ],
     );
   }

@@ -15,12 +15,10 @@ import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/genre_tag_row.dart';
-import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
 import 'anime_stream_sheet.dart';
-import '../search/search_page.dart';
 import '../../services/theme/app_colors.dart';
 
 const _kAnimeGenres = [
@@ -228,7 +226,7 @@ class _AnimePageState extends State<AnimePage> {
     );
   }
 
-  /// The genre/decade/search pill row. Built once per [build] and either
+  /// The genre/decade pill row. Built once per [build] and either
   /// nested inside the hero carousel (see its call sites) or placed inline
   /// above other content via [_withHeader] -- never a page-level floating
   /// overlay, so it always scrolls away with whatever it sits above.
@@ -270,7 +268,6 @@ class _AnimePageState extends State<AnimePage> {
               () => _decadeFilter = (v == null || v < 0) ? null : v,
             ),
           ),
-        PageSearchButton(onTap: _navigateToSearch),
       ],
     );
   }
@@ -338,13 +335,6 @@ class _AnimePageState extends State<AnimePage> {
 
   void _openDetails(AnimeMedia anime) {
     pushPage(context, AnimeDetailsPage(anime: anime));
-  }
-
-  /// AniList anime is searchable from the unified search page -- arriving
-  /// from here pre-selects its Anime chip via [SearchScope], so the button
-  /// means the same thing it does on Movies and Series.
-  void _navigateToSearch() {
-    pushPage(context, const SearchPage());
   }
 
   /// The hero carousel's items -- the same "newest first" slides both modes

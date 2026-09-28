@@ -9,8 +9,8 @@
   "@navAnime": {"description": "Hub bottom tab / section label"},
   "navLiveTv": "Live TV",
   "@navLiveTv": {"description": "Hub bottom tab / section label"},
-  "navLibrary": "Library",
-  "@navLibrary": {"description": "Hub bottom tab / section label"},
+  "navProfile": "Profile",
+  "@navProfile": {"description": "Hub bottom tab / section label"},
 
   "settingsTitle": "Settings",
   "settingsCategoryAddons": "Addons",

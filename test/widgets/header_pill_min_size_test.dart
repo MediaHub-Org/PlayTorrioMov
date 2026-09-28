@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/widgets/common/filter_dropdown.dart';
 import 'package:playtorriomov/widgets/common/header_pill_style.dart';
-import 'package:playtorriomov/widgets/common/page_search_button.dart';
 
 Widget wrap(Widget child) => MaterialApp(
       home: Scaffold(
@@ -28,15 +27,6 @@ void main() {
         ),
       );
       final size = tester.getSize(find.byType(HeaderPillIconButton));
-      expect(size.width, greaterThanOrEqualTo(headerPillMinSize));
-      expect(size.height, greaterThanOrEqualTo(headerPillMinSize));
-    });
-
-    testWidgets('PageSearchButton is at least headerPillMinSize', (
-      tester,
-    ) async {
-      await tester.pumpWidget(wrap(const PageSearchButton()));
-      final size = tester.getSize(find.byType(PageSearchButton));
       expect(size.width, greaterThanOrEqualTo(headerPillMinSize));
       expect(size.height, greaterThanOrEqualTo(headerPillMinSize));
     });
