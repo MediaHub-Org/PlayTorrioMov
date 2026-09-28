@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 
 import '../../models/iptv/iptv_models.dart';
@@ -15,8 +16,19 @@ import '../../utils/navigation/route_transitions.dart';
 import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/setting_choice_chip.dart';
 import '../../widgets/common/clamped_text_scale.dart';
+
+/// The keys that activate a focused portal-browser card. `final`, not
+/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
+/// that inside a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 class IptvPortalBrowserPage extends StatefulWidget {
   final VerifiedPortal? portal;
@@ -1400,6 +1412,14 @@ class _CategoryListRow extends StatefulWidget {
 
 class _CategoryListRowState extends State<_CategoryListRow> {
   bool _hovered = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1407,9 +1427,13 @@ class _CategoryListRowState extends State<_CategoryListRow> {
     final palette = AppThemeService.currentPalette.value;
     final isFavCategory = widget.category.id == _IptvPortalBrowserPageState.favoritesCategoryId;
     final showCount = IptvSettings.showCategoryCount.value;
+    final hovered = _hovered || _focused;
 
     return RepaintBoundary(
-      child: MouseRegion(
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: _handleKey,
+        child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -1421,7 +1445,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
             decoration: BoxDecoration(
               color: widget.isSelected
                   ? (isFavCategory ? AppColors.inkAlpha(0.15) : palette.primaryColor.withValues(alpha: 0.15))
-                  : (_hovered ? AppColors.raised : Colors.transparent),
+                  : (hovered ? AppColors.raised : Colors.transparent),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: widget.isSelected
@@ -1454,7 +1478,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
                     style: TextStyle(
                       color: widget.isSelected
                           ? (isFavCategory ? const Color(0xFFFFD54F) : AppColors.ink)
-                          : (_hovered ? AppColors.ink : (isFavCategory ? AppColors.ink : AppColors.inkMuted)),
+                          : (hovered ? AppColors.ink : (isFavCategory ? AppColors.ink : AppColors.inkMuted)),
                       fontSize: 12.5,
                       fontWeight: widget.isSelected ? FontWeight.w800 : (isFavCategory ? FontWeight.w700 : FontWeight.w600),
                     ),
@@ -1485,6 +1509,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );
@@ -1517,7 +1542,15 @@ class _LiveChannelListRow extends StatefulWidget {
 
 class _LiveChannelListRowState extends State<_LiveChannelListRow> {
   bool _hovered = false;
+  bool _focused = false;
   List<EpgEntry>? _cachedEpg;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   void initState() {
@@ -1552,9 +1585,13 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
     final isVerySmall = screenW < 440;
     final showLogo = IptvSettings.showStreamLogos.value;
     final showEpg = IptvSettings.showEpgSnippet.value;
+    final hovered = _hovered || _focused;
 
     return RepaintBoundary(
-      child: MouseRegion(
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: _handleKey,
+        child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) {
           setState(() => _hovered = true);
@@ -1567,13 +1604,13 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
             duration: const Duration(milliseconds: 120),
             padding: EdgeInsets.symmetric(horizontal: isVerySmall ? 8 : 14, vertical: 8),
             decoration: BoxDecoration(
-              color: _hovered ? AppColors.raised : AppColors.bar,
+              color: hovered ? AppColors.raised : AppColors.bar,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: _hovered ? palette.primaryColor.withValues(alpha: 0.7) : AppColors.edge,
-                width: _hovered ? 1.4 : 1.0,
+                color: hovered ? palette.primaryColor.withValues(alpha: 0.7) : AppColors.edge,
+                width: hovered ? 1.4 : 1.0,
               ),
-              boxShadow: _hovered
+              boxShadow: hovered
                   ? [
                       BoxShadow(
                         color: palette.primaryColor.withValues(alpha: 0.2),
@@ -1738,7 +1775,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: _hovered ? palette.primaryColor : AppColors.inkAlpha(0.06),
+                    color: hovered ? palette.primaryColor : AppColors.inkAlpha(0.06),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -1751,6 +1788,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -1782,6 +1820,14 @@ class _LiveChannelGridCard extends StatefulWidget {
 
 class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
   bool _hovered = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1789,9 +1835,13 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final showLogo = IptvSettings.showStreamLogos.value;
+    final hovered = _hovered || _focused;
 
     return RepaintBoundary(
-      child: MouseRegion(
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: _handleKey,
+        child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -1801,13 +1851,13 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
             duration: const Duration(milliseconds: 140),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _hovered ? AppColors.raised : AppColors.bar,
+              color: hovered ? AppColors.raised : AppColors.bar,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: _hovered ? palette.primaryColor.withValues(alpha: 0.8) : AppColors.edge,
-                width: _hovered ? 1.5 : 1.0,
+                color: hovered ? palette.primaryColor.withValues(alpha: 0.8) : AppColors.edge,
+                width: hovered ? 1.5 : 1.0,
               ),
-              boxShadow: _hovered
+              boxShadow: hovered
                   ? [
                       BoxShadow(
                         color: palette.primaryColor.withValues(alpha: 0.22),
@@ -1874,7 +1924,8 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                       message: widget.isFavorite
                           ? context.l10n.iptvRemoveFavorite
                           : context.l10n.iptvAddFavorite,
-                      child: GestureDetector(
+                      child: HoverButton(
+                        scaleAmount: 1.15,
                         onTap: widget.onToggleFavorite,
                         child: Icon(
                           widget.isFavorite
@@ -1928,7 +1979,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                       width: 26,
                       height: 26,
                       decoration: BoxDecoration(
-                        color: _hovered ? palette.primaryColor : AppColors.inkAlpha(0.06),
+                        color: hovered ? palette.primaryColor : AppColors.inkAlpha(0.06),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -1943,6 +1994,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
@@ -1974,6 +2026,14 @@ class _LiveChannelCompactListRow extends StatefulWidget {
 
 class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> {
   bool _hovered = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1981,9 +2041,13 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final showLogo = IptvSettings.showStreamLogos.value;
+    final hovered = _hovered || _focused;
 
     return RepaintBoundary(
-      child: MouseRegion(
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: _handleKey,
+        child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
         onExit: (_) => setState(() => _hovered = false),
@@ -1993,10 +2057,10 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
             duration: const Duration(milliseconds: 120),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _hovered ? AppColors.raised : AppColors.bar,
+              color: hovered ? AppColors.raised : AppColors.bar,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: _hovered ? palette.primaryColor.withValues(alpha: 0.7) : AppColors.edge,
+                color: hovered ? palette.primaryColor.withValues(alpha: 0.7) : AppColors.edge,
               ),
             ),
             child: Row(
@@ -2048,7 +2112,8 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                   message: widget.isFavorite
                       ? context.l10n.iptvRemoveFavorite
                       : context.l10n.iptvAddFavorite,
-                  child: GestureDetector(
+                  child: HoverButton(
+                    scaleAmount: 1.15,
                     onTap: widget.onToggleFavorite,
                     child: Icon(
                       widget.isFavorite
@@ -2064,13 +2129,14 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                 const SizedBox(width: 8),
                 Icon(
                   Icons.play_arrow_rounded,
-                  color: _hovered ? palette.primaryColor : AppColors.inkDisabled,
+                  color: hovered ? palette.primaryColor : AppColors.inkDisabled,
                   size: 18,
                 ),
               ],
             ),
           ),
         ),
+      ),
       ),
     );
   }
