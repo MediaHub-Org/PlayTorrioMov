@@ -6,6 +6,7 @@ import '../../models/collection/media_collection.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/collections/media_collections_service.dart';
 import '../../services/theme/app_colors.dart';
+import '../../utils/navigation/adaptive_sheet.dart';
 
 /// Picks which collections a title belongs to.
 ///
@@ -28,7 +29,7 @@ class CollectionPickerSheet extends StatefulWidget {
   const CollectionPickerSheet({super.key, required this.item});
 
   static Future<void> show(BuildContext context, MyListItem item) {
-    return showModalBottomSheet<void>(
+    return showAdaptiveSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

@@ -12,6 +12,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_network.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../services/iptv/iptv_storage.dart';
+import '../../utils/navigation/adaptive_sheet.dart';
 import '../../utils/navigation/route_transitions.dart';
 import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
@@ -649,7 +650,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
       );
     }
   }  void _showMobileCategorySheet(BuildContext context) {
-    showModalBottomSheet(
+    showAdaptiveSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

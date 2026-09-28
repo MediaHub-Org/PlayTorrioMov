@@ -5,6 +5,7 @@ import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_controller.dart';
+import '../../utils/navigation/adaptive_sheet.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/like_button.dart';
@@ -18,7 +19,7 @@ class IptvChannelSheet extends StatefulWidget {
   const IptvChannelSheet({super.key, required this.channel});
 
   static Future<void> show(BuildContext context, HardcodedChannel channel) {
-    return showModalBottomSheet(
+    return showAdaptiveSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
