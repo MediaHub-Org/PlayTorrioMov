@@ -37,7 +37,7 @@ void main() {
       expect(find.text('Series'), findsOneWidget);
       expect(find.text('Anime'), findsOneWidget);
       expect(find.text('Live TV'), findsOneWidget);
-      expect(find.text('Library'), findsOneWidget);
+      expect(find.text('Profile'), findsOneWidget);
     });
 
     testWidgets('mobile bottom bar tap switches section', (tester) async {
@@ -88,6 +88,29 @@ void main() {
 
       expect(find.byIcon(Icons.settings_rounded), findsOneWidget);
       await tester.tap(find.byIcon(Icons.settings_rounded));
+      await tester.pump();
+      expect(tapped, true);
+    });
+
+    testWidgets('mobile top bar hides search icon when onSearchTap is null', (tester) async {
+      setSurfaceWidth(tester, 400);
+      await tester.pumpWidget(wrap(const AdaptiveNavShell(child: SizedBox.shrink())));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.search_rounded), findsNothing);
+    });
+
+    testWidgets('mobile top bar shows search icon and calls onSearchTap', (tester) async {
+      setSurfaceWidth(tester, 400);
+      var tapped = false;
+      await tester.pumpWidget(wrap(AdaptiveNavShell(
+        onSearchTap: () => tapped = true,
+        child: const SizedBox.shrink(),
+      )));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.search_rounded));
       await tester.pump();
       expect(tapped, true);
     });
@@ -165,7 +188,7 @@ void main() {
           final barCenter = tester.getCenter(find.byType(TopBar)).dy;
           for (final finder in [
             find.text('Films'),
-            find.text('Library'),
+            find.text('Profile'),
             find.byIcon(Icons.settings_rounded),
           ]) {
             expect((tester.getCenter(finder).dy - barCenter).abs(), lessThan(8));
@@ -188,8 +211,8 @@ void main() {
         await pumpShell(tester, 1400);
 
         final films = tester.getCenter(find.text('Films')).dx;
-        final library = tester.getCenter(find.text('Library')).dx;
-        final mid = (films + library) / 2;
+        final profile = tester.getCenter(find.text('Profile')).dx;
+        final mid = (films + profile) / 2;
         expect((mid - 700).abs(), lessThan(120),
             reason: 'roughly centered on the bar, not hugging the logo');
       });

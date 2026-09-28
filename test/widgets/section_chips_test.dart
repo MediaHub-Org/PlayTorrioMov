@@ -27,7 +27,7 @@ void main() {
 
       expect(find.text('Films'), findsNothing);
       expect(find.text('Anime'), findsNothing);
-      expect(find.text('Library'), findsNothing);
+      expect(find.text('Profile'), findsNothing);
     });
 
     testWidgets('desktop shows every section as a chip', (tester) async {
@@ -39,7 +39,7 @@ void main() {
       expect(find.text('Series'), findsOneWidget);
       expect(find.text('Anime'), findsOneWidget);
       expect(find.text('Live TV'), findsOneWidget);
-      expect(find.text('Library'), findsOneWidget);
+      expect(find.text('Profile'), findsOneWidget);
     });
 
     testWidgets('desktop chip tap switches the section', (tester) async {
@@ -59,12 +59,12 @@ void main() {
       expect(
         HubController.instance.currentSections.length,
         5,
-        reason: 'Movies, Series, Anime, Live TV, Library',
+        reason: 'Movies, Series, Anime, Live TV, Profile',
       );
     });
 
-    test('sections end with a Library section', () {
-      expect(HubController.instance.currentSections.last.label, 'Library');
+    test('sections end with a Profile section', () {
+      expect(HubController.instance.currentSections.last.label, 'Profile');
     });
 
     test('Movies and Series are both selectable top-level sections', () {

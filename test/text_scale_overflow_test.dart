@@ -295,7 +295,7 @@ void main() {
     (tester) async {
       // AdaptiveNavShell picks the mobile tier (bottom tab bar, not the
       // desktop chip row) below AppBreakpoints.tablet -- 360 is comfortably
-      // under that. 'Live TV' and 'Library' are HubController's longest
+      // under that. 'Live TV' and 'Profile' are HubController's longest
       // real labels, so this exercises the actual production strings, not
       // a friendlier stand-in.
       await pumpAtScale(

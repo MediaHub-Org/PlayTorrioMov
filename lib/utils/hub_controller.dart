@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 
 /// A single section within the Media hub (Movies & Series, Anime, Live TV,
-/// Library).
+/// Profile).
 class HubSection {
   final String id;
 
@@ -38,7 +38,7 @@ class HubSection {
       'series' => l10n.navSeries,
       'anime' => l10n.navAnime,
       'iptv' => l10n.navLiveTv,
-      'collection' => l10n.navLibrary,
+      'collection' => l10n.navProfile,
       _ => label,
     };
   }
@@ -67,7 +67,7 @@ class HubController extends ChangeNotifier {
         HubSection(id: 'series', label: 'Series', icon: Icons.tv_rounded),
         HubSection(id: 'anime', label: 'Anime', icon: Icons.animation_rounded),
         HubSection(id: 'iptv', label: 'Live TV', icon: Icons.live_tv_rounded),
-        HubSection(id: 'collection', label: 'Library', icon: Icons.video_library_rounded),
+        HubSection(id: 'collection', label: 'Profile', icon: Icons.account_circle_rounded),
       ];
 
   String get currentSectionId => _mediaSection;

@@ -8,12 +8,14 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../widgets/common/adaptive_nav_shell.dart';
+import '../iptv/iptv_search_page.dart';
+import '../search/search_page.dart';
 import '../settings/settings_page.dart';
 import 'media_hub.dart';
 import '../../services/theme/app_colors.dart';
 
 /// HubPage: the top-level container hosting the app's single Media hub
-/// (Movies, Series, Anime, Live TV, Library).
+/// (Movies, Series, Anime, Live TV, Profile).
 class HubPage extends StatefulWidget {
   const HubPage({super.key});
 
@@ -41,6 +43,9 @@ class _HubPageState extends State<HubPage> {
   // two SettingsPage instances -- back had to be pressed twice to actually
   // leave. Guards against a second push while one is already in flight.
   bool _openingSettings = false;
+
+  // Same double-push guard as Settings, for the same reason.
+  bool _openingSearch = false;
 
   void _onHubControllerChanged() {
     final section = HubController.instance.mediaSection;
@@ -104,6 +109,20 @@ class _HubPageState extends State<HubPage> {
                   if (mounted) {
                     setState(() => _rebuildKey++);
                   }
+                },
+                onSearchTap: () async {
+                  if (_openingSearch) return;
+                  _openingSearch = true;
+                  // Live TV searches a portal's stream list by keyword, not
+                  // a title catalog, so it keeps its own page -- same split
+                  // each catalog page's own search button used to make.
+                  await pushPage(
+                    context,
+                    HubController.instance.mediaSection == 'iptv'
+                        ? const IptvSearchPage()
+                        : const SearchPage(),
+                  );
+                  _openingSearch = false;
                 },
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(

@@ -21,20 +21,29 @@ import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
+import '../../widgets/common/top_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../player/player_screen.dart';
+import '../settings/settings_page.dart';
 import 'library_shelf_page.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 
-/// The Library: everything you saved, everything you started, everything on
-/// the device.
+/// The Profile tab: everything you saved, everything you started, everything
+/// on the device, plus a way into Settings.
 ///
 /// The three library states used to be three of its four tabs. They are cards
 /// in [LibrarySection.collections] now, beside the user's own collections --
 /// see [LibrarySection] for why. This page is the shelf of shelves; opening
 /// any card lands in [LibraryShelfPage], which is where titles are actually
 /// listed, filtered and sorted.
+///
+/// Settings has always been reachable globally (the gear in [TopBar]); the
+/// button in this page's own header is a second, more discoverable path to
+/// the same [SettingsPage], added when this tab was renamed from "Library"
+/// to "Profile" -- account/settings-adjacent things are what a "Profile" tab
+/// is expected to hold, even though the tab's actual content (saved items,
+/// continue watching, downloads) hasn't changed.
 class CollectionPage extends StatefulWidget {
   final int initialTabIndex;
 
@@ -254,9 +263,12 @@ class _CollectionPageState extends State<CollectionPage> {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return LibraryTabs(
-      title: context.l10n.navLibrary,
-      titleIcon: Icons.video_library_rounded,
+      title: context.l10n.navProfile,
+      titleIcon: Icons.account_circle_rounded,
       initialIndex: widget.initialTabIndex,
+      trailing: SettingsIconButton(
+        onTap: () => pushPage(context, const SettingsPage()),
+      ),
       tabs: [
         for (final section in LibrarySection.values)
           LibraryTab(

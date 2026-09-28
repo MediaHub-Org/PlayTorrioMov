@@ -9,9 +9,17 @@ import '../../services/theme/app_colors.dart';
 
 /// The slim global top bar shown above the hub's content, on every tier --
 /// mobile included, as of the fix described below. Holds the PlayTorrio
-/// logo and a Settings button; on tablet and desktop the hub's sections sit
-/// between them as chips (see [SectionChips]), all in one row. Phones show
-/// the sections in the bottom tab bar instead (see [AdaptiveNavShell]).
+/// logo and a Search + Settings button pair; on tablet and desktop the
+/// hub's sections sit between them as chips (see [SectionChips]), all in
+/// one row. Phones show the sections in the bottom tab bar instead (see
+/// [AdaptiveNavShell]).
+///
+/// Search used to be a separate button embedded in each catalog page's own
+/// header (Films, Series, Anime, Live TV), repeating the same icon four
+/// times. One button here means one place to reach it regardless of which
+/// section is active; [HubPage] still decides where it opens to (the
+/// unified [SearchPage], or Live TV's own keyword search), same as each
+/// page's button used to.
 ///
 /// The sections used to be a second bar underneath. Merging them takes back
 /// that bar's whole height and moves nothing: they were always at the top.
@@ -36,9 +44,17 @@ class TopBar extends StatelessWidget {
   /// Invoked when the settings (gear) button is tapped.
   final VoidCallback? onSettingsTap;
 
+  /// Invoked when the search button is tapped.
+  final VoidCallback? onSearchTap;
+
   static const double sharedHeight = 56;
 
-  const TopBar({super.key, this.height = sharedHeight, this.onSettingsTap});
+  const TopBar({
+    super.key,
+    this.height = sharedHeight,
+    this.onSettingsTap,
+    this.onSearchTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +97,13 @@ class TopBar extends StatelessWidget {
           ? Row(
               children: [
                 // The wordmark gives way on a tablet: logo, five chips and
-                // Settings do not fit 600px with it.
+                // Search + Settings do not fit 600px with it.
                 SidebarLogo(showWordmark: tier == ScreenTier.desktop),
                 const Expanded(child: SectionChips()),
+                if (onSearchTap != null) ...[
+                  SearchIconButton(onTap: onSearchTap!),
+                  const SizedBox(width: 8),
+                ],
                 if (onSettingsTap != null)
                   SettingsIconButton(onTap: onSettingsTap!),
               ],
@@ -92,8 +112,17 @@ class TopBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Flexible(child: SidebarLogo()),
-                if (onSettingsTap != null)
-                  SettingsIconButton(onTap: onSettingsTap!),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onSearchTap != null) ...[
+                      SearchIconButton(onTap: onSearchTap!),
+                      const SizedBox(width: 8),
+                    ],
+                    if (onSettingsTap != null)
+                      SettingsIconButton(onTap: onSettingsTap!),
+                  ],
+                ),
               ],
             ),
     );
@@ -121,6 +150,30 @@ class SettingsIconButton extends StatelessWidget {
         foregroundColor: AppColors.inkMuted,
       ),
       icon: const Icon(Icons.settings_rounded, size: 20),
+    );
+  }
+}
+
+/// The Search button, styled to match [SettingsIconButton] since the two
+/// now sit side by side in [TopBar].
+class SearchIconButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const SearchIconButton({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    return IconButton(
+      onPressed: onTap,
+      tooltip: context.l10n.commonSearch,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+      style: IconButton.styleFrom(
+        backgroundColor: AppColors.inkAlpha(0.04),
+        foregroundColor: AppColors.inkMuted,
+      ),
+      icon: const Icon(Icons.search_rounded, size: 20),
     );
   }
 }

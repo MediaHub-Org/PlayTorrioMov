@@ -8,7 +8,7 @@ import '../collection/collection_page.dart';
 import '../catalog/type_catalog_page.dart';
 import '../iptv/iptv_page.dart';
 
-/// Media hub: Movies, Series, Anime, Live TV, and the user's library.
+/// Media hub: Movies, Series, Anime, Live TV, and the user's Profile tab.
 ///
 /// Sections are switched via the [SectionChips] — chips on tablet/desktop,
 /// a bottom tab bar on mobile. The active section is driven by the shared

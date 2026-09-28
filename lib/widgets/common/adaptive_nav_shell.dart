@@ -14,7 +14,7 @@ import '../../services/tv_type.dart';
 ///
 /// Mobile mirrors that hierarchy: the bottom bar -- the easiest thing to
 /// reach on a phone -- carries the hub's four sections. The header is just
-/// the wordmark and a settings button.
+/// the wordmark and the Search/Settings button pair.
 class AdaptiveNavShell extends StatelessWidget {
   /// Height of the mobile bottom tab bar. Callers positioning other
   /// bottom-anchored chrome (e.g. a mini player) above it on mobile
@@ -31,11 +31,13 @@ class AdaptiveNavShell extends StatelessWidget {
 
   final Widget child;
   final VoidCallback? onSettingsTap;
+  final VoidCallback? onSearchTap;
 
   const AdaptiveNavShell({
     super.key,
     required this.child,
     this.onSettingsTap,
+    this.onSearchTap,
   });
 
   @override
@@ -50,7 +52,7 @@ class AdaptiveNavShell extends StatelessWidget {
       return Column(
         children: [
           SizedBox(height: topPadding),
-          TopBar(onSettingsTap: onSettingsTap),
+          TopBar(onSettingsTap: onSettingsTap, onSearchTap: onSearchTap),
           Expanded(child: child),
           const SafeArea(top: false, child: _MobileSectionTabBar()),
         ],
@@ -68,7 +70,7 @@ class AdaptiveNavShell extends StatelessWidget {
         // the navigated content, mirrors how the mobile bottom tab bar
         // already sits outside `child` and so never gets covered either.
         // The sections are inside this bar now, so that holds for them too.
-        TopBar(onSettingsTap: onSettingsTap),
+        TopBar(onSettingsTap: onSettingsTap, onSearchTap: onSearchTap),
         Expanded(child: child),
       ],
     );
