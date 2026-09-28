@@ -3,6 +3,7 @@ import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
 import 'iptv_channel_sheet.dart';
 import '../../services/theme/app_colors.dart';
@@ -127,7 +128,8 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                 final cat = _categories[index];
                 final isSelected = _selectedCategory == cat;
 
-                return GestureDetector(
+                return HoverButton(
+                  scaleAmount: 1.05,
                   onTap: () => setState(() => _selectedCategory = cat),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),

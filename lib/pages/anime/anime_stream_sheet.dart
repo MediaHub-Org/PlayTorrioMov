@@ -7,6 +7,7 @@ import '../../models/stream/stream_model.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/source_badges.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../player/player_screen.dart';
 
@@ -443,9 +444,12 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
     return IgnorePointer(
       ignoring: !enabled,
-      child: Opacity(
+      child: ExcludeFocus(
+        excluding: !enabled,
+        child: Opacity(
         opacity: enabled ? 1.0 : 0.35,
-        child: GestureDetector(
+        child: HoverButton(
+          scaleAmount: 1.05,
           onTap: () => setState(() => _selectedCategory = category),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
@@ -470,6 +474,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

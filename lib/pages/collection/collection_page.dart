@@ -17,6 +17,7 @@ import '../../services/subtitles/subtitle_languages.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/collection/collection_card.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
 import '../../widgets/home/continue_watching_slider.dart';
@@ -82,7 +83,8 @@ class _CollectionPageState extends State<CollectionPage> {
   Widget _buildTypePills(String current, ValueChanged<String> onPick) {
     Widget chip(String label, String value) {
       final selected = current == value;
-      return GestureDetector(
+      return HoverButton(
+        scaleAmount: 1.05,
         onTap: () => onPick(value),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
