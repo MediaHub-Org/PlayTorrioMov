@@ -99,6 +99,29 @@ numbers. What remains is hardcoded Arabic across the Arabic anime pages:
 correct for their audience today, and needing a native review before gaining
 es/pt/en translations.
 
+### Android TV and remote navigation (#78)
+
+Reported live: on an Android TV, the D-pad reaches almost nothing, and
+nothing shows a focus highlight when it does. Two separate causes, both
+confirmed by reading the code rather than guessed:
+
+- **The app declares no TV support.** `android/app/src/main/AndroidManifest.xml`
+  has no `android.software.leanback` `<uses-feature>` and no
+  `LEANBACK_LAUNCHER` intent category, so a TV treats a sideloaded build as
+  an unlisted phone app rather than something built for it.
+- **Most interactive widgets cannot take focus.** Flutter only routes D-pad
+  and keyboard directional traversal to a widget holding a `Focus` node --
+  Material's own buttons and chips get one for free, which is presumably why
+  some controls already respond. A lot of this codebase's custom controls do
+  not: `_buildFilterDropdownButton` in `watch_screen.dart` is one concrete
+  example, a bare `GestureDetector` with no `Focus` ancestor, and the pattern
+  repeats across `lib/widgets` and `lib/pages`.
+
+Fixing it for real is two parts: the manifest declarations, and a sweep
+making every reachable control focusable with a visible focus state --
+cross-cutting rather than one file, and its extent is unknown until the
+sweep starts. Nothing here has been touched yet.
+
 ### Not doing, so it stays decided
 
 | What | Why not |
