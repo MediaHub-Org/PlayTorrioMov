@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
 import '../movie/movie_card.dart';
+import 'first_focus_scope.dart';
 import 'section_header.dart';
 import 'slider_arrow.dart';
 
@@ -86,13 +87,9 @@ class BrowseRowView<T> extends StatefulWidget {
 
 class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
   final ScrollController _controller = ScrollController();
-  final FocusScopeNode _focusScope = FocusScopeNode(
-    debugLabel: 'BrowseRowView autofocus scope',
-  );
   bool _hovering = false;
   bool _canLeft = false;
   bool _canRight = false;
-  bool _didAutofocus = false;
 
   @override
   void initState() {
@@ -101,33 +98,12 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
     // Scroll extents are unknown until the first layout, so without this the
     // right arrow would never appear on a row nobody has scrolled yet.
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateEdges());
-    _maybeAutofocus();
-  }
-
-  @override
-  void didUpdateWidget(covariant BrowseRowView<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Items often arrive after the first build (async catalog fetch), so the
-    // one-shot attempt in initState alone would usually find nothing to
-    // focus yet.
-    _maybeAutofocus();
-  }
-
-  void _maybeAutofocus() {
-    if (_didAutofocus || !widget.autofocusFirstItem || widget.items.isEmpty) {
-      return;
-    }
-    _didAutofocus = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focusScope.nextFocus();
-    });
   }
 
   @override
   void dispose() {
     _controller.removeListener(_updateEdges);
     _controller.dispose();
-    _focusScope.dispose();
     super.dispose();
   }
 
@@ -183,8 +159,11 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                FocusScope(
-                  node: _focusScope,
+                FirstFocusScope(
+                  // build() already returned early on an empty items list,
+                  // so readiness here is just whether this row was chosen
+                  // to be the page's landing spot.
+                  ready: widget.autofocusFirstItem,
                   child: ListView.separated(
                     clipBehavior: Clip.none,
                     controller: _controller,

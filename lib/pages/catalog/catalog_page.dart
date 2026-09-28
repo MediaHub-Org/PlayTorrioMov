@@ -9,6 +9,7 @@ import '../../models/movie/movie.dart';
 import '../../models/movie/movie_section.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../widgets/common/error_view.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/movie/movie_card.dart';
@@ -253,7 +254,11 @@ class _CatalogPageState extends State<CatalogPage> {
               ),
             )
           else
-            GridView.builder(
+            FirstFocusScope(
+              // Only reached once _items is non-empty, so the grid below
+              // always has something to land on the moment it mounts.
+              ready: true,
+              child: GridView.builder(
               controller: _scrollController,
               padding: EdgeInsets.fromLTRB(
                 sizing.sidePadding,
@@ -277,6 +282,7 @@ class _CatalogPageState extends State<CatalogPage> {
                 }
                 return MovieCard(movie: _items[index]);
               },
+              ),
             ),
 
           // ── App Bar & Filters ──

@@ -10,6 +10,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/common/animated_ambient_background.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/hover_button.dart';
 import 'anime_details_page.dart';
@@ -788,7 +789,9 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 ),
               )
             else if (_allResults.isNotEmpty)
-              ListView(
+              FirstFocusScope(
+                ready: true,
+                child: ListView(
                 clipBehavior: Clip.none,
                 padding: EdgeInsets.only(
                   top: topPadding + kToolbarHeight + 80,
@@ -818,10 +821,13 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                       onAnimeTap: _openDetails,
                     ),
                 ],
+                ),
               )
             else
               // Discovery Sliders when not searching
-              ListView(
+              FirstFocusScope(
+                ready: true,
+                child: ListView(
                 clipBehavior: Clip.none,
                 padding: EdgeInsets.only(
                   top: topPadding + kToolbarHeight + 80,
@@ -848,6 +854,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                       onAnimeTap: _openDetails,
                     ),
                 ],
+                ),
               ),
           ],
         ),

@@ -9,6 +9,7 @@ import '../../models/movie/movie_section.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../widgets/common/error_view.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/movie/movie_card.dart';
@@ -507,7 +508,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
         .clamp(2, 10);
     final double cardAspectRatio = sizing.cardWidth / sizing.totalHeight;
 
-    return GridView.builder(
+    return FirstFocusScope(
+      // The three isEmpty branches above already returned, so the grid
+      // below always has something to land on the moment it mounts.
+      ready: true,
+      child: GridView.builder(
       controller: _scrollController,
       padding: EdgeInsets.fromLTRB(
         sizing.sidePadding,
@@ -531,6 +536,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
         }
         return MovieCard(movie: _items[index]);
       },
+      ),
     );
   }
 
@@ -1220,7 +1226,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
     final sizing = MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width);
     final double cardAspectRatio = sizing.cardWidth / sizing.totalHeight;
 
-    return GridView.builder(
+    return FirstFocusScope(
+      ready: allMovies.isNotEmpty,
+      child: GridView.builder(
       padding: EdgeInsets.fromLTRB(
         sizing.sidePadding,
         topPadding,
@@ -1241,6 +1249,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       itemBuilder: (context, index) {
         return MovieCard(movie: allMovies[index]);
       },
+      ),
     );
   }
 }

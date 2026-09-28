@@ -27,6 +27,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   surfaces, tap-outside-to-dismiss barriers, and one `onLongPress`) because
   a D-pad has no equivalent action for them -- see the roadmap for exactly
   which and why.
+- **Grids and result lists land focus on their first card, not the chrome
+  above it (#80).** `BrowseScaffold`'s hub pages (Films, Series, Anime, Live
+  TV) already skipped the auto-rotating hero to focus the first row; the
+  same one-shot landing, extracted into a shared `FirstFocusScope`, now
+  covers the Catalog, Discover, Search, Collection, Library shelf, IPTV
+  search and portal browser, Anime and Anime Search results, and the
+  multi-view channel picker. A D-pad or keyboard viewer opening any of
+  these no longer has to hunt for the first navigable item.
 
 ### Removed
 - **The floating scroll track is gone from Films, Series, Anime and Live

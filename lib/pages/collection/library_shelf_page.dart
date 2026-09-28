@@ -11,6 +11,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/my_list/my_list_service.dart';
 import '../../services/theme/app_colors.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
@@ -466,7 +467,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-        child: GridView.builder(
+        child: FirstFocusScope(
+          // Only called once the caller has confirmed items is non-empty.
+          ready: true,
+          child: GridView.builder(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
@@ -485,6 +489,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
               ),
             );
           },
+          ),
         ),
       ),
     );
@@ -731,7 +736,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: _maxContentWidth),
-        child: GridView.builder(
+        child: FirstFocusScope(
+          // Only called once the caller has confirmed channels is non-empty.
+          ready: true,
+          child: GridView.builder(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
@@ -750,6 +758,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
               onTap: () => IptvChannelSheet.show(context, channel),
             );
           },
+          ),
         ),
       ),
     );

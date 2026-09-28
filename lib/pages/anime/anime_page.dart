@@ -13,6 +13,7 @@ import '../../widgets/anime/anime_card.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/filter_dropdown.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
@@ -317,7 +318,10 @@ class _AnimePageState extends State<AnimePage> {
         : width < 1200
         ? 5
         : 6;
-    return GridView.builder(
+    return FirstFocusScope(
+      // The items.isEmpty branch above already returned.
+      ready: true,
+      child: GridView.builder(
       // No floating header to clear anymore -- _withHeader (see build())
       // already reserves real space for the pill row above this grid.
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 16, AppSpacing.lg, 120),
@@ -331,6 +335,7 @@ class _AnimePageState extends State<AnimePage> {
       itemBuilder: (context, index) => AnimeCard(
         anime: items[index],
         onTap: () => _openDetails(items[index]),
+      ),
       ),
     );
   }

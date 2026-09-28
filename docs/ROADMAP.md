@@ -272,6 +272,19 @@ TV-detection groundwork, helps keyboard/D-pad users on every platform (not
 just confirmed TVs), and is the most likely source of an actually-stuck
 viewer today. Phases 2-3 follow once phase 1 (detection) lands.
 
+**Starting-focus landed.** A shared `FirstFocusScope` (hands focus to the
+first focusable descendant once content is ready, exactly once) now covers
+every hub page via `BrowseScaffold`, plus the Catalog, Discover, Search,
+Collection, Library shelf, IPTV search, IPTV portal browser, Anime, Anime
+Search and multi-view channel-picker grids/lists -- deliberately skipping
+auto-rotating heroes and filter-chip rows in favor of the first real content
+card. Left alone on purpose: `anime_details_page.dart`'s small embedded
+episode-number grid (focus there belongs on the page's Play button, not a
+mid-page grid) and the multi-view *playback* grid (its tiles use tap-driven
+state, not `FocusNode`s, so autofocus has nothing to land on). Still open in
+phase 4: explicit `FocusTraversalGroup` ordering, and a stronger `FocusRing`
+for text/icon-only targets.
+
 ### Not doing, so it stays decided
 
 | What | Why not |
