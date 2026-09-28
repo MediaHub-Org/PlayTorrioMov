@@ -10,6 +10,7 @@ import '../../services/addon/addon_manager.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../widgets/common/error_view.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
@@ -905,7 +906,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
                             return Padding(
                               padding: const EdgeInsetsDirectional.only(end: 8),
-                              child: GestureDetector(
+                              child: HoverButton(
+                                scaleAmount: 1.05,
                                 onTap: () => _onCatalogChanged(entry),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
@@ -1071,7 +1073,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       // Text input chip for freeform extras (or search if isRequired)
                       return Padding(
                         padding: const EdgeInsetsDirectional.only(end: 8),
-                        child: GestureDetector(
+                        child: HoverButton(
+                          scaleAmount: 1.05,
                           onTap: () => _showCustomExtraDialog(extra.name),
                           child: Container(
                             padding: EdgeInsets.symmetric(
