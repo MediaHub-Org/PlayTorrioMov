@@ -55,6 +55,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   marker, an episode number, a rating pill, and 49 more, found by auditing
   every `fontSize:` in `lib/`) -- illegible from a couch is now merely
   small. Off Android, nothing changes.
+- **Bottom sheets push as full-screen pages on TV instead (#80).** A modal
+  sheet dismisses by a drag gesture or a tap outside it, neither of which a
+  D-pad/remote can produce; a normally pushed route already answers to the
+  remote's hardware Back button like every other page in the app. The new
+  `showAdaptiveSheet` is a drop-in replacement for `showModalBottomSheet`
+  that checks `TvModeService.isTv` and pushes via the app's existing
+  `pushPage` on TV, unchanged otherwise; all 8 call sites (the anime stream
+  sheet -- now behind its own `AnimeStreamSheet.show()` factory so its
+  three call sites share one control point -- the IPTV channel sheet,
+  collection picker, Cast device picker, the anime search filter picker,
+  and the IPTV portal's category sheet) now go through it. Each sheet's own
+  layout is unchanged, so on TV it may still show as a rounded-corner panel
+  rather than full-bleed content -- the dismiss gesture was the actual
+  functional problem, and it's now solved either way. This closes out
+  #80's phase 3; all four phases are complete.
 
 ### Fixed
 - **A departing episode card could no longer steal focus mid-transition
