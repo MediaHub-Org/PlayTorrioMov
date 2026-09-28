@@ -13,8 +13,20 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../pages/history/watch_history_page.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
+import 'package:flutter/services.dart';
+import '../common/hover_button.dart';
 import '../common/slider_arrow.dart';
 import '../../services/theme/app_colors.dart';
+
+/// The keys that activate a focused continue-watching card. `final`, not
+/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
+/// that inside a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 class ContinueWatchingSlider extends StatefulWidget {
   final String?
@@ -376,6 +388,14 @@ class ContinueWatchingCard extends StatefulWidget {
 
 class ContinueWatchingCardState extends State<ContinueWatchingCard> {
   bool _isHovered = false;
+  bool _isFocused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   void _openDetails(BuildContext context) {
     final item = widget.item;
@@ -421,8 +441,12 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
     final imgHeight = widget.width * 0.58;
     final progress = item.progressPercent;
     final imageUrl = item.backdropUrl ?? item.posterUrl;
+    final hovered = _isHovered || _isFocused;
 
-    return MouseRegion(
+    return Focus(
+      onFocusChange: (focused) => setState(() => _isFocused = focused),
+      onKeyEvent: _handleKey,
+      child: MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -430,7 +454,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: widget.width,
-          transform: _isHovered
+          transform: hovered
               ? Matrix4.diagonal3Values(1.02, 1.02, 1.0)
               : Matrix4.identity(),
           transformAlignment: Alignment.center,
@@ -438,12 +462,12 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
             color: AppColors.surface.withValues(alpha: 0.75),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: _isHovered
+              color: hovered
                   ? widget.palette.primaryColor.withValues(alpha: 0.5)
                   : AppColors.inkAlpha(0.08),
-              width: _isHovered ? 1.4 : 1.0,
+              width: hovered ? 1.4 : 1.0,
             ),
-            boxShadow: _isHovered
+            boxShadow: hovered
                 ? [
                     BoxShadow(
                       color: widget.palette.primaryColor.withValues(
@@ -499,10 +523,10 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                     Positioned.fill(
                       child: Center(
                         child: AnimatedScale(
-                          scale: _isHovered ? 1.0 : 0.8,
+                          scale: hovered ? 1.0 : 0.8,
                           duration: const Duration(milliseconds: 180),
                           child: AnimatedOpacity(
-                            opacity: _isHovered ? 1.0 : 0.0,
+                            opacity: hovered ? 1.0 : 0.0,
                             duration: const Duration(milliseconds: 180),
                             child: Container(
                               width: 44,
@@ -529,8 +553,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                       ),
                     ),
 
-                    // Action Buttons (Top-Right: always on mobile, hover-only on desktop)
-                    if (_isHovered ||
+                    // Action Buttons (Top-Right: always on mobile, hover/focus-only on desktop)
+                    if (hovered ||
                         !(defaultTargetPlatform == TargetPlatform.windows ||
                             defaultTargetPlatform == TargetPlatform.macOS ||
                             defaultTargetPlatform == TargetPlatform.linux))
@@ -543,7 +567,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             // Details Button
                             Tooltip(
                               message: context.l10n.homeViewDetails,
-                              child: GestureDetector(
+                              child: HoverButton(
+                                scaleAmount: 1.1,
                                 onTap: () => _openDetails(context),
                                 child: Container(
                                   padding: const EdgeInsets.all(4),
@@ -569,7 +594,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             // Dismiss / Remove Button
                             Tooltip(
                               message: context.l10n.homeRemoveFromContinue,
-                              child: GestureDetector(
+                              child: HoverButton(
+                                scaleAmount: 1.1,
                                 onTap: widget.onRemove,
                                 child: Container(
                                   padding: const EdgeInsets.all(4),
@@ -750,6 +776,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
