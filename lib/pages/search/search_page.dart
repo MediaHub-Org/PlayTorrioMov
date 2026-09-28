@@ -316,6 +316,7 @@ class _SearchPageState extends State<SearchPage> {
           if (_typeFilter == SearchFilter.anime)
             HoverButton(
               scaleAmount: 1.05,
+              showFocusRing: true,
               onTap: _openAnimeFilters,
               child: Container(
                 padding: const EdgeInsets.symmetric(

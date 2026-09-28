@@ -1216,6 +1216,7 @@ class _DetailsPageState extends State<DetailsPage>
 
   Widget _buildPlayButton({required bool fullWidth}) {
     return HoverButton(
+      showFocusRing: true,
       onTap: () => _handlePlayAction(
         _currentSeasonEpisodes.isNotEmpty
             ? _currentSeasonEpisodes.first

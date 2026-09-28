@@ -1022,6 +1022,7 @@ class _WatchScreenState extends State<WatchScreen>
   }) {
     return HoverButton(
       scaleAmount: 1.03,
+      showFocusRing: true,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1157,6 +1158,7 @@ class _WatchScreenState extends State<WatchScreen>
       builder: (buttonContext) {
         return HoverButton(
           scaleAmount: 1.03,
+          showFocusRing: true,
           onTap: () => onTap(buttonContext),
           child: DecoratedBox(
             decoration: const BoxDecoration(
