@@ -31,7 +31,7 @@
 
     <!-- Neither feature is required: this is one APK for phone, tablet and
          TV. Without the touchscreen line, Android TV's own install filter
-         excludes the app before the leanback category ever matters -- a
+         excludes the app before the leanback category ever matters: a
          touchscreen is assumed required unless told otherwise. -->
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
