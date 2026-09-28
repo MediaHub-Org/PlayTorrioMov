@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/over_artwork.dart';
 import '../../l10n/l10n.dart';
 import '../../widgets/common/arrow_affordance.dart';
@@ -13,6 +14,7 @@ import '../../widgets/common/reading_direction.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
+import '../../models/movie/movie_year.dart';
 import '../../models/movie/video.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/my_list/my_list_item.dart';
@@ -104,6 +106,11 @@ class _DetailsPageState extends State<DetailsPage>
   /// [_enrichedCast]. Most addons send no crew at all, so without this the
   /// Direction half of the credits row was empty for nearly everything.
   List<CrewMember>? _enrichedCrew;
+
+  /// The TMDB synopsis in the viewer's language, when TMDB has one. The
+  /// addon's own text stays the fallback: without a configured key, or when
+  /// TMDB sends nothing, there is nothing to prefer.
+  String? _tmdbOverview;
 
   String? _resolvedType;
   String? _resolvedBaseUrl;
@@ -310,7 +317,7 @@ class _DetailsPageState extends State<DetailsPage>
     if (effectiveId.startsWith('bestsimilar_') ||
         effectiveBaseUrl.contains('bestsimilar')) {
       final yearNum = widget.movie.year != null
-          ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), ''))
+          ? startYearOf(widget.movie.year)
           : null;
       final resolved = await MetadataService.findMovieByTitle(
         title: widget.movie.name,
@@ -335,7 +342,7 @@ class _DetailsPageState extends State<DetailsPage>
     // If fetchMeta failed, try fallback search to resolve
     if (meta == null && !effectiveId.startsWith('tt')) {
       final yearNum = widget.movie.year != null
-          ? int.tryParse(widget.movie.year!.replaceAll(RegExp(r'[^0-9]'), ''))
+          ? startYearOf(widget.movie.year)
           : null;
       final resolved = await MetadataService.findMovieByTitle(
         title: widget.movie.name,
@@ -364,6 +371,7 @@ class _DetailsPageState extends State<DetailsPage>
       setState(() {
         _detail = meta;
         _isLoading = false;
+        _tmdbOverview = null;
 
         if (meta != null &&
             (_isSeries || meta.videos.isNotEmpty) &&
@@ -451,6 +459,21 @@ class _DetailsPageState extends State<DetailsPage>
     }
     if (tmdbId == null || tmdbId.isEmpty) return;
 
+    // The synopsis in the viewer's language, fetched next to the credits so
+    // the page makes one TMDB pass per title. TMDB's catalog copy replaces
+    // the addon's when it exists -- and translated, where the addon only
+    // ever has English. Silent when there is nothing better to show.
+    final localeCode = AppThemeService.locale.value?.languageCode;
+    TmdbService.fetchOverview(
+      tmdbId: tmdbId,
+      isTvShow: isTvShow,
+      localeCode: localeCode,
+    ).then((overview) {
+      if (overview != null && overview.isNotEmpty && mounted) {
+        setState(() => _tmdbOverview = overview);
+      }
+    });
+
     final credits = await TmdbService.fetchCredits(tmdbId, isTvShow: isTvShow);
     if (credits.isEmpty || !mounted) return;
     setState(() {
@@ -469,7 +492,7 @@ class _DetailsPageState extends State<DetailsPage>
       final title = _detail?.name ?? widget.movie.name;
       final yearStr = _detail?.year ?? widget.movie.year;
       final year = yearStr != null
-          ? int.tryParse(yearStr.replaceAll(RegExp(r'[^0-9]'), ''))
+          ? startYearOf(yearStr)
           : null;
       final isTv = _isSeries;
 
@@ -951,9 +974,9 @@ class _DetailsPageState extends State<DetailsPage>
               _buildLogoOrTitle(meta, isDesktop: true),
               const SizedBox(height: _Space.md),
               _buildMetadataRow(meta),
-              if (meta.description != null && meta.description!.isNotEmpty) ...[
+              if (_synopsisText(meta).isNotEmpty) ...[
                 const SizedBox(height: _Space.lg),
-                _buildSynopsis(meta.description!),
+                _buildSynopsis(_synopsisText(meta)),
               ],
               if (meta.genres.isNotEmpty) ...[
                 const SizedBox(height: _Space.lg),
@@ -1013,9 +1036,9 @@ class _DetailsPageState extends State<DetailsPage>
         _buildPlayButton(fullWidth: true),
         const SizedBox(height: _Space.sm),
         _buildLibraryButton(),
-        if (meta.description != null && meta.description!.isNotEmpty) ...[
+        if (_synopsisText(meta).isNotEmpty) ...[
           const SizedBox(height: _Space.lg),
-          _buildSynopsis(meta.description!),
+          _buildSynopsis(_synopsisText(meta)),
         ],
         if (meta.genres.isNotEmpty) ...[
           const SizedBox(height: _Space.md),
@@ -1082,7 +1105,7 @@ class _DetailsPageState extends State<DetailsPage>
     if (meta.year != null && meta.year!.isNotEmpty) {
       items.add(
         Text(
-          meta.year!,
+          displayYearRange(meta.year),
           style: const TextStyle(
             color: Colors.white,
             fontSize: 15,
@@ -1250,6 +1273,15 @@ class _DetailsPageState extends State<DetailsPage>
     // Play, desktop the 280px poster column. Either way the four buttons
     // share the line rather than clustering at one end of it.
     return LibraryActionsRow(itemBuilder: _buildMyListItem, expanded: true);
+  }
+
+  /// What the synopsis block shows: TMDB's copy in the viewer's language
+  /// when it arrived, else the addon's own text. Empty when neither has
+  /// anything, which is when the block hides itself.
+  String _synopsisText(MovieDetail meta) {
+    final tmdb = _tmdbOverview;
+    if (tmdb != null && tmdb.isNotEmpty) return tmdb;
+    return meta.description ?? '';
   }
 
   Widget _buildSynopsis(String text) {

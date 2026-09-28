@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_info.dart';
@@ -51,16 +52,36 @@ abstract final class BackupService {
 
   static Future<String> _buildEnvelopeJson() async {
     final prefs = await SharedPreferences.getInstance();
+    // Sorted, so two exports diff cleanly instead of shuffling with the
+    // store's own key order.
+    final keys = prefs.getKeys().toList()..sort();
     final data = <String, dynamic>{
-      for (final key in prefs.getKeys()) key: prefs.get(key),
+      for (final key in keys) key: prefs.get(key),
     };
     final envelope = {
       'app': AppInfo.name,
+      // Which release wrote this, for the day a restore misbehaves across
+      // versions. Best effort: unit tests have no package channel.
+      'appVersion': await _appVersion(),
       'version': 1,
       'exportedAt': DateTime.now().toIso8601String(),
       'data': data,
     };
-    return jsonEncode(envelope);
+    // Indented: a one-line dump cannot be opened, read, or hand-fixed, and
+    // a backup exists for the day something needs fixing by hand.
+    return const JsonEncoder.withIndent('  ').convert(envelope);
+  }
+
+  /// The release running now, or `'unknown'` where no package channel
+  /// exists. Never throws: a backup must not fail for a missing version.
+  static Future<String> _appVersion() async {
+    try {
+      return (await PackageInfo.fromPlatform()).version;
+    } catch (_) {
+      // No channel here (tests, exotic platforms). Expected and
+      // uninteresting: the envelope stays readable without it.
+      return 'unknown';
+    }
   }
 
   /// Restores every key found in an envelope produced by [buildEnvelopeJson].

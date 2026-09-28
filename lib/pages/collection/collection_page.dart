@@ -1,12 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
-
 import '../../models/collection/media_collection.dart';
 import '../../models/continue_watching/continue_watching_item.dart';
 import '../../models/download/download_task_model.dart';
+import '../../models/movie/movie_year.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/app_breakpoints.dart';
@@ -47,6 +46,203 @@ class _CollectionPageState extends State<CollectionPage> {
   void initState() {
     super.initState();
     AnimeLibraryService.instance.init();
+  }
+
+  /// Type pills for the Continue Watching and Downloads tabs: All, Films,
+  /// Series, Anime -- the same three kinds the shelf filter offers, so a
+  /// mixed list narrows the same way everywhere in the Library.
+  ///
+  /// One Sort pill beside them, not a pill per order: five orders as pills
+  /// would double the header, and the shelf page already answers this with
+  /// one popup. Same five answers here -- recent, title both ways, year
+  /// both ways -- so sorting reads the same everywhere in the Library.
+  /// Genres are out on purpose: these lists mix kinds, and a genre narrow
+  /// belongs to the browse pages that own genres.
+  String _continueType = 'all';
+  String _downloadType = 'all';
+  String _continueSort = 'recent';
+  String _downloadSort = 'recent';
+
+  String _sortLabel(String sort) {
+    final l10n = context.l10n;
+    return switch (sort) {
+      'title_az' => l10n.librarySortTitle,
+      'title_za' => l10n.librarySortTitleDesc,
+      'year_new' => l10n.librarySortYearNewest,
+      'year_old' => l10n.librarySortYearOldest,
+      _ => l10n.librarySortRecent,
+    };
+  }
+
+  /// The leading four digits of a year string, or null when it carries
+  /// none. Series arrive as ranges (`2022–`, `2020–2023`); sorting only
+  /// ever wants the start, which [startYearOf] reads.
+  static int? _yearOf(String? year) => startYearOf(year);
+
+  Widget _buildTypePills(String current, ValueChanged<String> onPick) {
+    Widget chip(String label, String value) {
+      final selected = current == value;
+      return GestureDetector(
+        onTap: () => onPick(value),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.accent : AppColors.raised,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.5,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected ? AppColors.ink : AppColors.inkAlpha(0.60),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final l10n = context.l10n;
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          chip(l10n.commonAll, 'all'),
+          const SizedBox(width: 6),
+          chip(l10n.libraryFilterMovies, 'movie'),
+          const SizedBox(width: 6),
+          chip(l10n.libraryFilterSeries, 'series'),
+          const SizedBox(width: 6),
+          chip(l10n.libraryFilterAnime, 'anime'),
+        ],
+      ),
+    );
+  }
+
+  /// Type pills plus the one Sort pill, on a single header line. The pills
+  /// take the room and scroll; the sort pill keeps its width, so it is
+  /// always reachable without chasing the row to its end.
+  Widget _buildTabHeader({
+    required String type,
+    required ValueChanged<String> onType,
+    required String sort,
+    required ValueChanged<String> onSort,
+  }) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      child: Row(
+        children: [
+          Expanded(child: _buildTypePills(type, onType)),
+          const SizedBox(width: 8),
+          PopupMenuButton<String>(
+            tooltip: '${l10n.librarySortBy}: ${_sortLabel(sort)}',
+            onSelected: onSort,
+            color: AppColors.raised,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.raised,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.inkAlpha(0.08)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
+                  const SizedBox(width: 4),
+                  // Capped, not flexed: the name is a label, and at a large
+                  // text scale it names its natural width whatever the row
+                  // offers. The tooltip carries the full name.
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 120),
+                    child: Text(
+                      _sortLabel(sort),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.inkMuted,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'recent',
+                child: Text(l10n.librarySortRecent),
+              ),
+              PopupMenuItem(
+                value: 'title_az',
+                child: Text(l10n.librarySortTitle),
+              ),
+              PopupMenuItem(
+                value: 'title_za',
+                child: Text(l10n.librarySortTitleDesc),
+              ),
+              PopupMenuItem(
+                value: 'year_new',
+                child: Text(l10n.librarySortYearNewest),
+              ),
+              PopupMenuItem(
+                value: 'year_old',
+                child: Text(l10n.librarySortYearOldest),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<ContinueWatchingItem> _sortedContinue(List<ContinueWatchingItem> items) {
+    final sorted = List.of(items);
+    switch (_continueSort) {
+      case 'title_az':
+        sorted.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+      case 'title_za':
+        sorted.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
+      case 'year_new':
+        sorted.sort((a, b) => (_yearOf(b.year) ?? 0).compareTo(_yearOf(a.year) ?? 0));
+      case 'year_old':
+        sorted.sort(
+          (a, b) => (_yearOf(a.year) ?? 99999).compareTo(_yearOf(b.year) ?? 99999),
+        );
+      default:
+        sorted.sort((a, b) => b.lastWatchedAt.compareTo(a.lastWatchedAt));
+    }
+    return sorted;
+  }
+
+  List<DownloadTask> _sortedDownloads(List<DownloadTask> tasks) {
+    final sorted = List.of(tasks);
+    switch (_downloadSort) {
+      case 'title_az':
+        sorted.sort(
+          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
+        );
+      case 'title_za':
+        sorted.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
+      case 'year_new':
+        sorted.sort((a, b) => (_yearOf(b.year) ?? 0).compareTo(_yearOf(a.year) ?? 0));
+      case 'year_old':
+        sorted.sort(
+          (a, b) => (_yearOf(a.year) ?? 99999).compareTo(_yearOf(b.year) ?? 99999),
+        );
+      default:
+        sorted.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return sorted;
   }
 
   @override
@@ -140,8 +336,16 @@ class _CollectionPageState extends State<CollectionPage> {
   /// than an aspect ratio because the label under a square is a fixed height,
   /// not a fixed fraction -- with a ratio the text would grow with the card
   /// on a wide window and clip on a narrow one.
+  /// How wide Library content may grow before it centers instead. Past
+  /// this the grids sprawled across ultrawide windows; capped, the column
+  /// counts inside each grid also settle instead of ramping forever.
+  static const double _maxContentWidth = 1200;
+
   Widget _buildCardGrid(List<Widget> cards) {
-    return LayoutBuilder(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: LayoutBuilder(
       builder: (context, constraints) {
         const spacing = 14.0;
         const padding = 16.0;
@@ -178,8 +382,10 @@ class _CollectionPageState extends State<CollectionPage> {
           itemCount: cards.length,
           itemBuilder: (context, index) => cards[index],
         );
-      },
-    );
+        },
+      ),
+    ),
+  );
   }
 
   Future<void> _createCollection() async {
@@ -244,8 +450,16 @@ class _CollectionPageState extends State<CollectionPage> {
           );
         }
 
+        final visible = _sortedContinue(
+          _continueType == 'all'
+              ? items
+              : items.where((i) => i.type == _continueType).toList(),
+        );
         final palette = AppThemeService.currentPalette.value;
-        return LayoutBuilder(
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            child: LayoutBuilder(
           builder: (context, constraints) {
             const spacing = 14.0;
             const padding = 16.0;
@@ -261,31 +475,48 @@ class _CollectionPageState extends State<CollectionPage> {
                 (width - padding * 2 - spacing * (crossAxisCount - 1)) /
                 crossAxisCount;
 
-            return GridView.builder(
-              padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: spacing,
-                mainAxisSpacing: 16,
-                // The card's own art ratio plus its text block, straight off
-                // the slider, so a card is the same shape in both places.
-                mainAxisExtent: cardWidth * 0.62 + 60,
-              ),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return ContinueWatchingCard(
-                  item: item,
-                  width: cardWidth,
-                  palette: palette,
-                  onTap: () =>
-                      ContinueWatchingService.resumePlayback(context, item),
-                  onRemove: () => ContinueWatchingService.removeItem(item),
-                );
-              },
+            return Column(
+              children: [
+                _buildTabHeader(
+                  type: _continueType,
+                  onType: (v) => setState(() => _continueType = v),
+                  sort: _continueSort,
+                  onSort: (v) => setState(() => _continueSort = v),
+                ),
+                Expanded(
+                  child: GridView.builder(
+                    padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: spacing,
+                      mainAxisSpacing: 16,
+                      // The card's own art ratio plus its text block, straight off
+                      // the slider, so a card is the same shape in both places.
+                      mainAxisExtent: cardWidth * 0.62 + 60,
+                    ),
+                    itemCount: visible.length,
+                    itemBuilder: (context, index) {
+                      final item = visible[index];
+                      return ContinueWatchingCard(
+                        item: item,
+                        width: cardWidth,
+                        palette: palette,
+                        onTap: () => ContinueWatchingService.resumePlayback(
+                          context,
+                          item,
+                        ),
+                        onRemove: () =>
+                            ContinueWatchingService.removeItem(item),
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
-          },
-        );
+            },
+          ),
+        ),
+      );
       },
     );
   }
@@ -310,12 +541,34 @@ class _CollectionPageState extends State<CollectionPage> {
           );
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          itemCount: downloads.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, index) =>
-              _DownloadRow(task: downloads[index]),
+        final visible = _sortedDownloads(
+          _downloadType == 'all'
+              ? downloads
+              : downloads.where((t) => t.type == _downloadType).toList(),
+        );
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            child: Column(
+              children: [
+                _buildTabHeader(
+                  type: _downloadType,
+                  onType: (v) => setState(() => _downloadType = v),
+                  sort: _downloadSort,
+                  onSort: (v) => setState(() => _downloadSort = v),
+                ),
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    itemCount: visible.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) =>
+                        _DownloadRow(task: visible[index]),
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

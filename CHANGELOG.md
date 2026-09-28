@@ -3,13 +3,174 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.8.13+46] - 2026-09-28
+
+Live TV grows up: sources become a page, portals go live-only, four new
+language rows, categories filter, seeded playlists and captions. The
+Library centers, sorts both ways and reads series years as ranges.
+
+### Added
+- **Series years read as ranges.** `2020–2023` renders `2020 - 2023` on
+  cards and details rows, and every numeric use -- title matching, similar
+  titles, Library sorting -- takes the start year. Stripping punctuation
+  had turned ranges into years like `20192023`.
+
+### Changed
+- **Anime Continue Watching holds anime only.** Its filter fell through to
+  a default-true branch and listed every movie beside the anime.
+
+### Added
+- **Continue and Downloads sort five ways.** Recent, title A-Z and Z-A,
+  newest-first and oldest-first behind one Sort pill, the same orders the
+  shelves already answer. Rating is honestly absent: no saved title
+  carries one yet, so there is nothing to sort by.
+
+### Added
+- **Live TV's hero fills the viewport like every other section.** It used
+  the scaffold's shorter default; the same band extent Films, Series and
+  Anime pass now sizes it, with no band widget riding along.
+- **Sources show one list at a time.** Xtream Panels and M3U Playlists get
+  a view toggle on top instead of stacking both down the page.
+
+### Changed
+- **Library tabs sit in the middle.** The pills hugged the left edge while
+  the content below them centered; the row centers when it fits and still
+  scrolls when the labels outgrow a phone.
+
+### Added
+- **Library content centers on wide screens.** Collections, Continue
+  Watching, Downloads and every shelf cap at the same width instead of
+  sprawling across ultrawide windows.
+- **Anime genre filtering without leaving search.** A genre pill beside the
+  Anime chip narrows results in place; season, format, status and sort stay
+  one tap away on the Anime Filters page.
+- **A Music row on Live TV.** MTV, VH1 and Trace, completing the genre
+  shelves beside Movies, News, Kids and Documentaries.
+- **Portal browsers filter by region.** Shelves filed per region
+  (`AR | Sports`, `UK | News`) get a language pill that narrows categories
+  and streams together; regionless shelves stay either way.
+- **Combined playlist groups split apart.** `News;Public` was one ugly
+  bucket; each group is its own shelf now, with the channel listed under
+  both.
+- **Live TV starts with six public playlists.** All Languages, English,
+  Español, España, Sports and News from iptv-org load on first run, in the
+  background, so the shelves are not empty before any portal is added. A
+  deleted default stays deleted.
+- **Live TV sources are a page.** Portals and playlists moved out of the
+  modal into a Sources page with an add form, discovery, favorites and a
+  remove-all per section. Copy and delete sit on the row itself now, not
+  behind an overflow menu. Deleting asks first; the modal's multi-select
+  edit mode is gone with it.
+- **Live TV has captions on/off.** Portal feeds that carry subtitles show
+  them now, styled by the shared subtitle settings, with a CC toggle on the
+  transport bar. There is no track menu: a live feed does not list tracks
+  the way a file does.
+
+### Changed
+- **Sub/Dub chips name their counts.** An empty category is dimmed and
+  inert rather than a tap leading to a "no sources" dead end.
+- **Source rows share one icon tile.** Portals and playlists read as the
+  same kind of thing, centered against text of any height.
+- **No scroll arrows in the portal browser.** The wheel, the scrollbar and
+  the gesture move the lists; four floating buttons did nothing they do
+  not.
+- **Live TV settings link to Sources.** The Portals section keeps the row
+  display preferences and gains the way in; management happens on the page.
+- **Live TV speaks Spanish, German, Russian and Chinese.** La 1, La 2, 24h
+  and Teledeporte; Das Erste, ZDF, RTL, n-tv and WELT; Channel One Russia,
+  Rossiya 1, NTV and RT; CCTV-1, CCTV-4, CCTV News and CGTN -- each on its
+  own row, off the same keyword matching the rest of the catalog uses.
+  Existing installs gain the rows automatically: a saved category list
+  keeps what it had and appends what it was missing.
+
+### Removed
+- **The Live TV category pill.** The cards already tag their category and
+  every portal carries its own categories -- the header filter repeated
+  both without adding a way to browse.
+- **The Portals & Playlists modal.** Two tabs, two edit modes and its own
+  copy of every display preference settings already owns.
+- **Movies and Series tabs in the portal browser.** A portal's VOD is not
+  live, and the tabs rebuilt Films/Series navigation inside a source
+  browser. Portals open live channels only now.
+- **The top-bar fullscreen button on Live TV.** The transport bar carries
+  it on desktop, and two buttons for one job crowded the channel title out
+  of its own bar.
+
+### Fixed
+- **The Sources page survives large text.** Its scrape-source pill named
+  its natural width and ran 156px past the panel at 3x scale. Found by the
+  3x probe (#69), which now holds 40 cases.
+
+## [1.8.12+45] - 2026-09-27
+
+Classic Masterpieces rows on Films, Series and Anime; the Library sorts
+both ways; and the subtitle menus list languages, survive large text, and
+no longer offer `mon`, `und` or `auto` as something to watch.
 
 Sources & Filters is two settings instead of three, and both take more than
 one choice. The player's `C` key toggles subtitles, its menus list languages
 rather than files, and the sleep timer can wait for the video to end.
 
 ### Added
+- **A Classic Masterpieces row on Films and Series, and Classics on Anime.**
+  Ranked by the catalog's own ratings, highest first, and skipped when
+  there is nothing acclaimed to show. Anime's classics are its all-time
+  best that are at least a decade old -- the series that defined what
+  came after.
+- **One title, one row.** Addon catalogs overlap, so the same film showed
+  up under Popular, Top and Featured at once. The first row keeps it now,
+  and a row left with nothing is dropped.
+- **The Library shelf sorts both ways.** Title A-Z and Z-A, newest-first
+  and oldest-first, beside the recent order that was already there. Live TV
+  favorites follow the title directions; a year sort falls back to recent
+  for channels, which have no year.
+- **Watch Sources filters read Audio, Quality, Sources, Size.** The order a
+  viewer narrows a list in: what is heard, how it looks, where it comes
+  from, how big it is.
+- **Details pages prefer the TMDB synopsis in your language.** The addon's
+  English text stays the fallback: without a configured key, or when TMDB
+  sends nothing, there is nothing to prefer. One cached request per title,
+  next to the credits fetch that already runs there.
+- **Live TV's hero is the same height as every other section.** The
+  user-selectable banner style made this one carousel a different size for
+  no reason a viewer could name, so the setting, its styles and its rows in
+  the settings page are gone.
+- **The Library's Continue Watching and Downloads tabs filter by type.**
+  All, Films, Series and Anime pills, matching the shelf filter.
+- **Films everywhere.** The section was Films while the Library filter chip
+  and collection titles still said Movies; only English disagreed, the other
+  three languages already said Films.
+- **The Arabic anime catalog is gone.** The separate Arabic feed, its
+  English/Arabic mode pill and its details/stream sheets are removed; anime
+  is AniList end to end, with the same genre pills and a new decade filter.
+  Arabic audio and subtitle support elsewhere is untouched.
+- **Resetting a genre or decade filter works again.** Tapping "All Genres"
+  or "All Decades" did nothing: a null menu value never reaches the picker,
+  so both reset options carry a value that arrives now. Anime gains the
+  decade filter Films and Series already had.
+- **The backup file reads like a document now.** Indented with sorted keys,
+  so two exports diff to nothing and a file can be opened, read, and
+  hand-fixed on the day that matters. The envelope also names the release
+  that wrote it, for restores across versions.
+- **The ORIGINAL audio badge is gone.** It marked the track the file opened
+  with, which is not the same as the track the film was made in -- a release
+  defaulting to the dub badged the dub. The menu is languages and a tick now,
+  nothing else.
+- **Source rows read scraper, quality and container.** The watch-screen card
+  printed the provider id ("111477"), then the same long release name twice
+  as title and description. One compact title plus badges now: quality,
+  delivery with seed health, container (MKV/MP4), release source
+  (REMUX/BluRay/WEB-DL), codec, size and audio languages. A numeric file id
+  shows the scraper instead.
+- **Provider names come from the registered roster.** Most built-in scrapers
+  stamp every source `PlayTorrioHTTP`, so cards and download rows resolve the
+  site behind a source ("HindMoviez") through the scraper list instead. A
+  Stremio release title matches nothing and keeps its manifest name.
+- **Continue Watching badges, season parts and the Arabic sheet's status
+  lines follow the app language.** Source-type and countdown badges, the
+  `Movie` type label and collection `Part N` are keys now. `S01E01` shapes
+  stay codes -- as universal as episode numbers -- and hardcoded Arabic
+  stays Arabic until a native review says otherwise.
 - **`C` toggles subtitles on and off.** It used to open the subtitle panel.
   Turning them on matches the language you are hearing, so an English audio
   track gets English subtitles rather than whatever the file happens to
@@ -55,8 +216,9 @@ rather than files, and the sleep timer can wait for the video to end.
   Spanish (LATAM) are different recordings, not two spellings of one label,
   and they used to collapse into a single "Spanish" group -- so the choice
   was hidden rather than simplified. An *untagged* "Spanish" joins the ES
-  group now instead of sitting beside it as a near-duplicate: a provider
-  that names no region means Castilian until it says otherwise. The same
+  group now instead of sitting beside it as a near-duplicate. Untagged
+  Spanish stays plain "Spanish": naming it Spanish (ES) would state a region
+  no metadata names, and a wrong region is worse than a bare language. The same
   for Portuguese (BR) and (PT), and for English (US) and (UK). Only the
   Chinese *script* split still collapses, because Simplified and
   Traditional are the same audio.
@@ -146,6 +308,19 @@ rather than files, and the sleep timer can wait for the video to end.
   rather than a guessed one.
 
 ### Fixed
+- **The subtitle menu no longer overflows at large text sizes.** Its toggle,
+  tabs and filter chips were fixed chrome above a scrolling list; at a large
+  accessibility scale they took the whole card and the list overflowed by
+  over a hundred pixels. They scroll with the rows now -- identical when
+  everything fits, reachable when it does not. Found by the 3x text-scale
+  probe (#69), which also covers the audio menu, the Downloads rows, the
+  search idle state and the Library collections tab.
+- **Embedded tracks tagged `mon`, `und` or `unknown` no longer fake a
+  language.** `mon` (subtitles matching the audio) was never filtered in the
+  player, so it surfaced as a fallback-titled row; `und`/`unknown` rendered
+  as "UND" rows and blocked the title-guess that would have named them
+  ("English SDH"). The first is dropped, the other two fall back to the
+  container title like any untagged track.
 - **The Cast sheet scrolls, and its title no longer pushes the close button off
   the edge.** Two separate faults in the same sheet. The title, the `Spacer`
   and the close button sat in one flat row with no flex on the title, so the
@@ -2028,8 +2203,8 @@ history only.
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
 | #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them. Device-confirmed on a phone 2026-09-16 |
-| #68 | Translation (i18n) — Spanish/Arabic/Portuguese-BR, 987 keys, with tests holding the hardcoded-text tail, the RTL padding and alignment, the icon-only tooltips and the spelling; icon direction turns with the reading direction and the display/native title toggle shipped |
-| #69 | Text scale and accessibility — 26 high-traffic widgets probed at 3x and capped at 1.3x, every icon-only control labelled button or not; the unprobed tail (mostly pages a test cannot construct) is deliberately unranked |
+| #68 | Translation (i18n) — Spanish/Arabic/Portuguese-BR, 994 keys, with tests holding the hardcoded-text tail, the RTL padding and alignment, the icon-only tooltips and the spelling; icon direction turns with the reading direction; anime carries a display/native title toggle, movies and series carry one title; data strings (catalog descriptions, AniList genres) stay English on purpose |
+| #69 | Text scale and accessibility — 32 high-traffic widgets (including the details-page cards) probed at 3x and capped at 1.3x, every icon-only control labelled button or not; the unprobed tail (mostly pages a test cannot construct) is deliberately unranked |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; confirmed on real speakers 2026-09-16 |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |
 | #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |

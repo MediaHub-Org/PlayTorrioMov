@@ -8,19 +8,6 @@ library;
 
 import '../l10n/app_localizations.dart';
 
-enum HeroStyle {
-  immersive,
-  compact,
-  minimalist;
-
-  /// The chip text, in the app's language.
-  String localizedLabel(AppLocalizations l10n) => switch (this) {
-    HeroStyle.immersive => l10n.liveTvHeroImmersive,
-    HeroStyle.compact => l10n.liveTvHeroCompact,
-    HeroStyle.minimalist => l10n.liveTvHeroMinimalist,
-  };
-}
-
 enum AmbientLightPattern {
   dualOrbs('Dual Floating Orbs'),
   topAurora('Top Aurora Horizon'),

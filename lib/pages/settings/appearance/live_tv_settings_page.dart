@@ -3,10 +3,12 @@ import '../../../l10n/l10n.dart';
 import '../../../services/theme/app_theme_service.dart';
 import '../../../services/content_display_enums.dart';
 import '../../../services/iptv/iptv_settings.dart';
+import '../../../utils/navigation/route_transitions.dart';
 import '../../../widgets/settings/settings_scroll_view.dart';
 import '../../../services/theme/app_colors.dart';
 import '../../../widgets/common/setting_choice_chip.dart';
 import '../../../widgets/iptv/default_portal_tab_picker.dart';
+import '../../../pages/iptv/iptv_sources_page.dart';
 
 class LiveTvSettingsPage extends StatefulWidget {
   const LiveTvSettingsPage({super.key});
@@ -190,41 +192,6 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                 Divider(color: AppColors.inkAlpha(0.06)),
                 const SizedBox(height: 12),
 
-                // Style Selection
-                Text(
-                  context.l10n.liveTvHeroStyle,
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.inkAlpha(0.8),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<HeroStyle>(
-                  valueListenable: IptvSettings.heroStyle,
-                  builder: (context, currentStyle, _) {
-                    return Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: HeroStyle.values.map((style) {
-                        final isSelected = style == currentStyle;
-                        return SettingChoiceChip(
-                          label: style.localizedLabel(context.l10n),
-                          selected: isSelected,
-                          onSelect: () {
-                            IptvSettings.setHeroStyle(style);
-                            setState(() {});
-                          },
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
-
-                const SizedBox(height: 16),
-                Divider(color: AppColors.inkAlpha(0.06)),
-                const SizedBox(height: 12),
-
                 // Auto Rotate
                 ValueListenableBuilder<bool>(
                   valueListenable: IptvSettings.heroAutoRotate,
@@ -386,14 +353,17 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      // Expanded: the label yields to the value beside it, the
+                      // same shape as the rotation row above. In Spanish the
+                      // label runs 490px in a 360px panel.
+                      Expanded(child: Text(
                         context.l10n.liveTvHoverZoom,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                           color: AppColors.inkAlpha(0.8),
                         ),
-                      ),
+                      )),
                       Text(
                         '+$percent%',
                         style: TextStyle(
@@ -585,6 +555,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
     );
   }
 
+  /// Sources live on their own page now; this card keeps the row display
+  /// preferences that used to sit beside them in the modal, plus the way
+  /// in. Management happens on the page, configuration stays here.
   Widget _buildPortalsModalCustomizerCard(AppThemePalette palette) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -596,6 +569,41 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          InkWell(
+            onTap: () => pushPage(context, const IptvSourcesPage()),
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.settings_input_antenna_rounded,
+                    color: palette.primaryColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      context.l10n.iptvManagePortals,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.inkSubtle,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Divider(color: AppColors.inkAlpha(0.06)),
+          const SizedBox(height: 12),
           Text(
             context.l10n.iptvCardDisplayStyle,
             style: TextStyle(

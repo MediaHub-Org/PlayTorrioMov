@@ -57,8 +57,6 @@ import '../scraper/sites/xpass.dart';
 import '../scraper/sites/zxcstream.dart';
 import '../scraper/sites/hindmoviez.dart';
 import '../anime/anime_scraper_service.dart';
-import '../anime_arabic/anime_arabic_service.dart';
-import '../anime_arabic/anime_arabic_extractor.dart';
 import '../p2p/p2p_settings_service.dart';
 
 /// Service that fetches playback streams from all installed Stremio addons
@@ -212,57 +210,6 @@ class StreamService {
   }) {
     final controller = StreamController<StreamSource>();
     final normalizedTarget = targetAddonName.trim().toLowerCase();
-
-    final isArabicAnime = id.startsWith('arabic_anime:') ||
-        normalizedTarget == 'arabicanime' ||
-        normalizedTarget.contains('arabic');
-
-    if (isArabicAnime) {
-      () async {
-        try {
-          String slug = '';
-          if (id.startsWith('arabic_anime:')) {
-            final parts = id.split(':');
-            if (parts.length >= 2) slug = parts[1];
-          } else if (id.isNotEmpty) {
-            slug = id;
-          }
-          if (slug.isEmpty && title.isNotEmpty) {
-            final searchResults = await AnimeArabicService.instance.search(title);
-            if (searchResults.isNotEmpty) {
-              slug = searchResults.first.slug;
-            }
-          }
-          final epNum = episode ?? 1;
-          if (slug.isNotEmpty) {
-            final details = await AnimeArabicService.instance.getDetails(slug);
-            final targetEp = details.episodes.firstWhere(
-              (e) => e.number == epNum,
-              orElse: () => ArabicEpisode(
-                number: epNum,
-                title: 'الحلقة $epNum',
-                encodedHref: '',
-                watchPath: '/e/$slug-$epNum#tok',
-              ),
-            );
-            final hits = await AnimeArabicExtractor.instance.resolveEpisode(targetEp);
-            final sources = AnimeArabicExtractor.toSources(
-              hits,
-              animeTitle: details.title,
-              episodeNumber: epNum,
-            );
-            for (final s in sources) {
-              if (!controller.isClosed) controller.add(s);
-            }
-          }
-        } catch (_) {
-          // One provider failing does not close the merged stream -- the
-          // others have already contributed to it.
-        }
-        if (!controller.isClosed) controller.close();
-      }();
-      return controller.stream;
-    }
 
     // Check if targeting general anime providers
     final isAnime = type == 'anime' ||

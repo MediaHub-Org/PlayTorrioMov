@@ -7,9 +7,8 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/stream/stream_service.dart';
+import '../../services/scraper/stream_scraper.dart';
 import '../../services/anime/anime_scraper_service.dart';
-import '../../services/anime_arabic/anime_arabic_service.dart';
-import '../../services/anime_arabic/anime_arabic_extractor.dart';
 import '../common/source_badges.dart';
 import 'player_glass.dart';
 
@@ -77,68 +76,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     final year = int.tryParse(detail?.year ?? '');
     final epNum = ep.episode ?? 1;
 
-    final isArabicAnime = id.startsWith('arabic_anime:') ||
-        (detail?.id.startsWith('arabic_anime:') ?? false) ||
-        widget.currentAddonName == 'ArabicAnime';
-
     _streamSub?.cancel();
-
-    if (isArabicAnime) {
-      String slug = '';
-      if (detail?.id.startsWith('arabic_anime:') == true) {
-        slug = detail!.id.replaceFirst('arabic_anime:', '');
-      } else if (id.startsWith('arabic_anime:')) {
-        final parts = id.split(':');
-        if (parts.length >= 2) slug = parts[1];
-      }
-
-      () async {
-        try {
-          if (slug.isEmpty && title.isNotEmpty) {
-            final searchResults = await AnimeArabicService.instance.search(title);
-            if (searchResults.isNotEmpty) {
-              slug = searchResults.first.slug;
-            }
-          }
-
-          if (slug.isNotEmpty) {
-            final arabicDetails = await AnimeArabicService.instance.getDetails(slug);
-            final targetEp = arabicDetails.episodes.firstWhere(
-              (e) => e.number == epNum,
-              orElse: () => ArabicEpisode(
-                number: epNum,
-                title: 'الحلقة $epNum',
-                encodedHref: '',
-                watchPath: '/e/$slug-$epNum#tok',
-              ),
-            );
-
-            final hits = await AnimeArabicExtractor.instance.resolveEpisode(targetEp);
-            final sources = AnimeArabicExtractor.toSources(
-              hits,
-              animeTitle: arabicDetails.title.isNotEmpty ? arabicDetails.title : title,
-              episodeNumber: epNum,
-            );
-
-            if (mounted) {
-              setState(() {
-                _sources.addAll(sources);
-                _isLoading = false;
-              });
-              widget.onSourcesLoaded(List.from(_sources));
-            }
-            return;
-          }
-        } catch (e) {
-          debugPrint('[PlayerSourcesPanel] Arabic anime scrape error: $e');
-        }
-
-        if (mounted) {
-          setState(() => _isLoading = false);
-        }
-      }();
-      return;
-    }
 
     final isAnime = type == 'anime' ||
         id.startsWith('anilist:') ||
@@ -555,14 +493,16 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     bool isHovered,
     bool isCompact,
   ) {
-    final rawTitle =
-        source.title ?? source.name ?? context.l10n.playerStreamSourceFallback;
-    // The release name carries everything (audio, codec, size, group),
-    // which reads as a paragraph in a 12.5px row. The row answers three
-    // questions -- where is this from, how sharp is it, what is the file
-    // -- so those are the title. Delivery (P2P / HTTP) and seeds already
-    // have their own badges above it.
-    final title = _compactSourceTitle(source, rawTitle);
+    // Scraper, quality and container only: the release name's facts already
+    // read as badges, so the full string would repeat them as a paragraph.
+    // The site comes from the registered roster (see
+    // ScraperManager.providerDisplayName); the raw add-on name is a
+    // delivery label most scrapers share.
+    final title = (source.title == null && source.name == null)
+        ? context.l10n.playerStreamSourceFallback
+        : source.compactTitleFor(
+            ScraperManager.instance.providerDisplayName(source),
+          );
     // StreamSource.isMagnet, not a bare infoHash check: a magnet: URL
     // with no separate infoHash field is still a torrent, and the icon
     // has to agree with the P2P/HTTP badge next to it.
@@ -658,15 +598,17 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                           // same wherever it is listed.
                           ...sourceDeliveryBadges(source),
 
-                          if (source.name != null && source.name!.isNotEmpty)
-                            Text(
-                              source.name!,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.50),
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                              ),
+                          // The site behind the source, resolved through the
+                          // registered roster -- never a bare file id or a
+                          // shared delivery label.
+                          Text(
+                            ScraperManager.instance.providerDisplayName(source),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.50),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
                             ),
+                          ),
                         ],
                       ),
 
@@ -781,29 +723,5 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
       default:
         return Colors.white.withValues(alpha: 0.20);
     }
-  }
-
-  /// Scraper, quality and container only ("VixSrc • 1080p • HLS").
-  ///
-  /// The full release name is detail for a details screen, not a list row.
-  /// [fallback] keeps the row from going blank when none of the three is
-  /// known, which is better than an empty title no one can act on.
-  String _compactSourceTitle(StreamSource source, String fallback) {
-    final scraper = source.addonName.trim();
-    final quality = source.quality ??
-        (() {
-          final parsed = _extractResolution(
-            '${source.title ?? ''} ${source.name ?? ''}',
-          );
-          return parsed.isEmpty ? null : parsed;
-        })();
-    final container = source.containerLabel;
-    final parts = [
-      if (scraper.isNotEmpty) scraper,
-      if (quality != null && quality.isNotEmpty) quality,
-      if (container != null) container,
-    ];
-    if (parts.isEmpty) return fallback;
-    return parts.join(' • ');
   }
 }

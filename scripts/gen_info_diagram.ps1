@@ -299,7 +299,7 @@ $p2p = Add-Box -Id (New-Id) -X 60 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSiz
 $subs = Add-Box -Id (New-Id) -X 380 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
   -Text "Subtitles`nembedded (libass)`n+ online providers"
 $meta = Add-Box -Id (New-Id) -X 700 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
-  -Text "Metadata`nTMDB · Simkl · Trakt`nAniList (anime)"
+  -Text "Metadata`nStremio baseline + TMDB`nSimkl · Trakt · AniList"
 $debrid = Add-Box -Id (New-Id) -X 1020 -Y 1260 -W 300 -H 63 -Fill $C.support -FontSize 14 `
   -Text "Debrid & Downloads`nReal-Debrid and friends`noffline files"
 

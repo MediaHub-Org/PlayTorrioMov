@@ -19,6 +19,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/stream/stream_model.dart';
 import './player_screen.dart';
 import '../../services/app_breakpoints.dart';
+import '../../services/scraper/stream_scraper.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/download/download_launcher.dart';
@@ -1375,6 +1376,11 @@ class _WatchScreenState extends State<WatchScreen>
 
   /// The four filter pills, in the one scrollable frame both layouts use.
   ///
+  /// Ordered the way a viewer narrows a list: the language being heard
+  /// first, then the picture quality, then which provider it comes from,
+  /// then how big the file is. Size sorts as much as it filters, so it
+  /// goes last.
+  ///
   /// The add-on pill is dropped rather than added as an empty box when
   /// there is only one add-on: its dropdown would offer a single choice that
   /// is already the only thing shown.
@@ -1383,10 +1389,10 @@ class _WatchScreenState extends State<WatchScreen>
         _sources.map((e) => e.addonName).toSet().length > 1;
     return FilterPillRail(
       children: [
-        _buildSizeFilterDropdown(),
-        if (hasAddonChoice) _buildAddonFilterDropdown(),
-        _buildQualityFilterDropdown(),
         _buildAudioFilterDropdown(),
+        _buildQualityFilterDropdown(),
+        if (hasAddonChoice) _buildAddonFilterDropdown(),
+        _buildSizeFilterDropdown(),
       ],
     );
   }
@@ -1716,6 +1722,12 @@ class _SourceCardState extends State<_SourceCard> {
     badges.addAll(sourceDeliveryBadges(s));
 
     if (s.isHDR) badges.add(_badge('HDR', const Color(0xFFFFD43B)));
+    if (s.containerLabel != null) {
+      badges.add(_badge(s.containerLabel!, _C.textTertiary));
+    }
+    if (s.releaseSource != null) {
+      badges.add(_badge(s.releaseSource!, _C.textTertiary));
+    }
     if (s.codec != null) badges.add(_badge(s.codec!, _C.textTertiary));
     if (s.fileSize != null) badges.add(_badge(s.fileSize!, _C.textTertiary));
 
@@ -1857,41 +1869,24 @@ class _SourceCardState extends State<_SourceCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // One title: the site behind the source, then quality
+                        // and container. The raw release name and description
+                        // repeated the same long string twice, and every fact
+                        // in it already reads as a badge below. The site comes
+                        // from the registered roster, not the delivery label
+                        // most scrapers stamp.
                         Text(
-                          s.name != null && s.name!.isNotEmpty
-                              ? s.name!
-                              : s.addonName,
+                          s.compactTitleFor(
+                            ScraperManager.instance.providerDisplayName(s),
+                          ),
                           style: const TextStyle(
                             color: _C.textPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (s.title != null && s.title!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            s.title!,
-                            style: const TextStyle(
-                              color: _C.textTertiary,
-                              fontSize: 12,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                        if (s.description != null &&
-                            s.description!.isNotEmpty) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            s.description!,
-                            maxLines: 4,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: _C.textSecondary,
-                              fontSize: 12,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
                         if (badges.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Wrap(spacing: 4, runSpacing: 4, children: badges),
@@ -2372,10 +2367,14 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
 /// hides that: with no scrollbar and no cut-off hint, a pill off the right
 /// edge looks identical to one that does not exist, and there is nothing to
 /// tell the user to try dragging. So the row is drawn inside a bordered
-/// rectangle -- the "there is a region here" cue -- and each edge fades in a
-/// chevron exactly while there is more content in that direction, which is
-/// the whole trick: the fade *is* the overflow indicator, and it disappears
-/// at the ends so the last pill is never ambiguous with a hard cut.
+/// rectangle -- the "there is a region here" cue -- and the edge past which
+/// content continues fades in a chevron, which is the whole trick: the fade
+/// *is* the overflow indicator, and it is gone at an extreme so the last
+/// pill is never ambiguous with a hard cut.
+///
+/// Only the live end is drawn. A spent end used to linger as a dimmed
+/// chevron, which read as a control that should do something and did
+/// nothing; at an extreme there is nowhere to go, so there is no control.
 ///
 /// Public rather than private so a widget test can pump it directly: the
 /// platform split (button on desktop, fade alone on touch) is a decision
@@ -2547,12 +2546,10 @@ class _FilterPillRailState extends State<FilterPillRail> {
                   ),
                 ),
               ),
-              // Both ends are drawn whenever the row overflows at all, with
-              // the spent end dimmed rather than removed. Showing only the
-              // live end made the row look lopsided -- a lone chevron on the
-              // right reads as "there is more", but it also reads as the
-              // control having moved, and at the far end of the scroll the
-              // row appeared to have no control at all.
+              // Only the live end is drawn: at an extreme there is nowhere to
+              // go, so there is no control. A spent end used to linger here
+              // dimmed, which read as a control that should do something and
+              // did nothing.
               //
               // The fade is drawn on every platform; the button inside it is
               // desktop-only, which [_buildEdgeFade] decides. On a phone the
@@ -2561,10 +2558,8 @@ class _FilterPillRailState extends State<FilterPillRail> {
               // land on a button instead. The check is the platform, not the
               // width: a tablet is wide enough to pass any breakpoint and is
               // still a touch device.
-              if (_canScrollBack || _canScrollForward) ...[
-                _buildEdgeFade(forward: false, enabled: _canScrollBack),
-                _buildEdgeFade(forward: true, enabled: _canScrollForward),
-              ],
+              if (_canScrollBack) _buildEdgeFade(forward: false),
+              if (_canScrollForward) _buildEdgeFade(forward: true),
             ],
           ),
         ),
@@ -2574,53 +2569,46 @@ class _FilterPillRailState extends State<FilterPillRail> {
 
   /// One end's indicator: a gradient into the panel color, plus a tappable
   /// chevron button on desktop platforms. Tapping nudges the row, so a tap
-  /// or a drag both work. [enabled] is false at an end with nothing further
-  /// to scroll; the button stays in place, dimmed and inert.
+  /// or a drag both work. Drawn only while there is content past that end
+  /// -- the caller drops it at the extreme instead of dimming it.
   ///
   /// On a touch platform the gradient is drawn alone. It is the cue that
   /// there is more content past the edge, and it costs no tap target -- the
   /// row is dragged there, and a button over the first and last pill would
   /// swallow taps meant for them.
-  Widget _buildEdgeFade({required bool forward, required bool enabled}) {
+  Widget _buildEdgeFade({required bool forward}) {
     final showButton = isDesktopPlatform();
     return Positioned(
       top: 0,
       bottom: 0,
       left: forward ? null : 0,
       right: forward ? 0 : null,
-      child: IgnorePointer(
-        ignoring: !enabled,
-        child: AnimatedOpacity(
-          opacity: enabled ? 1.0 : 0.35,
-          duration: const Duration(milliseconds: 180),
-          child: Container(
-            width: showButton ? _edgeFadeWidth : _edgeFadeWidthMobile,
-            decoration: BoxDecoration(
-              // Opaque at the outer edge, transparent toward the pills. The
-              // first version had this the other way round, which put the
-              // chevron on the transparent end of its own fade -- part of why
-              // it read as a smudge rather than a button.
-              gradient: LinearGradient(
-                begin: forward ? Alignment.centerLeft : Alignment.centerRight,
-                end: forward ? Alignment.centerRight : Alignment.centerLeft,
-                colors: [
-                  _C.surface.withValues(alpha: 0.0),
-                  _C.surface.withValues(alpha: 0.92),
-                ],
-              ),
-            ),
-            alignment: Alignment.center,
-            child: showButton
-                ? MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: () => _nudge(forward),
-                      child: _buildEdgeButton(forward),
-                    ),
-                  )
-                : null,
+      child: Container(
+        width: showButton ? _edgeFadeWidth : _edgeFadeWidthMobile,
+        decoration: BoxDecoration(
+          // Opaque at the outer edge, transparent toward the pills. The
+          // first version had this the other way round, which put the
+          // chevron on the transparent end of its own fade -- part of why
+          // it read as a smudge rather than a button.
+          gradient: LinearGradient(
+            begin: forward ? Alignment.centerLeft : Alignment.centerRight,
+            end: forward ? Alignment.centerRight : Alignment.centerLeft,
+            colors: [
+              _C.surface.withValues(alpha: 0.0),
+              _C.surface.withValues(alpha: 0.92),
+            ],
           ),
         ),
+        alignment: Alignment.center,
+        child: showButton
+            ? MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () => _nudge(forward),
+                  child: _buildEdgeButton(forward),
+                ),
+              )
+            : null,
       ),
     );
   }

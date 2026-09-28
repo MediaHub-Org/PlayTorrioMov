@@ -2,11 +2,11 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
-import '../../widgets/common/arrow_affordance.dart';
 
 import '../../models/iptv/iptv_models.dart';
 import '../../models/iptv/m3u_models.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../widgets/common/filter_dropdown.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_network.dart';
 import '../../services/iptv/iptv_settings.dart';
@@ -32,10 +32,55 @@ class IptvPortalBrowserPage extends StatefulWidget {
   State<IptvPortalBrowserPage> createState() => _IptvPortalBrowserPageState();
 }
 
+/// The region a portal category belongs to, from the prefix portals file
+/// them under (`AR | Sports`, `UK: News`).
+///
+/// Portals shelve the same kinds per region, so without this the category
+/// list is one long run of near-duplicates. Null when the name carries no
+/// prefix -- those shelves are regionless and always shown.
+String? regionPrefixOf(String name) {
+  final match =
+      RegExp(r'^([A-Za-z]{2,3})\s*[|:\-–—]\s*.+').firstMatch(name.trim());
+  if (match == null) return null;
+  return match.group(1)!.toUpperCase();
+}
+
+/// One `(group, stream)` per group a playlist files a channel under.
+///
+/// iptv-org playlists tag a channel with several groups at once
+/// (`News;Public`), and keeping that as one category name put an ugly
+/// combined bucket in the list. Split on `;` so each group is its own
+/// shelf; a channel in two groups appears in both, the way a TV guide
+/// lists it twice. Ungrouped channels pool under `General`, as before.
+/// Pure and synchronous -- the playlist is already in memory.
+List<(String, IptvStream)> expandM3uGroups(M3uPlaylist pl) {
+  final entries = <(String, IptvStream)>[];
+  for (final c in pl.channels) {
+    final groups = c.group
+        .split(';')
+        .map((g) => g.trim())
+        .where((g) => g.isNotEmpty)
+        .toList();
+    for (final group in groups.isEmpty ? const ['General'] : groups) {
+      entries.add((
+        group,
+        IptvStream(
+          streamId: c.url,
+          name: c.name,
+          icon: c.logo,
+          categoryId: group,
+          containerExt: 'm3u8',
+          kind: 'live',
+        ),
+      ));
+    }
+  }
+  return entries;
+}
+
 class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   static const String favoritesCategoryId = '__favorites__';
 
-  IptvSection _activeSection = IptvSection.live;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -52,12 +97,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   final ScrollController _categoryScrollController = ScrollController();
   final ScrollController _contentScrollController = ScrollController();
 
-  bool _isHoveringCategories = false;
-  bool _isHoveringContent = false;
-  bool _canScrollCatUp = false;
-  bool _canScrollCatDown = false;
-  bool _canScrollContentUp = false;
-  bool _canScrollContentDown = false;
 
   // Stream Health / Alive Checker State
   bool _isCheckingAlive = false;
@@ -68,6 +107,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
   // Favorited Streams in this Portal
   Set<String> _favoriteStreamIds = {};
+
+  /// The picked region prefix, or null for every region. Portals shelve the
+  /// same kinds per region (`AR | Sports`, `UK | Sports`), so picking one
+  /// narrows categories and streams together; regionless shelves belong to
+  /// no region to exclude and stay visible either way.
+  String? _regionFilter;
 
   String get _storageKey {
     if (widget.portal != null) {
@@ -84,8 +129,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   @override
   void initState() {
     super.initState();
-    _categoryScrollController.addListener(_updateCategoryScrollState);
-    _contentScrollController.addListener(_updateContentScrollState);
     IptvSettings.changeNotifier.addListener(_onSettingsChanged);
     AppThemeService.currentPalette.addListener(_onSettingsChanged);
     _loadFavorites();
@@ -124,8 +167,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     _cancelAlive = true;
     IptvSettings.changeNotifier.removeListener(_onSettingsChanged);
     AppThemeService.currentPalette.removeListener(_onSettingsChanged);
-    _categoryScrollController.removeListener(_updateCategoryScrollState);
-    _contentScrollController.removeListener(_updateContentScrollState);
     _categoryScrollController.dispose();
     _contentScrollController.dispose();
     _searchCtrl.dispose();
@@ -288,54 +329,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     );
   }
 
-  void _updateCategoryScrollState() {
-    if (!_categoryScrollController.hasClients) return;
-    final canUp = _categoryScrollController.position.pixels > 10;
-    final canDown = _categoryScrollController.position.pixels <
-        _categoryScrollController.position.maxScrollExtent - 10;
-    if (canUp != _canScrollCatUp || canDown != _canScrollCatDown) {
-      setState(() {
-        _canScrollCatUp = canUp;
-        _canScrollCatDown = canDown;
-      });
-    }
-  }
-
-  void _updateContentScrollState() {
-    if (!_contentScrollController.hasClients) return;
-    final canUp = _contentScrollController.position.pixels > 10;
-    final canDown = _contentScrollController.position.pixels <
-        _contentScrollController.position.maxScrollExtent - 10;
-    if (canUp != _canScrollContentUp || canDown != _canScrollContentDown) {
-      setState(() {
-        _canScrollContentUp = canUp;
-        _canScrollContentDown = canDown;
-      });
-    }
-  }
-
-  void _scrollCategories(double delta) {
-    if (!_categoryScrollController.hasClients) return;
-    final target = (_categoryScrollController.position.pixels + delta)
-        .clamp(0.0, _categoryScrollController.position.maxScrollExtent);
-    _categoryScrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _scrollContent(double delta) {
-    if (!_contentScrollController.hasClients) return;
-    final target = (_contentScrollController.position.pixels + delta)
-        .clamp(0.0, _contentScrollController.position.maxScrollExtent);
-    _contentScrollController.animateTo(
-      target,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
   bool _isDesktop(BuildContext context) {
     return AppBreakpoints.of(context) == ScreenTier.desktop;
   }
@@ -370,8 +363,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     try {
       if (widget.portal != null) {
         final p = widget.portal!.portal;
-        final cats = await IptvClient.categories(p, _activeSection);
-        final streams = await IptvClient.streams(p, _activeSection, '');
+        // Live channels only. A portal also carries movies and series, but
+        // those are not live: giving them tabs here rebuilt the app's own
+        // Films/Series navigation inside a source browser.
+        final cats = await IptvClient.categories(p, IptvSection.live);
+        final streams = await IptvClient.streams(p, IptvSection.live, '');
 
         if (!mounted) return;
         setState(() {
@@ -385,37 +381,23 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
           _isLoading = false;
         });
 
-        if (_activeSection == IptvSection.live) {
-          _loadSavedAliveSnapshot();
-        }
+        _loadSavedAliveSnapshot();
       } else if (widget.m3uPlaylist != null) {
         final pl = widget.m3uPlaylist!;
-        final groupNames = pl.channels
-            .map((c) => c.group.isNotEmpty ? c.group : 'General')
-            .toSet()
-            .toList();
 
-        final cats = groupNames
-            .map((g) => IptvCategory(id: g, name: g))
-            .toList();
-
-        final streams = pl.channels
-            .map((c) => IptvStream(
-                  streamId: c.url,
-                  name: c.name,
-                  icon: c.logo,
-                  categoryId: c.group.isNotEmpty ? c.group : 'General',
-                  containerExt: 'm3u8',
-                  kind: 'live',
-                ))
-            .toList();
+        final cats = <String>{};
+        final streams = <IptvStream>[];
+        for (final entry in expandM3uGroups(pl)) {
+          cats.add(entry.$1);
+          streams.add(entry.$2);
+        }
 
         if (!mounted) return;
         setState(() {
           _categories = [
             IptvCategory(id: '', name: l10n.iptvAllCategories),
             IptvCategory(id: favoritesCategoryId, name: l10n.iptvPinned),
-            ...cats,
+            ...cats.map((g) => IptvCategory(id: g, name: g)),
           ];
           _selectedCategoryId = '';
           _allStreams = streams;
@@ -429,11 +411,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
         _errorMessage = l10n.iptvLoadFailed('$e');
       });
     }
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _updateCategoryScrollState();
-      _updateContentScrollState();
-    });
   }
 
   Future<void> _loadSavedAliveSnapshot() async {
@@ -448,7 +425,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   Future<void> _startAliveCheck() async {
-    if (widget.portal == null || _activeSection != IptvSection.live || _isCheckingAlive) return;
+    if (widget.portal == null || _isCheckingAlive) return;
 
     final p = widget.portal!.portal;
     final filtered = _filteredStreams();
@@ -501,13 +478,50 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   List<IptvCategory> _filteredCategories() {
-    if (_catSearchQuery.trim().isEmpty) return _categories;
-    final q = _catSearchQuery.toLowerCase();
-    return _categories.where((c) => c.name.toLowerCase().contains(q)).toList();
+    final q = _catSearchQuery.trim().toLowerCase();
+    final region = _regionFilter;
+    return _categories.where((c) {
+      if (region != null &&
+          c.id.isNotEmpty &&
+          c.id != favoritesCategoryId) {
+        final prefix = regionPrefixOf(c.name);
+        if (prefix != null && prefix != region) return false;
+      }
+      if (q.isEmpty) return true;
+      return c.name.toLowerCase().contains(q);
+    }).toList();
+  }
+
+  /// Distinct region prefixes across the portal's own categories, sorted.
+  /// Empty when the portal files everything under plain names -- the
+  /// dropdown then has nothing to offer and stays out of the header.
+  List<String> get _regions {
+    final regions = <String>{};
+    for (final c in _categories) {
+      if (c.id.isEmpty || c.id == favoritesCategoryId) continue;
+      final prefix = regionPrefixOf(c.name);
+      if (prefix != null) regions.add(prefix);
+    }
+    return regions.toList()..sort();
+  }
+
+  String _categoryNameOf(String categoryId) {
+    for (final c in _categories) {
+      if (c.id == categoryId) return c.name;
+    }
+    return '';
+  }
+
+  bool _passesRegion(IptvStream s) {
+    final region = _regionFilter;
+    if (region == null) return true;
+    final prefix = regionPrefixOf(_categoryNameOf(s.categoryId));
+    return prefix == null || prefix == region;
   }
 
   List<IptvStream> _filteredStreams() {
     return _allStreams.where((s) {
+      if (!_passesRegion(s)) return false;
       if (_selectedCategoryId == favoritesCategoryId) {
         if (!_favoriteStreamIds.contains(s.streamId)) return false;
       } else if (_selectedCategoryId.isNotEmpty) {
@@ -519,22 +533,23 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
   }
 
   int _countForCategory(String catId) {
+    final streams =
+        _regionFilter == null ? _allStreams : _allStreams.where(_passesRegion);
     if (catId == favoritesCategoryId) {
-      return _allStreams.where((s) => _favoriteStreamIds.contains(s.streamId)).length;
+      return streams.where((s) => _favoriteStreamIds.contains(s.streamId)).length;
     }
-    if (catId.isEmpty) return _allStreams.length;
-    return _allStreams.where((s) => s.categoryId == catId).length;
+    if (catId.isEmpty) return streams.length;
+    return streams.where((s) => s.categoryId == catId).length;
   }
 
   void _playStream(IptvStream stream) {
-    final isLive = _activeSection == IptvSection.live;
     final currentList = _filteredStreams();
     final clickedIndex = currentList.indexWhere((s) => s.streamId == stream.streamId);
     final initialIndex = clickedIndex >= 0 ? clickedIndex : 0;
 
     final currentCat = _categories.firstWhere(
       (c) => c.id == _selectedCategoryId,
-      orElse: () => IptvCategory(id: '', name: isLive ? context.l10n.iptvLiveChannels : (_activeSection == IptvSection.vod ? context.l10n.libraryFilterMovies : context.l10n.libraryFilterSeries)),
+      orElse: () => IptvCategory(id: '', name: context.l10n.iptvLiveChannels),
     );
 
     if (widget.portal != null) {
@@ -548,7 +563,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
       final ch = HardcodedChannel(
         id: stream.streamId,
         name: stream.name,
-        short: isLive ? 'LIVE' : (_activeSection == IptvSection.vod ? 'VOD' : 'SERIES'),
+        short: 'LIVE',
         category: currentCat.name,
         keywords: [stream.name],
         gradient: [AppColors.accent, const Color(0xFF00D2EF)],
@@ -568,7 +583,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                   ),
                 ],
           initialHitIndex: initialIndex,
-          isLive: isLive,
+          isLive: true,
           categoryTitle: currentCat.name,
         ),
       );
@@ -588,7 +603,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
       final ch = HardcodedChannel(
         id: stream.streamId,
         name: stream.name,
-        short: isLive ? 'LIVE' : 'VOD',
+        short: 'LIVE',
         category: currentCat.name,
         keywords: [stream.name],
         gradient: [AppColors.accent, const Color(0xFF00D2EF)],
@@ -614,25 +629,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                   ),
                 ],
           initialHitIndex: initialIndex,
-          isLive: isLive,
+          isLive: true,
           categoryTitle: currentCat.name,
         ),
       );
     }
-  }
-
-  Future<void> _openSeriesEpisodes(IptvStream series) async {
-    if (widget.portal == null) return;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) => _SeriesEpisodesSheet(
-        portal: widget.portal!,
-        series: series,
-      ),
-    );
   }  void _showMobileCategorySheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -756,6 +757,28 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     );
   }
 
+  /// The region pill. Absent unless the portal actually files shelves by
+  /// region -- a dropdown with one option is a control that does nothing.
+  Widget _regionDropdown() {
+    final regions = _regions;
+    if (regions.isEmpty) return const SizedBox.shrink();
+    return FilterDropdown<String?>(
+      label: _regionFilter ?? context.l10n.iptvAllRegions,
+      icon: Icons.language_rounded,
+      items: [
+        PopupMenuItem(value: '', child: Text(context.l10n.iptvAllRegions)),
+        for (final r in regions) PopupMenuItem(value: r, child: Text(r)),
+      ],
+      onSelected: (v) => setState(() {
+        _regionFilter = (v == null || v.isEmpty) ? null : v;
+        _selectedCategoryId = '';
+        if (_contentScrollController.hasClients) {
+          _contentScrollController.jumpTo(0);
+        }
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
@@ -842,27 +865,11 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                     const SizedBox(width: 16),
 
-                    // ── SECTION SWITCHER TABS ──
-                    if (widget.portal != null) ...[
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: AppColors.raised,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.raised),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _buildSectionTab(context.l10n.navLiveTv, Icons.live_tv_rounded, IptvSection.live),
-                            const SizedBox(width: 4),
-                            _buildSectionTab(context.l10n.libraryFilterMovies, Icons.movie_rounded, IptvSection.vod),
-                            const SizedBox(width: 4),
-                            _buildSectionTab(context.l10n.iptvTvSeries, Icons.tv_rounded, IptvSection.series),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
+                    // The region pill, when the portal files shelves by
+                    // region. Next to search, where filters live.
+                    if (_regions.isNotEmpty) ...[
+                      _regionDropdown(),
+                      const SizedBox(width: 12),
                     ],
 
                     // Search Bar
@@ -908,7 +915,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     ),
 
                     // Alive Sniffer Action
-                    if (_activeSection == IptvSection.live && widget.portal != null) ...[
+                    if (widget.portal != null) ...[
                       const SizedBox(width: 12),
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
@@ -997,7 +1004,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                             ],
                           ),
                         ),
-                        if (_activeSection == IptvSection.live && widget.portal != null)
+                        if (widget.portal != null)
                           IconButton(
                             tooltip: context.l10n.iptvCheckHealth,
                             icon: _isCheckingAlive
@@ -1019,7 +1026,10 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                     const SizedBox(height: 8),
 
-                    // Controls Bar: Category Selector Chip + Section Tabs
+                    // Controls Bar: the portal's channel category picker.
+                    // No Live/Movies/Series switcher: those are the app's
+                    // own sections, and repeating them here made a source
+                    // browser look like a second media hub.
                     Row(
                       children: [
                         // Mobile Category Chip
@@ -1054,33 +1064,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                           ),
                         ),
 
-                        const SizedBox(width: 8),
-
-                        // Section Switchers
-                        if (widget.portal != null)
-                          Expanded(
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  color: AppColors.raised,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: AppColors.raised),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildSectionTab(context.l10n.iptvLive, Icons.live_tv_rounded, IptvSection.live),
-                                    const SizedBox(width: 2),
-                                    _buildSectionTab(context.l10n.libraryFilterMovies, Icons.movie_rounded, IptvSection.vod),
-                                    const SizedBox(width: 2),
-                                    _buildSectionTab(context.l10n.libraryFilterSeries, Icons.tv_rounded, IptvSection.series),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
+                        // The region pill shares the row on mobile, icon-only
+                        // like every other header pill at this width.
+                        if (_regions.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          _regionDropdown(),
+                        ],
                       ],
                     ),
 
@@ -1189,12 +1178,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                                         // Category List with Desktop Vertical Scroll Arrows
                                         Expanded(
-                                          child: MouseRegion(
-                                            onEnter: (_) => setState(() => _isHoveringCategories = true),
-                                            onExit: (_) => setState(() => _isHoveringCategories = false),
-                                            child: Stack(
-                                              children: [
-                                                ListView.builder(
+                                          child: ListView.builder(
                                                   controller: _categoryScrollController,
                                                   itemExtent: 46.0,
                                                   cacheExtent: 300.0,
@@ -1219,36 +1203,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                                   },
                                                 ),
 
-                                                // Desktop Category Scroll Up Arrow
-                                                if (_isHoveringCategories && _canScrollCatUp)
-                                                  Positioned(
-                                                    top: 6,
-                                                    left: 0,
-                                                    right: 0,
-                                                    child: Center(
-                                                      child: _VerticalScrollButton(
-                                                        icon: Icons.keyboard_arrow_up_rounded,
-                                                        onTap: () => _scrollCategories(-240),
-                                                      ),
-                                                    ),
-                                                  ),
-
-                                                // Desktop Category Scroll Down Arrow
-                                                if (_isHoveringCategories && _canScrollCatDown)
-                                                  Positioned(
-                                                    bottom: 6,
-                                                    left: 0,
-                                                    right: 0,
-                                                    child: Center(
-                                                      child: _VerticalScrollButton(
-                                                        icon: Icons.keyboard_arrow_down_rounded,
-                                                        onTap: () => _scrollCategories(240),
-                                                      ),
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                          ),
                                         ),
                                       ],
                                     ),
@@ -1257,87 +1211,13 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
                                 // ── RIGHT CONTENT PANEL ──
                                 Expanded(
-                                  child: MouseRegion(
-                                    onEnter: (_) => setState(() => _isHoveringContent = true),
-                                    onExit: (_) => setState(() => _isHoveringContent = false),
-                                    child: Stack(
-                                      children: [
-                                        _buildMainContent(),
-
-                                        // Desktop Content Scroll Up Arrow
-                                        if (_isHoveringContent && _canScrollContentUp)
-                                          Positioned(
-                                            top: 14,
-                                            right: 28,
-                                            child: _VerticalScrollButton(
-                                              icon: Icons.keyboard_arrow_up_rounded,
-                                              onTap: () => _scrollContent(-450),
-                                            ),
-                                          ),
-
-                                        // Desktop Content Scroll Down Arrow
-                                        if (_isHoveringContent && _canScrollContentDown)
-                                          Positioned(
-                                            bottom: 14,
-                                            right: 28,
-                                            child: _VerticalScrollButton(
-                                              icon: Icons.keyboard_arrow_down_rounded,
-                                              onTap: () => _scrollContent(450),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
+                                  child: _buildMainContent(),
                                 ),
                               ],
                             )
                           : _buildMainContent(),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTab(String label, IconData icon, IptvSection section) {
-    final palette = AppThemeService.currentPalette.value;
-    final isSelected = _activeSection == section;
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: () {
-          if (_activeSection != section) {
-            setState(() => _activeSection = section);
-            _loadSectionData();
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            color: isSelected ? palette.primaryColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                color: isSelected ? AppColors.onAccent : AppColors.inkAlpha(0.60),
-                size: 16,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? AppColors.onAccent : AppColors.inkMuted,
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );
@@ -1392,7 +1272,9 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
 
     final isDesktop = _isDesktop(context);
 
-    if (_activeSection == IptvSection.live) {
+    {
+      // Live channels only -- the Movies & Series branch is gone (see the
+      // class doc): a portal browser is a source browser, not a media hub.
       final layout = IptvSettings.browserLayout.value;
 
       if (layout == PortalBrowserLayout.grid) {
@@ -1495,63 +1377,6 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
           },
         );
       }
-    } else {
-      // ── MOVIES & SERIES GRID VIEW ──
-      final screenW = MediaQuery.sizeOf(context).width;
-      final sidebarW = isDesktop ? IptvSettings.sidebarWidth.value : 0.0;
-      final width = isDesktop ? (screenW - sidebarW) : screenW;
-      int crossAxisCount = 2;
-      if (width > 1200) {
-        crossAxisCount = 6;
-      } else if (width > 900) {
-        crossAxisCount = 5;
-      } else if (width > 650) {
-        crossAxisCount = 4;
-      } else if (width > 420) {
-        crossAxisCount = 3;
-      } else {
-        crossAxisCount = 2;
-      }
-
-      return GridView.builder(
-        controller: _contentScrollController,
-        cacheExtent: 400.0,
-        addAutomaticKeepAlives: false,
-        addRepaintBoundaries: true,
-        padding: EdgeInsets.fromLTRB(isDesktop ? 20 : 10, 12, isDesktop ? 20 : 10, 30),
-        physics: const BouncingScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.68,
-          crossAxisSpacing: isDesktop ? 14 : 10,
-          mainAxisSpacing: isDesktop ? 14 : 10,
-        ),
-        itemCount: streams.length,
-        itemBuilder: (context, index) {
-          final stream = streams[index];
-          final isFav = _favoriteStreamIds.contains(stream.streamId);
-
-          if (_activeSection == IptvSection.series) {
-            return _VodSeriesCard(
-              key: ValueKey(stream.streamId),
-              stream: stream,
-              isSeries: true,
-              isFavorite: isFav,
-              onToggleFavorite: () => _toggleFavoriteStream(stream.streamId),
-              onTap: () => _openSeriesEpisodes(stream),
-            );
-          } else {
-            return _VodSeriesCard(
-              key: ValueKey(stream.streamId),
-              stream: stream,
-              isSeries: false,
-              isFavorite: isFav,
-              onToggleFavorite: () => _toggleFavoriteStream(stream.streamId),
-              onTap: () => _playStream(stream),
-            );
-          }
-        },
-      );
     }
   }
 }
@@ -2248,396 +2073,5 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
         ),
       ),
     );
-  }
-}
-
-class _VodSeriesCard extends StatefulWidget {
-  final IptvStream stream;
-  final bool isSeries;
-  final bool isFavorite;
-  final VoidCallback onToggleFavorite;
-  final VoidCallback onTap;
-
-  const _VodSeriesCard({
-    super.key,
-    required this.stream,
-    required this.isSeries,
-    required this.isFavorite,
-    required this.onToggleFavorite,
-    required this.onTap,
-  });
-
-  @override
-  State<_VodSeriesCard> createState() => _VodSeriesCardState();
-}
-
-class _VodSeriesCardState extends State<_VodSeriesCard> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    AppColors.dependOn(context);
-    final s = widget.stream;
-
-    return RepaintBoundary(
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedScale(
-            duration: const Duration(milliseconds: 140),
-            scale: _hovered ? 1.035 : 1.0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.raised,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _hovered ? AppColors.accent : AppColors.raised,
-                        width: _hovered ? 1.4 : 1.0,
-                      ),
-                      boxShadow: _hovered
-                          ? [
-                              BoxShadow(
-                                color: AppColors.accent.withValues(alpha: 0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 3),
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(11),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          s.icon.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: s.icon,
-                                  fit: BoxFit.cover,
-                                  memCacheWidth: 256,
-                                  errorWidget: (_, _, _) => Center(
-                                    child: Icon(Icons.movie_rounded, color: AppColors.inkDisabled, size: 32),
-                                  ),
-                                )
-                              : Center(
-                                  child: Icon(Icons.movie_rounded, color: AppColors.inkDisabled, size: 32),
-                                ),
-                          if (_hovered)
-                            Positioned.fill(
-                              child: Container(
-                                color: Colors.black45,
-                                child: Center(
-                                  child: Icon(Icons.play_circle_fill_rounded, color: AppColors.accent, size: 40),
-                                ),
-                              ),
-                            ),
-                          // Floating Favorite Star Button
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Tooltip(
-                                message: widget.isFavorite
-                                    ? context.l10n.iptvRemoveFavorite
-                                    : context.l10n.iptvAddFavorite,
-                                child: InkWell(
-                                  onTap: widget.onToggleFavorite,
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.75),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: widget.isFavorite
-                                            ? AppColors.onAccent.withValues(alpha: 0.70)
-                                            : AppColors.onAccent.withValues(alpha: 0.24),
-                                        width: 1.2,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      widget.isFavorite
-                                          ? Icons.push_pin_rounded
-                                          : Icons.push_pin_outlined,
-                                      color: widget.isFavorite
-                                          ? AppColors.onAccent
-                                          : AppColors.onAccent.withValues(alpha: 0.70),
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  s.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: AppColors.ink,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SeriesEpisodesSheet extends StatefulWidget {
-  final VerifiedPortal portal;
-  final IptvStream series;
-
-  const _SeriesEpisodesSheet({required this.portal, required this.series});
-
-  @override
-  State<_SeriesEpisodesSheet> createState() => _SeriesEpisodesSheetState();
-}
-
-class _SeriesEpisodesSheetState extends State<_SeriesEpisodesSheet> {
-  bool _isLoading = true;
-  List<IptvEpisode> _episodes = [];
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEpisodes();
-  }
-
-  Future<void> _loadEpisodes() async {
-    try {
-      final eps = await IptvClient.seriesEpisodes(widget.portal.portal, widget.series.streamId);
-      if (mounted) {
-        setState(() {
-          _episodes = eps;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = '$e';
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _playEpisode(IptvEpisode ep) {
-    final epIndex = _episodes.indexWhere((e) => e.id == ep.id);
-    final initialIndex = epIndex >= 0 ? epIndex : 0;
-
-    final hits = _episodes.map((e) {
-      final s = IptvStream(
-        streamId: e.id,
-        name: '${widget.series.name} - S${e.season}E${e.episode} ${e.title}',
-        icon: e.image.isNotEmpty ? e.image : widget.series.icon,
-        categoryId: widget.series.categoryId,
-        containerExt: e.containerExt,
-        kind: 'series',
-      );
-      return ChannelHit(
-        portal: widget.portal,
-        stream: s,
-        streamUrl: IptvClient.streamUrl(widget.portal.portal, s),
-      );
-    }).toList();
-
-    final currentStream = (hits.isNotEmpty && initialIndex < hits.length)
-        ? hits[initialIndex].stream
-        : IptvStream(
-            streamId: ep.id,
-            name: '${widget.series.name} - S${ep.season}E${ep.episode} ${ep.title}',
-            icon: ep.image.isNotEmpty ? ep.image : widget.series.icon,
-            categoryId: widget.series.categoryId,
-            containerExt: ep.containerExt,
-            kind: 'series',
-          );
-
-    final ch = HardcodedChannel(
-      id: ep.id,
-      name: currentStream.name,
-      short: 'TV',
-      category: widget.series.name,
-      keywords: [widget.series.name],
-      gradient: [AppColors.accent, const Color(0xFF00D2EF)],
-    );
-
-    Navigator.pop(context);
-    pushPage(
-      context,
-      IptvPlayerPage(
-        channel: ch,
-        hits: hits.isNotEmpty
-            ? hits
-            : [
-                ChannelHit(
-                  portal: widget.portal,
-                  stream: currentStream,
-                  streamUrl: IptvClient.streamUrl(widget.portal.portal, currentStream),
-                ),
-              ],
-        initialHitIndex: initialIndex,
-        isLive: false,
-        categoryTitle: '${widget.series.name} Episodes',
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    AppColors.dependOn(context);
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.8,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.canvas,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        children: [
-          // Handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 8),
-              width: 44,
-              height: 4.5,
-              decoration: BoxDecoration(
-                color: AppColors.inkAlpha(0.2),
-                borderRadius: BorderRadius.circular(3),
-              ),
-            ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.series.name,
-                    style: TextStyle(color: AppColors.ink, fontSize: 18, fontWeight: FontWeight.w900),
-                  ),
-                ),
-                IconButton(
-                  tooltip: context.l10n.commonClose,
-                  icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: _isLoading
-                ? Center(child: CircularProgressIndicator(color: AppColors.accent))
-                : _error != null
-                    ? Center(child: Text(_error!, style: const TextStyle(color: Colors.redAccent)))
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        itemCount: _episodes.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final ep = _episodes[index];
-                          return ListTile(
-                            tileColor: AppColors.raised,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            leading: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.accent.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'S${ep.season}E${ep.episode}',
-                                style: const TextStyle(color: Color(0xFF9D4EDD), fontWeight: FontWeight.w800),
-                              ),
-                            ),
-                            title: Text(
-                              ep.title.isNotEmpty
-                                  ? ep.title
-                                  : context.l10n.playerEpisodeN(ep.episode),
-                              style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w700),
-                            ),
-                            trailing: Icon(Icons.play_circle_fill_rounded, color: AppColors.accent),
-                            onTap: () => _playEpisode(ep),
-                          );
-                        },
-                      ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _VerticalScrollButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _VerticalScrollButton({required this.icon, required this.onTap});
-
-  @override
-  State<_VerticalScrollButton> createState() => _VerticalScrollButtonState();
-}
-
-class _VerticalScrollButtonState extends State<_VerticalScrollButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    AppColors.dependOn(context);
-    final arrow = MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: _hovered ? AppColors.accent : Colors.black87,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: _hovered ? AppColors.accent : AppColors.onAccent.withValues(alpha: 0.3),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: Icon(
-            widget.icon,
-            color: AppColors.onAccent,
-            size: 22,
-          ),
-        ),
-      ),
-    );
-    return ArrowTooltip(icon: widget.icon, child: arrow);
   }
 }

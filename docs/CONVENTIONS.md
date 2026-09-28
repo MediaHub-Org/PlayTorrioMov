@@ -147,6 +147,29 @@ static const List<double> _points = [0.25, 0.5, 0.75, 1.0];
 const Map<String, String> _iso639ToDisplayName = { ... };
 ```
 
+### Titles
+
+A title is two fields on `AnimeMedia`, and they must never merge:
+`canonicalTitle` feeds scraper queries, `uniqueKey`, Trakt/Simkl matching and
+filename parsing, and is never localized; `nativeTitle` is the title in its
+own language. `titleFor({required bool native})` picks between them, and a
+model depends on nothing, so it takes the preference rather than reading
+it — `animeDisplayTitle()` in `services/titles/title_display.dart` is what
+every call site uses, reading `AppThemeService.preferNativeTitles`.
+
+Localizing the identifier forks identity — the same show saved under one
+setting becomes a different object from the one saved under another, taking
+collection membership, Continue Watching dedupe and Trakt/Simkl matching with
+it — and starves the title-string scrapers, which fail silently on a
+translated title. `displayTitle` still exists as a fixed alias of
+`canonicalTitle`, deliberately *not* made switchable: every call site was
+checked and moved to `animeDisplayTitle`, and a getter that had quietly
+started honoring the setting instead would have made a missed one impossible
+to spot in review.
+
+AniList sends four titles per show, so the toggle exists for anime today.
+Movies and series carry one title, with no per-viewer choice to make.
+
 ### Spelling: American English, everywhere
 
 One variant, not two. `color`, `behavior`, `catalog`, `center`, `gray`,
@@ -424,7 +447,8 @@ English copies of four rows the settings page already translated, and
 
 **A `const` enum cannot hold a translated string; give it a method.**
 `LibrarySection.localizedLabel` and `LibraryShelf.localizedLabel` are the
-shape to copy. `DecoderPreset`, `BufferResiliencePreset` and
+shape to copy (`HubSection.localizedLabel` is the earlier hand-rolled
+version). `DecoderPreset`, `BufferResiliencePreset` and
 `SubtitleStylePreset` expose `title(l10n)` / `description(l10n)` with
 exhaustive switches, so a preset without a translation is a compile error
 rather than a blank row.
@@ -435,68 +459,14 @@ own name and the release's quality ("VidRock · Alpha · 1080p"): those strings
 are how a source row is read and matched, not sentences. Debrid provider ids
 are persisted and compared with `==`, so only the display of `'None'` is
 translated, never the value. Platform names and the Keyboard Shortcuts page's
-key column are product names and physical keys. AniList's genre and format
+key column are product names and physical keys; only the generic
+`Desktop/Mobile` fallback goes through the ARB. AniList's genre and format
 values are sent back to its API to filter.
 
 **Translating a widget can expose an overflow the English hid.** A longer
 Portuguese string pushed the audio menu's rows 75px past the card. Probe a
 newly translated widget in the longest language at a phone's width, not only
 in English — see *Probing for overflow at 3x text scale*.
-
-#### A title is two fields, and they must never merge
-
-Localizing a *title* is not like localizing a label, and getting it wrong
-breaks things that look unrelated.
-
-|                  | Used for                                                             | Localizable |
-|:-----------------|:---------------------------------------------------------------------|:------------|
-| `displayTitle`   | What the user reads                                                  | Yes         |
-| `canonicalTitle` | Scraper queries, `uniqueKey`, Trakt/Simkl matching, filename parsing | **Never**   |
-
-Three things depend on a stable title, and each breaks differently:
-
-1. **Identity falls back to it.** `MyListItem.uniqueKey` returns
-   `title:$type:$clean:$year` when there is no IMDb, TMDB, Trakt or Simkl id —
-   and anime saved from AniList hits that branch *by design*, because AniList
-   ids are their own namespace. Localize `title` and the same show saved under
-   a Spanish UI is a different object from the one saved under English, which
-   takes collection membership, Continue Watching dedupe and Trakt/Simkl
-   matching with it.
-2. **All 48 scrapers search by title string.** They index release names, which
-   are English or original language. "El Caballero Oscuro" returns nothing,
-   and it fails silently — the user sees no sources, not an error.
-3. **AniList already returns four titles** — `titleUserPreferred`,
-   `titleRomaji`, `titleEnglish`, `titleNative` — so the "which title do we
-   show" decision has always lived here.
-
-**Default: original/English titles even when the UI is translated**, with an
-opt-in toggle that affects display only. A translated title is not a stable
-identifier — Spain and Latin America give the same film different Spanish
-titles — while the original is the one string every provider agrees on, and it
-is what Stremio, Plex and Jellyfin default to.
-
-That toggle is `AppThemeService.preferNativeTitles`, in the Appearance
-settings' language card. Three pieces keep it honest, and the shape is the one
-to copy if a second media kind ever gains a second title:
-
-- `AnimeMedia.canonicalTitle` is what scrapers query and what identity falls
-  back to. It cannot move.
-- `AnimeMedia.titleFor(native:)` **takes** the preference rather than reading
-  it, because a model depends on nothing.
-- `animeDisplayTitle(anime)` in `services/titles/title_display.dart` reads the
-  setting and is what a widget calls. Anywhere a title is rendered, call that;
-  anywhere one is queried, matched or stored, use `canonicalTitle`.
-
-`test/services/title_display_test.dart` asserts the part that matters: a saved
-item's `uniqueKey` is identical with the setting on and off. The failure it
-prevents is not a wrong label but a *duplicate object*.
-
-Catalog descriptions are not a free win either, if anyone reaches for that
-next: synopsis and genre text comes from the Stremio addon (Cinemeta by
-default), read as `json['overview'] ?? json['description']` in
-`models/movie/video.dart` — not from TMDB, which this codebase uses only for
-cast/crew and scrapers' own IMDb→TMDB id matching. It would mean finding out
-whether Cinemeta's API takes a locale at all.
 
 ### Right-to-left
 
@@ -751,10 +721,10 @@ Fix flatpak suspend + shortcut focus loss; retry failed catalogs
 ### Keep the docs current
 
 - `CHANGELOG.md` — a `[Unreleased]` entry for anything user-visible.
-- `docs/ROADMAP.md` — **pending work only**, plus its "Not doing" table so
-  settled decisions stop being re-litigated. Anything that shipped belongs in
-  the changelog, and any rule for writing code belongs in this file. The
-  roadmap is a list of what is left, not a record of what happened.
+- `docs/ROADMAP.md` — **pending work only**. Anything that shipped belongs in
+  the changelog, any rule for writing code belongs in this file, and settled
+  scope decisions live under §12 below. The roadmap is a list of what is left,
+  not a record of what happened.
 
 ---
 

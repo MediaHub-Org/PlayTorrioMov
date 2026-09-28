@@ -9,11 +9,11 @@ import 'package:playtorriomov/services/subtitles/subtitle_languages.dart';
 void main() {
   group('uniqueTrackLanguageNames', () {
     test('leaves a single track of a language alone', () {
-      // Untagged Spanish joins Spanish (ES), so even a singleton reads
-      // like its region-tagged siblings.
+      // Untagged stays untagged: calling it Spanish (ES) would state a
+      // region no metadata names.
       expect(
         uniqueTrackLanguageNames(['spa'], ['Spanish']),
-        ['Spanish (ES)'],
+        ['Spanish'],
       );
     });
 
@@ -48,7 +48,7 @@ void main() {
       // them is picking by trial.
       expect(
         uniqueTrackLanguageNames(['spa', 'spa'], ['Spanish', 'Spanish']),
-        ['Spanish (ES) #1', 'Spanish (ES) #2'],
+        ['Spanish #1', 'Spanish #2'],
       );
     });
 
@@ -58,7 +58,7 @@ void main() {
           ['eng', 'spa', 'spa'],
           ['English', 'Spanish', 'Spanish'],
         ),
-        ['English', 'Spanish (ES) #1', 'Spanish (ES) #2'],
+        ['English', 'Spanish #1', 'Spanish #2'],
       );
     });
 
@@ -70,7 +70,7 @@ void main() {
           ['spa', 'spa'],
           ['Spanish (Latin America)', 'Spanish'],
         ),
-        ['Spanish (LATAM)', 'Spanish (ES)'],
+        ['Spanish (LATAM)', 'Spanish'],
       );
     });
 
@@ -108,7 +108,7 @@ void main() {
     });
 
     test('a real tag beats whatever the title says', () {
-      expect(uniqueTrackLanguageNames(['spa'], ['chi']), ['Spanish (ES)']);
+      expect(uniqueTrackLanguageNames(['spa'], ['chi']), ['Spanish']);
     });
 
     test('script spellings collapse to one Chinese', () {
@@ -171,7 +171,7 @@ void main() {
       // than a label the track does not claim.
       expect(
         uniqueTrackLanguageNames(['spa', 'spa'], ['Standard', 'Standard']),
-        ['Spanish (ES) #1', 'Spanish (ES) #2'],
+        ['Spanish #1', 'Spanish #2'],
       );
     });
   });
@@ -187,7 +187,7 @@ void main() {
           ['Spanish (Castilian)', 'Spanish (Latin America)', 'Spanish'],
           numberDuplicates: false,
         ),
-        ['Spanish (ES)', 'Spanish (LATAM)', 'Spanish (ES)'],
+        ['Spanish (ES)', 'Spanish (LATAM)', 'Spanish'],
       );
     });
 
@@ -209,7 +209,7 @@ void main() {
           ['English', 'Spanish'],
           numberDuplicates: false,
         ),
-        ['English', 'Spanish (ES)'],
+        ['English', 'Spanish'],
       );
     });
   });

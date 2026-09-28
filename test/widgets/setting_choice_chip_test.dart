@@ -88,9 +88,9 @@ void main() {
     // modal and Live TV's settings page. All of it was this chip, written out
     // ten times across three files, every copy agreeing on the same six
     // styling properties. A scan rather than a widget test because what is
-    // being pinned is that nobody writes an eleventh.
+    // being pinned is that nobody writes an eleventh. The modal is gone;
+    // the portal browser and the settings page remain.
     const sources = [
-      'lib/pages/iptv/iptv_portals_modal.dart',
       'lib/pages/settings/appearance/live_tv_settings_page.dart',
       'lib/pages/iptv/iptv_portal_browser_page.dart',
     ];
@@ -115,22 +115,23 @@ void main() {
       );
     });
 
-    test('both screens share one Default Starting Tab picker', () {
-      // Same control, reachable from the modal and from settings. Two copies
-      // is how the two drift apart.
-      for (final path in [sources[0], sources[1]]) {
-        final source = File(path).readAsStringSync();
-        expect(
-          source.contains('DefaultPortalTabPicker'),
-          isTrue,
-          reason: '$path should use the shared picker',
-        );
-        expect(
-          source.contains('IptvSettings.setDefaultPortalTab'),
-          isFalse,
-          reason: '$path should not write the setting itself any more',
-        );
-      }
+    test('the starting tab picker lives in settings', () {
+      // One control in one place: it used to be reachable from the portals
+      // modal too, which is how the two copies drifted apart. The modal is
+      // gone; settings owns it now.
+      const path =
+          'lib/pages/settings/appearance/live_tv_settings_page.dart';
+      final source = File(path).readAsStringSync();
+      expect(
+        source.contains('DefaultPortalTabPicker'),
+        isTrue,
+        reason: '$path should use the shared picker',
+      );
+      expect(
+        source.contains('IptvSettings.setDefaultPortalTab'),
+        isFalse,
+        reason: '$path should not write the setting itself any more',
+      );
     });
   });
 }

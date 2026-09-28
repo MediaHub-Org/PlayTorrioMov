@@ -51,13 +51,22 @@ Future<void> withPlatform(
   }
 }
 
-/// The chevron buttons, found by their icons. The rail draws one per end
-/// when it overflows, so a count of 2 means both ends are showing.
+/// The chevron buttons, found by their icons. Only the live end draws one,
+// so a count of 1 with content hidden past it means the spent end is gone
+// rather than dimmed.
 Finder chevrons() => find.byWidgetPredicate(
   (w) =>
       w is Icon &&
       (w.icon == Icons.chevron_left_rounded ||
           w.icon == Icons.chevron_right_rounded),
+);
+
+/// Just the forward (right) chevron, and just the back (left) one.
+Finder forwardChevron() => find.byWidgetPredicate(
+  (w) => w is Icon && w.icon == Icons.chevron_right_rounded,
+);
+Finder backChevron() => find.byWidgetPredicate(
+  (w) => w is Icon && w.icon == Icons.chevron_left_rounded,
 );
 
 void main() {
@@ -80,7 +89,7 @@ void main() {
       });
     });
 
-    testWidgets('an overflowing row shows an affordance at both ends', (
+    testWidgets('an overflowing row shows only the live end', (
       tester,
     ) async {
       setSurfaceWidth(tester, 400);
@@ -94,16 +103,26 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        // Both ends, not just the right one. Showing only the live end made
-        // the row look lopsided and left it with no control at all once
-        // scrolled to the far end.
-        expect(chevrons(), findsNWidgets(2));
+        // At the start there is nowhere back to go, so the spent end is
+        // gone rather than dimmed -- a dimmed chevron read as a control
+        // that should do something and did nothing.
+        expect(forwardChevron(), findsOneWidget);
+        expect(backChevron(), findsNothing);
+
+        await tester.drag(
+          find.byType(FilterPillRail),
+          const Offset(-400, 0),
+        );
+        await tester.pumpAndSettle();
+
+        expect(backChevron(), findsOneWidget);
+        expect(forwardChevron(), findsNothing);
       });
     });
   });
 
   group('FilterPillRail platform split', () {
-    testWidgets('desktop gets tappable chevron buttons', (tester) async {
+    testWidgets('desktop gets a tappable chevron button', (tester) async {
       setSurfaceWidth(tester, 400);
       await withPlatform(TargetPlatform.windows, () async {
         await tester.pumpWidget(
@@ -115,12 +134,12 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(chevrons(), findsNWidgets(2));
+        expect(chevrons(), findsOneWidget);
         // A button is something you can press, so it carries a tap handler.
         expect(
           find.byType(GestureDetector),
           findsWidgets,
-          reason: 'the desktop chevrons must be tappable',
+          reason: 'the desktop chevron must be tappable',
         );
       });
     });

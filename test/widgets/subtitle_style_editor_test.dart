@@ -84,4 +84,39 @@ void main() {
     await tester.pump();
     expect(PlayerSettings.subFont.value, 'Georgia');
   });
+
+  group('color dots', () {
+    // Fourteen named pills took most of the panel; fourteen dots take two
+    // short rows, with the translated name in the tooltip for anyone who
+    // wants it -- the same deal as the B/I toggles.
+    testWidgets('palettes render as dots with translated tooltips', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(editor());
+      await tester.pump();
+
+      expect(find.byTooltip('Cinema Yellow'), findsOneWidget);
+      expect(find.byTooltip('Dark Slate'), findsOneWidget);
+      // "Cinema Yellow" is also a preset name, so absence is asserted on
+      // names no preset carries.
+      expect(find.text('Dark Slate'), findsNothing);
+      expect(find.text('Amber Gold'), findsNothing);
+    });
+
+    testWidgets('tapping a dot picks the color', (tester) async {
+      tester.view.physicalSize = const Size(900, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await PlayerSettings.setSubColor('#FFFFFFFF');
+      await tester.pumpWidget(editor());
+      await tester.pump();
+
+      await tester.tap(find.byTooltip('Amber Gold'));
+      await tester.pump();
+      expect(PlayerSettings.subColor.value, '#FFFFC107');
+    });
+  });
 }

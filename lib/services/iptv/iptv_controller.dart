@@ -144,6 +144,20 @@ class IptvController extends ChangeNotifier {
 
   // ── Init ──
   bool _initialized = false;
+
+  /// The playlists a fresh install starts with, so Live TV is not empty
+  /// before any portal is added. Public for the test that pins the exact
+  /// URLs -- a typo here is a dead default nobody notices until a user
+  /// reports an empty shelf.
+  static const defaultPlaylists = {
+    'All Languages': 'https://iptv-org.github.io/iptv/index.language.m3u',
+    'English': 'https://iptv-org.github.io/iptv/languages/eng.m3u',
+    'Español': 'https://iptv-org.github.io/iptv/languages/spa.m3u',
+    'España': 'https://iptv-org.github.io/iptv/raw/es.m3u',
+    'Sports': 'https://iptv-org.github.io/iptv/categories/sports.m3u',
+    'News': 'https://iptv-org.github.io/iptv/categories/news.m3u',
+  };
+
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
@@ -165,7 +179,34 @@ class IptvController extends ChangeNotifier {
       scrape();
     }
 
+    // The bundled playlists, in the background: six fetches must not hold
+    // up startup, and the flag is what keeps a deleted default deleted.
+    unawaited(_seedDefaultPlaylists());
+
     notifyListeners();
+  }
+
+  /// Fetches each bundled playlist missing from the shelf. Skips what is
+  /// already there by URL rather than by name, so a renamed default is not
+  /// fetched twice. A failure anywhere leaves the flag unset and retries
+  /// next launch; a deleted default stays deleted because the flag is set.
+  Future<void> _seedDefaultPlaylists() async {
+    // Settings initializes beside this controller with no ordering
+    // between the two, so the flag is read after ensuring it is loaded.
+    await IptvSettings.initialize();
+    if (IptvSettings.defaultPlaylistsSeeded) return;
+    var ok = true;
+    for (final entry in defaultPlaylists.entries) {
+      if (m3uPlaylists.any((p) => p.sourceUrl == entry.value)) continue;
+      try {
+        await addM3uFromUrl(entry.key, entry.value);
+      } catch (_) {
+        // One dead list must not take the other five with it; the unset
+        // flag retries everything next launch.
+        ok = false;
+      }
+    }
+    if (ok) await IptvSettings.setDefaultPlaylistsSeeded();
   }
 
   List<VerifiedPortal> _sortFavoritesFirst(List<VerifiedPortal> list) {

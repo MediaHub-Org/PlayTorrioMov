@@ -108,7 +108,7 @@ class _LibraryTabsState extends State<LibraryTabs>
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Align(
-                alignment: AlignmentDirectional.centerStart,
+                alignment: AlignmentDirectional.center,
                 child: PillTabRow(
                   tabs: [
                     for (var i = 0; i < widget.tabs.length; i++)

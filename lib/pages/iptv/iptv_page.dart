@@ -7,11 +7,11 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/custom_channels_service.dart';
 import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/iptv_controller.dart';
-import '../../services/content_display_enums.dart';
 import '../../services/iptv/iptv_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/header_pill_style.dart';
+import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/common/page_search_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
@@ -20,7 +20,7 @@ import '../../widgets/iptv/iptv_slider_section.dart' show IptvCardSizing;
 import 'iptv_channel_sheet.dart';
 import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
-import 'iptv_portals_modal.dart';
+import 'iptv_sources_page.dart';
 import 'iptv_search_page.dart';
 
 class IptvPage extends StatefulWidget {
@@ -40,10 +40,16 @@ class _IptvPageState extends State<IptvPage> {
   List<HardcodedChannel> _combat = [];
   List<HardcodedChannel> _racing = [];
   List<HardcodedChannel> _movies = [];
+  List<HardcodedChannel> _music = [];
   List<HardcodedChannel> _news = [];
   List<HardcodedChannel> _arabic = [];
   List<HardcodedChannel> _discovery = [];
   List<HardcodedChannel> _kids = [];
+  List<HardcodedChannel> _spanish = [];
+  List<HardcodedChannel> _german = [];
+  List<HardcodedChannel> _russian = [];
+  List<HardcodedChannel> _chinese = [];
+
 
   @override
   void initState() {
@@ -116,10 +122,15 @@ class _IptvPageState extends State<IptvPage> {
     _combat = HardcodedChannels.byCategory('Combat');
     _racing = HardcodedChannels.byCategory('Racing');
     _movies = HardcodedChannels.byCategory('Movies');
+    _music = HardcodedChannels.byCategory('Music');
     _news = HardcodedChannels.byCategory('News');
     _arabic = HardcodedChannels.byCategory('Arabic');
     _discovery = HardcodedChannels.byCategory('Discovery');
     _kids = HardcodedChannels.byCategory('Kids');
+    _spanish = HardcodedChannels.byCategory('Spanish');
+    _german = HardcodedChannels.byCategory('German');
+    _russian = HardcodedChannels.byCategory('Russian');
+    _chinese = HardcodedChannels.byCategory('Chinese');
   }
 
   void _openChannel(HardcodedChannel channel) {
@@ -186,6 +197,10 @@ class _IptvPageState extends State<IptvPage> {
         'HBO, Showtime, Starz, Cinemax, Paramount & AMC',
         _movies,
       ),
+      'Music Television': (
+        'MTV, VH1 & Trace hits',
+        _music,
+      ),
       '24/7 Global News Networks': (
         'CNN, BBC World, Fox News, Sky News, Al Jazeera & Bloomberg',
         _news,
@@ -202,18 +217,35 @@ class _IptvPageState extends State<IptvPage> {
         'Cartoon Network, Disney Channel, Nickelodeon & Spacetoon',
         _kids,
       ),
+      'Spanish TV': (
+        'La 1, La 2, 24h news & Teledeporte',
+        _spanish,
+      ),
+      'German TV': (
+        'Das Erste, ZDF, RTL, n-tv & WELT',
+        _german,
+      ),
+      'Russian TV': (
+        'Channel One, Rossiya 1, NTV & RT',
+        _russian,
+      ),
+      'Chinese TV': (
+        'CCTV-1, CCTV-4, CCTV News & CGTN',
+        _chinese,
+      ),
     };
 
     final pillHeader = _IptvGlassAppBar(
       onSearchTap: _navigateToSearch,
-      onSourcesTap: () => IptvPortalsModal.show(context),
+      onSourcesTap: () => pushPage(context, const IptvSourcesPage()),
       onMultiViewTap: _navigateToMultiView,
     );
     // Live TV now renders through the same scaffold as Movies, Series and
     // Anime, rather than hand-rolling a hero, a row list and a header band.
-    // Its three hero settings survive the move: auto-rotate and its interval
-    // map onto `heroInterval`, and the style-driven height goes through the
-    // `heroHeightOf` hook added for exactly this.
+    // Auto-rotate and its interval map onto `heroInterval`. The hero takes
+    // the scaffold's own height like every other section: a separate
+    // user-selectable height made this carousel a different size from the
+    // rest for no reason a viewer could name.
     // Liked channels lead, because someone opening Live TV is usually going
     // back to a channel they already keep. They lived only in Library until
     // now, which is the wrong place: you go to Library to manage what you
@@ -257,6 +289,12 @@ class _IptvPageState extends State<IptvPage> {
       heroItems: spotlightEnabled ? _featured : const [],
       rows: rows,
       header: pillHeader,
+      // The same viewport-filling hero the other sections get: without an
+      // extent the scaffold falls back to its shorter default and this
+      // carousel reads smaller than every sibling. No band widget rides
+      // along -- Live TV channels do not track Continue Watching, so there
+      // is nothing to show under it -- the extent only sizes the hero.
+      belowHeroExtent: ContinueWatchingSlider.bandHeight,
       heroBuilder: (context, channel) => IptvHeroSlide(
         channel: channel,
         onWatchNow: () => _watchChannelNow(channel),
@@ -269,7 +307,6 @@ class _IptvPageState extends State<IptvPage> {
       // Channel art is a logo or a banner, not a poster, so these rows keep
       // their own card shape rather than being forced into the 2:3 default.
       rowSizingOf: (width) => IptvCardSizing.fromWidth(width).toRowSizing(),
-      heroHeightOf: _heroHeight,
       heroInterval: IptvSettings.heroAutoRotate.value
           ? Duration(seconds: IptvSettings.heroRotateSeconds.value)
           : null,
@@ -278,10 +315,10 @@ class _IptvPageState extends State<IptvPage> {
       },
     );
 
-    // No scroll-track overlay here any more: BrowseScaffold floats its own
-    // over whatever it is scrolling. Keeping this page's copy would have
-    // left a second track driven by a controller no longer attached to any
-    // scroll view.
+    // No scroll-track overlay here: BrowseScaffold floats its own over
+    // whatever it is scrolling. Keeping this page's copy would have left a
+    // second track driven by a controller no longer attached to any scroll
+    // view.
     return Scaffold(
       backgroundColor: AppColors.canvas,
       body: Container(
@@ -289,20 +326,6 @@ class _IptvPageState extends State<IptvPage> {
         child: RepaintBoundary(child: content),
       ),
     );
-  }
-
-  /// Live TV's user-selectable hero height. Immersive is the default and is
-  /// the same formula [BrowseScaffold] uses for a desktop-width hero; the
-  /// other two are the shorter variants this section has always offered.
-  double _heroHeight(double screenWidth, double screenHeight) {
-    switch (IptvSettings.heroStyle.value) {
-      case HeroStyle.compact:
-        return (screenHeight * 0.38).clamp(300.0, 400.0);
-      case HeroStyle.minimalist:
-        return (screenHeight * 0.28).clamp(210.0, 260.0);
-      case HeroStyle.immersive:
-        return (screenHeight * 0.52).clamp(380.0, 560.0);
-    }
   }
 }
 

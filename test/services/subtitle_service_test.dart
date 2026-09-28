@@ -50,7 +50,7 @@ void main() {
       // recordings -- a viewer who wants Spanish (LATAM) does not want
       // Spanish (ES) -- so collapsing them hid the choice rather than
       // simplifying it.
-      expect(canonicalLanguageGroup('Spanish'), 'Spanish (ES)');
+      expect(canonicalLanguageGroup('Spanish'), 'Spanish');
       expect(canonicalLanguageGroup('Spanish (ES)'), 'Spanish (ES)');
       expect(canonicalLanguageGroup('Spanish (LATAM)'), 'Spanish (LATAM)');
       expect(canonicalLanguageGroup('Portuguese (BR)'), 'Portuguese (BR)');

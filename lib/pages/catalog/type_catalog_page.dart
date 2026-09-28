@@ -22,7 +22,29 @@ import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
 import '../details/details_page.dart';
 import 'latest_releases.dart';
+import 'top_rated.dart';
 import '../../services/theme/app_colors.dart';
+
+/// One title, one row.
+///
+/// Addon catalogs overlap heavily -- the same film is "Popular" in one and
+/// "Top" in another -- so without this every row repeats its neighbours and
+/// no row reads as its own shelf. The first row wins; a row left with
+/// nothing is dropped. Pure and synchronous, like the other helpers here.
+List<BrowseRow<Movie>> distinctBrowseRows(List<BrowseRow<Movie>> rows) {
+  final seen = <String>{};
+  final distinct = <BrowseRow<Movie>>[];
+  for (final row in rows) {
+    final fresh = row.items
+        .where((m) => seen.add('${m.type}:${m.id}'))
+        .toList();
+    if (fresh.isEmpty) continue;
+    distinct.add(
+      BrowseRow(title: row.title, subtitle: row.subtitle, items: fresh),
+    );
+  }
+  return distinct;
+}
 
 enum _CatalogSort { yearNewest, yearOldest }
 
@@ -288,7 +310,16 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         afterRows: widget.type == 'series' ? const UpcomingCalendarRow() : null,
         isLoading: _loading,
         heroItems: _heroItems,
-        rows: [
+        rows: distinctBrowseRows([
+          // First: the catalog's most acclaimed titles, ranked by rating
+          // rather than by the page's year sort -- acclaim is the point,
+          // and re-sorting them by year would unrank them.
+          if (topRated(_items).isNotEmpty)
+            BrowseRow<Movie>(
+              title: '⭐ ${context.l10n.catalogTopRated}',
+              subtitle: context.l10n.catalogTopRatedSub,
+              items: topRated(_items),
+            ),
           for (final section in _sections)
             if (section.movies.isNotEmpty)
               BrowseRow<Movie>(
@@ -305,7 +336,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
               title: context.l10n.catalogLatestReleases,
               items: latestReleases(_items),
             ),
-        ],
+        ]),
         heroBuilder: _buildHeroSlide,
         itemBuilder: (context, movie) => MovieCard(movie: movie),
         onRefresh: _load,
@@ -325,6 +356,11 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   /// since the section pill/bottom-bar tab already says "Movies" or "Series".
   /// Shared by both views so the controls do not move when switching between
   /// rows and the grid.
+  ///
+  /// The "All" reset options carry `''` (genres) and `-1` (decades) rather
+  /// than null: a tap on a null-valued popup item never reaches `onSelected`
+  /// -- the framework reads a null route result as a dismissal -- so "All
+  /// Genres" reset nothing until the sentinels gave it a value that arrives.
   Widget _buildHeader(BuildContext context) {
     final decades = _items.map(_decadeOf).whereType<int>().toSet().toList()
       ..sort((a, b) => b.compareTo(a));
@@ -337,11 +373,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             label: _genreFilter ?? context.l10n.catalogAllGenres,
             icon: Icons.category_rounded,
             items: [
-              PopupMenuItem(value: null, child: Text(context.l10n.catalogAllGenres)),
+              PopupMenuItem(value: '', child: Text(context.l10n.catalogAllGenres)),
               for (final g in _availableGenres)
                 PopupMenuItem(value: g, child: Text(g)),
             ],
-            onSelected: _selectGenreFilter,
+            onSelected: (v) =>
+                _selectGenreFilter(v == null || v.isEmpty ? null : v),
           ),
           if (_loadingGenre)
             SizedBox(
@@ -358,11 +395,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             label: _decadeFilter == null ? context.l10n.catalogAllDecades : '${_decadeFilter}s',
             icon: Icons.calendar_today_rounded,
             items: [
-              PopupMenuItem(value: null, child: Text(context.l10n.catalogAllDecades)),
+              PopupMenuItem(value: -1, child: Text(context.l10n.catalogAllDecades)),
               for (final d in decades)
                 PopupMenuItem(value: d, child: Text('${d}s')),
             ],
-            onSelected: (v) => setState(() => _decadeFilter = v),
+            onSelected: (v) =>
+                setState(() => _decadeFilter = (v == null || v < 0) ? null : v),
           ),
         FilterDropdown<_CatalogSort>(
           label: switch (_sort) {

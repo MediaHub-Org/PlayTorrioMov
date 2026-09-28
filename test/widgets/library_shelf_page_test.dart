@@ -1,9 +1,18 @@
 // test/widgets/library_shelf_page_test.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
+import 'package:playtorriomov/models/download/download_task_model.dart';
 import 'package:playtorriomov/models/my_list/my_list_item.dart';
+import 'package:playtorriomov/pages/collection/collection_page.dart';
 import 'package:playtorriomov/pages/collection/library_shelf_page.dart';
+import 'package:playtorriomov/services/continue_watching/continue_watching_service.dart';
+import 'package:playtorriomov/services/download/download_service.dart';
+import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/services/collections/media_collections_service.dart';
+import 'package:playtorriomov/services/my_list/my_list_service.dart';
+import 'package:playtorriomov/widgets/common/library_sections.dart';
+import 'package:playtorriomov/widgets/movie/movie_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Poster-less on purpose: a title with artwork renders a CachedNetworkImage,
@@ -140,6 +149,169 @@ void main() {
         MediaCollectionsService.byId(c.id)!.items.map((i) => i.title),
         ['Zulu', 'Alpha'],
       );
+    });
+  });
+
+  group('a built-in shelf sort', () {
+    // Poster-less on purpose, like the collection helper above: artwork
+    // would put a real fetch inside the test.
+    MyListItem liked(String title, int year, int month) => MyListItem(
+          title: title,
+          type: 'movie',
+          imdbId: 'tt-$title',
+          year: year,
+          isLiked: true,
+          addedAt: DateTime(2026, month),
+        );
+
+    Future<void> pumpLiked(WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(home: LibraryShelfPage.builtIn(LibraryShelf.liked)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    List<String> cardOrder(WidgetTester tester) => tester
+        .widgetList<MovieCard>(find.byType(MovieCard))
+        .map((c) => c.movie.name)
+        .toList();
+
+    Future<void> pickSort(WidgetTester tester, String option) async {
+      // The sort button is a PopupMenuButton whose closed face names the
+      // active sort; tapping it opens the menu in the overlay.
+      await tester.tap(find.byType(PopupMenuButton<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(option).last);
+      await tester.pumpAndSettle();
+    }
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      MyListService.items.value = [];
+      await MyListService.initialize();
+      MyListService.items.value = [
+        liked('Mike', 1999, 2),
+        liked('Zulu', 2010, 1),
+        liked('Alpha', 2001, 3),
+      ];
+    });
+
+    testWidgets('sorts A-Z and Z-A', (tester) async {
+      await pumpLiked(tester);
+
+      await pickSort(tester, 'Title (A-Z)');
+      expect(cardOrder(tester), ['Alpha', 'Mike', 'Zulu']);
+
+      await pickSort(tester, 'Title (Z-A)');
+      expect(cardOrder(tester), ['Zulu', 'Mike', 'Alpha']);
+    });
+
+    testWidgets('sorts newest-first and oldest-first', (tester) async {
+      await pumpLiked(tester);
+
+      await pickSort(tester, 'Newest First');
+      expect(cardOrder(tester), ['Zulu', 'Alpha', 'Mike']);
+
+      await pickSort(tester, 'Oldest First');
+      expect(cardOrder(tester), ['Mike', 'Alpha', 'Zulu']);
+    });
+
+    testWidgets('the button names the active sort', (tester) async {
+      await pumpLiked(tester);
+      expect(find.text('Recently Added'), findsOneWidget);
+
+      await pickSort(tester, 'Title (Z-A)');
+      expect(find.text('Title (Z-A)'), findsOneWidget);
+    });
+  });
+
+  group('the library tabs sort', () {
+    // Continue and Downloads carry the same five orders as the shelves,
+    // behind one Sort pill rather than five pills: the header is already
+    // a row of type pills, and doubling it would push the sort off the
+    // edge it needs to stay on.
+    ContinueWatchingItem watching(
+      String title,
+      int year,
+      int month,
+    ) =>
+        ContinueWatchingItem(
+          id: 'tt-$title',
+          title: title,
+          type: 'movie',
+          year: '$year',
+          isTorrent: false,
+          positionSeconds: 30,
+          totalDurationSeconds: 100,
+          lastWatchedAt: DateTime(2026, month),
+        );
+
+    DownloadTask download(String title, int month) => DownloadTask(
+          id: 'dl-$title',
+          title: title,
+          mediaId: 'tt-$title',
+          type: 'movie',
+          sourceType: DownloadSourceType.p2p,
+          sourceName: 'Scraper',
+          targetFilePath: '/downloads/$title.mkv',
+          // Determinate progress: an indeterminate bar animates forever
+          // and pumpAndSettle would time out rather than test the sort.
+          status: DownloadStatus.downloading,
+          receivedBytes: 100,
+          totalBytes: 1000,
+          createdAt: DateTime(2026, month),
+        );
+
+    Future<void> pumpTabs(WidgetTester tester, int tab) async {
+      await tester.pumpWidget(
+        MaterialApp(home: CollectionPage(initialTabIndex: tab)),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> pickSort(WidgetTester tester, String option) async {
+      await tester.tap(find.byType(PopupMenuButton<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(option).last);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('continue sorts Z-A and oldest-first', (tester) async {
+      ContinueWatchingService.activeItems.value = [
+        watching('Mike', 1999, 2),
+        watching('Zulu', 2010, 1),
+        watching('Alpha', 2001, 3),
+      ];
+      addTearDown(() => ContinueWatchingService.activeItems.value = []);
+      await pumpTabs(tester, 1);
+
+      List<String> order() => tester
+          .widgetList<ContinueWatchingCard>(find.byType(ContinueWatchingCard))
+          .map((c) => c.item.title)
+          .toList();
+
+      await pickSort(tester, 'Title (Z-A)');
+      expect(order(), ['Zulu', 'Mike', 'Alpha']);
+
+      await pickSort(tester, 'Oldest First');
+      expect(order(), ['Mike', 'Alpha', 'Zulu']);
+    });
+
+    testWidgets('downloads sorts Z-A', (tester) async {
+      DownloadService.instance.tasksNotifier.value = [
+        download('Mike', 2),
+        download('Zulu', 1),
+        download('Alpha', 3),
+      ];
+      addTearDown(
+        () => DownloadService.instance.tasksNotifier.value = [],
+      );
+      await pumpTabs(tester, 2);
+
+      await pickSort(tester, 'Title (Z-A)');
+      final top = tester.getTopLeft(find.text('Zulu'));
+      final bottom = tester.getTopLeft(find.text('Alpha'));
+      expect(top.dy, lessThan(bottom.dy));
     });
   });
 }

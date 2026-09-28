@@ -90,11 +90,15 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart'))) {
-      if (valueTracks.contains(file.path)) continue;
+      // Forward slashes everywhere: on Windows listSync reports
+      // backslashes, and without this the allowlist above misses -- green
+      // on Linux CI, red on a Windows checkout.
+      final path = file.path.replaceAll(r'\', '/');
+      if (valueTracks.contains(path)) continue;
       final lines = file.readAsLinesSync();
       for (var i = 0; i < lines.length; i++) {
         if (physical.hasMatch(lines[i]) && !mirrored.hasMatch(lines[i])) {
-          offenders.add('${file.path}:${i + 1}: ${lines[i].trim()}');
+          offenders.add('$path:${i + 1}: ${lines[i].trim()}');
         }
       }
     }

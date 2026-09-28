@@ -1,7 +1,6 @@
 // lib/pages/collection/library_shelf_page.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 import '../../models/collection/media_collection.dart';
 import '../../models/movie/movie.dart';
 import '../../models/my_list/my_list_item.dart';
@@ -72,6 +71,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   String _sortBy = 'recent';
   bool _reordering = false;
 
+  /// Same cap as the Library tabs: shelf content centers past this instead
+  /// of sprawling, so a shelf looks like the tab that opened it.
+  static const double _maxContentWidth = 1200;
+
   // ── Titles ────────────────────────────────────────────────────────────────
 
   Movie _toMovie(MyListItem item) {
@@ -117,11 +120,19 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
     switch (_sortBy) {
       case 'title':
+      case 'title_az':
         filtered.sort(
           (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
         );
+      case 'title_za':
+        filtered.sort(
+          (a, b) => b.title.toLowerCase().compareTo(a.title.toLowerCase()),
+        );
       case 'year':
+      case 'year_new':
         filtered.sort((a, b) => (b.year ?? 0).compareTo(a.year ?? 0));
+      case 'year_old':
+        filtered.sort((a, b) => (a.year ?? 99999).compareTo(b.year ?? 99999));
       default:
         filtered.sort((a, b) => b.addedAt.compareTo(a.addedAt));
     }
@@ -451,25 +462,30 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         : width < 1600
         ? 6
         : 7;
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        childAspectRatio: 0.62,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 20,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return GestureDetector(
-          onLongPress: () => _removeTitle(item, collection),
-          child: MovieCard(
-            movie: _toMovie(item),
-            onTap: () => _openDetails(item),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.62,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 20,
           ),
-        );
-      },
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return GestureDetector(
+              onLongPress: () => _removeTitle(item, collection),
+              child: MovieCard(
+                movie: _toMovie(item),
+                onTap: () => _openDetails(item),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -478,7 +494,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   /// The grid is for browsing; this is for arranging, and they are different
   /// enough jobs to be different views of the same list.
   Widget _buildReorderList(MediaCollection collection) {
-    return ReorderableListView.builder(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: ReorderableListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
       itemCount: collection.items.length,
       onReorder: (from, to) {
@@ -543,6 +562,8 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           ),
         );
       },
+        ),
+      ),
     );
   }
 
@@ -601,9 +622,18 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
   Widget _buildSortButton() {
     final l10n = context.l10n;
+    // The button names the active sort rather than showing the raw key:
+    // `title_za` is storage, "Title (Z-A)" is what a viewer reads.
+    final activeLabel = switch (_sortBy) {
+      'title' || 'title_az' => l10n.librarySortTitle,
+      'title_za' => l10n.librarySortTitleDesc,
+      'year' || 'year_new' => l10n.librarySortYearNewest,
+      'year_old' => l10n.librarySortYearOldest,
+      _ => l10n.librarySortRecent,
+    };
     return PopupMenuButton<String>(
       initialValue: _sortBy,
-      tooltip: l10n.librarySortBy,
+      tooltip: '${l10n.librarySortBy}: $activeLabel',
       onSelected: (val) => setState(() => _sortBy = val),
       color: AppColors.raised,
       child: Container(
@@ -618,12 +648,20 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           children: [
             Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
             const SizedBox(width: 4),
-            Text(
-              _sortBy.toUpperCase(),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: AppColors.inkMuted,
+            // Capped like the tab sort pill: the name is a label, and at a
+            // large text scale it names its natural width whatever the row
+            // offers. The tooltip carries the full name.
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 120),
+              child: Text(
+                activeLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.inkMuted,
+                ),
               ),
             ),
           ],
@@ -631,27 +669,44 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       ),
       itemBuilder: (context) => [
         PopupMenuItem(value: 'recent', child: Text(l10n.librarySortRecent)),
-        PopupMenuItem(value: 'title', child: Text(l10n.librarySortTitle)),
-        PopupMenuItem(value: 'year', child: Text(l10n.librarySortYear)),
+        PopupMenuItem(value: 'title_az', child: Text(l10n.librarySortTitle)),
+        PopupMenuItem(
+          value: 'title_za',
+          child: Text(l10n.librarySortTitleDesc),
+        ),
+        PopupMenuItem(
+          value: 'year_new',
+          child: Text(l10n.librarySortYearNewest),
+        ),
+        PopupMenuItem(
+          value: 'year_old',
+          child: Text(l10n.librarySortYearOldest),
+        ),
       ],
     );
   }
 
   // ── Live TV ───────────────────────────────────────────────────────────────
 
-  /// Favorited channels newest-first ("recent") or alphabetically ("title");
-  /// "year" does not apply to a channel, so it falls back to recent.
+  /// Favorited channels newest-first ("recent") or alphabetically in either
+  /// direction; a year sort does not apply to a channel, so it falls back
+  /// to recent rather than promising an order with nothing behind it.
   List<HardcodedChannel> _sortedFavoriteChannels(
     List<FavoriteChannel> favorites,
   ) {
     final sorted = List<FavoriteChannel>.from(favorites);
-    if (_sortBy == 'title') {
+    if (_sortBy == 'title' || _sortBy == 'title_az' || _sortBy == 'title_za') {
+      final descending = _sortBy == 'title_za';
       final byId = {for (final f in sorted) f.channelId: f};
       return byId.values
           .map((f) => HardcodedChannels.byId(f.channelId))
           .whereType<HardcodedChannel>()
           .toList()
-        ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        ..sort(
+          (a, b) => descending
+              ? b.name.toLowerCase().compareTo(a.name.toLowerCase())
+              : a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
     }
     sorted.sort((a, b) => b.addedAt.compareTo(a.addedAt));
     return sorted
@@ -671,25 +726,30 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         : width < 1600
         ? 5
         : 6;
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
-        // favorited channel looks the same size and shape here as it does in
-        // Live TV's own rows.
-        childAspectRatio: 0.58,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 20,
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: GridView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
+            // favorited channel looks the same size and shape here as it does in
+            // Live TV's own rows.
+            childAspectRatio: 0.58,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 20,
+          ),
+          itemCount: channels.length,
+          itemBuilder: (context, index) {
+            final channel = channels[index];
+            return IptvChannelCard(
+              channel: channel,
+              onTap: () => IptvChannelSheet.show(context, channel),
+            );
+          },
+        ),
       ),
-      itemCount: channels.length,
-      itemBuilder: (context, index) {
-        final channel = channels[index];
-        return IptvChannelCard(
-          channel: channel,
-          onTap: () => IptvChannelSheet.show(context, channel),
-        );
-      },
     );
   }
 }

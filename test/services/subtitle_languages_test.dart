@@ -97,12 +97,12 @@ void main() {
       );
     });
 
-    test('a bare code still groups with its own language', () {
-      // Untagged provider Spanish is Castilian until it says otherwise, so
-      // it joins the ES group rather than sitting beside it. LATAM-tagged
-      // results keep their own group.
-      expect(canonicalLanguageGroup('Spanish'), 'Spanish (ES)');
-      expect(canonicalLanguageGroup('es'), 'Spanish (ES)');
+    test('untagged Spanish stays Spanish, not Spanish (ES)', () {
+      // Naming a region no metadata states would invent information, and a
+      // wrong region is worse than a bare language. LATAM-tagged results
+      // keep their own group either way.
+      expect(canonicalLanguageGroup('Spanish'), 'Spanish');
+      expect(canonicalLanguageGroup('es'), 'Spanish');
     });
 
     test('muxer spellings of the Chinese tags join Chinese', () {
@@ -129,6 +129,20 @@ void main() {
       expect(subtitleTrackLanguageName('auto'), isEmpty);
       expect(subtitleTrackLanguageName('AUTO'), isEmpty);
       expect(subtitleTrackLanguageName(' auto '), isEmpty);
+    });
+
+    test('does not render "und" and "unknown" as languages', () {
+      // The container saying it does not know is not a language, and
+      // rendering it as "UND" blocked the title-guess: the guess only
+      // consults the title when the tag names nothing.
+      expect(subtitleTrackLanguageName('und'), isEmpty);
+      expect(subtitleTrackLanguageName('UND'), isEmpty);
+      expect(subtitleTrackLanguageName('unknown'), isEmpty);
+      expect(
+        uniqueTrackLanguageNames(['und'], ['English SDH']),
+        ['English'],
+      );
+      expect(uniqueTrackLanguageNames(['und'], [null]), ['']);
     });
   });
 }

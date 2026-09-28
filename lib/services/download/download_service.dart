@@ -11,6 +11,7 @@ import '../../models/stream/stream_model.dart';
 import '../../utils/download/download_path_helper.dart';
 import '../../utils/platform/storage_space_helper.dart';
 import '../debrid/debrid_service.dart';
+import '../scraper/stream_scraper.dart';
 import '../stream/torrent_stream_service.dart';
 import 'hls_download_engine.dart';
 
@@ -213,7 +214,11 @@ class DownloadService {
       year: year,
       sourceType: sourceType,
       sourceName: source.name ?? source.addonName,
-      addonName: source.addonName,
+      // Resolved through the roster now, so the row reads the site
+      // ("HindMoviez") rather than the delivery label most scrapers stamp
+      // ("PlayTorrioHTTP"). Read once here: the source object is gone by
+      // the time the row is drawn.
+      addonName: ScraperManager.instance.providerDisplayName(source),
       rawUrl: source.url,
       magnet: fullMagnet,
       infoHash: infoHash,

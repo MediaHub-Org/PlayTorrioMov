@@ -39,27 +39,39 @@ class PillTabRow extends StatelessWidget {
     // Scrolls rather than overflows. Two short labels always fit, but a
     // three-way split with longer ones ("Audiobooks / Books / Manga")
     // runs past a 360px phone, and further still at a large text scale.
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        padding: const EdgeInsets.all(3),
-        decoration: BoxDecoration(
-          color: AppColors.inkAlpha(0.05),
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          border: Border.all(color: AppColors.inkAlpha(0.12)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final tab in tabs)
-              _SubTabButton(
-                tab: tab,
-                selected: tab.id == activeId,
-                onTap: () => onSelected(tab.id),
+    // Centered when it fits: the pills are the page's tabs, and tabs sit
+    // in the middle. The min-width box is what makes both true -- narrow
+    // content centers inside the viewport width, wide content keeps its
+    // size and scrolls.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: AppColors.inkAlpha(0.05),
+                borderRadius: BorderRadius.circular(AppRadii.md),
+                border: Border.all(color: AppColors.inkAlpha(0.12)),
               ),
-          ],
-        ),
-      ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final tab in tabs)
+                    _SubTabButton(
+                      tab: tab,
+                      selected: tab.id == activeId,
+                      onTap: () => onSelected(tab.id),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

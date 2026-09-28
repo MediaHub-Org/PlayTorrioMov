@@ -729,6 +729,32 @@ class HardcodedChannels {
       iconUrl: 'https://media0106.elcinema.com/tvguide/1213_1.png',
     ),
 
+    // ── MUSIC TELEVISION ──
+    HardcodedChannel(
+      id: 'mtv',
+      name: 'MTV',
+      short: 'MTV',
+      category: 'Music',
+      keywords: ['mtv', 'mtv hd', 'mtv 00s', 'mtv 80s', 'mtv 90s', 'mtv hits'],
+      gradient: [Color(0xFFFF0099), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'vh1',
+      name: 'VH1',
+      short: 'VH1',
+      category: 'Music',
+      keywords: ['vh1', 'vh1 hd'],
+      gradient: [Color(0xFFFFD600), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'trace_tv',
+      name: 'Trace',
+      short: 'TRACE',
+      category: 'Music',
+      keywords: ['trace urban', 'trace vanilla', 'trace africa', 'trace'],
+      gradient: [Color(0xFFE91E63), Color(0xFF1A1A1A)],
+    ),
+
     // ── 24/7 GLOBAL NEWS ──
     HardcodedChannel(
       id: 'cnn',
@@ -912,7 +938,15 @@ class HardcodedChannels {
       name: 'Cartoon Network HD',
       short: 'CN',
       category: 'Kids',
-      keywords: ['cartoon network', 'cn', 'boomerang'],
+      keywords: [
+        'cartoon network',
+        'boomerang',
+        // No bare `cn`: portal streams prefix Chinese feeds with the `CN`
+        // country code (`CN | CCTV-1`), and a two-letter keyword matches
+        // that prefix before any Chinese entry is reached -- so every
+        // Chinese feed filed under Kids. Real Cartoon Network streams
+        // spell the name out.
+      ],
       gradient: [Color(0xFF000000), Color(0xFF00AEEF)],
       iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Cartoon_Network_2010_logo.svg/960px-Cartoon_Network_2010_logo.svg.png',
     ),
@@ -942,6 +976,159 @@ class HardcodedChannels {
       keywords: ['spacetoon', 'space toon', 'spacetoon go'],
       gradient: [Color(0xFF00ACC1), Color(0xFF1A1A1A)],
       iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSNLD0wanJTx5fZ0NXpXfh3nTKwsi96CG_tRDiuJn_AyD3JCCdsLadCSMY&s=10',
+    ),
+
+    // ── SPANISH TV ──
+    //
+    // No icon URLs: remote logo paths for these change without notice, and
+    // the card falls back to the gradient and the short name, which is
+    // always correct. A wrong URL is worse than none -- it is a broken
+    // image on every tile.
+    HardcodedChannel(
+      id: 'la1',
+      name: 'La 1',
+      short: 'La1',
+      category: 'Spanish',
+      keywords: ['la 1', 'tve1', 'tve-1', 'la primera', 'tve la 1'],
+      exclude: ['la 10', 'la 100'],
+      gradient: [Color(0xFFC60B1E), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'la2',
+      name: 'La 2',
+      short: 'La2',
+      category: 'Spanish',
+      keywords: ['la 2', 'tve2', 'tve-2', 'la dos'],
+      exclude: ['la 20', 'la 24', 'la 25', 'la 27'],
+      gradient: [Color(0xFFC60B1E), Color(0xFF3A3A3A)],
+    ),
+    HardcodedChannel(
+      id: 'tve24h',
+      name: '24h',
+      short: '24H',
+      category: 'Spanish',
+      keywords: ['24h', '24 horas', 'canal 24h', 'tve 24h', '24h tve'],
+      gradient: [Color(0xFF0A4C8B), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'teledeporte',
+      name: 'Teledeporte',
+      short: 'TDP',
+      category: 'Spanish',
+      keywords: ['teledeporte', 'tdp', 'tdp hd'],
+      gradient: [Color(0xFF0A7A3D), Color(0xFF1A1A1A)],
+    ),
+
+    // ── GERMAN TV ──
+    HardcodedChannel(
+      id: 'das_erste',
+      name: 'Das Erste',
+      short: 'ARD',
+      category: 'German',
+      keywords: ['das erste', 'daserste', 'ard', 'ard hd'],
+      gradient: [Color(0xFF1A1A1A), Color(0xFFDD0000)],
+    ),
+    HardcodedChannel(
+      id: 'zdf',
+      name: 'ZDF',
+      short: 'ZDF',
+      category: 'German',
+      keywords: ['zdf', 'zdf hd', 'zdf neo', 'zdf info'],
+      gradient: [Color(0xFF1A1A1A), Color(0xFFF47920)],
+    ),
+    HardcodedChannel(
+      id: 'rtl_de',
+      name: 'RTL',
+      short: 'RTL',
+      category: 'German',
+      keywords: ['rtl hd', 'rtl de', 'rtl deutschland', 'rtl+'],
+      gradient: [Color(0xFFE30613), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'ntv_de',
+      name: 'n-tv',
+      short: 'NTV',
+      category: 'German',
+      // The Russian NTV is a different channel sharing the letters: only
+      // the German spellings match here, the Russian ones live on ntv_ru.
+      keywords: ['n-tv', 'ntv germany', 'ntv de', 'ntv hd de'],
+      gradient: [Color(0xFF003366), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'welt',
+      name: 'WELT',
+      short: 'WELT',
+      category: 'German',
+      keywords: ['welt', 'welt tv', 'n24', 'welt hd'],
+      gradient: [Color(0xFF0A1931), Color(0xFFB8860B)],
+    ),
+
+    // ── RUSSIAN TV ──
+    HardcodedChannel(
+      id: 'channel_one_ru',
+      name: 'Channel One Russia',
+      short: 'C1R',
+      category: 'Russian',
+      keywords: ['channel one russia', 'perviy kanal', 'первый канал', '1tv rus'],
+      gradient: [Color(0xFF0039A6), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'rossiya1',
+      name: 'Rossiya 1',
+      short: 'RTR',
+      category: 'Russian',
+      keywords: ['rossiya 1', 'rossiya1', 'rtr', 'rtr planeta', 'россия 1'],
+      gradient: [Color(0xFFD52B1E), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'ntv_ru',
+      name: 'NTV Russia',
+      short: 'HTB',
+      category: 'Russian',
+      keywords: ['ntv russia', 'ntv mir', 'нтв', 'ntv ru'],
+      gradient: [Color(0xFF43A047), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'rt_news',
+      name: 'RT',
+      short: 'RT',
+      category: 'Russian',
+      keywords: ['russia today', 'rt hd', 'rt international', 'rt english'],
+      gradient: [Color(0xFF4CAF50), Color(0xFF1A1A1A)],
+    ),
+
+    // ── CHINESE TV ──
+    HardcodedChannel(
+      id: 'cctv1',
+      name: 'CCTV-1',
+      short: 'CCTV1',
+      category: 'Chinese',
+      keywords: ['cctv-1', 'cctv 1', 'cctv1'],
+      gradient: [Color(0xFFDE2910), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'cctv4',
+      name: 'CCTV-4',
+      short: 'CCTV4',
+      category: 'Chinese',
+      keywords: ['cctv-4', 'cctv 4', 'cctv4'],
+      gradient: [Color(0xFFDE2910), Color(0xFF3A3A3A)],
+    ),
+    HardcodedChannel(
+      id: 'cctv_news',
+      name: 'CCTV News',
+      short: 'CCTV',
+      category: 'Chinese',
+      keywords: ['cctv news', 'cctv-13', 'cctv 13'],
+      gradient: [Color(0xFF0A4C8B), Color(0xFF1A1A1A)],
+    ),
+    HardcodedChannel(
+      id: 'cgtn',
+      name: 'CGTN',
+      short: 'CGTN',
+      category: 'Chinese',
+      keywords: ['cgtn', 'cgtn hd', 'cgtn english'],
+      gradient: [Color(0xFFFFDE00), Color(0xFF1A1A1A)],
     ),
   ];
 }

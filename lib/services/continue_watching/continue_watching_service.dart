@@ -9,15 +9,11 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
 import '../../models/stream/stream_model.dart';
 import '../../pages/anime/anime_stream_sheet.dart';
-import '../../pages/anime_arabic/anime_arabic_details_page.dart';
 import '../../pages/player/player_screen.dart';
 import '../../pages/player/watch_screen.dart';
 import '../../services/anime/anime_scraper_service.dart';
-import '../../services/anime_arabic/anime_arabic_service.dart';
-import '../../services/anime_arabic/anime_arabic_extractor.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/fullscreen_navigator.dart';
-import '../../utils/navigation/route_transitions.dart';
 import '../trakt/trakt_service.dart';
 import '../trakt/trakt_continue_watching_service.dart';
 import '../simkl/simkl_service.dart';
@@ -118,27 +114,22 @@ class ContinueWatchingService {
   ///
   /// Lives here rather than inside `ContinueWatchingSlider` because the
   /// history view has to answer the identical question, and anime is not
-  /// identifiable by `type` alone: entries arrive from three places (the
-  /// AniList catalog, the Arabic catalog, and addons that report
-  /// `type == 'anime'`) and are told apart by id prefix and addon name.
+  /// identifiable by `type` alone: entries arrive from two places (the
+  /// AniList catalog and addons that report `type == 'anime'`) and are told
+  /// apart by id prefix and addon name.
   /// Duplicating that into a second screen is how the two would drift.
   ///
   /// A null or unrecognised [typeFilter] matches everything.
   static bool matchesTypeFilter(ContinueWatchingItem item, String? typeFilter) {
-    final isArabicAnime =
-        item.id.startsWith('arabic_anime:') || item.addonName == 'ArabicAnime';
     final isAnime =
-        item.type == 'anime' || item.id.startsWith('anilist:') || isArabicAnime;
+        item.type == 'anime' || item.id.startsWith('anilist:');
 
     switch (typeFilter) {
       case 'main':
         return !isAnime;
       case 'anime':
-        return isAnime;
-      case 'arabic_anime':
-        return isArabicAnime;
       case 'general_anime':
-        return isAnime && !isArabicAnime;
+        return isAnime;
       case 'movie':
         return item.type == 'movie';
       case 'series':
@@ -707,88 +698,7 @@ class ContinueWatchingService {
       return;
     }
 
-    // 1. Arabic Anime Specialized Resume Path
-    if (item.id.startsWith('arabic_anime:') || item.addonName == 'ArabicAnime') {
-      final slug = item.id.replaceAll('arabic_anime:', '');
-      final episodeNum = item.episode ?? 1;
-
-      final closeLoader = _showResumeLoader(
-        context,
-        'استئناف ${item.title} الحلقة $episodeNum...',
-      );
-
-      try {
-        final details = await AnimeArabicService.instance.getDetails(slug);
-        final ep = details.episodes.firstWhere(
-          (e) => e.number == episodeNum,
-          orElse: () => details.episodes.isNotEmpty
-              ? details.episodes.first
-              : ArabicEpisode(
-                  number: episodeNum,
-                  title: 'الحلقة $episodeNum',
-                  encodedHref: '',
-                  watchPath: '/e/$slug-$episodeNum#tok',
-                ),
-        );
-
-        final rawStreams = await AnimeArabicExtractor.instance.resolveEpisode(ep);
-
-        closeLoader();
-
-        if (rawStreams.isNotEmpty) {
-          final sources = AnimeArabicExtractor.toSources(
-            rawStreams,
-            animeTitle: details.title,
-            episodeNumber: episodeNum,
-          );
-
-          StreamSource targetSource = sources.first;
-          if (item.streamName != null) {
-            final matched = sources.where((s) => s.name == item.streamName || s.title == item.streamTitle);
-            if (matched.isNotEmpty) targetSource = matched.first;
-          }
-
-          final movieDetail = details.toMovieDetail();
-          final video = movieDetail.videos.firstWhere(
-            (v) => v.episode == episodeNum,
-            orElse: () => movieDetail.videos.first,
-          );
-
-          if (!context.mounted) return;
-          pushFullscreenPage(
-            PlayerScreen(
-              source: targetSource,
-              title: '${details.title} - الحلقة $episodeNum',
-              backdropUrl: details.displayBanner,
-              detail: movieDetail,
-              episode: video,
-              initialPosition: Duration(seconds: item.positionSeconds),
-            ),
-          );
-          return;
-        }
-      } catch (e) {
-        debugPrint('[ContinueWatching] Arabic resume error: $e');
-        closeLoader();
-      }
-
-      if (!context.mounted) return;
-      final card = ArabicAnimeCard(
-        slug: slug,
-        title: item.title,
-        cover: item.posterUrl ?? item.backdropUrl,
-      );
-      pushPage(
-        context,
-        AnimeArabicDetailsPage(
-          anime: card,
-          initialEpisodeNumber: episodeNum,
-        ),
-      );
-      return;
-    }
-
-    // 2. General Anime Specialized Resume Path
+    // 1. General Anime Specialized Resume Path
     if (item.type == 'anime' || item.id.startsWith('anilist:')) {
       final anilistId = int.tryParse(item.id.replaceAll('anilist:', '')) ?? 0;
       final anime = AnimeMedia(

@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-27**, on `v1.8.11+44`.
+Last reconciled: **2026-09-28**, on `v1.8.13+46`.
 
 ---
 
@@ -18,18 +18,20 @@ Last reconciled: **2026-09-27**, on `v1.8.11+44`.
 
 **Nothing here needs a device.** Hardware checks are not tracked in this file
 any more: #28's Cast path, the phone-casts-a-torrent question, forced-subtitle
-rendering, #74's pill rail and the ORIGINAL audio badge were all
-"seen listed, not seen working", and a list of things only one person can look
-at is not a roadmap. Each is now a doc comment on the thing it is uncertain
-about, where whoever next opens that file will meet it:
-`PlayerCastSheet` (#28), `CastService.canCastUrl` (the torrent question, with
-the one `curl` that answers it), `PlayerOriginalBadge` (#76),
-`FilterPillRail` (#74), and `_buildSourceTabs` in the subtitle menu (forced
-tracks).
+rendering and #74's pill rail were all "seen listed, not seen working", and a
+list of things only one person can look at is not a roadmap. Each is now a doc
+comment on the thing it is uncertain about, where whoever next opens that file
+will meet it: `PlayerCastSheet` (#28), `CastService.canCastUrl` (the torrent
+question, with the one `curl` that answers it), `FilterPillRail` (#74), and
+`_buildSourceTabs` in the subtitle menu (forced tracks). Cast issues go the
+same way: use it, and report what breaks. The ORIGINAL audio badge (once
+#76) was dropped outright rather than left pending -- it marked the track a
+file opened with, not the track it was made in, so it was wrong more often
+than it was right.
 
 ### What holds without anyone re-auditing it
 
-Six invariants fail in CI rather than needing a pass over `lib/`:
+Six invariants are held by tests, not by passes over `lib/`:
 
 | Test | Invariant |
 |:--|:--|
@@ -37,8 +39,16 @@ Six invariants fail in CI rather than needing a pass over `lib/`:
 | `icon_button_tooltip_test` | Every icon-only control carries a label, button or not |
 | `rtl_directional_padding_test` | No padding, and no content alignment, names a physical edge |
 | `american_spelling_test` | One spelling of every word, `.arb` files included |
-| `text_scale_overflow_test` | 26 widgets survive 3x text scale on a 360px view |
+| `text_scale_overflow_test` | 32 widgets survive 3x text scale on a 360px view |
 | `arrow_affordance_test` | Every rail arrow turns around for Arabic, and the player transport does not |
+
+What is left is the part a test cannot hold:
+
+- Data strings stay English on purpose.
+- Unprobed fixed heights: lift on touch, probe, repeat. Pages that fetch
+  on init (Details, Discover, the Watch cards) are out of scope -- their
+  skeletons need the network, and this is about fixed heights around real
+  text.
 
 ### The long tail of fixed heights (#69)
 
@@ -61,6 +71,34 @@ scan pairing each fixed height with the largest `fontSize` inside it returns
 `fontSize: 22` title. A static scan cannot tell "box that wraps this text" from
 "box that happens to be near it".
 
+### Xtream catalogs as parent sources (#77)
+
+A portal's movies and series stay out of Films, Series and Anime today:
+the portal browser is live-only on purpose, because folding VOD in means
+more than listing it. Doing it properly needs a pipeline, not a tab:
+
+- Match each entry to a catalog title (IMDb/TMDB id where the feed
+  carries one, guarded title-plus-year matching where it does not, and a
+  rule for what happens to the entries that match nothing).
+- Play through the existing details and player pages, so watch history,
+  Continue Watching and the library buttons treat portal and catalog
+  titles as the same thing rather than two copies.
+- Decide where unmatchable entries live: a portal shelf of their own, or
+  nowhere at all. A wrong match pushed into Films is worse than an
+  honest gap.
+
+Until that exists, portals provide Live TV only, and that boundary is
+load-bearing rather than temporary-looking.
+
+### Translation (#68)
+
+**What is left outside `Text(` is hardcoded Arabic.** The English sites are
+keyed now -- Continue Watching badges, season-collection parts, the Arabic
+sheet's status lines -- and `S01E01` shapes stay codes, as universal as episode
+numbers. What remains is hardcoded Arabic across the Arabic anime pages:
+correct for their audience today, and needing a native review before gaining
+es/pt/en translations.
+
 ### Not doing, so it stays decided
 
 | What | Why not |
@@ -75,6 +113,25 @@ scan pairing each fixed height with the largest `fontSize` inside it returns
 | Pure-alphabetical online subtitle order | The list leads with the language being heard because that is the track a viewer most likely wants. Identical counts tie-break alphabetically, covered by a test |
 | Translating catalog descriptions | They come from the Stremio addon, not TMDB, and whether Cinemeta's API takes a locale is an unstarted question. See CONVENTIONS |
 | Translating AniList's genres and formats | They are AniList's own values, sent back to its API to filter, and would need a display-name map per language on top |
+
+### Whether a phone can cast a torrent
+
+The one open feature question. A torrent plays from TorrServer on the phone at
+`127.0.0.1`, and a receiver asked to fetch that address asks *itself* — so it
+would need the server bound to the LAN and handed the device's LAN address.
+On Android the plugin is not the obstacle — it exposes `port`, so the LAN URL
+would be built here from `NetworkInterface.list()`. (iOS is out of the
+question regardless -- see `CastService.canCastUrl`.)
+
+What the shipped `libtorrserver.so` actually binds is unproven. One command
+decides it, with a torrent playing on the phone, from a laptop on the same
+Wi-Fi:
+
+```
+curl http://<phone-LAN-IP>:<port>/echo
+```
+
+An answer means the feature is possible. A refusal closes it for good.
 
 ---
 

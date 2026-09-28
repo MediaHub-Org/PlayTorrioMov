@@ -152,11 +152,6 @@ class _PlayerScreenState extends State<PlayerScreen>
   List<PlayerAudioTrack> _audioTracks = [];
   int _selectedAudioTrackIndex = 0;
 
-  /// The track the file opens with, so the audio menu can mark one row as
-  /// the release's own primary track. Only ever set once, on the first track
-  /// list, and never cleared: it describes the file, not the current choice.
-  int? _primaryAudioTrackIndex;
-
   /// Whether the preferred-audio ranking has already had its one chance at
   /// this file. Tracks arrive once, but a manual choice afterwards must not
   /// be undone by a later track update, so the ranking only fires on the
@@ -905,7 +900,12 @@ class _PlayerScreenState extends State<PlayerScreen>
     final keptSubs = <SubtitleTrack>[];
     for (final t in subList) {
       if (t.id == 'no' || t.id == 'auto') continue;
-      if (t.language?.trim().toLowerCase() == 'spl') continue;
+      // mpv's own tags, not languages: `spl` is a signs-only track and
+      // `mon` marks subtitles matching the audio. Neither names something
+      // anyone can choose deliberately, so both are dropped rather than
+      // given a fallback title -- see subtitle_languages.dart.
+      final tag = t.language?.trim().toLowerCase();
+      if (tag == 'spl' || tag == 'mon') continue;
       // mpv's "auto" pseudo-track, arriving as the language or as the title.
       // It is not a language, and a row reading "Auto" cannot be chosen
       // deliberately -- there is nothing to choose it by.
@@ -967,26 +967,10 @@ class _PlayerScreenState extends State<PlayerScreen>
       );
     }
 
-    // The track the file itself opens with, captured before the preferred-
-    // audio ranking can override it. This is the closest thing to "the
-    // original" the data offers, and it is deliberately read *here*
-    // rather than derived later: the ranking below changes what is selected,
-    // which would erase the very signal being recorded.
-    //
-    // It is not the same claim as an `original` flag, and there is not one to
-    // read -- the media_kit fork this builds against exposes no default or
-    // original marker on an audio track at all, and mpv's track list carries
-    // none either. What a release ships as its opening track is the release's
-    // own statement of which one it is, and it is what every other player
-    // treats as primary. Null while there is no track list yet, or when the
-    // single track means the question does not arise.
     int activeIdx = _selectedAudioTrackIndex;
     if (activeIdx == 0 && audioTracks.isNotEmpty) {
       final activeAid = _player.state.track.audio.id;
       activeIdx = int.tryParse(activeAid) ?? audioTracks.first.index;
-    }
-    if (_primaryAudioTrackIndex == null && audioTracks.isNotEmpty) {
-      _primaryAudioTrackIndex = activeIdx;
     }
 
     // The preferred-audio ranking gets one shot, on the first populated
@@ -2497,7 +2481,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     final episodeTitle = _currentEpisode?.title;
     final episodeSubtitle = _currentEpisode != null
         ? (isColl
-            ? 'Part ${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
+            ? '${context.l10n.playerEpisodePart(_currentEpisode!.episode ?? 1)}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}'
             : 'S${_currentEpisode!.season ?? 1}:E${_currentEpisode!.episode ?? 1}${episodeTitle != null && episodeTitle.isNotEmpty ? " • $episodeTitle" : ""}')
         : widget.detail?.year;
 
@@ -2719,7 +2703,6 @@ class _PlayerScreenState extends State<PlayerScreen>
               onBack: _backToSettings,
               audioTracks: _audioTracks,
               selectedIndex: _selectedAudioTrackIndex,
-              primaryIndex: _primaryAudioTrackIndex,
               onTrackSelected: (idx) {
                 setState(() => _selectedAudioTrackIndex = idx);
                 try {

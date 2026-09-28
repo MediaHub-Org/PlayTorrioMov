@@ -352,7 +352,16 @@ String subtitleTrackLanguageName(String? rawLanguage) {
   // `auto` is mpv's own pseudo-track, not a language. It reached the picker
   // as a row reading "Auto", which is not something anyone can choose
   // deliberately -- there is nothing to choose it by.
-  if (const {'spl', 'mon', 'auto'}.contains(raw.toLowerCase())) return '';
+  //
+  // `und` and `unknown` are the container's way of saying it does not know.
+  // Rendering them as "UND" both invents a language and blocks the
+  // title-guess below: [_namedOrGuessed] only consults the title when the
+  // tag names nothing, so a track tagged `und` but titled "English SDH"
+  // would otherwise never be found.
+  if (const {'spl', 'mon', 'auto', 'und', 'unknown'}
+      .contains(raw.toLowerCase())) {
+    return '';
+  }
   final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
   if (mpv != null) return mpv;
   return subtitleLanguageName(raw);
@@ -583,10 +592,9 @@ String canonicalLanguageGroup(String? rawLanguage) {
   // Script variants collapse to one Chinese group; the row still says which
   // script it is.
   if (name.startsWith('Chinese')) return 'Chinese';
-  // A bare "Spanish" from a provider is Castilian until it says otherwise,
-  // so it joins "Spanish (ES)" instead of sitting beside it as a
-  // near-duplicate. Region-tagged results keep their own group -- LATAM
-  // below stays apart -- so this only names the untagged one.
-  if (name == 'Spanish') return 'Spanish (ES)';
+  // No invented regions: an untagged "Spanish" stays "Spanish". Calling it
+  // Spanish (ES) would state a region no metadata names, and a wrong region
+  // is worse than a bare language -- the region shows only where a title or
+  // tag actually states one.
   return name;
 }
