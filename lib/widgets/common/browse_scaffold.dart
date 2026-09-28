@@ -313,6 +313,20 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     // When there's no header to overlay, build() puts it in its own band
     // above this viewport instead, so it stays put and nothing scrolls
     // under it.
+    //
+    // The first row with content gets a deterministic landing spot for a
+    // D-pad/keyboard viewer -- found by identity, not index, since the loop
+    // below skips empty rows. Not the hero: it auto-rotates on its own
+    // timer, and stealing focus into a slide that changes out from under
+    // the viewer a few seconds later would be worse than landing nowhere.
+    BrowseRow<T>? firstRowWithContent;
+    for (final row in widget.rows) {
+      if (row.items.isNotEmpty) {
+        firstRowWithContent = row;
+        break;
+      }
+    }
+
     final content = CustomScrollView(
       controller: _scrollController,
       slivers: [
@@ -342,6 +356,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                   onSeeAll: row.onSeeAll,
                   itemBuilder: widget.itemBuilder,
                   sizingOf: widget.rowSizingOf,
+                  autofocusFirstItem: identical(row, firstRowWithContent),
                 ),
               ),
           if (widget.afterRows != null)

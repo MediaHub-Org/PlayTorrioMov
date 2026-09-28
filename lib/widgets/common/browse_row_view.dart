@@ -61,6 +61,14 @@ class BrowseRowView<T> extends StatefulWidget {
   /// [MovieCardSizing.fromWidth].
   final RowCardSizing Function(double screenWidth)? sizingOf;
 
+  /// Whether this row should hand focus to its first card once it has
+  /// items, so a D-pad/keyboard viewer lands somewhere deterministic
+  /// instead of wherever Flutter's traversal happens to start. [BrowseScaffold]
+  /// sets this on the first row with content and no other -- the hero above
+  /// it auto-rotates, and stealing focus into a slide that is about to
+  /// change out from under the viewer would be worse than landing nowhere.
+  final bool autofocusFirstItem;
+
   const BrowseRowView({
     super.key,
     required this.title,
@@ -69,6 +77,7 @@ class BrowseRowView<T> extends StatefulWidget {
     this.subtitle,
     this.onSeeAll,
     this.sizingOf,
+    this.autofocusFirstItem = false,
   });
 
   @override
@@ -77,9 +86,13 @@ class BrowseRowView<T> extends StatefulWidget {
 
 class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
   final ScrollController _controller = ScrollController();
+  final FocusScopeNode _focusScope = FocusScopeNode(
+    debugLabel: 'BrowseRowView autofocus scope',
+  );
   bool _hovering = false;
   bool _canLeft = false;
   bool _canRight = false;
+  bool _didAutofocus = false;
 
   @override
   void initState() {
@@ -88,12 +101,33 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
     // Scroll extents are unknown until the first layout, so without this the
     // right arrow would never appear on a row nobody has scrolled yet.
     WidgetsBinding.instance.addPostFrameCallback((_) => _updateEdges());
+    _maybeAutofocus();
+  }
+
+  @override
+  void didUpdateWidget(covariant BrowseRowView<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Items often arrive after the first build (async catalog fetch), so the
+    // one-shot attempt in initState alone would usually find nothing to
+    // focus yet.
+    _maybeAutofocus();
+  }
+
+  void _maybeAutofocus() {
+    if (_didAutofocus || !widget.autofocusFirstItem || widget.items.isEmpty) {
+      return;
+    }
+    _didAutofocus = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusScope.nextFocus();
+    });
   }
 
   @override
   void dispose() {
     _controller.removeListener(_updateEdges);
     _controller.dispose();
+    _focusScope.dispose();
     super.dispose();
   }
 
@@ -149,16 +183,19 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                ListView.separated(
-                  clipBehavior: Clip.none,
-                  controller: _controller,
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: sizing.sidePadding),
-                  itemCount: widget.items.length,
-                  separatorBuilder: (_, __) => SizedBox(width: sizing.spacing),
-                  itemBuilder: (context, i) => SizedBox(
-                    width: sizing.cardWidth,
-                    child: widget.itemBuilder(context, widget.items[i]),
+                FocusScope(
+                  node: _focusScope,
+                  child: ListView.separated(
+                    clipBehavior: Clip.none,
+                    controller: _controller,
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(horizontal: sizing.sidePadding),
+                    itemCount: widget.items.length,
+                    separatorBuilder: (_, __) => SizedBox(width: sizing.spacing),
+                    itemBuilder: (context, i) => SizedBox(
+                      width: sizing.cardWidth,
+                      child: widget.itemBuilder(context, widget.items[i]),
+                    ),
                   ),
                 ),
                 // Gated on hover alone. A platform or width check would be a

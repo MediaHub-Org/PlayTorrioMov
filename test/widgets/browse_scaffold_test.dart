@@ -280,6 +280,49 @@ void main() {
     );
 
     testWidgets(
+      'the first row with content, not the hero, gets initial focus',
+      (tester) async {
+        // The hero auto-rotates on its own timer, so landing keyboard/D-pad
+        // focus inside it would have that focus yanked away mid-browse.
+        setSurfaceWidth(tester, 1400);
+        final heroNode = FocusNode();
+        final firstRowNode = FocusNode();
+        final secondRowNode = FocusNode();
+        addTearDown(heroNode.dispose);
+        addTearDown(firstRowNode.dispose);
+        addTearDown(secondRowNode.dispose);
+
+        await tester.pumpWidget(
+          wrap(
+            BrowseScaffold<String>(
+              contentLabel: 'items',
+              heroItems: const ['a'],
+              rows: const [
+                BrowseRow(title: 'Empty', items: []),
+                BrowseRow(title: 'Trending', items: ['one']),
+                BrowseRow(title: 'Latest', items: ['two']),
+              ],
+              heroInterval: null,
+              heroBuilder: (_, item) => Focus(
+                focusNode: heroNode,
+                child: Text('hero:$item'),
+              ),
+              itemBuilder: (_, item) => Focus(
+                focusNode: item == 'one' ? firstRowNode : secondRowNode,
+                child: Text(item),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(heroNode.hasFocus, isFalse);
+        expect(firstRowNode.hasFocus, isTrue);
+        expect(secondRowNode.hasFocus, isFalse);
+      },
+    );
+
+    testWidgets(
       'the header keeps its own band above the content when there is no '
       'hero to float over',
       (tester) async {

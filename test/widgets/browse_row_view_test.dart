@@ -48,6 +48,49 @@ void main() {
       expect(find.text('one'), findsOneWidget);
     });
 
+    testWidgets(
+      'autofocusFirstItem hands focus to the first card once items arrive',
+      (tester) async {
+        setSurfaceWidth(tester, 1200);
+        final firstNode = FocusNode();
+        final secondNode = FocusNode();
+        addTearDown(firstNode.dispose);
+        addTearDown(secondNode.dispose);
+
+        await tester.pumpWidget(wrap(BrowseRowView<String>(
+          title: 'Trending',
+          items: const ['one', 'two'],
+          autofocusFirstItem: true,
+          itemBuilder: (_, item) => Focus(
+            focusNode: item == 'one' ? firstNode : secondNode,
+            child: Text(item),
+          ),
+        )));
+        await tester.pumpAndSettle();
+
+        expect(firstNode.hasFocus, isTrue);
+        expect(secondNode.hasFocus, isFalse);
+      },
+    );
+
+    testWidgets(
+      'an empty row given autofocusFirstItem focuses nothing (no crash)',
+      (tester) async {
+        // Guards the loading state: a row with no items yet must not throw
+        // trying to focus a card that does not exist.
+        setSurfaceWidth(tester, 1200);
+        await tester.pumpWidget(wrap(BrowseRowView<String>(
+          title: 'Trending',
+          items: const [],
+          autofocusFirstItem: true,
+          itemBuilder: (_, item) => Text(item),
+        )));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('sizingOf overrides the default poster width', (tester) async {
       // Live TV's channel cards are a logo/banner shape, not a poster
       // shape -- this is what lets IptvSliderSection reuse the row without
