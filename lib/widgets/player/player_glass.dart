@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
+import '../common/focus_ring.dart';
+
+export '../common/focus_ring.dart';
 
 /// Design tokens and glass styling for the modern video player UI.
 class PlayerTheme {
@@ -299,42 +302,6 @@ class PlayerMenuHeader extends StatelessWidget {
         ),
         if (end != null) end,
       ],
-    );
-  }
-}
-
-/// A focus indicator for D-pad/keyboard navigation: a rounded ring drawn
-/// just outside the widget it wraps.
-///
-/// The player's controls were built pointer-first -- GestureDetector, no
-/// Focus -- so a remote's directional pad could not reach them at all, and
-/// a keyboard's Tab key moved focus invisibly. This is the visible half of
-/// fixing that; the interactive widgets wrap themselves in a [Focus] and
-/// show this ring when they have it.
-class FocusRing extends StatelessWidget {
-  final bool visible;
-  final double borderRadius;
-  final Widget child;
-
-  const FocusRing({
-    super.key,
-    required this.visible,
-    this.borderRadius = 9999,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (!visible) return child;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: PlayerTheme.accent, width: 2),
-      ),
-      // A little outside the widget, so the ring reads as marking it rather
-      // than as a border of it.
-      padding: const EdgeInsets.all(2),
-      child: child,
     );
   }
 }
