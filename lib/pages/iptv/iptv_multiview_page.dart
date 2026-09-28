@@ -7,6 +7,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_storage.dart';
 import '../../services/playback_coordinator.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 
 /// Watch up to 4 live channels at once in a grid.
@@ -113,24 +114,27 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
                       ),
                     ),
                     Expanded(
-                      child: GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 200,
-                          mainAxisSpacing: 12,
-                          crossAxisSpacing: 12,
-                          childAspectRatio: 1.3,
+                      child: FirstFocusScope(
+                        ready: true,
+                        child: GridView.builder(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 200,
+                            mainAxisSpacing: 12,
+                            crossAxisSpacing: 12,
+                            childAspectRatio: 1.3,
+                          ),
+                          itemCount: _available.length,
+                          itemBuilder: (context, index) {
+                            final ch = _available[index];
+                            final isSelected = _selected.contains(ch);
+                            return _ChannelPickTile(
+                              channel: ch.channel,
+                              selected: isSelected,
+                              onTap: () => _toggleSelect(ch),
+                            );
+                          },
                         ),
-                        itemCount: _available.length,
-                        itemBuilder: (context, index) {
-                          final ch = _available[index];
-                          final isSelected = _selected.contains(ch);
-                          return _ChannelPickTile(
-                            channel: ch.channel,
-                            selected: isSelected,
-                            onTap: () => _toggleSelect(ch),
-                          );
-                        },
                       ),
                     ),
                   ],
