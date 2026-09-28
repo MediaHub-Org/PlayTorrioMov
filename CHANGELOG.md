@@ -36,6 +36,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   multi-view channel picker. A D-pad or keyboard viewer opening any of
   these no longer has to hunt for the first navigable item.
 
+### Fixed
+- **A departing episode card could no longer steal focus mid-transition
+  (#80).** The Details page's season switcher keeps the outgoing season's
+  episode row in the tree while it fades out, and it was still reachable by
+  D-pad or Tab during that 550ms window. Its outgoing children are now
+  wrapped in `ExcludeFocus`. (Checked the app's other `AnimatedSwitcher`,
+  on the watch screen -- it only switches a single icon, nothing to
+  exclude.)
+
 ### Removed
 - **The floating scroll track is gone from Films, Series, Anime and Live
   TV.** `CustomScrollTrack` drew a draggable thumb with hover-only up/down

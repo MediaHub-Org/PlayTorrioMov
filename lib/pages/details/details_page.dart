@@ -706,10 +706,15 @@ class _DetailsPageState extends State<DetailsPage>
                             switchInCurve: Curves.easeOutCubic,
                             switchOutCurve: Curves.easeInCubic,
                             layoutBuilder: (currentChild, previousChildren) {
+                              // The outgoing season's episode row stays in
+                              // the tree while it fades out -- excluded from
+                              // focus so a D-pad/keyboard viewer can't land
+                              // on a card that's on its way out.
                               return Stack(
                                 alignment: Alignment.topCenter,
                                 children: <Widget>[
-                                  ...previousChildren,
+                                  for (final child in previousChildren)
+                                    ExcludeFocus(child: child),
                                   if (currentChild != null) currentChild,
                                 ],
                               );

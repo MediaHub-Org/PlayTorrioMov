@@ -281,9 +281,34 @@ auto-rotating heroes and filter-chip rows in favor of the first real content
 card. Left alone on purpose: `anime_details_page.dart`'s small embedded
 episode-number grid (focus there belongs on the page's Play button, not a
 mid-page grid) and the multi-view *playback* grid (its tiles use tap-driven
-state, not `FocusNode`s, so autofocus has nothing to land on). Still open in
-phase 4: explicit `FocusTraversalGroup` ordering, and a stronger `FocusRing`
-for text/icon-only targets.
+state, not `FocusNode`s, so autofocus has nothing to land on).
+
+**Traversal order checked -- mostly already correct.** The premise above
+("a D-pad gets Flutter's default reading-order traversal... unchecked
+against what a viewer would expect") assumed reading order followed widget
+*declaration* order. It doesn't: `ReadingOrderTraversalPolicy`, Flutter's
+default, sorts focusable nodes by on-screen geometry (top-then-left) for
+both Tab/Shift+Tab and D-pad arrow keys (`inDirection`), so a floating
+control's position in a `Stack`'s children list doesn't affect when it's
+reached. Checked six places where a back button or floating transport bar
+is declared *after* the scrollable content it floats over (`details_page`,
+`anime_details_page`, `watch_screen`, `catalog_page`, `discover_page`,
+`hub_page`'s `UniversalPlayBar`) -- that ordering is there so the control
+*hit-tests* on top for touch/mouse (`Stack` hit-tests last-declared-first),
+and is unrelated to keyboard/D-pad traversal, which is already geometric.
+No fix needed.
+
+One real bug did turn up: `AnimatedSwitcher`'s outgoing child stays in the
+tree, still focusable, for the whole fade-out (both its default
+`layoutBuilder` and any custom one following the same
+`[...previousChildren, currentChild]` `Stack` shape). Of the app's two
+`AnimatedSwitcher` uses, `details_page.dart`'s season switcher genuinely
+mattered -- the outgoing child is a full episode row, reachable by D-pad
+mid-transition -- so its outgoing children are now wrapped in
+`ExcludeFocus`. `watch_screen.dart`'s only switches a single icon; nothing
+to exclude there.
+
+Still open in phase 4: a stronger `FocusRing` for text/icon-only targets.
 
 ### Not doing, so it stays decided
 
