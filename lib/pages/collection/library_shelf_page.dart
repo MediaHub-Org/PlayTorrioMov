@@ -608,6 +608,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     final isSelected = _typeFor(shelf) == value;
     return HoverButton(
       scaleAmount: 1.05,
+      showFocusRing: true,
       onTap: () => setState(() => _filterType = value),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

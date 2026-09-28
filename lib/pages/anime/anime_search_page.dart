@@ -580,6 +580,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                             padding: const EdgeInsetsDirectional.only(end: 8),
                             child: HoverButton(
                               scaleAmount: 1.05,
+                              showFocusRing: true,
                               onTap: () => _toggleAdult(!_allowAdult),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),

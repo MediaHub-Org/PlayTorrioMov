@@ -1421,6 +1421,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
                                 return HoverButton(
                                   scaleAmount: 1.02,
+                                  showFocusRing: true,
                                   onTap: () => _switchSource(index),
                                   child: AnimatedContainer(
                                       duration: const Duration(

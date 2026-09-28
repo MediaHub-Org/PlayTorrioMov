@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/widgets/common/focus_ring.dart';
 import 'package:playtorriomov/widgets/common/hover_button.dart';
 
 Widget wrap(Widget child) => MaterialApp(
@@ -86,5 +87,35 @@ void main() {
 
     final scale = tester.widget<AnimatedScale>(find.byType(AnimatedScale));
     expect(scale.scale, 1.2);
+  });
+
+  testWidgets('showFocusRing off by default: focus does not show a ring',
+      (tester) async {
+    await tester.pumpWidget(wrap(
+      HoverButton(
+        autofocus: true,
+        onTap: () {},
+        child: const SizedBox(width: 40, height: 40),
+      ),
+    ));
+    await tester.pump();
+
+    final ring = tester.widget<FocusRing>(find.byType(FocusRing));
+    expect(ring.visible, isFalse);
+  });
+
+  testWidgets('showFocusRing on: focus shows the ring', (tester) async {
+    await tester.pumpWidget(wrap(
+      HoverButton(
+        autofocus: true,
+        showFocusRing: true,
+        onTap: () {},
+        child: const SizedBox(width: 40, height: 40),
+      ),
+    ));
+    await tester.pump();
+
+    final ring = tester.widget<FocusRing>(find.byType(FocusRing));
+    expect(ring.visible, isTrue);
   });
 }

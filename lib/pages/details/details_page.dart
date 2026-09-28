@@ -706,10 +706,15 @@ class _DetailsPageState extends State<DetailsPage>
                             switchInCurve: Curves.easeOutCubic,
                             switchOutCurve: Curves.easeInCubic,
                             layoutBuilder: (currentChild, previousChildren) {
+                              // The outgoing season's episode row stays in
+                              // the tree while it fades out -- excluded from
+                              // focus so a D-pad/keyboard viewer can't land
+                              // on a card that's on its way out.
                               return Stack(
                                 alignment: Alignment.topCenter,
                                 children: <Widget>[
-                                  ...previousChildren,
+                                  for (final child in previousChildren)
+                                    ExcludeFocus(child: child),
                                   if (currentChild != null) currentChild,
                                 ],
                               );
@@ -1211,6 +1216,7 @@ class _DetailsPageState extends State<DetailsPage>
 
   Widget _buildPlayButton({required bool fullWidth}) {
     return HoverButton(
+      showFocusRing: true,
       onTap: () => _handlePlayAction(
         _currentSeasonEpisodes.isNotEmpty
             ? _currentSeasonEpisodes.first
@@ -1338,6 +1344,7 @@ class _DetailsPageState extends State<DetailsPage>
               const SizedBox(height: _Space.xs),
               HoverButton(
                 scaleAmount: 1.05,
+                showFocusRing: true,
                 onTap: () =>
                     setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
                 child: Text(
@@ -1497,6 +1504,7 @@ class _DetailsPageState extends State<DetailsPage>
                 final season = seasons[index];
                 final isSelected = _selectedSeason == season;
                 return HoverButton(
+                  showFocusRing: true,
                   onTap: () {
                     if (_selectedSeason != season) {
                       setState(() {
@@ -1975,6 +1983,7 @@ class _DetailsPageState extends State<DetailsPage>
           child: HoverButton(
             onTap: onTap,
             scaleAmount: 1.1,
+            showFocusRing: true,
             child: ClipOval(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),

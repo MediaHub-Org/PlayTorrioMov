@@ -462,6 +462,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                       if (isScanning)
                         HoverButton(
                           scaleAmount: 1.05,
+                          showFocusRing: true,
                           onTap: _ctrl.stopChannelSearch,
                           child: Text(
                             context.l10n.iptvStop,
@@ -559,6 +560,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
 
                               return HoverButton(
                                 scaleAmount: 1.02,
+                                showFocusRing: true,
                                 onTap: () => _isSelecting
                                     ? _toggleSelection(hit.streamUrl)
                                     : _playHit(hit),

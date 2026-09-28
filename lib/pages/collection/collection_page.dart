@@ -86,6 +86,7 @@ class _CollectionPageState extends State<CollectionPage> {
       final selected = current == value;
       return HoverButton(
         scaleAmount: 1.05,
+        showFocusRing: true,
         onTap: () => onPick(value),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

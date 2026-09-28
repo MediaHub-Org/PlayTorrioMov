@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'focus_ring.dart';
+
 /// The keys that activate a focused [HoverButton]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
 /// a `const` set literal.
@@ -27,12 +29,19 @@ final _activators = {
 /// uncounted. A caller wrapping an icon-only control in one of these has to
 /// label it at the call site.
 ///
-/// Focus reuses the hover lean rather than adding a second visual: a remote
-/// or a keyboard moving focus here should be at least as visible as a mouse
-/// hovering it, and a ring drawn around an arbitrary [child] would have to
-/// guess at a shape this widget does not know. `Enter`, `NumpadEnter`, the
-/// TV remote's select button and Space all fire [onTap], matching what a
-/// screen reader's "activate" gesture already does for a focused control.
+/// Focus reuses the hover lean by default rather than adding a second
+/// visual: a remote or a keyboard moving focus here should be at least as
+/// visible as a mouse hovering it, and a ring drawn around an arbitrary
+/// [child] would have to guess at a shape this widget does not know.
+/// `Enter`, `NumpadEnter`, the TV remote's select button and Space all fire
+/// [onTap], matching what a screen reader's "activate" gesture already does
+/// for a focused control.
+///
+/// [showFocusRing] opts back into that ring for a call site whose [child]
+/// *does* have a known, plain shape -- a bare icon, a short line of text --
+/// where the lean alone is easy to miss, especially at TV viewing distance.
+/// It only ever reacts to focus, never to hover: a mouse already has the
+/// cursor itself as a positional cue, which a D-pad or Tab press does not.
 class HoverButton extends StatefulWidget {
   final Widget child;
   final VoidCallback onTap;
@@ -47,12 +56,17 @@ class HoverButton extends StatefulWidget {
   /// focused, so a caller opts in deliberately for the one that should.
   final bool autofocus;
 
+  /// Whether a [FocusRing] marks focus in addition to the scale-lean. See
+  /// the class doc for when to turn this on.
+  final bool showFocusRing;
+
   const HoverButton({
     super.key,
     required this.child,
     required this.onTap,
     this.scaleAmount = 1.04,
     this.autofocus = false,
+    this.showFocusRing = false,
   });
 
   @override
@@ -79,25 +93,28 @@ class _HoverButtonState extends State<HoverButton> {
       autofocus: widget.autofocus,
       onFocusChange: (focused) => setState(() => _isFocused = focused),
       onKeyEvent: _handleKey,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() {
-          _isHovered = false;
-          _isPressed = false;
-        }),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTapCancel: () => setState(() => _isPressed = false),
-          onTap: widget.onTap,
-          child: AnimatedScale(
-            scale: _isPressed
-                ? 0.96
-                : (_isHovered || _isFocused ? widget.scaleAmount : 1.0),
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOutCubic,
-            child: widget.child,
+      child: FocusRing(
+        visible: widget.showFocusRing && _isFocused,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() {
+            _isHovered = false;
+            _isPressed = false;
+          }),
+          child: GestureDetector(
+            onTapDown: (_) => setState(() => _isPressed = true),
+            onTapUp: (_) => setState(() => _isPressed = false),
+            onTapCancel: () => setState(() => _isPressed = false),
+            onTap: widget.onTap,
+            child: AnimatedScale(
+              scale: _isPressed
+                  ? 0.96
+                  : (_isHovered || _isFocused ? widget.scaleAmount : 1.0),
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOutCubic,
+              child: widget.child,
+            ),
           ),
         ),
       ),

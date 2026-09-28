@@ -837,6 +837,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   Widget _buildSynopsis(String description) {
     return HoverButton(
       scaleAmount: 1.02,
+      showFocusRing: true,
       onTap: () => setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
       child: AnimatedCrossFade(
         duration: const Duration(milliseconds: 200),
@@ -1098,6 +1099,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                       children: [
                         HoverButton(
                           scaleAmount: 1.05,
+                          showFocusRing: true,
                           onTap: () => setState(() => _isDub = false),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -1120,6 +1122,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         ),
                         HoverButton(
                           scaleAmount: 1.05,
+                          showFocusRing: true,
                           onTap: () => setState(() => _isDub = true),
                           child: Container(
                             padding: const EdgeInsets.symmetric(

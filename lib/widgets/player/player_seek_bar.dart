@@ -417,6 +417,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
         // start label above, for the same reason.
         HoverButton(
           scaleAmount: 1.05,
+          showFocusRing: true,
           onTap: () =>
               setState(() => _showRemainingTime = !_showRemainingTime),
           child: Container(

@@ -126,6 +126,7 @@ class _SubSyncBarState extends State<SubSyncBar> {
                             message: context.l10n.syncResetTiming,
                             child: HoverButton(
                               scaleAmount: 1.1,
+                              showFocusRing: true,
                               onTap: () => _applyDelay(0.0),
                               child: Container(
                                 padding: const EdgeInsets.all(2),

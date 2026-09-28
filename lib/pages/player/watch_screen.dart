@@ -890,6 +890,7 @@ class _WatchScreenState extends State<WatchScreen>
 
             return HoverButton(
               scaleAmount: 1.03,
+              showFocusRing: true,
               onTap: () =>
                   setState(() => _synopsisExpanded = !_synopsisExpanded),
               child: Text(
@@ -1021,6 +1022,7 @@ class _WatchScreenState extends State<WatchScreen>
   }) {
     return HoverButton(
       scaleAmount: 1.03,
+      showFocusRing: true,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1156,6 +1158,7 @@ class _WatchScreenState extends State<WatchScreen>
       builder: (buttonContext) {
         return HoverButton(
           scaleAmount: 1.03,
+          showFocusRing: true,
           onTap: () => onTap(buttonContext),
           child: DecoratedBox(
             decoration: const BoxDecoration(
@@ -2629,6 +2632,7 @@ class _FilterPillRailState extends State<FilterPillRail> {
         child: showButton
             ? HoverButton(
                 scaleAmount: 1.1,
+                showFocusRing: true,
                 onTap: () => _nudge(forward),
                 child: _buildEdgeButton(forward),
               )

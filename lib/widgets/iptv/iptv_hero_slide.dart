@@ -242,6 +242,7 @@ class IptvHeroSlide extends StatelessWidget {
                   // Primary Watch Live Button
                   HoverButton(
                     scaleAmount: 1.04,
+                    showFocusRing: true,
                     onTap: onWatchNow,
                     child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -291,6 +292,7 @@ class IptvHeroSlide extends StatelessWidget {
                   // Sources / Stream Selector Pill
                   HoverButton(
                     scaleAmount: 1.04,
+                    showFocusRing: true,
                     onTap: onSourcesTap,
                     child: Container(
                         padding: const EdgeInsets.symmetric(
