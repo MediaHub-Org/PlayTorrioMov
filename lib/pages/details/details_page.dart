@@ -1980,6 +1980,7 @@ class _DetailsPageState extends State<DetailsPage>
           child: HoverButton(
             onTap: onTap,
             scaleAmount: 1.1,
+            showFocusRing: true,
             child: ClipOval(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),

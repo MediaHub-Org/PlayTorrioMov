@@ -2629,6 +2629,7 @@ class _FilterPillRailState extends State<FilterPillRail> {
         child: showButton
             ? HoverButton(
                 scaleAmount: 1.1,
+                showFocusRing: true,
                 onTap: () => _nudge(forward),
                 child: _buildEdgeButton(forward),
               )

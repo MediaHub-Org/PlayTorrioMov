@@ -551,6 +551,7 @@ class _CatalogPageState extends State<CatalogPage> {
             excluding: !isVisible,
             child: HoverButton(
             scaleAmount: 1.1,
+            showFocusRing: true,
             onTap: onTap,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),

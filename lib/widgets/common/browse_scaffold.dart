@@ -472,6 +472,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                     for (var i = 0; i < widget.heroItems.length; i++)
                       HoverButton(
                         scaleAmount: 1.3,
+                        showFocusRing: true,
                         onTap: () => goToHeroPage(i),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),

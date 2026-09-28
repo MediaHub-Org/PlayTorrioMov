@@ -569,6 +569,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                               message: context.l10n.homeViewDetails,
                               child: HoverButton(
                                 scaleAmount: 1.1,
+                                showFocusRing: true,
                                 onTap: () => _openDetails(context),
                                 child: Container(
                                   padding: const EdgeInsets.all(4),
@@ -596,6 +597,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                               message: context.l10n.homeRemoveFromContinue,
                               child: HoverButton(
                                 scaleAmount: 1.1,
+                                showFocusRing: true,
                                 onTap: widget.onRemove,
                                 child: Container(
                                   padding: const EdgeInsets.all(4),

@@ -1937,6 +1937,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                           : context.l10n.iptvAddFavorite,
                       child: HoverButton(
                         scaleAmount: 1.15,
+                        showFocusRing: true,
                         onTap: widget.onToggleFavorite,
                         child: Icon(
                           widget.isFavorite
@@ -2125,6 +2126,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                       : context.l10n.iptvAddFavorite,
                   child: HoverButton(
                     scaleAmount: 1.15,
+                    showFocusRing: true,
                     onTap: widget.onToggleFavorite,
                     child: Icon(
                       widget.isFavorite
