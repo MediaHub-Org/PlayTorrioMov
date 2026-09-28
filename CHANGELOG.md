@@ -5,6 +5,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Removed
+- **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
+  renamed Profile tab a second Settings entry point in its own header,
+  alongside the existing global gear in the top bar. It just duplicated a
+  screen already one tap away everywhere else, and on a TV cost an extra
+  D-pad hop for nothing the always-visible gear didn't already cover.
+  Settings stays reachable exactly one way: the global icon next to Search.
+
 ## [1.9.0+47] - 2026-09-28
 
 The Android TV release. All four phases of #80 land here: detection, type
