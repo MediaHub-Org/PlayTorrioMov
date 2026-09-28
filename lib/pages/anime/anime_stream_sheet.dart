@@ -6,6 +6,7 @@ import '../../models/anime/anime_media.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../../utils/fullscreen_navigator.dart';
+import '../../utils/navigation/adaptive_sheet.dart';
 import '../../widgets/common/source_badges.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -30,6 +31,31 @@ class AnimeStreamSheet extends StatefulWidget {
     this.aniDbEpisodes,
     this.totalEpisodes,
   });
+
+  /// The one entry point every "play this episode" action goes through, so
+  /// the sheet-vs-full-screen-on-TV choice (see [showAdaptiveSheet]) lives
+  /// in one place rather than being copied at each of its call sites.
+  static Future<void> show(
+    BuildContext context, {
+    required AnimeMedia anime,
+    required int episodeNumber,
+    bool autoPlay = false,
+    List<AniDbEpisode>? aniDbEpisodes,
+    int? totalEpisodes,
+  }) {
+    return showAdaptiveSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => AnimeStreamSheet(
+        anime: anime,
+        episodeNumber: episodeNumber,
+        autoPlay: autoPlay,
+        aniDbEpisodes: aniDbEpisodes,
+        totalEpisodes: totalEpisodes,
+      ),
+    );
+  }
 
   @override
   State<AnimeStreamSheet> createState() => _AnimeStreamSheetState();

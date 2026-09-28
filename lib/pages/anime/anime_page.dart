@@ -220,15 +220,11 @@ class _AnimePageState extends State<AnimePage> {
   }
 
   void _playEpisode(AnimeMedia anime, int episodeNumber) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => AnimeStreamSheet(
-        anime: anime,
-        episodeNumber: episodeNumber,
-        autoPlay: false,
-      ),
+    AnimeStreamSheet.show(
+      context,
+      anime: anime,
+      episodeNumber: episodeNumber,
+      autoPlay: false,
     );
   }
 
