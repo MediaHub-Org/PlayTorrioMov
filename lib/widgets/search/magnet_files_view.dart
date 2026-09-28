@@ -7,6 +7,7 @@ import '../../services/debrid/debrid_service.dart';
 import '../../services/stream/torrent_stream_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 import '../common/hover_button.dart';
 
 class MagnetFileItem {
@@ -687,7 +688,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                         child: Text(
                           ext,
                           style: TextStyle(
-                            fontSize: 9.5,
+                            fontSize: TvType.scale(9.5),
                             fontWeight: FontWeight.bold,
                             color: AppColors.inkMuted,
                           ),

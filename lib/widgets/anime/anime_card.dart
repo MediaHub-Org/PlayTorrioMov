@@ -9,6 +9,7 @@ import '../../services/titles/title_display.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 /// The keys that activate a focused [AnimeCard]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -287,8 +288,8 @@ class _AnimePosterFrame extends StatelessWidget {
                 ),
                 child: Text(
                   anime.formattedFormat.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 9.5,
+                  style: TextStyle(
+                    fontSize: TvType.scale(9.5),
                     fontWeight: FontWeight.w900,
                     color: AppColors.onAccent,
                     letterSpacing: 0.5,
@@ -311,7 +312,7 @@ class _AnimePosterFrame extends StatelessWidget {
                   child: Text(
                     context.l10n.animeEpsShort(anime.totalEpisodes),
                     style: TextStyle(
-                      fontSize: 9.5,
+                      fontSize: TvType.scale(9.5),
                       fontWeight: FontWeight.bold,
                       color: AppColors.onAccent.withValues(alpha: 0.70),
                     ),

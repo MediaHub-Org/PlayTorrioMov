@@ -3,6 +3,7 @@ import 'package:media_kit/media_kit.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
+import '../../services/tv_type.dart';
 import 'player_glass.dart';
 
 /// How opaque the subtitle background is, 0 to 1, read from a `#AARRGGBB`
@@ -755,8 +756,8 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 10.5,
+      style: TextStyle(
+        fontSize: TvType.scale(10.5),
         fontWeight: FontWeight.w700,
         color: PlayerTheme.inkSubtle,
         letterSpacing: 1.1,

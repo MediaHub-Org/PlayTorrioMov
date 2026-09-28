@@ -26,6 +26,7 @@ import '../../app_info.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 
@@ -308,7 +309,7 @@ class _SettingsCategoryTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 10.5,
+                        fontSize: TvType.scale(10.5),
                         fontWeight: FontWeight.w700,
                         color: badgeColor ?? iconColor,
                       ),

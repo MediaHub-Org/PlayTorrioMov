@@ -48,6 +48,7 @@ import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
 import '../../services/cast/cast_service.dart';
+import '../../services/tv_type.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../utils/download/download_launcher.dart';
@@ -2995,7 +2996,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                           _volume > 1.75 ? 'MAX BOOST' : 'BOOST',
                           style: TextStyle(
                             color: boostColor,
-                            fontSize: 10.5,
+                            fontSize: TvType.scale(10.5),
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.5,
                           ),

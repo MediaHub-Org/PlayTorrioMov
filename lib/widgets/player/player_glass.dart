@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 import '../common/focus_ring.dart';
 
 export '../common/focus_ring.dart';
@@ -288,9 +289,9 @@ class PlayerMenuHeader extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: PlayerTheme.inkSubtle,
-                      fontSize: 10.5,
+                      fontSize: TvType.scale(10.5),
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
                     ),

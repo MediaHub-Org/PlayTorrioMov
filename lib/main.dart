@@ -33,6 +33,7 @@ import 'services/simkl/simkl_settings.dart';
 import './services/tmdb/tmdb_settings.dart';
 import './services/stream/torrent_stream_service.dart';
 import './services/config/env_service.dart';
+import './services/tv_mode_service.dart';
 import './services/window/window_service.dart';
 import './services/p2p/p2p_settings_service.dart';
 import './services/sources/source_filter_settings.dart';
@@ -107,6 +108,7 @@ void main() async {
     TmdbSettings.initialize(),
     SimklSettings.initialize(),
     P2pSettingsService.initialize(),
+    TvModeService.initialize(),
     // The remembered source filters. Must land before the first WatchScreen
     // builds, which reads them synchronously to seed its dropdowns.
     SourceFilterSettings.initialize(),

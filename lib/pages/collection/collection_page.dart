@@ -25,6 +25,7 @@ import '../../widgets/home/continue_watching_slider.dart';
 import '../player/player_screen.dart';
 import 'library_shelf_page.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 /// The Library: everything you saved, everything you started, everything on
 /// the device.
@@ -874,7 +875,7 @@ class _FactChip extends StatelessWidget {
         label,
         style: TextStyle(
           color: AppColors.inkMuted,
-          fontSize: 10.5,
+          fontSize: TvType.scale(10.5),
           fontWeight: FontWeight.w600,
         ),
       ),

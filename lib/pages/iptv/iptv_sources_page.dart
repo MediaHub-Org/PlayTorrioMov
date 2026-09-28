@@ -8,6 +8,7 @@ import '../../services/iptv/iptv_settings.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../services/tv_type.dart';
 import '../../widgets/common/pill_tab_row.dart';
 import 'iptv_portal_browser_page.dart';
 
@@ -944,7 +945,7 @@ class _Badge extends StatelessWidget {
         text,
         style: TextStyle(
           color: color,
-          fontSize: 10,
+          fontSize: TvType.scale(10),
           fontWeight: FontWeight.w700,
         ),
       ),

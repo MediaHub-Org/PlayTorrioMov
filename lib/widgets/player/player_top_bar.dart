@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
+import '../../services/tv_type.dart';
 import 'player_glass.dart';
 
 /// Top header bar for the video player.
@@ -115,9 +116,9 @@ class PlayerTopBar extends StatelessWidget {
                         ),
                         child: Text(
                           quality!.toUpperCase(),
-                          style: const TextStyle(
-                            color: Color(0xDDFFFFFF),
-                            fontSize: 10.5,
+                          style: TextStyle(
+                            color: const Color(0xDDFFFFFF),
+                            fontSize: TvType.scale(10.5),
                             fontWeight: FontWeight.w800,
                             letterSpacing: 0.6,
                           ),

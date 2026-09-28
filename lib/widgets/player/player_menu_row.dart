@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../services/tv_type.dart';
 import 'player_glass.dart';
 
 /// One selectable row in a player menu.
@@ -117,9 +118,9 @@ class _MiniBadge extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           color: PlayerTheme.inkSubtle,
-          fontSize: 9,
+          fontSize: TvType.scale(9),
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -139,9 +140,9 @@ class PlayerSectionLabel extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(
+        style: TextStyle(
           color: PlayerTheme.inkSubtle,
-          fontSize: 10,
+          fontSize: TvType.scale(10),
           fontWeight: FontWeight.w800,
           letterSpacing: 1.1,
         ),

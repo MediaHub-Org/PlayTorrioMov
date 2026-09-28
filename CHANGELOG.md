@@ -46,6 +46,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   buttons, and more. The 5 targets that wrap a poster, backdrop or other
   card keep the lean alone, where it already reads clearly. This closes
   out #80's phase 4.
+- **The app knows when it's actually running on an Android TV, and the
+  smallest labels size up for it (#80).** `TvModeService` asks Android's
+  `UiModeManager` over a platform channel at startup -- not a width guess,
+  which would also fire on a wide tablet or a desktop window. On a real TV,
+  `TvType.scale()` multiplies a badge or label's `fontSize` by 1.4 wherever
+  the app had one under 11px (a source's codec badge, a channel's LIVE
+  marker, an episode number, a rating pill, and 49 more, found by auditing
+  every `fontSize:` in `lib/`) -- illegible from a couch is now merely
+  small. Off Android, nothing changes.
 
 ### Fixed
 - **A departing episode card could no longer steal focus mid-transition

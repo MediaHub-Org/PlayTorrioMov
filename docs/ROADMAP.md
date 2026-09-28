@@ -324,6 +324,31 @@ the lean alone already reads clearly.
 Phase 4 is done: starting focus, traversal order, and a real focus
 indicator for every kind of target.
 
+**Phase 1 (TV-mode detection) landed.** `TvModeService`
+(`lib/services/tv_mode_service.dart`), an `abstract final class` with a
+static `ValueNotifier<bool> isTv` matching `AppThemeService`/`IptvSettings`,
+resolved once at startup alongside the app's other services. It calls the
+new `com.example.playtorrio/tv_mode` platform channel, whose Kotlin side
+(`MainActivity.kt`) asks `UiModeManager.currentModeType ==
+UI_MODE_TYPE_TELEVISION` -- the same native check the scoping decision
+above settled on, not a pub dependency and not a width/aspect guess. Off
+Android (`Platform.isAndroid` false, including every desktop/iOS build)
+`initialize()` is a no-op and `isTv` stays permanently false, since only
+Android exposes `UiModeManager`. Unblocks phases 2 and 3.
+
+**Phase 2 (type & spacing) landed.** `TvType.scale()`
+(`lib/services/tv_type.dart`) multiplies a `fontSize` by 1.4 when
+`TvModeService.isTv` is true, unchanged otherwise -- chosen so the audit's
+worst offender (8.5px) clears the same 11px floor the audit itself used to
+flag a spot as undersized. Applied at exactly the 53 spots the audit
+found, not a system-wide rewrite: each was either a literal `fontSize:`
+under 11 wrapped in `TvType.scale(...)`, or, for a `const TextStyle`, the
+same plus dropping the now-invalid `const` (and adding it back on any
+sibling `Color(...)` literal that only inherited constness from the
+`TextStyle` around it, to keep `prefer_const_constructors` clean). Left
+alone on purpose: the 600+ other `fontSize` literals the original audit
+did not flag.
+
 ### Not doing, so it stays decided
 
 | What | Why not |
