@@ -14,14 +14,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   already used; `HoverButton`, the shared wrapper the details rails and
   cards use, now does the same for everything else, reusing its hover lean
   as the focus indicator. `watch_screen.dart` was the first file converted;
-  the sweep now also covers the rest of the player transport (seek bar,
-  volume, episodes and sources panels, subtitle sync bar), the shared
-  `InteractiveCardShell` (so every movie poster and IPTV channel card on
-  the catalog grids gets focus for free), `AnimeCard`, and a batch of
-  smaller shared widgets and filter chips across the anime, collection and
-  IPTV pages. Roughly a dozen files with `GestureDetector`s remain --
-  mostly page-level chrome rather than catalog browsing -- see the roadmap
-  for the exact list.
+  the sweep has since covered every remaining bare `GestureDetector` in
+  `lib/`: the rest of the player transport (seek bar, volume, episodes and
+  sources panels, subtitle sync bar), the shared `InteractiveCardShell` (so
+  every movie poster and IPTV channel card on the catalog grids gets focus
+  for free), `AnimeCard`, the hub's hero-carousel page dots, the
+  Details/Anime Details/Catalog/Discover/Search/Collection/Library/Addons
+  pages, the IPTV channel sheet, portal browser and multiview/timeshift
+  player, the Universal Play Bar, the Continue Watching card, the IPTV
+  hero slide, and the remaining smaller shared widgets. A handful of
+  gestures were deliberately left pointer-only (full-screen tap-to-reveal
+  surfaces, tap-outside-to-dismiss barriers, and one `onLongPress`) because
+  a D-pad has no equivalent action for them -- see the roadmap for exactly
+  which and why.
 
 ### Removed
 - **The floating scroll track is gone from Films, Series, Anime and Live
