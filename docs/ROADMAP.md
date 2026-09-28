@@ -161,6 +161,15 @@ order has been set anywhere either -- Flutter's default reading-order
 traversal is what a remote will get until someone checks whether that is
 the order a viewer actually wants.
 
+**One thing removed rather than converted.** `CustomScrollTrack` -- the
+floating draggable scrollbar with hover-only up/down arrows on Films,
+Series, Anime and Live TV -- was gated to `ScreenTier.desktop`, and that
+tier is picked by width alone, so a TV counts as desktop too. Its arrows
+and thumb-drag both need a pointer a D-pad cannot produce, so it was dead
+chrome there rather than something worth making focusable: a mouse wheel
+or a trackpad already scrolls the same page without it. Deleted outright,
+not gated behind a platform check.
+
 ### Casting a scraper source gets stuck loading (#79)
 
 **Confirmed on a device 2026-09-28.** Casting a movie/series/anime source to

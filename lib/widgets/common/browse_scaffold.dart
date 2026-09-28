@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
-import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../movie/movie_card.dart';
 import 'browse_row_view.dart';
-import 'custom_scroll_track.dart';
 import 'error_view.dart';
 import 'over_artwork.dart';
 import 'hero_carousel_auto_rotate.dart';
@@ -277,7 +275,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
       );
     }
 
-    final body = widget.header == null || headerOverlaysHero
+    return widget.header == null || headerOverlaysHero
         ? content
         : Column(
             children: [
@@ -286,21 +284,6 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               Expanded(child: content),
             ],
           );
-
-    if (AppBreakpoints.of(context) != ScreenTier.desktop) return body;
-
-    // The scroll-position indicator is an affordance over the page rather
-    // than part of it, so it is the one thing that floats.
-    return Stack(
-      children: [
-        body,
-        Positioned(
-          right: 24,
-          bottom: 40,
-          child: CustomScrollTrack(controller: _scrollController),
-        ),
-      ],
-    );
   }
 
   Widget _buildScrollable(
