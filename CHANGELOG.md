@@ -5,6 +5,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.9.0+47] - 2026-09-28
+
+The Android TV release. All four phases of #80 land here: detection, type
+scaling, sheets-to-full-screen on TV, and focus order/indicators -- plus a
+nav reorganization (Profile tab, global search) that shipped alongside it.
+Nothing in this entry has been driven on a real Android TV or Android TV
+emulator; see each item's own note on what was and wasn't verified.
+
 ### Added
 - **The app declares Android TV support, and the player transport and watch
   screen respond to a D-pad or a keyboard (#78).** The manifest gained the
