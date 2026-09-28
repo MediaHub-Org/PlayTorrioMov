@@ -228,6 +228,50 @@ pointed at that instead of the origin URL. That is the same shape of problem
 as the torrent-cast question below (can a receiver reach a server running on
 this phone), so an answer to one is evidence for the other.
 
+### TV-native UX redesign (#80)
+
+**#78/#79 made the app D-pad-*reachable*, not TV-native.** Checked against
+the actual codebase rather than guessed: 53 of 630 `fontSize` declarations
+are under 11px (episode/source badges, sized for a phone 12-18in away, not a
+couch 8-10ft back); 8 files present core flows (stream picking, channel
+picking, casting) as `showModalBottomSheet`s, a phone gesture; zero uses of
+`FocusTraversalGroup`/`FocusTraversalOrder` anywhere, so a D-pad gets
+Flutter's default reading-order traversal on every grid, unchecked against
+what a viewer would expect; only 16 `autofocus: true` uses total, almost all
+in player menus, so most hub/catalog pages have no deliberate landing focus.
+`ScreenTier` picks by width alone, so a TV is sized as a wide desktop window
+rather than something viewed from 10 feet away.
+
+Scoped into four phases, decided 2026-09-28:
+
+1. **TV-mode detection.** A native platform-channel check against Android's
+   `UiModeManager` (`UI_MODE_TYPE_TELEVISION`) -- not a pub dependency, not a
+   width/aspect heuristic (would misfire on tablets/Chromebooks in
+   landscape) -- exposed as a `ValueNotifier<bool>` service matching the
+   `AppThemeService`/`IptvSettings` pattern already used throughout. Blocks
+   phases 2 and 3.
+2. **Type & spacing.** Targeted fixes to the 53 undersized `fontSize` spots
+   found above via a `TvType.scale()`-style helper gated on phase 1 -- not a
+   system-wide type-scale rewrite, since there is no central type scale to
+   hook into (630 inline literals).
+3. **Sheets to full-screen routes on TV.** All 8 `showModalBottomSheet`
+   call sites swap to the app's existing `pushPage`/`pushFullscreenPage`
+   helpers when phase 1 reports a TV, reusing existing sheet content/logic
+   unchanged. (Only `iptv_portal_browser_page.dart` already branches UI
+   shape by width today; `anime_details_page.dart`'s `isDesktop` branching
+   is layout-only and does not extend to its stream sheet -- the other 6
+   sheets have no wide-screen alternative at all.)
+4. **Focus order, starting focus, and a real indicator for non-card
+   targets.** `FocusTraversalGroup`/explicit order plus `autofocus` on each
+   hub/catalog page's first tile; `FocusRing` (already built for the player
+   controls) on text/icon-only `HoverButton` targets that currently rely on
+   a ~2% hover-scale as their only cue.
+
+**Starting with phase 4's focus-order half**, since it needs no
+TV-detection groundwork, helps keyboard/D-pad users on every platform (not
+just confirmed TVs), and is the most likely source of an actually-stuck
+viewer today. Phases 2-3 follow once phase 1 (detection) lands.
+
 ### Not doing, so it stays decided
 
 | What | Why not |
