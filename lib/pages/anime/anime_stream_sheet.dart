@@ -13,6 +13,7 @@ import '../player/player_screen.dart';
 
 import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class AnimeStreamSheet extends StatefulWidget {
   final AnimeMedia anime;
@@ -421,7 +422,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                               color: isDub
                                                   ? Colors.orangeAccent
                                                   : Colors.lightBlueAccent,
-                                              fontSize: 10,
+                                              fontSize: TvType.scale(10),
                                               fontWeight: FontWeight.w900,
                                             ),
                                           ),

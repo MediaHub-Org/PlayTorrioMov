@@ -14,6 +14,7 @@ import '../../services/anime/anime_library_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../services/tv_type.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/clamped_text_scale.dart';
@@ -933,9 +934,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                           ),
                           Text(
                             char.role,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white38,
-                              fontSize: 10,
+                              fontSize: TvType.scale(10),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1035,9 +1036,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     ),
                     Text(
                       member.role,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white38,
-                        fontSize: 10,
+                        fontSize: TvType.scale(10),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1413,7 +1414,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                                 rel.relationType.replaceAll('_', ' '),
                                 style: TextStyle(
                                   color: _Palette.accent,
-                                  fontSize: 9.5,
+                                  fontSize: TvType.scale(9.5),
                                   fontWeight: FontWeight.w900,
                                   letterSpacing: 0.2,
                                 ),
