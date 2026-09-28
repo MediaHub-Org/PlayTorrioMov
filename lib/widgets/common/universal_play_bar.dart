@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 
 import '../../services/playback_coordinator.dart';
+import 'hover_button.dart';
 import 'like_button.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -44,7 +45,8 @@ class UniversalPlayBar extends StatelessWidget {
         final progress =
             durMs > 0 ? (posMs / durMs).clamp(0.0, 1.0).toDouble() : 0.0;
 
-        return GestureDetector(
+        return HoverButton(
+          scaleAmount: 1.01,
           onTap: PlaybackCoordinator.expand,
           child: Container(
             height: 60,
