@@ -349,6 +349,29 @@ sibling `Color(...)` literal that only inherited constness from the
 alone on purpose: the 600+ other `fontSize` literals the original audit
 did not flag.
 
+**Phase 3 (sheets to full-screen routes) landed -- #80 is complete.** A new
+`showAdaptiveSheet()` (`lib/utils/navigation/adaptive_sheet.dart`) checks
+`TvModeService.isTv`: true pushes the same builder's content via the
+existing `pushPage` onto the root navigator, false calls
+`showModalBottomSheet` exactly as before. All 8 call sites the audit found
+now go through it. `AnimeStreamSheet` had three separate inline
+`showModalBottomSheet` calls and no shared factory, unlike the other five
+sheets; it gained its own `static Future<void> show(...)`, matching
+`IptvChannelSheet`/`CollectionPickerSheet`/`PlayerCastSheet`'s existing
+pattern, so all three of its call sites share one control point. Each
+sheet's own content and chrome are unchanged, per the phase's scope --
+several hardcode a rounded-top-corner decoration meant for bottom-sheet
+presentation, so on TV they may show as a rounded panel rather than true
+full-bleed content. Not fixed here: the actual problem this phase targets
+is the dismiss gesture (drag/tap-outside, neither reachable by D-pad),
+which the routing swap alone fully solves, since a normally pushed route
+already answers to the remote's hardware Back button like any other page.
+Untested against a real TV or Android TV emulator in this environment --
+the swap was verified by reading each call site and `TvModeService`, not
+by driving a device.
+
+All four phases of #80 are now done.
+
 ### Not doing, so it stays decided
 
 | What | Why not |

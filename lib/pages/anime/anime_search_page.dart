@@ -7,6 +7,7 @@ import '../../services/app_spacing.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../utils/navigation/adaptive_sheet.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/common/animated_ambient_background.dart';
@@ -251,7 +252,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
     required T? current,
     required void Function(T?) onSelected,
   }) async {
-    final picked = await showModalBottomSheet<_PickResult<T>>(
+    final picked = await showAdaptiveSheet<_PickResult<T>>(
       context: context,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(

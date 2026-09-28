@@ -787,15 +787,11 @@ class ContinueWatchingService {
           ),
         );
       } else {
-        showModalBottomSheet(
-          context: context,
-          backgroundColor: Colors.transparent,
-          isScrollControlled: true,
-          builder: (_) => AnimeStreamSheet(
-            anime: anime,
-            episodeNumber: episodeNum,
-            autoPlay: false,
-          ),
+        AnimeStreamSheet.show(
+          context,
+          anime: anime,
+          episodeNumber: episodeNum,
+          autoPlay: false,
         );
       }
       return;

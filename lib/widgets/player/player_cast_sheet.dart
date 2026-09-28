@@ -3,6 +3,7 @@ import '../../l10n/l10n.dart';
 import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
 
 import '../../services/cast/cast_service.dart';
+import '../../utils/navigation/adaptive_sheet.dart';
 import 'player_glass.dart';
 
 /// Device picker for Cast -- shown from the player's Cast button. Only ever
@@ -46,7 +47,7 @@ class PlayerCastSheet extends StatefulWidget {
     bool isLive = false,
     String? posterUrl,
   }) {
-    showModalBottomSheet(
+    showAdaptiveSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (_) => PlayerCastSheet(
