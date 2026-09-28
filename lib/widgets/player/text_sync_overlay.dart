@@ -6,6 +6,7 @@ import 'package:media_kit/media_kit.dart';
 
 import '../../services/subtitles/subtitle_parser.dart';
 import '../../services/subtitles/subtitle_sync_helper.dart';
+import '../../services/tv_type.dart';
 import 'player_glass.dart';
 
 /// Full-screen right-side floating drawer for dialogue speech following & subtitle sync.
@@ -385,9 +386,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           children: [
                             Text(
                               _sectionMode ? context.l10n.syncFixSection.toUpperCase() : context.l10n.syncSubtitleTiming.toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: PlayerTheme.inkSubtle,
-                                fontSize: 10,
+                                fontSize: TvType.scale(10),
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.2,
                               ),
@@ -491,7 +492,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                 color: _searchQuery.length >= 3 && _matchedIndices.isNotEmpty
                                     ? const Color(0xFFFFC107)
                                     : PlayerTheme.inkSubtle,
-                                fontSize: 10,
+                                fontSize: TvType.scale(10),
                                 fontWeight: FontWeight.w700,
                                 fontFeatures: const [FontFeature.tabularFigures()],
                               ),
@@ -694,9 +695,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                               ),
                                               child: Text(
                                                 'P$pointNum',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 9,
+                                                  fontSize: TvType.scale(9),
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
@@ -710,9 +711,9 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                               ),
                                               child: Text(
                                                 context.l10n.syncNowBadge,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 8.5,
+                                                  fontSize: TvType.scale(8.5),
                                                   fontWeight: FontWeight.w800,
                                                   letterSpacing: 0.5,
                                                 ),

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../models/movie/video.dart';
+import '../../services/tv_type.dart';
 import 'player_glass.dart';
 
 /// The keys that activate a focused episode card. `final`, not `const`:
@@ -687,9 +688,9 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                                 ),
                                 child: Text(
                                   context.l10n.playerEpShort(epNum),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 10,
+                                    fontSize: TvType.scale(10),
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.4,
                                   ),
@@ -754,9 +755,9 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                                       const SizedBox(width: 4),
                                       Text(
                                         context.l10n.playerPlaying.toUpperCase(),
-                                        style: const TextStyle(
-                                          color: Color(0xFF34D399),
-                                          fontSize: 9.5,
+                                        style: TextStyle(
+                                          color: const Color(0xFF34D399),
+                                          fontSize: TvType.scale(9.5),
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: 0.5,
                                         ),

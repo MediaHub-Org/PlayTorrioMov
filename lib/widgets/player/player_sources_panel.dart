@@ -10,6 +10,7 @@ import '../../services/stream/stream_service.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../common/source_badges.dart';
+import '../../services/tv_type.dart';
 import 'player_glass.dart';
 
 /// The keys that activate a focused source card. `final`, not `const`:
@@ -611,9 +612,9 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                               ),
                               child: Text(
                                 resolution,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 9.5,
+                                  fontSize: TvType.scale(9.5),
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.4,
                                 ),
