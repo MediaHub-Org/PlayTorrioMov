@@ -90,14 +90,22 @@ more than listing it. Doing it properly needs a pipeline, not a tab:
 Until that exists, portals provide Live TV only, and that boundary is
 load-bearing rather than temporary-looking.
 
-### Translation (#68)
+### Translation (#68) is closed
 
-**What is left outside `Text(` is hardcoded Arabic.** The English sites are
-keyed now -- Continue Watching badges, season-collection parts, the Arabic
-sheet's status lines -- and `S01E01` shapes stay codes, as universal as episode
-numbers. What remains is hardcoded Arabic across the Arabic anime pages:
-correct for their audience today, and needing a native review before gaining
-es/pt/en translations.
+This section used to describe hardcoded Arabic across the Arabic anime
+pages as the last outstanding piece of #68, needing a native review before
+gaining es/pt/en translations. That description is now stale: the Arabic
+anime catalog (`anime_arabic_details_page.dart`, `anime_arabic_stream_sheet.dart`
+and its services) was deleted outright in the commit that removed the
+separate Arabic feed (see CHANGELOG's "The Arabic anime catalog is gone"),
+not translated -- there was nothing left to migrate once those files were
+gone. Checked 2026-09-28: a full scan of `lib/` for Arabic-script
+characters turns up exactly two, both intentional and out of scope --
+`stream_model.dart`'s language-detection regex (matches the word "Arabic"
+in scraped release titles, in either script) and
+`appearance_settings_page.dart`'s language-switcher entry (shows each
+language in its own name on purpose, same reason `'es'` reads `Español`
+rather than `Spanish`). Nothing under #68 remains pending.
 
 ### Android TV and remote navigation (#78)
 
