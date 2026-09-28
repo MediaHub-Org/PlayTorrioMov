@@ -45,14 +45,12 @@ rather than files, and the sleep timer can wait for the video to end.
   Forced filters.** The file's own tracks and the online downloads were one
   merged list, so the tracks already in the file -- usually the answer -- sat
   among a hundred downloads. The filters narrow whichever tab is showing.
-- **Forced subtitles get their own pill.** Forced tracks hid among full
-  translations they are not: they cover only foreign-language dialogue,
-  whichever side it comes from. The third pill reads the embedded list and
-  the online list narrowed to forced files, with the file's own tracks
-  first. The filter chips are three independent kinds now -- Subtitles,
-  CC-SDH, Forced -- instead of an All that could never say whether forced
-  tracks were in or out; tapping the active chip falls back to Subtitles.
-  The Forced chip hides in the Forced view, leaving CC-SDH.
+- **Forced subtitles live under their own chip.** Forced tracks hid among
+  full translations they are not: they cover only foreign-language dialogue,
+  whichever side it comes from. The filter chips are three independent kinds
+  now -- Subtitles, CC-SDH, Forced -- instead of an All that could never say
+  whether forced tracks were in or out; tapping the active chip falls back
+  to Subtitles.
 - **Regional subtitle variants are separate languages.** Spanish (ES) and
   Spanish (LATAM) are different recordings, not two spellings of one label,
   and they used to collapse into a single "Spanish" group -- so the choice
@@ -75,11 +73,12 @@ rather than files, and the sleep timer can wait for the video to end.
   coin flip. Subtitle sync is unchanged.
 - **Two tracks in one language are told apart.** A file with both Spanish
   dubs listed "Spanish" twice, so the choice between them was invisible.
-  Duplicates take the region where the track's own title names one --
-  `Spanish (ES)`, `Spanish (LATAM)` -- since a file's handful of tracks are
-  told apart by trial. The audio menu additionally numbers them
-  (`Spanish #1`), where identical rows would otherwise collide with no
-  recourse.
+  Every language now follows one pattern: a canonical base with the title's
+  region swapped in -- `Spanish (ES)`, `Spanish (LATAM)`, `Chinese
+  (Traditional)` -- so "Chinese" never sits beside a second spelling of
+  itself. The audio menu additionally numbers repeats (`Spanish (ES) #1`),
+  where identical rows would otherwise collide with no recourse; embedded
+  lists do not number, since a handful of tracks are told apart by trial.
 - **Spanish and Portuguese forced tracks are recognized.** Only the English
   word "forced" was matched, so a track titled "Espanol (Forzados)" got no
   badge and sat outside the Forced filter. The Spanish and Portuguese
@@ -1908,7 +1907,7 @@ recorded in [docs/ROADMAP.md](docs/ROADMAP.md).
 - 30 new torrent/stream scraper sites and 7 new anime extractors, ported
   from upstream `ayman708-UX/PlayTorrioV3` (commit `b0aecf5`) side by side
   with Mov's own existing, non-overlapping set — see
-  [ROADMAP.md](docs/ROADMAP.md#upstream-sync) for the full list and
+  [INFO.md](docs/INFO.md#upstream) for the full list and
   what was deliberately left out
 - `stream_model.dart` getters (`quality`, `isHDR`, `codec`, `fileSize`,
   `sizeBytes`, `qualityRank`) now memoized instead of recomputing regexes
@@ -2029,8 +2028,8 @@ history only.
 | #65 | `OverArtwork`, the details backdrop bounded to its hero, and the last black backgrounds (Live TV, settings, genre chips) |
 | #66 | Three parallel PR-check jobs, and the `prefer_const` sweep that emptied the analyzer's info list |
 | #67 | Collections: CRUD, the fourth library action, and a Library rebuilt around them. Device-confirmed on a phone 2026-09-16 |
-| #68 | Translation (i18n) — Spanish/Arabic/Portuguese-BR across the app, 981 keys, with a test that fails on the next hardcoded sentence; RTL padding held by a test too. The `Alignment` constants, icon direction and the display/canonical title toggle are still open |
-| #69 | Text scale and accessibility — 25 high-traffic overflow fixes + in-app zoom, capped at 1.3x, with every icon-only button labelled and a test holding it; ~46 files still unaudited |
+| #68 | Translation (i18n) — Spanish/Arabic/Portuguese-BR, 987 keys, with tests holding the hardcoded-text tail, the RTL padding and alignment, the icon-only tooltips and the spelling; icon direction turns with the reading direction and the display/native title toggle shipped |
+| #69 | Text scale and accessibility — 26 high-traffic widgets probed at 3x and capped at 1.3x, every icon-only control labelled button or not; the unprobed tail (mostly pages a test cannot construct) is deliberately unranked |
 | #70 | Audio silent under Flatpak — `--socket=pulseaudio` added; confirmed on real speakers 2026-09-16 |
 | #71 | Subtitle appearance settings now expand inline in Settings instead of opening as a pop-up |
 | #72 | Source filters (audio language, video quality) persisted as a global default, set from a new Sources & Filters settings page |

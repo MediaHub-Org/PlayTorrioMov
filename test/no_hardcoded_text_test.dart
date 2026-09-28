@@ -43,11 +43,15 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart'))) {
+      // Forward slashes everywhere: on Windows listSync reports
+      // backslashes, and without this the allowlist below misses -- green
+      // on Linux CI, red on a Windows checkout.
+      final path = file.path.replaceAll(r'\', '/');
       // Generated from the ARB files; nothing here is hand-written.
-      if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+      if (path.startsWith('lib/l10n/app_localizations')) continue;
 
       final source = file.readAsStringSync();
-      final exempt = allowed[file.path] ?? const <String>{};
+      final exempt = allowed[path] ?? const <String>{};
 
       for (final match in call.allMatches(source)) {
         if (match.end >= source.length || source[match.end] != "'") continue;
@@ -58,7 +62,7 @@ void main() {
         if (!_isProse(literal.stripped)) continue;
 
         final line = source.substring(0, match.start).split('\n').length;
-        offenders.add('${file.path}:$line: \'${literal.raw}\'');
+        offenders.add('$path:$line: \'${literal.raw}\'');
       }
     }
 

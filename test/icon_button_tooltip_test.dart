@@ -35,8 +35,12 @@ void main() {
           .listSync(recursive: true)
           .whereType<File>()
           .where((f) => f.path.endsWith('.dart'))) {
+        // Forward slashes everywhere: on Windows listSync reports
+        // backslashes, and without this the generated-output skip below
+        // misses -- green on Linux CI, red on a Windows checkout.
+        final path = file.path.replaceAll(r'\', '/');
         // Generated from the ARB files; nothing here is hand-written.
-        if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+        if (path.startsWith('lib/l10n/app_localizations')) continue;
 
         final source = file.readAsStringSync();
         for (final match in call.allMatches(source)) {
@@ -48,7 +52,7 @@ void main() {
           if (body.contains('tooltip:')) continue;
 
           final line = source.substring(0, match.start).split('\n').length;
-          offenders.add('${file.path}:$line');
+          offenders.add('$path:$line');
         }
       }
 
@@ -81,7 +85,11 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((f) => f.path.endsWith('.dart'))) {
-      if (file.path.startsWith('lib/l10n/app_localizations')) continue;
+      // Forward slashes everywhere: on Windows listSync reports backslashes,
+      // matching the same fix in the test above and in the other two
+      // source-scanning guards.
+      final path = file.path.replaceAll(r'\', '/');
+      if (path.startsWith('lib/l10n/app_localizations')) continue;
       final source = file.readAsStringSync();
 
       for (final match in control.allMatches(source)) {
