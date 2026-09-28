@@ -7,6 +7,7 @@ import 'browse_row_view.dart';
 import 'error_view.dart';
 import 'over_artwork.dart';
 import 'hero_carousel_auto_rotate.dart';
+import 'hover_button.dart';
 import 'pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
 import 'poster_skeleton.dart';
 import 'slider_arrow.dart';
@@ -454,7 +455,8 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (var i = 0; i < widget.heroItems.length; i++)
-                      GestureDetector(
+                      HoverButton(
+                        scaleAmount: 1.3,
                         onTap: () => goToHeroPage(i),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),

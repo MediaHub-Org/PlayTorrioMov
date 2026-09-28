@@ -6,6 +6,7 @@ import '../../services/iptv/favorite_channels_service.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_controller.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/like_button.dart';
 import 'iptv_player_page.dart';
 import '../../services/theme/app_colors.dart';
@@ -459,7 +460,8 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                         ),
                       ),
                       if (isScanning)
-                        GestureDetector(
+                        HoverButton(
+                          scaleAmount: 1.05,
                           onTap: _ctrl.stopChannelSearch,
                           child: Text(
                             context.l10n.iptvStop,
@@ -555,13 +557,12 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                               final isFav = _ctrl.isFavoriteHit(ch.id, hit);
                               final isSelected = _selectedUrls.contains(hit.streamUrl);
 
-                              return MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () => _isSelecting
-                                      ? _toggleSelection(hit.streamUrl)
-                                      : _playHit(hit),
-                                  child: Container(
+                              return HoverButton(
+                                scaleAmount: 1.02,
+                                onTap: () => _isSelecting
+                                    ? _toggleSelection(hit.streamUrl)
+                                    : _playHit(hit),
+                                child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     decoration: BoxDecoration(
                                       color: isSelected
@@ -709,7 +710,6 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                       ],
                                     ),
                                   ),
-                                ),
                               );
                             },
                           )),

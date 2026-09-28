@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../services/titles/title_display.dart';
 import '../../services/app_breakpoints.dart';
@@ -20,8 +21,19 @@ import '../../l10n/l10n.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_actions_row.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
+
+/// The keys that activate a focused [_HoverScale]. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
+/// inside a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 class _Space {
   static const sm = 12.0;
@@ -823,7 +835,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   }
 
   Widget _buildSynopsis(String description) {
-    return GestureDetector(
+    return HoverButton(
+      scaleAmount: 1.02,
       onTap: () => setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
       child: AnimatedCrossFade(
         duration: const Duration(milliseconds: 200),
@@ -1083,7 +1096,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                     ),
                     child: Row(
                       children: [
-                        GestureDetector(
+                        HoverButton(
+                          scaleAmount: 1.05,
                           onTap: () => setState(() => _isDub = false),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -1104,7 +1118,8 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                             ),
                           ),
                         ),
-                        GestureDetector(
+                        HoverButton(
+                          scaleAmount: 1.05,
                           onTap: () => setState(() => _isDub = true),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -1614,10 +1629,25 @@ class _HoverScale extends StatefulWidget {
 
 class _HoverScaleState extends State<_HoverScale> {
   bool _hover = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    final onTap = widget.onTap;
+    if (onTap == null) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
+    final hover = _hover || _focused;
+    return Focus(
+      canRequestFocus: widget.onTap != null,
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: _handleKey,
+      child: MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       cursor: widget.onTap != null
@@ -1630,14 +1660,15 @@ class _HoverScaleState extends State<_HoverScale> {
           curve: Curves.easeOutCubic,
           transform: Matrix4.identity()
             ..scaleByDouble(
-              _hover ? 1.04 : 1.0,
-              _hover ? 1.04 : 1.0,
+              hover ? 1.04 : 1.0,
+              hover ? 1.04 : 1.0,
               1.0,
               1.0,
             ),
           transformAlignment: Alignment.center,
           child: widget.child,
         ),
+      ),
       ),
     );
   }

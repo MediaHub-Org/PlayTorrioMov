@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/over_artwork.dart';
@@ -31,6 +32,16 @@ import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
+
+/// The keys that activate a focused [_EpisodeCard]. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
+/// a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -1325,7 +1336,8 @@ class _DetailsPageState extends State<DetailsPage>
             ),
             if (isOverflowing) ...[
               const SizedBox(height: _Space.xs),
-              GestureDetector(
+              HoverButton(
+                scaleAmount: 1.05,
                 onTap: () =>
                     setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
                 child: Text(
@@ -2011,21 +2023,33 @@ class _EpisodeCard extends StatefulWidget {
 
 class _EpisodeCardState extends State<_EpisodeCard> {
   bool _hovered = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    (widget.onTap ?? () {})();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final ep = widget.episode;
     final imgUrl = ep.thumbnail ?? widget.fallbackImageUrl;
+    final hovered = _hovered || _focused;
 
-    return MouseRegion(
+    return Focus(
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: _handleKey,
+      child: MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: widget.onTap ?? () {},
         child: AnimatedScale(
-          scale: _hovered ? 1.03 : 1.0,
+          scale: hovered ? 1.03 : 1.0,
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
           child: Container(
@@ -2033,11 +2057,11 @@ class _EpisodeCardState extends State<_EpisodeCard> {
               color: _Palette.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: _hovered
+                color: hovered
                     ? AppColors.ink.withOpacity(0.22)
                     : AppColors.ink.withOpacity(0.04),
               ),
-              boxShadow: _hovered
+              boxShadow: hovered
                   ? [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.4),
@@ -2081,7 +2105,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                         ),
                         Center(
                           child: AnimatedOpacity(
-                            opacity: _hovered ? 1.0 : 0.0,
+                            opacity: hovered ? 1.0 : 0.0,
                             duration: const Duration(milliseconds: 150),
                             child: Container(
                               padding: const EdgeInsets.all(10),
@@ -2167,6 +2191,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

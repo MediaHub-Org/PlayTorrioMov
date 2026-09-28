@@ -23,6 +23,7 @@ import '../../widgets/player/player_aspect_menu.dart';
 import '../../widgets/player/sleep_timer_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
+import '../../widgets/common/hover_button.dart';
 
 class IptvPlayerPage extends StatefulWidget {
   final HardcodedChannel channel;
@@ -1418,11 +1419,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     .toString()
                                     .padLeft(3, '0');
 
-                                return MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: GestureDetector(
-                                    onTap: () => _switchSource(index),
-                                    child: AnimatedContainer(
+                                return HoverButton(
+                                  scaleAmount: 1.02,
+                                  onTap: () => _switchSource(index),
+                                  child: AnimatedContainer(
                                       duration: const Duration(
                                         milliseconds: 120,
                                       ),
@@ -1575,7 +1575,6 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         ],
                                       ),
                                     ),
-                                  ),
                                 );
                               },
                             ),
@@ -1675,13 +1674,28 @@ class _IptvCustomProgressBar extends StatefulWidget {
 class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
   double? _hoverX;
   bool _isDragging = false;
+  bool _isFocused = false;
   Duration? _dragPosition;
+
+  /// Matches `player_seek_bar.dart`'s own keyboard step, so arrow-key
+  /// seeking feels the same whether this is the main player or Live TV's.
+  static const _keyboardSeekStep = Duration(seconds: 10);
 
   void _seekTo(double x, double width, Duration totalDuration) {
     if (width <= 0 || totalDuration <= Duration.zero) return;
     final percent = (x / width).clamp(0.0, 1.0);
     final position = totalDuration * percent;
     widget.player.seek(position);
+  }
+
+  void _nudge(int direction, Duration currentPosition, Duration totalDuration) {
+    if (totalDuration <= Duration.zero) return;
+    final next = currentPosition + _keyboardSeekStep * direction;
+    widget.player.seek(
+      next < Duration.zero
+          ? Duration.zero
+          : (next > totalDuration ? totalDuration : next),
+    );
   }
 
   @override
@@ -1703,7 +1717,24 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
               builder: (context, constraints) {
                 final width = constraints.maxWidth;
 
-                return MouseRegion(
+                return Focus(
+                  onFocusChange: (focused) => setState(() => _isFocused = focused),
+                  onKeyEvent: (node, event) {
+                    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+                    if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+                      _nudge(-1, position, duration);
+                      return KeyEventResult.handled;
+                    }
+                    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+                      _nudge(1, position, duration);
+                      return KeyEventResult.handled;
+                    }
+                    return KeyEventResult.ignored;
+                  },
+                  child: FocusRing(
+                  visible: _isFocused,
+                  borderRadius: 999,
+                  child: MouseRegion(
                   cursor: SystemMouseCursors.click,
                   onHover: (event) {
                     setState(() {
@@ -1873,6 +1904,8 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                         ],
                       ),
                     ),
+                  ),
+                  ),
                   ),
                 );
               },

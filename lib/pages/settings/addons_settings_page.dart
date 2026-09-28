@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../models/addon/addon.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
+
+/// The keys that activate a focused [_FeatureToggleChip]. `final`, not
+/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
+/// that inside a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 class AddonsSettingsPage extends StatefulWidget {
   const AddonsSettingsPage({super.key});
@@ -608,14 +620,26 @@ class _FeatureToggleChip extends StatefulWidget {
 
 class _FeatureToggleChipState extends State<_FeatureToggleChip> {
   bool _hovered = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final activeColor = AppColors.accent;
     final isEnabled = widget.isEnabled;
+    final hovered = _hovered || _focused;
 
-    return MouseRegion(
+    return Focus(
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: _handleKey,
+      child: MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
@@ -626,10 +650,10 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: isEnabled
-                ? (_hovered
+                ? (hovered
                     ? activeColor.withValues(alpha: 0.25)
                     : activeColor.withValues(alpha: 0.15))
-                : (_hovered
+                : (hovered
                     ? AppColors.inkAlpha(0.08)
                     : AppColors.inkAlpha(0.03)),
             borderRadius: BorderRadius.circular(9),
@@ -639,7 +663,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
                   : AppColors.inkAlpha(0.08),
               width: 1,
             ),
-            boxShadow: isEnabled && _hovered
+            boxShadow: isEnabled && hovered
                 ? [
                     BoxShadow(
                       color: activeColor.withValues(alpha: 0.25),
@@ -686,6 +710,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -703,8 +728,13 @@ class _AddAddonButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return GestureDetector(
-      onTap: isLoading ? null : onTap,
+    return IgnorePointer(
+      ignoring: isLoading,
+      child: ExcludeFocus(
+        excluding: isLoading,
+        child: HoverButton(
+      scaleAmount: 1.02,
+      onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -740,6 +770,8 @@ class _AddAddonButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

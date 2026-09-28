@@ -13,6 +13,7 @@ import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/filter_dropdown.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/movie/movie_slider_section.dart';
@@ -312,7 +313,8 @@ class _SearchPageState extends State<SearchPage> {
               },
             ),
           if (_typeFilter == SearchFilter.anime)
-            GestureDetector(
+            HoverButton(
+              scaleAmount: 1.05,
               onTap: _openAnimeFilters,
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -354,7 +356,8 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildChoiceChip(SearchFilter filter) {
     final isSelected = _typeFilter == filter;
-    return GestureDetector(
+    return HoverButton(
+      scaleAmount: 1.05,
       onTap: () => _onTypeChanged(filter),
       child: Container(
         alignment: Alignment.center,

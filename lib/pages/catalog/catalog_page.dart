@@ -10,6 +10,7 @@ import '../../models/movie/movie_section.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../widgets/common/error_view.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/hover_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
@@ -540,7 +541,10 @@ class _CatalogPageState extends State<CatalogPage> {
         duration: const Duration(milliseconds: 200),
         child: IgnorePointer(
           ignoring: !isVisible,
-          child: GestureDetector(
+          child: ExcludeFocus(
+            excluding: !isVisible,
+            child: HoverButton(
+            scaleAmount: 1.1,
             onTap: onTap,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -555,6 +559,7 @@ class _CatalogPageState extends State<CatalogPage> {
                 color: AppColors.ink,
                 size: 16,
               ),
+            ),
             ),
           ),
         ),
@@ -578,7 +583,8 @@ class _GenreChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return GestureDetector(
+    return HoverButton(
+      scaleAmount: 1.05,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
