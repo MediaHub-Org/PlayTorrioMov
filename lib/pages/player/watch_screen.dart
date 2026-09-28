@@ -32,6 +32,16 @@ import '../settings/settings_page.dart';
 import '../details/details_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 
+/// The keys that activate the "no sources, install addons" button below.
+/// `final`, not `const`: `LogicalKeyboardKey` overrides `==`, and the
+/// analyzer rejects that inside a `const` set literal.
+final _settingsButtonActivators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
+
 // ---------------------------------------------------------------------------
 // Design tokens
 // ---------------------------------------------------------------------------
@@ -2276,13 +2286,7 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 setState(() => _isHovering = focused),
             onKeyEvent: (node, event) {
               if (event is! KeyDownEvent) return KeyEventResult.ignored;
-              const activators = {
-                LogicalKeyboardKey.enter,
-                LogicalKeyboardKey.numpadEnter,
-                LogicalKeyboardKey.select,
-                LogicalKeyboardKey.gameButtonA,
-              };
-              if (!activators.contains(event.logicalKey)) {
+              if (!_settingsButtonActivators.contains(event.logicalKey)) {
                 return KeyEventResult.ignored;
               }
               pushPage(context, const SettingsPage());
