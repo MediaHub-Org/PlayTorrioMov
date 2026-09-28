@@ -16,6 +16,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   as the focus indicator. `watch_screen.dart` is fully converted; the rest
   of `lib/` is not yet -- see the roadmap.
 
+### Removed
+- **The floating scroll track is gone from Films, Series, Anime and Live
+  TV.** `CustomScrollTrack` drew a draggable thumb with hover-only up/down
+  arrows over the catalog pages at desktop width -- which, on a TV, is
+  every width, since the tier is picked by screen size and a TV is wide.
+  Its arrows and drag gesture need a pointer that a D-pad cannot produce,
+  so it rendered as dead, unusable chrome there. It offered nothing a mouse
+  wheel or a trackpad did not already do, so it is removed rather than
+  gated to real desktops.
+
 ## [1.8.13+46] - 2026-09-28
 
 Live TV grows up: sources become a page, portals go live-only, four new

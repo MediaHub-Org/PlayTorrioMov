@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/widgets/common/browse_scaffold.dart';
-import 'package:playtorriomov/widgets/common/custom_scroll_track.dart';
 import 'package:playtorriomov/widgets/common/slider_arrow.dart';
 
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
@@ -299,21 +298,5 @@ void main() {
         expect(emptyTop, greaterThanOrEqualTo(headerBottom));
       },
     );
-
-    testWidgets('the scroll track is desktop-only', (tester) async {
-      setSurfaceWidth(tester, 1400);
-      await tester.pumpWidget(
-        wrap(build(hero: ['a'], header: const Text('filters'))),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(CustomScrollTrack), findsOneWidget);
-
-      setSurfaceWidth(tester, 420);
-      await tester.pumpWidget(
-        wrap(build(hero: ['a'], header: const Text('filters'))),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(CustomScrollTrack), findsNothing);
-    });
   });
 }
