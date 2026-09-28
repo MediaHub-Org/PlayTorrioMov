@@ -11,6 +11,7 @@ import '../../services/addon/addon_manager.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/hover_button.dart';
@@ -507,15 +508,18 @@ class _SearchPageState extends State<SearchPage> {
 
     final sections = _resultSections();
     if (sections.isNotEmpty) {
-      return ListView.builder(
-        clipBehavior: Clip.none,
-        padding: EdgeInsets.only(
-          top: 8,
-          bottom: 40 + MediaQuery.paddingOf(context).bottom,
+      return FirstFocusScope(
+        ready: true,
+        child: ListView.builder(
+          clipBehavior: Clip.none,
+          padding: EdgeInsets.only(
+            top: 8,
+            bottom: 40 + MediaQuery.paddingOf(context).bottom,
+          ),
+          physics: const BouncingScrollPhysics(),
+          itemCount: sections.length,
+          itemBuilder: (context, index) => sections[index],
         ),
-        physics: const BouncingScrollPhysics(),
-        itemCount: sections.length,
-        itemBuilder: (context, index) => sections[index],
       );
     }
 
