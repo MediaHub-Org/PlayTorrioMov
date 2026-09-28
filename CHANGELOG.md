@@ -13,8 +13,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   now takes focus and shows the same `FocusRing` two of its neighbours
   already used; `HoverButton`, the shared wrapper the details rails and
   cards use, now does the same for everything else, reusing its hover lean
-  as the focus indicator. `watch_screen.dart` is fully converted; the rest
-  of `lib/` is not yet -- see the roadmap.
+  as the focus indicator. `watch_screen.dart` was the first file converted;
+  the sweep now also covers the rest of the player transport (seek bar,
+  volume, episodes and sources panels, subtitle sync bar), the shared
+  `InteractiveCardShell` (so every movie poster and IPTV channel card on
+  the catalog grids gets focus for free), `AnimeCard`, and a batch of
+  smaller shared widgets and filter chips across the anime, collection and
+  IPTV pages. Roughly a dozen files with `GestureDetector`s remain --
+  mostly page-level chrome rather than catalog browsing -- see the roadmap
+  for the exact list.
 
 ### Removed
 - **The floating scroll track is gone from Films, Series, Anime and Live

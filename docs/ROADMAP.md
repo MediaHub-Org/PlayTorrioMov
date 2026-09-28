@@ -151,15 +151,41 @@ Two primitives carry the fix, matching what each already looked like:
   gained its own `Focus` and key handling directly, the same shape
   `player_glass.dart` already used.
 
-That is the worked example, not the finished sweep: the other 37 files
-counted above are not touched, and there is no guard test enforcing this
-going forward -- adding one now would turn all of them red. Untested against
-a real remote: the key set (`select`, `enter`, `gameButtonA` for `HoverButton`)
-is a reasonable guess at what different remotes and controllers send, matched
-to what `PlayerToggleChip` already assumed, not a confirmed one. No focus
-order has been set anywhere either -- Flutter's default reading-order
-traversal is what a remote will get until someone checks whether that is
-the order a viewer actually wants.
+**Widened well past the worked example since.** `watch_screen.dart` was the
+first file done; the sweep has since covered the player transport
+(`player_center_controls.dart`, `player_seek_bar.dart`,
+`player_volume_control.dart`, `player_episodes_panel.dart`,
+`player_sources_panel.dart`, `sub_sync_bar.dart`), the shared catalog card
+shell (`InteractiveCardShell` -- which propagates focus to every `MovieCard`
+and `IptvChannelCard` on the Films/Series/Anime/Live TV grids with no change
+needed at either call site), `AnimeCard`, and a batch of smaller shared
+widgets and page-level filter chips (`LikeButton`, `SliderArrow`,
+`GenreTagRow`, `LibraryActionsRow`, `UpcomingCalendarRow`,
+`MagnetFilesView`, and the category/toggle pills in `anime_search_page.dart`,
+`anime_stream_sheet.dart`, `collection_page.dart`, `iptv_multiview_page.dart`
+and `iptv_search_page.dart`). Same two primitives throughout: `FocusRing`
+where a widget already painted one (the player controls), `HoverButton`'s
+own focus-reuses-hover styling everywhere else.
+
+**Still not touched**, by file (`GestureDetector` count each, as last
+counted): `anime_details_page.dart` (4), `catalog_page.dart` (2),
+`library_shelf_page.dart` (2), `details_page.dart` (2), `discover_page.dart`
+(2), `iptv_channel_sheet.dart` (2), `iptv_player_page.dart` (4),
+`iptv_portal_browser_page.dart` (6), `player_screen.dart` (6),
+`search_page.dart` (2), `addons_settings_page.dart` (2),
+`universal_play_bar.dart` (3), `continue_watching_slider.dart` (3),
+`iptv_hero_slide.dart` (2) -- roughly 42 `GestureDetector` calls across 14
+files, mostly page-level chrome rather than catalog browsing, which is why
+they were left for a later pass rather than blocking this one.
+
+There is no guard test enforcing full coverage going forward -- adding one
+now would turn the remaining files red. Untested against a real remote: the
+key set (`select`, `enter`, `gameButtonA` for `HoverButton`) is a reasonable
+guess at what different remotes and controllers send, matched to what
+`PlayerToggleChip` already assumed, not a confirmed one. No focus order has
+been set anywhere either -- Flutter's default reading-order traversal is
+what a remote will get until someone checks whether that is the order a
+viewer actually wants.
 
 **One thing removed rather than converted.** `CustomScrollTrack` -- the
 floating draggable scrollbar with hover-only up/down arrows on Films,
