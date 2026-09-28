@@ -122,6 +122,26 @@ making every reachable control focusable with a visible focus state --
 cross-cutting rather than one file, and its extent is unknown until the
 sweep starts. Nothing here has been touched yet.
 
+### Casting a scraper source gets stuck loading (#79)
+
+**Confirmed on a device 2026-09-28.** Casting a movie/series/anime source to
+a TV: the receiver connects, shows its loading splash, and the media never
+starts -- no error, just stuck. `CastService.loadMedia`'s own doc comment
+already named the likely cause before this test: the Cast SDK has no
+sender-side way to attach a Referer/User-Agent header to the receiver's
+request, and most scraper sources require one, unlike this app's own player
+which sends it directly. The symptom matches exactly, but it is not yet
+isolated from some other cast-only failure -- that needs a direct/CDN source
+(one with no header requirement) cast the same way, to see whether *that*
+one plays.
+
+If the header gap is confirmed, there is no sender-side fix: the Cast SDK
+gives no hook for it. The only path is a local relay -- something on the
+phone re-serves the stream with the right headers added, and the receiver is
+pointed at that instead of the origin URL. That is the same shape of problem
+as the torrent-cast question below (can a receiver reach a server running on
+this phone), so an answer to one is evidence for the other.
+
 ### Not doing, so it stays decided
 
 | What | Why not |

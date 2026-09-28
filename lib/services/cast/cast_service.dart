@@ -166,6 +166,12 @@ abstract final class CastService {
   /// requires them (many do) will fail to play on the TV even though it
   /// plays fine locally, where this app's own player sends those headers
   /// itself. Direct/CDN sources are the ones most likely to work.
+  ///
+  /// **Confirmed on a device 2026-09-28, for a scraper source:** the
+  /// receiver connects, shows its loading splash, and never starts --
+  /// exactly the shape this header gap predicts. Not yet isolated from a
+  /// direct/CDN source, which this note expects to work; that comparison is
+  /// what would confirm the header gap over some other cast-only failure.
   /// [isLive] picks the receiver's stream type. A live channel announced as
   /// `buffered` gets a seek bar and a duration the receiver cannot honour;
   /// the Cast SDK has a `live` type precisely for this. It was hardcoded to
