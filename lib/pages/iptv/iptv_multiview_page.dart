@@ -7,6 +7,7 @@ import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/iptv/iptv_storage.dart';
 import '../../services/playback_coordinator.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../widgets/common/hover_button.dart';
 
 /// Watch up to 4 live channels at once in a grid.
 ///
@@ -293,7 +294,8 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
           final hasError = _errored[ch.channel.id] ?? false;
           final isFocused = index == _focusedIndex;
 
-          return GestureDetector(
+          return HoverButton(
+            scaleAmount: 1.0,
             onTap: () => _focusTile(index),
             child: Container(
               decoration: BoxDecoration(

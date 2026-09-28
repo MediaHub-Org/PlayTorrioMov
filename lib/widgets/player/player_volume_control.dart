@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart';
 
@@ -26,7 +27,18 @@ class PlayerVolumeControl extends StatefulWidget {
 
 class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
   bool _isHovered = false;
+  bool _isFocused = false;
   static const double _trackWidth = 96.0;
+
+  /// Same step the scroll wheel uses, so left/right and the wheel move the
+  /// level by the same amount either way.
+  static const double _keyboardVolumeStep = 0.05;
+
+  void _nudgeVolume(double direction) {
+    final next = (widget.volume + _keyboardVolumeStep * direction)
+        .clamp(0.0, PlayerVolumeControl.maxVolume);
+    widget.onVolumeChanged((next * 100).round() / 100.0);
+  }
 
   IconData _getVolumeIcon() {
     if (widget.isMuted || widget.volume == 0) {
@@ -104,86 +116,115 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
             const SizedBox(width: 4),
 
             // Volume Slider Track
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onHorizontalDragUpdate: (e) => _updateFromPosition(e.localPosition.dx),
-              onTapDown: (e) => _updateFromPosition(e.localPosition.dx),
-              child: Container(
-                width: _trackWidth,
-                height: 32,
-                alignment: Alignment.center,
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    // Background track
-                    Container(
-                      height: 6,
-                      width: _trackWidth,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-
-                    // 100% Threshold Notch Line
-                    Positioned(
-                      left: _trackWidth * 0.55 - 0.75,
-                      child: Container(
-                        width: 1.5,
-                        height: 9,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.40),
-                          borderRadius: BorderRadius.circular(1),
+            Focus(
+              onFocusChange: (focused) =>
+                  setState(() => _isFocused = focused),
+              onKeyEvent: (node, event) {
+                if (event is! KeyDownEvent) return KeyEventResult.ignored;
+                if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
+                    event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                  _nudgeVolume(-1);
+                  return KeyEventResult.handled;
+                }
+                if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
+                    event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                  _nudgeVolume(1);
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: FocusRing(
+                visible: _isFocused,
+                borderRadius: 8,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (e) =>
+                      _updateFromPosition(e.localPosition.dx),
+                  onTapDown: (e) => _updateFromPosition(e.localPosition.dx),
+                  child: Container(
+                    width: _trackWidth,
+                    height: 32,
+                    alignment: Alignment.center,
+                    child: Stack(
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        // Background track
+                        Container(
+                          height: 6,
+                          width: _trackWidth,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
                         ),
-                      ),
-                    ),
 
-                    // Filled track
-                    Container(
-                      height: 6,
-                      width: _trackWidth * fillFraction,
-                      decoration: BoxDecoration(
-                        gradient: isBoosting
-                          ? LinearGradient(
-                              colors: [
-                                Colors.white,
-                                const Color(0xFFFF8A00),
-                                if (widget.volume > 1.75) const Color(0xFFFF3D00),
-                              ],
-                            )
-                          : null,
-                        color: isBoosting ? null : Colors.white.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-
-                    // Thumb dot
-                    Positioned(
-                      left: (_trackWidth * fillFraction - 6).clamp(0.0, _trackWidth - 12),
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: isBoosting ? boostColor : Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: isBoosting ? boostColor.withValues(alpha: 0.6) : Colors.black54,
-                              blurRadius: isBoosting ? 6 : 4,
-                              spreadRadius: isBoosting ? 1 : 0,
-                              offset: const Offset(0, 1),
+                        // 100% Threshold Notch Line
+                        Positioned(
+                          left: _trackWidth * 0.55 - 0.75,
+                          child: Container(
+                            width: 1.5,
+                            height: 9,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.40),
+                              borderRadius: BorderRadius.circular(1),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+
+                        // Filled track
+                        Container(
+                          height: 6,
+                          width: _trackWidth * fillFraction,
+                          decoration: BoxDecoration(
+                            gradient: isBoosting
+                                ? LinearGradient(
+                                    colors: [
+                                      Colors.white,
+                                      const Color(0xFFFF8A00),
+                                      if (widget.volume > 1.75)
+                                        const Color(0xFFFF3D00),
+                                    ],
+                                  )
+                                : null,
+                            color: isBoosting
+                                ? null
+                                : Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+
+                        // Thumb dot
+                        Positioned(
+                          left: (_trackWidth * fillFraction - 6)
+                              .clamp(0.0, _trackWidth - 12),
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: isBoosting ? boostColor : Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isBoosting
+                                      ? boostColor.withValues(alpha: 0.6)
+                                      : Colors.black54,
+                                  blurRadius: isBoosting ? 6 : 4,
+                                  spreadRadius: isBoosting ? 1 : 0,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
 
             // Percentage Readout
-            if (isBoosting || _isHovered) ...[
+            if (isBoosting || _isHovered || _isFocused) ...[
               const SizedBox(width: 6),
               Container(
                 constraints: const BoxConstraints(minWidth: 38),

@@ -11,6 +11,7 @@ import '../../services/trakt/trakt_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_colors.dart';
 import '../common/clamped_text_scale.dart';
+import '../common/hover_button.dart';
 
 /// Upcoming episodes for the user's synced shows, next 14 days. Series-only:
 /// Trakt/Simkl calendars are episode-shaped, movies have no equivalent
@@ -123,7 +124,8 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final entry = entries[index];
-                return GestureDetector(
+                return HoverButton(
+                  scaleAmount: 1.03,
                   onTap: () => _openDetails(entry),
                   child: Container(
                     width: 220,

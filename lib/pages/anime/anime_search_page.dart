@@ -11,6 +11,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/glass_back_button.dart';
+import '../../widgets/common/hover_button.dart';
 import 'anime_details_page.dart';
 
 import '../../services/theme/app_colors.dart';
@@ -576,7 +577,8 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                         // 18+ Adult Toggle Pill
                         Padding(
                             padding: const EdgeInsetsDirectional.only(end: 8),
-                            child: GestureDetector(
+                            child: HoverButton(
+                              scaleAmount: 1.05,
                               onTap: () => _toggleAdult(!_allowAdult),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),

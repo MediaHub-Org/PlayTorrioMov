@@ -7,6 +7,7 @@ import '../../services/debrid/debrid_service.dart';
 import '../../services/stream/torrent_stream_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../services/theme/app_colors.dart';
+import '../common/hover_button.dart';
 
 class MagnetFileItem {
   final int id;
@@ -585,7 +586,8 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
 
   Widget _buildCategoryChip(String category, String label, AppThemePalette palette) {
     final isSelected = _activeCategory == category;
-    return GestureDetector(
+    return HoverButton(
+      scaleAmount: 1.05,
       onTap: () => setState(() => _activeCategory = category),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
