@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import '../common/hover_button.dart';
 import '../common/slider_arrow.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 /// The keys that activate a focused continue-watching card. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
@@ -658,8 +659,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   (item.isTorrent
                                       ? context.l10n.continueTorrent
                                       : context.l10n.continueStream),
-                              style: const TextStyle(
-                                fontSize: 9,
+                              style: TextStyle(
+                                fontSize: TvType.scale(9),
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.onAccent,
                               ),
@@ -688,8 +689,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   item.remainingMinutes,
                                 )
                               : '${(progress * 100).toInt()}%',
-                          style: const TextStyle(
-                            fontSize: 10,
+                          style: TextStyle(
+                            fontSize: TvType.scale(10),
                             fontWeight: FontWeight.w600,
                             color: AppColors.onAccent,
                           ),

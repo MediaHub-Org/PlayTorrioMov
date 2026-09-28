@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class P2pWarningDialog extends StatelessWidget {
   const P2pWarningDialog({super.key});
@@ -108,8 +109,8 @@ class P2pWarningDialog extends StatelessWidget {
                                     ),
                                     child: Text(
                                       context.l10n.p2pAdvisoryBadge.toUpperCase(),
-                                      style: const TextStyle(
-                                        fontSize: 10,
+                                      style: TextStyle(
+                                        fontSize: TvType.scale(10),
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1.1,
                                         color: _warningColor,

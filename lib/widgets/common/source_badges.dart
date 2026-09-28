@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/stream/stream_model.dart';
+import '../../services/tv_type.dart';
 
 /// Neutral badge tint, for facts that describe a source rather than rank it
 /// (codec, file size, how it is delivered).
@@ -50,7 +51,7 @@ class SourceBadge extends StatelessWidget {
             text,
             style: TextStyle(
               color: color,
-              fontSize: 10,
+              fontSize: TvType.scale(10),
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
             ),

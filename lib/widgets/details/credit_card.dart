@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/details/credit.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 import '../common/hover_button.dart';
 
 /// One person on a details page's credits rail: avatar, name, and what they
@@ -80,7 +81,7 @@ class CreditCard extends StatelessWidget {
                   MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.0),
               style: TextStyle(
                 color: AppColors.inkSubtle,
-                fontSize: 10.5,
+                fontSize: TvType.scale(10.5),
                 height: 1.1,
               ),
             ),

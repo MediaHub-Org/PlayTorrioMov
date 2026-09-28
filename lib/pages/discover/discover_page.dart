@@ -15,6 +15,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class DiscoverPage extends StatefulWidget {
   final String? query;
@@ -963,7 +964,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                           child: Text(
                                             context.l10n.discoverCustom,
                                             style: TextStyle(
-                                              fontSize: 9.5,
+                                              fontSize: TvType.scale(9.5),
                                               fontWeight: FontWeight.bold,
                                               color: isSelected ? AppColors.ink : Colors.amber,
                                             ),

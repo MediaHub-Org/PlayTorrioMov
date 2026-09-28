@@ -11,6 +11,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../common/interactive_card_shell.dart';
 import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Card sizing — responsive breakpoints that mimic Stremio poster sizes.
@@ -304,8 +305,8 @@ class _PosterFrame extends StatelessWidget {
                   ),
                   child: Text(
                     contentType == 'series' ? 'SERIES' : (contentType == 'anime' ? 'ANIME' : 'MOVIE'),
-                    style: const TextStyle(
-                      fontSize: 10,
+                    style: TextStyle(
+                      fontSize: TvType.scale(10),
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
                       color: AppColors.onAccent,
@@ -341,8 +342,8 @@ class _PosterFrame extends StatelessWidget {
                           const SizedBox(width: 3),
                           Text(
                             displayRating,
-                            style: const TextStyle(
-                              fontSize: 10.5,
+                            style: TextStyle(
+                              fontSize: TvType.scale(10.5),
                               fontWeight: FontWeight.w800,
                               color: AppColors.onAccent,
                             ),

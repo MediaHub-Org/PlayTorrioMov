@@ -5,6 +5,7 @@ import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
 import 'top_bar.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 /// Tier-aware nav chrome wrapping the Media hub's content area.
 ///
@@ -148,7 +149,7 @@ class _SectionTab extends StatelessWidget {
               textScaler: labelScaler,
               style: TextStyle(
                 color: color,
-                fontSize: 10,
+                fontSize: TvType.scale(10),
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               ),
             ),
