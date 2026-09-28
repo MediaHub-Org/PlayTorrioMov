@@ -48,9 +48,9 @@ void main() {
         final firstNode = FocusNode();
         addTearDown(firstNode.dispose);
 
-        await tester.pumpWidget(wrap(FirstFocusScope(
+        await tester.pumpWidget(wrap(const FirstFocusScope(
           ready: false,
-          child: const SizedBox.shrink(),
+          child: SizedBox.shrink(),
         )));
         await tester.pumpAndSettle();
         expect(firstNode.hasFocus, isFalse);
