@@ -16,6 +16,7 @@ import '../../utils/navigation/route_transitions.dart';
 import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/setting_choice_chip.dart';
 import '../../widgets/common/clamped_text_scale.dart';
@@ -1296,7 +1297,10 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
           gridCols = screenW > 600 ? 3 : 2;
         }
 
-        return GridView.builder(
+        return FirstFocusScope(
+          // The streams.isEmpty branch above already returned.
+          ready: true,
+          child: GridView.builder(
           controller: _contentScrollController,
           cacheExtent: 400.0,
           addAutomaticKeepAlives: false,
@@ -1326,9 +1330,12 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               onTap: () => _playStream(stream),
             );
           },
+          ),
         );
       } else if (layout == PortalBrowserLayout.compactList) {
-        return ListView.builder(
+        return FirstFocusScope(
+          ready: true,
+          child: ListView.builder(
           controller: _contentScrollController,
           itemExtent: 52.0,
           cacheExtent: 400.0,
@@ -1356,10 +1363,13 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               ),
             );
           },
+          ),
         );
       } else {
         // Detailed List view
-        return ListView.builder(
+        return FirstFocusScope(
+          ready: true,
+          child: ListView.builder(
           controller: _contentScrollController,
           itemExtent: 78.0,
           cacheExtent: 400.0,
@@ -1387,6 +1397,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
               ),
             );
           },
+          ),
         );
       }
     }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/iptv/hardcoded_channels.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
@@ -167,7 +168,10 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                 ? Center(
                     child: Text(context.l10n.iptvNoChannelsMatch, style: TextStyle(color: AppColors.inkSubtle)),
                   )
-                : GridView.builder(
+                : FirstFocusScope(
+                    // The isEmpty branch above already handles the other case.
+                    ready: true,
+                    child: GridView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
                     physics: const BouncingScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -184,6 +188,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                         onTap: () => IptvChannelSheet.show(context, ch),
                       );
                     },
+                    ),
                   ),
           ),
         ],
