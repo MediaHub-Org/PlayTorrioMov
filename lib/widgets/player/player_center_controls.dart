@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
+import 'player_glass.dart' show FocusRing;
+
+/// The keys that activate a focused control in this file. `final`, not
+/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
+/// that inside a `const` set literal.
+final _activators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+};
 
 /// Centered play/pause with ±30s seek on either side. Lives over the middle
 /// of the video, not in the bottom transport bar, so it stays reachable (and
@@ -101,31 +113,53 @@ class _CenterButton extends StatefulWidget {
 
 class _CenterButtonState extends State<_CenterButton> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: widget.tooltip,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: widget.size,
-            height: widget.size,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: _hovered ? 0.20 : 0.12),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.2),
-                width: 1,
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: (node, event) {
+          if (event is! KeyDownEvent) return KeyEventResult.ignored;
+          if (!_activators.contains(event.logicalKey)) {
+            return KeyEventResult.ignored;
+          }
+          widget.onTap();
+          return KeyEventResult.handled;
+        },
+        child: FocusRing(
+          visible: _focused,
+          borderRadius: widget.size / 2,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            onEnter: (_) => setState(() => _hovered = true),
+            onExit: (_) => setState(() => _hovered = false),
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: widget.size,
+                height: widget.size,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(
+                    alpha: (_hovered || _focused) ? 0.20 : 0.12,
+                  ),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  widget.icon,
+                  color: Colors.white,
+                  size: widget.iconSize,
+                ),
               ),
             ),
-            alignment: Alignment.center,
-            child: Icon(widget.icon, color: Colors.white, size: widget.iconSize),
           ),
         ),
       ),
@@ -152,39 +186,59 @@ class _PlayPauseButton extends StatefulWidget {
 
 class _PlayPauseButtonState extends State<_PlayPauseButton> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
-    final button = MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: widget.size,
-          height: widget.size,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: _hovered ? 0.28 : 0.18),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.25),
-              width: 1.2,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x66000000),
-                offset: Offset(0, 4),
-                blurRadius: 16,
+    final button = Focus(
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (!_activators.contains(event.logicalKey)) {
+          return KeyEventResult.ignored;
+        }
+        widget.onTap();
+        return KeyEventResult.handled;
+      },
+      child: FocusRing(
+        visible: _focused,
+        borderRadius: widget.size / 2,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: widget.onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: widget.size,
+              height: widget.size,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(
+                  alpha: (_hovered || _focused) ? 0.28 : 0.18,
+                ),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  width: 1.2,
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x66000000),
+                    offset: Offset(0, 4),
+                    blurRadius: 16,
+                  ),
+                ],
               ),
-            ],
-          ),
-          alignment: Alignment.center,
-          child: Icon(
-            widget.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            color: Colors.white,
-            size: widget.iconSize,
+              alignment: Alignment.center,
+              child: Icon(
+                widget.isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: widget.iconSize,
+              ),
+            ),
           ),
         ),
       ),
