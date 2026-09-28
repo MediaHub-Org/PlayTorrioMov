@@ -17,6 +17,7 @@ import '../../services/subtitles/subtitle_languages.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/collection/collection_card.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/library_sections.dart';
 import '../../widgets/common/library_tabs.dart';
@@ -373,7 +374,9 @@ class _CollectionPageState extends State<CollectionPage> {
             (width - padding * 2 - spacing * (crossAxisCount - 1)) /
             crossAxisCount;
 
-        return GridView.builder(
+        return FirstFocusScope(
+          ready: cards.isNotEmpty,
+          child: GridView.builder(
           padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
@@ -383,6 +386,7 @@ class _CollectionPageState extends State<CollectionPage> {
           ),
           itemCount: cards.length,
           itemBuilder: (context, index) => cards[index],
+          ),
         );
         },
       ),
@@ -486,7 +490,9 @@ class _CollectionPageState extends State<CollectionPage> {
                   onSort: (v) => setState(() => _continueSort = v),
                 ),
                 Expanded(
-                  child: GridView.builder(
+                  child: FirstFocusScope(
+                    ready: visible.isNotEmpty,
+                    child: GridView.builder(
                     padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
@@ -511,6 +517,7 @@ class _CollectionPageState extends State<CollectionPage> {
                             ContinueWatchingService.removeItem(item),
                       );
                     },
+                    ),
                   ),
                 ),
               ],
