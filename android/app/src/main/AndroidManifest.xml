@@ -29,6 +29,13 @@
         </intent>
     </queries>
 
+    <!-- Neither feature is required: this is one APK for phone, tablet and
+         TV. Without the touchscreen line, Android TV's own install filter
+         excludes the app before the leanback category ever matters -- a
+         touchscreen is assumed required unless told otherwise. -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+
     <application
         android:label="PlayTorrioMov"
         android:name="${applicationName}"
@@ -55,6 +62,11 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+                <!-- Without this category an Android TV launcher never lists
+                     the app at all, leanback declaration or not. No banner
+                     is set: the system falls back to the launcher icon, and
+                     a real banner (320x180) is a follow-up, not a blocker. -->
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
 

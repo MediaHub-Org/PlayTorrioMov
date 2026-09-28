@@ -3,6 +3,19 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **The app declares Android TV support, and the player transport and watch
+  screen respond to a D-pad or a keyboard (#78).** The manifest gained the
+  leanback feature and launcher category needed just to appear on a TV.
+  `PlayerIconButton` -- play/pause, seek, volume, every transport button --
+  now takes focus and shows the same `FocusRing` two of its neighbours
+  already used; `HoverButton`, the shared wrapper the details rails and
+  cards use, now does the same for everything else, reusing its hover lean
+  as the focus indicator. `watch_screen.dart` is fully converted; the rest
+  of `lib/` is not yet -- see the roadmap.
+
 ## [1.8.13+46] - 2026-09-28
 
 Live TV grows up: sources become a page, portals go live-only, four new

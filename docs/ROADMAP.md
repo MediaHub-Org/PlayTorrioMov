@@ -111,16 +111,55 @@ confirmed by reading the code rather than guessed:
   an unlisted phone app rather than something built for it.
 - **Most interactive widgets cannot take focus.** Flutter only routes D-pad
   and keyboard directional traversal to a widget holding a `Focus` node --
-  Material's own buttons and chips get one for free, which is presumably why
-  some controls already respond. A lot of this codebase's custom controls do
-  not: `_buildFilterDropdownButton` in `watch_screen.dart` is one concrete
-  example, a bare `GestureDetector` with no `Focus` ancestor, and the pattern
-  repeats across `lib/widgets` and `lib/pages`.
+  Material's own buttons, chips and `InkWell` get one for free. A
+  `GestureDetector` does not, and that pattern repeated across `lib/widgets`
+  and `lib/pages`: 74 bare `GestureDetector` calls in 38 files when this was
+  counted. A `Scrollable` (the pill rail, for one) takes arrow-key scrolling
+  for free too -- which is likely what "the pills respond" was actually
+  seeing: the row scrolling, not a pill taking focus and showing it.
+  **Not a from-scratch problem, though: `player_glass.dart` already had a
+  deliberate answer.** `PlayerToggleChip` and `PlayerStepSlider` both wrap in
+  `Focus` with an `onKeyEvent` handler and paint `FocusRing` on focus --
+  `PlayerStepSlider`'s own comment says it takes `autofocus` so a menu's
+  primary control works immediately. That pattern was never carried to
+  `PlayerIconButton`, the transport's actual buttons (play/pause, seek,
+  volume), or to anything outside the player's menus.
 
-Fixing it for real is two parts: the manifest declarations, and a sweep
-making every reachable control focusable with a visible focus state --
-cross-cutting rather than one file, and its extent is unknown until the
-sweep starts. Nothing here has been touched yet.
+**Underway, not finished.** The manifest now declares both features
+required=false (`android.hardware.touchscreen` has to be there too, or
+Android TV's own install filter excludes the app before leanback ever
+matters) and the launch activity carries `LEANBACK_LAUNCHER`, so the app
+should at least appear in a TV launcher now -- unconfirmed on a device, and
+there is no banner image yet, so it falls back to the launcher icon.
+
+Two primitives carry the fix, matching what each already looked like:
+
+- **`PlayerIconButton`** (`lib/widgets/player/player_glass.dart`) now uses the
+  same `Focus`/`onKeyEvent`/`FocusRing` shape as its neighbours in that file,
+  activating on Select or Enter. This is the highest-leverage single change
+  here: every play/pause, seek and volume control in the transport goes
+  through this one class.
+- **`HoverButton`** (`lib/widgets/common/hover_button.dart`) is the shared
+  wrapper the details rails and cards already used, so it became the
+  primitive for everything built from a bare `GestureDetector` instead: it
+  now holds a `Focus` node, activates on Enter/NumpadEnter/Select/
+  gameButtonA/Space, and reuses its existing hover lean as the focus visual
+  rather than guessing at a ring for a `child` whose shape it does not know.
+  `watch_screen.dart` -- the file actually tested -- is fully converted:
+  every bare `GestureDetector` in it now either wraps in `HoverButton` or,
+  where it shared hand-rolled hover state that did not fit that primitive,
+  gained its own `Focus` and key handling directly, the same shape
+  `player_glass.dart` already used.
+
+That is the worked example, not the finished sweep: the other 37 files
+counted above are not touched, and there is no guard test enforcing this
+going forward -- adding one now would turn all of them red. Untested against
+a real remote: the key set (`select`, `enter`, `gameButtonA` for `HoverButton`)
+is a reasonable guess at what different remotes and controllers send, matched
+to what `PlayerToggleChip` already assumed, not a confirmed one. No focus
+order has been set anywhere either -- Flutter's default reading-order
+traversal is what a remote will get until someone checks whether that is
+the order a viewer actually wants.
 
 ### Casting a scraper source gets stuck loading (#79)
 

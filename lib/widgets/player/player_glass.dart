@@ -352,6 +352,12 @@ class PlayerIconButton extends StatefulWidget {
   final Color? backgroundColor;
   final double borderRadius;
 
+  /// Whether this button takes focus as soon as it is built. Off by
+  /// default, for the same reason as [PlayerStepSlider]'s own autofocus is
+  /// on: only the menu's primary control should claim it, and most icon
+  /// buttons sit in a row where nothing should jump ahead of the others.
+  final bool autofocus;
+
   const PlayerIconButton({
     super.key,
     required this.icon,
@@ -365,6 +371,7 @@ class PlayerIconButton extends StatefulWidget {
     this.badgeColor,
     this.backgroundColor,
     this.borderRadius = 9999,
+    this.autofocus = false,
   });
 
   @override
@@ -373,12 +380,13 @@ class PlayerIconButton extends StatefulWidget {
 
 class _PlayerIconButtonState extends State<PlayerIconButton> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
     final bg = widget.active
         ? (widget.activeColor ?? Colors.white.withValues(alpha: 0.22))
-        : (_hovered
+        : ((_hovered || _focused)
             ? (widget.backgroundColor ?? Colors.white.withValues(alpha: 0.12))
             : (widget.backgroundColor ?? Colors.transparent));
 
@@ -387,7 +395,7 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
       children: [
         IconTheme(
           data: IconThemeData(
-            color: widget.active ? Colors.white : (_hovered ? Colors.white : PlayerTheme.inkMuted),
+            color: widget.active ? Colors.white : ((_hovered || _focused) ? Colors.white : PlayerTheme.inkMuted),
             size: widget.iconSize,
           ),
           child: widget.icon,
@@ -426,14 +434,32 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
       child: iconContent,
     );
 
-    Widget button = MouseRegion(
-      cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.onPressed,
-        child: buttonBody,
+    Widget button = Focus(
+      autofocus: widget.autofocus,
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (event.logicalKey != LogicalKeyboardKey.select &&
+            event.logicalKey != LogicalKeyboardKey.enter) {
+          return KeyEventResult.ignored;
+        }
+        if (widget.onPressed == null) return KeyEventResult.ignored;
+        widget.onPressed!();
+        return KeyEventResult.handled;
+      },
+      child: FocusRing(
+        visible: _focused,
+        borderRadius: widget.borderRadius,
+        child: MouseRegion(
+          cursor: widget.onPressed != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onPressed,
+            child: buttonBody,
+          ),
+        ),
       ),
     );
 
