@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -988,9 +989,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                         ? ch.category
                                                               .toUpperCase()
                                                         : 'VOD'),
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 9.5,
+                                                fontSize: TvType.scale(9.5),
                                                 fontWeight: FontWeight.w900,
                                               ),
                                             ),
@@ -1550,7 +1551,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                   style: TextStyle(
                                                     color: Colors.white
                                                         .withValues(alpha: 0.4),
-                                                    fontSize: 10.5,
+                                                    fontSize: TvType.scale(10.5),
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                 ),

@@ -9,6 +9,7 @@ import '../../services/iptv/iptv_settings.dart';
 import '../common/interactive_card_shell.dart';
 import '../common/like_button.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class IptvChannelCard extends StatelessWidget {
   final HardcodedChannel channel;
@@ -165,7 +166,7 @@ class IptvChannelCard extends StatelessWidget {
                                           context.l10n.iptvLive.toUpperCase(),
                                           style: TextStyle(
                                             color: AppColors.ink,
-                                            fontSize: 9.5,
+                                            fontSize: TvType.scale(9.5),
                                             fontWeight: FontWeight.w900,
                                             letterSpacing: 0.6,
                                           ),
@@ -190,7 +191,7 @@ class IptvChannelCard extends StatelessWidget {
                                       ch.category,
                                       style: TextStyle(
                                         color: AppColors.inkMuted,
-                                        fontSize: 9,
+                                        fontSize: TvType.scale(9),
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),

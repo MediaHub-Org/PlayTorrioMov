@@ -10,6 +10,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/like_button.dart';
 import 'iptv_player_page.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 
 class IptvChannelSheet extends StatefulWidget {
   final HardcodedChannel channel;
@@ -205,9 +206,9 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                 ),
                                 child: Text(
                                   context.l10n.iptvLive.toUpperCase(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.onAccent,
-                                    fontSize: 9,
+                                    fontSize: TvType.scale(9),
                                     fontWeight: FontWeight.w900,
                                   ),
                                 ),
@@ -689,7 +690,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                                             hit.stream.containerExt.toUpperCase(),
                                             style: TextStyle(
                                               color: AppColors.inkMuted,
-                                              fontSize: 10,
+                                              fontSize: TvType.scale(10),
                                               fontWeight: FontWeight.w800,
                                             ),
                                           ),

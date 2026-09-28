@@ -16,6 +16,7 @@ import '../../utils/navigation/route_transitions.dart';
 import 'iptv_player_page.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/tv_type.dart';
 import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/setting_choice_chip.dart';
@@ -1010,7 +1011,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                               if (widget.portal != null)
                                 Text(
                                   context.l10n.iptvConnAndExpiry(widget.portal!.activeConnections, widget.portal!.maxConnections, widget.portal!.expiry),
-                                  style: TextStyle(color: AppColors.inkSubtle, fontSize: 10.5),
+                                  style: TextStyle(color: AppColors.inkSubtle, fontSize: TvType.scale(10.5)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -1511,7 +1512,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
                         color: isFavCategory
                             ? AppColors.ink
                             : (widget.isSelected ? palette.primaryColor : AppColors.inkDisabled),
-                        fontSize: 10.5,
+                        fontSize: TvType.scale(10.5),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -1713,7 +1714,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                                   const SizedBox(width: 3),
                                   Text(
                                     context.l10n.iptvLive.toUpperCase(),
-                                    style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900),
+                                    style: TextStyle(color: Colors.greenAccent, fontSize: TvType.scale(9), fontWeight: FontWeight.w900),
                                   ),
                                 ],
                               ),
@@ -1753,7 +1754,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
                   ),
                   child: Text(
                     s.containerExt.toUpperCase(),
-                    style: TextStyle(color: AppColors.inkAlpha(0.60), fontSize: 9.5, fontWeight: FontWeight.w800),
+                    style: TextStyle(color: AppColors.inkAlpha(0.60), fontSize: TvType.scale(9.5), fontWeight: FontWeight.w800),
                   ),
                 ),
 
@@ -1913,7 +1914,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                         ),
                         child: Text(
                           '#${widget.index}',
-                          style: TextStyle(color: AppColors.inkSubtle, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: AppColors.inkSubtle, fontSize: TvType.scale(10), fontWeight: FontWeight.bold),
                         ),
                       ),
 
@@ -1928,7 +1929,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.4)),
                         ),
-                        child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
+                        child: Text(context.l10n.iptvLive.toUpperCase(), style: TextStyle(color: Colors.greenAccent, fontSize: TvType.scale(9), fontWeight: FontWeight.w900)),
                       ),
 
                     Tooltip(
@@ -1983,7 +1984,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
                       ),
                       child: Text(
                         s.containerExt.toUpperCase(),
-                        style: TextStyle(color: AppColors.inkAlpha(0.60), fontSize: 9, fontWeight: FontWeight.w800),
+                        style: TextStyle(color: AppColors.inkAlpha(0.60), fontSize: TvType.scale(9), fontWeight: FontWeight.w800),
                       ),
                     ),
                     AnimatedContainer(
@@ -2117,7 +2118,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
                       color: Colors.greenAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(context.l10n.iptvLive.toUpperCase(), style: const TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.w900)),
+                    child: Text(context.l10n.iptvLive.toUpperCase(), style: TextStyle(color: Colors.greenAccent, fontSize: TvType.scale(9), fontWeight: FontWeight.w900)),
                   ),
                 ],
                 Tooltip(
