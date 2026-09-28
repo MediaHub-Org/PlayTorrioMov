@@ -297,10 +297,10 @@ void main() {
             BrowseScaffold<String>(
               contentLabel: 'items',
               heroItems: const ['a'],
-              rows: [
-                const BrowseRow(title: 'Empty', items: []),
-                BrowseRow(title: 'Trending', items: const ['one']),
-                BrowseRow(title: 'Latest', items: const ['two']),
+              rows: const [
+                BrowseRow(title: 'Empty', items: []),
+                BrowseRow(title: 'Trending', items: ['one']),
+                BrowseRow(title: 'Latest', items: ['two']),
               ],
               heroInterval: null,
               heroBuilder: (_, item) => Focus(
