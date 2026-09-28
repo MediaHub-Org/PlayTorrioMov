@@ -1,6 +1,8 @@
 package com.example.playtorrio
 
+import android.app.UiModeManager
 import android.content.Context
+import android.content.res.Configuration
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.PowerManager
@@ -13,11 +15,26 @@ import io.flutter.plugin.common.MethodChannel
 // the running app instead of starting a second copy of it.
 class MainActivity : AudioServiceActivity() {
     private val CHANNEL = "com.example.playtorrio/power"
+    private val TV_MODE_CHANNEL = "com.example.playtorrio/tv_mode"
     private var wifiLock: WifiManager.WifiLock? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, TV_MODE_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                // The one on-device source of truth for "is this a TV" -- not a
+                // width/aspect-ratio guess, which a tablet or a Chromebook in
+                // landscape would also match.
+                "isTv" -> {
+                    val uiModeManager = applicationContext.getSystemService(Context.UI_MODE_SERVICE) as? UiModeManager
+                    val isTv = uiModeManager?.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
+                    result.success(isTv)
+                }
+                else -> result.notImplemented()
+            }
+        }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
