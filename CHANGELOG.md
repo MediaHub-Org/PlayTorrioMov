@@ -36,6 +36,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   "right" looks like here still needs eyes on an actual screen.
 
 ### Fixed
+- **Up and Down still did nothing on a TV, in every catalog row (#80).**
+  The cacheExtent change did not fix it because the cause was elsewhere:
+  `BrowseRowView` wraps every row in `FirstFocusScope`, which built a real
+  `FocusScope` around each row. Directional traversal only considers the
+  nodes inside the focused node's nearest scope, so every row was an island
+  the D-pad could move sideways within and never leave. `FirstFocusScope`
+  now anchors its subtree with a plain non-focusable `Focus` instead, so all
+  rows share the page's scope and Up/Down reach the neighboring rows. This
+  also puts the grids' filter chips in the same scope as their cards. A new
+  widget test presses Right then Down across two wrapped rows. Not confirmed
+  on a TV yet.
 - **A real remote could barely navigate the app at all (#80).** Device
   testing of v1.9.0 on an actual TV found several D-pad problems the
   earlier phases' testing (all done by reading code, not by using a

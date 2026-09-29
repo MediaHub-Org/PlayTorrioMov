@@ -18,8 +18,10 @@ Last reconciled: **2026-09-29**, on `v1.9.0+47` plus the unreleased work in CHAN
 
 Every item here needs a device; none can be closed by reading code.
 
-- **Top bar from content on a TV (#80).** Can the D-pad reach the section
-  chips from inside the content area? The content sits in `NestedNavigator`'s
+- **Top bar from content on a TV (#80).** Up/Down between rows was fixed
+  by removing the per-row `FocusScope` (`FirstFocusScope`); confirm that on a
+  TV first. Then: can the D-pad reach the section chips from inside the
+  content area? The content sits in `NestedNavigator`'s
   own `Navigator`, and each route has its own `FocusScopeNode`, which may stop
   directional traversal at the scope edge. Candidate fixes: move focus into
   the chip row when an arrow key goes unhandled, or a `FocusTraversalPolicy`

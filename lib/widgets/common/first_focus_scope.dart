@@ -11,6 +11,15 @@ import 'package:flutter/material.dart';
 /// starting to drift, the same reasoning `BrowseRowView` itself was pulled
 /// out of `AnimeSliderSection`/`IptvSliderSection` for.
 ///
+/// Deliberately NOT a [FocusScope]. It used to be one, and `BrowseRowView`
+/// wraps every catalog row in it: directional traversal only considers the
+/// nodes inside the focused node's nearest scope, so each row became its own
+/// island a D-pad could move sideways within and never leave -- "only the
+/// Popular row is reachable", confirmed on a TV after the cacheExtent fix
+/// changed nothing. A plain non-focusable [Focus] anchors the subtree
+/// instead, so its cards stay in the page's scope and Up/Down reach the
+/// neighboring rows.
+///
 /// [ready] flips from false to true once, not per-rebuild: pass
 /// `!isLoading && items.isNotEmpty`, not a value that toggles back and
 /// forth, or a later "false" is simply ignored (see [_maybeAutofocus]) and
@@ -30,8 +39,10 @@ class FirstFocusScope extends StatefulWidget {
 }
 
 class _FirstFocusScopeState extends State<FirstFocusScope> {
-  final FocusScopeNode _scope = FocusScopeNode(
+  final FocusNode _anchor = FocusNode(
     debugLabel: 'FirstFocusScope',
+    canRequestFocus: false,
+    skipTraversal: true,
   );
   bool _didAutofocus = false;
 
@@ -54,18 +65,20 @@ class _FirstFocusScopeState extends State<FirstFocusScope> {
     if (_didAutofocus || !widget.ready) return;
     _didAutofocus = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _scope.nextFocus();
+      if (!mounted) return;
+      final first = _anchor.traversalDescendants.firstOrNull;
+      first?.requestFocus();
     });
   }
 
   @override
   void dispose() {
-    _scope.dispose();
+    _anchor.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FocusScope(node: _scope, child: widget.child);
+    return Focus(focusNode: _anchor, child: widget.child);
   }
 }
