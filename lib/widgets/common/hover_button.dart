@@ -60,6 +60,10 @@ class HoverButton extends StatefulWidget {
   /// the class doc for when to turn this on.
   final bool showFocusRing;
 
+  /// The ring's corner radius. The default is a pill, right for a bare icon
+  /// or a short line of text; a rounded-rectangle [child] passes its own.
+  final double focusRingBorderRadius;
+
   const HoverButton({
     super.key,
     required this.child,
@@ -67,6 +71,7 @@ class HoverButton extends StatefulWidget {
     this.scaleAmount = 1.04,
     this.autofocus = false,
     this.showFocusRing = false,
+    this.focusRingBorderRadius = 9999,
   });
 
   @override
@@ -113,6 +118,7 @@ class _HoverButtonState extends State<HoverButton> {
       onKeyEvent: _handleKey,
       child: FocusRing(
         visible: widget.showFocusRing && _isFocused,
+        borderRadius: widget.focusRingBorderRadius,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           onEnter: (_) => setState(() => _isHovered = true),

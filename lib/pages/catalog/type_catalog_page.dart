@@ -9,12 +9,12 @@ import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../services/addon/addon_manager.dart';
-import '../../services/theme/app_theme_service.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/error_view.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
+import '../../widgets/common/hero_action_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
@@ -582,64 +582,28 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                 SizedBox(height: isCompact ? 18 : 22),
                 Row(
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: () => openDetails(autoPlay: true),
-                      icon: const Icon(Icons.play_arrow_rounded, size: 22),
-                      label: Text(
-                        widget.type == 'series' ? 'Watch Now' : 'Play Movie',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14.5,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppThemeService.currentPalette.value.primaryColor,
-                        foregroundColor: AppColors.onAccent,
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isCompact ? 16 : 24,
-                          vertical: isCompact ? 10 : 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 10,
-                        shadowColor: AppThemeService
-                            .currentPalette
-                            .value
-                            .primaryColor
-                            .withValues(alpha: 0.45),
-                      ),
+                    HeroActionButton(
+                      primary: true,
+                      onTap: () => openDetails(autoPlay: true),
+                      icon: Icons.play_arrow_rounded,
+                      iconSize: 22,
+                      label: widget.type == 'series' ? 'Watch Now' : 'Play Movie',
+                      fontSize: 14.5,
+                      horizontalPadding: isCompact ? 16 : 24,
+                      verticalPadding: isCompact ? 10 : 14,
+                      radius: 12,
                     ),
                     const SizedBox(width: 10),
-                    OutlinedButton.icon(
-                      onPressed: () => openDetails(),
-                      icon: Icon(
-                        Icons.info_outline_rounded,
-                        size: isCompact ? 17 : 19,
-                        color: AppColors.onAccent.withValues(alpha: 0.80),
-                      ),
-                      label: Text(
-                        context.l10n.commonDetails,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: isCompact ? 13 : 14.5,
-                          color: AppColors.onAccent.withValues(alpha: 0.80),
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isCompact ? 14 : 20,
-                          vertical: isCompact ? 10 : 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        side: BorderSide(
-                          color: AppColors.onAccent.withValues(alpha: 0.18),
-                          width: 1.2,
-                        ),
-                      ),
+                    HeroActionButton(
+                      primary: false,
+                      onTap: () => openDetails(),
+                      icon: Icons.info_outline_rounded,
+                      iconSize: isCompact ? 17 : 19,
+                      label: context.l10n.commonDetails,
+                      fontSize: isCompact ? 13 : 14.5,
+                      horizontalPadding: isCompact ? 14 : 20,
+                      verticalPadding: isCompact ? 10 : 14,
+                      radius: 12,
                     ),
                   ],
                 ),

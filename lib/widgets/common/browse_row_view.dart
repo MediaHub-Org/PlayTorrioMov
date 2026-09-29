@@ -224,11 +224,17 @@ class _Arrow extends StatelessWidget {
       top: 0,
       bottom: 0,
       child: Center(
-        child: SliderArrow(
-          icon: alignLeft
-              ? Icons.arrow_back_ios_new_rounded
-              : Icons.arrow_forward_ios_rounded,
-          onTap: onTap,
+        // Parked 60px off the edge until a pointer hovers the row, but still
+        // in the tree: without this a D-pad could land on the invisible
+        // arrow, a focus stop with nothing to see and nothing worth doing.
+        child: ExcludeFocus(
+          excluding: !visible,
+          child: SliderArrow(
+            icon: alignLeft
+                ? Icons.arrow_back_ios_new_rounded
+                : Icons.arrow_forward_ios_rounded,
+            onTap: onTap,
+          ),
         ),
       ),
     );

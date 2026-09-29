@@ -34,7 +34,13 @@ class FilterDropdown<T> extends StatelessWidget {
       itemBuilder: (context) => items,
       onSelected: onSelected,
       color: AppColors.raised,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      // The pill's own corner and edge (see headerPillDecoration), so the
+      // menu that opens from it reads as the same shape grown, not a
+      // rounder box that starts somewhere else.
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+        side: BorderSide(color: tint.withValues(alpha: 0.10)),
+      ),
       tooltip: isMobile ? label : '',
       child: Container(
         constraints: const BoxConstraints(
