@@ -10,11 +10,11 @@ import '../../services/anime/anime_library_service.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
-import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/genre_tag_row.dart';
+import '../../widgets/common/hero_action_button.dart';
 import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
@@ -745,64 +745,28 @@ class _AnimeHeroSlide extends StatelessWidget {
                   SizedBox(height: isCompact ? 22 : 26),
                   Row(
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: onWatchNow,
-                        icon: const Icon(Icons.play_arrow_rounded, size: 24),
-                        label: Text(
-                          context.l10n.animeWatchEp1,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 15.5,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppThemeService.currentPalette.value.primaryColor,
-                          foregroundColor: AppColors.onAccent,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isCompact ? 18 : 28,
-                            vertical: isCompact ? 12 : 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          elevation: 12,
-                          shadowColor: AppThemeService
-                              .currentPalette
-                              .value
-                              .primaryColor
-                              .withValues(alpha: 0.45),
-                        ),
+                      HeroActionButton(
+                        primary: true,
+                        onTap: onWatchNow,
+                        icon: Icons.play_arrow_rounded,
+                        iconSize: 24,
+                        label: context.l10n.animeWatchEp1,
+                        fontSize: 15.5,
+                        horizontalPadding: isCompact ? 18 : 28,
+                        verticalPadding: isCompact ? 12 : 16,
+                        radius: 14,
                       ),
                       SizedBox(width: isCompact ? 8 : 12),
-                      OutlinedButton.icon(
-                        onPressed: onDetailsTap,
-                        icon: Icon(
-                          Icons.info_outline_rounded,
-                          size: isCompact ? 18 : 21,
-                          color: AppColors.onAccent.withValues(alpha: 0.80),
-                        ),
-                        label: Text(
-                          context.l10n.commonDetails,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: isCompact ? 14 : 15.5,
-                            color: AppColors.onAccent.withValues(alpha: 0.80),
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isCompact ? 16 : 24,
-                            vertical: isCompact ? 12 : 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          side: BorderSide(
-                            color: AppColors.onAccent.withValues(alpha: 0.18),
-                            width: 1.2,
-                          ),
-                        ),
+                      HeroActionButton(
+                        primary: false,
+                        onTap: onDetailsTap,
+                        icon: Icons.info_outline_rounded,
+                        iconSize: isCompact ? 18 : 21,
+                        label: context.l10n.commonDetails,
+                        fontSize: isCompact ? 14 : 15.5,
+                        horizontalPadding: isCompact ? 16 : 24,
+                        verticalPadding: isCompact ? 12 : 16,
+                        radius: 14,
                       ),
                     ],
                   ),

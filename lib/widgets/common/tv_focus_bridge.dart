@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../services/tv_mode_service.dart';
-
 /// Lets a TV remote's Up/Down cross between the hub's content and the top
 /// bar's section chips.
 ///
@@ -16,7 +14,13 @@ import '../../services/tv_mode_service.dart';
 /// the focused node to move in the pressed direction first
 /// ([FocusNode.focusInDirection] says whether it did), and only when that
 /// returns false does it hand focus across, so in-content navigation is never
-/// second-guessed. TV only: on a keyboard the same keys belong to text fields.
+/// second-guessed.
+///
+/// Not gated on `TvModeService.isTv`: the first version was, and on a real
+/// device the top bar stayed unreachable, so it cannot be relied on to
+/// answer for every box that has a remote. It stays out of the way of the two
+/// places these keys mean something else instead -- a focused text field (the
+/// caret) and an open popup menu or dialog (its own items).
 class TvFocusBridge extends StatelessWidget {
   /// The debug label a chip's `Focus` carries; how the bridge finds them
   /// without the two widgets holding each other's nodes.
@@ -37,14 +41,22 @@ class TvFocusBridge extends StatelessWidget {
   }
 
   static KeyEventResult _handleKey(KeyEvent event) {
-    if (!TvModeService.isTv.value) return KeyEventResult.ignored;
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final up = event.logicalKey == LogicalKeyboardKey.arrowUp;
     final down = event.logicalKey == LogicalKeyboardKey.arrowDown;
     if (!up && !down) return KeyEventResult.ignored;
 
     final primary = FocusManager.instance.primaryFocus;
-    if (primary == null) return KeyEventResult.ignored;
+    final primaryContext = primary?.context;
+    if (primary == null || primaryContext == null) {
+      return KeyEventResult.ignored;
+    }
+    if (primaryContext.findAncestorWidgetOfExactType<EditableText>() != null) {
+      return KeyEventResult.ignored;
+    }
+    if (ModalRoute.of(primaryContext) is PopupRoute) {
+      return KeyEventResult.ignored;
+    }
 
     final chips = FocusManager.instance.rootScope.descendants
         .where((n) => n.debugLabel == chipLabel && n.canRequestFocus)

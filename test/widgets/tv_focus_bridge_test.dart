@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:playtorriomov/services/tv_mode_service.dart';
 import 'package:playtorriomov/widgets/common/tv_focus_bridge.dart';
 
 /// The hub's shape: a bar of chips above a nested Navigator, whose route has
@@ -56,11 +55,9 @@ void main() {
       FocusNode(debugLabel: TvFocusBridge.chipLabel),
     ];
     cards = [FocusNode(debugLabel: 'k0'), FocusNode(debugLabel: 'k1')];
-    TvModeService.isTv.value = true;
   });
 
   tearDown(() {
-    TvModeService.isTv.value = false;
     for (final n in [...chips, ...cards]) {
       n.dispose();
     }
@@ -93,17 +90,5 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     expect(cards[0].hasPrimaryFocus, isTrue);
-  });
-
-  testWidgets('does nothing off TV', (tester) async {
-    TvModeService.isTv.value = false;
-    await tester.pumpWidget(hub(chips, cards));
-    await tester.pump();
-    cards[0].requestFocus();
-    await tester.pump();
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-    await tester.pump();
-    expect(chips.any((c) => c.hasPrimaryFocus), isFalse);
   });
 }

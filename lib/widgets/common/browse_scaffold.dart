@@ -446,10 +446,15 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                 top: 0,
                 bottom: 0,
                 child: Center(
-                  child: SliderArrow(
-                    icon: Icons.arrow_back_ios_new_rounded,
-                    onTap: () => goToHeroPage(
-                      (currentHeroIndex - 1) % widget.heroItems.length,
+                  child: ExcludeFocus(
+                    // Hidden arrows are parked off-screen until a pointer hovers;
+                    // a D-pad must not be able to focus what it cannot see.
+                    excluding: !isHoveringCarousel,
+                    child: SliderArrow(
+                      icon: Icons.arrow_back_ios_new_rounded,
+                      onTap: () => goToHeroPage(
+                        (currentHeroIndex - 1) % widget.heroItems.length,
+                      ),
                     ),
                   ),
                 ),
@@ -461,10 +466,15 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                 top: 0,
                 bottom: 0,
                 child: Center(
-                  child: SliderArrow(
-                    icon: Icons.arrow_forward_ios_rounded,
-                    onTap: () => goToHeroPage(
-                      (currentHeroIndex + 1) % widget.heroItems.length,
+                  child: ExcludeFocus(
+                    // Hidden arrows are parked off-screen until a pointer hovers;
+                    // a D-pad must not be able to focus what it cannot see.
+                    excluding: !isHoveringCarousel,
+                    child: SliderArrow(
+                      icon: Icons.arrow_forward_ios_rounded,
+                      onTap: () => goToHeroPage(
+                        (currentHeroIndex + 1) % widget.heroItems.length,
+                      ),
                     ),
                   ),
                 ),

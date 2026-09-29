@@ -36,6 +36,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   "right" looks like here still needs eyes on an actual screen.
 
 ### Fixed
+- **The top bar still could not be reached, and the hero's Play/Details
+  buttons showed nothing under the remote (#80).** Device testing of
+  `v1.9.0-dev.3` moved through Films rows but not out of Films. Three fixes:
+  - `TvFocusBridge` no longer depends on `TvModeService.isTv`, which
+    evidently did not hold on that box; it now yields only to a focused text
+    field and to an open popup menu or dialog.
+  - The hero's Play/Details pair were Material `ElevatedButton` and
+    `OutlinedButton`, whose only focus cue is a faint overlay that vanishes on
+    a saturated fill over a photo. They are now `HeroActionButton`, built on
+    `HoverButton` like every other target: explicit select/enter, the lean,
+    and a focus ring sized to the button. Movies, Series and Anime.
+  - The hero's and rows' scroll arrows are parked off-screen until a pointer
+    hovers, but stayed focusable, so a D-pad could land on an invisible
+    arrow. They are excluded from focus while hidden.
+  The dropdown menu opened from a header pill now uses the pill's corner and
+  edge (10px, the pill's border) instead of a rounder, borderless box.
+  Unconfirmed on a TV.
 - **A TV remote can now reach the top bar's section chips, and get back
   (#80).** The content sits in its own `Navigator`, and each route has its
   own focus scope, which directional traversal cannot cross. `TvFocusBridge`
