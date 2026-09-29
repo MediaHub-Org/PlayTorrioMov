@@ -87,11 +87,29 @@ class _HoverButtonState extends State<HoverButton> {
     return KeyEventResult.handled;
   }
 
+  void _onFocusChange(bool focused) {
+    setState(() => _isFocused = focused);
+    if (!focused) return;
+    // A D-pad/keyboard move can land focus on something the scroll offset
+    // hasn't caught up to yet -- a card in the next row down, still outside
+    // the viewport. Without this the focus ring lands somewhere the viewer
+    // cannot see, which reads as "the remote stopped working" rather than
+    // "keep pressing, it moved". No-ops when there is no ancestor
+    // Scrollable (a hero dot, a fixed toolbar button).
+    if (Scrollable.maybeOf(context) == null) return;
+    Scrollable.ensureVisible(
+      context,
+      alignment: 0.5,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Focus(
       autofocus: widget.autofocus,
-      onFocusChange: (focused) => setState(() => _isFocused = focused),
+      onFocusChange: _onFocusChange,
       onKeyEvent: _handleKey,
       child: FocusRing(
         visible: widget.showFocusRing && _isFocused,

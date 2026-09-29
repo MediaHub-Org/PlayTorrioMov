@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
@@ -82,8 +83,28 @@ class _Chip extends StatefulWidget {
   State<_Chip> createState() => _ChipState();
 }
 
+/// The keys that activate a focused chip. `final`, not `const`:
+/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
+/// a `const` set literal.
+final _chipActivators = {
+  LogicalKeyboardKey.enter,
+  LogicalKeyboardKey.numpadEnter,
+  LogicalKeyboardKey.select,
+  LogicalKeyboardKey.gameButtonA,
+  LogicalKeyboardKey.space,
+};
+
 class _ChipState extends State<_Chip> {
   bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_chipActivators.contains(event.logicalKey)) {
+      return KeyEventResult.ignored;
+    }
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,58 +116,69 @@ class _ChipState extends State<_Chip> {
     // stayed the same color whichever of the eight palettes was chosen --
     // the one control on screen that ignored the theme.
     final accent = AppThemeService.currentPalette.value.primaryColor;
-    return InkWell(
-      onTap: widget.onTap,
+    // Bare Focus + GestureDetector, not InkResponse's built-in focus
+    // handling: every other D-pad-activatable control in the app
+    // (HoverButton, InteractiveCardShell, the player buttons) explicitly
+    // wires select/gameButtonA rather than trusting a widget's own
+    // default key handling to cover a TV remote's OK button, and this
+    // was the one control that hadn't been brought in line with that --
+    // exactly the gap a real remote (not a mouse) found.
+    return Focus(
       onFocusChange: (focused) => setState(() => _focused = focused),
-      borderRadius: BorderRadius.circular(AppRadii.md),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: selected ? accent : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadii.md),
-          // A remote's focus needs to read from across a room, and the
-          // InkWell's own overlay is a faint tint. A ring in the ink color
-          // shows on the selected chip's accent fill and on the bar alike.
-          border: Border.all(
-            color: _focused ? AppColors.ink : Colors.transparent,
-            width: 2,
+      onKeyEvent: _handleKey,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? accent : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadii.md),
+            // A remote's focus needs to read from across a room, and a
+            // plain overlay tint is a faint one. A ring in the ink color
+            // shows on the selected chip's accent fill and on the bar alike.
+            border: Border.all(
+              color: _focused ? AppColors.ink : Colors.transparent,
+              width: 2,
+            ),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: accent.withValues(alpha: 0.35),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              // Selected sits on the accent fill, so it is white in both
-              // themes; unselected sits on the bar and follows the ink.
-              color: selected ? AppColors.onAccent : AppColors.inkDisabled,
-              size: 16,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              // Clamped: the chip sits in TopBar's fixed height, which
-              // callers inset content by, so it cannot grow with the text
-              // (#69). The label still scales, up to that ceiling.
-              textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
-              maxLines: 1,
-              style: TextStyle(
-                color: selected ? AppColors.onAccent : AppColors.inkSubtle,
-                fontSize: 12,
-                fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                // Selected sits on the accent fill, so it is white in both
+                // themes; unselected sits on the bar and follows the ink.
+                color: selected ? AppColors.onAccent : AppColors.inkDisabled,
+                size: 16,
               ),
-            ),
-          ],
+              const SizedBox(width: 6),
+              Text(
+                label,
+                // Clamped: the chip sits in TopBar's fixed height, which
+                // callers inset content by, so it cannot grow with the text
+                // (#69). The label still scales, up to that ceiling.
+                textScaler:
+                    MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
+                maxLines: 1,
+                style: TextStyle(
+                  color: selected ? AppColors.onAccent : AppColors.inkSubtle,
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
