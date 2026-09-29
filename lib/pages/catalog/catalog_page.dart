@@ -401,7 +401,7 @@ class _CatalogPageState extends State<CatalogPage> {
         child: Stack(
           children: [
             SizedBox(
-              height: 50,
+              height: AppSpacing.textScaledHeight(context, 50),
               child: ListView.separated(
                 controller: _genreScrollController,
                 scrollDirection: Axis.horizontal,
@@ -464,7 +464,7 @@ class _CatalogPageState extends State<CatalogPage> {
     }
 
     return SizedBox(
-      height: 50,
+      height: AppSpacing.textScaledHeight(context, 50),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

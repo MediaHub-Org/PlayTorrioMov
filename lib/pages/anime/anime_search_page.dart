@@ -630,7 +630,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
 
                   // Row 2: Custom Dropdown Menu Buttons
                   SizedBox(
-                    height: 38,
+                    height: AppSpacing.textScaledHeight(context, 38),
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),

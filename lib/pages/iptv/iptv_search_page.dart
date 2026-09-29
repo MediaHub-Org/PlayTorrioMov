@@ -119,7 +119,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
         children: [
           // Category Pills Filter
           SizedBox(
-            height: 48,
+            height: AppSpacing.textScaledHeight(context, 48),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

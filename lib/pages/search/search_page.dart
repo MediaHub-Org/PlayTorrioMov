@@ -278,9 +278,7 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildTypeChips() {
     return SizedBox(
-      // 44 at 1x. A horizontal ListView needs a bounded height, so this
-      // cannot be a floor; the 32px chip grows with the text scale instead.
-      height: MediaQuery.textScalerOf(context).scale(32) + 12,
+      height: AppSpacing.textScaledHeight(context, 44),
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(

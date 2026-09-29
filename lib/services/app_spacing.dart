@@ -42,6 +42,13 @@ abstract final class AppSpacing {
   static double floatingTopInset(BuildContext context) =>
       MediaQuery.paddingOf(context).top + sm;
 
+  /// [base] logical pixels of text-bearing height, grown with the text scale
+  /// (unchanged at 1x). For the boxes that cannot be a `minHeight` floor:
+  /// a horizontal `ListView` needs a bounded height, so a chip or card rail
+  /// gets its size from here instead of a bare constant that clips at 2x-3x.
+  static double textScaledHeight(BuildContext context, double base) =>
+      MediaQuery.textScalerOf(context).scale(base);
+
   /// A poster/portrait card's width, as a fraction of [screenWidth] instead
   /// of a table of fixed pixel values that jump between breakpoints (#80).
   /// Real-device testing found the old step tables -- six branches in

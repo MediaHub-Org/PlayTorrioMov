@@ -1489,7 +1489,7 @@ class _DetailsPageState extends State<DetailsPage>
       onEnter: (_) => setState(() => _isHoveringSeasons = true),
       onExit: (_) => setState(() => _isHoveringSeasons = false),
       child: SizedBox(
-        height: 44,
+        height: AppSpacing.textScaledHeight(context, 44),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
