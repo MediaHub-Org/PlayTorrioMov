@@ -18,15 +18,10 @@ Last reconciled: **2026-09-29**, on `v1.9.0+47` plus the unreleased work in CHAN
 
 Every item here needs a device; none can be closed by reading code.
 
-- **Top bar from content on a TV (#80).** Up/Down between rows was fixed
-  by removing the per-row `FocusScope` (`FirstFocusScope`); confirm that on a
-  TV first. Then: can the D-pad reach the section chips from inside the
-  content area? The content sits in `NestedNavigator`'s
-  own `Navigator`, and each route has its own `FocusScopeNode`, which may stop
-  directional traversal at the scope edge. Candidate fixes: move focus into
-  the chip row when an arrow key goes unhandled, or a `FocusTraversalPolicy`
-  spanning both. A wrong one breaks in-content navigation, so isolate the
-  cause on a device first.
+- **D-pad on a TV (#80).** Up/Down between rows (per-row `FocusScope`
+  removed) and Up/Down between the content and the top bar chips
+  (`TvFocusBridge`) are fixed and covered by widget tests, but neither has
+  been seen on a TV yet. Report what the remote does.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
   says so). Cast a direct/CDN source with no header requirement: if it plays,

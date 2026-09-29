@@ -12,6 +12,7 @@ import '../iptv/iptv_search_page.dart';
 import '../search/search_page.dart';
 import '../settings/settings_page.dart';
 import 'media_hub.dart';
+import '../../widgets/common/tv_focus_bridge.dart';
 import '../../services/theme/app_colors.dart';
 
 /// HubPage: the top-level container hosting the app's single Media hub
@@ -95,7 +96,8 @@ class _HubPageState extends State<HubPage> {
             // Nav chrome + content: TopBar on tablet/desktop, a collapsed
             // top bar + bottom tab bar on mobile. See AdaptiveNavShell.
             Positioned.fill(
-              child: AdaptiveNavShell(
+              child: TvFocusBridge(
+                child: AdaptiveNavShell(
                 onSettingsTap: () async {
                   if (_openingSettings) return;
                   _openingSettings = true;
@@ -133,6 +135,7 @@ class _HubPageState extends State<HubPage> {
                     navigatorKey: _navKey,
                     child: const MediaHub(),
                   ),
+                ),
                 ),
               ),
             ),

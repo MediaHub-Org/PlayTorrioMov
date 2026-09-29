@@ -36,6 +36,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   "right" looks like here still needs eyes on an actual screen.
 
 ### Fixed
+- **A TV remote can now reach the top bar's section chips, and get back
+  (#80).** The content sits in its own `Navigator`, and each route has its
+  own focus scope, which directional traversal cannot cross. `TvFocusBridge`
+  wraps the hub's chrome and content: on TV, Up/Down first try the ordinary
+  move (`focusInDirection` reports whether it worked) and only when that
+  fails hand focus across, Up from the top of the content to the nearest
+  chip and Down from the bar to the first row below it. In-content
+  navigation is never second-guessed, and off TV it does nothing. Covered by
+  a widget test on the same shape (chips above a nested `Navigator`); not
+  confirmed on a TV.
 - **Up and Down still did nothing on a TV, in every catalog row (#80).**
   The cacheExtent change did not fix it because the cause was elsewhere:
   `BrowseRowView` wraps every row in `FirstFocusScope`, which built a real

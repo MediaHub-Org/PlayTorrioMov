@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../utils/hub_controller.dart';
+import 'tv_focus_bridge.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 
@@ -124,6 +125,7 @@ class _ChipState extends State<_Chip> {
     // was the one control that hadn't been brought in line with that --
     // exactly the gap a real remote (not a mouse) found.
     return Focus(
+      debugLabel: TvFocusBridge.chipLabel,
       onFocusChange: (focused) => setState(() => _focused = focused),
       onKeyEvent: _handleKey,
       child: GestureDetector(
