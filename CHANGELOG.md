@@ -66,6 +66,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   that needs a device to confirm before attempting a fix that could just as
   easily make in-content navigation worse.
 
+- **"Watch Sources" packed three more focusable targets into every source
+  row on TV (#80).** Real-device testing found the copy-magnet, download,
+  and decorative play-chevron icons on each `_SourceCard` were three extra
+  D-pad stops per row, on top of the whole card already opening the source
+  when pressed -- the same kind of confusion the rest of this pass's fixes
+  were about removing. All three are now hidden on TV (`TvModeService.isTv`);
+  a card's only action there is itself, tap to play. Download and
+  copy-magnet stay reachable from inside the player once a source is open,
+  so nothing is lost, only the couch-distance action row is. The sources
+  panel is also widened from a 40% to a 50% share of the desktop-tier
+  layout on TV, since the per-source badges are what's left to read at
+  couch distance once the icon row is gone.
+
 ### Removed
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,

@@ -21,6 +21,7 @@ import '../../models/stream/stream_model.dart';
 import './player_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/scraper/stream_scraper.dart';
+import '../../services/tv_mode_service.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/download/download_launcher.dart';
@@ -434,9 +435,18 @@ class _WatchScreenState extends State<WatchScreen>
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Desktop: side-by-side 60/40
+  // Desktop: side-by-side 60/40 (50/50 on TV -- see the flex comment below)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildDesktopLayout(Size screenSize) {
+    // Wider on TV: with the per-source download/copy/play icons gone (see
+    // _SourceCard), the source badges are what is left to read at couch
+    // distance, and 40% of a TV-sized window cramped them same as it did
+    // at desktop width. The info region gives up the difference rather
+    // than the sources panel growing past it, since the synopsis/cast rail
+    // reads fine narrower and a viewer picking a source is the actual task
+    // this screen exists for.
+    final sourcesFlex = TvModeService.isTv.value ? 5 : 4;
+    final infoFlex = 10 - sourcesFlex;
     return SlideTransition(
       position: _slideAnim,
       child: FadeTransition(
@@ -453,7 +463,7 @@ class _WatchScreenState extends State<WatchScreen>
             children: [
               // Left: info region
               Expanded(
-                flex: 6,
+                flex: infoFlex,
                 child: SingleChildScrollView(
                   controller: _mainScrollController,
                   physics: const BouncingScrollPhysics(),
@@ -463,7 +473,7 @@ class _WatchScreenState extends State<WatchScreen>
               const SizedBox(width: 32),
               // Right: sources panel (extends to right edge)
               Expanded(
-                flex: 4,
+                flex: sourcesFlex,
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(end: 24),
                   child: _buildSourcesPanel(isDesktop: true),
@@ -1714,6 +1724,14 @@ class _SourceCardState extends State<_SourceCard> {
   Widget build(BuildContext context) {
     final s = widget.source;
     final badges = <Widget>[];
+    // On TV the copy-magnet, download and play-chevron icons are three more
+    // separately focusable targets crammed into one row, on top of the
+    // whole card already opening the source when pressed -- exactly the
+    // D-pad confusion #80's other fixes were about removing. Download and
+    // copy-magnet are both still reachable from inside the player once a
+    // source is open, so nothing is lost, only the couch-distance action
+    // row is: on TV the row is just the source itself, tap to play.
+    final isTv = TvModeService.isTv.value;
 
     // Quality badge
     if (s.quality != null) {
@@ -1911,57 +1929,59 @@ class _SourceCardState extends State<_SourceCard> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: _S.xs),
-                  // Copy the magnet link, for a torrent source.
-                  if (s.isMagnet && s.magnetUrl != null) ...[
-                    _CopyMagnetButton(magnetUrl: s.magnetUrl!),
-                    const SizedBox(width: 8),
-                  ],
-                  // Download this source directly, without opening the player.
-                  ClipOval(
-                    child: Material(
-                      color: _hovered
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Colors.white.withValues(alpha: 0.06),
-                      child: Tooltip(
-                        message: context.l10n.playerDownload,
-                        child: InkWell(
-                          onTap: () => startSourceDownload(
-                            context,
-                            detail: widget.detail,
-                            episode: widget.episode,
-                            source: s,
-                          ),
-                          child: const SizedBox(
-                            width: 36,
-                            height: 36,
-                            child: Icon(
-                              Icons.download_rounded,
-                              color: _C.textTertiary,
-                              size: 18,
+                  if (!isTv) ...[
+                    const SizedBox(width: _S.xs),
+                    // Copy the magnet link, for a torrent source.
+                    if (s.isMagnet && s.magnetUrl != null) ...[
+                      _CopyMagnetButton(magnetUrl: s.magnetUrl!),
+                      const SizedBox(width: 8),
+                    ],
+                    // Download this source directly, without opening the player.
+                    ClipOval(
+                      child: Material(
+                        color: _hovered
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.white.withValues(alpha: 0.06),
+                        child: Tooltip(
+                          message: context.l10n.playerDownload,
+                          child: InkWell(
+                            onTap: () => startSourceDownload(
+                              context,
+                              detail: widget.detail,
+                              episode: widget.episode,
+                              source: s,
+                            ),
+                            child: const SizedBox(
+                              width: 36,
+                              height: 36,
+                              child: Icon(
+                                Icons.download_rounded,
+                                color: _C.textTertiary,
+                                size: 18,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: _S.xs),
-                  // Play chevron
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: _hovered
-                          ? _C.accent.withValues(alpha: 0.2)
-                          : Colors.white.withValues(alpha: 0.06),
-                      shape: BoxShape.circle,
+                    const SizedBox(width: _S.xs),
+                    // Play chevron
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: _hovered
+                            ? _C.accent.withValues(alpha: 0.2)
+                            : Colors.white.withValues(alpha: 0.06),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        color: _hovered ? _C.accent : _C.textTertiary,
+                        size: 20,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.play_arrow_rounded,
-                      color: _hovered ? _C.accent : _C.textTertiary,
-                      size: 20,
-                    ),
-                  ),
+                  ],
                 ],
               ),
             ),

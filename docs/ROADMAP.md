@@ -475,6 +475,21 @@ key handler unhandled) or a `FocusTraversalPolicy` that spans both, and a
 wrong version of either risks breaking the in-content navigation the fixes
 above just repaired. Needs a device to isolate before attempting it.
 
+### Watch Sources: one more D-pad target than the row needed
+
+Device-confirmed on a TV 2026-09-29, from the same testing pass as the
+section above. Each source row's whole-card tap already opened the source
+-- that part was already correct -- but the row also carried three more
+separately focusable icons (copy-magnet, download, a decorative play
+chevron), each its own D-pad stop stacked on top of the card. Hidden all
+three on TV (`TvModeService.isTv`); download and copy-magnet are both
+still one tap away from inside the player once a source is open, so
+nothing is lost, only the extra row of targets is. `_buildDesktopLayout`'s
+sources panel also moved from a fixed 40% to 50% of the row's width on TV,
+since the per-source badges are what a viewer actually reads at couch
+distance once the icon row is gone, and 40% cramped them same as it did at
+desktop width.
+
 ### Not doing, so it stays decided
 
 | What | Why not |
