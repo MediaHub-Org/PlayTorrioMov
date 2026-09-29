@@ -882,7 +882,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             clipBehavior: Clip.none,
             children: [
               SizedBox(
-                height: 180,
+                height: 116 + AppSpacing.textScaledHeight(context, 64),
                 child: ListView.separated(
                   clipBehavior: Clip.none,
                   controller: _castScrollController,
@@ -987,7 +987,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       children: [
         DetailsSectionHeader(context.l10n.detailsStaff),
         SizedBox(
-          height: 180,
+          height: 116 + AppSpacing.textScaledHeight(context, 64),
           child: ListView.separated(
             clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
@@ -1325,7 +1325,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   Widget _buildRelationsRow() {
     final isDesktop = _isDesktop();
     final cardWidth = isDesktop ? 165.0 : 135.0;
-    final cardHeight = cardWidth * 1.5 + 68.0;
+    final cardHeight = cardWidth * 1.5 + AppSpacing.textScaledHeight(context, 68);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1478,7 +1478,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   Widget _buildRecommendationsRow() {
     final isDesktop = _isDesktop();
     final cardWidth = isDesktop ? 165.0 : 135.0;
-    final cardHeight = cardWidth * 1.5 + 68.0;
+    final cardHeight = cardWidth * 1.5 + AppSpacing.textScaledHeight(context, 68);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),

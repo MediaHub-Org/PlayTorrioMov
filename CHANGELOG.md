@@ -112,6 +112,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Unprobed: these were changed by reading, and `text_scale_overflow_test`
   was not extended to cover them.
 
+- **Chip and card rails now grow with the text scale (#69).** Ten
+  horizontal rails sat in a fixed-height `SizedBox` (Catalog's two filter rows,
+  Anime Search's filter row, Search's type chips, the seasons row, Live TV's
+  category pills, the anime cast and staff rows, and the anime relations and
+  recommendations cards), which clipped their text at 2x-3x. They take
+  `AppSpacing.textScaledHeight` instead: unchanged at 1x, larger with the
+  text scale. Unprobed: `text_scale_overflow_test` does not cover them.
+
 ### Removed
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,
