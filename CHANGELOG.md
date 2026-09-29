@@ -99,6 +99,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   layout on TV, since the per-source badges are what's left to read at
   couch distance once the icon row is gone.
 
+- **Six more fixed heights around text now grow with the text scale (#69).**
+  The watch-screen filter pill, the cast sheet's device row, the
+  subtitle-sync step buttons, the episodes panel's sources button and the
+  Sources & Filters rank badge were `height:`/`width:` boxes around a label;
+  each is now a `minHeight`/`minWidth` floor with the same size at 1x, so a
+  large text scale grows the box instead of clipping the text. The search
+  page's type-chip rail sits in a horizontal `ListView` that needs a bounded
+  height, so it takes the text-scaled height (still 44 at 1x) instead. A
+  re-scan of `lib/` found these were the only ones wrapping text; the rest
+  of the old "~42 files" estimate wrapped icons, images or spinners.
+  Unprobed: these were changed by reading, and `text_scale_overflow_test`
+  was not extended to cover them.
+
 ### Removed
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,
@@ -2422,3 +2435,7 @@ history only.
 | #74 | The source-filter pills on their own scrollable row, with edge buttons showing when a pill is hidden past either end (desktop; the phone keeps the fade alone) |
 | #75 | Sources & Filters became two multi-select settings, with the audio filter and the preferred-audio ranking merged into one ordered list |
 | #76 | Sleep timer gained 10 and 45 minute presets and an End of video mode |
+| #77 | Xtream/portal movies and series as parent sources — decided not viable for now; see the roadmap's "Not doing" table |
+| #78 | Android TV support: manifest, focusable controls across `lib/`, the TV banner |
+| #79 | Casting a scraper source gets stuck loading (open; see the roadmap) |
+| #80 | TV-native UX: TV-mode detection, type scale, full-screen sheets, focus order and rings, and the first real-remote fixes (player arrows, chips, catalog rows, card rings, Watch Sources, poster sizing) |

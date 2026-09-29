@@ -1183,7 +1183,8 @@ class _WatchScreenState extends State<WatchScreen>
             ),
             child: PerformanceLiquidLens(
               child: Container(
-                height: 36,
+                // A floor, not a fixed height: the label grows with text scale.
+                constraints: const BoxConstraints(minHeight: 36),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(18),
