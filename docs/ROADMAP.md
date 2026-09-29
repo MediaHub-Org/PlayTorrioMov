@@ -37,31 +37,20 @@ Every item here needs a device; none can be closed by reading code.
   (`AppSpacing.cardWidthForScreenWidth`, 108-168px, a guess), Watch Sources on
   TV, and the card focus ring.
 
-## What tests hold
-
-Six invariants are held by tests, not by passes over `lib/`: no `Text()` holds
-an English sentence (`no_hardcoded_text_test`); every icon-only control has a
-label (`icon_button_tooltip_test`); no padding or alignment names a physical
-edge (`rtl_directional_padding_test`); one spelling of every word
-(`american_spelling_test`); 32 widgets survive 3x text scale on a 360px view
-(`text_scale_overflow_test`); rail arrows turn around for Arabic
-(`arrow_affordance_test`). Data strings stay English on purpose.
-
 ## Not doing, so it stays decided
 
 | What | Why not |
 |:--|:--|
-| A size/sort filter under Sources & Filters (#72's open question) | A size range and "largest first" are browsing choices for *this* title, not a standing preference, so they stay on the sources screen. #75 settled the settings page's shape: two multi-select blocks, one per media kind |
-| A keyboard shortcut for the subtitle panel | `A`, `S` and `R` are the audio, speed and aspect menus, and `C` became the on/off toggle, so no key is free. Keyboard-only users reach the panel through the transport bar, which needs a pointer. Revisit if a key frees up |
-| Merge `megasource` / `nova` (50 shared windows) | They share an HTTP-and-parse skeleton, but Nova munges stream titles in a way MegaSource does not. Unifying them means a formatting hook whose two implementations have nothing in common — an abstraction serving a duplication count rather than the code |
-| Offline tests for the page **scraping** (script tags, slug matching) | Its input is one host's markup on one day, so a fixture pins that day rather than a contract. The payload ciphers and response *formats* are covered |
-| Cast from Windows | `flutter_chrome_cast` is Android/iOS only, because Google ships no Cast *sender* SDK for Windows. It would mean a different protocol (DLNA/UPnP) — a feature, not a fix |
-| Sponsor/monetization, keyboard aspect-cycle HUD (upstream) | Out of scope, and Mov already has an aspect control in the player settings |
-| Single-select audio-language filter | "English or Spanish" is not expressible with one choice, and the multi-select checkmark delay was a stale-rows bug, now fixed by rebuilding the menu from the setting on every change — the control was never the problem |
-| Pure-alphabetical online subtitle order | The list leads with the language being heard because that is the track a viewer most likely wants. Identical counts tie-break alphabetically, covered by a test |
-| Translating catalog descriptions | They come from the Stremio addon, not TMDB, and whether Cinemeta's API takes a locale is an unstarted question. See CONVENTIONS |
-| Translating AniList's genres and formats | They are AniList's own values, sent back to its API to filter, and would need a display-name map per language on top |
-| Xtream/portal movies and series as parent sources (#77) | **Not viable right now.** Folding a portal's VOD into Films, Series and Anime is a pipeline, not a tab: match each entry to a catalog title (IMDb/TMDB id where the feed carries one, guarded title-plus-year where it does not), play through the existing details and player so history and Continue Watching see one title rather than two copies, and decide where unmatchable entries live. A wrong match pushed into Films is worse than an honest gap, and none of that is small. Until it is revisited, portals provide Live TV only, and that boundary is load-bearing rather than temporary-looking |
+| Xtream/portal movies and series as parent sources (#77) | **Not viable right now.** Needs a pipeline, not a tab: match entries to catalog titles (ids where the feed has them, guarded title-plus-year where not), play through the existing details/player so history sees one title, and decide where unmatchable entries live. A wrong match in Films is worse than an honest gap. Portals stay Live TV only |
+| Size/sort filter under Sources & Filters | Browsing choices for *this* title, not a standing preference; they stay on the sources screen |
+| Keyboard shortcut for the subtitle panel | `A`, `S`, `R`, `C` are taken. Revisit if a key frees up |
+| Merge `megasource` / `nova` | Shared skeleton, but Nova munges titles MegaSource does not; unifying them needs a hook with nothing in common between its two sides |
+| Offline tests for page scraping | Input is one host's markup on one day, so a fixture pins that day. Ciphers and response formats are covered |
+| Cast from Windows | Google ships no Cast sender SDK for Windows; it would be DLNA/UPnP, a feature not a fix |
+| Sponsor/monetization, aspect-cycle HUD (upstream) | Out of scope; the player settings already have an aspect control |
+| Single-select audio filter | "English or Spanish" needs multi-select; the checkmark delay was a stale-rows bug, since fixed |
+| Alphabetical online subtitle order | The list leads with the language being heard on purpose |
+| Translating catalog descriptions, AniList genres/formats | Addon and AniList data, sent back to their APIs to filter; would need a display-name map per language. See CONVENTIONS |
 
 ---
 
