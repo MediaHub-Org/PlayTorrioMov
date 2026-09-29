@@ -15,6 +15,26 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   wordmark in the icon's own two-purple gradient, and wired it up in the
   manifest.
 
+### Changed
+- **Poster cards are smaller, and no longer plateau at one flat size on a
+  wide window (#80).** Real-device feedback said cards were "very big" even
+  at the default (100%) text size, which rules out the text-zoom slider as
+  the cause -- this is the card grid's own sizing. `MovieCardSizing` and
+  `IptvCardSizing` each carried a step table of five or six fixed pixel
+  widths (138-205px and 145-205px); both landed on the same flat, largest
+  value for *any* window 1400px and up, a desktop browser and a TV alike,
+  and nobody had checked that value against an actual TV before now. Both
+  now compute width as a continuous fraction of the available width instead
+  (`AppSpacing.cardWidthForScreenWidth`), clamped between 108px and 168px --
+  smaller at every size than the old tables, and no longer capped at the
+  same number for an arbitrarily wide window. The details page's Related
+  and Similar rows, which had their own separate isDesktop-or-not two-value
+  guess, now compute from the same shared formula instead of a third
+  set of numbers. Unverified against a real TV or a real 100%-zoom desktop
+  window -- the old sizes were only ever confirmed too big by the report
+  that prompted this, not measured against a specific target, so what
+  "right" looks like here still needs eyes on an actual screen.
+
 ### Fixed
 - **A real remote could barely navigate the app at all (#80).** Device
   testing of v1.9.0 on an actual TV found several D-pad problems the
@@ -65,6 +85,32 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   persistent chrome outside it as a candidate -- a real gap if so, but one
   that needs a device to confirm before attempting a fix that could just as
   easily make in-content navigation worse.
+
+- **"Watch Sources" packed three more focusable targets into every source
+  row on TV (#80).** Real-device testing found the copy-magnet, download,
+  and decorative play-chevron icons on each `_SourceCard` were three extra
+  D-pad stops per row, on top of the whole card already opening the source
+  when pressed -- the same kind of confusion the rest of this pass's fixes
+  were about removing. All three are now hidden on TV (`TvModeService.isTv`);
+  a card's only action there is itself, tap to play. Download and
+  copy-magnet stay reachable from inside the player once a source is open,
+  so nothing is lost, only the couch-distance action row is. The sources
+  panel is also widened from a 40% to a 50% share of the desktop-tier
+  layout on TV, since the per-source badges are what's left to read at
+  couch distance once the icon row is gone.
+
+- **Six more fixed heights around text now grow with the text scale (#69).**
+  The watch-screen filter pill, the cast sheet's device row, the
+  subtitle-sync step buttons, the episodes panel's sources button and the
+  Sources & Filters rank badge were `height:`/`width:` boxes around a label;
+  each is now a `minHeight`/`minWidth` floor with the same size at 1x, so a
+  large text scale grows the box instead of clipping the text. The search
+  page's type-chip rail sits in a horizontal `ListView` that needs a bounded
+  height, so it takes the text-scaled height (still 44 at 1x) instead. A
+  re-scan of `lib/` found these were the only ones wrapping text; the rest
+  of the old "~42 files" estimate wrapped icons, images or spinners.
+  Unprobed: these were changed by reading, and `text_scale_overflow_test`
+  was not extended to cover them.
 
 ### Removed
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
@@ -2389,3 +2435,7 @@ history only.
 | #74 | The source-filter pills on their own scrollable row, with edge buttons showing when a pill is hidden past either end (desktop; the phone keeps the fade alone) |
 | #75 | Sources & Filters became two multi-select settings, with the audio filter and the preferred-audio ranking merged into one ordered list |
 | #76 | Sleep timer gained 10 and 45 minute presets and an End of video mode |
+| #77 | Xtream/portal movies and series as parent sources — decided not viable for now; see the roadmap's "Not doing" table |
+| #78 | Android TV support: manifest, focusable controls across `lib/`, the TV banner |
+| #79 | Casting a scraper source gets stuck loading (open; see the roadmap) |
+| #80 | TV-native UX: TV-mode detection, type scale, full-screen sheets, focus order and rings, and the first real-remote fixes (player arrows, chips, catalog rows, card rings, Watch Sources, poster sizing) |

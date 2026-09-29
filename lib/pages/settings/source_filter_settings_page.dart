@@ -261,8 +261,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
       child: Row(
         children: [
           Container(
-            width: 24,
-            height: 24,
+            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.inkAlpha(0.08),

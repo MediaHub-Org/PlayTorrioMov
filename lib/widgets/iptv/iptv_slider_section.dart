@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/app_spacing.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../common/browse_row_view.dart';
 import 'iptv_channel_card.dart';
@@ -18,17 +19,16 @@ class IptvCardSizing {
     required this.sidePadding,
   });
 
+  // Same continuous width as a poster card (see MovieCardSizing and
+  // AppSpacing.cardWidthForScreenWidth, #80): a channel logo card used to
+  // carry its own near-identical four-branch table, stepping to the same
+  // flat 205px on any window 1400px and up that the poster table did.
   factory IptvCardSizing.fromWidth(double screenWidth) {
-    double cardWidth;
-    if (screenWidth < 600) {
-      cardWidth = 145;
-    } else if (screenWidth < 1000) {
-      cardWidth = 165;
-    } else if (screenWidth < 1400) {
-      cardWidth = 185;
-    } else {
-      cardWidth = 205;
-    }
+    final cardWidth = AppSpacing.cardWidthForScreenWidth(
+      screenWidth,
+      min: 108,
+      max: 168,
+    );
 
     final posterHeight = cardWidth * 1.35;
     final totalHeight = posterHeight + 66;

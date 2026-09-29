@@ -226,7 +226,7 @@ class _StepButton extends StatelessWidget {
         onTap: onTap,
         child: Container(
           width: isWide ? 44 : 38,
-          height: 28,
+          constraints: const BoxConstraints(minHeight: 28),
           alignment: Alignment.center,
           child: Text(
             label,

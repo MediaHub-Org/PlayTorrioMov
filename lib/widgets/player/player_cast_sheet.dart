@@ -198,7 +198,8 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                                   );
                                 },
                                 child: Container(
-                                  height: 48,
+                                  // A floor, not a fixed height: the device name grows with text scale.
+                                  constraints: const BoxConstraints(minHeight: 48),
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   child: Row(
                                     children: [

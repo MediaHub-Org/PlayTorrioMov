@@ -842,7 +842,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                       onTap: () => widget.onEpisodeSelected(video),
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        height: 38,
+                        constraints: const BoxConstraints(minHeight: 38),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [AppColors.accent, const Color(0xFF9D84FF)],
