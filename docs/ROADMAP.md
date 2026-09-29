@@ -490,6 +490,43 @@ since the per-source badges are what a viewer actually reads at couch
 distance once the icon row is gone, and 40% cramped them same as it did at
 desktop width.
 
+### Poster cards plateaued at one size on any wide window
+
+Reported 2026-09-29: "cards and portraits... at default zoom 100% are very
+big... possible no hard coded sizes." The 100% is the in-app text-zoom
+slider (#69) at its default -- naming it ruled out that slider as the
+cause and pointed at the card grid's own sizing instead, which is
+unrelated to text scale entirely.
+
+`MovieCardSizing.fromWidth` and `IptvCardSizing.fromWidth` each stepped
+through 5-6 fixed pixel widths across breakpoints, and both topped out at
+a flat value (205px) for *any* window 1400px and up -- a desktop browser
+resized wide, and a TV, which reports its width through the exact same
+`MediaQuery` any other window does. Nothing in that table had ever been
+checked against an actual TV; #80's other phases were all about input
+(D-pad reachability), not this. Replaced both tables with one formula,
+`AppSpacing.cardWidthForScreenWidth` (`(screenWidth * 0.12).clamp(min,
+max)`), so width is a continuous fraction of the window instead of a
+series of jumps, with `min: 108, max: 168` for both card families -- flat
+108px up to 900px wide (`AppBreakpoints.desktop`), scaling linearly to
+168px at 1400px, flat past that. Both bounds are smaller than every value
+either old table used. `DetailsPage`'s Related and Similar rows had their
+own third, separate `isDesktop ? X : Y` guess at the same kind of number;
+pointed those at the same formula rather than leaving a third set of
+constants to drift from the other two.
+
+Deliberately not touched this pass: `ContinueWatchingSlider`'s landscape
+cards and the episode-thumbnail row, both a genuinely different shape
+(wide thumbnail, not a poster), and `CollectionPage`/`LibraryShelfPage`'s
+grids, which already pick a column *count* per breakpoint and derive
+width from what's left over -- already proportional, not a fixed-pixel
+table, so not the pattern this fix was about.
+
+**Unverified.** No device or even a resized desktop browser confirmed
+these specific numbers look right -- only that the old flat 205px read as
+"very big" in the report. `min`/`max` are a reasoned guess sized to be
+smaller everywhere than what was there before, not a measured target.
+
 ### Not doing, so it stays decided
 
 | What | Why not |

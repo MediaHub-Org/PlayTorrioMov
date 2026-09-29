@@ -15,6 +15,26 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   wordmark in the icon's own two-purple gradient, and wired it up in the
   manifest.
 
+### Changed
+- **Poster cards are smaller, and no longer plateau at one flat size on a
+  wide window (#80).** Real-device feedback said cards were "very big" even
+  at the default (100%) text size, which rules out the text-zoom slider as
+  the cause -- this is the card grid's own sizing. `MovieCardSizing` and
+  `IptvCardSizing` each carried a step table of five or six fixed pixel
+  widths (138-205px and 145-205px); both landed on the same flat, largest
+  value for *any* window 1400px and up, a desktop browser and a TV alike,
+  and nobody had checked that value against an actual TV before now. Both
+  now compute width as a continuous fraction of the available width instead
+  (`AppSpacing.cardWidthForScreenWidth`), clamped between 108px and 168px --
+  smaller at every size than the old tables, and no longer capped at the
+  same number for an arbitrarily wide window. The details page's Related
+  and Similar rows, which had their own separate isDesktop-or-not two-value
+  guess, now compute from the same shared formula instead of a third
+  set of numbers. Unverified against a real TV or a real 100%-zoom desktop
+  window -- the old sizes were only ever confirmed too big by the report
+  that prompted this, not measured against a specific target, so what
+  "right" looks like here still needs eyes on an actual screen.
+
 ### Fixed
 - **A real remote could barely navigate the app at all (#80).** Device
   testing of v1.9.0 on an actual TV found several D-pad problems the

@@ -1700,7 +1700,13 @@ class _DetailsPageState extends State<DetailsPage>
   // gives people somewhere to go next instead of hitting a wall of black.
   Widget _buildRelatedRow(List<Movie> related) {
     final isDesktop = _isDesktop();
-    final cardWidth = isDesktop ? 150.0 : 120.0;
+    // Same continuous poster width as everywhere else (#80), not this row's
+    // own two-value guess.
+    final cardWidth = AppSpacing.cardWidthForScreenWidth(
+      MediaQuery.sizeOf(context).width,
+      min: 108,
+      max: 168,
+    );
     final fadeWidth = isDesktop ? 60.0 : 40.0;
 
     return MouseRegion(
@@ -1844,7 +1850,13 @@ class _DetailsPageState extends State<DetailsPage>
 
   Widget _buildSimilarRow() {
     final isDesktop = _isDesktop();
-    final cardWidth = isDesktop ? 160.0 : 130.0;
+    // Same continuous poster width as everywhere else (#80), not this row's
+    // own two-value guess.
+    final cardWidth = AppSpacing.cardWidthForScreenWidth(
+      MediaQuery.sizeOf(context).width,
+      min: 108,
+      max: 168,
+    );
     final cardHeight = SimilarCard.heightFor(cardWidth);
     final fadeWidth = isDesktop ? 60.0 : 40.0;
 

@@ -41,6 +41,24 @@ abstract final class AppSpacing {
   /// back button under the system clock on a phone with a notch.
   static double floatingTopInset(BuildContext context) =>
       MediaQuery.paddingOf(context).top + sm;
+
+  /// A poster/portrait card's width, as a fraction of [screenWidth] instead
+  /// of a table of fixed pixel values that jump between breakpoints (#80).
+  /// Real-device testing found the old step tables -- six branches in
+  /// `MovieCardSizing`, four in `IptvCardSizing` -- landed on the same flat
+  /// pixel value for every window from 1400px up, desktop browser and TV
+  /// alike, which read as oversized on a TV nobody had checked this against
+  /// before. [min]/[max] still bound the result: below [min] a poster stops
+  /// being legible, and without [max] it would keep growing on an
+  /// arbitrarily wide window instead of leveling off the way the old tables
+  /// did on purpose.
+  static double cardWidthForScreenWidth(
+    double screenWidth, {
+    required double min,
+    required double max,
+    double factor = 0.12,
+  }) =>
+      (screenWidth * factor).clamp(min, max);
 }
 
 /// Corner-radius scale matching the values already in use across the

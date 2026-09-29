@@ -14,11 +14,15 @@ import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Card sizing — responsive breakpoints that mimic Stremio poster sizes.
+// Card sizing — a poster's width scales continuously with the window
+// instead of stepping between fixed pixel values (see
+// AppSpacing.cardWidthForScreenWidth, and #80 for why).
 //
-//   Mobile  : ~138-162 px wide
-//   Tablet  : ~176 px
-//   Desktop : ~190-205 px
+//   Up to 900px wide : a flat 108 px.
+//   900 – 1400px wide: scales linearly from 108 to 168 px.
+//   1400px and up    : a flat 168 px -- desktop browser windows and TVs
+//                      both land here, and both used to get 205 px before
+//                      real TV testing said that read as oversized.
 //
 // Aspect ratio 1:1.48  (width × 1.48 = poster height).
 // Total card height = poster + 66 px for title / year.
@@ -40,21 +44,11 @@ class MovieCardSizing {
   });
 
   factory MovieCardSizing.fromWidth(double screenWidth) {
-    double cardWidth;
-
-    if (screenWidth < 360) {
-      cardWidth = 138;
-    } else if (screenWidth < 430) {
-      cardWidth = 152;
-    } else if (screenWidth < 700) {
-      cardWidth = 162;
-    } else if (screenWidth < 1000) {
-      cardWidth = 176;
-    } else if (screenWidth < 1400) {
-      cardWidth = 190;
-    } else {
-      cardWidth = 205;
-    }
+    final cardWidth = AppSpacing.cardWidthForScreenWidth(
+      screenWidth,
+      min: 108,
+      max: 168,
+    );
 
     final posterHeight = cardWidth * 1.48;
     final totalHeight = posterHeight + 66;
