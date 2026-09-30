@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/app_breakpoints.dart';
-import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../utils/hub_controller.dart';
 import 'top_bar.dart';
 import '../../services/theme/app_colors.dart';
@@ -19,7 +19,10 @@ class AdaptiveNavShell extends StatelessWidget {
   /// Height of the mobile bottom tab bar. Callers positioning other
   /// bottom-anchored chrome (e.g. a mini player) above it on mobile
   /// should offset by at least this much.
-  static const double mobileBottomBarHeight = 64;
+  ///
+  /// This is the height at the default text size; the bar itself is drawn
+  /// in rem and grows with the text size, which [mobileBottomBarInset] follows.
+  static const double mobileBottomBarHeight = AppRem.bottomBar * AppUnits.remPixels;
 
   /// Total space the mobile bottom tab bar occupies on screen, including
   /// the device's bottom safe-area inset (e.g. the iOS home indicator).
@@ -27,7 +30,7 @@ class AdaptiveNavShell extends StatelessWidget {
   /// (e.g. a mini player) should use this instead of [mobileBottomBarHeight]
   /// alone, or their chrome will overlap the inset.
   static double mobileBottomBarInset(BuildContext context) =>
-      mobileBottomBarHeight + MediaQuery.paddingOf(context).bottom;
+      context.rem(AppRem.bottomBar) + MediaQuery.paddingOf(context).bottom;
 
   final Widget child;
   final VoidCallback? onSettingsTap;
@@ -95,7 +98,7 @@ class _MobileSectionTabBar extends StatelessWidget {
     AppColors.dependOn(context);
     return Container(
       key: const Key('adaptiveNavMobileBar'),
-      height: AdaptiveNavShell.mobileBottomBarHeight,
+      height: context.rem(AppRem.bottomBar),
       decoration: BoxDecoration(
         color: AppColors.bar,
         border: Border(top: BorderSide(color: AppColors.inkAlpha(0.12))),
@@ -133,9 +136,8 @@ class _SectionTab extends StatelessWidget {
     AppColors.dependOn(context);
     final color = selected ? AppColors.ink : AppColors.inkSubtle;
     // Clamped, not left to follow the system/in-app scale 1:1: this Column
-    // sits inside AdaptiveNavShell.mobileBottomBarHeight, a fixed 64 — a
-    // constant other chrome (the mini player) positions itself above via
-    // mobileBottomBarInset. Left unclamped, a large accessibility text size
+    // sits inside the bottom bar's rem height -- a size other chrome (the
+    // mini player) positions itself above via mobileBottomBarInset. Left unclamped, a large accessibility text size
     // grows the label past what that fixed height has room for and this
     // Column overflows it (#69). Icon + label still grow together, just
     // capped short of that point.
@@ -145,10 +147,10 @@ class _SectionTab extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(section.icon, color: color, size: 21),
-          const SizedBox(height: AppSpacing.xs),
+          Icon(section.icon, color: color, size: context.rem(AppRem.iconMd)),
+          SizedBox(height: context.rem(AppRem.xs)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xxs)),
             child: Text(
               section.localizedLabel(context),
               maxLines: 1,
@@ -157,7 +159,7 @@ class _SectionTab extends StatelessWidget {
               textScaler: labelScaler,
               style: TextStyle(
                 color: color,
-                fontSize: TvType.scale(10),
+                fontSize: TvType.scale(AppType.micro),
                 fontWeight: selected ? FontWeight.bold : FontWeight.w600,
               ),
             ),

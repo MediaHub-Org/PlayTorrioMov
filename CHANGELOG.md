@@ -28,9 +28,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   fails on a bare size in any migrated file. The second batch moves the hub
   chrome: top bar, section chips, filter dropdown, header pills and section
   headers (`TopBar.height` is now optional and defaults to `AppRem.bar`).
-  The rest of the code is not migrated yet; see the roadmap. Unverified on a device: the hero buttons and
-  side menu keep their look at the default text size apart from a few pixels
-  (the anime Play button is now the same size as the movie one).
+  The third finishes the chrome: the phone's bottom tab bar, the pill filter
+  bar, the music mini-player bar and the logo. The mini-player's height is a
+  floor now, so its text can grow. The rest of the code is not migrated yet;
+  see the roadmap. Unverified on a device: the hero buttons and side menu
+  keep their look at the default text size apart from a few pixels (the anime
+  Play button is now the same size as the movie one).
 - **Poster cards are smaller, and no longer plateau at one flat size on a
   wide window (#80).** Real-device feedback said cards were "very big" even
   at the default (100%) text size, which rules out the text-zoom slider as

@@ -50,6 +50,8 @@ abstract final class AppRem {
   static const double snug = 0.375;
   static const double sm = 0.5;
   static const double ms = 0.75;
+  // The gap between two pills in a row.
+  static const double pillGap = 0.625;
   static const double md = 1;
   static const double lg = 1.5;
   static const double xl = 2;
@@ -59,12 +61,15 @@ abstract final class AppRem {
   static const double radiusPill = 0.625;
   static const double radiusMd = 0.75;
   static const double radiusLg = 1;
+  static const double radiusXl = 1.125;
 
   // Icons.
   static const double iconXs = 1;
   static const double iconSm = 1.125;
   static const double icon = 1.25;
+  static const double iconMd = 1.375;
   static const double iconLg = 1.5;
+  static const double iconXl = 2.125;
 
   // A tap target: the smallest square a finger or a remote's focus ring should
   // be asked to hit.
@@ -73,9 +78,22 @@ abstract final class AppRem {
   // The slim bar across the top of the hub.
   static const double bar = 3.5;
 
+  // The phone's bottom tab bar.
+  static const double bottomBar = 4;
+
+  // The wordmark's mark and the film-strip rule under it, phone and wider.
+  static const double logoCompact = 1.625;
+  static const double logo = 2;
+  static const double ruleWidthCompact = 2.125;
+  static const double ruleWidth = 2.5;
+
+  // The music mini-player's least height.
+  static const double miniPlayer = 3.75;
+
   // Shadow blur.
   static const double blurSm = 0.625;
   static const double blur = 0.75;
+  static const double blurLg = 1.25;
 
   // The TV side menu's width bounds, which the window width sits between.
   static const double menuMin = 9.25;
@@ -91,9 +109,12 @@ abstract final class AppRem {
 /// Font sizes, as plain constants -- see [AppUnits] for why these are not in
 /// rem. The text scaler applies the user's setting when the text is painted.
 abstract final class AppType {
+  static const double micro = 10;
+  static const double tiny = 11;
   static const double caption = 12;
   static const double small = 13;
   static const double body = 14;
   static const double bodyLg = 16;
+  static const double lead = 18;
   static const double title = 21;
 }
