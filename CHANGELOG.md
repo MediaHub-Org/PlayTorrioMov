@@ -58,9 +58,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   similar cards are separate widgets and not yet migrated). The sixth does the
   anime details page the same way; the two pages now share one set of sizes
   (`lib/widgets/details/details_metrics.dart`) instead of each keeping a copy.
-  The rest of the code is not migrated yet; see the roadmap. Unverified on a device: the hero buttons and side menu
-  keep their look at the default text size apart from a few pixels (the anime
-  Play button is now the same size as the movie one).
+  The seventh does the video player: every widget in `lib/widgets/player`, both
+  player pages and the Live TV player. `AppType` is now a half-step ramp, and
+  the player menus' shadow lists are functions of the context
+  (`PlayerTheme.menuShadowOf`) because their sizes are rem. The rest of the
+  code is not migrated yet; see the roadmap. Unverified on a device: the hero
+  buttons and side menu keep their look at the default text size apart from a
+  few pixels (the anime Play button is now the same size as the movie one).
 - **Poster cards are smaller, and no longer plateau at one flat size on a
   wide window (#80).** Real-device feedback said cards were "very big" even
   at the default (100%) text size, which rules out the text-zoom slider as
