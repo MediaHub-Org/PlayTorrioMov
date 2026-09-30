@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../common/browse_row_view.dart';
 import 'iptv_channel_card.dart';
@@ -23,22 +24,25 @@ class IptvCardSizing {
   // AppSpacing.cardWidthForScreenWidth, #80): a channel logo card used to
   // carry its own near-identical four-branch table, stepping to the same
   // flat 205px on any window 1400px and up that the poster table did.
-  factory IptvCardSizing.fromWidth(double screenWidth) {
+  factory IptvCardSizing.fromWidth(double screenWidth, {double scale = 1}) {
+    final rem = AppUnits.remPixels * scale;
     final cardWidth = AppSpacing.cardWidthForScreenWidth(
       screenWidth,
-      min: 108,
-      max: 168,
+      min: AppRem.cardMin * rem,
+      max: AppRem.cardMax * rem,
     );
 
     final posterHeight = cardWidth * 1.35;
-    final totalHeight = posterHeight + 66;
+    final totalHeight = posterHeight + AppRem.cardText * rem;
 
     return IptvCardSizing(
       cardWidth: cardWidth,
       posterHeight: posterHeight,
       totalHeight: totalHeight,
-      spacing: 16,
-      sidePadding: 18,
+      spacing: AppRem.md * rem,
+      // A poster row takes the page gutter; a channel row has always sat a
+      // little further in, at a fixed 18 px (1.125 rem) of its own.
+      sidePadding: AppRem.radiusXl * rem,
     );
   }
 
@@ -85,7 +89,8 @@ class IptvSliderSection extends StatelessWidget {
       subtitle: subtitle,
       items: channels,
       onSeeAll: onSeeAll,
-      sizingOf: (width) => IptvCardSizing.fromWidth(width).toRowSizing(),
+      sizingOf: (width, scale) =>
+          IptvCardSizing.fromWidth(width, scale: scale).toRowSizing(),
       itemBuilder: (context, channel) => IptvChannelCard(
         channel: channel,
         onTap: () => onChannelTap(channel),

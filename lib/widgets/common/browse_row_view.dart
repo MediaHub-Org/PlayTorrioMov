@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../movie/movie_card.dart';
 import 'first_focus_scope.dart';
 import 'section_header.dart';
@@ -60,7 +60,10 @@ class BrowseRowView<T> extends StatefulWidget {
   /// Overrides the default poster sizing -- e.g. Live TV's channel cards,
   /// which are a logo/banner shape, not a poster shape. Null uses
   /// [MovieCardSizing.fromWidth].
-  final RowCardSizing Function(double screenWidth)? sizingOf;
+  ///
+  /// Given the screen width and the text-size factor ([AppUnits.scaleOf]),
+  /// so a rem-sized card follows the user's text size like everything else.
+  final RowCardSizing Function(double screenWidth, double scale)? sizingOf;
 
   /// Whether this row should hand focus to its first card once it has
   /// items, so a D-pad/keyboard viewer lands somewhere deterministic
@@ -139,9 +142,12 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
     if (widget.items.isEmpty) return const SizedBox.shrink();
 
     final screenWidth = MediaQuery.sizeOf(context).width;
+    final scale = AppUnits.scaleOf(context);
     final sizing = widget.sizingOf != null
-        ? widget.sizingOf!(screenWidth)
-        : RowCardSizing.fromMovieSizing(MovieCardSizing.fromWidth(screenWidth));
+        ? widget.sizingOf!(screenWidth, scale)
+        : RowCardSizing.fromMovieSizing(
+            MovieCardSizing.fromWidth(screenWidth, scale: scale),
+          );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +203,7 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.md),
+        SizedBox(height: context.rem(AppRem.md)),
       ],
     );
   }
@@ -216,15 +222,17 @@ class _Arrow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Parked off the edge by a full arrow and a bit, in rem like the arrow.
+    final offset = context.rem(visible ? AppRem.sm : -AppRem.arrowParked);
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeOutCubic,
-      left: alignLeft ? (visible ? 10 : -60) : null,
-      right: alignLeft ? null : (visible ? 10 : -60),
+      left: alignLeft ? offset : null,
+      right: alignLeft ? null : offset,
       top: 0,
       bottom: 0,
       child: Center(
-        // Parked 60px off the edge until a pointer hovers the row, but still
+        // Parked off the edge until a pointer hovers the row, but still
         // in the tree: without this a D-pad could land on the invisible
         // arrow, a focus stop with nothing to see and nothing worth doing.
         child: ExcludeFocus(

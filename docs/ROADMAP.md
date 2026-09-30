@@ -25,10 +25,10 @@ The first item is code work, in batches; the rest need a device.
   header pills, section header, nav shell bottom bar, pill filter bar, mini
   player bar, sidebar logo). Two constants stay as default-scale values for
   tests (`TopBar.sharedHeight`, `pillFilterHeaderContentHeight`); layout reads
-  the rem versions (`pillFilterHeaderHeightOf`). Next, each its own PR: (1) cards
-  and rows: `MovieCard`,
-  `AnimeCard`, `BrowseRowView`, `BrowseScaffold`, the card sizing; (2) details
-  and anime details; (3) the player and its menus; (4) settings; (5) the rest
+  the rem versions (`pillFilterHeaderHeightOf`). The poster cards and rows are
+  done too (`MovieCard`, `AnimeCard`, `BrowseRowView`, `BrowseScaffold`, the
+  card sizing; `SliderArrow` and the IPTV channel card are not). Next, each its own PR: (1) details and anime
+  details; (2) the player and its menus; (3) settings; (4) the rest
   of `lib/pages` and `lib/widgets`. Judge each against a device at the default
   text size: the batches are made without one, so a visual drift is the risk.
 

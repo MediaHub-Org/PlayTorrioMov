@@ -393,11 +393,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
     final mediaQuery = MediaQuery.of(context);
     final topPadding = mediaQuery.padding.top;
     final bottomInset = mediaQuery.padding.bottom;
-    final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
     final isCompactScreen = screenHeight < 520;
 
-    final sizing = MovieCardSizing.fromWidth(screenWidth);
+    final sizing = MovieCardSizing.of(context);
 
     final hasExtras = _hasVisibleExtras;
     final toolbarH = isCompactScreen ? 46.0 : kToolbarHeight;
@@ -1226,7 +1225,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       }
     }
     final allMovies = allMoviesMap.values.toList();
-    final sizing = MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width);
+    final sizing = MovieCardSizing.of(context);
     final double cardAspectRatio = sizing.cardWidth / sizing.totalHeight;
 
     return FirstFocusScope(
