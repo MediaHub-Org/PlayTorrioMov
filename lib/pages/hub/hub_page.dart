@@ -13,6 +13,8 @@ import '../search/search_page.dart';
 import '../settings/settings_page.dart';
 import 'media_hub.dart';
 import '../../widgets/common/tv_focus_bridge.dart';
+import '../../widgets/common/tv_side_menu.dart';
+import '../../services/tv_mode_service.dart';
 import '../../services/theme/app_colors.dart';
 
 /// HubPage: the top-level container hosting the app's single Media hub
@@ -69,6 +71,36 @@ class _HubPageState extends State<HubPage> {
     super.dispose();
   }
 
+  Future<void> _openSettings() async {
+    if (_openingSettings) return;
+    _openingSettings = true;
+    // Same root-navigator escape every back-button page uses (see pushPage)
+    // -- covers the top bar and section chips instead of leaving them drawn
+    // around Settings.
+    await pushPage(context, const SettingsPage());
+    _openingSettings = false;
+    // Addons may have changed in Settings — remount the hub so it rebuilds
+    // and refetches on next show.
+    if (mounted) {
+      setState(() => _rebuildKey++);
+    }
+  }
+
+  Future<void> _openSearch() async {
+    if (_openingSearch) return;
+    _openingSearch = true;
+    // Live TV searches a portal's stream list by keyword, not a title
+    // catalog, so it keeps its own page -- same split each catalog page's own
+    // search button used to make.
+    await pushPage(
+      context,
+      HubController.instance.mediaSection == 'iptv'
+          ? const IptvSearchPage()
+          : const SearchPage(),
+    );
+    _openingSearch = false;
+  }
+
   /// TV remote Back/Exit support: Escape pops the current route.
   void _handleKeyEvent(KeyEvent event) {
     if (event is! KeyDownEvent) return;
@@ -96,46 +128,41 @@ class _HubPageState extends State<HubPage> {
             // Nav chrome + content: TopBar on tablet/desktop, a collapsed
             // top bar + bottom tab bar on mobile. See AdaptiveNavShell.
             Positioned.fill(
-              child: TvFocusBridge(
-                child: AdaptiveNavShell(
-                onSettingsTap: () async {
-                  if (_openingSettings) return;
-                  _openingSettings = true;
-                  // Same root-navigator escape every back-button page uses
-                  // (see pushPage) -- covers the top bar and section chips
-                  // instead of leaving them drawn around Settings.
-                  await pushPage(context, const SettingsPage());
-                  _openingSettings = false;
-                  // Addons may have changed in Settings — remount the hub so
-                  // it rebuilds and refetches on next show.
-                  if (mounted) {
-                    setState(() => _rebuildKey++);
-                  }
-                },
-                onSearchTap: () async {
-                  if (_openingSearch) return;
-                  _openingSearch = true;
-                  // Live TV searches a portal's stream list by keyword, not
-                  // a title catalog, so it keeps its own page -- same split
-                  // each catalog page's own search button used to make.
-                  await pushPage(
-                    context,
-                    HubController.instance.mediaSection == 'iptv'
-                        ? const IptvSearchPage()
-                        : const SearchPage(),
-                  );
-                  _openingSearch = false;
-                },
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppRadii.lg),
+              // On a TV the top bar and the phone's bottom tab bar give way
+              // to a side menu inside the content itself (see TvSideMenu for
+              // why it has to be inside). Listened to, not read once: the
+              // answer arrives from the platform channel and the first frame
+              // may precede it.
+              child: ValueListenableBuilder<bool>(
+                valueListenable: TvModeService.isTv,
+                builder: (context, isTv, _) => TvFocusBridge(
+                  child: AdaptiveNavShell(
+                    tvLayout: isTv,
+                    onSettingsTap: _openSettings,
+                    onSearchTap: _openSearch,
+                    child: ClipRRect(
+                      borderRadius: isTv
+                          ? BorderRadius.zero
+                          : const BorderRadius.only(
+                              topLeft: Radius.circular(AppRadii.lg),
+                            ),
+                      child: NestedNavigator(
+                        // The initial route is built once, so a change of
+                        // layout needs a fresh navigator.
+                        key: ValueKey('$_rebuildKey-$isTv'),
+                        navigatorKey: _navKey,
+                        child: isTv
+                            ? TvHubFrame(
+                                menu: TvSideMenu(
+                                  onSearchTap: _openSearch,
+                                  onSettingsTap: _openSettings,
+                                ),
+                                child: const MediaHub(),
+                              )
+                            : const MediaHub(),
+                      ),
+                    ),
                   ),
-                  child: NestedNavigator(
-                    key: ValueKey(_rebuildKey),
-                    navigatorKey: _navKey,
-                    child: const MediaHub(),
-                  ),
-                ),
                 ),
               ),
             ),

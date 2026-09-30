@@ -100,7 +100,6 @@ class MovieCard extends StatelessWidget {
               child: _PosterFrame(
                 posterUrl: movie.poster,
                 hovered: hovered,
-                contentType: movie.type,
                 imdbRating: movie.imdbRating,
               ),
             ),
@@ -179,13 +178,11 @@ class MovieCard extends StatelessWidget {
 class _PosterFrame extends StatelessWidget {
   final String? posterUrl;
   final bool hovered;
-  final String contentType;
   final String? imdbRating;
 
   const _PosterFrame({
     required this.posterUrl,
     required this.hovered,
-    required this.contentType,
     this.imdbRating,
   });
 
@@ -270,40 +267,6 @@ class _PosterFrame extends StatelessWidget {
                         Colors.transparent,
                         Colors.black.withOpacity(0.40),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // Content type badge (top-left)
-            Positioned(
-              left: 9,
-              top: 9,
-              child: AnimatedOpacity(
-                opacity: hovered ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 170),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: (contentType == 'series' || contentType == 'anime')
-                        ? palette.accentColor.withOpacity(0.90)
-                        : palette.primaryColor.withOpacity(0.90),
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.40),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    contentType == 'series' ? 'SERIES' : (contentType == 'anime' ? 'ANIME' : 'MOVIE'),
-                    style: TextStyle(
-                      fontSize: TvType.scale(10),
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.6,
-                      color: AppColors.onAccent,
                     ),
                   ),
                 ),

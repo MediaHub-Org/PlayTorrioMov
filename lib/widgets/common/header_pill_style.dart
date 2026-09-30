@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'focus_highlight.dart';
 import 'over_artwork.dart';
 
 /// The tint every header pill draws itself from -- see [OverArtwork.tint],
@@ -113,25 +114,28 @@ class HeaderPillIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(
-              minWidth: headerPillMinSize,
-              minHeight: headerPillMinSize,
-            ),
-            padding: const EdgeInsets.all(8),
-            decoration: headerPillDecoration(context),
-            alignment: Alignment.center,
-            child: Icon(
-              icon,
-              size: headerPillIconSize,
-              color: headerPillTint(context).withValues(alpha: 0.70),
+    return FocusHighlight(
+      borderRadius: 14,
+      child: Tooltip(
+        message: tooltip,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: onTap,
+            child: Container(
+              constraints: const BoxConstraints(
+                minWidth: headerPillMinSize,
+                minHeight: headerPillMinSize,
+              ),
+              padding: const EdgeInsets.all(8),
+              decoration: headerPillDecoration(context),
+              alignment: Alignment.center,
+              child: Icon(
+                icon,
+                size: headerPillIconSize,
+                color: headerPillTint(context).withValues(alpha: 0.70),
+              ),
             ),
           ),
         ),

@@ -1,3 +1,4 @@
+import 'focus_highlight.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 
@@ -140,16 +141,18 @@ class SettingsIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return IconButton(
-      onPressed: onTap,
-      tooltip: context.l10n.commonSettings,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
-      style: IconButton.styleFrom(
-        backgroundColor: AppColors.inkAlpha(0.04),
-        foregroundColor: AppColors.inkMuted,
+    return FocusHighlight(
+      child: IconButton(
+        onPressed: onTap,
+        tooltip: context.l10n.commonSettings,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+        style: IconButton.styleFrom(
+          backgroundColor: AppColors.inkAlpha(0.04),
+          foregroundColor: AppColors.inkMuted,
+        ),
+        icon: const Icon(Icons.settings_rounded, size: 20),
       ),
-      icon: const Icon(Icons.settings_rounded, size: 20),
     );
   }
 }
@@ -164,16 +167,18 @@ class SearchIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return IconButton(
-      onPressed: onTap,
-      tooltip: context.l10n.commonSearch,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
-      style: IconButton.styleFrom(
-        backgroundColor: AppColors.inkAlpha(0.04),
-        foregroundColor: AppColors.inkMuted,
+    return FocusHighlight(
+      child: IconButton(
+        onPressed: onTap,
+        tooltip: context.l10n.commonSearch,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+        style: IconButton.styleFrom(
+          backgroundColor: AppColors.inkAlpha(0.04),
+          foregroundColor: AppColors.inkMuted,
+        ),
+        icon: const Icon(Icons.search_rounded, size: 20),
       ),
-      icon: const Icon(Icons.search_rounded, size: 20),
     );
   }
 }

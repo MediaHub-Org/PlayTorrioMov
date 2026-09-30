@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/app_breakpoints.dart';
+import 'focus_highlight.dart';
 import 'header_pill_style.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -30,7 +31,9 @@ class FilterDropdown<T> extends StatelessWidget {
     // Over a hero this pill sits on a photo, so its glyphs stay white; in
     // its own band they follow the theme. See the OverArtwork marker.
     final tint = headerPillTint(context);
-    return PopupMenuButton<T>(
+    return FocusHighlight(
+      borderRadius: 14,
+      child: PopupMenuButton<T>(
       itemBuilder: (context) => items,
       onSelected: onSelected,
       color: AppColors.raised,
@@ -79,6 +82,7 @@ class FilterDropdown<T> extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
