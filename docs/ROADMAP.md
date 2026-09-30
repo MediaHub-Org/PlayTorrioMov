@@ -18,10 +18,11 @@ Last reconciled: **2026-09-29**, on `v1.9.0+47` plus the unreleased work in CHAN
 
 Every item here needs a device; none can be closed by reading code.
 
-- **D-pad on a TV (#80).** Rows are confirmed on a TV. Not yet: leaving
-  Films for the top bar (`TvFocusBridge`, now ungated from TV detection), the
-  hero's Play/Details buttons (`HeroActionButton`), and hidden arrows no
-  longer taking focus. Report what the remote does.
+- **D-pad on a TV (#80).** Rows are confirmed on a TV. Not yet: the side
+  menu (`TvSideMenu`, which replaced hand-bridging to the top bar), the hero's
+  Play/Details (`HeroActionButton`), the focus rings on pills and header icons,
+  and TV detection now including the leanback feature. Report what the remote
+  does.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
   says so). Cast a direct/CDN source with no header requirement: if it plays,

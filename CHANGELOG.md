@@ -36,6 +36,30 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   "right" looks like here still needs eyes on an actual screen.
 
 ### Fixed
+- **A TV gets a side menu instead of the top bar (#80).** Two rounds of
+  hand-bridging the top bar from the content (`TvFocusBridge`) did not work on
+  a real remote, while ordinary traversal inside the content did. The bar sits
+  outside the content's `Navigator`, and each route's focus scope is a wall
+  traversal cannot cross, so the fix is to stop crossing it: on a TV the
+  sections, Search and Settings are a vertical `TvSideMenu` built *inside* the
+  content route, in the same scope as the rows. Left from the first card of a
+  row reaches it, Up/Down move through it, OK switches section, Right returns.
+  The top bar and the phone's bottom tab bar are not drawn on a TV.
+  TV detection also now counts the `leanback` and `television` system
+  features, not just the UI mode, which some boxes do not report. The bridge
+  stays for keyboards on other platforms. Covered by widget tests
+  (`tv_side_menu_test`); not confirmed on a TV.
+- **Focus is now visible on filter pills, Search and Settings (#80).** The
+  header pills' dropdowns, the Search and Settings buttons and the
+  icon-only header pill had only Material's faint focus overlay, which
+  vanishes on a translucent pill or a dark bar. `FocusHighlight` draws the
+  same accent ring the rest of the app uses around them.
+- **Cards no longer carry a Movie/Series/Anime label over the poster.** The
+  movie card faded a type badge in over the top-left of the poster whenever it
+  was hovered or focused, hiding a corner of the artwork exactly when someone
+  was looking at it; the anime card's permanent format pill did the same on
+  the other corner. The type is already the second line under a movie card,
+  and the format is the second line under an anime card when it has no genre.
 - **The top bar still could not be reached, and the hero's Play/Details
   buttons showed nothing under the remote (#80).** Device testing of
   `v1.9.0-dev.3` moved through Films rows but not out of Films. Three fixes:

@@ -276,28 +276,6 @@ class _AnimePosterFrame extends StatelessWidget {
                 ),
               ),
 
-            // Top Right Format Pill
-            Positioned(
-              top: 9,
-              right: 9,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
-                decoration: BoxDecoration(
-                  color: AppThemeService.currentPalette.value.primaryColor.withValues(alpha: 0.90),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  anime.formattedFormat.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: TvType.scale(9.5),
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.onAccent,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ),
-
             // Bottom Overlay with Episode Count
             if (anime.totalEpisodes > 0)
               Positioned(

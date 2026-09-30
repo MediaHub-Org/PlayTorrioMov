@@ -29,8 +29,15 @@ class MainActivity : AudioServiceActivity() {
                 // landscape would also match.
                 "isTv" -> {
                     val uiModeManager = applicationContext.getSystemService(Context.UI_MODE_SERVICE) as? UiModeManager
-                    val isTv = uiModeManager?.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
-                    result.success(isTv)
+                    val byMode = uiModeManager?.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
+                    // UiModeManager alone is not enough: some TV boxes report
+                    // a normal UI mode while still being a leanback device
+                    // with no touchscreen. The system feature flags are what
+                    // a TV is declared by.
+                    val pm = applicationContext.packageManager
+                    val byFeature = pm.hasSystemFeature("android.software.leanback") ||
+                        pm.hasSystemFeature("android.hardware.type.television")
+                    result.success(byMode || byFeature)
                 }
                 else -> result.notImplemented()
             }

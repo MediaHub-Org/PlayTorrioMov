@@ -33,11 +33,16 @@ class AdaptiveNavShell extends StatelessWidget {
   final VoidCallback? onSettingsTap;
   final VoidCallback? onSearchTap;
 
+  /// A TV draws no bars here: [TvSideMenu] carries the sections, Search and
+  /// Settings from inside [child], so the remote can reach them.
+  final bool tvLayout;
+
   const AdaptiveNavShell({
     super.key,
     required this.child,
     this.onSettingsTap,
     this.onSearchTap,
+    this.tvLayout = false,
   });
 
   @override
@@ -45,6 +50,7 @@ class AdaptiveNavShell extends StatelessWidget {
     // Both bars below are handed down const, so they will not rebuild on a
     // theme change on their own -- see AppColors.dependOn.
     AppColors.dependOn(context);
+    if (tvLayout) return child;
     final tier = AppBreakpoints.of(context);
     final topPadding = MediaQuery.paddingOf(context).top;
 
