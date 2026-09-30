@@ -29,6 +29,8 @@ const migratedFiles = <String>[
   'lib/widgets/common/browse_scaffold.dart',
   'lib/widgets/iptv/iptv_slider_section.dart',
   'lib/pages/details/details_page.dart',
+  'lib/pages/anime/anime_details_page.dart',
+  'lib/widgets/details/details_metrics.dart',
 ];
 
 /// A size written as a number. A line that must keep one -- a hairline border,

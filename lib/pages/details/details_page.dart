@@ -26,6 +26,7 @@ import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/details_section_header.dart';
+import '../../widgets/details/details_metrics.dart';
 import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_actions_row.dart';
 import '../discover/discover_page.dart';
@@ -47,59 +48,6 @@ final _activators = {
 // ---------------------------------------------------------------------------
 // Design tokens
 // ---------------------------------------------------------------------------
-/// This page's own spacing scale, in rem (one rem is 16 px at the default
-/// text size; see AppUnits). Read through `context.rem(context.rem(_Space.md))`.
-class _Space {
-  static const xs = 0.5;
-  static const sm = 0.75;
-  static const md = 1.0;
-  static const lg = 1.5;
-  static const xl = 2.0;
-  static const xxl = 3.0;
-}
-
-/// This page's other sizes, in rem. Read through `context.rem(_Dim.x)`.
-class _Dim {
-  static const backButton = 2.75; // the floating back button's footprint
-  static const errorIcon = 4.0;
-  static const spinnerPadding = 2.5;
-  static const desktopPoster = 17.5;
-  static const mobilePoster = 6.875;
-  static const posterRadius = 0.875;
-  static const glowBlur = 2.875;
-  static const glowSpread = 0.375;
-  static const posterShadowBlur = 1.875;
-  static const posterShadowLift = 0.875;
-  static const mobileGlowBlur = 1.75;
-  static const logoWidthDesktop = 23.75;
-  static const logoWidthMobile = 13.75;
-  static const logoHeightDesktop = 8.125;
-  static const logoHeightMobile = 5.0;
-  static const ratingPadX = 0.4375;
-  static const ratingPadY = 0.1875;
-  static const ratingRadius = 0.3125;
-  static const ratingStar = 0.875;
-  static const synopsisWidth = 45.0;
-  static const creditsHeight = 9.25;
-  static const railArrowTop = 0.625;
-  static const railArrowBottom = 2.5;
-  static const seasonPadX = 1.375;
-  static const seasonRadius = 1.375;
-  static const episodeWidthDesktop = 18.75;
-  static const episodeWidthMobile = 14.375;
-  static const episodeRailDesktop = 17.1875;
-  static const episodeRailMobile = 15.3125;
-  static const fadeDesktop = 3.75;
-  static const fadeMobile = 2.5;
-  static const fadeOverlap = 0.625;
-  static const similarArrowBottom = 3.75;
-  static const arrowSize = 2.625;
-  static const playGlyphPad = 0.625;
-  static const episodeRadius = 0.75;
-  static const episodeShadowBlur = 1.125;
-  static const contentMaxWidth = 90.0;
-}
-
 // Font sizes without an AppType step, as plain constants (see AppType).
 const double _kTitleDesktop = 40;
 const double _kTitleMobile = 28;
@@ -646,15 +594,15 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           Icon(
             Icons.broken_image_rounded,
-            size: context.rem(_Dim.errorIcon),
+            size: context.rem(DetailsDim.errorIcon),
             color: AppColors.inkFaint,
           ),
-          SizedBox(height: context.rem(_Space.md)),
+          SizedBox(height: context.rem(DetailsSpace.md)),
           Text(
             context.l10n.detailsUnavailable,
             style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.lead),
           ),
-          SizedBox(height: context.rem(_Space.lg)),
+          SizedBox(height: context.rem(DetailsSpace.lg)),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
@@ -676,7 +624,7 @@ class _DetailsPageState extends State<DetailsPage>
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     final contentMaxWidth =
-        isDesktop ? context.rem(_Dim.contentMaxWidth) : double.infinity;
+        isDesktop ? context.rem(DetailsDim.contentMaxWidth) : double.infinity;
     // How far down the poster/title block starts. Previously a fraction of
     // a "hero height" left over from when this page sat below the hub's top
     // bar -- once the page went fullscreen that read as an oversized empty
@@ -686,8 +634,8 @@ class _DetailsPageState extends State<DetailsPage>
     // instead: status-bar inset down to its top edge, its own ~44px circle,
     // a little breathing room after it.
     final topGap = AppSpacing.floatingTopInset(context) +
-        context.rem(_Dim.backButton) +
-        context.rem(_Space.md);
+        context.rem(DetailsDim.backButton) +
+        context.rem(DetailsSpace.md);
 
     // The backdrop is part of the scroll content and only as tall as the
     // hero block, rather than a pinned layer filling the viewport forever.
@@ -724,7 +672,7 @@ class _DetailsPageState extends State<DetailsPage>
                             isDesktop
                                 ? _buildDesktopLayout(meta, posterUrl)
                                 : _buildMobileLayout(meta, posterUrl),
-                            SizedBox(height: context.rem(_Space.xl)),
+                            SizedBox(height: context.rem(DetailsSpace.xl)),
                           ],
                         ),
                       ),
@@ -733,11 +681,11 @@ class _DetailsPageState extends State<DetailsPage>
                   _contentColumn(
                     isDesktop: isDesktop,
                     maxWidth: contentMaxWidth,
-                    bottomPadding: context.rem(_Space.xxl) + bottomInset,
+                    bottomPadding: context.rem(DetailsSpace.xxl) + bottomInset,
                     children: [
                         if (_credits(meta).isNotEmpty) ...[
                           _buildCreditsRow(meta),
-                          SizedBox(height: context.rem(_Space.xl)),
+                          SizedBox(height: context.rem(DetailsSpace.xl)),
                         ],
                         if (meta.videos.isNotEmpty) ...[
                           if (meta.videos
@@ -747,7 +695,7 @@ class _DetailsPageState extends State<DetailsPage>
                                   .length >
                               1) ...[
                             _buildSeasonSelector(meta),
-                            SizedBox(height: context.rem(_Space.lg)),
+                            SizedBox(height: context.rem(DetailsSpace.lg)),
                           ] else ...[
                             DetailsSectionHeader(
                               _isCollection
@@ -831,22 +779,22 @@ class _DetailsPageState extends State<DetailsPage>
                               key: ValueKey(_selectedSeason),
                             ),
                           ),
-                          SizedBox(height: context.rem(_Space.xl)),
+                          SizedBox(height: context.rem(DetailsSpace.xl)),
                         ],
                         if (widget.relatedItems != null &&
                             widget.relatedItems!.isNotEmpty) ...[
                           _buildRelatedRow(widget.relatedItems!),
-                          SizedBox(height: context.rem(_Space.xl)),
+                          SizedBox(height: context.rem(DetailsSpace.xl)),
                         ],
                         if (_similarItems.isNotEmpty) ...[
                           _buildSimilarRow(),
-                          SizedBox(height: context.rem(_Space.xl)),
+                          SizedBox(height: context.rem(DetailsSpace.xl)),
                         ] else if (_isFetchingSimilar) ...[
                           DetailsSectionHeader(context.l10n.detailsSimilarContent),
                           Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(
-                                vertical: context.rem(_Dim.spinnerPadding),
+                                vertical: context.rem(DetailsDim.spinnerPadding),
                               ),
                               child: SizedBox(
                                 width: context.rem(AppRem.lg),
@@ -858,9 +806,9 @@ class _DetailsPageState extends State<DetailsPage>
                               ),
                             ),
                           ),
-                          SizedBox(height: context.rem(_Space.xl)),
+                          SizedBox(height: context.rem(DetailsSpace.xl)),
                         ],
-                        SizedBox(height: context.rem(_Space.xxl)),
+                        SizedBox(height: context.rem(DetailsSpace.xxl)),
                     ],
                   ),
                 ],
@@ -888,9 +836,9 @@ class _DetailsPageState extends State<DetailsPage>
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            isDesktop ? context.rem(_Space.xxl) : context.rem(_Space.lg),
+            isDesktop ? context.rem(DetailsSpace.xxl) : context.rem(DetailsSpace.lg),
             0,
-            isDesktop ? context.rem(_Space.xxl) : context.rem(_Space.lg),
+            isDesktop ? context.rem(DetailsSpace.xxl) : context.rem(DetailsSpace.lg),
             bottomPadding,
           ),
           child: Column(
@@ -992,32 +940,32 @@ class _DetailsPageState extends State<DetailsPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: context.rem(_Dim.desktopPoster),
+          width: context.rem(DetailsDim.desktopPoster),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (posterUrl != null)
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.rem(_Dim.posterRadius)),
+                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
                     boxShadow: [
                       // subtle accent-tinted glow behind the poster, on top
                       // of the usual drop shadow, so it reads as "lit" rather
                       // than just floating on black
                       BoxShadow(
                         color: _Palette.accent.withOpacity(0.18),
-                        blurRadius: context.rem(_Dim.glowBlur),
-                        spreadRadius: -context.rem(_Dim.glowSpread),
+                        blurRadius: context.rem(DetailsDim.glowBlur),
+                        spreadRadius: -context.rem(DetailsDim.glowSpread),
                       ),
                       BoxShadow(
                         color: Colors.black.withOpacity(0.55),
-                        blurRadius: context.rem(_Dim.posterShadowBlur),
-                        offset: Offset(0, context.rem(_Dim.posterShadowLift)),
+                        blurRadius: context.rem(DetailsDim.posterShadowBlur),
+                        offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(context.rem(_Dim.posterRadius)),
+                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
                     child: AspectRatio(
                       aspectRatio: 2 / 3,
                       child: CachedNetworkImage(
@@ -1031,27 +979,27 @@ class _DetailsPageState extends State<DetailsPage>
                     ),
                   ),
                 ),
-              SizedBox(height: context.rem(_Space.lg)),
+              SizedBox(height: context.rem(DetailsSpace.lg)),
               _buildPlayButton(fullWidth: true),
-              SizedBox(height: context.rem(_Space.sm)),
+              SizedBox(height: context.rem(DetailsSpace.sm)),
               _buildLibraryButton(),
             ],
           ),
         ),
-        SizedBox(width: context.rem(_Space.xl)),
+        SizedBox(width: context.rem(DetailsSpace.xl)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildLogoOrTitle(meta, isDesktop: true),
-              SizedBox(height: context.rem(_Space.md)),
+              SizedBox(height: context.rem(DetailsSpace.md)),
               _buildMetadataRow(meta),
               if (_synopsisText(meta).isNotEmpty) ...[
-                SizedBox(height: context.rem(_Space.lg)),
+                SizedBox(height: context.rem(DetailsSpace.lg)),
                 _buildSynopsis(_synopsisText(meta)),
               ],
               if (meta.genres.isNotEmpty) ...[
-                SizedBox(height: context.rem(_Space.lg)),
+                SizedBox(height: context.rem(DetailsSpace.lg)),
                 _buildGenreChips(meta.genres),
               ],
             ],
@@ -1075,7 +1023,7 @@ class _DetailsPageState extends State<DetailsPage>
                   boxShadow: [
                     BoxShadow(
                       color: _Palette.accent.withOpacity(0.16),
-                      blurRadius: context.rem(_Dim.mobileGlowBlur),
+                      blurRadius: context.rem(DetailsDim.mobileGlowBlur),
                       spreadRadius: -context.rem(AppRem.xs),
                     ),
                     BoxShadow(
@@ -1089,31 +1037,31 @@ class _DetailsPageState extends State<DetailsPage>
                   borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   child: CachedNetworkImage(
                     imageUrl: posterUrl,
-                    width: context.rem(_Dim.mobilePoster),
+                    width: context.rem(DetailsDim.mobilePoster),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-            SizedBox(width: context.rem(_Space.md)),
+            SizedBox(width: context.rem(DetailsSpace.md)),
             Expanded(child: _buildLogoOrTitle(meta, isDesktop: false)),
           ],
         ),
-        SizedBox(height: context.rem(_Space.lg)),
+        SizedBox(height: context.rem(DetailsSpace.lg)),
         _buildMetadataRow(meta),
-        SizedBox(height: context.rem(_Space.lg)),
+        SizedBox(height: context.rem(DetailsSpace.lg)),
         // Play on its own line, the library actions under it. They used to
         // share one Row, which shrank the primary action to make room for the
         // secondary ones and left nothing for a fourth. Stacked, Play gets the
         // full width and the four actions split it between them.
         _buildPlayButton(fullWidth: true),
-        SizedBox(height: context.rem(_Space.sm)),
+        SizedBox(height: context.rem(DetailsSpace.sm)),
         _buildLibraryButton(),
         if (_synopsisText(meta).isNotEmpty) ...[
-          SizedBox(height: context.rem(_Space.lg)),
+          SizedBox(height: context.rem(DetailsSpace.lg)),
           _buildSynopsis(_synopsisText(meta)),
         ],
         if (meta.genres.isNotEmpty) ...[
-          SizedBox(height: context.rem(_Space.md)),
+          SizedBox(height: context.rem(DetailsSpace.md)),
           _buildGenreChips(meta.genres),
         ],
       ],
@@ -1127,8 +1075,8 @@ class _DetailsPageState extends State<DetailsPage>
     if (meta.logo != null && meta.logo!.isNotEmpty) {
       return ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: context.rem(isDesktop ? _Dim.logoWidthDesktop : _Dim.logoWidthMobile),
-          maxHeight: context.rem(isDesktop ? _Dim.logoHeightDesktop : _Dim.logoHeightMobile),
+          maxWidth: context.rem(isDesktop ? DetailsDim.logoWidthDesktop : DetailsDim.logoWidthMobile),
+          maxHeight: context.rem(isDesktop ? DetailsDim.logoHeightDesktop : DetailsDim.logoHeightMobile),
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
@@ -1214,18 +1162,18 @@ class _DetailsPageState extends State<DetailsPage>
       items.add(
         Container(
           padding: EdgeInsets.symmetric(
-            horizontal: context.rem(_Dim.ratingPadX),
-            vertical: context.rem(_Dim.ratingPadY),
+            horizontal: context.rem(DetailsDim.ratingPadX),
+            vertical: context.rem(DetailsDim.ratingPadY),
           ),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(context.rem(_Dim.ratingRadius)),
+            borderRadius: BorderRadius.circular(context.rem(DetailsDim.ratingRadius)),
             border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.star_rounded, color: _Palette.gold, size: context.rem(_Dim.ratingStar)),
+              Icon(Icons.star_rounded, color: _Palette.gold, size: context.rem(DetailsDim.ratingStar)),
               SizedBox(width: context.rem(AppRem.xs)),
               Text(
                 meta.imdbRating!,
@@ -1256,7 +1204,7 @@ class _DetailsPageState extends State<DetailsPage>
       if (i < items.length - 1) {
         spaced.add(
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.rem(_Space.sm)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(DetailsSpace.sm)),
             child: const Text(
               '•',
               style: TextStyle(color: Colors.white30, fontSize: AppType.bodyLg),
@@ -1375,7 +1323,7 @@ class _DetailsPageState extends State<DetailsPage>
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth =
-            constraints.maxWidth.clamp(0.0, context.rem(_Dim.synopsisWidth));
+            constraints.maxWidth.clamp(0.0, context.rem(DetailsDim.synopsisWidth));
         final tp = TextPainter(
           text: TextSpan(text: text, style: style),
           maxLines: maxLines,
@@ -1388,7 +1336,7 @@ class _DetailsPageState extends State<DetailsPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: context.rem(_Dim.synopsisWidth)),
+              constraints: BoxConstraints(maxWidth: context.rem(DetailsDim.synopsisWidth)),
               child: AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -1404,7 +1352,7 @@ class _DetailsPageState extends State<DetailsPage>
               ),
             ),
             if (isOverflowing) ...[
-              SizedBox(height: context.rem(_Space.xs)),
+              SizedBox(height: context.rem(DetailsSpace.xs)),
               HoverButton(
                 scaleAmount: 1.05,
                 showFocusRing: true,
@@ -1486,7 +1434,7 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           DetailsSectionHeader(context.l10n.detailsCastCrew),
           SizedBox(
-            height: context.rem(_Dim.creditsHeight),
+            height: context.rem(DetailsDim.creditsHeight),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -1496,7 +1444,7 @@ class _DetailsPageState extends State<DetailsPage>
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: credits.length,
-                  separatorBuilder: (_, __) => SizedBox(width: context.rem(_Space.lg)),
+                  separatorBuilder: (_, __) => SizedBox(width: context.rem(DetailsSpace.lg)),
                   itemBuilder: (context, index) {
                     final credit = credits[index];
                     return CreditCard(
@@ -1512,8 +1460,8 @@ class _DetailsPageState extends State<DetailsPage>
                   if (_canScrollCastLeft)
                     PositionedDirectional(
                       start: 0,
-                      top: context.rem(_Dim.railArrowTop),
-                      bottom: context.rem(_Dim.railArrowBottom),
+                      top: context.rem(DetailsDim.railArrowTop),
+                      bottom: context.rem(DetailsDim.railArrowBottom),
                       child: _buildScrollArrow(
                         Icons.arrow_back_ios_new_rounded,
                         () => _scrollList(_castScrollController, -1),
@@ -1523,8 +1471,8 @@ class _DetailsPageState extends State<DetailsPage>
                   if (_canScrollCastRight)
                     PositionedDirectional(
                       end: 0,
-                      top: context.rem(_Dim.railArrowTop),
-                      bottom: context.rem(_Dim.railArrowBottom),
+                      top: context.rem(DetailsDim.railArrowTop),
+                      bottom: context.rem(DetailsDim.railArrowBottom),
                       child: _buildScrollArrow(
                         Icons.arrow_forward_ios_rounded,
                         () => _scrollList(_castScrollController, 1),
@@ -1562,7 +1510,7 @@ class _DetailsPageState extends State<DetailsPage>
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               itemCount: seasons.length,
-              separatorBuilder: (_, __) => SizedBox(width: context.rem(_Space.sm)),
+              separatorBuilder: (_, __) => SizedBox(width: context.rem(DetailsSpace.sm)),
               itemBuilder: (context, index) {
                 final season = seasons[index];
                 final isSelected = _selectedSeason == season;
@@ -1580,13 +1528,13 @@ class _DetailsPageState extends State<DetailsPage>
                   scaleAmount: 1.02,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: EdgeInsets.symmetric(horizontal: context.rem(_Dim.seasonPadX)),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(DetailsDim.seasonPadX)),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.ink
                           : AppColors.ink.withOpacity(0.07),
-                      borderRadius: BorderRadius.circular(context.rem(_Dim.seasonRadius)),
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.seasonRadius)),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.ink
@@ -1640,16 +1588,16 @@ class _DetailsPageState extends State<DetailsPage>
   Widget _buildEpisodeSlider({Key? key}) {
     final isDesktop = _isDesktop();
     final cardWidth = context.rem(
-      isDesktop ? _Dim.episodeWidthDesktop : _Dim.episodeWidthMobile,
+      isDesktop ? DetailsDim.episodeWidthDesktop : DetailsDim.episodeWidthMobile,
     );
-    final fadeWidth = context.rem(isDesktop ? _Dim.fadeDesktop : _Dim.fadeMobile);
+    final fadeWidth = context.rem(isDesktop ? DetailsDim.fadeDesktop : DetailsDim.fadeMobile);
 
     return MouseRegion(
       key: key,
       onEnter: (_) => setState(() => _isHoveringEpisodes = true),
       onExit: (_) => setState(() => _isHoveringEpisodes = false),
       child: SizedBox(
-        height: context.rem(isDesktop ? _Dim.episodeRailDesktop : _Dim.episodeRailMobile),
+        height: context.rem(isDesktop ? DetailsDim.episodeRailDesktop : DetailsDim.episodeRailMobile),
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
@@ -1681,7 +1629,7 @@ class _DetailsPageState extends State<DetailsPage>
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: _currentSeasonEpisodes.length,
-                separatorBuilder: (_, __) => SizedBox(width: context.rem(_Space.md)),
+                separatorBuilder: (_, __) => SizedBox(width: context.rem(DetailsSpace.md)),
                 itemBuilder: (context, index) {
                   final ep = _currentSeasonEpisodes[index];
                   return SizedBox(
@@ -1706,7 +1654,7 @@ class _DetailsPageState extends State<DetailsPage>
                   top: 0,
                   bottom: 0,
                   child: Container(
-                    width: fadeWidth + context.rem(_Dim.fadeOverlap),
+                    width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: AlignmentDirectional.centerStart,
@@ -1733,7 +1681,7 @@ class _DetailsPageState extends State<DetailsPage>
                   top: 0,
                   bottom: 0,
                   child: Container(
-                    width: fadeWidth + context.rem(_Dim.fadeOverlap),
+                    width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: AlignmentDirectional.centerEnd,
@@ -1772,7 +1720,7 @@ class _DetailsPageState extends State<DetailsPage>
       min: context.rem(AppRem.cardMin),
       max: context.rem(AppRem.cardMax),
     );
-    final fadeWidth = context.rem(isDesktop ? _Dim.fadeDesktop : _Dim.fadeMobile);
+    final fadeWidth = context.rem(isDesktop ? DetailsDim.fadeDesktop : DetailsDim.fadeMobile);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringRelated = true),
@@ -1819,7 +1767,7 @@ class _DetailsPageState extends State<DetailsPage>
                     physics: const BouncingScrollPhysics(),
                     itemCount: related.length,
                     separatorBuilder: (_, __) =>
-                        SizedBox(width: context.rem(_Space.md)),
+                        SizedBox(width: context.rem(DetailsSpace.md)),
                     itemBuilder: (context, index) {
                       final item = related[index];
                       return SizedBox(
@@ -1856,7 +1804,7 @@ class _DetailsPageState extends State<DetailsPage>
                       top: 0,
                       bottom: 0,
                       child: Container(
-                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
+                        width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerStart,
@@ -1883,7 +1831,7 @@ class _DetailsPageState extends State<DetailsPage>
                       top: 0,
                       bottom: 0,
                       child: Container(
-                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
+                        width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerEnd,
@@ -1923,7 +1871,7 @@ class _DetailsPageState extends State<DetailsPage>
       max: context.rem(AppRem.cardMax),
     );
     final cardHeight = SimilarCard.heightFor(cardWidth);
-    final fadeWidth = context.rem(isDesktop ? _Dim.fadeDesktop : _Dim.fadeMobile);
+    final fadeWidth = context.rem(isDesktop ? DetailsDim.fadeDesktop : DetailsDim.fadeMobile);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringSimilar = true),
@@ -1970,7 +1918,7 @@ class _DetailsPageState extends State<DetailsPage>
                     physics: const BouncingScrollPhysics(),
                     itemCount: _similarItems.length,
                     separatorBuilder: (_, __) =>
-                        SizedBox(width: context.rem(_Space.md)),
+                        SizedBox(width: context.rem(DetailsSpace.md)),
                     itemBuilder: (context, index) {
                       final item = _similarItems[index];
                       return SimilarCard(
@@ -1986,9 +1934,9 @@ class _DetailsPageState extends State<DetailsPage>
                     PositionedDirectional(
                       start: 0,
                       top: 0,
-                      bottom: context.rem(_Dim.similarArrowBottom),
+                      bottom: context.rem(DetailsDim.similarArrowBottom),
                       child: Container(
-                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
+                        width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerStart,
@@ -2013,9 +1961,9 @@ class _DetailsPageState extends State<DetailsPage>
                     PositionedDirectional(
                       end: 0,
                       top: 0,
-                      bottom: context.rem(_Dim.similarArrowBottom),
+                      bottom: context.rem(DetailsDim.similarArrowBottom),
                       child: Container(
-                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
+                        width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerEnd,
@@ -2065,8 +2013,8 @@ class _DetailsPageState extends State<DetailsPage>
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  width: context.rem(_Dim.arrowSize),
-                  height: context.rem(_Dim.arrowSize),
+                  width: context.rem(DetailsDim.arrowSize),
+                  height: context.rem(DetailsDim.arrowSize),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
@@ -2141,7 +2089,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
           child: Container(
             decoration: BoxDecoration(
               color: _Palette.surface,
-              borderRadius: BorderRadius.circular(context.rem(_Dim.episodeRadius)),
+              borderRadius: BorderRadius.circular(context.rem(DetailsDim.episodeRadius)),
               border: Border.all(
                 color: hovered
                     ? AppColors.ink.withOpacity(0.22)
@@ -2151,14 +2099,14 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                   ? [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.4),
-                        blurRadius: context.rem(_Dim.episodeShadowBlur),
+                        blurRadius: context.rem(DetailsDim.episodeShadowBlur),
                         offset: Offset(0, context.rem(AppRem.sm)),
                       ),
                     ]
                   : [],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(context.rem(_Dim.episodeRadius)),
+              borderRadius: BorderRadius.circular(context.rem(DetailsDim.episodeRadius)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -2194,7 +2142,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             opacity: hovered ? 1.0 : 0.0,
                             duration: const Duration(milliseconds: 150),
                             child: Container(
-                              padding: EdgeInsets.all(context.rem(_Dim.playGlyphPad)),
+                              padding: EdgeInsets.all(context.rem(DetailsDim.playGlyphPad)),
                               decoration: BoxDecoration(
                                 color: AppColors.ink,
                                 shape: BoxShape.circle,
@@ -2217,7 +2165,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(context.rem(_Space.sm)),
+                    padding: EdgeInsets.all(context.rem(DetailsSpace.sm)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
