@@ -16,7 +16,17 @@ Last reconciled: **2026-09-29**, on `v1.9.0+47` plus the unreleased work in CHAN
 
 ## Pending
 
-Every item here needs a device; none can be closed by reading code.
+The first item is code work, in batches; the rest need a device.
+
+- **Sizes in rem and tokens (batches).** The convention is in CONVENTIONS
+  ("Sizes") and `lib/services/app_units.dart`; `units_no_raw_pixels_test`
+  lists the migrated files. Done: the TV side menu, hero Play/Details, focus
+  helpers. Next, each its own PR: (1) the hub chrome: top bar, section chips,
+  nav shell, filter pills, page headers; (2) cards and rows: `MovieCard`,
+  `AnimeCard`, `BrowseRowView`, `BrowseScaffold`, the card sizing; (3) details
+  and anime details; (4) the player and its menus; (5) settings; (6) the rest
+  of `lib/pages` and `lib/widgets`. Judge each against a device at the default
+  text size: the batches are made without one, so a visual drift is the risk.
 
 - **D-pad on a TV (#80).** Rows are confirmed on a TV. Not yet: the side
   menu (`TvSideMenu`, which replaced hand-bridging to the top bar), the hero's

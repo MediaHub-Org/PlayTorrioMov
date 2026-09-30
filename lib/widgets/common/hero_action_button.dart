@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../services/app_units.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import 'hover_button.dart';
@@ -11,7 +12,11 @@ import 'hover_button.dart';
 /// invisible on a saturated fill over a photo, so a remote moving across
 /// them showed nothing at all -- reported on a TV as "no response when moving
 /// the selector". Built on [HoverButton] instead, like every other target
-/// here: explicit select/enter activation, the lean, and a real focus ring.
+/// here: explicit select/enter, the lean, and a real focus ring.
+///
+/// Sizes come from [AppRem] and [AppType], so both buttons in a pair are the
+/// same height and scale with the text size; the only choice a caller makes
+/// is [compact] (a phone).
 class HeroActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -20,11 +25,8 @@ class HeroActionButton extends StatelessWidget {
   /// Filled with the palette color (Play) or outlined (Details).
   final bool primary;
 
-  final double iconSize;
-  final double fontSize;
-  final double horizontalPadding;
-  final double verticalPadding;
-  final double radius;
+  /// The phone's smaller size.
+  final bool compact;
 
   const HeroActionButton({
     super.key,
@@ -32,11 +34,7 @@ class HeroActionButton extends StatelessWidget {
     required this.label,
     required this.onTap,
     required this.primary,
-    required this.iconSize,
-    required this.fontSize,
-    required this.horizontalPadding,
-    required this.verticalPadding,
-    required this.radius,
+    this.compact = false,
   });
 
   @override
@@ -45,17 +43,22 @@ class HeroActionButton extends StatelessWidget {
     final fill = AppThemeService.currentPalette.value.primaryColor;
     final foreground =
         primary ? AppColors.onAccent : AppColors.onAccent.withValues(alpha: 0.80);
+    final radius = context.rem(AppRem.radiusMd);
     return Semantics(
       button: true,
       child: HoverButton(
         scaleAmount: 1.05,
         showFocusRing: true,
-        focusRingBorderRadius: radius + 4,
+        focusRingBorderRadius: radius + context.rem(AppRem.xs),
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
-            vertical: verticalPadding,
+            horizontal: context.rem(
+              compact ? AppRem.controlXCompact : AppRem.controlX,
+            ),
+            vertical: context.rem(
+              compact ? AppRem.controlYCompact : AppRem.controlY,
+            ),
           ),
           decoration: BoxDecoration(
             color: primary ? fill : Colors.transparent,
@@ -64,14 +67,14 @@ class HeroActionButton extends StatelessWidget {
                 ? null
                 : Border.all(
                     color: AppColors.onAccent.withValues(alpha: 0.18),
-                    width: 1.2,
+                    width: 1, // px: a hairline stays a hairline at any text size
                   ),
             boxShadow: primary
                 ? [
                     BoxShadow(
                       color: fill.withValues(alpha: 0.45),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+                      blurRadius: context.rem(AppRem.lg),
+                      offset: Offset(0, context.rem(AppRem.xs)),
                     ),
                   ]
                 : null,
@@ -79,14 +82,18 @@ class HeroActionButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: iconSize, color: foreground),
-              const SizedBox(width: 8),
+              Icon(
+                icon,
+                size: context.rem(compact ? AppRem.icon : AppRem.iconLg),
+                color: foreground,
+              ),
+              SizedBox(width: context.rem(AppRem.sm)),
               Text(
                 label,
                 style: TextStyle(
                   color: foreground,
                   fontWeight: FontWeight.w700,
-                  fontSize: fontSize,
+                  fontSize: compact ? AppType.body : AppType.bodyLg,
                 ),
               ),
             ],

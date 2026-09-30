@@ -7,6 +7,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/movie/movie_section.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../utils/navigation/route_transitions.dart';
@@ -584,26 +585,18 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                   children: [
                     HeroActionButton(
                       primary: true,
+                      compact: isCompact,
                       onTap: () => openDetails(autoPlay: true),
                       icon: Icons.play_arrow_rounded,
-                      iconSize: 22,
                       label: widget.type == 'series' ? 'Watch Now' : 'Play Movie',
-                      fontSize: 14.5,
-                      horizontalPadding: isCompact ? 16 : 24,
-                      verticalPadding: isCompact ? 10 : 14,
-                      radius: 12,
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: context.rem(AppRem.ms)),
                     HeroActionButton(
                       primary: false,
+                      compact: isCompact,
                       onTap: () => openDetails(),
                       icon: Icons.info_outline_rounded,
-                      iconSize: isCompact ? 17 : 19,
                       label: context.l10n.commonDetails,
-                      fontSize: isCompact ? 13 : 14.5,
-                      horizontalPadding: isCompact ? 14 : 20,
-                      verticalPadding: isCompact ? 10 : 14,
-                      radius: 12,
                     ),
                   ],
                 ),

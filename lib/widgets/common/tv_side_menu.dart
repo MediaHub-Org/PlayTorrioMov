@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../utils/hub_controller.dart';
@@ -31,25 +32,24 @@ class TvSideMenu extends StatelessWidget {
   /// Proportional to the window like the poster cards, not a fixed number:
   /// wide enough for "Live TV" and its icon at couch distance, never more
   /// than a tenth-odd of the screen.
-  static double widthFor(double screenWidth) =>
+  static double widthFor(BuildContext context) =>
       AppSpacing.cardWidthForScreenWidth(
-        screenWidth,
-        min: 148,
-        max: 220,
+        MediaQuery.sizeOf(context).width,
+        min: context.rem(AppRem.menuMin),
+        max: context.rem(AppRem.menuMax),
         factor: 0.11,
       );
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    final width = widthFor(MediaQuery.sizeOf(context).width);
     return Container(
-      width: width,
+      width: widthFor(context),
       padding: EdgeInsets.fromLTRB(
-        AppSpacing.sm,
-        MediaQuery.paddingOf(context).top + AppSpacing.md,
-        AppSpacing.sm,
-        AppSpacing.md,
+        context.rem(AppRem.sm),
+        MediaQuery.paddingOf(context).top + context.rem(AppRem.md),
+        context.rem(AppRem.sm),
+        context.rem(AppRem.md),
       ),
       decoration: BoxDecoration(
         color: AppColors.bar,
@@ -111,23 +111,24 @@ class _MenuItem extends StatelessWidget {
     AppColors.dependOn(context);
     final accent = AppThemeService.currentPalette.value.primaryColor;
     final foreground = selected ? AppColors.onAccent : AppColors.inkSubtle;
+    final radius = context.rem(AppRem.radiusMd);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.xxs)),
       child: HoverButton(
         scaleAmount: 1.03,
         showFocusRing: true,
-        focusRingBorderRadius: AppRadii.lg,
+        focusRingBorderRadius: radius + context.rem(AppRem.xs),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          padding: EdgeInsets.all(context.rem(AppRem.ms)),
           decoration: BoxDecoration(
             color: selected ? accent : AppColors.inkAlpha(0.05),
-            borderRadius: BorderRadius.circular(AppRadii.md),
+            borderRadius: BorderRadius.circular(radius),
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: foreground),
-              const SizedBox(width: 10),
+              Icon(icon, size: context.rem(AppRem.icon), color: foreground),
+              SizedBox(width: context.rem(AppRem.sm)),
               Expanded(
                 child: Text(
                   label,
@@ -135,7 +136,7 @@ class _MenuItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: foreground,
-                    fontSize: 14,
+                    fontSize: AppType.body,
                     fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                   ),
                 ),

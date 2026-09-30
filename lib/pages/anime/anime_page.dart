@@ -8,6 +8,7 @@ import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
 import '../../widgets/common/browse_scaffold.dart';
@@ -747,26 +748,18 @@ class _AnimeHeroSlide extends StatelessWidget {
                     children: [
                       HeroActionButton(
                         primary: true,
+                        compact: isCompact,
                         onTap: onWatchNow,
                         icon: Icons.play_arrow_rounded,
-                        iconSize: 24,
                         label: context.l10n.animeWatchEp1,
-                        fontSize: 15.5,
-                        horizontalPadding: isCompact ? 18 : 28,
-                        verticalPadding: isCompact ? 12 : 16,
-                        radius: 14,
                       ),
-                      SizedBox(width: isCompact ? 8 : 12),
+                      SizedBox(width: context.rem(AppRem.ms)),
                       HeroActionButton(
                         primary: false,
+                        compact: isCompact,
                         onTap: onDetailsTap,
                         icon: Icons.info_outline_rounded,
-                        iconSize: isCompact ? 18 : 21,
                         label: context.l10n.commonDetails,
-                        fontSize: isCompact ? 14 : 15.5,
-                        horizontalPadding: isCompact ? 16 : 24,
-                        verticalPadding: isCompact ? 12 : 16,
-                        radius: 14,
                       ),
                     ],
                   ),
