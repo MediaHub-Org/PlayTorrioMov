@@ -27,6 +27,7 @@ import '../../services/sources/source_filter_settings.dart';
 
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_top_bar.dart';
+import '../../widgets/player/remote_key_decision.dart';
 import '../../widgets/player/player_transport.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_seek_feedback.dart';
@@ -2231,37 +2232,31 @@ class _PlayerScreenState extends State<PlayerScreen>
               // just show them; with them up, the first arrow lands on
               // play/pause and the rest move focus between the controls as
               // the traversal always did.
-              final key = event.logicalKey;
-              final isArrow = key == LogicalKeyboardKey.arrowUp ||
-                  key == LogicalKeyboardKey.arrowDown ||
-                  key == LogicalKeyboardKey.arrowLeft ||
-                  key == LogicalKeyboardKey.arrowRight;
-              final isOk = key == LogicalKeyboardKey.select ||
-                  key == LogicalKeyboardKey.gameButtonA;
-              // Not while a menu or a side panel has the screen: those take
-              // the arrows for their own lists.
-              final hasOverlayOpen = _activeMenu != null ||
-                  _showEpisodesPanel ||
-                  _showSourcesPanel ||
-                  _showSubSyncBar;
-              if (!hasOverlayOpen && (isArrow || isOk)) {
-                final wasHidden = !_showControls;
-                _revealControls();
-                if (isTv && isArrow) {
-                  if (wasHidden) {
-                    if (key == LogicalKeyboardKey.arrowLeft) {
-                      _seekRelative(const Duration(seconds: -10));
-                    } else if (key == LogicalKeyboardKey.arrowRight) {
-                      _seekRelative(const Duration(seconds: 10));
-                    }
-                    return KeyEventResult.handled;
-                  }
-                  if (FocusManager.instance.primaryFocus == _focusNode) {
-                    _playPauseFocus.requestFocus();
-                    return KeyEventResult.handled;
-                  }
-                }
+              final decision = decideRemoteKey(
+                key: event.logicalKey,
+                isTv: isTv,
+                controlsVisible: _showControls,
+                // Not while a menu or a side panel has the screen: those take
+                // the arrows for their own lists.
+                hasOverlayOpen: _activeMenu != null ||
+                    _showEpisodesPanel ||
+                    _showSourcesPanel ||
+                    _showSubSyncBar,
+                screenHoldsFocus:
+                    FocusManager.instance.primaryFocus == _focusNode,
+              );
+              if (decision.revealControls) _revealControls();
+              switch (decision.action) {
+                case RemoteKeyAction.seekBack:
+                  _seekRelative(const Duration(seconds: -10));
+                case RemoteKeyAction.seekForward:
+                  _seekRelative(const Duration(seconds: 10));
+                case RemoteKeyAction.focusPlayPause:
+                  _playPauseFocus.requestFocus();
+                case RemoteKeyAction.revealOnly || RemoteKeyAction.none:
+                  break;
               }
+              if (decision.isHandled) return KeyEventResult.handled;
 
               if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
                   (!isTv && event.logicalKey == LogicalKeyboardKey.arrowUp)) {

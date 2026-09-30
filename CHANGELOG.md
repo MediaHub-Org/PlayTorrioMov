@@ -32,8 +32,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   row's title is the release's own file name again (up to two lines), with the
   site under it; the tags are down from as many as eight to quality, HDR, a
   torrent's seed count, size and audio language. Container, release source,
-  codec and P2P/HTTP are in the file name. The other two source pickers (in
-  the player, anime episodes) are unchanged. New `StreamSource.releaseName`.
+  codec and P2P/HTTP are in the file name. The in-player sources panel and the
+  anime episode sheet follow: `sourceDeliveryBadges` no longer emits the gray
+  P2P/HTTP pill (it told nobody anything), leaving just a torrent's seed-health
+  count, and the anime sheet drops the empty row a direct link would leave.
+  New `StreamSource.releaseName`.
+- **The player's remote-key decision is a tested function.** What an arrow or
+  OK means to the player on a TV (bars back, Left/Right seek while hidden,
+  first arrow to play/pause) moved out of `PlayerScreen`'s key handler into
+  `decideRemoteKey` (`remote_key_decision.dart`), with a test per row. No
+  behavior change; it is the part that regressed silently before, and a test
+  that pumps the whole screen cannot see it. Not confirmed on a TV.
 - **Sizes are `rem` and named tokens, done in batches.** The code
   measured layout in bare numbers (`SizedBox(width: 12)`, `height: 40`), so a
   larger text size grew the text and left every gap, bar and button where it

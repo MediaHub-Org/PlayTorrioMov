@@ -415,17 +415,22 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                                   fontSize: AppType.tiny,
                                                 ),
                                               ),
-                                              // Same delivery/seed badges
-                                              // the movie and series picker
-                                              // shows, so a torrent source
-                                              // reads the same here.
-                                              SizedBox(height: context.rem(AppRem.snug)),
-                                              Wrap(
-                                                spacing: context.rem(AppRem.snug),
-                                                runSpacing: context.rem(AppRem.xs),
-                                                children:
-                                                    sourceDeliveryBadges(s),
-                                              ),
+                                              // Same seed badge the movie
+                                              // and series picker shows, so
+                                              // a torrent source reads the
+                                              // same here. A direct link has
+                                              // none, and then the gap above
+                                              // it would be dead space.
+                                              if (sourceDeliveryBadges(s)
+                                                  .isNotEmpty) ...[
+                                                SizedBox(height: context.rem(AppRem.snug)),
+                                                Wrap(
+                                                  spacing: context.rem(AppRem.snug),
+                                                  runSpacing: context.rem(AppRem.xs),
+                                                  children:
+                                                      sourceDeliveryBadges(s),
+                                                ),
+                                              ],
                                             ],
                                           ),
                                         ),

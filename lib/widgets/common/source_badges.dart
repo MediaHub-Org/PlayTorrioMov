@@ -4,10 +4,6 @@ import '../../models/stream/stream_model.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
 
-/// Neutral badge tint, for facts that describe a source rather than rank it
-/// (codec, file size, how it is delivered).
-const Color kSourceBadgeNeutral = Color(0xFF66666B);
-
 const Color _kHealthy = Color(0xFF51CF66);
 const Color _kThin = Color(0xFFFBBF24);
 const Color _kStalled = Color(0xFFFF6B6B);
@@ -63,27 +59,29 @@ class SourceBadge extends StatelessWidget {
   }
 }
 
-/// How a source is delivered, and -- for a torrent -- how healthy it is.
+/// How healthy a torrent is -- the one delivery fact worth a pill.
 ///
-/// Every source picker shows these, so the same source reads the same way
+/// Every source picker shows this, so the same source reads the same way
 /// whether you reached it from a movie, a series episode, an anime episode,
 /// or the panel inside the player. [StreamSource.seeders] was already being
 /// parsed out of the source title and then never shown anywhere, which left
 /// the seed count, the single most useful signal for picking between two
 /// otherwise identical torrents, invisible.
+///
+/// There is no "HTTP" or "P2P" pill any more. They were neutral gray, present
+/// on every row, and so told nobody anything: a torrent is recognizable by
+/// its seed count, and a direct link by its absence. On a TV, where #80's
+/// feedback was that the rows carry too many tags, that was a pill per row
+/// spent on nothing. The Watch Sources rows dropped them first; the
+/// in-player panel and the anime episode sheet now match.
 List<Widget> sourceDeliveryBadges(StreamSource source) {
-  if (!source.isMagnet) {
-    return const [SourceBadge('HTTP', kSourceBadgeNeutral)];
-  }
-
-  final seeders = source.seeders;
+  final seeders = source.isMagnet ? source.seeders : null;
+  if (seeders == null) return const [];
   return [
-    const SourceBadge('P2P', kSourceBadgeNeutral),
-    if (seeders != null)
-      SourceBadge(
-        '$seeders',
-        seedHealthColor(seeders),
-        icon: Icons.arrow_upward_rounded,
-      ),
+    SourceBadge(
+      '$seeders',
+      seedHealthColor(seeders),
+      icon: Icons.arrow_upward_rounded,
+    ),
   ];
 }
