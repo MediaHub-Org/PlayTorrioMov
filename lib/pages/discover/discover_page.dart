@@ -16,6 +16,7 @@ import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 class DiscoverPage extends StatefulWidget {
   final String? query;
@@ -438,15 +439,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
       return Center(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(20, topOffset + 30, 20, 100),
+          padding: EdgeInsets.fromLTRB(context.rem(1.25), topOffset + context.rem(1.875), context.rem(1.25), context.rem(6.25)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.category_outlined, size: 48, color: AppColors.inkAlpha(0.3)),
-              const SizedBox(height: 12),
+              Icon(Icons.category_outlined, size: context.rem(3), color: AppColors.inkAlpha(0.3)),
+              SizedBox(height: context.rem(AppRem.ms)),
               Text(
                 context.l10n.discoverNoCatalogs(_selectedType),
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -470,7 +471,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       return Center(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(20, topOffset + 30, 20, 100),
+          padding: EdgeInsets.fromLTRB(context.rem(1.25), topOffset + context.rem(1.875), context.rem(1.25), context.rem(6.25)),
           child: ErrorView(
             title: context.l10n.catalogCouldNotLoad,
             error: _error,
@@ -484,15 +485,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
       return Center(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(20, topOffset + 30, 20, 100),
+          padding: EdgeInsets.fromLTRB(context.rem(1.25), topOffset + context.rem(1.875), context.rem(1.25), context.rem(6.25)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.inbox_rounded, size: 48, color: AppColors.inkAlpha(0.3)),
-              const SizedBox(height: 12),
+              Icon(Icons.inbox_rounded, size: context.rem(3), color: AppColors.inkAlpha(0.3)),
+              SizedBox(height: context.rem(AppRem.ms)),
               Text(
                 context.l10n.discoverNoTitles,
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -516,7 +517,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       controller: _scrollController,
       padding: EdgeInsets.fromLTRB(
         sizing.sidePadding,
-        topOffset + 14,
+        topOffset + context.rem(0.875),
         sizing.sidePadding,
         110 + bottomInset,
       ),
@@ -549,26 +550,26 @@ class _DiscoverPageState extends State<DiscoverPage> {
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.fromLTRB(
-          isNarrow ? 16 : 24,
-          topOffset + 20,
-          isNarrow ? 16 : 24,
+          context.rem(isNarrow ? AppRem.md : AppRem.lg),
+          topOffset + context.rem(1.25),
+          context.rem(isNarrow ? AppRem.md : AppRem.lg),
           120 + MediaQuery.paddingOf(context).bottom,
         ),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 480),
+          constraints: BoxConstraints(maxWidth: context.rem(30)),
           padding: EdgeInsets.symmetric(
-            horizontal: isNarrow ? 18 : 28,
-            vertical: isNarrow ? 20 : 28,
+            horizontal: context.rem(isNarrow ? 1.125 : 1.75),
+            vertical: context.rem(isNarrow ? 1.25 : 1.75),
           ),
           decoration: BoxDecoration(
             color: AppColors.surface.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(context.rem(1.25)),
             border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
                 color: AppColors.accent.withValues(alpha: 0.1),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
+                blurRadius: context.rem(AppRem.lg),
+                offset: Offset(0, context.rem(AppRem.sm)),
               ),
             ],
           ),
@@ -576,46 +577,46 @@ class _DiscoverPageState extends State<DiscoverPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(context.rem(0.875)),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.tune_rounded, color: Color(0xFF9D85FF), size: 30),
+                child: Icon(Icons.tune_rounded, color: const Color(0xFF9D85FF), size: context.rem(1.875)),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: context.rem(AppRem.md)),
               Text(
                 context.l10n.discoverSelectRequired,
                 style: TextStyle(
                   color: AppColors.ink,
-                  fontSize: isNarrow ? 17 : 19,
+                  fontSize: isNarrow ? AppType.subhead : AppType.headline,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: context.rem(AppRem.sm)),
               Text(
                 context.l10n.discoverRequiresSelecting(missing.map((e) => e.name).join(' & ')),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppColors.inkAlpha(0.7),
-                  fontSize: isNarrow ? 13 : 14,
-                  height: 1.4,
+                  fontSize: isNarrow ? AppType.small : AppType.body,
+                  height: 1.4, // ratio: a line height, not a size
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: context.rem(1.25)),
               // Quick selection chips for missing extras
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: context.rem(AppRem.sm),
+                runSpacing: context.rem(AppRem.sm),
                 alignment: WrapAlignment.center,
                 children: missing.map((extra) {
                   if (extra.options.isNotEmpty) {
                     return PopupMenuButton<String>(
                       tooltip: extra.name,
-                      constraints: const BoxConstraints(maxHeight: 360),
+                      constraints: BoxConstraints(maxHeight: context.rem(22.5)),
                       color: AppColors.surface,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                         side: BorderSide(color: AppColors.inkAlpha(0.1)),
                       ),
                       onSelected: (val) => _onExtraOptionSelected(extra.name, val),
@@ -629,12 +630,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                           .toList(),
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isNarrow ? 14 : 16,
-                          vertical: isNarrow ? 7 : 8,
+                          horizontal: context.rem(isNarrow ? 0.875 : AppRem.md),
+                          vertical: context.rem(isNarrow ? 0.4375 : AppRem.sm),
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.accent,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(context.rem(1.25)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -644,11 +645,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               style: TextStyle(
                                 color: AppColors.ink,
                                 fontWeight: FontWeight.bold,
-                                fontSize: isNarrow ? 12.5 : 14,
+                                fontSize: isNarrow ? AppType.captionPlus : AppType.body,
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Icon(Icons.arrow_drop_down, color: AppColors.ink, size: 20),
+                            SizedBox(width: context.rem(AppRem.snug)),
+                            Icon(Icons.arrow_drop_down, color: AppColors.ink, size: context.rem(AppRem.icon)),
                           ],
                         ),
                       ),
@@ -660,15 +661,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
                         backgroundColor: AppColors.accent,
                         foregroundColor: AppColors.onAccent,
                         padding: EdgeInsets.symmetric(
-                          horizontal: isNarrow ? 14 : 18,
-                          vertical: isNarrow ? 8 : 10,
+                          horizontal: context.rem(isNarrow ? 0.875 : 1.125),
+                          vertical: context.rem(isNarrow ? AppRem.sm : 0.625),
                         ),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(1.25))),
                       ),
-                      icon: const Icon(Icons.edit_rounded, size: 16),
+                      icon: Icon(Icons.edit_rounded, size: context.rem(AppRem.iconXs)),
                       label: Text(
                         context.l10n.discoverEnterExtra(extra.name),
-                        style: TextStyle(fontSize: isNarrow ? 12.5 : 14),
+                        style: TextStyle(fontSize: isNarrow ? AppType.captionPlus : AppType.body),
                       ),
                     );
                   }
@@ -690,15 +691,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
           side: BorderSide(color: AppColors.inkAlpha(0.1)),
         ),
         title: Text(
           context.l10n.discoverEnterExtra(extraName),
-          style: TextStyle(color: AppColors.ink, fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.ink, fontSize: AppType.lead, fontWeight: FontWeight.bold),
         ),
         content: SizedBox(
-          width: (screenWidth - 64).clamp(260.0, 420.0),
+          width: (screenWidth - context.rem(AppRem.xl * 2)).clamp(context.rem(16.25), context.rem(26.25)),
           child: TextField(
             controller: controller,
             autofocus: true,
@@ -728,7 +729,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.accent,
               foregroundColor: AppColors.onAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
             ),
             onPressed: () {
               Navigator.pop(ctx);
@@ -781,15 +782,15 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   children: [
                     SizedBox(width: AppSpacing.pageInset(context)),
                     const GlassBackButton(),
-                    const SizedBox(width: 2),
+                    SizedBox(width: context.rem(AppRem.xxs)),
                     if (!_isSearching) ...[
-                      Icon(Icons.explore_rounded, color: AppColors.accent, size: 21),
-                      const SizedBox(width: 8),
+                      Icon(Icons.explore_rounded, color: AppColors.accent, size: context.rem(1.3125)),
+                      SizedBox(width: context.rem(AppRem.sm)),
                       Text(
                         context.l10n.discoverTitle,
                         style: TextStyle(
                           color: AppColors.ink,
-                          fontSize: isDesktop ? 20 : (isNarrow ? 17 : 18),
+                          fontSize: isDesktop ? AppType.titleSm : (isNarrow ? AppType.subhead : AppType.lead),
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.5,
                         ),
@@ -798,11 +799,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     if (_isSearching)
                       Expanded(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625)),
                           child: TextField(
                             controller: _searchController,
                             autofocus: true,
-                            style: TextStyle(color: AppColors.ink, fontSize: 15),
+                            style: TextStyle(color: AppColors.ink, fontSize: AppType.bodyMd),
                             textInputAction: TextInputAction.search,
                             onSubmitted: _onSearchSubmitted,
                             decoration: InputDecoration(
@@ -811,12 +812,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                   : context.l10n.discoverSearchWithin(_selectedCatalogEntry?.catalog.name ?? 'catalog'),
                               hintStyle: TextStyle(
                                 color: AppColors.inkAlpha(0.4),
-                                fontSize: 14,
+                                fontSize: AppType.body,
                               ),
                               border: InputBorder.none,
                               suffixIcon: IconButton(
                                 tooltip: context.l10n.commonClose,
-                                icon: Icon(Icons.close_rounded, size: 18, color: AppColors.inkMuted),
+                                icon: Icon(Icons.close_rounded, size: context.rem(AppRem.iconSm), color: AppColors.inkMuted),
                                 onPressed: _clearSearch,
                               ),
                             ),
@@ -829,11 +830,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
                     // Search toggle button
                     if (!_isSearching && (_selectedCatalogEntry?.catalog.supportsSearch ?? false))
                       IconButton(
-                        icon: Icon(Icons.search_rounded, color: AppColors.inkMuted, size: 22),
+                        icon: Icon(Icons.search_rounded, color: AppColors.inkMuted, size: context.rem(AppRem.iconMd)),
                         tooltip: context.l10n.discoverSearchCatalog,
                         onPressed: () => setState(() => _isSearching = true),
                       ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: context.rem(AppRem.sm)),
                   ],
                 ),
               ),
@@ -841,17 +842,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
               // ── Type and Catalog Selector Row ──
               Container(
                 height: selectorH,
-                padding: EdgeInsets.symmetric(horizontal: isNarrow ? 10 : 16),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(isNarrow ? 0.625 : AppRem.md)),
                 child: Row(
                   children: [
                     // Type selector popup/dropdown
                     if (_availableTypes.isNotEmpty) ...[
                       PopupMenuButton<String>(
                         tooltip: context.l10n.discoverContentType,
-                        constraints: const BoxConstraints(maxHeight: 360),
+                        constraints: BoxConstraints(maxHeight: context.rem(22.5)),
                         color: AppColors.surface,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                           side: BorderSide(color: AppColors.inkAlpha(0.1)),
                         ),
                         onSelected: _onTypeChanged,
@@ -871,12 +872,12 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             .toList(),
                         child: Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: isNarrow ? 10 : 14,
-                            vertical: 6,
+                            horizontal: context.rem(isNarrow ? 0.625 : 0.875),
+                            vertical: context.rem(AppRem.snug),
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.accent.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(context.rem(1.25)),
                             border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
                           ),
                           child: Row(
@@ -887,16 +888,16 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                 style: TextStyle(
                                   color: AppColors.ink,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: isNarrow ? 12 : 13,
+                                  fontSize: isNarrow ? AppType.caption : AppType.small,
                                 ),
                               ),
-                              const SizedBox(width: 4),
-                              Icon(Icons.arrow_drop_down, color: AppColors.inkMuted, size: 18),
+                              SizedBox(width: context.rem(AppRem.xs)),
+                              Icon(Icons.arrow_drop_down, color: AppColors.inkMuted, size: context.rem(AppRem.iconSm)),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(width: isNarrow ? 6 : 10),
+                      SizedBox(width: context.rem(isNarrow ? AppRem.snug : 0.625)),
                     ],
 
                     // Catalog selector horizontal scroll
@@ -911,7 +912,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             final hasReq = entry.catalog.hasRequiredExtra;
 
                             return Padding(
-                              padding: const EdgeInsetsDirectional.only(end: 8),
+                              padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
                               child: HoverButton(
                                 scaleAmount: 1.05,
                                 showFocusRing: true,
@@ -919,14 +920,14 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
                                   padding: EdgeInsets.symmetric(
-                                    horizontal: isNarrow ? 11 : 14,
-                                    vertical: 6,
+                                    horizontal: context.rem(isNarrow ? 0.6875 : 0.875),
+                                    vertical: context.rem(AppRem.snug),
                                   ),
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? AppColors.accent
                                         : AppColors.inkAlpha(0.08),
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(context.rem(1.25)),
                                     border: Border.all(
                                       color: isSelected
                                           ? AppColors.accent
@@ -936,7 +937,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                         ? [
                                             BoxShadow(
                                               color: AppColors.accent.withValues(alpha: 0.3),
-                                              blurRadius: 8,
+                                              blurRadius: context.rem(AppRem.sm),
                                             )
                                           ]
                                         : null,
@@ -949,21 +950,21 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                         style: TextStyle(
                                           color: isSelected ? AppColors.ink : AppColors.inkMuted,
                                           fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                          fontSize: isNarrow ? 12 : 13,
+                                          fontSize: isNarrow ? AppType.caption : AppType.small,
                                         ),
                                       ),
                                       if (hasReq) ...[
-                                        const SizedBox(width: 6),
+                                        SizedBox(width: context.rem(AppRem.snug)),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                          padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0625)),
                                           decoration: BoxDecoration(
                                             color: isSelected ? AppColors.inkFaint : Colors.amber.withValues(alpha: 0.25),
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                                           ),
                                           child: Text(
                                             context.l10n.discoverCustom,
                                             style: TextStyle(
-                                              fontSize: TvType.scale(9.5),
+                                              fontSize: TvType.scale(AppType.nanoPlus),
                                               fontWeight: FontWeight.bold,
                                               color: isSelected ? AppColors.ink : Colors.amber,
                                             ),
@@ -990,7 +991,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   child: ListView(
                     controller: _filtersScrollController,
                     scrollDirection: Axis.horizontal,
-                    padding: EdgeInsets.symmetric(horizontal: isNarrow ? 10 : 16, vertical: 6),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(isNarrow ? 0.625 : AppRem.md), vertical: context.rem(AppRem.snug)),
                     physics: const BouncingScrollPhysics(),
                     children: _selectedCatalogEntry!.catalog.extra.map((extra) {
                       if (extra.name == 'skip' || (extra.name == 'search' && !extra.isRequired)) {
@@ -1004,13 +1005,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       // Dropdown for extras with predefined options
                       if (extra.options.isNotEmpty) {
                         return Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 8),
+                          padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
                           child: PopupMenuButton<String?>(
                             tooltip: extra.name,
-                            constraints: const BoxConstraints(maxHeight: 360),
+                            constraints: BoxConstraints(maxHeight: context.rem(22.5)),
                             color: AppColors.surface,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                               side: BorderSide(color: AppColors.inkAlpha(0.1)),
                             ),
                             onSelected: (val) => _onExtraOptionSelected(extra.name, val),
@@ -1035,14 +1036,14 @@ class _DiscoverPageState extends State<DiscoverPage> {
                             ],
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: isNarrow ? 10 : 14,
-                                vertical: 6,
+                                horizontal: context.rem(isNarrow ? 0.625 : 0.875),
+                                vertical: context.rem(AppRem.snug),
                               ),
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? AppColors.accent
                                     : (isReq ? Colors.amber.withValues(alpha: 0.15) : AppColors.inkAlpha(0.08)),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(context.rem(1.25)),
                                 border: Border.all(
                                   color: isSelected
                                       ? AppColors.accent
@@ -1059,13 +1060,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                           ? AppColors.ink
                                           : (isReq ? Colors.amber : AppColors.inkAlpha(0.8)),
                                       fontWeight: FontWeight.w600,
-                                      fontSize: isNarrow ? 11.5 : 12,
+                                      fontSize: isNarrow ? AppType.tinyPlus : AppType.caption,
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
+                                  SizedBox(width: context.rem(AppRem.xs)),
                                   Icon(
                                     Icons.arrow_drop_down,
-                                    size: 18,
+                                    size: context.rem(AppRem.iconSm),
                                     color: isSelected
                                         ? AppColors.ink
                                         : (isReq ? Colors.amber : AppColors.inkMuted),
@@ -1079,21 +1080,21 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
                       // Text input chip for freeform extras (or search if isRequired)
                       return Padding(
-                        padding: const EdgeInsetsDirectional.only(end: 8),
+                        padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
                         child: HoverButton(
                           scaleAmount: 1.05,
                           showFocusRing: true,
                           onTap: () => _showCustomExtraDialog(extra.name),
                           child: Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: isNarrow ? 10 : 14,
-                              vertical: 6,
+                              horizontal: context.rem(isNarrow ? 0.625 : 0.875),
+                              vertical: context.rem(AppRem.snug),
                             ),
                             decoration: BoxDecoration(
                               color: isSelected
                                   ? AppColors.accent
                                   : (isReq ? Colors.amber.withValues(alpha: 0.15) : AppColors.inkAlpha(0.08)),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(context.rem(1.25)),
                               border: Border.all(
                                 color: isSelected
                                     ? AppColors.accent
@@ -1110,13 +1111,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
                                         ? AppColors.ink
                                         : (isReq ? Colors.amber : AppColors.inkAlpha(0.8)),
                                     fontWeight: FontWeight.w600,
-                                    fontSize: isNarrow ? 11.5 : 12,
+                                    fontSize: isNarrow ? AppType.tinyPlus : AppType.caption,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: context.rem(AppRem.xs)),
                                 Icon(
                                   Icons.edit_rounded,
-                                  size: 14,
+                                  size: context.rem(0.875),
                                   color: isSelected
                                       ? AppColors.ink
                                       : (isReq ? Colors.amber : AppColors.inkMuted),
@@ -1160,7 +1161,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
             Center(
               child: Text(
                 context.l10n.commonNoResultsFor(widget.query ?? ''),
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
               ),
             )
           else
@@ -1184,19 +1185,19 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   decoration: BoxDecoration(
                     color: AppColors.canvas.withValues(alpha: 0.6),
                     border: Border(
-                      bottom: BorderSide(color: AppColors.inkAlpha(0.05), width: 1),
+                      bottom: BorderSide(color: AppColors.inkAlpha(0.05), width: 1), // px: a hairline, not a layout size
                     ),
                   ),
                   child: Row(
                     children: [
                       const GlassBackButton(),
-                      const SizedBox(width: 8),
+                      SizedBox(width: context.rem(AppRem.sm)),
                       Expanded(
                         child: Text(
                           widget.isGenre ? context.l10n.discoverGenreTitle(widget.query ?? '') : context.l10n.discoverSearchTitle(widget.query ?? ''),
                           style: TextStyle(
                             color: AppColors.ink,
-                            fontSize: isDesktop ? 22 : 20,
+                            fontSize: isDesktop ? AppType.titleMd : AppType.titleSm,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
                           ),

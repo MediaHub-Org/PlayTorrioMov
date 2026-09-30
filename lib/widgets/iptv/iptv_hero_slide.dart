@@ -7,6 +7,7 @@ import '../../l10n/l10n.dart';
 import '../../services/iptv/hardcoded_channels.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// One full-bleed Live TV hero slide: the channel's art, its name and
 /// category, and the Watch / Sources actions.
@@ -109,9 +110,9 @@ class IptvHeroSlide extends StatelessWidget {
 
         // Content
         Positioned(
-          left: 32,
-          right: 32,
-          bottom: 44,
+          left: context.rem(AppRem.xl),
+          right: context.rem(AppRem.xl),
+          bottom: context.rem(2.75),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -120,35 +121,35 @@ class IptvHeroSlide extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(0.625),
+                      vertical: context.rem(AppRem.xs),
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFF3B30).withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFFFF3B30).withValues(alpha: 0.5),
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
+                          blurRadius: context.rem(0.625),
+                          offset: Offset(0, context.rem(AppRem.xxs)),
                         ),
                       ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.sensors_rounded,
                           color: AppColors.onAccent,
-                          size: 14,
+                          size: context.rem(0.875),
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: context.rem(0.3125)),
                         Text(
                           context.l10n.iptvLiveBroadcast.toUpperCase(),
                           style: const TextStyle(
                             color: AppColors.onAccent,
-                            fontSize: 11,
+                            fontSize: AppType.tiny,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.8,
                           ),
@@ -156,15 +157,15 @@ class IptvHeroSlide extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: context.rem(0.625)),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(0.625),
+                      vertical: context.rem(AppRem.xs),
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.onAccent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                       border: Border.all(
                         color: AppColors.onAccent.withValues(alpha: 0.15),
                       ),
@@ -173,7 +174,7 @@ class IptvHeroSlide extends StatelessWidget {
                       channel.category,
                       style: TextStyle(
                         color: AppColors.onAccent.withValues(alpha: 0.70),
-                        fontSize: 11,
+                        fontSize: AppType.tiny,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.4,
                       ),
@@ -182,14 +183,14 @@ class IptvHeroSlide extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 14),
+              SizedBox(height: context.rem(0.875)),
 
               // Channel Logo (instead of plain text name)
               if (channel.iconUrl != null && channel.iconUrl!.isNotEmpty)
                 ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 280,
-                    maxHeight: 65,
+                  constraints: BoxConstraints(
+                    maxWidth: context.rem(17.5),
+                    maxHeight: context.rem(4.0625),
                   ),
                   child: CachedNetworkImage(
                     imageUrl: channel.iconUrl!,
@@ -200,10 +201,10 @@ class IptvHeroSlide extends StatelessWidget {
                       channel.name,
                       style: const TextStyle(
                         color: AppColors.onAccent,
-                        fontSize: 34,
+                        fontSize: AppType.display,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.5,
-                        height: 1.1,
+                        height: 1.1, // ratio: a line height, not a size
                       ),
                     ),
                   ),
@@ -213,14 +214,14 @@ class IptvHeroSlide extends StatelessWidget {
                   channel.name,
                   style: const TextStyle(
                     color: AppColors.onAccent,
-                    fontSize: 34,
+                    fontSize: AppType.display,
                     fontWeight: FontWeight.w900,
                     letterSpacing: -0.5,
-                    height: 1.1,
+                    height: 1.1, // ratio: a line height, not a size
                   ),
                 ),
 
-              const SizedBox(height: 12),
+              SizedBox(height: context.rem(AppRem.ms)),
 
               // Description / stream info
               Text(
@@ -229,12 +230,12 @@ class IptvHeroSlide extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: AppColors.onAccent.withValues(alpha: 0.65),
-                  fontSize: 14,
-                  height: 1.3,
+                  fontSize: AppType.body,
+                  height: 1.3, // ratio: a line height, not a size
                 ),
               ),
 
-              const SizedBox(height: 18),
+              SizedBox(height: context.rem(1.125)),
 
               // Action Buttons
               Row(
@@ -245,12 +246,12 @@ class IptvHeroSlide extends StatelessWidget {
                     showFocusRing: true,
                     onTap: onWatchNow,
                     child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(AppRem.lg),
+                          vertical: context.rem(AppRem.ms),
                         ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(context.rem(0.875)),
                           gradient: LinearGradient(
                             colors: [palette.primaryColor, palette.accentColor],
                           ),
@@ -259,25 +260,25 @@ class IptvHeroSlide extends StatelessWidget {
                               color: palette.primaryColor.withValues(
                                 alpha: 0.5,
                               ),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
+                              blurRadius: context.rem(AppRem.md),
+                              offset: Offset(0, context.rem(AppRem.xs)),
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.play_arrow_rounded,
                               color: AppColors.onAccent,
-                              size: 22,
+                              size: context.rem(AppRem.iconMd),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: context.rem(AppRem.sm)),
                             Text(
                               context.l10n.iptvWatchLive,
                               style: const TextStyle(
                                 color: AppColors.onAccent,
-                                fontSize: 15,
+                                fontSize: AppType.bodyMd,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.2,
                               ),
@@ -287,7 +288,7 @@ class IptvHeroSlide extends StatelessWidget {
                       ),
                     ),
 
-                  const SizedBox(width: 14),
+                  SizedBox(width: context.rem(0.875)),
 
                   // Sources / Stream Selector Pill
                   HoverButton(
@@ -295,13 +296,13 @@ class IptvHeroSlide extends StatelessWidget {
                     showFocusRing: true,
                     onTap: onSourcesTap,
                     child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(1.125),
+                          vertical: context.rem(AppRem.ms),
                         ),
                         decoration: BoxDecoration(
                           color: AppColors.onAccent.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(context.rem(0.875)),
                           border: Border.all(
                             color: AppColors.onAccent.withValues(alpha: 0.2),
                           ),
@@ -312,14 +313,14 @@ class IptvHeroSlide extends StatelessWidget {
                             Icon(
                               Icons.tune_rounded,
                               color: AppColors.onAccent.withValues(alpha: 0.70),
-                              size: 18,
+                              size: context.rem(AppRem.iconSm),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: context.rem(AppRem.sm)),
                             Text(
                               context.l10n.iptvStreamFeeds,
                               style: const TextStyle(
                                 color: AppColors.onAccent,
-                                fontSize: 14,
+                                fontSize: AppType.body,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'pill_tab_row.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// A reusable tabbed "Library" scaffold shared by the Media, Music, and Books
 /// hubs so they all present their library content with a consistent design.
@@ -88,25 +89,25 @@ class _LibraryTabsState extends State<LibraryTabs>
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(widget.titleIcon, color: AppColors.accent, size: 22),
-              const SizedBox(width: 10),
+              Icon(widget.titleIcon, color: AppColors.accent, size: context.rem(AppRem.iconMd)),
+              SizedBox(width: context.rem(0.625)),
               Text(
                 widget.title,
                 style: const TextStyle(
                   fontWeight: FontWeight.w800,
-                  fontSize: 20,
+                  fontSize: AppType.titleSm,
                 ),
               ),
             ],
           ),
           actions: [
             if (widget.trailing != null) widget.trailing!,
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
           ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(52),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), 0, context.rem(AppRem.md), context.rem(AppRem.ms)),
               child: Align(
                 alignment: AlignmentDirectional.center,
                 child: PillTabRow(
@@ -167,23 +168,23 @@ class LibraryEmptyState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 48, color: AppColors.inkFaint),
-          const SizedBox(height: 12),
+          Icon(icon, size: context.rem(3), color: AppColors.inkFaint),
+          SizedBox(height: context.rem(AppRem.ms)),
           Text(
             title,
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              fontSize: 16,
+              fontSize: AppType.bodyLg,
               color: AppColors.ink,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xl)),
             child: Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: AppColors.inkSubtle),
+              style: TextStyle(fontSize: AppType.small, color: AppColors.inkSubtle),
             ),
           ),
         ],

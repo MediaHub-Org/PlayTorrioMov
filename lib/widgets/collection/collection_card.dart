@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// The three ways a card's square can be filled. Named so the choice can be
 /// asserted without rendering a network image in a test.
@@ -77,7 +78,7 @@ class CollectionCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -85,27 +86,27 @@ class CollectionCard extends StatelessWidget {
           AspectRatio(
             aspectRatio: 1,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: _buildArt(),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              child: _buildArt(context),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           Text(
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: AppColors.ink,
-              fontSize: 13.5,
+              fontSize: AppType.smallPlus,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: context.rem(AppRem.xxs)),
           Text(
             subtitle,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: AppColors.inkSubtle, fontSize: 11.5),
+            style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.tinyPlus),
           ),
         ],
       ),
@@ -128,13 +129,13 @@ class CollectionCard extends StatelessWidget {
     CollectionArt.mosaic => posters.take(4).toList(),
   };
 
-  Widget _buildArt() => switch (artKind) {
-    CollectionArt.icon => _buildIconArt(),
-    CollectionArt.single => _buildPoster(visiblePosters.first),
-    CollectionArt.mosaic => _buildMosaic(),
+  Widget _buildArt(BuildContext context) => switch (artKind) {
+    CollectionArt.icon => _buildIconArt(context),
+    CollectionArt.single => _buildPoster(context, visiblePosters.first),
+    CollectionArt.mosaic => _buildMosaic(context),
   };
 
-  Widget _buildIconArt() {
+  Widget _buildIconArt(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -147,20 +148,20 @@ class CollectionCard extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Icon(icon, size: 34, color: AppColors.ink),
+        child: Icon(icon, size: context.rem(2.125), color: AppColors.ink),
       ),
     );
   }
 
-  Widget _buildMosaic() {
+  Widget _buildMosaic(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
       physics: const NeverScrollableScrollPhysics(),
-      children: [for (final p in visiblePosters) _buildPoster(p)],
+      children: [for (final p in visiblePosters) _buildPoster(context, p)],
     );
   }
 
-  Widget _buildPoster(String url) {
+  Widget _buildPoster(BuildContext context, String url) {
     return CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,
@@ -168,7 +169,7 @@ class CollectionCard extends StatelessWidget {
       // the same choice the details pages make for a poster that has not
       // arrived yet.
       placeholder: (_, __) => const ColoredBox(color: Color(0xFF15171F)),
-      errorWidget: (_, __, ___) => _buildIconArt(),
+      errorWidget: (_, __, ___) => _buildIconArt(context),
     );
   }
 }

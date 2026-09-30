@@ -73,7 +73,7 @@ class SleepTimerMenu extends StatelessWidget {
                           ),
                           style: TextButton.styleFrom(
                             foregroundColor: PlayerTheme.inkSubtle,
-                            minimumSize: const Size(0, 36),
+                            minimumSize: Size(0, context.rem(2.25)),
                             textStyle: const TextStyle(fontSize: AppType.caption),
                           ),
                         ),

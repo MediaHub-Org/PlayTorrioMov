@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// Animated shimmer skeleton shown while a poster image is loading.
 class PosterSkeleton extends StatefulWidget {
@@ -22,7 +23,7 @@ class _PosterSkeletonState extends State<PosterSkeleton>
       duration: const Duration(milliseconds: 900),
     )..repeat(reverse: true);
     
-    _animation = Tween<double>(begin: 0.2, end: 0.6).animate(
+    _animation = Tween<double>(begin: 0.2, end: 0.6).animate( // ratio: a line height, not a size
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -60,7 +61,7 @@ class MissingPoster extends StatelessWidget {
       child: Center(
         child: Icon(
           Icons.movie_rounded,
-          size: 46,
+          size: context.rem(2.875),
           color: AppColors.onAccent.withValues(alpha: 0.22),
         ),
       ),

@@ -12,6 +12,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../services/theme/app_colors.dart';
 import '../common/clamped_text_scale.dart';
 import '../common/hover_button.dart';
+import '../../services/app_units.dart';
 
 /// Upcoming episodes for the user's synced shows, next 14 days. Series-only:
 /// Trakt/Simkl calendars are episode-shaped, movies have no equivalent
@@ -91,23 +92,23 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
     if (entries == null || entries.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 28),
+      padding: EdgeInsets.only(bottom: context.rem(1.75)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(1.125)),
             child: Text(
               context.l10n.homeCalendar,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: AppType.lead,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
                 letterSpacing: -0.3,
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           SizedBox(
             // 92 plus headroom: three text lines (title, episode, date) in a
             // 12px-padded card were already tight at the system default, and
@@ -116,12 +117,12 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
             // else on the page lines up against this row's exact height, so
             // unlike the cast rail there is no reason to hold it to the
             // original number.
-            height: 116,
+            height: context.rem(7.25),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(1.125)),
               itemCount: entries.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, __) => SizedBox(width: context.rem(AppRem.ms)),
               itemBuilder: (context, index) {
                 final entry = entries[index];
                 return HoverButton(
@@ -129,11 +130,11 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                   showFocusRing: true,
                   onTap: () => _openDetails(entry),
                   child: Container(
-                    width: 220,
-                    padding: const EdgeInsets.all(12),
+                    width: context.rem(13.75),
+                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
                     decoration: BoxDecoration(
                       color: AppColors.surface.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(context.rem(0.875)),
                       border: Border.all(
                         color: AppColors.inkAlpha(0.08),
                       ),
@@ -148,12 +149,12 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: AppType.small,
                               fontWeight: FontWeight.w700,
                               color: AppColors.ink,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: context.rem(AppRem.xs)),
                           Text(
                             'S${entry.seasonNumber.toString().padLeft(2, '0')}'
                             'E${entry.episodeNumber.toString().padLeft(2, '0')}'
@@ -161,15 +162,15 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                               color: AppColors.inkAlpha(0.55),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: context.rem(AppRem.xs)),
                           Text(
                             '${entry.firstAiredLocal.month}/${entry.firstAiredLocal.day}',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                               fontWeight: FontWeight.w600,
                               color: AppColors.inkAlpha(0.4),
                             ),

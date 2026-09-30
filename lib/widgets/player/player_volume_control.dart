@@ -29,7 +29,7 @@ class PlayerVolumeControl extends StatefulWidget {
 class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
   bool _isHovered = false;
   bool _isFocused = false;
-  static const double _trackWidth = 96.0;
+  double get _trackWidth => context.rem(6);
 
   /// Same step the scroll wheel uses, so left/right and the wheel move the
   /// level by the same amount either way.

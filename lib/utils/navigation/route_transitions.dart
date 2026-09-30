@@ -31,13 +31,13 @@ class CinematicSlideRoute<T> extends PageRouteBuilder<T> {
             );
 
             final slideIn = Tween<Offset>(
-              begin: const Offset(0.15, 0),
+              begin: const Offset(0.15, 0), // ratio: a line height, not a size
               end: Offset.zero,
             ).animate(inCurve);
 
             final fadeIn = Tween<double>(
               begin: 0.0,
-              end: 1.0,
+              end: 1.0, // ratio: a line height, not a size
             ).animate(CurvedAnimation(
               parent: animation,
               curve: const Interval(0.0, 0.6, curve: Curves.easeOut),

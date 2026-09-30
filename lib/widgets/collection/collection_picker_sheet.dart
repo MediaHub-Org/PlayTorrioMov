@@ -7,6 +7,7 @@ import '../../models/my_list/my_list_item.dart';
 import '../../services/collections/media_collections_service.dart';
 import '../../services/theme/app_colors.dart';
 import '../../utils/navigation/adaptive_sheet.dart';
+import '../../services/app_units.dart';
 
 /// Picks which collections a title belongs to.
 ///
@@ -72,10 +73,10 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
       padding: EdgeInsets.only(bottom: bottomInset),
       child: SafeArea(
         child: Container(
-          margin: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+          margin: EdgeInsets.fromLTRB(context.rem(AppRem.ms), context.rem(AppRem.sm), context.rem(AppRem.ms), context.rem(AppRem.ms)),
           decoration: BoxDecoration(
             color: AppColors.raised,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             border: Border.all(color: AppColors.inkAlpha(0.12)),
           ),
           child: Column(
@@ -83,15 +84,15 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.sm)),
                 child: Row(
                   children: [
                     Icon(
                       Icons.playlist_add_rounded,
                       color: AppColors.accent,
-                      size: 20,
+                      size: context.rem(AppRem.icon),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: context.rem(0.625)),
                     Expanded(
                       child: Text(
                         context.l10n.libraryAddToCollection,
@@ -99,13 +100,13 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: AppColors.ink,
-                          fontSize: 15,
+                          fontSize: AppType.bodyMd,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 18),
+                      icon: Icon(Icons.close_rounded, size: context.rem(AppRem.iconSm)),
                       color: AppColors.inkMuted,
                       tooltip: context.l10n.playerClose,
                       onPressed: () => Navigator.pop(context),
@@ -120,19 +121,19 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                   builder: (context, collections, _) {
                     if (collections.isEmpty) {
                       return Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(AppRem.lg)),
                         child: Text(
                           context.l10n.libraryNoCollectionsYet,
                           style: TextStyle(
                             color: AppColors.inkSubtle,
-                            fontSize: 13,
+                            fontSize: AppType.small,
                           ),
                         ),
                       );
                     }
                     return ListView.builder(
                       shrinkWrap: true,
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
                       itemCount: collections.length,
                       itemBuilder: (context, i) =>
                           _buildRow(collections[i]),
@@ -157,16 +158,16 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
             _nameFocus.requestFocus();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
             child: Row(
               children: [
-                Icon(Icons.add_rounded, color: AppColors.accent, size: 20),
-                const SizedBox(width: 12),
+                Icon(Icons.add_rounded, color: AppColors.accent, size: context.rem(AppRem.icon)),
+                SizedBox(width: context.rem(AppRem.ms)),
                 Text(
                   context.l10n.libraryNewCollection,
                   style: TextStyle(
                     color: AppColors.accent,
-                    fontSize: 14,
+                    fontSize: AppType.body,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -178,7 +179,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+      padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.xs), context.rem(AppRem.md), context.rem(AppRem.ms)),
       child: Row(
         children: [
           Expanded(
@@ -188,27 +189,27 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
               autofocus: true,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _submitNew(),
-              style: TextStyle(color: AppColors.ink, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
               decoration: InputDecoration(
                 hintText: context.l10n.libraryCollectionNameHint,
-                hintStyle: TextStyle(color: AppColors.inkSubtle, fontSize: 14),
+                hintStyle: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.body),
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: context.rem(AppRem.ms),
+                  vertical: context.rem(0.625),
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                   borderSide: BorderSide(color: AppColors.inkAlpha(0.18)),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                   borderSide: BorderSide(color: AppColors.inkAlpha(0.18)),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: context.rem(AppRem.sm)),
           TextButton(onPressed: _submitNew, child: Text(context.l10n.libraryCreate)),
         ],
       ),
@@ -228,7 +229,7 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
           child: Row(
             children: [
               Icon(
@@ -236,21 +237,21 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
                     ? Icons.check_box_rounded
                     : Icons.check_box_outline_blank_rounded,
                 color: inIt ? AppColors.accent : AppColors.inkMuted,
-                size: 22,
+                size: context.rem(AppRem.iconMd),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               Expanded(
                 child: Text(
                   collection.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: AppColors.ink, fontSize: 14),
+                  style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: context.rem(AppRem.sm)),
               Text(
                 collection.count == 1 ? '1 title' : '${collection.count} titles',
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: 12),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.caption),
               ),
             ],
           ),

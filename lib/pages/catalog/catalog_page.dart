@@ -15,6 +15,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 class CatalogPage extends StatefulWidget {
   final MovieSection section;
@@ -229,7 +230,7 @@ class _CatalogPageState extends State<CatalogPage> {
     // Calculate safe top padding for grid based on if filters are available
     final selectableExtras = widget.section.catalog.selectableExtras;
     final hasFilters = selectableExtras.isNotEmpty && !_isSearching;
-    final gridTopPadding = topPadding + kToolbarHeight + (hasFilters ? 60 : 20) + 20;
+    final gridTopPadding = topPadding + kToolbarHeight + context.rem(hasFilters ? 3.75 : 1.25) + context.rem(1.25);
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -250,7 +251,7 @@ class _CatalogPageState extends State<CatalogPage> {
             Center(
               child: Text(
                 context.l10n.catalogNoItems,
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
               ),
             )
           else
@@ -322,13 +323,13 @@ class _CatalogPageState extends State<CatalogPage> {
                           children: [
                             SizedBox(width: AppSpacing.pageInset(context)),
                             const GlassBackButton(),
-                            const SizedBox(width: 10),
+                            SizedBox(width: context.rem(0.625)),
                             if (!_isSearching)
                               Expanded(
                                 child: Text(
                                   widget.section.title,
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: AppType.lead,
                                     fontWeight: FontWeight.w800,
                                     color: AppColors.ink,
                                   ),
@@ -339,11 +340,11 @@ class _CatalogPageState extends State<CatalogPage> {
                             if (_isSearching)
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsetsDirectional.only(end: 16),
+                                  padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.md)),
                                   child: TextField(
                                     controller: _searchController,
                                     autofocus: true,
-                                    style: TextStyle(color: AppColors.ink, fontSize: 16),
+                                    style: TextStyle(color: AppColors.ink, fontSize: AppType.bodyLg),
                                     textInputAction: TextInputAction.search,
                                     onSubmitted: _onSearchSubmitted,
                                     decoration: InputDecoration(
@@ -352,7 +353,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                       border: InputBorder.none,
                                       suffixIcon: IconButton(
                                         tooltip: context.l10n.commonClose,
-                                        icon: const Icon(Icons.close_rounded, size: 20),
+                                        icon: Icon(Icons.close_rounded, size: context.rem(AppRem.icon)),
                                         color: AppColors.inkMuted,
                                         onPressed: _clearSearch,
                                       ),
@@ -372,7 +373,7 @@ class _CatalogPageState extends State<CatalogPage> {
                                 },
                               ),
                             if (!_isSearching)
-                              const SizedBox(width: 8),
+                              SizedBox(width: context.rem(AppRem.sm)),
                           ],
                         ),
                       ),
@@ -405,10 +406,10 @@ class _CatalogPageState extends State<CatalogPage> {
               child: ListView.separated(
                 controller: _genreScrollController,
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.sm)),
                 physics: const BouncingScrollPhysics(),
                 itemCount: options.length + (singleExtra.isRequired ? 0 : 1),
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
+                separatorBuilder: (context, index) => SizedBox(width: context.rem(AppRem.sm)),
                 itemBuilder: (context, index) {
                   if (!singleExtra.isRequired) {
                     if (index == 0) {
@@ -467,10 +468,10 @@ class _CatalogPageState extends State<CatalogPage> {
       height: AppSpacing.textScaledHeight(context, 50),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.sm)),
         physics: const BouncingScrollPhysics(),
         itemCount: selectableExtras.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        separatorBuilder: (context, index) => SizedBox(width: context.rem(AppRem.sm)),
         itemBuilder: (context, index) {
           final extra = selectableExtras[index];
           final currentVal = _selectedExtras[extra.name];
@@ -479,7 +480,7 @@ class _CatalogPageState extends State<CatalogPage> {
             tooltip: extra.name,
             color: AppColors.surface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
               side: BorderSide(color: AppColors.inkAlpha(0.1)),
             ),
             onSelected: (val) => _onExtraSelected(extra.name, val),
@@ -506,10 +507,10 @@ class _CatalogPageState extends State<CatalogPage> {
               ),
             ],
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
               decoration: BoxDecoration(
                 color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.08),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(context.rem(1.25)),
                 border: Border.all(
                   color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.12),
                 ),
@@ -522,13 +523,13 @@ class _CatalogPageState extends State<CatalogPage> {
                     style: TextStyle(
                       color: currentVal != null ? AppColors.ink : AppColors.inkAlpha(0.8),
                       fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                      fontSize: AppType.small,
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: context.rem(AppRem.xs)),
                   Icon(
                     Icons.arrow_drop_down,
-                    size: 18,
+                    size: context.rem(AppRem.iconSm),
                     color: currentVal != null ? AppColors.ink : AppColors.inkMuted,
                   ),
                 ],
@@ -554,8 +555,8 @@ class _CatalogPageState extends State<CatalogPage> {
             showFocusRing: true,
             onTap: onTap,
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              padding: const EdgeInsets.all(8),
+              margin: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xs)),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.7),
                 shape: BoxShape.circle,
@@ -564,7 +565,7 @@ class _CatalogPageState extends State<CatalogPage> {
               child: Icon(
                 readingOrderArrow(context, icon),
                 color: AppColors.ink,
-                size: 16,
+                size: context.rem(AppRem.iconXs),
               ),
             ),
             ),
@@ -596,17 +597,17 @@ class _GenreChip extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.snug)),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.accent : AppColors.inkAlpha(0.08),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.rem(1.25)),
           border: Border.all(
             color: isSelected 
               ? AppColors.accent 
               : AppColors.inkAlpha(0.12),
           ),
           boxShadow: isSelected 
-            ? [BoxShadow(color: AppColors.accent.withValues(alpha: 0.3), blurRadius: 8)] 
+            ? [BoxShadow(color: AppColors.accent.withValues(alpha: 0.3), blurRadius: context.rem(AppRem.sm))] 
             : null,
         ),
         alignment: Alignment.center,
@@ -615,7 +616,7 @@ class _GenreChip extends StatelessWidget {
           style: TextStyle(
             color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.7),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-            fontSize: 13,
+            fontSize: AppType.small,
           ),
         ),
       ),

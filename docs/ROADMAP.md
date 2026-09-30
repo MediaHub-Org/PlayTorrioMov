@@ -18,24 +18,17 @@ Last reconciled: **2026-09-29**, on `v1.9.0+47` plus the unreleased work in CHAN
 
 The first item is code work, in batches; the rest need a device.
 
-- **Sizes in rem and tokens (batches).** The convention is in CONVENTIONS
-  ("Sizes") and `lib/services/app_units.dart`; `units_no_raw_pixels_test`
-  lists the migrated files. Done: the TV side menu, hero Play/Details, focus
-  helpers, and the whole hub chrome (top bar, section chips, filter dropdown,
-  header pills, section header, nav shell bottom bar, pill filter bar, mini
-  player bar, sidebar logo). Two constants stay as default-scale values for
-  tests (`TopBar.sharedHeight`, `pillFilterHeaderContentHeight`); layout reads
-  the rem versions (`pillFilterHeaderHeightOf`). The poster cards and rows are
-  done too (`MovieCard`, `AnimeCard`, `BrowseRowView`, `BrowseScaffold`, the
-  card sizing; `SliderArrow` and the IPTV channel card are not), and both
-  details pages (sharing `details_metrics.dart`). `CreditCard` and
-  `SimilarCard` stay in pixels on purpose for now: each lives inside a box
-  whose height is a measured budget (`CreditCard.railHeight`,
-  `SimilarCard.heightFor`), asserted at 3x text by
-  `text_scale_overflow_test`, so moving them means changing that contract and
-  its probes together. Next, each its own PR: (1) everything else. The video player,
-  settings and the updater/P2P dialogs are done. Judge each against a device at the default
-  text size: the batches are made without one, so a visual drift is the risk.
+- **Sizes in rem: check it on a device.** The migration is done in code:
+  `units_no_raw_pixels_test` scans all of `lib/pages` and `lib/widgets`, and
+  the convention is in CONVENTIONS ("Sizes") and `lib/services/app_units.dart`.
+  It was made without a device, so a visual drift is the risk: look at the
+  default text size (should be unchanged) and at 130% (should grow, not clip).
+  Left in pixels on purpose, each because a test measures a fixed budget:
+  `CreditCard`, `SimilarCard` and `ContinueWatchingSlider` (whose
+  `bandHeight` sizes the hero), plus a few static APIs with no context
+  (`PlayerTheme.menuWidth`, `SettingsScrollView.gutterFor`'s default, the
+  preferred size in `library_tabs`). Moving those means changing their
+  probes in `text_scale_overflow_test` together with them.
 
 - **D-pad on a TV (#80).** Confirmed on a TV: rows, the side menu and reaching
   every element. Not yet: the menu's new icon-rail form (opens on focus), the

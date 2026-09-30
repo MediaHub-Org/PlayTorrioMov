@@ -7,7 +7,6 @@ import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
-import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
@@ -37,6 +36,10 @@ const _kAnimeGenres = [
   'Supernatural',
   'Thriller',
 ];
+
+// The hero title's sizes, which have no AppType step.
+const double _kHeroTitleCompact = 30;
+const double _kHeroTitleWide = 44;
 
 class AnimePage extends StatefulWidget {
   const AnimePage({super.key});
@@ -283,7 +286,7 @@ class _AnimePageState extends State<AnimePage> {
     return Column(
       children: [
         header,
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: context.rem(AppRem.sm)),
         Expanded(child: child),
       ],
     );
@@ -300,7 +303,7 @@ class _AnimePageState extends State<AnimePage> {
           _genreFilter != null
               ? context.l10n.animeNoGenreResults(_genreFilter ?? '')
               : context.l10n.catalogNoTitlesInDecade(_decadeFilter ?? 0),
-          style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+          style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
         ),
       );
     }
@@ -318,11 +321,11 @@ class _AnimePageState extends State<AnimePage> {
       child: GridView.builder(
       // No floating header to clear anymore -- _withHeader (see build())
       // already reserves real space for the pill row above this grid.
-      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 16, AppSpacing.lg, 120),
+      padding: EdgeInsets.fromLTRB(context.rem(AppRem.lg), context.rem(AppRem.md), context.rem(AppRem.lg), context.rem(7.5)),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 16,
+        mainAxisSpacing: context.rem(1.25),
+        crossAxisSpacing: context.rem(AppRem.md),
         childAspectRatio: 0.62,
       ),
       itemCount: items.length,
@@ -461,7 +464,7 @@ class _AnimePageState extends State<AnimePage> {
             emptyState: Center(
               child: Text(
                 context.l10n.animeLoadFailed,
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
               ),
             ),
           );
@@ -477,11 +480,11 @@ class _AnimePageState extends State<AnimePage> {
                 children: [
                   // Ambient background glows matching Home
                   Positioned(
-                    top: -120,
-                    right: -120,
+                    top: -context.rem(7.5),
+                    right: -context.rem(7.5),
                     child: Container(
-                      width: 500,
-                      height: 500,
+                      width: context.rem(31.25),
+                      height: context.rem(31.25),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.accent.withValues(alpha: 0.08),
@@ -489,11 +492,11 @@ class _AnimePageState extends State<AnimePage> {
                     ),
                   ),
                   Positioned(
-                    bottom: 100,
-                    left: -100,
+                    bottom: context.rem(6.25),
+                    left: -context.rem(6.25),
                     child: Container(
-                      width: 450,
-                      height: 450,
+                      width: context.rem(28.125),
+                      height: context.rem(28.125),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: const Color(0xFF00D2EF).withValues(alpha: 0.05),
@@ -597,14 +600,14 @@ class _AnimeHeroSlide extends StatelessWidget {
 
         // Content Overlay
         Positioned(
-          left: isCompact ? 20 : 48,
-          right: isCompact ? 20 : 48,
-          bottom: isCompact ? 36 : 56,
+          left: context.rem(isCompact ? 1.25 : 3),
+          right: context.rem(isCompact ? 1.25 : 3),
+          bottom: context.rem(isCompact ? 2.25 : 3.5),
           child: Align(
             alignment: AlignmentDirectional.bottomStart,
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: isCompact ? double.infinity : 680.0,
+                maxWidth: isCompact ? double.infinity : context.rem(42.5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,15 +618,15 @@ class _AnimeHeroSlide extends StatelessWidget {
                     children: [
                       if (anime.averageScore > 0) ...[
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 11,
-                            vertical: 6,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.rem(0.6875),
+                            vertical: context.rem(AppRem.snug),
                           ),
                           decoration: BoxDecoration(
                             color: const Color(
                               0xFFFFD700,
                             ).withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(9),
+                            borderRadius: BorderRadius.circular(context.rem(0.5625)),
                             border: Border.all(
                               color: const Color(
                                 0xFFFFD700,
@@ -633,16 +636,16 @@ class _AnimeHeroSlide extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.star_rounded,
-                                size: 17,
-                                color: Color(0xFFFFD700),
+                                size: context.rem(1.0625),
+                                color: const Color(0xFFFFD700),
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: context.rem(AppRem.xs)),
                               Text(
                                 anime.formattedScore,
                                 style: const TextStyle(
-                                  fontSize: 15,
+                                  fontSize: AppType.bodyMd,
                                   fontWeight: FontWeight.w800,
                                   color: Color(0xFFFFD700),
                                 ),
@@ -650,30 +653,30 @@ class _AnimeHeroSlide extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: context.rem(0.625)),
                       ],
                       if (anime.seasonYear > 0)
                         Text(
                           '${anime.seasonYear}',
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppType.bodyMd,
                             color: AppColors.onAccent.withValues(alpha: 0.55),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       if (anime.totalEpisodes > 0) ...[
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
                           child: Icon(
                             Icons.circle,
-                            size: 4,
+                            size: context.rem(0.25),
                             color: AppColors.onAccent.withValues(alpha: 0.25),
                           ),
                         ),
                         Text(
                           context.l10n.playerEpisodeCount(anime.totalEpisodes),
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppType.bodyMd,
                             color: AppColors.onAccent.withValues(alpha: 0.55),
                             fontWeight: FontWeight.w600,
                           ),
@@ -681,17 +684,17 @@ class _AnimeHeroSlide extends StatelessWidget {
                       ],
                       if (anime.studioName.isNotEmpty) ...[
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
                           child: Icon(
                             Icons.circle,
-                            size: 4,
+                            size: context.rem(0.25),
                             color: AppColors.onAccent.withValues(alpha: 0.25),
                           ),
                         ),
                         Text(
                           anime.studioName,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppType.bodyMd,
                             color: AppColors.onAccent.withValues(alpha: 0.55),
                             fontWeight: FontWeight.w600,
                           ),
@@ -700,16 +703,16 @@ class _AnimeHeroSlide extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: context.rem(AppRem.md)),
 
                   // Title
                   Text(
                     animeDisplayTitle(anime),
                     style: TextStyle(
-                      fontSize: isCompact ? 30 : 44,
+                      fontSize: isCompact ? _kHeroTitleCompact : _kHeroTitleWide,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -1.2,
-                      height: 1.05,
+                      height: 1.05, // ratio: a line height, not a size
                       color: AppColors.onAccent,
                     ),
                     maxLines: 2,
@@ -718,19 +721,19 @@ class _AnimeHeroSlide extends StatelessWidget {
 
                   // Description
                   if (anime.description.isNotEmpty) ...[
-                    SizedBox(height: isCompact ? 12 : 16),
+                    SizedBox(height: context.rem(isCompact ? AppRem.ms : AppRem.md)),
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: isCompact ? double.infinity : 580,
+                        maxWidth: isCompact ? double.infinity : context.rem(36.25),
                       ),
                       child: Text(
                         anime.description,
                         maxLines: isCompact ? 2 : 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: isCompact ? 14.5 : 15.5,
+                          fontSize: isCompact ? AppType.bodyPlus : AppType.bodyMdPlus,
                           color: AppColors.onAccent.withValues(alpha: 0.65),
-                          height: 1.5,
+                          height: 1.5, // ratio: a line height, not a size
                         ),
                       ),
                     ),
@@ -738,12 +741,12 @@ class _AnimeHeroSlide extends StatelessWidget {
 
                   // Genre chips
                   if (anime.genres.isNotEmpty) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.rem(AppRem.md)),
                     GenreTagRow(genres: anime.genres.take(4).toList()),
                   ],
 
                   // Action buttons (Matching Home Page)
-                  SizedBox(height: isCompact ? 22 : 26),
+                  SizedBox(height: context.rem(isCompact ? 1.375 : 1.625)),
                   Row(
                     children: [
                       HeroActionButton(

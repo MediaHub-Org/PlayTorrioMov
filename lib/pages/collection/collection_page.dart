@@ -26,6 +26,7 @@ import '../player/player_screen.dart';
 import 'library_shelf_page.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 /// The Profile tab: everything you saved, everything you started, everything
 /// on the device.
@@ -97,15 +98,15 @@ class _CollectionPageState extends State<CollectionPage> {
         showFocusRing: true,
         onTap: () => onPick(value),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
           decoration: BoxDecoration(
             color: selected ? AppColors.accent : AppColors.raised,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: AppType.tinyPlus,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               color: selected ? AppColors.ink : AppColors.inkAlpha(0.60),
             ),
@@ -121,11 +122,11 @@ class _CollectionPageState extends State<CollectionPage> {
       child: Row(
         children: [
           chip(l10n.commonAll, 'all'),
-          const SizedBox(width: 6),
+          SizedBox(width: context.rem(AppRem.snug)),
           chip(l10n.libraryFilterMovies, 'movie'),
-          const SizedBox(width: 6),
+          SizedBox(width: context.rem(AppRem.snug)),
           chip(l10n.libraryFilterSeries, 'series'),
-          const SizedBox(width: 6),
+          SizedBox(width: context.rem(AppRem.snug)),
           chip(l10n.libraryFilterAnime, 'anime'),
         ],
       ),
@@ -143,38 +144,38 @@ class _CollectionPageState extends State<CollectionPage> {
   }) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.md), 0),
       child: Row(
         children: [
           Expanded(child: _buildTypePills(type, onType)),
-          const SizedBox(width: 8),
+          SizedBox(width: context.rem(AppRem.sm)),
           PopupMenuButton<String>(
             tooltip: '${l10n.librarySortBy}: ${_sortLabel(sort)}',
             onSelected: onSort,
             color: AppColors.raised,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
               decoration: BoxDecoration(
                 color: AppColors.raised,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                 border: Border.all(color: AppColors.inkAlpha(0.08)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
-                  const SizedBox(width: 4),
+                  Icon(Icons.sort_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
+                  SizedBox(width: context.rem(AppRem.xs)),
                   // Capped, not flexed: the name is a label, and at a large
                   // text scale it names its natural width whatever the row
                   // offers. The tooltip carries the full name.
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 120),
+                    constraints: BoxConstraints(maxWidth: context.rem(7.5)),
                     child: Text(
                       _sortLabel(sort),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AppType.tiny,
                         fontWeight: FontWeight.bold,
                         color: AppColors.inkMuted,
                       ),
@@ -351,16 +352,15 @@ class _CollectionPageState extends State<CollectionPage> {
   /// How wide Library content may grow before it centers instead. Past
   /// this the grids sprawled across ultrawide windows; capped, the column
   /// counts inside each grid also settle instead of ramping forever.
-  static const double _maxContentWidth = 1200;
 
   Widget _buildCardGrid(List<Widget> cards) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        constraints: BoxConstraints(maxWidth: context.rem(75)),
         child: LayoutBuilder(
       builder: (context, constraints) {
-        const spacing = 14.0;
-        const padding = 16.0;
+        final spacing = context.rem(0.875);
+        final padding = context.rem(AppRem.md);
         // Two single lines and the gap above them, scaled the way they will
         // actually be drawn: at 200% system text a fixed 46 would overflow
         // the cell, and a grid cell has no slack to absorb it.
@@ -386,11 +386,11 @@ class _CollectionPageState extends State<CollectionPage> {
         return FirstFocusScope(
           ready: cards.isNotEmpty,
           child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
+          padding: EdgeInsets.fromLTRB(padding, context.rem(AppRem.md), padding, context.rem(6.25)),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: spacing,
-            mainAxisSpacing: 18,
+            mainAxisSpacing: context.rem(1.125),
             mainAxisExtent: tile + labelHeight,
           ),
           itemCount: cards.length,
@@ -409,7 +409,7 @@ class _CollectionPageState extends State<CollectionPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
         title: Text(
           ctx.l10n.libraryNewCollection,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
@@ -473,11 +473,11 @@ class _CollectionPageState extends State<CollectionPage> {
         final palette = AppThemeService.currentPalette.value;
         return Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            constraints: BoxConstraints(maxWidth: context.rem(75)),
             child: LayoutBuilder(
           builder: (context, constraints) {
-            const spacing = 14.0;
-            const padding = 16.0;
+            final spacing = context.rem(0.875);
+            final padding = context.rem(AppRem.md);
             final width = constraints.maxWidth;
             final crossAxisCount = width < AppBreakpoints.tablet
                 ? 1
@@ -502,11 +502,11 @@ class _CollectionPageState extends State<CollectionPage> {
                   child: FirstFocusScope(
                     ready: visible.isNotEmpty,
                     child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(padding, 16, padding, 100),
+                    padding: EdgeInsets.fromLTRB(padding, context.rem(AppRem.md), padding, context.rem(6.25)),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
                       crossAxisSpacing: spacing,
-                      mainAxisSpacing: 16,
+                      mainAxisSpacing: context.rem(AppRem.md),
                       // The card's own art ratio plus its text block, straight off
                       // the slider, so a card is the same shape in both places.
                       mainAxisExtent: cardWidth * 0.62 + 60,
@@ -566,7 +566,7 @@ class _CollectionPageState extends State<CollectionPage> {
         );
         return Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+            constraints: BoxConstraints(maxWidth: context.rem(75)),
             child: Column(
               children: [
                 _buildTabHeader(
@@ -577,9 +577,9 @@ class _CollectionPageState extends State<CollectionPage> {
                 ),
                 Expanded(
                   child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.md), context.rem(6.25)),
                     itemCount: visible.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, __) => SizedBox(height: context.rem(AppRem.ms)),
                     itemBuilder: (context, index) =>
                         _DownloadRow(task: visible[index]),
                   ),
@@ -685,28 +685,28 @@ class _DownloadRow extends StatelessWidget {
     final audio = _audioLabels(context);
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(context.rem(AppRem.ms)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(context.rem(0.875)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
             child: task.posterUrl != null
                 ? CachedNetworkImage(
                     imageUrl: task.posterUrl!,
-                    width: 50,
-                    height: 75,
+                    width: context.rem(3.125),
+                    height: context.rem(4.6875),
                     fit: BoxFit.cover,
-                    errorWidget: (_, __, ___) => _posterFallback(),
+                    errorWidget: (_, __, ___) => _posterFallback(context),
                   )
-                : _posterFallback(),
+                : _posterFallback(context),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: context.rem(0.875)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,32 +715,32 @@ class _DownloadRow extends StatelessWidget {
                   task.title,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 15,
+                    fontSize: AppType.bodyMd,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (task.episodeTitle != null) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: context.rem(AppRem.xxs)),
                   Text(
                     task.episodeTitle!,
                     style: TextStyle(
                       color: AppColors.inkSubtle,
-                      fontSize: 12,
+                      fontSize: AppType.caption,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                const SizedBox(height: 6),
+                SizedBox(height: context.rem(AppRem.snug)),
                 _facts(context, audio),
-                const SizedBox(height: 8),
+                SizedBox(height: context.rem(AppRem.sm)),
                 if (task.isCompleted && !_fileExists)
                   Text(
                     context.l10n.downloadFileMissingHint,
                     style: TextStyle(
                       color: AppColors.inkDisabled,
-                      fontSize: 11,
+                      fontSize: AppType.tiny,
                     ),
                   )
                 else ...[
@@ -752,30 +752,30 @@ class _DownloadRow extends StatelessWidget {
                     valueColor: AlwaysStoppedAnimation<Color>(
                       task.isFailed ? Colors.redAccent : AppColors.accent,
                     ),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.rem(AppRem.xs)),
                   Text(
                     _progressLine(context, progress),
                     style: TextStyle(
                       color: AppColors.inkDisabled,
-                      fontSize: 11,
+                      fontSize: AppType.tiny,
                     ),
                   ),
                 ],
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: context.rem(AppRem.sm)),
           _actions(context),
         ],
       ),
     );
   }
 
-  Widget _posterFallback() => Container(
-    width: 50,
-    height: 75,
+  Widget _posterFallback(BuildContext context) => Container(
+    width: context.rem(3.125),
+    height: context.rem(4.6875),
     color: AppColors.inkAlpha(0.10),
     child: Icon(Icons.movie_rounded, color: AppColors.inkAlpha(0.30)),
   );
@@ -800,8 +800,8 @@ class _DownloadRow extends StatelessWidget {
     ];
     if (facts.isEmpty) return const SizedBox.shrink();
     return Wrap(
-      spacing: 6,
-      runSpacing: 4,
+      spacing: context.rem(AppRem.snug),
+      runSpacing: context.rem(AppRem.xs),
       children: [for (final fact in facts) _FactChip(label: fact)],
     );
   }
@@ -873,16 +873,16 @@ class _FactChip extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
       decoration: BoxDecoration(
         color: AppColors.inkAlpha(0.06),
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(context.rem(0.3125)),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: AppColors.inkMuted,
-          fontSize: TvType.scale(10.5),
+          fontSize: TvType.scale(AppType.microPlus),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -929,7 +929,7 @@ class _NewCollectionCard extends StatelessWidget {
     AppColors.dependOn(context);
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -938,26 +938,26 @@ class _NewCollectionCard extends StatelessWidget {
             aspectRatio: 1,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(color: AppColors.inkAlpha(0.20)),
               ),
               child: Center(
                 child: Icon(
                   Icons.add_rounded,
-                  size: 32,
+                  size: context.rem(2),
                   color: AppColors.inkMuted,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           Text(
             context.l10n.libraryNewCollection,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: AppColors.inkMuted,
-              fontSize: 13.5,
+              fontSize: AppType.smallPlus,
               fontWeight: FontWeight.w700,
             ),
           ),

@@ -80,9 +80,9 @@ class PlayerTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    final btnSize = isCompact ? 36.0 : 42.0;
-    final btnIconSize = isCompact ? 20.0 : 22.0;
-    final gap = isCompact ? 2.0 : 4.0;
+    final btnSize = context.rem(isCompact ? 2.25 : 2.625);
+    final btnIconSize = context.rem(isCompact ? AppRem.icon : AppRem.iconMd);
+    final gap = context.rem(isCompact ? AppRem.xxs : AppRem.xs);
 
     return Container(
       padding: EdgeInsets.fromLTRB(

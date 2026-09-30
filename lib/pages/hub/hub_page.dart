@@ -6,7 +6,6 @@ import '../../widgets/common/universal_play_bar.dart';
 import '../../utils/hub_controller.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/app_breakpoints.dart';
-import '../../services/app_spacing.dart';
 import '../../widgets/common/adaptive_nav_shell.dart';
 import '../iptv/iptv_search_page.dart';
 import '../search/search_page.dart';
@@ -16,6 +15,7 @@ import '../../widgets/common/tv_focus_bridge.dart';
 import '../../widgets/common/tv_side_menu.dart';
 import '../../services/tv_mode_service.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// HubPage: the top-level container hosting the app's single Media hub
 /// (Movies, Series, Anime, Live TV, Profile).
@@ -143,8 +143,8 @@ class _HubPageState extends State<HubPage> {
                     child: ClipRRect(
                       borderRadius: isTv
                           ? BorderRadius.zero
-                          : const BorderRadius.only(
-                              topLeft: Radius.circular(AppRadii.lg),
+                          : BorderRadius.only(
+                              topLeft: Radius.circular(context.rem(AppRem.radiusLg)),
                             ),
                       child: NestedNavigator(
                         // The initial route is built once, so a change of
@@ -172,8 +172,8 @@ class _HubPageState extends State<HubPage> {
               bottom: tier == ScreenTier.mobile
                   ? AdaptiveNavShell.mobileBottomBarInset(context) + 12
                   : 16,
-              left: 12,
-              right: 12,
+              left: context.rem(AppRem.ms),
+              right: context.rem(AppRem.ms),
               // UniversalPlayBar hides itself when nothing is playing.
               child: const UniversalPlayBar(),
             ),

@@ -180,7 +180,7 @@ class _SubSyncBarState extends State<SubSyncBar> {
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.4375)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
-                minimumSize: const Size(0, 32),
+                minimumSize: Size(0, context.rem(AppRem.xl)),
               ),
               icon: Icon(Icons.check_rounded, size: context.rem(0.9375)),
               label: Text(

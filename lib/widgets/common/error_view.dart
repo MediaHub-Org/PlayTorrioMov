@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// Full-screen error view with retry button.
 ///
@@ -33,24 +34,24 @@ class ErrorView extends StatelessWidget {
     // widget does not control (#69).
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(26),
+        padding: EdgeInsets.all(context.rem(1.625)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.warning_amber_rounded,
-              size: 48,
+              size: context.rem(3),
               color: Colors.orangeAccent,
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: context.rem(0.875)),
             Text(
               title,
               style: const TextStyle(
-                fontSize: 21,
+                fontSize: AppType.title,
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: context.rem(AppRem.sm)),
             Text(
               error ?? context.l10n.commonUnknownError,
               textAlign: TextAlign.center,
@@ -58,7 +59,7 @@ class ErrorView extends StatelessWidget {
                 color: AppColors.ink.withOpacity(0.58),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: context.rem(1.25)),
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),

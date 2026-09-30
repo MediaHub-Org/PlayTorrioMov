@@ -520,9 +520,11 @@ then move with the text, and a change of spacing is made in one place.
   cannot be `const`. That is the price of a size that moves; it is cheap.
 - **Fractions of the window** (a poster's width, a menu's) already avoid a
   fixed number; give their bounds as rem too.
-- **Migration is by batches.** `test/units_no_raw_pixels_test.dart` lists the
-  files that are done and fails on a bare size in them. When you migrate a file,
-  add it to that list.
+- **The guard covers the whole UI.** `test/units_no_raw_pixels_test.dart` scans
+  every file under `lib/pages` and `lib/widgets` and fails on a bare size. A
+  file that must keep pixels (a widget whose height is a budget a test
+  measures) goes in its `exemptFiles`, with the reason. `lib/services` is not
+  scanned: a number there is data, not the size of something on screen.
 
 ### Text scale: the box must be able to grow
 

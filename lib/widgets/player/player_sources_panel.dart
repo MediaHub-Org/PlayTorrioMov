@@ -189,7 +189,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     // 94% drawer this replaced left a 6% sliver of video down one edge: too
     // little to watch, enough to make the panel read as covering the player
     // rather than replacing it.
-    final drawerWidth = isCompact ? screenWidth : 440.0;
+    final drawerWidth = isCompact ? screenWidth : context.rem(27.5);
     final sNum = widget.episode.season ?? 1;
     final eNum = widget.episode.episode ?? 1;
 

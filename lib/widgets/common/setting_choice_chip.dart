@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
+import '../../services/app_units.dart';
 
 /// One option in a short row of mutually exclusive choices — hero style,
 /// card density, which tab a screen opens on.
@@ -59,7 +60,7 @@ class SettingChoiceChip extends StatelessWidget {
       labelStyle: TextStyle(
         color: selected ? palette.primaryColor : AppColors.inkMuted,
         fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-        fontSize: 12,
+        fontSize: AppType.caption,
       ),
       side: BorderSide(
         color: selected

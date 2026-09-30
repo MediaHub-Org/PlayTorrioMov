@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// A focus indicator for D-pad/keyboard navigation: a rounded ring drawn
 /// just outside the widget it wraps, shown when [visible].
@@ -33,11 +34,11 @@ class FocusRing extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: AppColors.accent, width: 2),
+        border: Border.all(color: AppColors.accent, width: 2), // px: a hairline, not a layout size
       ),
       // A little outside the widget, so the ring reads as marking it rather
       // than as a border of it.
-      padding: const EdgeInsets.all(2),
+      padding: EdgeInsets.all(context.rem(AppRem.xxs)),
       child: child,
     );
   }

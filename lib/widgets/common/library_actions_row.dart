@@ -9,6 +9,7 @@ import '../../services/my_list/my_list_service.dart';
 import '../collection/collection_picker_sheet.dart';
 import 'like_button.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// The app's one set of library actions: **Watchlist**, **Watched**, **Like**.
 ///
@@ -138,7 +139,7 @@ class LibraryActionsRow extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               for (var i = 0; i < buttons.length; i++) ...[
-                if (i > 0) const SizedBox(width: 10),
+                if (i > 0) SizedBox(width: context.rem(0.625)),
                 buttons[i],
               ],
             ],
@@ -148,7 +149,7 @@ class LibraryActionsRow extends StatelessWidget {
         return Row(
           children: [
             for (var i = 0; i < buttons.length; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
+              if (i > 0) SizedBox(width: context.rem(0.625)),
               Expanded(child: buttons[i]),
             ],
           ],
@@ -227,12 +228,12 @@ class _StatusButtonState extends State<_StatusButton> {
               scale: highlighted ? 1.08 : 1.0,
               duration: const Duration(milliseconds: 150),
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(context.rem(0.625)),
                 decoration: BoxDecoration(
                   color: widget.active
                       ? widget.color.withValues(alpha: 0.18)
                       : AppColors.inkAlpha(0.08),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                   border: Border.all(
                     color: widget.active
                         ? widget.color.withValues(alpha: 0.35)
@@ -242,7 +243,7 @@ class _StatusButtonState extends State<_StatusButton> {
                 child: Icon(
                   widget.icon,
                   color: widget.active ? widget.color : AppColors.ink,
-                  size: 22,
+                  size: context.rem(AppRem.iconMd),
                 ),
               ),
             ),

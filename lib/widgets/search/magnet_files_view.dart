@@ -9,6 +9,7 @@ import '../../utils/fullscreen_navigator.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../common/hover_button.dart';
+import '../../services/app_units.dart';
 
 class MagnetFileItem {
   final int id;
@@ -275,50 +276,50 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
         if (_isLoading) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.lg)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(context.rem(1.25)),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: palette.primaryColor.withValues(alpha: 0.12),
                       border: Border.all(
                         color: palette.primaryColor.withValues(alpha: 0.3),
-                        width: 1.5,
+                        width: 1.5, // px: a hairline, not a layout size
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: palette.primaryColor.withValues(alpha: 0.25),
-                          blurRadius: 24,
-                          spreadRadius: 4,
+                          blurRadius: context.rem(AppRem.lg),
+                          spreadRadius: context.rem(AppRem.xs),
                         ),
                       ],
                     ),
                     child: SizedBox(
-                      width: 38,
-                      height: 38,
+                      width: context.rem(2.375),
+                      height: context.rem(2.375),
                       child: CircularProgressIndicator(
                         color: palette.primaryColor,
                         strokeWidth: 3,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: context.rem(AppRem.lg)),
                   Text(
                     _isDebrid ? context.l10n.playerStatusUsing(_providerName) : context.l10n.magnetConnecting,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: AppType.bodyLg,
                       fontWeight: FontWeight.w700,
                       color: AppColors.ink,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.rem(AppRem.sm)),
                   Text(
                     context.l10n.magnetGathering,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppType.small,
                       color: AppColors.inkAlpha(0.5),
                     ),
                   ),
@@ -331,40 +332,40 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
         if (_errorMessage != null) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xl)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(18),
+                    padding: EdgeInsets.all(context.rem(1.125)),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.redAccent.withValues(alpha: 0.12),
                       border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                     ),
-                    child: const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 36),
+                    child: Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: context.rem(2.25)),
                   ),
-                  const SizedBox(height: 18),
+                  SizedBox(height: context.rem(1.125)),
                   Text(
                     context.l10n.magnetFailed,
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.ink),
+                    style: TextStyle(fontSize: AppType.subhead, fontWeight: FontWeight.bold, color: AppColors.ink),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.rem(AppRem.sm)),
                   Text(
                     _errorMessage!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 13, color: AppColors.inkAlpha(0.6), height: 1.4),
+                    style: TextStyle(fontSize: AppType.small, color: AppColors.inkAlpha(0.6), height: 1.4), // ratio: a line height, not a size
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: context.rem(1.25)),
                   ElevatedButton.icon(
                     onPressed: _loadMagnetFiles,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: palette.primaryColor,
                       foregroundColor: AppColors.onAccent,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(AppRem.ms)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd))),
                     ),
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    icon: Icon(Icons.refresh_rounded, size: context.rem(AppRem.iconSm)),
                     label: Text(context.l10n.commonTryAgain, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ],
@@ -378,9 +379,9 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
 
         return ListView(
           padding: EdgeInsets.fromLTRB(
-            16,
-            MediaQuery.paddingOf(context).top + kToolbarHeight + 20,
-            16,
+            context.rem(AppRem.md),
+            MediaQuery.paddingOf(context).top + kToolbarHeight + context.rem(1.25),
+            context.rem(AppRem.md),
             40 + MediaQuery.paddingOf(context).bottom,
           ),
           physics: const BouncingScrollPhysics(),
@@ -388,21 +389,21 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
             // Header Info Card
             _buildTorrentHeaderCard(palette, videoCount),
 
-            const SizedBox(height: 18),
+            SizedBox(height: context.rem(1.125)),
 
             // Search & Filter Toolbar
             _buildFilterToolbar(palette, videoCount),
 
-            const SizedBox(height: 14),
+            SizedBox(height: context.rem(0.875)),
 
             // Files List
             if (filtered.isEmpty)
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  padding: EdgeInsets.symmetric(vertical: context.rem(2.5)),
                   child: Text(
                     context.l10n.magnetNoMatch,
-                    style: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 14),
+                    style: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: AppType.body),
                   ),
                 ),
               )
@@ -416,19 +417,19 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
 
   Widget _buildTorrentHeaderCard(AppThemePalette palette, int videoCount) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         color: AppColors.surface.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
         border: Border.all(
           color: palette.primaryColor.withValues(alpha: 0.3),
-          width: 1.2,
+          width: 1.2, // px: a hairline, not a layout size
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
+            blurRadius: context.rem(1.125),
+            offset: Offset(0, context.rem(AppRem.snug)),
           ),
         ],
       ),
@@ -438,14 +439,14 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: EdgeInsets.all(context.rem(0.625)),
                 decoration: BoxDecoration(
                   color: palette.primaryColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 ),
-                child: Icon(Icons.link_rounded, color: palette.primaryColor, size: 22),
+                child: Icon(Icons.link_rounded, color: palette.primaryColor, size: context.rem(AppRem.iconMd)),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -453,7 +454,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                     Text(
                       _torrentTitle,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: AppType.bodyLg,
                         fontWeight: FontWeight.bold,
                         color: AppColors.ink,
                         letterSpacing: -0.2,
@@ -462,11 +463,11 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (_infoHash != null) ...[
-                      const SizedBox(height: 3),
+                      SizedBox(height: context.rem(0.1875)),
                       Text(
                         _infoHash!,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: AppType.tiny,
                           color: AppColors.inkAlpha(0.4),
                           fontFamily: 'monospace',
                         ),
@@ -479,10 +480,10 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: context.rem(AppRem.sm),
+            runSpacing: context.rem(AppRem.sm),
             children: [
               // Provider Badge
               _buildBadge(
@@ -522,21 +523,21 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.3125)),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8), // px: a hairline, not a layout size
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 5),
+          Icon(icon, size: context.rem(0.8125), color: color),
+          SizedBox(width: context.rem(0.3125)),
           Text(
             label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: AppType.tinyPlus,
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -551,33 +552,33 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
       children: [
         // Search Filter Input
         Container(
-          height: 38,
+          height: context.rem(2.375),
           decoration: BoxDecoration(
             color: AppColors.inkAlpha(0.05),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             border: Border.all(color: AppColors.inkAlpha(0.08)),
           ),
           child: TextField(
-            style: TextStyle(color: AppColors.ink, fontSize: 13),
+            style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
             onChanged: (val) => setState(() => _searchFilter = val),
             decoration: InputDecoration(
               hintText: context.l10n.magnetFilterFiles,
-              hintStyle: TextStyle(color: AppColors.inkAlpha(0.3), fontSize: 13),
-              prefixIcon: Icon(Icons.filter_list_rounded, size: 16, color: AppColors.inkAlpha(0.4)),
+              hintStyle: TextStyle(color: AppColors.inkAlpha(0.3), fontSize: AppType.small),
+              prefixIcon: Icon(Icons.filter_list_rounded, size: context.rem(AppRem.iconXs), color: AppColors.inkAlpha(0.4)),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.sm)),
               isDense: true,
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: context.rem(0.625)),
         // Filter Chips
         Row(
           children: [
             _buildCategoryChip('all', 'All (${_files.length})', palette),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             _buildCategoryChip('video', 'Videos ($videoCount)', palette),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             _buildCategoryChip('other', 'Other (${_files.length - videoCount})', palette),
           ],
         ),
@@ -593,23 +594,23 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
       onTap: () => setState(() => _activeCategory = category),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.snug)),
         decoration: BoxDecoration(
           color: isSelected
               ? palette.primaryColor.withValues(alpha: 0.25)
               : AppColors.inkAlpha(0.05),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.rem(1.25)),
           border: Border.all(
             color: isSelected
                 ? palette.primaryColor
                 : AppColors.inkAlpha(0.1),
-            width: 1,
+            width: 1, // px: a hairline, not a layout size
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 11.5,
+            fontSize: AppType.tinyPlus,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
           ),
@@ -622,31 +623,31 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
     final ext = file.extension;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
+      padding: EdgeInsets.all(context.rem(AppRem.ms)),
       decoration: BoxDecoration(
         color: file.isVideo
             ? AppColors.raised.withValues(alpha: 0.75)
             : AppColors.surface.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(context.rem(0.875)),
         border: Border.all(
           color: file.isVideo
               ? palette.primaryColor.withValues(alpha: 0.2)
               : AppColors.inkAlpha(0.05),
-          width: 0.9,
+          width: 0.9, // px: a hairline, not a layout size
         ),
       ),
       child: Row(
         children: [
           // File Type Icon
           Container(
-            width: 38,
-            height: 38,
+            width: context.rem(2.375),
+            height: context.rem(2.375),
             decoration: BoxDecoration(
               color: file.isVideo
                   ? palette.primaryColor.withValues(alpha: 0.15)
                   : AppColors.inkAlpha(0.05),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             ),
             child: Icon(
               file.isVideo
@@ -655,10 +656,10 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                       ? Icons.audiotrack_rounded
                       : Icons.insert_drive_file_rounded),
               color: file.isVideo ? palette.primaryColor : AppColors.inkSubtle,
-              size: 20,
+              size: context.rem(AppRem.icon),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: context.rem(AppRem.ms)),
 
           // Filename & Size
           Expanded(
@@ -668,38 +669,38 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
                 Text(
                   file.cleanFilename,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppType.small,
                     fontWeight: file.isVideo ? FontWeight.w600 : FontWeight.normal,
                     color: file.isVideo ? AppColors.ink : AppColors.inkMuted,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: context.rem(AppRem.xs)),
                 Row(
                   children: [
                     if (ext.isNotEmpty) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
                         decoration: BoxDecoration(
                           color: AppColors.inkAlpha(0.08),
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                         ),
                         child: Text(
                           ext,
                           style: TextStyle(
-                            fontSize: TvType.scale(9.5),
+                            fontSize: TvType.scale(AppType.nanoPlus),
                             fontWeight: FontWeight.bold,
                             color: AppColors.inkMuted,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: context.rem(AppRem.snug)),
                     ],
                     Text(
                       MagnetFileItem.formatBytes(file.size),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AppType.tiny,
                         color: AppColors.inkAlpha(0.45),
                       ),
                     ),
@@ -709,7 +710,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
             ),
           ),
 
-          const SizedBox(width: 10),
+          SizedBox(width: context.rem(0.625)),
 
           // Action Button
           if (file.isVideo)
@@ -718,17 +719,17 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.primaryColor,
                 foregroundColor: AppColors.onAccent,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.5625)),
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
                 elevation: 0,
               ),
-              icon: const Icon(Icons.play_arrow_rounded, size: 18),
+              icon: Icon(Icons.play_arrow_rounded, size: context.rem(AppRem.iconSm)),
               label: Text(
                 context.l10n.playerPlay,
                 style: const TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppType.captionPlus,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -737,7 +738,7 @@ class _MagnetFilesViewState extends State<MagnetFilesView> {
             Text(
               context.l10n.magnetNonVideo,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: AppType.tiny,
                 color: AppColors.inkAlpha(0.25),
               ),
             ),

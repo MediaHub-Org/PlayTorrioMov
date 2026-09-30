@@ -1280,7 +1280,7 @@ class _WatchScreenState extends State<WatchScreen>
       Offset.zero,
       ancestor: overlay,
     );
-    const double dialogWidth = 230.0;
+    final dialogWidth = context.rem(14.375);
     final double spaceBelow =
         overlay.size.height - (buttonOffset.dy + button.size.height + 8) - 16;
     final double spaceAbove = buttonOffset.dy - 16;
@@ -2479,12 +2479,12 @@ class _FilterPillRailState extends State<FilterPillRail> {
 
   /// The fade + chevron width. Wide enough to hold the chevron clear of the
   /// edge pill, narrow enough not to swallow a whole pill behind it.
-  static const double _edgeFadeWidth = 40;
+  double get _edgeFadeWidth => context.rem(2.5);
 
   /// The fade alone, on touch platforms. Narrower than [_edgeFadeWidth]
   /// because there is no button to hold clear of the pills -- it only has to
   /// be wide enough to read as a fade rather than a hard cut.
-  static const double _edgeFadeWidthMobile = 24;
+  double get _edgeFadeWidthMobile => context.rem(AppRem.lg);
 
   /// The chevron's own circle. The first version of this rail drew a bare
   /// 18px `textSecondary` glyph on a 28px fade, and it was reported as "not
@@ -2492,7 +2492,7 @@ class _FilterPillRailState extends State<FilterPillRail> {
   /// decoration, not as something to press. The circle is what makes it a
   /// button: it has a border, it holds the glyph off the pills behind it,
   /// and it is the same size at both ends so the row never looks lopsided.
-  static const double _edgeButtonSize = 32;
+  double get _edgeButtonSize => context.rem(AppRem.xl);
 
   @override
   void initState() {

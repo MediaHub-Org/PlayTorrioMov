@@ -964,7 +964,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
     String text,
     String query,
     bool isActive, {
-    double fontSize = 12.5,
+    double fontSize = AppType.captionPlus,
   }) {
     if (query.isEmpty || query.length < 3) {
       return Text(
