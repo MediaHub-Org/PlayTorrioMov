@@ -95,6 +95,10 @@ abstract final class AppRem {
   static const double blur = 0.75;
   static const double blurLg = 1.25;
 
+  // The TV side menu at rest: the rail's width and its icon pills.
+  static const double menuRail = 4.5;
+  static const double railItem = 2.75;
+
   // The TV side menu's width bounds, which the window width sits between.
   static const double menuMin = 9.25;
   static const double menuMax = 13.75;

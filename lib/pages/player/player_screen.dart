@@ -224,6 +224,10 @@ class _PlayerScreenState extends State<PlayerScreen>
   // ── Accessibility / keyboard focus ──
   final FocusNode _focusNode = FocusNode();
 
+  /// The centered play/pause button's node: where a remote's first arrow
+  /// press lands once the controls are back on screen.
+  final FocusNode _playPauseFocus = FocusNode(debugLabel: 'PlayerPlayPause');
+
   @override
   void initState() {
     super.initState();
@@ -1155,9 +1159,33 @@ class _PlayerScreenState extends State<PlayerScreen>
           !_showSubSyncBar &&
           !_showTextSyncOverlay) {
         setState(() => _showControls = false);
+        // The hidden controls stop taking focus (see _controlsFocusable), so a
+        // remote's focus that was on one of them falls back to the screen's own
+        // node, where the key handler lives.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          final primary = FocusManager.instance.primaryFocus;
+          if (primary == null || primary is FocusScopeNode) {
+            _focusNode.requestFocus();
+          }
+        });
       }
     });
   }
+
+  /// Brings the controls back and keeps them up a while longer. Any key a
+  /// remote sends means someone is watching, and a remote has no pointer to
+  /// do it the way [_handlePointerActivity] does.
+  void _revealControls() {
+    if (!_showControls) setState(() => _showControls = true);
+    _startHideControlsTimer();
+  }
+
+  /// Whether the three overlays (top bar, center buttons, transport bar) can
+  /// take focus. They are hidden with opacity and `IgnorePointer`, neither of
+  /// which stops a remote's focus landing on them, which is how a D-pad ended
+  /// up moving invisibly between controls nobody could see.
+  bool get _controlsFocusable => _showControls || _isLoading || _activeMenu != null;
 
   void _handlePointerActivity() {
     if (_isLoading) return;
@@ -2089,6 +2117,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     _autoNextTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _focusNode.dispose();
+    _playPauseFocus.dispose();
     PlaybackCoordinator.release(
       'video:${widget.episode?.id ?? widget.detail?.id ?? widget.source.url}',
     );
@@ -2194,6 +2223,45 @@ class _PlayerScreenState extends State<PlayerScreen>
               // remote does. The hardware volume keys and J/K/L keep working
               // everywhere either way -- they never meant "move focus".
               final isTv = TvModeService.isTv.value;
+
+              // A remote has no pointer to bring the controls back with, so
+              // an arrow or OK does. On a TV, with them hidden, Left/Right
+              // seek (the way a streaming app's remote does) and Up/Down
+              // just show them; with them up, the first arrow lands on
+              // play/pause and the rest move focus between the controls as
+              // the traversal always did.
+              final key = event.logicalKey;
+              final isArrow = key == LogicalKeyboardKey.arrowUp ||
+                  key == LogicalKeyboardKey.arrowDown ||
+                  key == LogicalKeyboardKey.arrowLeft ||
+                  key == LogicalKeyboardKey.arrowRight;
+              final isOk = key == LogicalKeyboardKey.select ||
+                  key == LogicalKeyboardKey.gameButtonA;
+              // Not while a menu or a side panel has the screen: those take
+              // the arrows for their own lists.
+              final hasOverlayOpen = _activeMenu != null ||
+                  _showEpisodesPanel ||
+                  _showSourcesPanel ||
+                  _showSubSyncBar;
+              if (!hasOverlayOpen && (isArrow || isOk)) {
+                final wasHidden = !_showControls;
+                _revealControls();
+                if (isTv && isArrow) {
+                  if (wasHidden) {
+                    if (key == LogicalKeyboardKey.arrowLeft) {
+                      _seekRelative(const Duration(seconds: -10));
+                    } else if (key == LogicalKeyboardKey.arrowRight) {
+                      _seekRelative(const Duration(seconds: 10));
+                    }
+                    return KeyEventResult.handled;
+                  }
+                  if (FocusManager.instance.primaryFocus == _focusNode) {
+                    _playPauseFocus.requestFocus();
+                    return KeyEventResult.handled;
+                  }
+                }
+              }
+
               if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp ||
                   (!isTv && event.logicalKey == LogicalKeyboardKey.arrowUp)) {
                 _applyVolume(
@@ -2529,7 +2597,9 @@ class _PlayerScreenState extends State<PlayerScreen>
           top: 0,
           left: 0,
           right: 0,
-          child: IgnorePointer(
+          child: ExcludeFocus(
+            excluding: !_controlsFocusable,
+            child: IgnorePointer(
             ignoring:
                 (!_showControls && !_isLoading) ||
                 _showSubSyncBar ||
@@ -2586,6 +2656,7 @@ class _PlayerScreenState extends State<PlayerScreen>
               ),
             ),
           ),
+          ),
         ),
 
         // Seek feedback. Deliberately not gated on _showControls: a
@@ -2600,13 +2671,16 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Centered Play/Pause + ±10s (YouTube/Netflix style)
         if (!_isLoading)
           Positioned.fill(
-            child: IgnorePointer(
+            child: ExcludeFocus(
+              excluding: !_controlsFocusable,
+              child: IgnorePointer(
               ignoring: !_showControls || _showTextSyncOverlay,
               child: AnimatedOpacity(
                 opacity: (_showControls && !_showTextSyncOverlay) ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
                 child: Center(
                   child: PlayerCenterControls(
+                    playPauseFocusNode: _playPauseFocus,
                     isPlaying: _isPlaying,
                     onPlayPause: _togglePlayPause,
                     onSeekBack30: () =>
@@ -2617,6 +2691,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 ),
               ),
             ),
+            ),
           ),
 
         // Bottom Transport Bar
@@ -2625,7 +2700,9 @@ class _PlayerScreenState extends State<PlayerScreen>
             bottom: 0,
             left: 0,
             right: 0,
-            child: IgnorePointer(
+            child: ExcludeFocus(
+              excluding: !_controlsFocusable,
+              child: IgnorePointer(
               ignoring:
                   (!_showControls && _activeMenu == null) ||
                   _showTextSyncOverlay,
@@ -2668,6 +2745,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   ),
                 ),
               ),
+            ),
             ),
           ),
 

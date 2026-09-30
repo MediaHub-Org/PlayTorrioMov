@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'focus_ring.dart';
-
 /// The keys that activate a focused [InteractiveCardShell]. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
 /// that inside a `const` set literal.
@@ -26,12 +24,12 @@ final _activators = {
 /// `Enter`, `NumpadEnter`, a TV remote's select button and a gamepad's A
 /// button all fire [onTap].
 ///
-/// The hover-lean was originally judged enough on its own here -- unlike
-/// [HoverButton]'s `showFocusRing`, no card type opted into a ring. Real
-/// remote testing on an actual TV said otherwise: at couch distance a ~4%
-/// lean is easy to lose track of against a full grid of posters, especially
-/// once scrolling (see `Scrollable.ensureVisible` below) moves the whole
-/// grid under it at the same time. Every card now gets a [FocusRing] too.
+/// No [FocusRing] here, on purpose. Cards got one after a first TV test said
+/// the ~4% lean was easy to lose against a full grid; a later test said the
+/// other way: a card already scales up and lifts when focused, and the violet
+/// ring around it on top of that only covers the poster. The lean and the lift
+/// are the indicator (plus `Scrollable.ensureVisible` below, which keeps the
+/// card on screen as the grid scrolls under it).
 class InteractiveCardShell extends StatefulWidget {
   final Widget Function(BuildContext context, bool hovered, bool pressed) builder;
   final VoidCallback onTap;
@@ -47,12 +45,6 @@ class InteractiveCardShell extends StatefulWidget {
   final double pressedScale;
   final double hoveredScale;
 
-  /// [FocusRing]'s corner radius, matched to the card's own artwork corners
-  /// so the ring reads as marking the card rather than as a mismatched box
-  /// around it. Movie/series posters use 18; overridden per caller for a
-  /// different shape (a channel logo tile, for instance).
-  final double focusRingBorderRadius;
-
   const InteractiveCardShell({
     super.key,
     required this.builder,
@@ -60,7 +52,6 @@ class InteractiveCardShell extends StatefulWidget {
     this.autofocus = false,
     this.pressedScale = 0.97,
     this.hoveredScale = 1.045,
-    this.focusRingBorderRadius = 18,
   });
 
   @override
@@ -102,31 +93,27 @@ class _InteractiveCardShellState extends State<InteractiveCardShell> {
       autofocus: widget.autofocus,
       onFocusChange: _onFocusChange,
       onKeyEvent: _handleKey,
-      child: FocusRing(
-        visible: _focused,
-        borderRadius: widget.focusRingBorderRadius,
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: (_) => setState(() => _hovered = true),
-          onExit: (_) => setState(() {
-            _hovered = false;
-            _pressed = false;
-          }),
-          child: GestureDetector(
-            onTapDown: (_) => setState(() => _pressed = true),
-            onTapCancel: () => setState(() => _pressed = false),
-            onTapUp: (_) => setState(() => _pressed = false),
-            onTap: widget.onTap,
-            child: AnimatedScale(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() {
+          _hovered = false;
+          _pressed = false;
+        }),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapCancel: () => setState(() => _pressed = false),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTap: widget.onTap,
+          child: AnimatedScale(
+            duration: const Duration(milliseconds: 170),
+            curve: Curves.easeOutCubic,
+            scale: _pressed ? widget.pressedScale : (hovered ? widget.hoveredScale : 1.0),
+            child: AnimatedContainer(
               duration: const Duration(milliseconds: 170),
               curve: Curves.easeOutCubic,
-              scale: _pressed ? widget.pressedScale : (hovered ? widget.hoveredScale : 1.0),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 170),
-                curve: Curves.easeOutCubic,
-                transform: Matrix4.translationValues(0, hovered ? -6 : 0, 0),
-                child: widget.builder(context, hovered, _pressed),
-              ),
+              transform: Matrix4.translationValues(0, hovered ? -6 : 0, 0),
+              child: widget.builder(context, hovered, _pressed),
             ),
           ),
         ),

@@ -32,11 +32,12 @@ The first item is code work, in batches; the rest need a device.
   of `lib/pages` and `lib/widgets`. Judge each against a device at the default
   text size: the batches are made without one, so a visual drift is the risk.
 
-- **D-pad on a TV (#80).** Rows are confirmed on a TV. Not yet: the side
-  menu (`TvSideMenu`, which replaced hand-bridging to the top bar), the hero's
-  Play/Details (`HeroActionButton`), the focus rings on pills and header icons,
-  and TV detection now including the leanback feature. Report what the remote
-  does.
+- **D-pad on a TV (#80).** Confirmed on a TV: rows, the side menu and reaching
+  every element. Not yet: the menu's new icon-rail form (opens on focus), the
+  player's controls coming back on an arrow/OK (and Left/Right seeking with
+  them hidden), the trimmed Watch Sources rows, and cards without a ring.
+  Report what the remote does. Open question: the in-player sources panel and
+  the anime episode sheet still show the longer tag set.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
   says so). Cast a direct/CDN source with no header requirement: if it plays,
