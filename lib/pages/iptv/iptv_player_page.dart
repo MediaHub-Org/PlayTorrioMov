@@ -628,7 +628,26 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       autofocus: true,
       onKeyEvent: (node, event) {
         if (event is KeyDownEvent) {
-          if (event.logicalKey == LogicalKeyboardKey.space) {
+          // A remote has no pointer to bring the controls back with, so an
+          // arrow or OK does -- otherwise the title and transport bar stay
+          // hidden for good once they time out.
+          final key = event.logicalKey;
+          if (!_showSourcesDrawer &&
+              (key == LogicalKeyboardKey.arrowUp ||
+                  key == LogicalKeyboardKey.arrowDown ||
+                  key == LogicalKeyboardKey.arrowLeft ||
+                  key == LogicalKeyboardKey.arrowRight ||
+                  key == LogicalKeyboardKey.select ||
+                  key == LogicalKeyboardKey.gameButtonA)) {
+            if (!_showControls) setState(() => _showControls = true);
+            _startHideControlsTimer();
+          }
+          // OK only when nothing else holds focus: a focused button takes it
+          // as its own press, and this must not turn that into play/pause.
+          if (event.logicalKey == LogicalKeyboardKey.space ||
+              (node.hasPrimaryFocus &&
+                  (event.logicalKey == LogicalKeyboardKey.select ||
+                      event.logicalKey == LogicalKeyboardKey.gameButtonA))) {
             _togglePlayPause();
             return KeyEventResult.handled;
           } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft &&

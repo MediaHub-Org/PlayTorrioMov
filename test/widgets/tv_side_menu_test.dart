@@ -92,6 +92,53 @@ void main() {
     },
   );
 
+  testWidgets('the menu rests as a rail and opens while focus is inside it',
+      (tester) async {
+    setSurface(tester, 1280);
+    final card = FocusNode(debugLabel: 'card');
+    addTearDown(card.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TvHubFrame(
+          menu: TvSideMenu(onSearchTap: () {}, onSettingsTap: () {}),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Focus(
+              focusNode: card,
+              child: const SizedBox(key: Key('content'), width: 120, height: 180),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+
+    final rail = TvSideMenu.railWidthFor(tester.element(find.byType(TvSideMenu)));
+    final labels = find.descendant(
+      of: find.byType(TvSideMenu),
+      matching: find.byType(AnimatedOpacity),
+    );
+    double opacityOf(Element e) => (e.widget as AnimatedOpacity).opacity;
+
+    expect(tester.getSize(find.byType(TvSideMenu)).width, rail);
+    expect(labels.evaluate().map(opacityOf), everyElement(0));
+
+    // The content starts past the rail, so opening the menu never moves it.
+    expect(tester.getTopLeft(find.byKey(const Key('content'))).dx, greaterThanOrEqualTo(rail));
+
+    card.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(labels.evaluate().map(opacityOf), everyElement(1));
+    expect(tester.getSize(find.byType(TvSideMenu)).width, rail);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(card.hasPrimaryFocus, isTrue);
+    expect(labels.evaluate().map(opacityOf), everyElement(0));
+  });
+
   testWidgets('a TV layout draws no top bar and no bottom tab bar',
       (tester) async {
     setSurface(tester, 400);

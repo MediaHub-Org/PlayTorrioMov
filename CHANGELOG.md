@@ -16,6 +16,24 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   manifest.
 
 ### Changed
+- **The TV side menu rests as a rail of icons and opens on focus (#80).** The
+  first device test confirmed it works; the feedback was that a permanently
+  wide menu takes room from the posters. It is now a narrow icon rail
+  (`AppRem.menuRail`) that opens into the labelled panel while the remote is
+  inside it, over the content rather than pushing it, and closes when focus
+  leaves. Only the icon pills take focus (the labels hang outside them), so a
+  wide item cannot sit over the first card's column and make Right skip it.
+  Hidden behind a button was the other option: it needs a first press just to
+  find the menu. Not confirmed on a TV.
+- **Poster cards lose the focus ring (#80).** A focused card already scales up
+  and lifts, and the violet ring on top only covered the poster. The ring stays
+  on pills, header icons, the menu and the hero buttons, which do not move.
+- **Watch Sources rows show the release's file name and fewer tags.** The
+  row's title is the release's own file name again (up to two lines), with the
+  site under it; the tags are down from as many as eight to quality, HDR, a
+  torrent's seed count, size and audio language. Container, release source,
+  codec and P2P/HTTP are in the file name. The other two source pickers (in
+  the player, anime episodes) are unchanged. New `StreamSource.releaseName`.
 - **Sizes are moving to `rem` and named tokens, in batches.** The code
   measured layout in bare numbers (`SizedBox(width: 12)`, `height: 40`), so a
   larger text size grew the text and left every gap, bar and button where it
@@ -59,6 +77,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   "right" looks like here still needs eyes on an actual screen.
 
 ### Fixed
+- **The video player showed no bars on a TV and only paused (#80).** Its
+  controls appeared on pointer movement, which a remote does not produce, so
+  after the first four seconds they were gone for good and OK only toggled
+  play. Any arrow or OK now brings them back and keeps them up; with them
+  hidden, Left/Right seek 10 s (as a streaming app's remote does) and Up/Down
+  show them; with them up the first arrow lands on play/pause. Hidden controls
+  no longer take focus, which is how a remote ended up moving between buttons
+  nobody could see. The Live TV player reveals its controls the same way and OK
+  toggles play there too. Not confirmed on a TV.
 - **A TV gets a side menu instead of the top bar (#80).** Two rounds of
   hand-bridging the top bar from the content (`TvFocusBridge`) did not work on
   a real remote, while ordinary traversal inside the content did. The bar sits
