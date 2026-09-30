@@ -47,6 +47,7 @@ abstract final class AppRem {
   // Space.
   static const double xxs = 0.125;
   static const double xs = 0.25;
+  static const double snug = 0.375;
   static const double sm = 0.5;
   static const double ms = 0.75;
   static const double md = 1;
@@ -55,13 +56,26 @@ abstract final class AppRem {
 
   // Corner radii.
   static const double radiusSm = 0.5;
+  static const double radiusPill = 0.625;
   static const double radiusMd = 0.75;
   static const double radiusLg = 1;
 
   // Icons.
+  static const double iconXs = 1;
   static const double iconSm = 1.125;
   static const double icon = 1.25;
   static const double iconLg = 1.5;
+
+  // A tap target: the smallest square a finger or a remote's focus ring should
+  // be asked to hit.
+  static const double target = 2.5;
+
+  // The slim bar across the top of the hub.
+  static const double bar = 3.5;
+
+  // Shadow blur.
+  static const double blurSm = 0.625;
+  static const double blur = 0.75;
 
   // The TV side menu's width bounds, which the window width sits between.
   static const double menuMin = 9.25;
@@ -77,7 +91,9 @@ abstract final class AppRem {
 /// Font sizes, as plain constants -- see [AppUnits] for why these are not in
 /// rem. The text scaler applies the user's setting when the text is painted.
 abstract final class AppType {
+  static const double caption = 12;
   static const double small = 13;
   static const double body = 14;
   static const double bodyLg = 16;
+  static const double title = 21;
 }

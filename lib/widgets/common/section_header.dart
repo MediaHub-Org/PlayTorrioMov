@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -29,9 +30,9 @@ class SectionHeader extends StatelessWidget {
       // the title flush against the card row with no breathing room.
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pageInset(context),
-        8,
+        context.rem(AppRem.sm),
         AppSpacing.pageInset(context),
-        12,
+        context.rem(AppRem.ms),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,18 +44,18 @@ class SectionHeader extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 21,
+                    fontSize: AppType.title,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
-                    height: 1.1,
+                    height: 1.1, // ratio: a line height, not a size
                   ),
                 ),
                 if (subtitle != null && subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 3),
+                  SizedBox(height: context.rem(AppRem.xxs)),
                   Text(
                     subtitle!,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppType.small,
                       color: AppColors.inkAlpha(0.38),
                       fontWeight: FontWeight.w500,
                     ),
@@ -72,14 +73,14 @@ class SectionHeader extends StatelessWidget {
             // browse page.
             Flexible(
               child: Padding(
-                padding: const EdgeInsets.only(top: 3),
+                padding: EdgeInsets.only(top: context.rem(AppRem.xxs)),
                 child: TextButton(
                   onPressed: onSeeAll,
                   style: TextButton.styleFrom(
                     foregroundColor: primaryColor,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(AppRem.radiusPill),
+                      vertical: context.rem(AppRem.xs),
                     ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -93,13 +94,16 @@ class SectionHeader extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: AppType.body,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 2),
-                      const Icon(Icons.chevron_right_rounded, size: 20),
+                      SizedBox(width: context.rem(AppRem.xxs)),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        size: context.rem(AppRem.icon),
+                      ),
                     ],
                   ),
                 ),

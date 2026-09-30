@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/app_breakpoints.dart';
-import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../utils/hub_controller.dart';
 import 'tv_focus_bridge.dart';
 import '../../services/theme/app_colors.dart';
@@ -44,12 +44,12 @@ class SectionChips extends StatelessWidget {
         return Center(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 for (var i = 0; i < sections.length; i++) ...[
-                  if (i > 0) const SizedBox(width: 6),
+                  if (i > 0) SizedBox(width: context.rem(AppRem.snug)),
                   _Chip(
                     label: sections[i].localizedLabel(context),
                     icon: sections[i].icon,
@@ -133,23 +133,26 @@ class _ChipState extends State<_Chip> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: EdgeInsets.symmetric(
+            horizontal: context.rem(AppRem.ms),
+            vertical: context.rem(AppRem.snug),
+          ),
           decoration: BoxDecoration(
             color: selected ? accent : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadii.md),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             // A remote's focus needs to read from across a room, and a
             // plain overlay tint is a faint one. A ring in the ink color
             // shows on the selected chip's accent fill and on the bar alike.
             border: Border.all(
               color: _focused ? AppColors.ink : Colors.transparent,
-              width: 2,
+              width: 2, // px: a focus ring keeps its weight at any text size
             ),
             boxShadow: selected
                 ? [
                     BoxShadow(
                       color: accent.withValues(alpha: 0.35),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
+                      blurRadius: context.rem(AppRem.blurSm),
+                      offset: Offset(0, context.rem(AppRem.xxs)),
                     ),
                   ]
                 : null,
@@ -162,9 +165,9 @@ class _ChipState extends State<_Chip> {
                 // Selected sits on the accent fill, so it is white in both
                 // themes; unselected sits on the bar and follows the ink.
                 color: selected ? AppColors.onAccent : AppColors.inkDisabled,
-                size: 16,
+                size: context.rem(AppRem.iconXs),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
               Text(
                 label,
                 // Clamped: the chip sits in TopBar's fixed height, which
@@ -175,7 +178,7 @@ class _ChipState extends State<_Chip> {
                 maxLines: 1,
                 style: TextStyle(
                   color: selected ? AppColors.onAccent : AppColors.inkSubtle,
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   fontWeight: selected ? FontWeight.bold : FontWeight.w500,
                 ),
               ),
