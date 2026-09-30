@@ -33,8 +33,8 @@ The first item is code work, in batches; the rest need a device.
   whose height is a measured budget (`CreditCard.railHeight`,
   `SimilarCard.heightFor`), asserted at 3x text by
   `text_scale_overflow_test`, so moving them means changing that contract and
-  its probes together. Next, each its own PR: (1) the player and its menus;
-  (2) settings; (3) the rest of `lib/pages` and `lib/widgets`. Judge each against a device at the default
+  its probes together. Next, each its own PR: (1) settings and the updater/P2P
+  widgets; (2) everything else. The video player is done. Judge each against a device at the default
   text size: the batches are made without one, so a visual drift is the risk.
 
 - **D-pad on a TV (#80).** Confirmed on a TV: rows, the side menu and reaching

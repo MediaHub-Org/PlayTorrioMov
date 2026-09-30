@@ -7,6 +7,7 @@ import 'language_flag.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
 import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
+import '../../services/app_units.dart';
 
 /// Subtitle on/off and the language list.
 ///
@@ -137,7 +138,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
       height: cardHeight,
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(context.rem(0.625)),
       child: _showAppearance
           ? _buildAppearanceEditor(context)
           : _buildTrackList(context),
@@ -153,13 +154,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         Row(
           children: [
             PlayerIconButton(
-              size: 28,
-              iconSize: 14,
+              size: context.rem(1.75),
+              iconSize: context.rem(0.875),
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               tooltip: context.l10n.subsBackToSubtitles,
               onPressed: () => _setAppearance(false),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: context.rem(AppRem.xs)),
             Expanded(
               child: PlayerMenuHeader(
                 title: context.l10n.subsAppearance.toUpperCase(),
@@ -167,7 +168,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: context.rem(AppRem.snug)),
         Expanded(child: SubtitleStyleEditor(player: widget.player)),
       ],
     );
@@ -181,13 +182,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
           children: [
             if (widget.onBack != null) ...[
               PlayerIconButton(
-                size: 28,
-                iconSize: 14,
+                size: context.rem(1.75),
+                iconSize: context.rem(0.875),
                 icon: const Icon(Icons.arrow_back_ios_new_rounded),
                 tooltip: context.l10n.playerBackToSettings,
                 onPressed: widget.onBack,
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: context.rem(AppRem.xs)),
             ],
             Expanded(
               child: PlayerMenuHeader(
@@ -199,16 +200,16 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             // and read as a second set of choices rather than as actions on
             // the list below.
             PlayerIconButton(
-              size: 28,
-              iconSize: 15,
+              size: context.rem(1.75),
+              iconSize: context.rem(0.9375),
               icon: const Icon(Icons.refresh_rounded),
               tooltip: context.l10n.subsRefreshOnline,
               onPressed: widget.onRefresh,
             ),
-            const SizedBox(width: 2),
+            SizedBox(width: context.rem(AppRem.xxs)),
             PlayerIconButton(
-              size: 28,
-              iconSize: 15,
+              size: context.rem(1.75),
+              iconSize: context.rem(0.9375),
               icon: const Icon(Icons.timer_outlined),
               tooltip: context.l10n.subsSyncBar,
               showActiveBadge: widget.delaySec != 0,
@@ -216,17 +217,17 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                   ? null
                   : widget.onOpenSyncBar,
             ),
-            const SizedBox(width: 2),
+            SizedBox(width: context.rem(AppRem.xxs)),
             PlayerIconButton(
-              size: 28,
-              iconSize: 15,
+              size: context.rem(1.75),
+              iconSize: context.rem(0.9375),
               icon: const Icon(Icons.tune_rounded),
               tooltip: context.l10n.subsAppearanceTooltip,
               onPressed: () => _setAppearance(true),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
 
         // One scrollable under the header, not fixed chrome over a
         // scrolling list. The toggle, tabs and chips are fixed-height rows
@@ -246,13 +247,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                       ? widget.onDisable
                       : widget.onEnable,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: context.rem(AppRem.sm)),
                 _buildSourceTabs(context),
-                const SizedBox(height: 6),
+                SizedBox(height: context.rem(AppRem.snug)),
                 _buildFilterChips(context),
-                const SizedBox(height: 6),
-                const Divider(color: PlayerTheme.edgeSoft, height: 1),
-                const SizedBox(height: 6),
+                SizedBox(height: context.rem(AppRem.snug)),
+                const Divider(color: PlayerTheme.edgeSoft, height: 1), // px: a hairline, not a layout size
+                SizedBox(height: context.rem(AppRem.snug)),
                 ..._buildRows(context),
               ],
             ),
@@ -289,7 +290,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             onTap: () => setState(() => _source = _SubtitleSource.embedded),
           ),
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: context.rem(AppRem.snug)),
         Expanded(
           child: _TabButton(
             label: context.l10n.subsOnline,
@@ -332,13 +333,13 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             isSelected: _filter == _SubtitleFilter.subtitles,
             onTap: () => pick(_SubtitleFilter.subtitles),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: context.rem(AppRem.snug)),
           _FilterChip(
             label: context.l10n.subsSdhShort,
             isSelected: _filter == _SubtitleFilter.sdh,
             onTap: () => pick(_SubtitleFilter.sdh),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: context.rem(AppRem.snug)),
           _FilterChip(
             label: context.l10n.subsForced,
             isSelected: _filter == _SubtitleFilter.forced,
@@ -415,7 +416,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         }
         rows.add(
           PlayerMenuRow(
-            leading: LanguageFlag(track.language ?? '', height: 13),
+            leading: LanguageFlag(track.language ?? '', height: context.rem(0.8125)),
             title: track.displayName,
             badges: [
               if (track.isForced) context.l10n.subsForced,
@@ -477,7 +478,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         if (groupTicked && !isExpanded) markedSelected = true;
         rows.add(
           PlayerMenuRow(
-            leading: LanguageFlag(group.language, height: 13),
+            leading: LanguageFlag(group.language, height: context.rem(0.8125)),
             title: group.language,
             // The count is back, but as a reason to tap rather than a fact
             // about the implementation: it says there is more than one file
@@ -493,7 +494,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                     isExpanded
                         ? Icons.expand_less_rounded
                         : Icons.expand_more_rounded,
-                    size: 16,
+                    size: context.rem(AppRem.iconXs),
                     color: PlayerTheme.inkSubtle,
                   )
                 : null,
@@ -619,24 +620,24 @@ class _ShowAllRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 2, bottom: 3),
+      padding: EdgeInsets.only(top: context.rem(AppRem.xxs), bottom: context.rem(0.1875)),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(context.rem(0.5625)),
           onTap: onTap,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 36),
+            constraints: BoxConstraints(minHeight: context.rem(2.25)),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(context.rem(0.5625)),
               border: Border.all(color: PlayerTheme.edgeSoft),
             ),
             child: Text(
               label,
               style: const TextStyle(
                 color: PlayerTheme.inkSubtle,
-                fontSize: 11.5,
+                fontSize: AppType.tinyPlus,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -666,16 +667,16 @@ class _TabButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(context.rem(0.5625)),
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minHeight: 34),
+          constraints: BoxConstraints(minHeight: context.rem(2.125)),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: isSelected
                 ? PlayerTheme.accent.withValues(alpha: 0.18)
                 : PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
             border: Border.all(
               color: isSelected
                   ? PlayerTheme.accent.withValues(alpha: 0.55)
@@ -686,7 +687,7 @@ class _TabButton extends StatelessWidget {
             count > 0 ? '$label  $count' : label,
             style: TextStyle(
               color: isSelected ? PlayerTheme.ink : PlayerTheme.inkSubtle,
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
@@ -713,13 +714,13 @@ class _FilterChip extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(context.rem(0.4375)),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.3125)),
           decoration: BoxDecoration(
             color: isSelected ? PlayerTheme.raised : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
+            borderRadius: BorderRadius.circular(context.rem(0.4375)),
             border: Border.all(
               color: isSelected ? PlayerTheme.edge : PlayerTheme.edgeSoft,
             ),
@@ -728,7 +729,7 @@ class _FilterChip extends StatelessWidget {
             label,
             style: TextStyle(
               color: isSelected ? PlayerTheme.ink : PlayerTheme.inkSubtle,
-              fontSize: 11,
+              fontSize: AppType.tiny,
               fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
@@ -754,17 +755,17 @@ class _SubtitleToggleButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(context.rem(0.5625)),
         onTap: onPressed,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 38),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          constraints: BoxConstraints(minHeight: context.rem(2.375)),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625)),
           decoration: BoxDecoration(
             color: isEnabled
                 ? PlayerTheme.accent.withValues(alpha: 0.18)
                 : PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
             border: Border.all(
               color: isEnabled
                   ? PlayerTheme.accent.withValues(alpha: 0.55)
@@ -777,12 +778,12 @@ class _SubtitleToggleButton extends StatelessWidget {
                 isEnabled
                     ? Icons.closed_caption_rounded
                     : Icons.closed_caption_disabled_rounded,
-                size: 17,
+                size: context.rem(1.0625),
                 color: isEnabled
                     ? PlayerTheme.accent
                     : PlayerTheme.inkDisabled,
               ),
-              const SizedBox(width: 9),
+              SizedBox(width: context.rem(0.5625)),
               Expanded(
                 child: Text(
                   isEnabled
@@ -791,7 +792,7 @@ class _SubtitleToggleButton extends StatelessWidget {
                   style: TextStyle(
                     color:
                         isEnabled ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                    fontSize: 12.5,
+                    fontSize: AppType.captionPlus,
                     fontWeight: FontWeight.w700,
                   ),
                 ),

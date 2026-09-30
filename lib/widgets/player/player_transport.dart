@@ -6,6 +6,7 @@ import '../../services/player/sleep_timer_service.dart';
 import 'player_glass.dart';
 import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
+import '../../services/app_units.dart';
 
 /// Bottom transport bar: timeline scrubber, volume, and one button per
 /// control -- speed, audio, subtitles, sleep timer, aspect ratio. Play/pause
@@ -85,10 +86,10 @@ class PlayerTransport extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.fromLTRB(
-        isCompact ? 14 : 28,
-        isCompact ? 32 : 48,
-        isCompact ? 14 : 28,
-        isCompact ? 14 : 24,
+        context.rem(isCompact ? 0.875 : 1.75),
+        context.rem(isCompact ? AppRem.xl : 3),
+        context.rem(isCompact ? 0.875 : 1.75),
+        context.rem(isCompact ? 0.875 : AppRem.lg),
       ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -116,7 +117,7 @@ class PlayerTransport extends StatelessWidget {
             onScrubbingChanged: onScrubbingChanged,
           ),
 
-          SizedBox(height: isCompact ? 4 : 8),
+          SizedBox(height: context.rem(isCompact ? AppRem.xs : AppRem.sm)),
 
           // Bottom Controls Row: volume at one end, the menu triggers at
           // the other.

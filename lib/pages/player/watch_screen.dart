@@ -32,6 +32,7 @@ import '../../widgets/common/source_badges.dart';
 import '../settings/settings_page.dart';
 import '../details/details_page.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate the "no sources, install addons" button below.
 /// `final`, not `const`: `LogicalKeyboardKey` overrides `==`, and the
@@ -123,7 +124,7 @@ class _WatchScreenState extends State<WatchScreen>
       duration: const Duration(milliseconds: 500),
     );
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero)
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero) // ratio: a line height, not a size
         .animate(
           CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
         );
@@ -373,8 +374,8 @@ class _WatchScreenState extends State<WatchScreen>
               : _buildMobileLayout(screenSize),
         ),
         Positioned(
-          top: MediaQuery.of(context).padding.top + 8,
-          left: 12,
+          top: MediaQuery.of(context).padding.top + context.rem(AppRem.sm),
+          left: context.rem(AppRem.ms),
           child: _buildBackButton(),
         ),
       ],
@@ -452,11 +453,11 @@ class _WatchScreenState extends State<WatchScreen>
       child: FadeTransition(
         opacity: _fadeAnim,
         child: Padding(
-          padding: const EdgeInsetsDirectional.only(
-            top: 60,
-            start: 48,
+          padding: EdgeInsetsDirectional.only(
+            top: context.rem(3.75),
+            start: context.rem(3),
             end: 0,
-            bottom: 24,
+            bottom: context.rem(AppRem.lg),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -470,12 +471,12 @@ class _WatchScreenState extends State<WatchScreen>
                   child: _buildInfoRegion(isDesktop: true),
                 ),
               ),
-              const SizedBox(width: 32),
+              SizedBox(width: context.rem(AppRem.xl)),
               // Right: sources panel (extends to right edge)
               Expanded(
                 flex: sourcesFlex,
                 child: Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 24),
+                  padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.lg)),
                   child: _buildSourcesPanel(isDesktop: true),
                 ),
               ),
@@ -501,7 +502,7 @@ class _WatchScreenState extends State<WatchScreen>
           physics: const BouncingScrollPhysics(),
           slivers: [
             // ── Top padding ──
-            const SliverPadding(padding: EdgeInsets.only(top: 60)),
+            SliverPadding(padding: EdgeInsets.only(top: context.rem(3.75))),
 
             // ── Info region (single box) ──
             SliverToBoxAdapter(
@@ -528,14 +529,14 @@ class _WatchScreenState extends State<WatchScreen>
                             Icon(
                               Icons.stream_rounded,
                               color: _C.accent,
-                              size: 20,
+                              size: context.rem(AppRem.icon),
                             ),
                             const SizedBox(width: _S.xs),
                             Text(
                               context.l10n.watchSources,
                               style: const TextStyle(
                                 color: _C.textPrimary,
-                                fontSize: 18,
+                                fontSize: AppType.lead,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -547,13 +548,13 @@ class _WatchScreenState extends State<WatchScreen>
                               : '${filtered.length} source${filtered.length == 1 ? '' : 's'} found',
                           style: const TextStyle(
                             color: _C.textTertiary,
-                            fontSize: 12,
+                            fontSize: AppType.caption,
                           ),
                         ),
                       ],
                     ),
                     if (_sources.isNotEmpty) ...[
-                      const SizedBox(height: 10),
+                      SizedBox(height: context.rem(0.625)),
                       _buildFilterPillRail(),
                     ],
                     const SizedBox(height: _S.md),
@@ -611,7 +612,7 @@ class _WatchScreenState extends State<WatchScreen>
               ),
 
             // ── Bottom padding ──
-            const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+            SliverPadding(padding: EdgeInsets.only(bottom: context.rem(AppRem.lg))),
           ],
         ),
       ),
@@ -631,10 +632,10 @@ class _WatchScreenState extends State<WatchScreen>
         // Episode info header (if applicable)
         if (ep != null) ...[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.snug)),
             decoration: BoxDecoration(
               color: _C.accent.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
               border: Border.all(color: _C.accent.withValues(alpha: 0.3)),
             ),
             child: Text(
@@ -643,7 +644,7 @@ class _WatchScreenState extends State<WatchScreen>
                   : 'S${ep.season ?? '?' }E${ep.episode ?? '?' }',
               style: TextStyle(
                 color: _C.accent,
-                fontSize: 13,
+                fontSize: AppType.small,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),
@@ -663,7 +664,7 @@ class _WatchScreenState extends State<WatchScreen>
             child: Text(
               ep.title,
               style: TextStyle(
-                fontSize: isDesktop ? 20 : 17,
+                fontSize: isDesktop ? AppType.titleSm : AppType.subhead,
                 fontWeight: FontWeight.w600,
                 color: _C.textPrimary.withValues(alpha: 0.85),
               ),
@@ -717,8 +718,8 @@ class _WatchScreenState extends State<WatchScreen>
     if (meta.logo != null && meta.logo!.isNotEmpty) {
       return ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isDesktop ? 380 : 260,
-          maxHeight: isDesktop ? 120 : 80,
+          maxWidth: context.rem(isDesktop ? 23.75 : 16.25),
+          maxHeight: context.rem(isDesktop ? 7.5 : 5),
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
@@ -735,16 +736,16 @@ class _WatchScreenState extends State<WatchScreen>
     return Text(
       text,
       style: TextStyle(
-        fontSize: isDesktop ? 36 : 28,
+        fontSize: isDesktop ? AppType.displayMd : AppType.displaySm,
         fontWeight: FontWeight.w800,
-        height: 1.1,
+        height: 1.1, // ratio: a line height, not a size
         letterSpacing: -0.5,
         color: _C.textPrimary,
         shadows: [
           Shadow(
             color: Colors.black.withValues(alpha: 0.7),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            blurRadius: context.rem(1.25),
+            offset: Offset(0, context.rem(AppRem.xs)),
           ),
         ],
       ),
@@ -760,7 +761,7 @@ class _WatchScreenState extends State<WatchScreen>
           meta.year!,
           style: const TextStyle(
             color: _C.textPrimary,
-            fontSize: 14,
+            fontSize: AppType.body,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -771,7 +772,7 @@ class _WatchScreenState extends State<WatchScreen>
       items.add(
         Text(
           meta.runtime!,
-          style: const TextStyle(color: _C.textSecondary, fontSize: 14),
+          style: const TextStyle(color: _C.textSecondary, fontSize: AppType.body),
         ),
       );
     }
@@ -779,22 +780,22 @@ class _WatchScreenState extends State<WatchScreen>
     if (meta.imdbRating != null && meta.imdbRating!.isNotEmpty) {
       items.add(
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1875)),
           decoration: BoxDecoration(
             color: _C.gold.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
             border: Border.all(color: _C.gold.withValues(alpha: 0.4)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.star_rounded, color: _C.gold, size: 14),
-              const SizedBox(width: 3),
+              Icon(Icons.star_rounded, color: _C.gold, size: context.rem(0.875)),
+              SizedBox(width: context.rem(0.1875)),
               Text(
                 meta.imdbRating!,
                 style: const TextStyle(
                   color: _C.gold,
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -813,7 +814,7 @@ class _WatchScreenState extends State<WatchScreen>
             padding: EdgeInsets.symmetric(horizontal: _S.xs),
             child: Text(
               '·',
-              style: TextStyle(color: _C.textTertiary, fontSize: 16),
+              style: TextStyle(color: _C.textTertiary, fontSize: AppType.bodyLg),
             ),
           ),
         );
@@ -822,7 +823,7 @@ class _WatchScreenState extends State<WatchScreen>
 
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
-      runSpacing: 6,
+      runSpacing: context.rem(AppRem.snug),
       children: spaced,
     );
   }
@@ -834,17 +835,17 @@ class _WatchScreenState extends State<WatchScreen>
       children: genres
           .map(
             (g) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.snug)),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                 border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
               ),
               child: Text(
                 g,
                 style: const TextStyle(
                   color: _C.textSecondary,
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -867,16 +868,16 @@ class _WatchScreenState extends State<WatchScreen>
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: _C.textSecondary,
-              fontSize: 14,
-              height: 1.6,
+              fontSize: AppType.body,
+              height: 1.6, // ratio: a line height, not a size
             ),
           ),
           secondChild: Text(
             text,
             style: const TextStyle(
               color: _C.textSecondary,
-              fontSize: 14,
-              height: 1.6,
+              fontSize: AppType.body,
+              height: 1.6, // ratio: a line height, not a size
             ),
           ),
           crossFadeState: _synopsisExpanded
@@ -884,13 +885,13 @@ class _WatchScreenState extends State<WatchScreen>
               : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 250),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: context.rem(AppRem.snug)),
         LayoutBuilder(
           builder: (context, constraints) {
             final painter = TextPainter(
               text: TextSpan(
                 text: text,
-                style: const TextStyle(fontSize: 14, height: 1.6),
+                style: const TextStyle(fontSize: AppType.body, height: 1.6), // ratio: a line height, not a size
               ),
               maxLines: 3,
               textDirection: TextDirection.ltr,
@@ -907,7 +908,7 @@ class _WatchScreenState extends State<WatchScreen>
                 _synopsisExpanded ? 'Show less' : 'Read more',
                 style: TextStyle(
                   color: _C.accent,
-                  fontSize: 13,
+                  fontSize: AppType.small,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -926,7 +927,7 @@ class _WatchScreenState extends State<WatchScreen>
           label,
           style: const TextStyle(
             color: _C.textTertiary,
-            fontSize: 11,
+            fontSize: AppType.tiny,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.0,
           ),
@@ -938,19 +939,19 @@ class _WatchScreenState extends State<WatchScreen>
           children: items
               .map(
                 (name) => Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.rem(0.625),
+                    vertical: context.rem(0.3125),
                   ),
                   decoration: BoxDecoration(
                     color: _C.surfaceLight,
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                   ),
                   child: Text(
                     name,
                     style: const TextStyle(
                       color: _C.textSecondary,
-                      fontSize: 12,
+                      fontSize: AppType.caption,
                     ),
                   ),
                 ),
@@ -1035,22 +1036,22 @@ class _WatchScreenState extends State<WatchScreen>
       showFocusRing: true,
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
         decoration: BoxDecoration(
           color: _C.surface.withValues(alpha: 0.6),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
           border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: _C.textSecondary, size: 22),
-            const SizedBox(height: 4),
+            Icon(icon, color: _C.textSecondary, size: context.rem(AppRem.iconMd)),
+            SizedBox(height: context.rem(AppRem.xs)),
             Text(
               label,
               style: const TextStyle(
                 color: _C.textSecondary,
-                fontSize: 11,
+                fontSize: AppType.tiny,
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
@@ -1077,20 +1078,20 @@ class _WatchScreenState extends State<WatchScreen>
         // get their own line now, the same one the phone layout gives them.
         Row(
           children: [
-            Icon(Icons.stream_rounded, color: _C.accent, size: 20),
+            Icon(Icons.stream_rounded, color: _C.accent, size: context.rem(AppRem.icon)),
             const SizedBox(width: _S.xs),
             Text(
               context.l10n.watchSources,
               style: const TextStyle(
                 color: _C.textPrimary,
-                fontSize: 18,
+                fontSize: AppType.lead,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ],
         ),
         if (_sources.isNotEmpty) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           _buildFilterPillRail(),
         ],
         const SizedBox(height: _S.sm),
@@ -1100,7 +1101,7 @@ class _WatchScreenState extends State<WatchScreen>
           _isLoadingSources
               ? 'Searching sources...'
               : '${filtered.length} source${filtered.length == 1 ? '' : 's'} found',
-          style: const TextStyle(color: _C.textTertiary, fontSize: 12),
+          style: const TextStyle(color: _C.textTertiary, fontSize: AppType.caption),
         ),
         const SizedBox(height: _S.md),
 
@@ -1171,45 +1172,45 @@ class _WatchScreenState extends State<WatchScreen>
           showFocusRing: true,
           onTap: () => onTap(buttonContext),
           child: DecoratedBox(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(18)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(context.rem(AppRem.radiusXl))),
               boxShadow: [
                 BoxShadow(
-                  color: Color(0x40000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+                  color: const Color(0x40000000),
+                  blurRadius: context.rem(0.625),
+                  offset: Offset(0, context.rem(AppRem.xs)),
                 ),
               ],
             ),
             child: PerformanceLiquidLens(
               child: Container(
                 // A floor, not a fixed height: the label grows with text scale.
-                constraints: const BoxConstraints(minHeight: 36),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                constraints: BoxConstraints(minHeight: context.rem(2.25)),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms)),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
                   border: Border.all(color: const Color(0x26FFFFFF)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (icon != null) ...[
-                      Icon(icon, color: Colors.white70, size: 16),
-                      const SizedBox(width: 6),
+                      Icon(icon, color: Colors.white70, size: context.rem(AppRem.iconXs)),
+                      SizedBox(width: context.rem(AppRem.snug)),
                     ],
                     Text(
                       currentText,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: AppType.small,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(
+                    SizedBox(width: context.rem(AppRem.xs)),
+                    Icon(
                       Icons.arrow_drop_down,
                       color: Colors.white70,
-                      size: 20,
+                      size: context.rem(AppRem.icon),
                     ),
                   ],
                 ),
@@ -1230,12 +1231,12 @@ class _WatchScreenState extends State<WatchScreen>
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+        padding: EdgeInsets.symmetric(vertical: context.rem(0.625), horizontal: context.rem(0.875)),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
           color: selected
               ? Colors.white.withValues(alpha: 0.1)
               : Colors.transparent,
@@ -1247,13 +1248,13 @@ class _WatchScreenState extends State<WatchScreen>
                 title,
                 style: TextStyle(
                   color: selected ? Colors.white : Colors.white70,
-                  fontSize: 14,
+                  fontSize: AppType.body,
                   fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                 ),
               ),
             ),
             if (selected)
-              const Icon(Icons.check_circle, color: Colors.white, size: 18),
+              Icon(Icons.check_circle, color: Colors.white, size: context.rem(AppRem.iconSm)),
           ],
         ),
       ),
@@ -1313,12 +1314,12 @@ class _WatchScreenState extends State<WatchScreen>
               child: Material(
                 color: Colors.transparent,
                 child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
+                  tween: Tween(begin: 0.0, end: 1.0), // ratio: a line height, not a size
                   duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOut,
                   builder: (context, value, child) {
                     return Transform.translate(
-                      offset: Offset(0, (openAbove ? 10 : -10) * (1 - value)),
+                      offset: Offset(0, context.rem(openAbove ? AppRem.pillGap : -AppRem.pillGap) * (1 - value)), // ratio: an animation fraction
                       child: Opacity(
                         opacity: value.clamp(0.0, 1.0),
                         child: child,
@@ -1326,13 +1327,13 @@ class _WatchScreenState extends State<WatchScreen>
                     );
                   },
                   child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(context.rem(AppRem.radiusLg))),
                       boxShadow: [
                         BoxShadow(
-                          color: Color(0x99000000),
-                          blurRadius: 18,
-                          offset: Offset(0, 8),
+                          color: const Color(0x99000000),
+                          blurRadius: context.rem(1.125),
+                          offset: Offset(0, context.rem(AppRem.sm)),
                         ),
                       ],
                     ),
@@ -1340,9 +1341,9 @@ class _WatchScreenState extends State<WatchScreen>
                       child: Container(
                         width: dialogWidth,
                         constraints: BoxConstraints(maxHeight: maxMenuHeight),
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(context.rem(AppRem.sm)),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                           border: Border.all(color: const Color(0x26FFFFFF)),
                         ),
                         child: SingleChildScrollView(
@@ -1387,9 +1388,9 @@ class _WatchScreenState extends State<WatchScreen>
   Widget _buildFilterMenuDivider() {
     return Column(
       children: [
-        const SizedBox(height: 4),
-        Container(height: 1, color: Colors.white.withValues(alpha: 0.1)),
-        const SizedBox(height: 4),
+        SizedBox(height: context.rem(AppRem.xs)),
+        Container(height: 1, color: Colors.white.withValues(alpha: 0.1)), // px: a hairline, not a layout size
+        SizedBox(height: context.rem(AppRem.xs)),
       ],
     );
   }
@@ -1591,10 +1592,10 @@ class _WatchScreenState extends State<WatchScreen>
     final l10n = context.l10n;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      padding: EdgeInsets.symmetric(vertical: context.rem(2.5), horizontal: context.rem(AppRem.lg)),
       decoration: BoxDecoration(
         color: _C.surface.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(context.rem(1.25)),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
@@ -1603,44 +1604,44 @@ class _WatchScreenState extends State<WatchScreen>
           Icon(
             Icons.filter_alt_off_rounded,
             color: _C.accent,
-            size: 36,
+            size: context.rem(2.25),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
           Text(
             l10n.sourceFilterFilteredEmptyTitle,
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: _C.textPrimary,
-              fontSize: 17,
+              fontSize: AppType.subhead,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 320),
+            constraints: BoxConstraints(maxWidth: context.rem(20)),
             child: Text(
               l10n.sourceFilterFilteredEmptyBody,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: _C.textSecondary,
-                fontSize: 13,
-                height: 1.5,
+                fontSize: AppType.small,
+                height: 1.5, // ratio: a line height, not a size
               ),
             ),
           ),
-          const SizedBox(height: 22),
+          SizedBox(height: context.rem(1.375)),
           OutlinedButton.icon(
-            icon: const Icon(Icons.restart_alt_rounded, size: 18),
+            icon: Icon(Icons.restart_alt_rounded, size: context.rem(AppRem.iconSm)),
             label: Text(l10n.sourceFilterFilteredEmptyClear),
             style: OutlinedButton.styleFrom(
               foregroundColor: _C.textPrimary,
               side: BorderSide(color: _C.accent.withValues(alpha: 0.5)),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
+              padding: EdgeInsets.symmetric(
+                horizontal: context.rem(1.25),
+                vertical: context.rem(AppRem.ms),
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(context.rem(0.875)),
               ),
             ),
             onPressed: () => SourceFilterSettings.clearFilters(),
@@ -1671,8 +1672,8 @@ class _WatchScreenState extends State<WatchScreen>
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildBackButton() {
     return Container(
-      width: 44,
-      height: 44,
+      width: context.rem(2.75),
+      height: context.rem(2.75),
       decoration: BoxDecoration(
         color: _C.bg.withValues(alpha: 0.7),
         shape: BoxShape.circle,
@@ -1680,9 +1681,9 @@ class _WatchScreenState extends State<WatchScreen>
       ),
       child: IconButton(
         tooltip: context.l10n.commonBack,
-        icon: const Icon(
+        icon: Icon(
           Icons.arrow_back_ios_new_rounded,
-          size: 18,
+          size: context.rem(AppRem.iconSm),
           color: _C.textPrimary,
         ),
         onPressed: () => Navigator.pop(context),
@@ -1809,11 +1810,11 @@ class _SourceCardState extends State<_SourceCard> {
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             onTap: () {
               HapticFeedback.lightImpact();
 
@@ -1869,12 +1870,12 @@ class _SourceCardState extends State<_SourceCard> {
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(context.rem(0.875)),
               decoration: BoxDecoration(
                 color: _hovered
                     ? _C.surfaceLight.withValues(alpha: 0.9)
                     : _C.surface.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(
                   color: _hovered
                       ? _C.accent.withValues(alpha: 0.3)
@@ -1884,7 +1885,7 @@ class _SourceCardState extends State<_SourceCard> {
                     ? [
                         BoxShadow(
                           color: _C.accent.withValues(alpha: 0.08),
-                          blurRadius: 16,
+                          blurRadius: context.rem(AppRem.md),
                         ),
                       ]
                     : [],
@@ -1893,16 +1894,16 @@ class _SourceCardState extends State<_SourceCard> {
                 children: [
                   // Addon icon
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: context.rem(2.5),
+                    height: context.rem(2.5),
                     decoration: BoxDecoration(
                       color: _C.accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                     ),
                     child: Icon(
                       Icons.extension_rounded,
                       color: _C.accent,
-                      size: 20,
+                      size: context.rem(AppRem.icon),
                     ),
                   ),
                   const SizedBox(width: _S.sm),
@@ -1921,7 +1922,7 @@ class _SourceCardState extends State<_SourceCard> {
                           s.releaseName,
                           style: const TextStyle(
                             color: _C.textPrimary,
-                            fontSize: 13,
+                            fontSize: AppType.small,
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 2,
@@ -1932,20 +1933,20 @@ class _SourceCardState extends State<_SourceCard> {
                         // Not repeated when the title already is that name.
                         if (provider.toLowerCase() !=
                             s.releaseName.toLowerCase()) ...[
-                          const SizedBox(height: 2),
+                          SizedBox(height: context.rem(AppRem.xxs)),
                           Text(
                             provider,
                             style: const TextStyle(
                               color: _C.textTertiary,
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
                         if (badges.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          Wrap(spacing: 4, runSpacing: 4, children: badges),
+                          SizedBox(height: context.rem(AppRem.sm)),
+                          Wrap(spacing: context.rem(AppRem.xs), runSpacing: context.rem(AppRem.xs), children: badges),
                         ],
                       ],
                     ),
@@ -1955,7 +1956,7 @@ class _SourceCardState extends State<_SourceCard> {
                     // Copy the magnet link, for a torrent source.
                     if (s.isMagnet && s.magnetUrl != null) ...[
                       _CopyMagnetButton(magnetUrl: s.magnetUrl!),
-                      const SizedBox(width: 8),
+                      SizedBox(width: context.rem(AppRem.sm)),
                     ],
                     // Download this source directly, without opening the player.
                     ClipOval(
@@ -1972,13 +1973,13 @@ class _SourceCardState extends State<_SourceCard> {
                               episode: widget.episode,
                               source: s,
                             ),
-                            child: const SizedBox(
-                              width: 36,
-                              height: 36,
+                            child: SizedBox(
+                              width: context.rem(2.25),
+                              height: context.rem(2.25),
                               child: Icon(
                                 Icons.download_rounded,
                                 color: _C.textTertiary,
-                                size: 18,
+                                size: context.rem(AppRem.iconSm),
                               ),
                             ),
                           ),
@@ -1988,8 +1989,8 @@ class _SourceCardState extends State<_SourceCard> {
                     const SizedBox(width: _S.xs),
                     // Play chevron
                     Container(
-                      width: 36,
-                      height: 36,
+                      width: context.rem(2.25),
+                      height: context.rem(2.25),
                       decoration: BoxDecoration(
                         color: _hovered
                             ? _C.accent.withValues(alpha: 0.2)
@@ -1999,7 +2000,7 @@ class _SourceCardState extends State<_SourceCard> {
                       child: Icon(
                         Icons.play_arrow_rounded,
                         color: _hovered ? _C.accent : _C.textTertiary,
-                        size: 20,
+                        size: context.rem(AppRem.icon),
                       ),
                     ),
                   ],
@@ -2054,17 +2055,17 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
         content: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.check_circle_rounded,
-              color: Color(0xFF10B981),
-              size: 18,
+              color: const Color(0xFF10B981),
+              size: context.rem(AppRem.iconSm),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             Text(
               context.l10n.playerMagnetCopied,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 13,
+                fontSize: AppType.small,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -2072,7 +2073,7 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
         ),
         backgroundColor: const Color(0xFF1A1D26),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -2089,11 +2090,11 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
           color: Colors.transparent,
           child: InkWell(
             onTap: _copy,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 36,
-              height: 36,
+              width: context.rem(2.25),
+              height: context.rem(2.25),
               decoration: BoxDecoration(
                 color: _copied
                     ? const Color(0xFF10B981).withValues(alpha: 0.2)
@@ -2107,7 +2108,7 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
                       : (_hovered
                           ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
                           : Colors.white.withValues(alpha: 0.08)),
-                  width: 1,
+                  width: 1, // px: a hairline, not a layout size
                 ),
               ),
               child: AnimatedSwitcher(
@@ -2118,7 +2119,7 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
                   color: _copied
                       ? const Color(0xFF10B981)
                       : (_hovered ? const Color(0xFF00E5FF) : _C.textSecondary),
-                  size: 18,
+                  size: context.rem(AppRem.iconSm),
                 ),
               ),
             ),
@@ -2164,10 +2165,10 @@ class _ShimmerCardState extends State<_ShimmerCard>
       animation: _controller,
       builder: (context, child) {
         return Container(
-          padding: const EdgeInsets.all(14),
+          padding: EdgeInsets.all(context.rem(0.875)),
           decoration: BoxDecoration(
             color: _C.surface.withValues(alpha: 0.5),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             border: Border.all(color: Colors.white.withValues(alpha: 0.04)),
           ),
           child: Row(
@@ -2179,13 +2180,13 @@ class _ShimmerCardState extends State<_ShimmerCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _shimmerBox(double.infinity, 12, 4),
-                    const SizedBox(height: 8),
+                    SizedBox(height: context.rem(AppRem.sm)),
                     _shimmerBox(180, 10, 4),
-                    const SizedBox(height: 8),
+                    SizedBox(height: context.rem(AppRem.sm)),
                     Row(
                       children: [
                         _shimmerBox(40, 16, 4),
-                        const SizedBox(width: 4),
+                        SizedBox(width: context.rem(AppRem.xs)),
                         _shimmerBox(50, 16, 4),
                       ],
                     ),
@@ -2252,13 +2253,13 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate( // ratio: a line height, not a size
       CurvedAnimation(
         parent: _animController,
         curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
       ),
     );
-    _scaleAnim = Tween<double>(begin: 0.95, end: 1.0).animate(
+    _scaleAnim = Tween<double>(begin: 0.95, end: 1.0).animate( // ratio: a line height, not a size
       CurvedAnimation(
         parent: _animController,
         curve: const Interval(0.0, 0.4, curve: Curves.easeOutBack),
@@ -2278,17 +2279,17 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
   Widget build(BuildContext context) {
     // Static card content — identical on every platform.
     final cardContent = Container(
-      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      padding: EdgeInsets.symmetric(vertical: context.rem(3), horizontal: context.rem(AppRem.lg)),
       decoration: BoxDecoration(
         color: const Color(0xF0141419),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(context.rem(1.25)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(context.rem(AppRem.md)),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFF7C5CFC).withValues(alpha: 0.1),
@@ -2296,35 +2297,35 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 color: const Color(0xFF7C5CFC).withValues(alpha: 0.3),
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.radar_rounded,
-              color: Color(0xFF7C5CFC),
-              size: 40,
+              color: const Color(0xFF7C5CFC),
+              size: context.rem(2.5),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: context.rem(AppRem.lg)),
           Text(
             context.l10n.watchNoSourcesFound,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: AppType.lead,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 280),
+            constraints: BoxConstraints(maxWidth: context.rem(17.5)),
             child: Text(
               context.l10n.watchNoSourcesBody,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Color(0xFF9B9BA5),
-                fontSize: 14,
-                height: 1.5,
+                fontSize: AppType.body,
+                height: 1.5, // ratio: a line height, not a size
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          SizedBox(height: context.rem(AppRem.xl)),
           Focus(
             onFocusChange: (focused) =>
                 setState(() => _isHovering = focused),
@@ -2346,12 +2347,12 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.rem(AppRem.lg),
+                    vertical: context.rem(AppRem.ms),
                   ),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.xl)),
                     gradient: const LinearGradient(
                       colors: [Color(0xFF7C5CFC), Color(0xFF5CFCB6)],
                     ),
@@ -2361,8 +2362,8 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                               color: const Color(
                                 0xFF7C5CFC,
                               ).withValues(alpha: 0.4),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
+                              blurRadius: context.rem(AppRem.md),
+                              offset: Offset(0, context.rem(AppRem.xs)),
                             ),
                           ]
                         : [],
@@ -2373,18 +2374,18 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.extension_rounded,
                           color: Colors.white,
-                          size: 18,
+                          size: context.rem(AppRem.iconSm),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: context.rem(AppRem.sm)),
                         Text(
                           context.l10n.watchInstallAddons,
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                            fontSize: AppType.body,
                           ),
                         ),
                       ],
@@ -2402,12 +2403,12 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
     final glassCard = Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(context.rem(1.25)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+            blurRadius: context.rem(1.875),
+            offset: Offset(0, context.rem(0.625)),
           ),
         ],
       ),
@@ -2583,12 +2584,12 @@ class _FilterPillRailState extends State<FilterPillRail> {
       onPointerSignal: _onPointerSignal,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.rem(1.25)),
           border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
           color: Colors.white.withValues(alpha: 0.02),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.rem(1.25)),
           child: Stack(
             children: [
               ScrollConfiguration(
@@ -2602,14 +2603,14 @@ class _FilterPillRailState extends State<FilterPillRail> {
                   controller: _controller,
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.rem(0.625),
+                    vertical: context.rem(AppRem.sm),
                   ),
                   child: Row(
                     children: [
                       for (var i = 0; i < widget.children.length; i++) ...[
-                        if (i > 0) const SizedBox(width: 8),
+                        if (i > 0) SizedBox(width: context.rem(AppRem.sm)),
                         widget.children[i],
                       ],
                     ],
@@ -2691,17 +2692,17 @@ class _FilterPillRailState extends State<FilterPillRail> {
         shape: BoxShape.circle,
         color: _C.surfaceLight.withValues(alpha: 0.95),
         border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x66000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: const Color(0x66000000),
+            blurRadius: context.rem(AppRem.sm),
+            offset: Offset(0, context.rem(AppRem.xxs)),
           ),
         ],
       ),
       child: Icon(
         forward ? Icons.chevron_right_rounded : Icons.chevron_left_rounded,
-        size: 20,
+        size: context.rem(AppRem.icon),
         color: _C.textPrimary,
       ),
     );

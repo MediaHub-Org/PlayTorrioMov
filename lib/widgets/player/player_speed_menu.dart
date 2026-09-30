@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// Playback speed floating popover menu: a readout, and a slider with a -/+
 /// button on either side of it.
@@ -67,7 +68,7 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
 
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(context.rem(AppRem.ms)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,23 +78,23 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
             onBack: widget.onBack,
           ),
 
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           Center(
             child: Text(
               '${widget.currentRate.toStringAsFixed(2)}×',
               style: const TextStyle(
                 color: PlayerTheme.ink,
-                fontSize: 20,
+                fontSize: AppType.titleSm,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: context.rem(AppRem.xs)),
           Row(
             children: [
               PlayerIconButton(
-                size: 32,
-                iconSize: 18,
+                size: context.rem(AppRem.xl),
+                iconSize: context.rem(1.125),
                 icon: const Icon(Icons.remove_rounded),
                 tooltip: context.l10n.playerSlower,
                 onPressed: index > 0 ? () => _step(-1) : null,
@@ -111,8 +112,8 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
                 ),
               ),
               PlayerIconButton(
-                size: 32,
-                iconSize: 18,
+                size: context.rem(AppRem.xl),
+                iconSize: context.rem(1.125),
                 icon: const Icon(Icons.add_rounded),
                 tooltip: context.l10n.playerFaster,
                 onPressed: index < _points.length - 1 ? () => _step(1) : null,

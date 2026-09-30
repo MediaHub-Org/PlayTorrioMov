@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../common/focus_ring.dart';
+import '../../services/app_units.dart';
 
 export '../common/focus_ring.dart';
 
@@ -52,26 +53,28 @@ class PlayerTheme {
   static const Color inkDisabled = Color(0x33FFFFFF); // 20% white
 
   // Shadows
-  static const List<BoxShadow> menuShadow = [
+  // Functions, not constants: the offsets and blurs are in rem, so they follow
+  // the text size like everything else the menus are built from.
+  static List<BoxShadow> menuShadowOf(BuildContext context) => [
     BoxShadow(
-      color: Color(0xCC000000),
-      offset: Offset(0, 24),
-      blurRadius: 60,
-      spreadRadius: -18,
+      color: const Color(0xCC000000),
+      offset: Offset(0, context.rem(AppRem.lg)),
+      blurRadius: context.rem(3.75),
+      spreadRadius: -context.rem(1.125),
     ),
     BoxShadow(
-      color: Color(0x40000000),
-      offset: Offset(0, 10),
-      blurRadius: 30,
-      spreadRadius: -5,
+      color: const Color(0x40000000),
+      offset: Offset(0, context.rem(AppRem.pillGap)),
+      blurRadius: context.rem(1.875),
+      spreadRadius: -context.rem(0.3125),
     ),
   ];
 
-  static const List<BoxShadow> buttonShadow = [
+  static List<BoxShadow> buttonShadowOf(BuildContext context) => [
     BoxShadow(
-      color: Color(0x4D000000),
-      offset: Offset(0, 4),
-      blurRadius: 16,
+      color: const Color(0x4D000000),
+      offset: Offset(0, context.rem(AppRem.xs)),
+      blurRadius: context.rem(AppRem.md),
     ),
   ];
 }
@@ -106,7 +109,7 @@ class PlayerGlassCard extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: shadows ?? PlayerTheme.menuShadow,
+        boxShadow: shadows ?? PlayerTheme.menuShadowOf(context),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -117,7 +120,7 @@ class PlayerGlassCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: backgroundColor ?? PlayerTheme.elevated,
               borderRadius: BorderRadius.circular(borderRadius),
-              border: border ?? Border.all(color: PlayerTheme.edge, width: 1),
+              border: border ?? Border.all(color: PlayerTheme.edge, width: 1), // px: a hairline, not a layout size
             ),
             child: child,
           ),
@@ -271,8 +274,8 @@ class PlayerMenuHeader extends StatelessWidget {
             children: [
               if (back != null)
                 PlayerIconButton(
-                  size: 28,
-                  iconSize: 14,
+                  size: context.rem(1.75),
+                  iconSize: context.rem(0.875),
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   tooltip: context.l10n.playerBackToSettings,
                   onPressed: back,
@@ -280,10 +283,10 @@ class PlayerMenuHeader extends StatelessWidget {
               Flexible(
                 child: Padding(
                   padding: EdgeInsetsDirectional.only(
-                    start: back != null ? 4 : 8,
-                    end: 8,
-                    top: 4,
-                    bottom: 4,
+                    start: context.rem(back != null ? AppRem.xs : AppRem.sm),
+                    end: context.rem(AppRem.sm),
+                    top: context.rem(AppRem.xs),
+                    bottom: context.rem(AppRem.xs),
                   ),
                   child: Text(
                     title,
@@ -291,7 +294,7 @@ class PlayerMenuHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: PlayerTheme.inkSubtle,
-                      fontSize: TvType.scale(10.5),
+                      fontSize: TvType.scale(AppType.microPlus),
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
                     ),
@@ -373,16 +376,16 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
             top: widget.size * 0.2,
             right: widget.size * 0.2,
             child: Container(
-              width: 6,
-              height: 6,
+              width: context.rem(AppRem.snug),
+              height: context.rem(AppRem.snug),
               decoration: BoxDecoration(
                 color: widget.badgeColor ?? PlayerTheme.accent,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: (widget.badgeColor ?? PlayerTheme.accent).withValues(alpha: 0.8),
-                    blurRadius: 4,
-                    spreadRadius: 1,
+                    blurRadius: context.rem(AppRem.xs),
+                    spreadRadius: context.rem(0.0625),
                   ),
                 ],
               ),
@@ -437,12 +440,12 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
         waitDuration: const Duration(milliseconds: 400),
         decoration: BoxDecoration(
           color: const Color(0xE6080C12),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           border: Border.all(color: PlayerTheme.edgeSoft),
         ),
         textStyle: const TextStyle(
           color: Colors.white,
-          fontSize: 12,
+          fontSize: AppType.caption,
           fontWeight: FontWeight.w500,
         ),
         child: button,
@@ -507,8 +510,8 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
           duration: const Duration(milliseconds: 150),
           opacity: widget.disabled ? 0.35 : 1.0,
           child: AnimatedContainer(
-            height: 28,
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            height: context.rem(1.75),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.625)),
             duration: const Duration(milliseconds: 120),
             decoration: BoxDecoration(
               color: widget.active
@@ -516,14 +519,14 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
                   : ((_hovered || _focused)
                         ? Colors.white.withValues(alpha: 0.08)
                         : Colors.transparent),
-              borderRadius: BorderRadius.circular(9999),
+              borderRadius: BorderRadius.circular(9999), // px: a hairline, not a layout size
               border: Border.all(
                 color: widget.active
                     ? PlayerTheme.edge
                     : ((_hovered || _focused)
                           ? PlayerTheme.edgeSoft
                           : Colors.transparent),
-                width: 1,
+                width: 1, // px: a hairline, not a layout size
               ),
             ),
             child: Row(
@@ -543,7 +546,7 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
                       color: widget.active
                           ? PlayerTheme.ink
                           : PlayerTheme.inkMuted,
-                      fontSize: 11.5,
+                      fontSize: AppType.tinyPlus,
                       fontWeight: widget.active
                           ? FontWeight.w600
                           : FontWeight.w500,
@@ -551,12 +554,12 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
                   ),
                 ),
                 if (widget.count != null) ...[
-                  const SizedBox(width: 4),
+                  SizedBox(width: context.rem(AppRem.xs)),
                   Text(
                     widget.count!,
                     style: const TextStyle(
                       color: PlayerTheme.inkSubtle,
-                      fontSize: 11,
+                      fontSize: AppType.tiny,
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),
@@ -643,7 +646,7 @@ class _PlayerStepSliderState extends State<PlayerStepSlider> {
       },
       child: FocusRing(
         visible: _focused,
-        borderRadius: 12,
+        borderRadius: context.rem(AppRem.radiusMd),
         child: SliderTheme(
           data: SliderTheme.of(context).copyWith(
             trackHeight: 4,

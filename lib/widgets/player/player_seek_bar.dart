@@ -5,6 +5,7 @@ import '../../services/theme/app_colors.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../common/hover_button.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// Timeline scrubber with buffered progress and interactive hover / drag preview.
 class PlayerSeekBar extends StatefulWidget {
@@ -132,7 +133,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
         // takes everything the labels leave. The cap is what still lets a
         // large text scale shrink "1:23:45" instead of pushing past the row.
         ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 46, maxWidth: _labelMaxWidth),
+          constraints: BoxConstraints(minWidth: context.rem(2.875), maxWidth: _labelMaxWidth),
           child: FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
@@ -142,7 +143,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                   : currentPosition),
               style: const TextStyle(
                 color: PlayerTheme.inkMuted,
-                fontSize: 12.5,
+                fontSize: AppType.captionPlus,
                 fontWeight: FontWeight.w600,
                 fontFeatures: [FontFeature.tabularFigures()],
               ),
@@ -150,7 +151,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
           ),
         ),
 
-        const SizedBox(width: 12),
+        SizedBox(width: context.rem(AppRem.ms)),
 
         // Scrubber Track
         Expanded(
@@ -175,7 +176,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                 },
                 child: FocusRing(
                   visible: _isFocused,
-                  borderRadius: 999,
+                  borderRadius: 999, // px: a hairline, not a layout size
                   child: MouseRegion(
                     cursor: SystemMouseCursors.click,
                     onEnter: (e) => setState(() {
@@ -213,7 +214,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                       },
                       onTapUp: (_) => _commitSeek(),
                       child: Container(
-                        height: 36,
+                        height: context.rem(2.25),
                         alignment: Alignment.center,
                         child: Stack(
                           clipBehavior: Clip.none,
@@ -223,14 +224,13 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               height:
-                                  (_isHovered || _isScrubbing || _isFocused)
-                                      ? 8
-                                      : 6,
+                                  context.rem((_isHovered || _isScrubbing || _isFocused)
+                                      ? AppRem.sm : AppRem.snug),
                               width: double.infinity,
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
+                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
+                              ), // px: a hairline, not a layout size
                               child: Stack(
                                 children: [
                                   // Buffered Track
@@ -242,8 +242,8 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                           color: Colors.white
                                               .withValues(alpha: 0.3),
                                           borderRadius:
-                                              BorderRadius.circular(999),
-                                        ),
+                                              BorderRadius.circular(999), // px: a hairline, not a layout size
+                                        ), // px: a hairline, not a layout size
                                       ),
                                     ),
 
@@ -274,7 +274,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                           decoration: BoxDecoration(
                                             color: color,
                                             borderRadius:
-                                                BorderRadius.circular(2),
+                                                BorderRadius.circular(context.rem(AppRem.xxs)),
                                           ),
                                         ),
                                       );
@@ -287,9 +287,8 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
                               height:
-                                  (_isHovered || _isScrubbing || _isFocused)
-                                      ? 8
-                                      : 6,
+                                  context.rem((_isHovered || _isScrubbing || _isFocused)
+                                      ? AppRem.sm : AppRem.snug),
                               width: trackWidth * activeFraction,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
@@ -298,13 +297,13 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                     const Color(0xFF9D84FF),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(999),
+                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                                 boxShadow: [
-                                  BoxShadow(
+                                  BoxShadow( // px: a hairline, not a layout size
                                     color:
                                         AppColors.accent.withValues(alpha: 0.5),
-                                    blurRadius: 6,
-                                    offset: const Offset(0, 1),
+                                    blurRadius: context.rem(AppRem.snug),
+                                    offset: Offset(0, context.rem(0.0625)),
                                   ),
                                 ],
                               ),
@@ -316,19 +315,17 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                       ((_isHovered ||
                                               _isScrubbing ||
                                               _isFocused)
-                                          ? 8
-                                          : 6))
-                                  .clamp(0.0, trackWidth - 16),
+                                          ? context.rem(AppRem.sm)
+                                          : context.rem(AppRem.snug)))
+                                  .clamp(0.0, trackWidth - context.rem(AppRem.md)),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 width:
-                                    (_isHovered || _isScrubbing || _isFocused)
-                                        ? 16
-                                        : 12,
+                                    context.rem((_isHovered || _isScrubbing || _isFocused)
+                                        ? AppRem.md : AppRem.ms),
                                 height:
-                                    (_isHovered || _isScrubbing || _isFocused)
-                                        ? 16
-                                        : 12,
+                                    context.rem((_isHovered || _isScrubbing || _isFocused)
+                                        ? AppRem.md : AppRem.ms),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
@@ -336,14 +333,14 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                     BoxShadow(
                                       color:
                                           Colors.black.withValues(alpha: 0.6),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 2),
+                                      blurRadius: context.rem(AppRem.sm),
+                                      offset: Offset(0, context.rem(AppRem.xxs)),
                                     ),
                                     BoxShadow(
                                       color: AppColors.accent
                                           .withValues(alpha: 0.8),
-                                      blurRadius: 4,
-                                      spreadRadius: 1,
+                                      blurRadius: context.rem(AppRem.xs),
+                                      spreadRadius: context.rem(0.0625),
                                     ),
                                   ],
                                 ),
@@ -358,24 +355,24 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                 left: (trackWidth *
                                             (_scrubFraction ??
                                                 _hoverFraction!) -
-                                        28)
-                                    .clamp(0.0, trackWidth - 56),
-                                top: -32,
+                                        context.rem(1.75))
+                                    .clamp(0.0, trackWidth - context.rem(3.5)),
+                                top: -context.rem(AppRem.xl),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: context.rem(AppRem.sm),
+                                    vertical: context.rem(AppRem.xs),
                                   ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xF0080C12),
-                                    borderRadius: BorderRadius.circular(6),
+                                    borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                                     border:
                                         Border.all(color: PlayerTheme.edge),
-                                    boxShadow: const [
+                                    boxShadow: [
                                       BoxShadow(
                                         color: Colors.black54,
-                                        blurRadius: 10,
-                                        offset: Offset(0, 4),
+                                        blurRadius: context.rem(0.625),
+                                        offset: Offset(0, context.rem(AppRem.xs)),
                                       ),
                                     ],
                                   ),
@@ -390,7 +387,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                                     ),
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 11.5,
+                                      fontSize: AppType.tinyPlus,
                                       fontWeight: FontWeight.w700,
                                       fontFeatures: [
                                         FontFeature.tabularFigures(),
@@ -411,7 +408,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
           ),
         ),
 
-        const SizedBox(width: 12),
+        SizedBox(width: context.rem(AppRem.ms)),
 
         // Time End / Remaining Toggle. Same cap-and-scale treatment as the
         // start label above, for the same reason.
@@ -422,7 +419,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
               setState(() => _showRemainingTime = !_showRemainingTime),
           child: Container(
             constraints:
-                const BoxConstraints(minWidth: 46, maxWidth: _labelMaxWidth),
+                BoxConstraints(minWidth: context.rem(2.875), maxWidth: _labelMaxWidth),
             alignment: Alignment.centerRight,
             child: FittedBox(
               fit: BoxFit.scaleDown,
@@ -433,7 +430,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                     : _formatDuration(widget.duration),
                 style: const TextStyle(
                   color: PlayerTheme.inkMuted,
-                  fontSize: 12.5,
+                  fontSize: AppType.captionPlus,
                   fontWeight: FontWeight.w600,
                   fontFeatures: [FontFeature.tabularFigures()],
                 ),

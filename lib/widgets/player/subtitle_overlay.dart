@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
+import '../../services/app_units.dart';
 
 /// The main player's subtitle text, drawn by the app rather than by media_kit's
 /// own `SubtitleView`.
@@ -100,9 +101,9 @@ class _SubtitleOverlayState extends State<SubtitleOverlay> {
         return IgnorePointer(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
-              side == 'left' ? 32 : 16,
+              context.rem(side == 'left' ? AppRem.xl : AppRem.md),
               0,
-              side == 'right' ? 32 : 16,
+              context.rem(side == 'right' ? AppRem.xl : AppRem.md),
               PlayerSettings.subMarginY.value.clamp(0.0, 300.0),
             ),
             child: Align(

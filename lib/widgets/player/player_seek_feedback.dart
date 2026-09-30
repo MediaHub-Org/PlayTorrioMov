@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
+import '../../services/app_units.dart';
 
 /// One seek, as the overlay needs to know about it.
 ///
@@ -72,15 +73,15 @@ class _PlayerSeekFeedbackState extends State<PlayerSeekFeedback>
       duration: const Duration(milliseconds: 700),
     );
     _opacity = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 18),
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 18), // ratio: a line height, not a size
       TweenSequenceItem(tween: ConstantTween(1.0), weight: 47),
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 35),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 35), // ratio: a line height, not a size
     ]).animate(_controller);
     _scaleCurve = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutBack,
     );
-    _scale = Tween<double>(begin: 0.88, end: 1.0).animate(_scaleCurve);
+    _scale = Tween<double>(begin: 0.88, end: 1.0).animate(_scaleCurve); // ratio: a line height, not a size
 
     if (widget.flash != null) _controller.forward(from: 0);
   }
@@ -118,14 +119,14 @@ class _PlayerSeekFeedbackState extends State<PlayerSeekFeedback>
           child: ScaleTransition(
             scale: _scale,
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: isCompact ? 24 : 56),
+              margin: EdgeInsets.symmetric(horizontal: context.rem(isCompact ? AppRem.lg : 3.5)),
               padding: EdgeInsets.symmetric(
-                horizontal: isCompact ? 18 : 24,
-                vertical: isCompact ? 14 : 18,
+                horizontal: context.rem(isCompact ? 1.125 : AppRem.lg),
+                vertical: context.rem(isCompact ? 0.875 : 1.125),
               ),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                 border: Border.all(color: Colors.white.withValues(alpha: 0.16)),
               ),
               child: Column(
@@ -136,14 +137,14 @@ class _PlayerSeekFeedbackState extends State<PlayerSeekFeedback>
                         ? Icons.fast_forward_rounded
                         : Icons.fast_rewind_rounded,
                     color: Colors.white,
-                    size: isCompact ? 30 : 38,
+                    size: context.rem(isCompact ? 1.875 : 2.375),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.rem(AppRem.xs)),
                   Text(
                     context.l10n.playerSecondsN(seconds),
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: isCompact ? 12 : 14,
+                      fontSize: isCompact ? AppType.caption : AppType.body,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

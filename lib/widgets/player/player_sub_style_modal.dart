@@ -5,6 +5,7 @@ import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// How opaque the subtitle background is, 0 to 1, read from a `#AARRGGBB`
 /// string. A value that does not parse counts as no background.
@@ -69,7 +70,7 @@ class PlayerSubStyleModal extends StatelessWidget {
         child: PlayerGlassCard(
           width: cardWidth,
           height: cardHeight,
-          borderRadius: 22,
+          borderRadius: context.rem(1.375),
           padding: EdgeInsets.zero,
           child: SubtitleStyleEditor(player: player, onClose: onClose),
         ),
@@ -178,28 +179,28 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                 // three of them.
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+                    padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(0.875), context.rem(AppRem.md), context.rem(1.25)),
                     physics: const BouncingScrollPhysics(),
                     children: [
                       _buildSectionHeader(context.l10n.subStyleSecText),
                       ..._sizeItems(),
                       ..._textColorItems(),
                       ..._boldItems(),
-                      const SizedBox(height: 24),
+                      SizedBox(height: context.rem(AppRem.lg)),
 
                       _buildSectionHeader(context.l10n.subStyleSecBackground),
                       ..._boxItems(),
-                      const SizedBox(height: 24),
+                      SizedBox(height: context.rem(AppRem.lg)),
 
                       _buildSectionHeader(context.l10n.subStyleSecOutline),
                       ..._outlineColorItems(),
                       ..._thicknessItems(),
-                      const SizedBox(height: 24),
+                      SizedBox(height: context.rem(AppRem.lg)),
 
                       _buildSectionHeader(context.l10n.subStyleSecPosition),
                       ..._alignItems(),
                       ..._vposItems(),
-                      const SizedBox(height: 8),
+                      SizedBox(height: context.rem(AppRem.sm)),
 
                       // Material, not a bare Theme: the glass card paints its
                       // background with a DecoratedBox, and a ListTile under
@@ -218,10 +219,10 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                             collapsedIconColor: PlayerTheme.inkMuted,
                             title: Text(
                               context.l10n.subStyleMore,
-                              style: const TextStyle(color: PlayerTheme.ink, fontSize: 13.5, fontWeight: FontWeight.w700),
+                              style: const TextStyle(color: PlayerTheme.ink, fontSize: AppType.smallPlus, fontWeight: FontWeight.w700),
                             ),
                             children: [
-                              const SizedBox(height: 6),
+                              SizedBox(height: context.rem(AppRem.snug)),
                               ..._fontFamilyItems(),
                               ..._scaleItems(),
                               ..._shadowItems(),
@@ -250,7 +251,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     final activePreset = PlayerSettings.subStylePreset.value;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: PlayerTheme.edgeSoft)),
       ),
@@ -263,16 +264,16 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
               .map((preset) {
             final isSelected = activePreset == preset;
             return Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
+              padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
               child: InkWell(
                 onTap: () => PlayerSettings.setSubStylePreset(preset, player: widget.player),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
                   decoration: BoxDecoration(
                     color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                     border: Border.all(
                       color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
                     ),
@@ -281,20 +282,20 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 10,
-                        height: 10,
-                        margin: const EdgeInsetsDirectional.only(end: 6),
+                        width: context.rem(0.625),
+                        height: context.rem(0.625),
+                        margin: EdgeInsetsDirectional.only(end: context.rem(AppRem.snug)),
                         decoration: BoxDecoration(
                           color: _parseColorFromHex(preset.textColor),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white30, width: 0.8),
+                          border: Border.all(color: Colors.white30, width: 0.8), // px: a hairline, not a layout size
                         ),
                       ),
                       Text(
                         preset.label(context.l10n),
                         style: TextStyle(
                           color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                          fontSize: 11.5,
+                          fontSize: AppType.tinyPlus,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                         ),
                       ),
@@ -319,10 +320,10 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
         : 'subfont';
     return [
       _buildSectionTitle(context.l10n.subStyleFontFamily.toUpperCase()),
-      const SizedBox(height: 10),
+      SizedBox(height: context.rem(0.625)),
       Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: context.rem(AppRem.sm),
+        runSpacing: context.rem(AppRem.sm),
         children: PlayerSettings.popularFonts.map((f) {
           final isDefault = f == 'subfont';
           return _buildChoiceChip(
@@ -332,7 +333,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
               isDefault ? context.l10n.subStyleFontDefault : f,
               style: TextStyle(
                 color: f == current ? Colors.white : PlayerTheme.inkMuted,
-                fontSize: 12.5,
+                fontSize: AppType.captionPlus,
                 fontWeight: FontWeight.w600,
                 fontFamily: isDefault ? 'Poppins' : f,
               ),
@@ -340,7 +341,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           );
         }).toList(),
       ),
-      const SizedBox(height: 18),
+      SizedBox(height: context.rem(1.125)),
     ];
   }
 
@@ -358,7 +359,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubFontSize(v.round(), player: widget.player),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -376,7 +377,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubScale(v, player: widget.player),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -396,7 +397,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
               onChanged: (val) =>
                   PlayerSettings.setSubBold(val, player: widget.player),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             _buildStyleToggle(
               tooltip: context.l10n.subStyleItalic,
               icon: Icons.format_italic_rounded,
@@ -414,14 +415,14 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return [
         // Text Color Palette
         _buildSectionTitle(context.l10n.subStyleTextColor.toUpperCase()),
-        const SizedBox(height: 10),
+        SizedBox(height: context.rem(0.625)),
         _colorDots(
           palette: _textColorPalette,
           activeHex: activeColor,
           onPick: (hex) =>
               PlayerSettings.setSubColor(hex, player: widget.player),
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: context.rem(1.125)),
     ];
   }
 
@@ -444,7 +445,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           onChanged: (v) => PlayerSettings.setSubBackColor(withSubtitleBackgroundOpacity(hex, v), player: widget.player),
         ),
       ),
-      const SizedBox(height: 8),
+      SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -453,14 +454,14 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return [
         // Outline Color Selector
         _buildSectionTitle(context.l10n.subStyleOutlineColor.toUpperCase()),
-        const SizedBox(height: 10),
+        SizedBox(height: context.rem(0.625)),
         _colorDots(
           palette: _borderColorPalette,
           activeHex: activeBorderColor,
           onPick: (hex) =>
               PlayerSettings.setSubBorderColor(hex, player: widget.player),
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: context.rem(1.125)),
     ];
   }
 
@@ -474,8 +475,8 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     required ValueChanged<String> onPick,
   }) {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
+      spacing: context.rem(0.625),
+      runSpacing: context.rem(0.625),
       children: palette.map((item) {
         final hex = item['hex'] as String;
         final selected =
@@ -484,22 +485,22 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           message: _paletteName(context.l10n, item['name'] as String),
           child: InkWell(
             onTap: () => onPick(hex),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             child: Container(
-              width: 28,
-              height: 28,
+              width: context.rem(1.75),
+              height: context.rem(1.75),
               decoration: BoxDecoration(
                 color: item['color'] as Color,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: selected ? PlayerTheme.accent : Colors.white38,
-                  width: selected ? 2.5 : 0.8,
+                  width: selected ? 2.5 : 0.8, // px: a hairline, not a layout size
                 ),
                 boxShadow: selected
-                    ? const [
+                    ? [
                         BoxShadow(
                           color: PlayerTheme.accentGlow,
-                          blurRadius: 6,
+                          blurRadius: context.rem(AppRem.snug),
                         ),
                       ]
                     : null,
@@ -525,7 +526,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubBorderSize(v, player: widget.player),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -543,7 +544,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubShadowOffset(v, player: widget.player),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -551,17 +552,17 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return [
         // Horizontal Alignment
         _buildSectionTitle(context.l10n.subStyleHAlign.toUpperCase()),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
         Row(
           children: [
             _buildAlignButton(context.l10n.subStyleLeft, 'left', Icons.format_align_left_rounded),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             _buildAlignButton(context.l10n.subStyleCenter, 'center', Icons.format_align_center_rounded),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             _buildAlignButton(context.l10n.subStyleRight, 'right', Icons.format_align_right_rounded),
           ],
         ),
-        const SizedBox(height: 18),
+        SizedBox(height: context.rem(1.125)),
     ];
   }
 
@@ -579,7 +580,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             onChanged: (v) => PlayerSettings.setSubMarginY(v, player: widget.player),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -598,12 +599,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md)),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(context.l10n.subStyleTop, style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11)),
-              Text(context.l10n.subStyleBottom, style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11)),
+              Text(context.l10n.subStyleTop, style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: AppType.tiny)),
+              Text(context.l10n.subStyleBottom, style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: AppType.tiny)),
             ],
           ),
         ),
@@ -615,12 +616,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return Expanded(
       child: InkWell(
         onTap: () => PlayerSettings.setSubAlignX(alignVal, player: widget.player),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: EdgeInsets.symmetric(vertical: context.rem(0.625)),
           decoration: BoxDecoration(
             color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             border: Border.all(
               color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
             ),
@@ -628,13 +629,13 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: isSelected ? Colors.white : PlayerTheme.inkSubtle, size: 18),
-              const SizedBox(height: 4),
+              Icon(icon, color: isSelected ? Colors.white : PlayerTheme.inkSubtle, size: context.rem(AppRem.iconSm)),
+              SizedBox(height: context.rem(AppRem.xs)),
               Text(
                 title,
                 style: TextStyle(
                   color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                  fontSize: 11.5,
+                  fontSize: AppType.tinyPlus,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -655,21 +656,21 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     final l10n = context.l10n;
     return [
       _buildSectionTitle(l10n.subStyleAssMode.toUpperCase()),
-      const SizedBox(height: 8),
+      SizedBox(height: context.rem(AppRem.sm)),
       _buildSwitchCard(
         title: l10n.subStyleAssApply,
         description: l10n.subStyleAssApplyDesc,
         value: PlayerSettings.subAssOverride.value != 'no',
         onChanged: (on) => PlayerSettings.setSubAssOverride(on ? 'yes' : 'no', player: widget.player),
       ),
-      const SizedBox(height: 10),
+      SizedBox(height: context.rem(0.625)),
       _buildSwitchCard(
         title: l10n.subStyleNativeEngine,
         description: l10n.subStyleNativeEngineDesc,
         value: PlayerSettings.useLibass.value,
         onChanged: (on) => PlayerSettings.setUseLibass(on, player: widget.player),
       ),
-      const SizedBox(height: 8),
+      SizedBox(height: context.rem(AppRem.sm)),
     ];
   }
 
@@ -680,10 +681,10 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     required ValueChanged<bool> onChanged,
   }) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
+      padding: EdgeInsets.fromLTRB(context.rem(AppRem.ms), context.rem(0.625), context.rem(AppRem.xs), context.rem(0.625)),
       decoration: BoxDecoration(
         color: PlayerTheme.raised,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         border: Border.all(color: PlayerTheme.edgeSoft),
       ),
       child: Row(
@@ -695,12 +696,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(color: PlayerTheme.ink, fontSize: 13, fontWeight: FontWeight.w700),
+                  style: const TextStyle(color: PlayerTheme.ink, fontSize: AppType.small, fontWeight: FontWeight.w700),
                 ),
-                const SizedBox(height: 3),
+                SizedBox(height: context.rem(0.1875)),
                 Text(
                   description,
-                  style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 11, height: 1.35),
+                  style: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: AppType.tiny, height: 1.35), // ratio: a line height, not a size
                 ),
               ],
             ),
@@ -717,18 +718,18 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: context.rem(0.625)),
       child: Row(
         children: [
           Container(
-            width: 3,
-            height: 14,
+            width: context.rem(0.1875),
+            height: context.rem(0.875),
             decoration: BoxDecoration(
               color: PlayerTheme.accent,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.xxs)),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: context.rem(AppRem.sm)),
           // Flexible: at a large text scale "BACKGROUND" outgrows the
           // panel, and a Row sizes its children to their natural width
           // unless one may give.
@@ -739,7 +740,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 color: PlayerTheme.ink,
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -757,7 +758,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     return Text(
       title,
       style: TextStyle(
-        fontSize: TvType.scale(10.5),
+        fontSize: TvType.scale(AppType.microPlus),
         fontWeight: FontWeight.w700,
         color: PlayerTheme.inkSubtle,
         letterSpacing: 1.1,
@@ -774,12 +775,12 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.sm)),
         decoration: BoxDecoration(
           color: selected ? PlayerTheme.accent : PlayerTheme.raised,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
           border: Border.all(color: selected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft),
         ),
         child: child,
@@ -804,18 +805,18 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(context.rem(0.5625)),
           onTap: () => onChanged(!value),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            width: 40,
-            height: 34,
+            width: context.rem(2.5),
+            height: context.rem(2.125),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: value
                   ? PlayerTheme.accent.withValues(alpha: 0.22)
                   : PlayerTheme.raised,
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(context.rem(0.5625)),
               border: Border.all(
                 color: value
                     ? PlayerTheme.accent.withValues(alpha: 0.6)
@@ -824,7 +825,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             ),
             child: Icon(
               icon,
-              size: 17,
+              size: context.rem(1.0625),
               color: value ? PlayerTheme.accent : PlayerTheme.inkSubtle,
             ),
           ),

@@ -25,6 +25,7 @@ import '../../widgets/player/sleep_timer_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
 import '../../widgets/common/hover_button.dart';
+import '../../services/app_units.dart';
 
 class IptvPlayerPage extends StatefulWidget {
   final HardcodedChannel channel;
@@ -755,7 +756,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                       _status(context.l10n),
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 16,
+                        fontSize: AppType.bodyLg,
                       ),
                     ),
                   ),
@@ -764,13 +765,13 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                 if (_isLoading)
                   Center(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.rem(AppRem.lg),
+                        vertical: context.rem(0.875),
                       ),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                         border: Border.all(
                           color: AppColors.accent.withValues(alpha: 0.5),
                         ),
@@ -779,19 +780,19 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SizedBox(
-                            width: 20,
-                            height: 20,
+                            width: context.rem(1.25),
+                            height: context.rem(1.25),
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
                               color: AppColors.accent,
                             ),
                           ),
-                          const SizedBox(width: 14),
+                          SizedBox(width: context.rem(0.875)),
                           Text(
                             _status(context.l10n),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: AppType.body,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -805,22 +806,22 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                   IgnorePointer(
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 22,
-                          vertical: 14,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(1.375),
+                          vertical: context.rem(0.875),
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xE60D101A),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                           border: Border.all(
                             color: AppColors.accent.withValues(alpha: 0.6),
-                            width: 1.5,
+                            width: 1.5, // px: a hairline, not a layout size
                           ),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.accent.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 4),
+                              blurRadius: context.rem(1.25),
+                              offset: Offset(0, context.rem(AppRem.xs)),
                             ),
                           ],
                         ),
@@ -836,13 +837,13 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                               color: _isMuted
                                   ? Colors.redAccent
                                   : const Color(0xFF00D2EF),
-                              size: 28,
+                              size: context.rem(1.75),
                             ),
-                            const SizedBox(width: 14),
+                            SizedBox(width: context.rem(0.875)),
                             SizedBox(
-                              width: 130,
+                              width: context.rem(8.125),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                                 child: LinearProgressIndicator(
                                   // Over the full range, boost included --
                                   // at 250% a 0..1 bar would sit pinned at
@@ -855,11 +856,11 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         ? Colors.redAccent
                                         : AppColors.accent,
                                   ),
-                                  minHeight: 7,
+                                  minHeight: context.rem(0.4375),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: context.rem(AppRem.ms)),
                             Text(
                               _isMuted
                                   ? 'MUTED'
@@ -868,7 +869,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 color: _isMuted
                                     ? Colors.redAccent
                                     : Colors.white,
-                                fontSize: 14,
+                                fontSize: AppType.body,
                                 fontWeight: FontWeight.w900,
                                 fontFamily: 'monospace',
                               ),
@@ -884,39 +885,39 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                   IgnorePointer(
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 22,
-                          vertical: 14,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(1.375),
+                          vertical: context.rem(0.875),
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xE60D101A),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                           border: Border.all(
                             color: AppColors.accent.withValues(alpha: 0.6),
-                            width: 1.5,
+                            width: 1.5, // px: a hairline, not a layout size
                           ),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.accent.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              offset: const Offset(0, 4),
+                              blurRadius: context.rem(1.25),
+                              offset: Offset(0, context.rem(AppRem.xs)),
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.aspect_ratio_rounded,
-                              color: Color(0xFF00D2EF),
-                              size: 26,
+                              color: const Color(0xFF00D2EF),
+                              size: context.rem(1.625),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: context.rem(AppRem.ms)),
                             Text(
                               _aspectHudText,
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 14,
+                                fontSize: AppType.body,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 0.5,
                               ),
@@ -957,7 +958,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           left: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                            padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.lg)),
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -973,14 +974,14 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 // bars read as different chrome even once
                                 // they carried the same actions.
                                 PlayerIconButton(
-                                  size: 40,
-                                  iconSize: 20,
+                                  size: context.rem(2.5),
+                                  iconSize: context.rem(1.25),
                                   icon: const Icon(Icons.arrow_back_rounded),
                                   tooltip: context.l10n.playerBack,
                                   backgroundColor: const Color(0x22080C12),
                                   onPressed: () => Navigator.pop(context),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: context.rem(AppRem.sm)),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -990,16 +991,16 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       Row(
                                         children: [
                                           Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2,
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: context.rem(AppRem.snug),
+                                              vertical: context.rem(AppRem.xxs),
                                             ),
                                             decoration: BoxDecoration(
                                               color: isLive
                                                   ? const Color(0xFFFF3B30)
                                                   : AppColors.accent,
                                               borderRadius:
-                                                  BorderRadius.circular(4),
+                                                  BorderRadius.circular(context.rem(AppRem.xs)),
                                             ),
                                             child: Text(
                                               isLive
@@ -1010,12 +1011,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                         : 'VOD'),
                                               style: TextStyle(
                                                 color: Colors.white,
-                                                fontSize: TvType.scale(9.5),
+                                                fontSize: TvType.scale(AppType.nanoPlus),
                                                 fontWeight: FontWeight.w900,
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
+                                          SizedBox(width: context.rem(AppRem.sm)),
                                           Expanded(
                                             child: Text(
                                               currentTitle,
@@ -1023,7 +1024,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 color: Colors.white,
-                                                fontSize: 17,
+                                                fontSize: AppType.subhead,
                                                 fontWeight: FontWeight.w800,
                                               ),
                                             ),
@@ -1031,7 +1032,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         ],
                                       ),
                                       if (currentHit != null) ...[
-                                        const SizedBox(height: 2),
+                                        SizedBox(height: context.rem(AppRem.xxs)),
                                         Text(
                                           isCategoryList
                                               ? 'Channel ${_activeHitIndex + 1}/${widget.hits.length} · ${currentHit.portal.name}'
@@ -1042,22 +1043,22 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                             color: Colors.white.withValues(
                                               alpha: 0.6,
                                             ),
-                                            fontSize: 12,
+                                            fontSize: AppType.caption,
                                           ),
                                         ),
                                       ],
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: context.rem(AppRem.ms)),
                                 // Cast. Live TV had none at all, while
                                 // Movies/Series/Anime have carried one in
                                 // this same slot -- and a channel is the
                                 // most natural thing to throw at a TV.
                                 if (_canCast)
                                   PlayerIconButton(
-                                    size: 40,
-                                    iconSize: 20,
+                                    size: context.rem(2.5),
+                                    iconSize: context.rem(1.25),
                                     icon: const Icon(Icons.cast_rounded),
                                     tooltip: context.l10n.playerCast,
                                     backgroundColor: const Color(0x22080C12),
@@ -1073,8 +1074,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 // they want to.
                                 if (_canSaveAsChannel)
                                   PlayerIconButton(
-                                    size: 40,
-                                    iconSize: 20,
+                                    size: context.rem(2.5),
+                                    iconSize: context.rem(1.25),
                                     backgroundColor: const Color(0x22080C12),
                                     active: _savedAsChannel,
                                     activeColor: const Color(0xFF00D2EF),
@@ -1097,8 +1098,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                 // channel title out of its own bar.
                                 if (widget.hits.length > 1)
                                   PlayerIconButton(
-                                    size: 40,
-                                    iconSize: 20,
+                                    size: context.rem(2.5),
+                                    iconSize: context.rem(1.25),
                                     backgroundColor: const Color(0x22080C12),
                                     icon: Icon(
                                       isCategoryList
@@ -1145,7 +1146,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           left: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+                            padding: EdgeInsets.fromLTRB(context.rem(1.25), context.rem(1.25), context.rem(1.25), context.rem(AppRem.md)),
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.bottomCenter,
@@ -1167,7 +1168,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                         _hideControlsTimer?.cancel(),
                                     onSeekEnd: () => _startHideControlsTimer(),
                                   ),
-                                  const SizedBox(height: 6),
+                                  SizedBox(height: context.rem(AppRem.snug)),
                                 ] else ...[
                                   // Where the seek bar would be. Without it
                                   // the bar just had a gap, which reads as a
@@ -1176,7 +1177,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   // stream is live and there is nothing to
                                   // scrub.
                                   const _LiveEdgeRow(),
-                                  const SizedBox(height: 6),
+                                  SizedBox(height: context.rem(AppRem.snug)),
                                 ],
 
                                 // Controls Buttons Row. Play/pause is not
@@ -1193,7 +1194,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                             '${_formatDuration(pos)} / ${_formatDuration(_duration)}',
                                             style: const TextStyle(
                                               color: Colors.white70,
-                                              fontSize: 12.5,
+                                              fontSize: AppType.captionPlus,
                                               fontWeight: FontWeight.w600,
                                               fontFamily: 'monospace',
                                             ),
@@ -1202,7 +1203,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       ),
                                     ],
 
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: context.rem(AppRem.sm)),
 
                                     // The same volume control as every
                                     // other player: one widget, so the mute
@@ -1227,8 +1228,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     // live feed does not list tracks the
                                     // way a file does.
                                     PlayerIconButton(
-                                      size: 40,
-                                      iconSize: 20,
+                                      size: context.rem(2.5),
+                                      iconSize: context.rem(1.25),
                                       icon: Icon(
                                         _subtitlesOn
                                             ? Icons.closed_caption_rounded
@@ -1245,7 +1246,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       onPressed: _toggleSubtitles,
                                     ),
 
-                                    const SizedBox(width: 8),
+                                    SizedBox(width: context.rem(AppRem.sm)),
 
                                     // The same gear, in the same corner of
                                     // the same bar, as Movies/Series/Anime.
@@ -1257,8 +1258,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     // live stream has fewer settings, which
                                     // is the whole intended difference.
                                     PlayerIconButton(
-                                      size: 40,
-                                      iconSize: 20,
+                                      size: context.rem(2.5),
+                                      iconSize: context.rem(1.25),
                                       icon: const Icon(Icons.bedtime_rounded),
                                       tooltip: context.l10n.playerSleepTimer,
                                       active: _activeMenu != null,
@@ -1270,15 +1271,15 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     if (Platform.isWindows ||
                                         Platform.isLinux ||
                                         Platform.isMacOS) ...[
-                                      const SizedBox(width: 8),
+                                      SizedBox(width: context.rem(AppRem.sm)),
                                       ValueListenableBuilder<bool>(
                                         valueListenable: WindowService
                                             .instance
                                             .isFullscreenNotifier,
                                         builder: (context, isFullscreen, _) {
                                           return PlayerIconButton(
-                                            size: 40,
-                                            iconSize: 20,
+                                            size: context.rem(2.5),
+                                            iconSize: context.rem(1.25),
                                             backgroundColor: const Color(
                                               0x22080C12,
                                             ),
@@ -1344,27 +1345,27 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                     top: 0,
                     bottom: 0,
                     right: 0,
-                    width: 360,
+                    width: context.rem(22.5),
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Color(0xF2080A10),
-                        border: Border(
+                      decoration: BoxDecoration(
+                        color: const Color(0xF2080A10),
+                        border: const Border(
                           left: BorderSide(
                             color: Color(0xFF1E2336),
-                            width: 1.2,
+                            width: 1.2, // px: a hairline, not a layout size
                           ),
                         ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black87,
-                            blurRadius: 24,
-                            offset: Offset(-6, 0),
+                            blurRadius: context.rem(AppRem.lg),
+                            offset: Offset(-context.rem(AppRem.snug), 0),
                           ),
                         ],
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 18,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.rem(AppRem.md),
+                        vertical: context.rem(1.125),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1376,9 +1377,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                     ? Icons.format_list_bulleted_rounded
                                     : Icons.tune_rounded,
                                 color: AppColors.accent,
-                                size: 20,
+                                size: context.rem(AppRem.icon),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: context.rem(AppRem.sm)),
                               Expanded(
                                 child: Text(
                                   widget.categoryTitle ??
@@ -1389,49 +1390,49 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: AppType.bodyLg,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: context.rem(AppRem.snug),
+                                  vertical: context.rem(AppRem.xxs),
                                 ),
                                 decoration: BoxDecoration(
                                   color: AppColors.accent.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                                 ),
                                 child: Text(
                                   '${widget.hits.length}',
                                   style: const TextStyle(
                                     color: Color(0xFF9D4EDD),
-                                    fontSize: 11,
+                                    fontSize: AppType.tiny,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: context.rem(AppRem.snug)),
                               IconButton(
                                 tooltip: context.l10n.commonClose,
-                                icon: const Icon(
+                                icon: Icon(
                                   Icons.close_rounded,
                                   color: Colors.white54,
-                                  size: 20,
+                                  size: context.rem(AppRem.icon),
                                 ),
                                 onPressed: () =>
                                     setState(() => _showSourcesDrawer = false),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: context.rem(AppRem.ms)),
                           Expanded(
                             child: ListView.separated(
                               controller: _sourcesScrollController,
                               itemCount: widget.hits.length,
                               separatorBuilder: (_, _) =>
-                                  const SizedBox(height: 6),
+                                  SizedBox(height: context.rem(AppRem.snug)),
                               itemBuilder: (context, index) {
                                 final hit = widget.hits[index];
                                 final isSelected = index == _activeHitIndex;
@@ -1447,9 +1448,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       duration: const Duration(
                                         milliseconds: 120,
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 8,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: context.rem(0.625),
+                                        vertical: context.rem(AppRem.sm),
                                       ),
                                       decoration: BoxDecoration(
                                         color: isSelected
@@ -1457,44 +1458,44 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                             : Colors.white.withValues(
                                                 alpha: 0.04,
                                               ),
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                                         border: Border.all(
                                           color: isSelected
                                               ? AppColors.accent
                                               : Colors.white.withValues(
                                                   alpha: 0.08,
                                                 ),
-                                          width: isSelected ? 1.4 : 1.0,
+                                          width: isSelected ? 1.4 : 1.0, // px: a hairline, not a layout size
                                         ),
                                       ),
                                       child: Row(
                                         children: [
                                           // Number
                                           SizedBox(
-                                            width: 28,
+                                            width: context.rem(1.75),
                                             child: Text(
                                               numFormatted,
                                               style: TextStyle(
                                                 color: isSelected
                                                     ? const Color(0xFF00E5FF)
                                                     : Colors.white30,
-                                                fontSize: 11,
+                                                fontSize: AppType.tiny,
                                                 fontWeight: FontWeight.w700,
                                                 fontFamily: 'monospace',
                                               ),
                                             ),
                                           ),
 
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: context.rem(AppRem.snug)),
 
                                           // Icon / Logo
                                           Container(
-                                            width: 38,
-                                            height: 28,
+                                            width: context.rem(2.375),
+                                            height: context.rem(1.75),
                                             decoration: BoxDecoration(
                                               color: const Color(0xFF080A10),
                                               borderRadius:
-                                                  BorderRadius.circular(4),
+                                                  BorderRadius.circular(context.rem(AppRem.xs)),
                                               border: Border.all(
                                                 color: const Color(0xFF1E2336),
                                               ),
@@ -1516,7 +1517,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                             : Icons
                                                                   .movie_rounded,
                                                         color: Colors.white38,
-                                                        size: 16,
+                                                        size: context.rem(AppRem.iconXs),
                                                       ),
                                                     ),
                                                   )
@@ -1525,11 +1526,11 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                         ? Icons.live_tv_rounded
                                                         : Icons.movie_rounded,
                                                     color: Colors.white38,
-                                                    size: 16,
+                                                    size: context.rem(AppRem.iconXs),
                                                   ),
                                           ),
 
-                                          const SizedBox(width: 10),
+                                          SizedBox(width: context.rem(0.625)),
 
                                           // Channel Title
                                           Expanded(
@@ -1546,13 +1547,13 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                     color: isSelected
                                                         ? Colors.white
                                                         : Colors.white70,
-                                                    fontSize: 13,
+                                                    fontSize: AppType.small,
                                                     fontWeight: isSelected
                                                         ? FontWeight.w800
                                                         : FontWeight.w600,
                                                   ),
                                                 ),
-                                                const SizedBox(height: 2),
+                                                SizedBox(height: context.rem(AppRem.xxs)),
                                                 Text(
                                                   hit
                                                           .portal
@@ -1570,7 +1571,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                                   style: TextStyle(
                                                     color: Colors.white
                                                         .withValues(alpha: 0.4),
-                                                    fontSize: TvType.scale(10.5),
+                                                    fontSize: TvType.scale(AppType.microPlus),
                                                     fontWeight: FontWeight.w600,
                                                   ),
                                                 ),
@@ -1579,17 +1580,17 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                           ),
 
                                           if (isSelected) ...[
-                                            const SizedBox(width: 6),
+                                            SizedBox(width: context.rem(AppRem.snug)),
                                             Container(
-                                              padding: const EdgeInsets.all(4),
+                                              padding: EdgeInsets.all(context.rem(AppRem.xs)),
                                               decoration: BoxDecoration(
                                                 color: AppColors.accent.withValues(alpha: 0.3),
                                                 shape: BoxShape.circle,
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.play_arrow_rounded,
-                                                color: Color(0xFF00E5FF),
-                                                size: 16,
+                                                color: const Color(0xFF00E5FF),
+                                                size: context.rem(AppRem.iconXs),
                                               ),
                                             ),
                                           ],
@@ -1637,32 +1638,32 @@ class _LiveEdgeRow extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 8,
-          height: 8,
+          width: context.rem(AppRem.sm),
+          height: context.rem(AppRem.sm),
           decoration: const BoxDecoration(
             color: Color(0xFFFF3B30),
             shape: BoxShape.circle,
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: context.rem(AppRem.sm)),
         Text(
           context.l10n.iptvLive,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 12,
+            fontSize: AppType.caption,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.3,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: context.rem(0.625)),
         // Takes the seek bar's width so the bar keeps its shape, and reads
         // as a track already at its end rather than an empty gap.
         Expanded(
           child: Container(
-            height: 3,
+            height: context.rem(0.1875),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.xxs)),
             ),
           ),
         ),
@@ -1754,7 +1755,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                   },
                   child: FocusRing(
                   visible: _isFocused,
-                  borderRadius: 999,
+                  borderRadius: 999, // px: a hairline, not a layout size
                   child: MouseRegion(
                   cursor: SystemMouseCursors.click,
                   onHover: (event) {
@@ -1801,25 +1802,25 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                       _seekTo(details.localPosition.dx, width, duration);
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.sm)),
                       child: Stack(
                         clipBehavior: Clip.none,
                         alignment: Alignment.centerLeft,
                         children: [
                           // Invisible hit target
                           Container(
-                            height: 24,
+                            height: context.rem(AppRem.lg),
                             width: double.infinity,
                             color: Colors.transparent,
                           ),
 
                           // Background Bar
                           Container(
-                            height: 5,
+                            height: context.rem(0.3125),
                             width: double.infinity,
                             decoration: BoxDecoration(
                               color: Colors.white24,
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(context.rem(0.1875)),
                             ),
                           ),
 
@@ -1829,7 +1830,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                             Positioned(
                               left: 0,
                               child: Container(
-                                height: 5,
+                                height: context.rem(0.3125),
                                 width:
                                     (width *
                                             (bufferedDuration.inMilliseconds /
@@ -1837,14 +1838,14 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                                         .clamp(0.0, width),
                                 decoration: BoxDecoration(
                                   color: Colors.white38,
-                                  borderRadius: BorderRadius.circular(3),
+                                  borderRadius: BorderRadius.circular(context.rem(0.1875)),
                                 ),
                               ),
                             ),
 
                           // Played Bar
                           Container(
-                            height: 5,
+                            height: context.rem(0.3125),
                             width: duration.inMilliseconds > 0
                                 ? (width *
                                           (position.inMilliseconds /
@@ -1855,7 +1856,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                               gradient: LinearGradient(
                                 colors: [AppColors.accent, const Color(0xFF00D2EF)],
                               ),
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(context.rem(0.1875)),
                             ),
                           ),
 
@@ -1866,18 +1867,18 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                                               (position.inMilliseconds /
                                                   duration.inMilliseconds))
                                           .clamp(0.0, width) -
-                                      7
-                                : -7,
+                                      context.rem(0.4375)
+                                : -context.rem(0.4375),
                             child: Container(
-                              width: 14,
-                              height: 14,
+                              width: context.rem(0.875),
+                              height: context.rem(0.875),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
                                     color: AppColors.accent.withValues(alpha: 0.5),
-                                    blurRadius: 6,
+                                    blurRadius: context.rem(AppRem.snug),
                                   ),
                                 ],
                               ),
@@ -1887,25 +1888,25 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                           // Hover Tooltip
                           if (_hoverX != null && duration > Duration.zero)
                             Positioned(
-                              left: (_hoverX! - 30).clamp(0.0, width - 60),
-                              bottom: 20,
+                              left: (_hoverX! - context.rem(1.875)).clamp(0.0, width - context.rem(3.75)),
+                              bottom: context.rem(1.25),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: context.rem(AppRem.sm),
+                                  vertical: context.rem(0.1875),
                                 ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF0C0E15),
-                                  borderRadius: BorderRadius.circular(6),
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                                   border: Border.all(
                                     color: Colors.white24,
-                                    width: 1,
+                                    width: 1, // px: a hairline, not a layout size
                                   ),
-                                  boxShadow: const [
+                                  boxShadow: [
                                     BoxShadow(
                                       color: Colors.black54,
-                                      blurRadius: 4,
-                                      offset: Offset(0, 2),
+                                      blurRadius: context.rem(AppRem.xs),
+                                      offset: Offset(0, context.rem(AppRem.xxs)),
                                     ),
                                   ],
                                 ),
@@ -1915,7 +1916,7 @@ class _IptvCustomProgressBarState extends State<_IptvCustomProgressBar> {
                                   ),
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 11,
+                                    fontSize: AppType.tiny,
                                     fontWeight: FontWeight.w700,
                                     fontFamily: 'monospace',
                                   ),

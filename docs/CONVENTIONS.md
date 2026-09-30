@@ -504,9 +504,16 @@ and the in-app zoom), clamped to the range the layouts were probed to hold --
 see `lib/services/app_units.dart`. A gap, a bar, a button's padding and an icon
 then move with the text, and a change of spacing is made in one place.
 
+- **A recurring size has a name; a one-off can be a rem number.** The spacing,
+  radius and icon steps are `AppRem` tokens (`context.rem(AppRem.md)`). A
+  size used in one place and nowhere else may be written as rem directly
+  (`context.rem(2.75)`, which is 44 logical pixels at the default text size);
+  give it a name the second time it appears. The guard test only rejects bare
+  pixel numbers, so both pass.
 - **Font sizes are not rem.** Flutter multiplies a `fontSize` by the text
   scaler when it paints, so scaling it here too would apply the setting twice.
-  Use the constants in `AppType`.
+  Use the constants in `AppType`, which is a half-step ramp (`caption` 12,
+  `captionPlus` 12.5, `small` 13, ...).
 - **A hairline stays a hairline.** A 1px border is meant to be 1px at any text
   size; mark the line `// px` so the guard test lets it through.
 - **Not `const`.** A rem size depends on the context, so the widget holding it

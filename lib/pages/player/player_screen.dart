@@ -53,6 +53,7 @@ import '../../services/tv_type.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../utils/download/download_launcher.dart';
+import '../../services/app_units.dart';
 
 class PlayerScreen extends StatefulWidget {
   final StreamSource source;
@@ -724,7 +725,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             return AlertDialog(
               backgroundColor: const Color(0xFF13151C),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.lg)),
                 side: BorderSide(
                   color: AppColors.accent.withValues(alpha: 0.3),
                 ),
@@ -734,9 +735,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                   Icon(
                     Icons.skip_next_rounded,
                     color: AppColors.accent,
-                    size: 26,
+                    size: context.rem(1.625),
                   ),
-                  const SizedBox(width: 10),
+                  SizedBox(width: context.rem(0.625)),
                   Text(
                     context.l10n.upNext,
                     style: const TextStyle(
@@ -754,7 +755,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                     context.l10n.upNextCountdown(_autoNextCountdown),
                     style: const TextStyle(color: Colors.white70),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.rem(AppRem.sm)),
                   Text(
                     'S${widget.episode?.season ?? '?'}E${(widget.episode?.episode ?? 0) + 1}',
                     style: TextStyle(
@@ -781,7 +782,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     ),
                   ),
                   onPressed: () {
@@ -1757,43 +1758,43 @@ class _PlayerScreenState extends State<PlayerScreen>
       color: Colors.black.withValues(alpha: 0.88),
       alignment: Alignment.center,
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(context.rem(AppRem.xl)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline_rounded,
               color: Colors.white70,
-              size: 44,
+              size: context.rem(2.75),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.rem(AppRem.md)),
             Text(
               context.l10n.playerThisSourceFailed,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: AppType.lead,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: context.rem(0.625)),
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 460),
+              constraints: BoxConstraints(maxWidth: context.rem(28.75)),
               child: Text(
                 _fatalError ?? '',
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white60, fontSize: 13),
+                style: const TextStyle(color: Colors.white60, fontSize: AppType.small),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: context.rem(AppRem.lg)),
             Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: context.rem(AppRem.ms),
+              runSpacing: context.rem(AppRem.ms),
               alignment: WrapAlignment.center,
               children: [
                 FilledButton.icon(
                   onPressed: _retryPlayback,
-                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  icon: Icon(Icons.refresh_rounded, size: context.rem(AppRem.iconSm)),
                   label: Text(context.l10n.playerTryAgain),
                   style: FilledButton.styleFrom(
                     backgroundColor: PlayerTheme.accent,
@@ -1801,7 +1802,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                 ),
                 OutlinedButton.icon(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.arrow_back_rounded, size: 18),
+                  icon: Icon(Icons.arrow_back_rounded, size: context.rem(AppRem.iconSm)),
                   label: Text(context.l10n.playerPickAnotherSource),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
@@ -2417,7 +2418,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                         },
                         child: Image.network(
                           widget.logoUrl!,
-                          height: 100,
+                          height: context.rem(6.25),
                           fit: BoxFit.contain,
                         ),
                       )
@@ -2425,12 +2426,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                       CircularProgressIndicator(
                         color: PlayerTheme.accent,
                       ),
-                    const SizedBox(height: 32),
+                    SizedBox(height: context.rem(AppRem.xl)),
                     Text(
                       _status(context.l10n),
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 16,
+                        fontSize: AppType.bodyLg,
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -2881,7 +2882,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             !_isLoading &&
             _selectedEmbeddedSubtitleIndex == null)
           Positioned(
-            top: MediaQuery.paddingOf(context).top + 16,
+            top: MediaQuery.paddingOf(context).top + context.rem(AppRem.md),
             left: 0,
             right: 0,
             child: SubSyncBar(
@@ -2985,10 +2986,10 @@ class _PlayerScreenState extends State<PlayerScreen>
           Positioned(
             bottom: (_showControls || _activeMenu != null)
                 ? (MediaQuery.paddingOf(context).bottom +
-                      (MediaQuery.sizeOf(context).width < 680 ? 108 : 128))
+                      context.rem(MediaQuery.sizeOf(context).width < 680 ? 6.75 : 8))
                 : (MediaQuery.paddingOf(context).bottom +
-                      (MediaQuery.sizeOf(context).width < 680 ? 22 : 36)),
-            right: MediaQuery.sizeOf(context).width < 680 ? 16 : 28,
+                      context.rem(MediaQuery.sizeOf(context).width < 680 ? 1.375 : 2.25)),
+            right: context.rem(MediaQuery.sizeOf(context).width < 680 ? AppRem.md : 1.75),
             child: AnimatedOpacity(
               opacity: _showSkipButton ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 250),
@@ -3032,23 +3033,23 @@ class _PlayerScreenState extends State<PlayerScreen>
 
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.lg), vertical: context.rem(AppRem.md)),
         decoration: BoxDecoration(
           color: const Color(0xFF0F1117).withValues(alpha: 0.88),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.rem(1.25)),
           border: Border.all(
             color: isBoosting
                 ? boostColor.withValues(alpha: 0.45)
                 : Colors.white.withValues(alpha: 0.15),
-            width: 1.2,
+            width: 1.2, // px: a hairline, not a layout size
           ),
           boxShadow: [
             BoxShadow(
               color: isBoosting
                   ? boostColor.withValues(alpha: 0.28)
                   : Colors.black54,
-              blurRadius: 30,
-              spreadRadius: 2,
+              blurRadius: context.rem(1.875),
+              spreadRadius: context.rem(AppRem.xxs),
             ),
           ],
         ),
@@ -3061,43 +3062,43 @@ class _PlayerScreenState extends State<PlayerScreen>
                 Icon(
                   volIcon,
                   color: isBoosting ? boostColor : Colors.white,
-                  size: 28,
+                  size: context.rem(1.75),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: context.rem(AppRem.ms)),
                 Text(
                   _isMuted ? 'Muted' : '$pct%',
                   style: TextStyle(
                     color: isBoosting ? boostColor : Colors.white,
-                    fontSize: 22,
+                    fontSize: AppType.titleMd,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
                   ),
                 ),
                 if (isBoosting) ...[
-                  const SizedBox(width: 8),
+                  SizedBox(width: context.rem(AppRem.sm)),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(AppRem.sm),
+                      vertical: context.rem(0.1875),
                     ),
                     decoration: BoxDecoration(
                       color: boostColor.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                       border: Border.all(
                         color: boostColor.withValues(alpha: 0.4),
-                        width: 0.8,
+                        width: 0.8, // px: a hairline, not a layout size
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.bolt_rounded, size: 13, color: boostColor),
-                        const SizedBox(width: 2),
+                        Icon(Icons.bolt_rounded, size: context.rem(0.8125), color: boostColor),
+                        SizedBox(width: context.rem(AppRem.xxs)),
                         Text(
                           _volume > 1.75 ? 'MAX BOOST' : 'BOOST',
                           style: TextStyle(
                             color: boostColor,
-                            fontSize: TvType.scale(10.5),
+                            fontSize: TvType.scale(AppType.microPlus),
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.5,
                           ),
@@ -3108,12 +3109,12 @@ class _PlayerScreenState extends State<PlayerScreen>
                 ],
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: context.rem(AppRem.ms)),
             SizedBox(
-              width: 140,
-              height: 6,
+              width: context.rem(8.75),
+              height: context.rem(AppRem.snug),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(3),
+                borderRadius: BorderRadius.circular(context.rem(0.1875)),
                 child: Stack(
                   children: [
                     Container(color: Colors.white.withValues(alpha: 0.15)),
@@ -3163,36 +3164,36 @@ class _PlayerScreenState extends State<PlayerScreen>
   Widget _buildAudioHud() {
     return Center(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(1.375), vertical: context.rem(0.875)),
         decoration: BoxDecoration(
           color: const Color(0xFF0F1117).withValues(alpha: 0.90),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
           border: Border.all(
             color: AppColors.accent.withValues(alpha: 0.5),
-            width: 1.2,
+            width: 1.2, // px: a hairline, not a layout size
           ),
           boxShadow: [
             BoxShadow(
               color: AppColors.accent.withValues(alpha: 0.25),
-              blurRadius: 24,
-              spreadRadius: 2,
+              blurRadius: context.rem(AppRem.lg),
+              spreadRadius: context.rem(AppRem.xxs),
             ),
           ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.audiotrack_rounded,
-              color: Color(0xFF00D2EF),
-              size: 24,
+              color: const Color(0xFF00D2EF),
+              size: context.rem(AppRem.iconLg),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: context.rem(0.625)),
             Text(
               _audioHudText,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),

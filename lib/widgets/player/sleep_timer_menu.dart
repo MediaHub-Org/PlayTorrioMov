@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import '../../services/player/sleep_timer_service.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
+import '../../services/app_units.dart';
 
 /// The sleep timer, one option per row.
 ///
@@ -25,7 +26,7 @@ class SleepTimerMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(context.rem(0.625)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -33,7 +34,7 @@ class SleepTimerMenu extends StatelessWidget {
           PlayerMenuHeader(
             title: context.l10n.playerSleepTimer.toUpperCase(),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           ValueListenableBuilder<int?>(
             valueListenable: SleepTimerService.instance.minutesRemaining,
             builder: (context, remaining, _) {
@@ -60,11 +61,11 @@ class SleepTimerMenu extends StatelessWidget {
                             .startUntilEndOfVideo(),
                       ),
                       if (isArmed) ...[
-                        const SizedBox(height: 4),
-                        const Divider(color: PlayerTheme.edgeSoft, height: 1),
+                        SizedBox(height: context.rem(AppRem.xs)),
+                        const Divider(color: PlayerTheme.edgeSoft, height: 1), // px: a hairline, not a layout size
                         TextButton.icon(
                           onPressed: SleepTimerService.instance.cancel,
-                          icon: const Icon(Icons.timer_off_outlined, size: 15),
+                          icon: Icon(Icons.timer_off_outlined, size: context.rem(0.9375)),
                           label: Text(
                             remaining != null
                                 ? context.l10n.playerSleepOff(remaining)
@@ -73,7 +74,7 @@ class SleepTimerMenu extends StatelessWidget {
                           style: TextButton.styleFrom(
                             foregroundColor: PlayerTheme.inkSubtle,
                             minimumSize: const Size(0, 36),
-                            textStyle: const TextStyle(fontSize: 12),
+                            textStyle: const TextStyle(fontSize: AppType.caption),
                           ),
                         ),
                       ],

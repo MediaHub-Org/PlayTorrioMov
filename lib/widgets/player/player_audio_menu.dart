@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import 'language_flag.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
+import '../../services/app_units.dart';
 
 /// One audio track, as the menu needs to draw it.
 class PlayerAudioTrack {
@@ -59,7 +60,7 @@ class PlayerAudioMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(context.rem(0.625)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,13 +69,13 @@ class PlayerAudioMenu extends StatelessWidget {
             children: [
               if (onBack != null) ...[
                 PlayerIconButton(
-                  size: 28,
-                  iconSize: 14,
+                  size: context.rem(1.75),
+                  iconSize: context.rem(0.875),
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   tooltip: context.l10n.playerBackToSettings,
                   onPressed: onBack,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: context.rem(AppRem.xs)),
               ],
               Expanded(
                 child: PlayerMenuHeader(
@@ -83,13 +84,13 @@ class PlayerAudioMenu extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           if (audioTracks.isEmpty)
             PlayerMenuEmptyRow(context.l10n.playerAudioDefaultStream)
           else
             for (final track in audioTracks)
               PlayerMenuRow(
-                leading: LanguageFlag(track.language ?? '', height: 13),
+                leading: LanguageFlag(track.language ?? '', height: context.rem(0.8125)),
                 title: track.title,
                 isSelected: track.index == selectedIndex,
                 onTap: () => onTrackSelected(track.index),
