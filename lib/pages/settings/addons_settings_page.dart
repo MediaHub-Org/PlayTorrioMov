@@ -7,6 +7,7 @@ import '../../widgets/settings/settings_scroll_view.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused [_FeatureToggleChip]. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
@@ -73,11 +74,11 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
         return AlertDialog(
           backgroundColor: AppColors.raised,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(context.rem(1.25)),
           ),
           title: Text(
             l10n.addonsAddDialogTitle,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -86,43 +87,43 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               Text(
                 l10n.addonsAddDialogBody,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppType.small,
                   color: AppColors.inkAlpha(0.50),
-                  height: 1.35,
+                  height: 1.35, // ratio: a line height, not a size
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: context.rem(AppRem.md)),
               TextField(
                 controller: controller,
                 autofocus: true,
-                style: TextStyle(fontSize: 13.5, color: AppColors.ink),
+                style: TextStyle(fontSize: AppType.smallPlus, color: AppColors.ink),
                 decoration: InputDecoration(
                   hintText: 'https://opensubtitles-v3.strem.io/manifest.json',
                   hintStyle: TextStyle(
                     color: AppColors.inkAlpha(0.22),
-                    fontSize: 12.5,
+                    fontSize: AppType.captionPlus,
                   ),
                   filled: true,
                   fillColor: AppColors.bar,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     borderSide: BorderSide(
                       color: AppColors.inkAlpha(0.10),
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     borderSide: BorderSide(
                       color: AppColors.inkAlpha(0.10),
                     ),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     borderSide: BorderSide(color: AppColors.accent),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: context.rem(AppRem.md),
+                    vertical: context.rem(0.875),
                   ),
                 ),
                 onSubmitted: (value) => Navigator.pop(context, value),
@@ -143,18 +144,18 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
                 backgroundColor: AppColors.accent,
                 foregroundColor: AppColors.onAccent,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.rem(1.25),
+                  vertical: context.rem(AppRem.ms),
                 ),
               ),
               child: Text(
                 l10n.addonsInstall,
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                  fontSize: AppType.small,
                 ),
               ),
             ),
@@ -172,12 +173,12 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
         return AlertDialog(
           backgroundColor: AppColors.raised,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
           ),
           title: Text(l10n.addonsRemoveConfirm(addon.manifest.name)),
           content: Text(
             l10n.addonsRemoveConfirmBody,
-            style: TextStyle(color: AppColors.inkAlpha(0.55), fontSize: 13.5),
+            style: TextStyle(color: AppColors.inkAlpha(0.55), fontSize: AppType.smallPlus),
           ),
           actions: [
             TextButton(
@@ -196,7 +197,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red.shade700,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
               ),
               child: Text(
@@ -223,12 +224,12 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.settingsCategoryAddons,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: SettingsScrollView(
@@ -237,20 +238,20 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
         children: [
           // Description
           Padding(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: EdgeInsets.only(bottom: context.rem(1.25)),
             child: Text(
               l10n.addonsIntro,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: AppType.smallPlus,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.4,
+                height: 1.4, // ratio: a line height, not a size
               ),
             ),
           ),
 
           // Add Addon Button
           _AddAddonButton(isLoading: _isAdding, onTap: _addAddon),
-          const SizedBox(height: 24),
+          SizedBox(height: context.rem(AppRem.lg)),
 
           // Section Header
           Row(
@@ -258,7 +259,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               Text(
                 l10n.addonsInstalledHeader,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   fontWeight: FontWeight.w700,
                   color: AppColors.inkAlpha(0.35),
                   letterSpacing: 1.1,
@@ -266,15 +267,15 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xxs)),
                 decoration: BoxDecoration(
                   color: AppColors.accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                 ),
                 child: Text(
                   l10n.addonsTotalBadge(addons.length),
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: AppType.tiny,
                     fontWeight: FontWeight.w700,
                     color: AppColors.accent,
                   ),
@@ -282,30 +283,30 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // Addons List or Empty State
           if (addons.isEmpty)
             Container(
-              padding: const EdgeInsets.all(28),
+              padding: EdgeInsets.all(context.rem(1.75)),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                 border: Border.all(color: AppColors.inkAlpha(0.06)),
               ),
               child: Column(
                 children: [
-                  Icon(Icons.extension_off_rounded, size: 40, color: AppColors.inkAlpha(0.25)),
-                  const SizedBox(height: 12),
+                  Icon(Icons.extension_off_rounded, size: context.rem(2.5), color: AppColors.inkAlpha(0.25)),
+                  SizedBox(height: context.rem(AppRem.ms)),
                   Text(
                     l10n.addonsEmptyTitle,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.inkMuted),
+                    style: TextStyle(fontSize: AppType.bodyLg, fontWeight: FontWeight.bold, color: AppColors.inkMuted),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: context.rem(AppRem.snug)),
                   Text(
                     l10n.addonsEmptyBody,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12.5, color: AppColors.inkAlpha(0.4)),
+                    style: TextStyle(fontSize: AppType.captionPlus, color: AppColors.inkAlpha(0.4)),
                   ),
                 ],
               ),
@@ -313,7 +314,7 @@ class _AddonsSettingsPageState extends State<AddonsSettingsPage> {
           else
             ...addons.map(
               (addon) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.only(bottom: context.rem(AppRem.ms)),
                 child: _AddonCard(
                   addon: addon,
                   onToggle: (enabled) async {
@@ -395,10 +396,10 @@ class _AddonCard extends StatelessWidget {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(
           color: addon.enabled
               ? AppColors.accent.withValues(alpha: 0.3)
@@ -412,19 +413,19 @@ class _AddonCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: context.rem(2.625),
+                height: context.rem(2.625),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                   color: AppColors.accent.withValues(alpha: 0.14),
                 ),
                 child: Icon(
                   Icons.extension_rounded,
                   color: AppColors.accent,
-                  size: 22,
+                  size: context.rem(AppRem.iconMd),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -432,16 +433,16 @@ class _AddonCard extends StatelessWidget {
                     Text(
                       m.name,
                       style: TextStyle(
-                        fontSize: 15.5,
+                        fontSize: AppType.bodyMdPlus,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: context.rem(AppRem.xxs)),
                     Text(
                       versionLine.toString(),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         color: AppColors.inkAlpha(0.4),
                         fontWeight: FontWeight.w500,
                       ),
@@ -459,27 +460,27 @@ class _AddonCard extends StatelessWidget {
 
           // Description
           if (m.description != null && m.description!.isNotEmpty) ...[
-            const SizedBox(height: 10),
+            SizedBox(height: context.rem(0.625)),
             Text(
               m.description!,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: AppType.captionPlus,
                 color: AppColors.inkAlpha(0.45),
-                height: 1.35,
+                height: 1.35, // ratio: a line height, not a size
               ),
             ),
           ],
 
           // Feature Toggles Section
           if (addon.enabled && hasAnyFeature) ...[
-            const SizedBox(height: 14),
+            SizedBox(height: context.rem(0.875)),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.625)),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(
                   color: AppColors.inkAlpha(0.05),
                 ),
@@ -491,14 +492,14 @@ class _AddonCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.tune_rounded,
-                        size: 13,
+                        size: context.rem(0.8125),
                         color: AppColors.inkAlpha(0.45),
                       ),
-                      const SizedBox(width: 5),
+                      SizedBox(width: context.rem(0.3125)),
                       Text(
                         l10n.addonsFunctionsHeader,
                         style: TextStyle(
-                          fontSize: TvType.scale(10.5),
+                          fontSize: TvType.scale(AppType.microPlus),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
                           color: AppColors.inkAlpha(0.45),
@@ -506,10 +507,10 @@ class _AddonCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.rem(AppRem.sm)),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: context.rem(AppRem.sm),
+                    runSpacing: context.rem(AppRem.sm),
                     children: [
                       if (hasCatalogs)
                         _FeatureToggleChip(
@@ -555,27 +556,27 @@ class _AddonCard extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // Type badges + Remove
           Row(
             children: [
               ...m.types.map(
                 (type) => Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 6),
+                  padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.snug)),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 3.5,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(0.5625),
+                      vertical: context.rem(0.2188),
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.inkAlpha(0.06),
-                      borderRadius: BorderRadius.circular(7),
+                      borderRadius: BorderRadius.circular(context.rem(0.4375)),
                     ),
                     child: Text(
                       type,
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: AppType.tiny,
                         color: AppColors.inkAlpha(0.5),
                         fontWeight: FontWeight.w600,
                       ),
@@ -585,12 +586,12 @@ class _AddonCard extends StatelessWidget {
               ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                icon: Icon(Icons.delete_outline_rounded, size: context.rem(AppRem.icon)),
                 color: Colors.red.withValues(alpha: 0.6),
                 onPressed: onRemove,
                 tooltip: context.l10n.addonsRemoveTooltip,
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                constraints: BoxConstraints(minWidth: context.rem(2.25), minHeight: context.rem(2.25)),
               ),
             ],
           ),
@@ -648,7 +649,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
           decoration: BoxDecoration(
             color: isEnabled
                 ? (hovered
@@ -657,19 +658,19 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
                 : (hovered
                     ? AppColors.inkAlpha(0.08)
                     : AppColors.inkAlpha(0.03)),
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
             border: Border.all(
               color: isEnabled
                   ? activeColor.withValues(alpha: 0.50)
                   : AppColors.inkAlpha(0.08),
-              width: 1,
+              width: 1, // px: a hairline, not a layout size
             ),
             boxShadow: isEnabled && hovered
                 ? [
                     BoxShadow(
                       color: activeColor.withValues(alpha: 0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      blurRadius: context.rem(AppRem.sm),
+                      offset: Offset(0, context.rem(AppRem.xxs)),
                     ),
                   ]
                 : null,
@@ -679,30 +680,30 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
             children: [
               Icon(
                 widget.icon,
-                size: 14,
+                size: context.rem(0.875),
                 color: isEnabled
                     ? activeColor
                     : AppColors.inkAlpha(0.35),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
               Text(
                 widget.count != null
                     ? '${widget.label} (${widget.count})'
                     : widget.label,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   fontWeight: isEnabled ? FontWeight.w600 : FontWeight.w500,
                   color: isEnabled
                       ? AppColors.ink
                       : AppColors.inkAlpha(0.45),
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
               Icon(
                 isEnabled
                     ? Icons.check_circle_rounded
                     : Icons.cancel_outlined,
-                size: 13,
+                size: context.rem(0.8125),
                 color: isEnabled
                     ? const Color(0xFF34D399)
                     : AppColors.inkAlpha(0.25),
@@ -739,9 +740,9 @@ class _AddAddonButton extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: EdgeInsets.symmetric(vertical: context.rem(1.25)),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
           border: Border.all(
             color: AppColors.accent.withValues(alpha: 0.25),
           ),
@@ -752,20 +753,20 @@ class _AddAddonButton extends StatelessWidget {
           children: [
             if (isLoading)
               SizedBox(
-                width: 20,
-                height: 20,
+                width: context.rem(1.25),
+                height: context.rem(1.25),
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: AppColors.accent,
                 ),
               )
             else
-              Icon(Icons.add_rounded, color: AppColors.accent, size: 22),
-            const SizedBox(width: 10),
+              Icon(Icons.add_rounded, color: AppColors.accent, size: context.rem(AppRem.iconMd)),
+            SizedBox(width: context.rem(0.625)),
             Text(
               isLoading ? context.l10n.addonsInstalling : context.l10n.addonsAdd,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.accent,
               ),

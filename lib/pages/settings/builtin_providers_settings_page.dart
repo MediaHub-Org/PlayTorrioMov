@@ -9,6 +9,7 @@ import '../../services/stream/stream_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../widgets/p2p/p2p_warning_dialog.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// Per-provider control over the app's built-in scrapers.
 ///
@@ -72,12 +73,12 @@ class _BuiltinProvidersSettingsPageState
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.builtinProvidersTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: ValueListenableBuilder<int>(
@@ -111,7 +112,7 @@ class _BuiltinProvidersSettingsPageState
             controller: _listController,
             slivers: [
               SliverPadding(
-                padding: EdgeInsets.fromLTRB(gutter, 20, gutter, 0),
+                padding: EdgeInsets.fromLTRB(gutter, context.rem(1.25), gutter, 0),
                 sliver: SliverToBoxAdapter(
                   child: _header(on, _providers.length, visible),
                 ),
@@ -120,10 +121,10 @@ class _BuiltinProvidersSettingsPageState
                 SliverFillRemaining(hasScrollBody: false, child: _empty())
               else
                 SliverPadding(
-                  padding: EdgeInsets.fromLTRB(gutter, 16, gutter, 24),
+                  padding: EdgeInsets.fromLTRB(gutter, context.rem(AppRem.md), gutter, context.rem(AppRem.lg)),
                   sliver: SliverList.separated(
                     itemCount: visible.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (_, __) => SizedBox(height: context.rem(AppRem.sm)),
                     itemBuilder: (context, i) => _row(visible[i]),
                   ),
                 ),
@@ -145,12 +146,12 @@ class _BuiltinProvidersSettingsPageState
         Text(
           l10n.builtinProvidersIntro,
           style: TextStyle(
-            fontSize: 13.5,
+            fontSize: AppType.smallPlus,
             color: AppColors.inkAlpha(0.5),
-            height: 1.4,
+            height: 1.4, // ratio: a line height, not a size
           ),
         ),
-        const SizedBox(height: 14),
+        SizedBox(height: context.rem(0.875)),
         // The master switch every torrent row below answers to -- used to
         // be its own top-level Settings row, disconnected from the list
         // whose rows it silences.
@@ -158,11 +159,11 @@ class _BuiltinProvidersSettingsPageState
           valueListenable: P2pSettingsService.isP2pEnabled,
           builder: (context, isP2p, _) {
             return Container(
-              margin: const EdgeInsets.only(bottom: 14),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              margin: EdgeInsets.only(bottom: context.rem(0.875)),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.625)),
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadii.md),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(
                   color: isP2p
                       ? const Color(0xFFF59E0B).withValues(alpha: 0.25)
@@ -173,17 +174,17 @@ class _BuiltinProvidersSettingsPageState
                 children: [
                   Icon(
                     Icons.hub_rounded,
-                    size: 20,
+                    size: context.rem(AppRem.icon),
                     color: isP2p
                         ? const Color(0xFFF59E0B)
                         : AppColors.inkAlpha(0.35),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: context.rem(AppRem.ms)),
                   Expanded(
                     child: Text(
                       l10n.builtinProvidersP2pLabel,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: AppType.body,
                         fontWeight: FontWeight.w600,
                         color: AppColors.inkAlpha(0.85),
                       ),
@@ -192,7 +193,7 @@ class _BuiltinProvidersSettingsPageState
                   IconButton(
                     icon: Icon(
                       Icons.info_outline_rounded,
-                      size: 16,
+                      size: context.rem(AppRem.iconXs),
                       color: AppColors.inkSubtle,
                     ),
                     padding: EdgeInsets.zero,
@@ -203,7 +204,7 @@ class _BuiltinProvidersSettingsPageState
                       builder: (context) => const P2pWarningDialog(),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: context.rem(AppRem.snug)),
                   Switch.adaptive(
                     value: isP2p,
                     activeColor: const Color(0xFFF59E0B),
@@ -219,13 +220,13 @@ class _BuiltinProvidersSettingsPageState
         // move to a second line.
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          runSpacing: 4,
+          spacing: context.rem(AppRem.sm),
+          runSpacing: context.rem(AppRem.xs),
           children: [
             Text(
               l10n.builtinProvidersActiveCount(on, total),
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: AppType.small,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF10B981),
               ),
@@ -248,18 +249,18 @@ class _BuiltinProvidersSettingsPageState
           ],
         ),
         if (_providers.length > 8) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           TextField(
             onChanged: (v) => setState(() => _query = v),
-            style: const TextStyle(fontSize: 14),
+            style: const TextStyle(fontSize: AppType.body),
             decoration: InputDecoration(
               isDense: true,
               hintText: l10n.builtinProvidersFilterHint,
-              prefixIcon: const Icon(Icons.search_rounded, size: 20),
+              prefixIcon: Icon(Icons.search_rounded, size: context.rem(AppRem.icon)),
               filled: true,
               fillColor: AppColors.surface,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 borderSide: BorderSide.none,
               ),
             ),
@@ -271,7 +272,7 @@ class _BuiltinProvidersSettingsPageState
 
   Widget _empty() => Center(
     child: Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(context.rem(AppRem.xl)),
       child: Text(
         context.l10n.builtinProvidersEmpty,
         textAlign: TextAlign.center,
@@ -294,15 +295,15 @@ class _BuiltinProvidersSettingsPageState
 
         return Material(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadii.md),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
           child: InkWell(
-            borderRadius: BorderRadius.circular(AppRadii.md),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             onTap: () =>
                 BuiltinProvidersService.setEnabled(provider.id, !enabled),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.625)),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppRadii.md),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(
                   color: live
                       ? const Color(0xFF10B981).withValues(alpha: 0.25)
@@ -315,12 +316,12 @@ class _BuiltinProvidersSettingsPageState
                     provider.isTorrent
                         ? Icons.hub_rounded
                         : Icons.cloud_outlined,
-                    size: 20,
+                    size: context.rem(AppRem.icon),
                     color: live
                         ? const Color(0xFF10B981)
                         : AppColors.inkAlpha(0.35),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: context.rem(AppRem.ms)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,11 +329,11 @@ class _BuiltinProvidersSettingsPageState
                         Text(
                           provider.displayName,
                           style: const TextStyle(
-                            fontSize: 14.5,
+                            fontSize: AppType.bodyPlus,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           mutedByP2p
                               ? l10n.builtinProvidersTorrentSilenced
@@ -340,7 +341,7 @@ class _BuiltinProvidersSettingsPageState
                                     ? l10n.builtinProvidersTorrent
                                     : l10n.builtinProvidersDirect),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: AppType.caption,
                             color: mutedByP2p
                                 ? const Color(0xFFF59E0B)
                                 : AppColors.inkAlpha(0.45),
@@ -349,7 +350,7 @@ class _BuiltinProvidersSettingsPageState
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: context.rem(AppRem.sm)),
                   Switch.adaptive(
                     value: enabled,
                     activeColor: const Color(0xFF10B981),

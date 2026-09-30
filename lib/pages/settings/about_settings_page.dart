@@ -4,11 +4,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app_info.dart';
 import '../../l10n/l10n.dart';
-import '../../services/app_spacing.dart';
 import '../../services/updater/app_updater_service.dart';
 import '../../widgets/updater/update_dialog.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 // Getters, not variables: a top-level or static variable is initialized
 // lazily, once, on its first read -- which would freeze whichever theme
@@ -95,12 +95,12 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.settingsCategoryAbout(AppInfo.name),
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: SettingsScrollView(
@@ -108,7 +108,7 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
         bottomPadding: 24,
         children: [
           const _BrandHeader(),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: context.rem(AppRem.md)),
           _UpdatesRow(
             isChecking: _isCheckingForUpdates,
             autoCheckEnabled: _autoCheckEnabled,
@@ -118,71 +118,71 @@ class _AboutSettingsPageState extends State<AboutSettingsPage> {
               AppUpdaterService.setAutoCheckEnabled(value);
             },
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.rem(AppRem.lg)),
           if (AppInfo.isPrerelease) ...[
             const _TestingNotice(),
-            const SizedBox(height: AppSpacing.md),
+            SizedBox(height: context.rem(AppRem.md)),
           ],
           _Card(
             title: l10n.aboutTaglineTitle,
             body: l10n.aboutTaglineBody,
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: context.rem(AppRem.md)),
           _SectionLabel(l10n.aboutHowItWorks),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: context.rem(AppRem.sm)),
           _Tile(
             title: l10n.aboutAddonsTitle,
             subtitle: l10n.aboutAddonsBody,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           _Tile(
             title: l10n.aboutPlaybackTitle,
             subtitle: l10n.aboutPlaybackBody,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           _Tile(
             title: l10n.aboutSourcesTitle,
             subtitle: l10n.aboutSourcesBody,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           _Tile(
             title: l10n.aboutSyncTitle,
             subtitle: l10n.aboutSyncBody,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.rem(AppRem.lg)),
           _SectionLabel(l10n.aboutProject),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: context.rem(AppRem.sm)),
           _LinkTile(
             icon: Icons.code_rounded,
             title: l10n.aboutSourceCode,
             subtitle: 'MediaHub-Org/PlayTorrioMov — GPL-3.0',
             url: _kRepoUrl,
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           _LinkTile(
             icon: Icons.bug_report_outlined,
             title: l10n.aboutReportProblem,
             subtitle: l10n.aboutReportProblemBody,
             url: '$_kRepoUrl/issues/new',
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           _LinkTile(
             icon: Icons.favorite_outline_rounded,
             title: l10n.aboutOriginalProject,
             subtitle: l10n.aboutOriginalProjectBody,
             url: _kUpstreamUrl,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.rem(AppRem.lg)),
           Text(
             l10n.aboutLicense,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 11.5,
-              height: 1.5,
+              fontSize: AppType.tinyPlus,
+              height: 1.5, // ratio: a line height, not a size
               color: AppColors.inkAlpha(0.3),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
+          SizedBox(height: context.rem(AppRem.lg)),
         ],
       ),
     );
@@ -199,40 +199,40 @@ class _BrandHeader extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: context.rem(4.5),
+            height: context.rem(4.5),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [_kAccent, _kAccentAlt],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(context.rem(1.375)),
               boxShadow: [
                 BoxShadow(
                   color: _kAccent.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  blurRadius: context.rem(1.25),
+                  offset: Offset(0, context.rem(AppRem.sm)),
                 ),
               ],
             ),
             child: Icon(
               Icons.play_arrow_rounded,
               color: AppColors.ink,
-              size: 44,
+              size: context.rem(2.75),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
           Text(
             AppInfo.name,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: AppType.heading,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.5,
               color: AppColors.ink,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
             builder: (context, snapshot) {
@@ -243,7 +243,7 @@ class _BrandHeader extends StatelessWidget {
               return Text(
                 context.l10n.aboutVersionBuild(version, build),
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppType.small,
                   color: AppColors.inkAlpha(0.45),
                   fontWeight: FontWeight.w500,
                 ),
@@ -277,10 +277,10 @@ class _UpdatesRow extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(0.625)),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Row(
@@ -290,31 +290,31 @@ class _UpdatesRow extends StatelessWidget {
               onPressed: isChecking ? null : onCheckNow,
               style: TextButton.styleFrom(
                 foregroundColor: _kAccent,
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(vertical: context.rem(0.625)),
               ),
               icon: isChecking
                   ? SizedBox(
-                      width: 14,
-                      height: 14,
+                      width: context.rem(0.875),
+                      height: context.rem(0.875),
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         color: _kAccent,
                       ),
                     )
-                  : const Icon(Icons.refresh_rounded, size: 18),
+                  : Icon(Icons.refresh_rounded, size: context.rem(AppRem.iconSm)),
               label: Text(
                 isChecking ? context.l10n.aboutChecking : context.l10n.aboutCheckForUpdates,
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                  fontSize: AppType.small,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: context.rem(AppRem.sm)),
           Text(
             context.l10n.aboutAutoCheck,
-            style: TextStyle(fontSize: 12.5, color: AppColors.inkSubtle),
+            style: TextStyle(fontSize: AppType.captionPlus, color: AppColors.inkSubtle),
           ),
           Switch(
             value: autoCheckEnabled,
@@ -338,10 +338,10 @@ class _TestingNotice extends StatelessWidget {
     AppColors.dependOn(context);
     final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: const Color(0xFFF59E0B).withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppRadii.lg),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(
           color: const Color(0xFFF59E0B).withValues(alpha: 0.28),
         ),
@@ -349,12 +349,12 @@ class _TestingNotice extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.science_outlined,
-            color: Color(0xFFF59E0B),
-            size: 20,
+            color: const Color(0xFFF59E0B),
+            size: context.rem(AppRem.icon),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: context.rem(AppRem.ms)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,17 +362,17 @@ class _TestingNotice extends StatelessWidget {
                 Text(
                   l10n.aboutTestingBuild,
                   style: const TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppType.smallPlus,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFFF59E0B),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: context.rem(AppRem.xs)),
                 Text(
                   l10n.aboutTestingBuildBody,
                   style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.4,
+                    fontSize: AppType.captionPlus,
+                    height: 1.4, // ratio: a line height, not a size
                     color: AppColors.inkAlpha(0.55),
                   ),
                 ),
@@ -395,7 +395,7 @@ class _SectionLabel extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 12,
+        fontSize: AppType.caption,
         fontWeight: FontWeight.w700,
         color: AppColors.inkAlpha(0.35),
         letterSpacing: 1.1,
@@ -414,10 +414,10 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: BorderRadius.circular(AppRadii.lg),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -426,18 +426,18 @@ class _Card extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontSize: 15,
+              fontSize: AppType.bodyMd,
               fontWeight: FontWeight.w800,
               color: AppColors.ink,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           Text(
             body,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppType.small,
               color: AppColors.inkAlpha(0.5),
-              height: 1.45,
+              height: 1.45, // ratio: a line height, not a size
             ),
           ),
         ],
@@ -456,25 +456,25 @@ class _Tile extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(context.rem(0.875)),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         border: Border.all(color: AppColors.inkAlpha(0.05)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: const EdgeInsets.only(top: 2),
-            width: 8,
-            height: 8,
+            margin: EdgeInsets.only(top: context.rem(AppRem.xxs)),
+            width: context.rem(AppRem.sm),
+            height: context.rem(AppRem.sm),
             decoration: BoxDecoration(
               color: _kAccent,
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
             ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: context.rem(0.875)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,17 +482,17 @@ class _Tile extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: AppType.smallPlus,
                     fontWeight: FontWeight.w700,
                     color: AppColors.ink,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: context.rem(AppRem.xxs)),
                 Text(
                   subtitle,
                   style: TextStyle(
-                    fontSize: 12,
-                    height: 1.35,
+                    fontSize: AppType.caption,
+                    height: 1.35, // ratio: a line height, not a size
                     color: AppColors.inkAlpha(0.4),
                   ),
                 ),
@@ -542,18 +542,18 @@ class _LinkTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _open(context),
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: EdgeInsets.all(context.rem(0.875)),
           decoration: BoxDecoration(
             color: _kSurface,
-            borderRadius: BorderRadius.circular(AppRadii.md),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             border: Border.all(color: AppColors.inkAlpha(0.05)),
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: _kAccent),
-              const SizedBox(width: 14),
+              Icon(icon, size: context.rem(AppRem.icon), color: _kAccent),
+              SizedBox(width: context.rem(0.875)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,17 +561,17 @@ class _LinkTile extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 13.5,
+                        fontSize: AppType.smallPlus,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: context.rem(AppRem.xxs)),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 12,
-                        height: 1.35,
+                        fontSize: AppType.caption,
+                        height: 1.35, // ratio: a line height, not a size
                         color: AppColors.inkAlpha(0.4),
                       ),
                     ),
@@ -580,7 +580,7 @@ class _LinkTile extends StatelessWidget {
               ),
               Icon(
                 Icons.open_in_new_rounded,
-                size: 16,
+                size: context.rem(AppRem.iconXs),
                 color: AppColors.inkAlpha(0.3),
               ),
             ],

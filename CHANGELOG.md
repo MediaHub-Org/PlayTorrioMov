@@ -58,7 +58,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   similar cards are separate widgets and not yet migrated). The sixth does the
   anime details page the same way; the two pages now share one set of sizes
   (`lib/widgets/details/details_metrics.dart`) instead of each keeping a copy.
-  The seventh does the video player: every widget in `lib/widgets/player`, both
+  The eighth does settings and the update/P2P dialogs (every page under
+  `lib/pages/settings`, `lib/widgets/updater`, `lib/widgets/p2p`). The seventh
+  does the video player: every widget in `lib/widgets/player`, both
   player pages and the Live TV player. `AppType` is now a half-step ramp, and
   the player menus' shadow lists are functions of the context
   (`PlayerTheme.menuShadowOf`) because their sizes are rem. The rest of the

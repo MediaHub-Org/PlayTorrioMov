@@ -3,6 +3,7 @@ import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// A reference list of the player's keyboard shortcuts -- split out of the
 /// old "General & Data" catch-all so it reads as its own category, matching
@@ -40,12 +41,12 @@ class KeyboardShortcutsPage extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.settingsCategoryKeyboardShortcuts,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.titleSm),
         ),
       ),
       body: SettingsScrollView(
@@ -54,10 +55,10 @@ class KeyboardShortcutsPage extends StatelessWidget {
         bottomPadding: 24,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(context.rem(AppRem.md)),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
               border: Border.all(color: AppColors.inkAlpha(0.08)),
             ),
             child: Column(
@@ -65,7 +66,7 @@ class KeyboardShortcutsPage extends StatelessWidget {
               children: [
                 for (final (key, action) in _shortcuts)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.snug)),
                     child: Row(
                       children: [
                         // The key chip is the one thing here that cannot
@@ -77,23 +78,23 @@ class KeyboardShortcutsPage extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             alignment: AlignmentDirectional.centerStart,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xs)),
                               decoration: BoxDecoration(
                                 color: AppColors.inkAlpha(0.06),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                               ),
                               child: Text(
                                 key,
-                                style: TextStyle(color: AppColors.ink, fontSize: 12, fontWeight: FontWeight.w700),
+                                style: TextStyle(color: AppColors.ink, fontSize: AppType.caption, fontWeight: FontWeight.w700),
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: context.rem(AppRem.ms)),
                         Expanded(
                           child: Text(
                             action.label(l10n),
-                            style: TextStyle(color: AppColors.inkMuted, fontSize: 13),
+                            style: TextStyle(color: AppColors.inkMuted, fontSize: AppType.small),
                           ),
                         ),
                       ],

@@ -6,6 +6,7 @@ import '../../services/theme/app_colors.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/common/setting_choice_chip.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
+import '../../services/app_units.dart';
 
 /// The one place the source-list filters are set as a global default.
 ///
@@ -65,12 +66,12 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.sourceFilterTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: AnimatedAmbientBackground(
@@ -82,17 +83,17 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
               bottomPadding: 32 + bottomInset,
               children: [
                 _buildIntroCard(context),
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
                 _buildSectionHeader(l10n.sourceFilterAudioSection),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildAudioCard(context),
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
                 _buildSectionHeader(l10n.sourceFilterQualitySection),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildQualityCard(context, qualityKeys),
-                const SizedBox(height: 32),
+                SizedBox(height: context.rem(AppRem.xl)),
                 _buildResetButton(context),
-                const SizedBox(height: 16),
+                SizedBox(height: context.rem(AppRem.md)),
               ],
             );
           },
@@ -105,7 +106,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
     final l10n = context.l10n;
     final palette = AppColors.accent;
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -115,31 +116,31 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
         border: Border.all(color: palette.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: context.rem(2.875),
+            height: context.rem(2.875),
             decoration: BoxDecoration(
               color: palette.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(context.rem(0.875)),
             ),
             child: Icon(
               Icons.filter_alt_rounded,
               color: palette,
-              size: 26,
+              size: context.rem(1.625),
             ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: context.rem(0.875)),
           Expanded(
             child: Text(
               l10n.sourceFilterIntro,
               style: TextStyle(
-                fontSize: 13,
-                height: 1.4,
+                fontSize: AppType.small,
+                height: 1.4, // ratio: a line height, not a size
                 color: AppColors.inkAlpha(0.7),
               ),
             ),
@@ -151,11 +152,11 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 4),
+      padding: EdgeInsetsDirectional.only(start: context.rem(AppRem.xs)),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: AppType.caption,
           fontWeight: FontWeight.w700,
           color: AppColors.inkAlpha(0.35),
           letterSpacing: 1.1,
@@ -188,7 +189,7 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
             Text(
               l10n.sourceFilterPreferredEmpty,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: AppType.small,
                 color: AppColors.inkAlpha(0.5),
               ),
             )
@@ -203,13 +204,13 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
             ),
           if (available.isNotEmpty) ...[
             if (ranked.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Divider(color: AppColors.inkAlpha(0.08), height: 1),
-              const SizedBox(height: 12),
+              SizedBox(height: context.rem(AppRem.ms)),
+              Divider(color: AppColors.inkAlpha(0.08), height: 1), // px: a hairline, not a layout size
+              SizedBox(height: context.rem(AppRem.ms)),
             ],
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: context.rem(AppRem.sm),
+              runSpacing: context.rem(AppRem.sm),
               children: available
                   .map(
                     (key) => SettingChoiceChip(
@@ -233,8 +234,8 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
     return _buildCard(
       title: l10n.sourceFilterQualityBody,
       child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: context.rem(AppRem.sm),
+        runSpacing: context.rem(AppRem.sm),
         children: kQualityFilterKeys
             .map(
               (key) => SettingChoiceChip(
@@ -257,49 +258,49 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
   ) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
       child: Row(
         children: [
           Container(
-            constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+            constraints: BoxConstraints(minWidth: context.rem(AppRem.lg), minHeight: context.rem(AppRem.lg)),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.inkAlpha(0.08),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
             ),
             child: Text(
               '${index + 1}',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 fontWeight: FontWeight.w700,
                 color: AppColors.inkMuted,
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: context.rem(0.625)),
           Expanded(
             child: Text(
               audioFilterLabel(l10n, key),
-              style: TextStyle(fontSize: 14, color: AppColors.ink),
+              style: TextStyle(fontSize: AppType.body, color: AppColors.ink),
             ),
           ),
           IconButton(
             tooltip: l10n.sourceFilterPreferredUp,
-            icon: const Icon(Icons.keyboard_arrow_up_rounded, size: 20),
+            icon: Icon(Icons.keyboard_arrow_up_rounded, size: context.rem(AppRem.icon)),
             onPressed: index == 0
                 ? null
                 : () => SourceFilterSettings.promoteAudioLanguage(key),
           ),
           IconButton(
             tooltip: l10n.sourceFilterPreferredDown,
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+            icon: Icon(Icons.keyboard_arrow_down_rounded, size: context.rem(AppRem.icon)),
             onPressed: index == total - 1
                 ? null
                 : () => SourceFilterSettings.demoteAudioLanguage(key),
           ),
           IconButton(
             tooltip: context.l10n.commonClose,
-            icon: const Icon(Icons.close_rounded, size: 18),
+            icon: Icon(Icons.close_rounded, size: context.rem(AppRem.iconSm)),
             onPressed: () => SourceFilterSettings.toggleAudioLanguage(key),
           ),
         ],
@@ -310,10 +311,10 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
   Widget _buildCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -322,12 +323,12 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               color: AppColors.inkAlpha(0.5),
-              height: 1.3,
+              height: 1.3, // ratio: a line height, not a size
             ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
           child,
         ],
       ),
@@ -337,14 +338,14 @@ class _SourceFilterSettingsPageState extends State<SourceFilterSettingsPage> {
   Widget _buildResetButton(BuildContext context) {
     return Center(
       child: OutlinedButton.icon(
-        icon: const Icon(Icons.restart_alt_rounded, size: 18),
+        icon: Icon(Icons.restart_alt_rounded, size: context.rem(AppRem.iconSm)),
         label: Text(context.l10n.sourceFilterResetButton),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.inkMuted,
           side: BorderSide(color: AppColors.inkAlpha(0.15)),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(0.875)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(context.rem(0.875)),
           ),
         ),
         onPressed: () => SourceFilterSettings.reset(),

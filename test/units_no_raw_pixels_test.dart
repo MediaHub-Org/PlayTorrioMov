@@ -57,6 +57,20 @@ const migratedFiles = <String>[
   'lib/widgets/player/sub_sync_bar.dart',
   'lib/widgets/player/subtitle_overlay.dart',
   'lib/widgets/player/text_sync_overlay.dart',
+  'lib/pages/settings/about_settings_page.dart',
+  'lib/pages/settings/addons_settings_page.dart',
+  'lib/pages/settings/appearance/live_tv_settings_page.dart',
+  'lib/pages/settings/appearance_settings_page.dart',
+  'lib/pages/settings/backup_settings_page.dart',
+  'lib/pages/settings/builtin_providers_settings_page.dart',
+  'lib/pages/settings/debrid_settings_page.dart',
+  'lib/pages/settings/keyboard_shortcuts_page.dart',
+  'lib/pages/settings/settings_page.dart',
+  'lib/pages/settings/source_filter_settings_page.dart',
+  'lib/pages/settings/sync_settings_page.dart',
+  'lib/pages/settings/video_player_settings_page.dart',
+  'lib/widgets/p2p/p2p_warning_dialog.dart',
+  'lib/widgets/updater/update_dialog.dart',
 ];
 
 /// A size written as a number. A line that must keep one -- a hairline border,
@@ -68,7 +82,7 @@ final _rawSize = <RegExp>[
     r'blurRadius|spreadRadius|radius|borderRadius|horizontal|vertical|left|'
     r'right|top|bottom|start|end)\s*:\s*[^,;]*(?<![\w.])[1-9]\d*(\.\d+)?\b',
   ),
-  RegExp(r'EdgeInsets\.\w+\([^)]*\d'),
+  RegExp(r'EdgeInsets\.\w+\([^)]*(?<![\w.])[1-9]'),
   RegExp(r'Radius\.circular\(\s*\d'),
   RegExp(r'(?<![\w.])Offset\(\s*[^)]*[1-9]'),
 ];

@@ -29,6 +29,7 @@ import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
+import '../../services/app_units.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -162,19 +163,19 @@ class _SettingsPageState extends State<SettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.settingsTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.titleSm),
         ),
       ),
       body: AnimatedAmbientBackground(
         child: SettingsScrollView.separated(
           bottomPadding: 32 + bottomInset,
           itemCount: tiles.length + 1,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          separatorBuilder: (_, __) => SizedBox(height: context.rem(0.625)),
           itemBuilder: (context, i) =>
               i < tiles.length ? tiles[i] : _aboutTile(context),
         ),
@@ -252,17 +253,17 @@ class _SettingsCategoryTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         child: Container(
           // A minimum, not a fixed 76. The title and the badge both grow
           // with text scale and the box had nowhere to put them -- 286px
           // past the tile at 3x on the longest title. The page scrolls, so
           // growing here is safe.
-          constraints: const BoxConstraints(minHeight: 76),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          constraints: BoxConstraints(minHeight: context.rem(4.75)),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.sm)),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             border: Border.all(
               color: AppColors.inkAlpha(0.08),
             ),
@@ -270,20 +271,20 @@ class _SettingsCategoryTile extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: context.rem(2.75),
+                height: context.rem(2.75),
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 ),
-                child: Icon(icon, color: iconColor, size: 22),
+                child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconMd)),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: context.rem(0.875)),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: AppType.bodyMd,
                     fontWeight: FontWeight.w700,
                     color: AppColors.ink,
                   ),
@@ -292,24 +293,24 @@ class _SettingsCategoryTile extends StatelessWidget {
                 ),
               ),
               if (badgeText != null) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 // Flexible, and the badge itself is the widest thing in the
                 // row after the title: "Built-in Providers" plus "Connected"
                 // asked for 64px more than the tile had at 3x.
                 Flexible(
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                        EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
                     decoration: BoxDecoration(
                       color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                     ),
                     child: Text(
                       badgeText!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: TvType.scale(10.5),
+                        fontSize: TvType.scale(AppType.microPlus),
                         fontWeight: FontWeight.w700,
                         color: badgeColor ?? iconColor,
                       ),
@@ -317,10 +318,10 @@ class _SettingsCategoryTile extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(width: 8),
+              SizedBox(width: context.rem(AppRem.sm)),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 14,
+                size: context.rem(0.875),
                 color: AppColors.inkAlpha(0.25),
               ),
             ],

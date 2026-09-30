@@ -5,6 +5,7 @@ import '../../services/debrid/debrid_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 class DebridSettingsPage extends StatefulWidget {
   const DebridSettingsPage({super.key});
@@ -273,12 +274,12 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.settingsCategoryDebrid,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: SettingsScrollView(
@@ -287,23 +288,23 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
         children: [
           // Header description
           Padding(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: EdgeInsets.only(bottom: context.rem(1.25)),
             child: Text(
               l10n.debridIntro,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: AppType.smallPlus,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.4,
+                height: 1.4, // ratio: a line height, not a size
               ),
             ),
           ),
 
           // Master Debrid Toggle Card
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: EdgeInsets.all(context.rem(1.125)),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
               border: Border.all(
                 color: _useDebrid
                     ? const Color(0xFF00E5FF).withValues(alpha: 0.35)
@@ -316,19 +317,19 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 Row(
                   children: [
                     Container(
-                      width: 44,
-                      height: 44,
+                      width: context.rem(2.75),
+                      height: context.rem(2.75),
                       decoration: BoxDecoration(
                         color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.cloud_download_rounded,
-                        color: Color(0xFF00E5FF),
-                        size: 24,
+                        color: const Color(0xFF00E5FF),
+                        size: context.rem(AppRem.iconLg),
                       ),
                     ),
-                    const SizedBox(width: 14),
+                    SizedBox(width: context.rem(0.875)),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -336,22 +337,22 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                           Text(
                             l10n.debridMasterTitle,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: AppType.bodyLg,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: context.rem(AppRem.xs)),
                           Text(
                             l10n.debridMasterSubtitle,
                             style: TextStyle(
                               color: AppColors.inkSubtle,
-                              fontSize: 12.5,
+                              fontSize: AppType.captionPlus,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: context.rem(AppRem.ms)),
                     Switch.adaptive(
                       value: _useDebrid,
                       activeColor: const Color(0xFF00E5FF),
@@ -383,38 +384,38 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: context.rem(0.875)),
                 Text(
                   l10n.debridMasterBody,
                   style: TextStyle(
                     color: AppColors.inkAlpha(0.45),
-                    fontSize: 12,
-                    height: 1.35,
+                    fontSize: AppType.caption,
+                    height: 1.35, // ratio: a line height, not a size
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: context.rem(AppRem.lg)),
 
           // Active Provider Selector
           Text(
             l10n.debridActiveProviderHeader,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
 
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(context.rem(AppRem.md)),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
               border: Border.all(
                 color: AppColors.inkAlpha(0.08),
               ),
@@ -426,40 +427,40 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                   l10n.debridSelectDefault,
                   style: TextStyle(
                     color: AppColors.ink,
-                    fontSize: 14,
+                    fontSize: AppType.body,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: context.rem(AppRem.xs)),
                 Text(
                   l10n.debridSelectDefaultBody,
                   style: TextStyle(
                     color: AppColors.inkAlpha(0.45),
-                    fontSize: 12,
+                    fontSize: AppType.caption,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 DropdownButtonFormField<String>(
                   value: services.contains(_selectedService) ? _selectedService : 'None',
                   dropdownColor: AppColors.raised,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: AppColors.bar,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.ms)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: const BorderSide(color: Color(0xFF00E5FF)),
                     ),
                   ),
-                  style: TextStyle(color: AppColors.ink, fontSize: 14, fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.ink, fontSize: AppType.body, fontWeight: FontWeight.w600),
                   items: services.map((s) {
                     return DropdownMenuItem<String>(
                       value: s,
@@ -467,10 +468,10 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                         children: [
                           Icon(
                             s == 'None' ? Icons.block_rounded : Icons.flash_on_rounded,
-                            size: 16,
+                            size: context.rem(AppRem.iconXs),
                             color: s == 'None' ? AppColors.inkDisabled : const Color(0xFF00E5FF),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: context.rem(AppRem.sm)),
                           Text(s == 'None' ? l10n.debridNone : s),
                         ],
                       ),
@@ -501,19 +502,19 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: context.rem(AppRem.lg)),
 
           // Provider API Keys
           Text(
             l10n.debridCredentialsHeader,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
 
           // Real-Debrid Card
           _buildProviderCard(
@@ -528,7 +529,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             isActive: _selectedService == 'Real-Debrid',
             onSave: () => _saveProviderKey('Real-Debrid', _rdKeyCtrl),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // TorBox Card
           _buildProviderCard(
@@ -543,7 +544,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             isActive: _selectedService == 'TorBox',
             onSave: () => _saveProviderKey('TorBox', _torboxKeyCtrl),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // AllDebrid Card
           _buildProviderCard(
@@ -558,7 +559,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             isActive: _selectedService == 'AllDebrid',
             onSave: () => _saveProviderKey('AllDebrid', _alldebridKeyCtrl),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // Premiumize Card
           _buildProviderCard(
@@ -573,7 +574,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             isActive: _selectedService == 'Premiumize',
             onSave: () => _saveProviderKey('Premiumize', _premiumizeKeyCtrl),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // Debrid-Link Card
           _buildProviderCard(
@@ -588,7 +589,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
             isActive: _selectedService == 'Debrid-Link',
             onSave: () => _saveProviderKey('Debrid-Link', _debridlinkKeyCtrl),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: context.rem(1.25)),
         ],
       ),
     );
@@ -608,10 +609,10 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
     final isObscured = _obscuredMap[name] ?? true;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(
           color: isActive
               ? const Color(0xFF00E5FF).withValues(alpha: 0.3)
@@ -627,22 +628,22 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 name,
                 style: TextStyle(
                   color: AppColors.ink,
-                  fontSize: 14.5,
+                  fontSize: AppType.bodyPlus,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               if (isActive) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xxs)),
                   decoration: BoxDecoration(
                     color: const Color(0xFF00E5FF).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                   ),
                   child: Text(
                     l10n.debridActiveBadge,
                     style: TextStyle(
-                      fontSize: TvType.scale(10),
+                      fontSize: TvType.scale(AppType.micro),
                       fontWeight: FontWeight.w800,
                       color: const Color(0xFF00E5FF),
                     ),
@@ -650,17 +651,17 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 ),
               ],
               if (statusBadge != null) ...[
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xxs)),
                   decoration: BoxDecoration(
                     color: (badgeColor ?? const Color(0xFF10B981)).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                   ),
                   child: Text(
                     statusBadge,
                     style: TextStyle(
-                      fontSize: TvType.scale(10),
+                      fontSize: TvType.scale(AppType.micro),
                       fontWeight: FontWeight.w800,
                       color: badgeColor ?? const Color(0xFF10B981),
                     ),
@@ -669,42 +670,42 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
               ],
             ],
           ),
-          const SizedBox(height: 3),
+          SizedBox(height: context.rem(0.1875)),
           Text(
             subtitle,
             style: TextStyle(
               color: AppColors.inkAlpha(0.45),
-              fontSize: 11.5,
+              fontSize: AppType.tinyPlus,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: controller,
                   obscureText: isObscured,
-                  style: TextStyle(color: AppColors.ink, fontSize: 13),
+                  style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
                   decoration: InputDecoration(
                     hintText: l10n.debridKeyHint,
                     hintStyle: TextStyle(
                       color: AppColors.inkAlpha(0.25),
-                      fontSize: 12,
+                      fontSize: AppType.caption,
                     ),
                     filled: true,
                     fillColor: AppColors.bar,
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.625)),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: BorderSide(color: AppColors.inkAlpha(0.08)),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: const BorderSide(color: Color(0xFF00E5FF)),
                     ),
                     suffixIcon: Row(
@@ -712,7 +713,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                       children: [
                         if (controller.text.isNotEmpty)
                           IconButton(
-                            icon: Icon(Icons.clear_rounded, color: AppColors.inkDisabled, size: 18),
+                            icon: Icon(Icons.clear_rounded, color: AppColors.inkDisabled, size: context.rem(AppRem.iconSm)),
                             tooltip: l10n.debridClear,
                             onPressed: () {
                               controller.clear();
@@ -723,7 +724,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                           icon: Icon(
                             isObscured ? Icons.visibility_off_rounded : Icons.visibility_rounded,
                             color: AppColors.inkDisabled,
-                            size: 18,
+                            size: context.rem(AppRem.iconSm),
                           ),
                           tooltip: isObscured ? l10n.debridShowKey : l10n.debridHideKey,
                           onPressed: () {
@@ -733,7 +734,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                           },
                         ),
                         IconButton(
-                          icon: const Icon(Icons.content_paste_rounded, color: Color(0xFF00E5FF), size: 18),
+                          icon: Icon(Icons.content_paste_rounded, color: const Color(0xFF00E5FF), size: context.rem(AppRem.iconSm)),
                           tooltip: l10n.debridPasteClipboard,
                           onPressed: () => _pasteToController(controller),
                         ),
@@ -742,25 +743,25 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: context.rem(0.625)),
               ElevatedButton(
                 onPressed: isLoading ? null : onSave,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00E5FF),
                   foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(0.625)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
                   elevation: 0,
                 ),
                 child: isLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                    ? SizedBox(
+                        width: context.rem(AppRem.md),
+                        height: context.rem(AppRem.md),
+                        child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                       )
                     : Text(
                         l10n.debridSave,
-                        style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                        style: const TextStyle(fontSize: AppType.captionPlus, fontWeight: FontWeight.w800),
                       ),
               ),
             ],
