@@ -221,7 +221,7 @@ class _MenuItem extends StatelessWidget {
                   duration: const Duration(milliseconds: 120),
                   opacity: open ? 1 : 0,
                   child: Align(
-                    alignment: Alignment.centerLeft,
+                    alignment: AlignmentDirectional.centerStart,
                     child: Text(
                       label,
                       maxLines: 1,
