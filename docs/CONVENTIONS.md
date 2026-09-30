@@ -496,6 +496,27 @@ back. `readingOrderArrow` in `widgets/common/arrow_affordance.dart` reads the
 flag rather than keeping a list of which icons have it, because that answer
 belongs to the Flutter version in `pubspec.yaml`.
 
+### Sizes: rem and named tokens, not numbers
+
+A size is `context.rem(AppRem.md)`, never `12` or `40`. One rem is 16 logical
+pixels at the default text size and follows the user's text size (the system's
+and the in-app zoom), clamped to the range the layouts were probed to hold --
+see `lib/services/app_units.dart`. A gap, a bar, a button's padding and an icon
+then move with the text, and a change of spacing is made in one place.
+
+- **Font sizes are not rem.** Flutter multiplies a `fontSize` by the text
+  scaler when it paints, so scaling it here too would apply the setting twice.
+  Use the constants in `AppType`.
+- **A hairline stays a hairline.** A 1px border is meant to be 1px at any text
+  size; mark the line `// px` so the guard test lets it through.
+- **Not `const`.** A rem size depends on the context, so the widget holding it
+  cannot be `const`. That is the price of a size that moves; it is cheap.
+- **Fractions of the window** (a poster's width, a menu's) already avoid a
+  fixed number; give their bounds as rem too.
+- **Migration is by batches.** `test/units_no_raw_pixels_test.dart` lists the
+  files that are done and fails on a bare size in them. When you migrate a file,
+  add it to that list.
+
 ### Text scale: the box must be able to grow
 
 A reader can set text to 3x. Where a box's height is fixed by the layout around

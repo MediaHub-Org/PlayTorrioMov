@@ -16,6 +16,19 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   manifest.
 
 ### Changed
+- **Sizes are moving to `rem` and named tokens, in batches.** The code
+  measured layout in bare numbers (`SizedBox(width: 12)`, `height: 40`), so a
+  larger text size grew the text and left every gap, bar and button where it
+  was. `lib/services/app_units.dart` adds `context.rem(AppRem.md)` (one rem is
+  16 logical pixels at the default text size and follows the user's text size,
+  clamped to 0.85-1.3), the `AppRem` tokens and `AppType` font-size constants
+  (not scaled twice). This first batch migrates the side menu, the hero
+  Play/Details buttons (now `HeroActionButton(compact:)`, callers pass no
+  numbers) and the focus helpers, and `test/units_no_raw_pixels_test.dart`
+  fails on a bare size in any migrated file. The rest of the code is not
+  migrated yet; see the roadmap. Unverified on a device: the hero buttons and
+  side menu keep their look at the default text size apart from a few pixels
+  (the anime Play button is now the same size as the movie one).
 - **Poster cards are smaller, and no longer plateau at one flat size on a
   wide window (#80).** Real-device feedback said cards were "very big" even
   at the default (100%) text size, which rules out the text-zoom slider as
