@@ -25,6 +25,7 @@
 //    to add a language, add its row below and drop the matching file in.
 
 import 'package:flutter/material.dart';
+import '../../services/app_units.dart';
 
 /// Language-name keyword -> ISO 3166 country code of the flag that stands for
 /// it. Order matters only where one keyword contains another; none do today.
@@ -117,12 +118,12 @@ class LanguageFlag extends StatelessWidget {
     // mixed flags and fallbacks keeps its baseline.
     final placeholder = SizedBox(
       height: height,
-      child: Text(fallback, style: TextStyle(fontSize: height * 0.9, height: 1)),
+      child: Text(fallback, style: TextStyle(fontSize: height * 0.9, height: 1)), // ratio: a line height, not a size
     );
     if (code == null) return placeholder;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
+      borderRadius: BorderRadius.circular(context.rem(AppRem.xxs)),
       child: Image.asset(
         'assets/flags/$code.png',
         height: height,

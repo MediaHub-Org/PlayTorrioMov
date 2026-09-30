@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/app_units.dart';
 
 /// A translucent panel decoration, used behind the player's menu buttons and
 /// sheets.
@@ -17,9 +18,9 @@ class PerformanceLiquidLens extends StatelessWidget {
     required this.child,
   });
 
-  static const BoxDecoration _decoration = BoxDecoration(
-    borderRadius: BorderRadius.all(Radius.circular(24)),
-    gradient: LinearGradient(
+  static BoxDecoration _decorationOf(BuildContext context) => BoxDecoration(
+    borderRadius: BorderRadius.all(Radius.circular(context.rem(AppRem.lg))),
+    gradient: const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [Color(0xF01A1D27), Color(0xF012151E)],
@@ -30,7 +31,7 @@ class PerformanceLiquidLens extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: _decoration,
+      decoration: _decorationOf(context),
       child: child,
     );
   }

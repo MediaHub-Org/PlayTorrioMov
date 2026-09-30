@@ -8,6 +8,7 @@ import '../../services/subtitles/subtitle_parser.dart';
 import '../../services/subtitles/subtitle_sync_helper.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// Full-screen right-side floating drawer for dialogue speech following & subtitle sync.
 class TextSyncOverlay extends StatefulWidget {
@@ -329,8 +330,8 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
     // sit on whichever face is towards the content, so this decoration stops
     // being const.
     final towardsContent = Directionality.of(context) == TextDirection.rtl
-        ? const Offset(8, 0)
-        : const Offset(-8, 0);
+        ? Offset(context.rem(AppRem.sm), 0)
+        : Offset(-context.rem(AppRem.sm), 0);
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Material(
@@ -346,7 +347,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
             boxShadow: [
               BoxShadow(
                 color: const Color(0xCC000000),
-                blurRadius: 36,
+                blurRadius: context.rem(2.25),
                 offset: towardsContent,
               ),
             ],
@@ -359,26 +360,26 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                 // Top Header Bar
                 Padding(
                   padding: EdgeInsets.fromLTRB(
-                    16,
-                    isLandscapeMobile ? 8 : 16,
-                    12,
-                    isLandscapeMobile ? 4 : 8,
+                    context.rem(AppRem.md),
+                    context.rem(isLandscapeMobile ? AppRem.sm : AppRem.md),
+                    context.rem(AppRem.ms),
+                    context.rem(isLandscapeMobile ? AppRem.xs : AppRem.sm),
                   ),
                   child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(5),
+                        padding: EdgeInsets.all(context.rem(0.3125)),
                         decoration: BoxDecoration(
                           color: PlayerTheme.accent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                         ),
                         child: Icon(
                           Icons.sync_alt_rounded,
                           color: PlayerTheme.accent,
-                          size: 16,
+                          size: context.rem(AppRem.iconXs),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: context.rem(0.625)),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -388,7 +389,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                               _sectionMode ? context.l10n.syncFixSection.toUpperCase() : context.l10n.syncSubtitleTiming.toUpperCase(),
                               style: TextStyle(
                                 color: PlayerTheme.inkSubtle,
-                                fontSize: TvType.scale(10),
+                                fontSize: TvType.scale(AppType.micro),
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: 1.2,
                               ),
@@ -397,7 +398,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                               _sectionMode ? context.l10n.syncSelectRange : context.l10n.syncSpeechDialogue,
                               style: TextStyle(
                                 color: PlayerTheme.ink,
-                                fontSize: isLandscapeMobile ? 14 : 16,
+                                fontSize: isLandscapeMobile ? AppType.body : AppType.bodyLg,
                                 fontWeight: FontWeight.bold,
                               ),
                               maxLines: 1,
@@ -407,8 +408,8 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                         ),
                       ),
                       PlayerIconButton(
-                        size: 30,
-                        iconSize: 15,
+                        size: context.rem(1.875),
+                        iconSize: context.rem(0.9375),
                         icon: const Icon(Icons.close_rounded),
                         tooltip: context.l10n.playerClose,
                         onPressed: widget.onClose,
@@ -420,34 +421,34 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                 // Hint Banner (Compact on mobile)
                 if (!isLandscapeMobile)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.xxs)),
                     child: Text(
                       hintText,
                       style: const TextStyle(
                         color: PlayerTheme.inkMuted,
-                        fontSize: 11.5,
-                        height: 1.3,
+                        fontSize: AppType.tinyPlus,
+                        height: 1.3, // ratio: a line height, not a size
                       ),
                     ),
                   ),
 
-                SizedBox(height: isLandscapeMobile ? 4 : 8),
+                SizedBox(height: context.rem(isLandscapeMobile ? AppRem.xs : AppRem.sm)),
 
                 // Search Bar with Search Navigation Controls
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: EdgeInsets.symmetric(horizontal: context.rem(0.875)),
                   child: Container(
-                    height: isLandscapeMobile ? 32 : 36,
+                    height: context.rem(isLandscapeMobile ? AppRem.xl : 2.25),
                     decoration: BoxDecoration(
                       color: PlayerTheme.raised,
-                      borderRadius: BorderRadius.circular(9),
+                      borderRadius: BorderRadius.circular(context.rem(0.5625)),
                       border: Border.all(
                         color: _searchQuery.isNotEmpty && _matchedIndices.isNotEmpty
                             ? const Color(0xFFFFC107).withValues(alpha: 0.45)
                             : PlayerTheme.edge,
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
                     child: Row(
                       children: [
                         Icon(
@@ -455,17 +456,17 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           color: _searchQuery.isNotEmpty && _matchedIndices.isNotEmpty
                               ? const Color(0xFFFFC107)
                               : PlayerTheme.inkSubtle,
-                          size: 15,
+                          size: context.rem(0.9375),
                         ),
-                        const SizedBox(width: 6),
+                        SizedBox(width: context.rem(AppRem.snug)),
                         Expanded(
                           child: TextField(
                             controller: _searchController,
-                            style: TextStyle(color: PlayerTheme.ink, fontSize: isLandscapeMobile ? 12 : 12.5),
+                            style: TextStyle(color: PlayerTheme.ink, fontSize: isLandscapeMobile ? AppType.caption : AppType.captionPlus),
                             onSubmitted: (_) => _goToNextMatch(),
                             decoration: InputDecoration(
                               hintText: context.l10n.syncSearchDialogue,
-                              hintStyle: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: 12),
+                              hintStyle: const TextStyle(color: PlayerTheme.inkSubtle, fontSize: AppType.caption),
                               border: InputBorder.none,
                               isDense: true,
                               contentPadding: EdgeInsets.zero,
@@ -475,12 +476,12 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                         if (_searchController.text.trim().isNotEmpty) ...[
                           // Match counter
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
                             decoration: BoxDecoration(
                               color: _searchQuery.length >= 3 && _matchedIndices.isNotEmpty
                                   ? const Color(0x33FFC107)
                                   : Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(5),
+                              borderRadius: BorderRadius.circular(context.rem(0.3125)),
                             ),
                             child: Text(
                               _searchQuery.length < 3
@@ -492,24 +493,24 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                 color: _searchQuery.length >= 3 && _matchedIndices.isNotEmpty
                                     ? const Color(0xFFFFC107)
                                     : PlayerTheme.inkSubtle,
-                                fontSize: TvType.scale(10),
+                                fontSize: TvType.scale(AppType.micro),
                                 fontWeight: FontWeight.w700,
                                 fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
                           ),
-                          const SizedBox(width: 2),
+                          SizedBox(width: context.rem(AppRem.xxs)),
                           if (_searchQuery.length >= 3) ...[
                             Tooltip(
                               message: context.l10n.commonPrevious,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                                 onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(2),
+                                  padding: EdgeInsets.all(context.rem(AppRem.xxs)),
                                   child: Icon(
                                     Icons.keyboard_arrow_up_rounded,
-                                    size: 16,
+                                    size: context.rem(AppRem.iconXs),
                                     color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
                                   ),
                                 ),
@@ -518,13 +519,13 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                             Tooltip(
                               message: context.l10n.commonNext,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                                 onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(2),
+                                  padding: EdgeInsets.all(context.rem(AppRem.xxs)),
                                   child: Icon(
                                     Icons.keyboard_arrow_down_rounded,
-                                    size: 16,
+                                    size: context.rem(AppRem.iconXs),
                                     color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
                                   ),
                                 ),
@@ -534,11 +535,11 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           Tooltip(
                             message: context.l10n.commonClearSearch,
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(4),
+                              borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                               onTap: () => _searchController.clear(),
-                              child: const Padding(
-                                padding: EdgeInsets.all(2),
-                                child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: 14),
+                              child: Padding(
+                                padding: EdgeInsets.all(context.rem(AppRem.xxs)),
+                                child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: context.rem(0.875)),
                               ),
                             ),
                           ),
@@ -548,7 +549,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                   ),
                 ),
 
-                SizedBox(height: isLandscapeMobile ? 4 : 8),
+                SizedBox(height: context.rem(isLandscapeMobile ? AppRem.xs : AppRem.sm)),
 
                 // Virtualized Dialogue Cues List (Lazy Rendered for 60fps)
                 Expanded(
@@ -568,8 +569,8 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           itemCount: cues.length,
                           cacheExtent: 300, // Pre-cache only adjacent visible rows
                           padding: EdgeInsets.only(
-                            top: 4,
-                            bottom: isLandscapeMobile ? 24 : 40,
+                            top: context.rem(AppRem.xs),
+                            bottom: context.rem(isLandscapeMobile ? AppRem.lg : 2.5),
                           ),
                           itemBuilder: (context, index) {
                             final cue = cues[index];
@@ -634,8 +635,8 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                     },
                                     child: Container(
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: isLandscapeMobile ? 6 : 8,
+                                        horizontal: context.rem(0.875),
+                                        vertical: context.rem(isLandscapeMobile ? AppRem.snug : AppRem.sm),
                                       ),
                                       decoration: BoxDecoration(
                                         border: Border(
@@ -645,12 +646,12 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                           left: isCurrentFocusedMatch
                                               ? const BorderSide(
                                                   color: Color(0xFFFFC107),
-                                                  width: 3,
+                                                  width: 3, // px: a hairline, not a layout size
                                                 )
                                               : isActive
                                                   ? BorderSide(
                                                       color: PlayerTheme.accent,
-                                                      width: 3,
+                                                      width: 3, // px: a hairline, not a layout size
                                                     )
                                                   : BorderSide.none,
                                         ),
@@ -660,18 +661,18 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                         children: [
                                           // Time label
                                           SizedBox(
-                                            width: 44,
+                                            width: context.rem(2.75),
                                             child: Text(
                                               SubtitleParser.formatDisplayTime(cue.start),
                                               style: TextStyle(
                                                 color: isActive ? PlayerTheme.accent : PlayerTheme.inkSubtle,
-                                                fontSize: isLandscapeMobile ? 10.5 : 11,
+                                                fontSize: isLandscapeMobile ? AppType.microPlus : AppType.tiny,
                                                 fontWeight: isActive ? FontWeight.w700 : FontWeight.normal,
                                                 fontFeatures: const [FontFeature.tabularFigures()],
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: context.rem(AppRem.snug)),
 
                                           // Dialogue text
                                           Expanded(
@@ -679,41 +680,41 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                               cue.text,
                                               _searchQuery,
                                               isActive,
-                                              fontSize: isLandscapeMobile ? 12 : 12.5,
+                                              fontSize: isLandscapeMobile ? AppType.caption : AppType.captionPlus,
                                             ),
                                           ),
 
-                                          const SizedBox(width: 6),
+                                          SizedBox(width: context.rem(AppRem.snug)),
 
                                           // Right badge
                                           if (pointNum != null)
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
                                               decoration: BoxDecoration(
                                                 color: PlayerTheme.accent,
-                                                borderRadius: BorderRadius.circular(999),
+                                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                                               ),
                                               child: Text(
                                                 'P$pointNum',
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: TvType.scale(9),
+                                                  fontSize: TvType.scale(AppType.nano),
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
                                             )
                                           else if (isActive)
                                             Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
                                               decoration: BoxDecoration(
                                                 color: PlayerTheme.accent,
-                                                borderRadius: BorderRadius.circular(4),
+                                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                                               ),
                                               child: Text(
                                                 context.l10n.syncNowBadge,
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: TvType.scale(8.5),
+                                                  fontSize: TvType.scale(AppType.pico),
                                                   fontWeight: FontWeight.w800,
                                                   letterSpacing: 0.5,
                                                 ),
@@ -723,7 +724,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                             Icon(
                                               Icons.check_rounded,
                                               color: PlayerTheme.accent,
-                                              size: 15,
+                                              size: context.rem(0.9375),
                                             ),
                                         ],
                                       ),
@@ -734,7 +735,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                 // Expanded Action Box for Selected Line
                                 if (isSelected)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
                                     color: PlayerTheme.raised,
                                     child: Row(
                                       children: [
@@ -742,26 +743,26 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: PlayerTheme.accent,
                                             foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                                            padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.3125)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(0.4375))),
                                           ),
-                                          icon: const Icon(Icons.check_rounded, size: 14),
+                                          icon: Icon(Icons.check_rounded, size: context.rem(0.875)),
                                           label: Text(
                                             context.l10n.syncFromHere,
-                                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                                            style: const TextStyle(fontSize: AppType.tiny, fontWeight: FontWeight.w600),
                                           ),
                                           onPressed: () => _handleSyncFromHere(index),
                                         ),
-                                        const SizedBox(width: 6),
+                                        SizedBox(width: context.rem(AppRem.snug)),
                                         OutlinedButton.icon(
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: PlayerTheme.inkMuted,
                                             side: const BorderSide(color: PlayerTheme.edgeSoft),
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+                                            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.3125)),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(0.4375))),
                                           ),
-                                          icon: const Icon(Icons.play_arrow_rounded, size: 14),
-                                          label: Text(context.l10n.syncJumpHere, style: const TextStyle(fontSize: 11)),
+                                          icon: Icon(Icons.play_arrow_rounded, size: context.rem(0.875)),
+                                          label: Text(context.l10n.syncJumpHere, style: const TextStyle(fontSize: AppType.tiny)),
                                           onPressed: () => _handleSeekTo(index),
                                         ),
                                       ],
@@ -775,7 +776,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                         // Floating Jump to now button
                         if (!_isFollowing && _searchQuery.isEmpty)
                           Positioned(
-                            bottom: 8,
+                            bottom: context.rem(AppRem.sm),
                             left: 0,
                             right: 0,
                             child: Center(
@@ -783,15 +784,15 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                 style: FilledButton.styleFrom(
                                   backgroundColor: PlayerTheme.accent,
                                   foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
                                   shadowColor: Colors.black,
                                   elevation: 6,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.snug)),
                                 ),
-                                icon: const Icon(Icons.arrow_downward_rounded, size: 13),
+                                icon: Icon(Icons.arrow_downward_rounded, size: context.rem(0.8125)),
                                 label: Text(
                                   context.l10n.syncJumpToNow,
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: AppType.tiny, fontWeight: FontWeight.bold),
                                 ),
                                 onPressed: _jumpToNow,
                               ),
@@ -819,10 +820,10 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
         border: Border(top: BorderSide(color: PlayerTheme.edgeSoft)),
       ),
       padding: EdgeInsets.fromLTRB(
-        12,
-        isLandscapeMobile ? 6 : 8,
-        12,
-        isLandscapeMobile ? 6 : 12,
+        context.rem(AppRem.ms),
+        context.rem(isLandscapeMobile ? AppRem.snug : AppRem.sm),
+        context.rem(AppRem.ms),
+        context.rem(isLandscapeMobile ? AppRem.snug : AppRem.ms),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -831,25 +832,25 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
           Row(
             children: [
               _NudgeButton(label: '−0.1s', onTap: () => _handleNudge(-0.1)),
-              const SizedBox(width: 4),
+              SizedBox(width: context.rem(AppRem.xs)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(0.4375), vertical: context.rem(AppRem.xs)),
                 decoration: BoxDecoration(
                   color: PlayerTheme.raised,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                   border: Border.all(color: PlayerTheme.edge),
                 ),
                 child: Text(
                   '${currentDelta >= 0 ? '+' : ''}${currentDelta.toStringAsFixed(2)}s',
                   style: const TextStyle(
                     color: PlayerTheme.ink,
-                    fontSize: 11.5,
+                    fontSize: AppType.tinyPlus,
                     fontWeight: FontWeight.bold,
                     fontFeatures: [FontFeature.tabularFigures()],
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: context.rem(AppRem.xs)),
               _NudgeButton(label: '+0.1s', onTap: () => _handleNudge(0.1)),
               const Spacer(),
               TextButton.icon(
@@ -858,13 +859,13 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                   backgroundColor: _sectionMode
                       ? PlayerTheme.accent.withValues(alpha: 0.18)
                       : Colors.white.withValues(alpha: 0.05),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.snug))),
+                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xs)),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                icon: const Icon(Icons.content_cut_rounded, size: 12),
-                label: Text(_sectionMode ? context.l10n.syncSelecting : context.l10n.syncFixSection, style: const TextStyle(fontSize: 11)),
+                icon: Icon(Icons.content_cut_rounded, size: context.rem(0.75)),
+                label: Text(_sectionMode ? context.l10n.syncSelecting : context.l10n.syncFixSection, style: const TextStyle(fontSize: AppType.tiny)),
                 onPressed: () {
                   setState(() {
                     _sectionMode = !_sectionMode;
@@ -874,19 +875,19 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                 },
               ),
               if (_isDirty) ...[
-                const SizedBox(width: 4),
+                SizedBox(width: context.rem(AppRem.xs)),
                 IconButton(
-                  icon: const Icon(Icons.replay_rounded, size: 15, color: PlayerTheme.inkSubtle),
+                  icon: Icon(Icons.replay_rounded, size: context.rem(0.9375), color: PlayerTheme.inkSubtle),
                   tooltip: context.l10n.syncResetTiming,
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 26, minHeight: 26),
+                  constraints: BoxConstraints(minWidth: context.rem(1.625), minHeight: context.rem(1.625)),
                   onPressed: _handleReset,
                 ),
               ],
             ],
           ),
 
-          SizedBox(height: isLandscapeMobile ? 4 : 8),
+          SizedBox(height: context.rem(isLandscapeMobile ? AppRem.xs : AppRem.sm)),
 
           // Play/Pause and Save Timing row
           Row(
@@ -897,18 +898,18 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: PlayerTheme.edgeSoft),
-                    padding: EdgeInsets.symmetric(vertical: isLandscapeMobile ? 6 : 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: EdgeInsets.symmetric(vertical: context.rem(isLandscapeMobile ? AppRem.snug : AppRem.sm)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm))),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   icon: Icon(
                     _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    size: 15,
+                    size: context.rem(0.9375),
                   ),
                   label: Text(
                     _isPlaying ? context.l10n.playerPause : context.l10n.playerPlay,
-                    style: TextStyle(fontSize: isLandscapeMobile ? 11 : 12),
+                    style: TextStyle(fontSize: isLandscapeMobile ? AppType.tiny : AppType.caption),
                   ),
                   onPressed: () {
                     setState(() {
@@ -923,29 +924,29 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                   },
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: context.rem(AppRem.sm)),
               Expanded(
                 flex: 3,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PlayerTheme.accent,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: isLandscapeMobile ? 6 : 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: EdgeInsets.symmetric(vertical: context.rem(isLandscapeMobile ? AppRem.snug : AppRem.sm)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm))),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   icon: _isSaving
-                      ? const SizedBox(
-                          width: 13,
-                          height: 13,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 1.8),
+                      ? SizedBox(
+                          width: context.rem(0.8125),
+                          height: context.rem(0.8125),
+                          child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 1.8),
                         )
-                      : const Icon(Icons.check_rounded, size: 15),
+                      : Icon(Icons.check_rounded, size: context.rem(0.9375)),
                   label: Text(
                     _isSaving ? context.l10n.syncSaving : context.l10n.syncSaveTiming,
                     style: TextStyle(
-                      fontSize: isLandscapeMobile ? 11 : 12,
+                      fontSize: isLandscapeMobile ? AppType.tiny : AppType.caption,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -972,7 +973,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
           color: isActive ? PlayerTheme.ink : PlayerTheme.inkMuted,
           fontSize: fontSize,
           fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          height: 1.3,
+          height: 1.3, // ratio: a line height, not a size
         ),
       );
     }
@@ -1009,7 +1010,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
           color: isActive ? PlayerTheme.ink : PlayerTheme.inkMuted,
           fontSize: fontSize,
           fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          height: 1.3,
+          height: 1.3, // ratio: a line height, not a size
         ),
         children: spans,
       ),
@@ -1030,17 +1031,17 @@ class _NudgeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white.withValues(alpha: 0.06),
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
       child: InkWell(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xs)),
           child: Text(
             label,
             style: const TextStyle(
               color: PlayerTheme.inkMuted,
-              fontSize: 11,
+              fontSize: AppType.tiny,
               fontWeight: FontWeight.w600,
               fontFeatures: [FontFeature.tabularFigures()],
             ),

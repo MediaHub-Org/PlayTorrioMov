@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../common/hover_button.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// Floating glass toolbar for quick live subtitle delay adjustment.
 class SubSyncBar extends StatefulWidget {
@@ -69,10 +70,10 @@ class _SubSyncBarState extends State<SubSyncBar> {
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms)),
         child: PlayerGlassCard(
-          borderRadius: 16,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          borderRadius: context.rem(AppRem.radiusLg),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.sm)),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -80,10 +81,10 @@ class _SubSyncBarState extends State<SubSyncBar> {
           children: [
             // Center: Stepper Buttons & Display Pill
             Container(
-              padding: const EdgeInsets.all(3),
+              padding: EdgeInsets.all(context.rem(0.1875)),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(color: PlayerTheme.edgeSoft),
               ),
               child: Row(
@@ -99,11 +100,11 @@ class _SubSyncBarState extends State<SubSyncBar> {
                     onTap: () => _applyDelay(_localDelay - 0.1),
                   ),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    margin: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xs)),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.3125)),
                     decoration: BoxDecoration(
                       color: PlayerTheme.raised,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                       border: Border.all(
                         color: isNonZero ? PlayerTheme.edge : Colors.transparent,
                       ),
@@ -115,13 +116,13 @@ class _SubSyncBarState extends State<SubSyncBar> {
                           '${_localDelay >= 0 ? '+' : ''}${_localDelay.toStringAsFixed(2)}s',
                           style: TextStyle(
                             color: isNonZero ? PlayerTheme.accent : PlayerTheme.inkMuted,
-                            fontSize: 13,
+                            fontSize: AppType.small,
                             fontWeight: FontWeight.w700,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
                         if (isNonZero) ...[
-                          const SizedBox(width: 6),
+                          SizedBox(width: context.rem(AppRem.snug)),
                           Tooltip(
                             message: context.l10n.syncResetTiming,
                             child: HoverButton(
@@ -129,15 +130,15 @@ class _SubSyncBarState extends State<SubSyncBar> {
                               showFocusRing: true,
                               onTap: () => _applyDelay(0.0),
                               child: Container(
-                                padding: const EdgeInsets.all(2),
+                                padding: EdgeInsets.all(context.rem(AppRem.xxs)),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.15),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.replay_rounded,
                                   color: Colors.white,
-                                  size: 11,
+                                  size: context.rem(0.6875),
                                 ),
                               ),
                             ),
@@ -159,40 +160,40 @@ class _SubSyncBarState extends State<SubSyncBar> {
               ),
             ),
 
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
 
             // Right: Discard & Save Done & Close
             if (isDirty) ...[
               PlayerIconButton(
-                size: 32,
-                iconSize: 15,
+                size: context.rem(AppRem.xl),
+                iconSize: context.rem(0.9375),
                 icon: const Icon(Icons.undo_rounded),
                 tooltip: context.l10n.playerDiscardChanges,
                 onPressed: _handleDiscard,
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: context.rem(AppRem.xs)),
             ],
 
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: PlayerTheme.accent,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.4375)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
                 minimumSize: const Size(0, 32),
               ),
-              icon: const Icon(Icons.check_rounded, size: 15),
+              icon: Icon(Icons.check_rounded, size: context.rem(0.9375)),
               label: Text(
                 context.l10n.playerDone,
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontSize: AppType.captionPlus, fontWeight: FontWeight.w600),
               ),
               onPressed: _handleSave,
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: context.rem(AppRem.xs)),
 
             PlayerIconButton(
-              size: 32,
-              iconSize: 15,
+              size: context.rem(AppRem.xl),
+              iconSize: context.rem(0.9375),
               icon: const Icon(Icons.close_rounded),
               tooltip: context.l10n.playerClose,
               onPressed: widget.onClose,
@@ -222,17 +223,17 @@ class _StepButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
         onTap: onTap,
         child: Container(
-          width: isWide ? 44 : 38,
-          constraints: const BoxConstraints(minHeight: 28),
+          width: context.rem(isWide ? 2.75 : 2.375),
+          constraints: BoxConstraints(minHeight: context.rem(1.75)),
           alignment: Alignment.center,
           child: Text(
             label,
             style: const TextStyle(
               color: PlayerTheme.inkMuted,
-              fontSize: 11.5,
+              fontSize: AppType.tinyPlus,
               fontWeight: FontWeight.w700,
               fontFeatures: [FontFeature.tabularFigures()],
             ),

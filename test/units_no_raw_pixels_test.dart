@@ -31,6 +31,32 @@ const migratedFiles = <String>[
   'lib/pages/details/details_page.dart',
   'lib/pages/anime/anime_details_page.dart',
   'lib/widgets/details/details_metrics.dart',
+  'lib/pages/iptv/iptv_player_page.dart',
+  'lib/pages/player/player_screen.dart',
+  'lib/pages/player/watch_screen.dart',
+  'lib/widgets/player/language_flag.dart',
+  'lib/widgets/player/performance_liquid_lens.dart',
+  'lib/widgets/player/player_aspect_menu.dart',
+  'lib/widgets/player/player_audio_menu.dart',
+  'lib/widgets/player/player_cast_sheet.dart',
+  'lib/widgets/player/player_center_controls.dart',
+  'lib/widgets/player/player_episodes_panel.dart',
+  'lib/widgets/player/player_glass.dart',
+  'lib/widgets/player/player_menu_row.dart',
+  'lib/widgets/player/player_seek_bar.dart',
+  'lib/widgets/player/player_seek_feedback.dart',
+  'lib/widgets/player/player_skip_button.dart',
+  'lib/widgets/player/player_sources_panel.dart',
+  'lib/widgets/player/player_speed_menu.dart',
+  'lib/widgets/player/player_sub_style_modal.dart',
+  'lib/widgets/player/player_subtitle_menu.dart',
+  'lib/widgets/player/player_top_bar.dart',
+  'lib/widgets/player/player_transport.dart',
+  'lib/widgets/player/player_volume_control.dart',
+  'lib/widgets/player/sleep_timer_menu.dart',
+  'lib/widgets/player/sub_sync_bar.dart',
+  'lib/widgets/player/subtitle_overlay.dart',
+  'lib/widgets/player/text_sync_overlay.dart',
 ];
 
 /// A size written as a number. A line that must keep one -- a hairline border,
@@ -44,8 +70,28 @@ final _rawSize = <RegExp>[
   ),
   RegExp(r'EdgeInsets\.\w+\([^)]*\d'),
   RegExp(r'Radius\.circular\(\s*\d'),
-  RegExp(r'Offset\(\s*[^)]*[1-9]'),
+  RegExp(r'(?<![\w.])Offset\(\s*[^)]*[1-9]'),
 ];
+
+/// [code] with every `context.rem(...)` call (balanced, so a nested call is
+/// fine) replaced by a placeholder: what is inside is already in rem.
+String _withoutRem(String code) {
+  const open = 'context.rem(';
+  var out = code;
+  var at = out.indexOf(open);
+  while (at >= 0) {
+    var depth = 1;
+    var i = at + open.length;
+    while (i < out.length && depth > 0) {
+      if (out[i] == '(') depth++;
+      if (out[i] == ')') depth--;
+      i++;
+    }
+    out = '${out.substring(0, at)}R${out.substring(i)}';
+    at = out.indexOf(open);
+  }
+  return out;
+}
 
 void main() {
   for (final path in migratedFiles) {
@@ -54,7 +100,8 @@ void main() {
       final offenders = <String>[];
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i];
-        final code = line.split('//').first;
+        // A rem literal is the unit, not a bare number: `context.rem(1.25)`.
+        final code = _withoutRem(line.split('//').first);
         if (line.contains('// px') || line.contains('// ratio')) continue;
         if (_rawSize.any((re) => re.hasMatch(code))) {
           offenders.add('$path:${i + 1}: ${line.trim()}');

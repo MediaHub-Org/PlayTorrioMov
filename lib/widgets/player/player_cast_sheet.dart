@@ -5,6 +5,7 @@ import 'package:flutter_chrome_cast/flutter_chrome_cast.dart';
 import '../../services/cast/cast_service.dart';
 import '../../utils/navigation/adaptive_sheet.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// Device picker for Cast -- shown from the player's Cast button. Only ever
 /// opened when [CastService.isSupported] is true (mobile only); callers must
@@ -85,9 +86,9 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(AppRem.md)),
         child: PlayerGlassCard(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(context.rem(AppRem.md)),
           // The sheet had no scrollable at all: a Column(min) straight into
           // the card. Its height is decided by the modal, not by its content,
           // so a long device list or a large text setting simply painted past
@@ -101,8 +102,8 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: 20),
-                    const SizedBox(width: 10),
+                    Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: context.rem(AppRem.icon)),
+                    SizedBox(width: context.rem(0.625)),
                     // Expanded, not Text + Spacer. Laid out flat the title
                     // demanded its natural width and pushed the close button
                     // past the edge -- 321px of overflow at 3x text scale, and
@@ -117,22 +118,22 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: PlayerTheme.ink,
-                          fontSize: 13,
+                          fontSize: AppType.small,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.8,
                         ),
                       ),
                     ),
                     PlayerIconButton(
-                      size: 28,
-                      iconSize: 14,
+                      size: context.rem(1.75),
+                      iconSize: context.rem(0.875),
                       icon: const Icon(Icons.close_rounded),
                       tooltip: context.l10n.playerClose,
                       onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: context.rem(AppRem.xs)),
                 StreamBuilder<GoogleCastSession?>(
                   stream: CastService.sessionStream,
                   builder: (context, sessionSnapshot) {
@@ -146,33 +147,33 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                           // a spinner. Before, the same words sat there
                           // motionless forever because nothing was searching.
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.lg)),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 SizedBox(
-                                  width: 18,
-                                  height: 18,
+                                  width: context.rem(1.125),
+                                  height: context.rem(1.125),
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color: PlayerTheme.accent,
                                   ),
                                 ),
-                                const SizedBox(height: 14),
+                                SizedBox(height: context.rem(0.875)),
                                 Text(
                                   context.l10n.playerCastLooking,
                                   style: const TextStyle(
                                     color: PlayerTheme.inkSubtle,
-                                    fontSize: 13,
+                                    fontSize: AppType.small,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
-                                const SizedBox(height: 6),
+                                SizedBox(height: context.rem(AppRem.snug)),
                                 Text(
                                   context.l10n.playerCastSameWifi,
                                   style: const TextStyle(
                                     color: PlayerTheme.inkSubtle,
-                                    fontSize: 11,
+                                    fontSize: AppType.tiny,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -186,7 +187,7 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                                 onTap: () async {
                                   Navigator.pop(context);
                                   await CastService.connect(device);
@@ -199,24 +200,24 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                                 },
                                 child: Container(
                                   // A floor, not a fixed height: the device name grows with text scale.
-                                  constraints: const BoxConstraints(minHeight: 48),
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  constraints: BoxConstraints(minHeight: context.rem(3)),
+                                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
                                   child: Row(
                                     children: [
                                       Icon(
                                         connected
                                             ? Icons.cast_connected_rounded
                                             : Icons.tv_rounded,
-                                        size: 20,
+                                        size: context.rem(AppRem.icon),
                                         color: PlayerTheme.inkMuted,
                                       ),
-                                      const SizedBox(width: 12),
+                                      SizedBox(width: context.rem(AppRem.ms)),
                                       Expanded(
                                         child: Text(
                                           device.friendlyName,
                                           style: const TextStyle(
                                             color: PlayerTheme.ink,
-                                            fontSize: 14,
+                                            fontSize: AppType.body,
                                             fontWeight: FontWeight.w500,
                                           ),
                                           maxLines: 1,

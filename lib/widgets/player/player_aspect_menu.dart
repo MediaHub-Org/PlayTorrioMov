@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 class AspectOption {
   final String id;
@@ -82,7 +83,7 @@ class PlayerAspectMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(context.rem(AppRem.ms)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +93,7 @@ class PlayerAspectMenu extends StatelessWidget {
             onBack: onBack,
           ),
 
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
 
           // Aspect Options List
           Column(
@@ -104,7 +105,7 @@ class PlayerAspectMenu extends StatelessWidget {
               return Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   onTap: () {
                     if (opt.fit != null) {
                       onFitSelected(opt.fit!);
@@ -118,17 +119,17 @@ class PlayerAspectMenu extends StatelessWidget {
                     // text scale and the row had nowhere to put it -- 685px
                     // past the card at 3x. PlayerMenuAnchor bounds and
                     // scrolls the card, so growing here is safe.
-                    constraints: const BoxConstraints(minHeight: 38),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
+                    constraints: BoxConstraints(minHeight: context.rem(2.375)),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(AppRem.ms),
+                      vertical: context.rem(AppRem.xs),
                     ),
                     decoration: BoxDecoration(
                       color: isSelected ? PlayerTheme.raised : Colors.transparent,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       border: Border.all(
                         color: isSelected ? PlayerTheme.edge : Colors.transparent,
-                        width: 1,
+                        width: 1, // px: a hairline, not a layout size
                       ),
                     ),
                     child: Row(
@@ -142,12 +143,12 @@ class PlayerAspectMenu extends StatelessWidget {
                           isSelected
                               ? Icons.radio_button_checked_rounded
                               : Icons.radio_button_unchecked_rounded,
-                          size: 15,
+                          size: context.rem(0.9375),
                           color: isSelected
                               ? PlayerTheme.accent
                               : PlayerTheme.inkDisabled,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: context.rem(AppRem.sm)),
                         // Flexible so the label yields to the mark rather
                         // than pushing it off the edge.
                         Flexible(
@@ -157,7 +158,7 @@ class PlayerAspectMenu extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                              fontSize: 13.5,
+                              fontSize: AppType.smallPlus,
                               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                             ),
                           ),

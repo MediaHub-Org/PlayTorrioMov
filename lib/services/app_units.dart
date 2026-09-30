@@ -136,13 +136,33 @@ abstract final class AppRem {
 /// Font sizes, as plain constants -- see [AppUnits] for why these are not in
 /// rem. The text scaler applies the user's setting when the text is painted.
 abstract final class AppType {
+  static const double pico = 8.5;
+  static const double nano = 9;
+  static const double nanoPlus = 9.5;
   static const double micro = 10;
+  static const double microPlus = 10.5;
   static const double tiny = 11;
+  static const double tinyPlus = 11.5;
   static const double caption = 12;
+  static const double captionPlus = 12.5;
   static const double small = 13;
+  static const double smallPlus = 13.5;
   static const double body = 14;
+  static const double bodyPlus = 14.5;
   static const double bodyMd = 15;
+  static const double bodyMdPlus = 15.5;
   static const double bodyLg = 16;
+  static const double bodyLgPlus = 16.5;
+  static const double subhead = 17;
   static const double lead = 18;
+  static const double leadPlus = 18.5;
+  static const double headline = 19;
+  static const double titleSm = 20;
   static const double title = 21;
+  static const double titleMd = 22;
+  static const double heading = 24;
+  static const double headingLg = 26;
+  static const double displaySm = 28;
+  static const double display = 34;
+  static const double displayMd = 36;
 }

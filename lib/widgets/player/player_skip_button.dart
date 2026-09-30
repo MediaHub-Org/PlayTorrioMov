@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../models/player/skip_segment_model.dart';
+import '../../services/app_units.dart';
 
 /// Ultra-sleek, responsive glassmorphism Skip Button with dynamic hover effects
 /// and a left-to-right sweep progress bar that auto-hides when complete.
@@ -92,37 +93,37 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
+            borderRadius: BorderRadius.circular(context.rem(isCompact ? AppRem.radiusMd : AppRem.radiusLg)),
             border: Border.all(
               color: _isHovered
                   ? accentGlow.withValues(alpha: 0.85)
                   : Colors.white.withValues(alpha: 0.20),
-              width: _isHovered ? 1.5 : 1.0,
+              width: _isHovered ? 1.5 : 1.0, // px: a hairline, not a layout size
             ),
             boxShadow: [
               // Deep ambient drop shadow
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.75),
-                offset: const Offset(0, 8),
-                blurRadius: 28,
+                offset: Offset(0, context.rem(AppRem.sm)),
+                blurRadius: context.rem(1.75),
               ),
               // Reactive neon hover glow
               if (_isHovered) ...[
                 BoxShadow(
                   color: accentColor.withValues(alpha: 0.40),
-                  blurRadius: 22,
-                  spreadRadius: 2,
+                  blurRadius: context.rem(1.375),
+                  spreadRadius: context.rem(AppRem.xxs),
                 ),
                 BoxShadow(
                   color: accentGlow.withValues(alpha: 0.20),
-                  blurRadius: 40,
-                  spreadRadius: 4,
+                  blurRadius: context.rem(2.5),
+                  spreadRadius: context.rem(AppRem.xs),
                 ),
               ],
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(isCompact ? 12 : 16),
+            borderRadius: BorderRadius.circular(context.rem(isCompact ? AppRem.radiusMd : AppRem.radiusLg)),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
@@ -175,8 +176,8 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                               splashColor: accentGlow.withValues(alpha: 0.30),
                               child: Padding(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: isCompact ? 13 : 18,
-                                  vertical: isCompact ? 9 : 12,
+                                  horizontal: context.rem(isCompact ? 0.8125 : 1.125),
+                                  vertical: context.rem(isCompact ? 0.5625 : AppRem.ms),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -191,25 +192,25 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                                       ),
                                       child: Icon(
                                         widget.segment.icon,
-                                        size: isCompact ? 16 : 20,
+                                        size: context.rem(isCompact ? AppRem.iconXs : AppRem.icon),
                                         color: _isHovered ? accentGlow : accentColor,
                                       ),
                                     ),
-                                    SizedBox(width: isCompact ? 7 : 10),
+                                    SizedBox(width: context.rem(isCompact ? 0.4375 : 0.625)),
 
                                     // Action Label
                                     Text(
                                       widget.segment.label(context.l10n),
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: isCompact ? 12.5 : 14.0,
+                                        fontSize: isCompact ? AppType.captionPlus : AppType.body,
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: -0.2,
                                         shadows: [
                                           Shadow(
                                             color: Colors.black.withValues(alpha: 0.8),
-                                            offset: const Offset(0, 1),
-                                            blurRadius: 4,
+                                            offset: Offset(0, context.rem(0.0625)),
+                                            blurRadius: context.rem(AppRem.xs),
                                           ),
                                         ],
                                       ),
@@ -222,8 +223,8 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
 
                           // Vertical Frosted Divider
                           Container(
-                            width: 1,
-                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            width: 1, // px: a hairline, not a layout size
+                            margin: EdgeInsets.symmetric(vertical: context.rem(AppRem.snug)),
                             color: Colors.white.withValues(alpha: 0.14),
                           ),
 
@@ -241,8 +242,8 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                                   message: context.l10n.playerDismiss,
                                   child: Container(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: isCompact ? 9 : 12,
-                                      vertical: isCompact ? 9 : 12,
+                                      horizontal: context.rem(isCompact ? 0.5625 : AppRem.ms),
+                                      vertical: context.rem(isCompact ? 0.5625 : AppRem.ms),
                                     ),
                                     alignment: Alignment.center,
                                     child: AnimatedScale(
@@ -250,7 +251,7 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                                       duration: const Duration(milliseconds: 140),
                                       child: Icon(
                                         Icons.close_rounded,
-                                        size: isCompact ? 15 : 17,
+                                        size: context.rem(isCompact ? 0.9375 : 1.0625),
                                         color: _isDismissHovered
                                             ? Colors.white
                                             : Colors.white.withValues(alpha: 0.60),
@@ -270,7 +271,7 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                       bottom: 0,
                       left: 0,
                       right: 0,
-                      height: isCompact ? 2.0 : 2.5,
+                      height: context.rem(isCompact ? AppRem.xxs : 0.1562),
                       child: AnimatedBuilder(
                         animation: _sweepController,
                         builder: (context, _) {
@@ -281,7 +282,7 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                             widthFactor: sweepProgress,
                             child: Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(999),
+                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                                 gradient: LinearGradient(
                                   colors: [
                                     accentColor.withValues(alpha: 0.5),
@@ -293,9 +294,9 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                                 boxShadow: [
                                   BoxShadow(
                                     color: accentGlow.withValues(alpha: 0.8),
-                                    blurRadius: 6,
-                                    spreadRadius: 1,
-                                    offset: const Offset(0, -0.5),
+                                    blurRadius: context.rem(AppRem.snug),
+                                    spreadRadius: context.rem(0.0625),
+                                    offset: const Offset(0, -0.5), // ratio: a line height, not a size
                                   ),
                                 ],
                               ),

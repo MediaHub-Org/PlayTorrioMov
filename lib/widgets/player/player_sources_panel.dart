@@ -12,6 +12,7 @@ import '../../services/anime/anime_scraper_service.dart';
 import '../common/source_badges.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused source card. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
@@ -195,8 +196,8 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     // See the note in player_episodes_panel: the drawer's edge line and shadow
     // sit on whichever face is towards the content.
     final towardsContent = Directionality.of(context) == TextDirection.rtl
-        ? const Offset(8, 0)
-        : const Offset(-8, 0);
+        ? Offset(context.rem(AppRem.sm), 0)
+        : Offset(-context.rem(AppRem.sm), 0);
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Container(
@@ -205,13 +206,13 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
         decoration: BoxDecoration(
           color: const Color(0xF2080C14),
           border: const BorderDirectional(
-            start: BorderSide(color: Color(0x33FFFFFF), width: 1.2),
+            start: BorderSide(color: Color(0x33FFFFFF), width: 1.2), // px: a hairline, not a layout size
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.85),
               offset: towardsContent,
-              blurRadius: 36,
+              blurRadius: context.rem(2.25),
             ),
           ],
         ),
@@ -228,7 +229,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                 if (widget.errorMessage != null && widget.errorMessage!.isNotEmpty)
                   _buildErrorBanner(widget.errorMessage!, isCompact),
 
-                const Divider(height: 1, color: Color(0x1AFFFFFF)),
+                const Divider(height: 1, color: Color(0x1AFFFFFF)), // px: a hairline, not a layout size
 
                 // ── Sources List / Loading / Empty State ──
                 Expanded(
@@ -249,24 +250,24 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
   Widget _buildHeader(int sNum, int eNum, bool isCompact) {
     return Container(
       padding: EdgeInsetsDirectional.only(
-        top: MediaQuery.paddingOf(context).top + 12,
-        start: isCompact ? 12 : 16,
-        end: isCompact ? 12 : 16,
-        bottom: 12,
+        top: MediaQuery.paddingOf(context).top + context.rem(AppRem.ms),
+        start: context.rem(isCompact ? AppRem.ms : AppRem.md),
+        end: context.rem(isCompact ? AppRem.ms : AppRem.md),
+        bottom: context.rem(AppRem.ms),
       ),
       color: const Color(0x66000000),
       child: Row(
         children: [
           // Back to Episodes Button
           PlayerIconButton(
-            size: 36,
-            iconSize: 20,
+            size: context.rem(2.25),
+            iconSize: context.rem(1.25),
             icon: const Icon(Icons.chevron_left_rounded),
             tooltip: context.l10n.playerBackToEpisodes,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
             onPressed: widget.onBackToEpisodes,
           ),
-          const SizedBox(width: 10),
+          SizedBox(width: context.rem(0.625)),
 
           Expanded(
             child: Column(
@@ -282,10 +283,10 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                     // title off the edge.
                     Flexible(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
                         decoration: BoxDecoration(
                           color: PlayerTheme.accent.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(context.rem(0.3125)),
                           border: Border.all(color: PlayerTheme.accent.withValues(alpha: 0.50)),
                         ),
                         child: FittedBox(
@@ -294,7 +295,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                             'S$sNum : E$eNum',
                             style: const TextStyle(
                               color: Color(0xFF9D84FF),
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.4,
                             ),
@@ -302,7 +303,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: context.rem(AppRem.sm)),
                     Flexible(
                       child: Text(
                         widget.episode.title.isNotEmpty
@@ -310,7 +311,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                             : context.l10n.playerEpisodeN(eNum),
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 14.5,
+                          fontSize: AppType.bodyPlus,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.2,
                         ),
@@ -320,12 +321,12 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: context.rem(AppRem.xxs)),
                 Text(
                   context.l10n.playerProviderName(widget.currentAddonName),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.50),
-                    fontSize: 11.5,
+                    fontSize: AppType.tinyPlus,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -335,8 +336,8 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
 
           // Close Drawer Button
           PlayerIconButton(
-            size: 36,
-            iconSize: 18,
+            size: context.rem(2.25),
+            iconSize: context.rem(1.125),
             icon: const Icon(Icons.close_rounded),
             tooltip: context.l10n.playerClose,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
@@ -349,32 +350,32 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
 
   Widget _buildErrorBanner(String message, bool isCompact) {
     return Container(
-      margin: EdgeInsets.all(isCompact ? 10 : 14),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      margin: EdgeInsets.all(context.rem(isCompact ? 0.625 : 0.875)),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.6875)),
       decoration: BoxDecoration(
         color: const Color(0x33EF4444),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0x99EF4444), width: 1.2),
-        boxShadow: const [
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+        border: Border.all(color: const Color(0x99EF4444), width: 1.2), // px: a hairline, not a layout size
+        boxShadow: [
           BoxShadow(
-            color: Color(0x33EF4444),
-            blurRadius: 12,
-            offset: Offset(0, 2),
+            color: const Color(0x33EF4444),
+            blurRadius: context.rem(AppRem.ms),
+            offset: Offset(0, context.rem(AppRem.xxs)),
           ),
         ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Color(0xFFFCA5A5), size: 22),
-          const SizedBox(width: 10),
+          Icon(Icons.warning_amber_rounded, color: const Color(0xFFFCA5A5), size: context.rem(AppRem.iconMd)),
+          SizedBox(width: context.rem(0.625)),
           Expanded(
             child: Text(
               message,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 12.5,
+                fontSize: AppType.captionPlus,
                 fontWeight: FontWeight.w600,
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
           ),
@@ -389,19 +390,19 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: 32,
-            height: 32,
+            width: context.rem(AppRem.xl),
+            height: context.rem(AppRem.xl),
             child: CircularProgressIndicator(
               strokeWidth: 2.8,
               valueColor: AlwaysStoppedAnimation<Color>(PlayerTheme.accent),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
           Text(
             context.l10n.playerScrapingFrom(widget.currentAddonName),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.70),
-              fontSize: 13,
+              fontSize: AppType.small,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -413,38 +414,38 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(context.rem(AppRem.lg)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.search_off_rounded, color: Colors.white.withValues(alpha: 0.30), size: 48),
-            const SizedBox(height: 12),
+            Icon(Icons.search_off_rounded, color: Colors.white.withValues(alpha: 0.30), size: context.rem(3)),
+            SizedBox(height: context.rem(AppRem.ms)),
             Text(
               context.l10n.playerNoStreams,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: context.rem(AppRem.snug)),
             Text(
               context.l10n.playerNoStreamsHint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.50),
-                fontSize: 12,
+                fontSize: AppType.caption,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: context.rem(AppRem.md)),
             ElevatedButton.icon(
               onPressed: _startScraping,
-              icon: const Icon(Icons.refresh_rounded, size: 16),
+              icon: Icon(Icons.refresh_rounded, size: context.rem(AppRem.iconXs)),
               label: Text(context.l10n.playerRescrape),
               style: ElevatedButton.styleFrom(
                 backgroundColor: PlayerTheme.accent,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
               ),
             ),
           ],
@@ -457,33 +458,33 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.symmetric(
-        horizontal: isCompact ? 12 : 16,
-        vertical: 14,
+        horizontal: context.rem(isCompact ? AppRem.ms : AppRem.md),
+        vertical: context.rem(0.875),
       ),
       itemCount: _sources.length + (_isLoading ? 1 : 0),
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, __) => SizedBox(height: context.rem(AppRem.sm)),
       itemBuilder: (context, index) {
         if (index == _sources.length && _isLoading) {
           return Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(context.rem(AppRem.ms)),
             alignment: Alignment.center,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  width: 14,
-                  height: 14,
+                  width: context.rem(0.875),
+                  height: context.rem(0.875),
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(PlayerTheme.accent),
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: context.rem(0.625)),
                 Text(
                   context.l10n.playerScrapingMore,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.60),
-                    fontSize: 11.5,
+                    fontSize: AppType.tinyPlus,
                   ),
                 ),
               ],
@@ -536,7 +537,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
       },
       child: FocusRing(
         visible: _focusedIndex == index,
-        borderRadius: 14,
+        borderRadius: context.rem(0.875),
         child: MouseRegion(
       onEnter: (_) => setState(() => _hoveredIndex = index),
       onExit: (_) => setState(() => _hoveredIndex = null),
@@ -551,41 +552,41 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: isHovered ? const Color(0x331E2435) : const Color(0x1F121722),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
               border: Border.all(
                 color: isHovered
                     ? PlayerTheme.accent.withValues(alpha: 0.80)
                     : Colors.white.withValues(alpha: 0.10),
-                width: isHovered ? 1.4 : 1.0,
+                width: isHovered ? 1.4 : 1.0, // px: a hairline, not a layout size
               ),
               boxShadow: [
                 if (isHovered)
                   BoxShadow(
                     color: PlayerTheme.accent.withValues(alpha: 0.25),
-                    blurRadius: 14,
-                    offset: const Offset(0, 3),
+                    blurRadius: context.rem(0.875),
+                    offset: Offset(0, context.rem(0.1875)),
                   ),
               ],
             ),
-            padding: EdgeInsets.all(isCompact ? 10 : 12),
+            padding: EdgeInsets.all(context.rem(isCompact ? 0.625 : AppRem.ms)),
             child: Row(
               children: [
                 // Icon / Type Badge
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: EdgeInsets.all(context.rem(AppRem.sm)),
                   decoration: BoxDecoration(
                     color: isTorrent
                         ? const Color(0x33F59E0B)
                         : const Color(0x337C5CFF),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                   ),
                   child: Icon(
                     isTorrent ? Icons.cloud_download_rounded : Icons.play_arrow_rounded,
                     color: isTorrent ? const Color(0xFFFBBF24) : const Color(0xFF9D84FF),
-                    size: 18,
+                    size: context.rem(AppRem.iconSm),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: context.rem(AppRem.ms)),
 
                 // Source Info
                 Expanded(
@@ -600,21 +601,21 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                       // badges flow onto a second line is the honest fix.
                       Wrap(
                         crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 6,
-                        runSpacing: 4,
+                        spacing: context.rem(AppRem.snug),
+                        runSpacing: context.rem(AppRem.xs),
                         children: [
                           if (resolution.isNotEmpty)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
                               decoration: BoxDecoration(
                                 color: _getResolutionColor(resolution),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                               ),
                               child: Text(
                                 resolution,
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: TvType.scale(9.5),
+                                  fontSize: TvType.scale(AppType.nanoPlus),
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 0.4,
                                 ),
@@ -633,23 +634,23 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                             ScraperManager.instance.providerDisplayName(source),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.50),
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
 
-                      const SizedBox(height: 4),
+                      SizedBox(height: context.rem(AppRem.xs)),
 
                       // Title
                       Text(
                         title,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w600,
-                          height: 1.25,
+                          height: 1.25, // ratio: a line height, not a size
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -658,13 +659,13 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                   ),
                 ),
 
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
 
                 if (source.isMagnet && source.magnetUrl != null) ...[
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                       onTap: () {
                         Clipboard.setData(ClipboardData(text: source.magnetUrl!));
                         HapticFeedback.lightImpact();
@@ -674,13 +675,13 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                             content: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 18),
-                                const SizedBox(width: 8),
+                                Icon(Icons.check_circle_rounded, color: const Color(0xFF10B981), size: context.rem(AppRem.iconSm)),
+                                SizedBox(width: context.rem(AppRem.sm)),
                                 Text(
                                   context.l10n.playerMagnetCopied,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 13,
+                                    fontSize: AppType.small,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -688,39 +689,39 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                             ),
                             backgroundColor: const Color(0xFF1A1D26),
                             behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
                             duration: const Duration(seconds: 2),
                           ),
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(7),
+                        padding: EdgeInsets.all(context.rem(0.4375)),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.08),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.link_rounded,
                           color: Colors.white70,
-                          size: 16,
+                          size: context.rem(AppRem.iconXs),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: context.rem(AppRem.snug)),
                 ],
 
                 // Play Button Icon
                 Container(
-                  padding: const EdgeInsets.all(7),
+                  padding: EdgeInsets.all(context.rem(0.4375)),
                   decoration: BoxDecoration(
                     color: (isHovered ? PlayerTheme.accent : Colors.white.withValues(alpha: 0.08)),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.play_arrow_rounded,
                     color: Colors.white,
-                    size: 16,
+                    size: context.rem(AppRem.iconXs),
                   ),
                 ),
               ],

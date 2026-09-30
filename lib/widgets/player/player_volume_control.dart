@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// Interactive volume slider with high-gain boost support (up to 250%).
 class PlayerVolumeControl extends StatefulWidget {
@@ -103,8 +104,8 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
           children: [
             // Mute / Unmute Button
             PlayerIconButton(
-              size: 40,
-              iconSize: 22,
+              size: context.rem(2.5),
+              iconSize: context.rem(1.375),
               icon: Icon(
                 _getVolumeIcon(),
                 color: isBoosting ? boostColor : (widget.isMuted ? PlayerTheme.inkSubtle : Colors.white),
@@ -113,7 +114,7 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
               onPressed: widget.onToggleMute,
             ),
 
-            const SizedBox(width: 4),
+            SizedBox(width: context.rem(AppRem.xs)),
 
             // Volume Slider Track
             Focus(
@@ -135,7 +136,7 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
               },
               child: FocusRing(
                 visible: _isFocused,
-                borderRadius: 8,
+                borderRadius: context.rem(AppRem.radiusSm),
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onHorizontalDragUpdate: (e) =>
@@ -143,18 +144,18 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                   onTapDown: (e) => _updateFromPosition(e.localPosition.dx),
                   child: Container(
                     width: _trackWidth,
-                    height: 32,
+                    height: context.rem(AppRem.xl),
                     alignment: Alignment.center,
                     child: Stack(
                       alignment: Alignment.centerLeft,
                       children: [
                         // Background track
                         Container(
-                          height: 6,
+                          height: context.rem(AppRem.snug),
                           width: _trackWidth,
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                           ),
                         ),
 
@@ -162,18 +163,18 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                         Positioned(
                           left: _trackWidth * 0.55 - 0.75,
                           child: Container(
-                            width: 1.5,
-                            height: 9,
+                            width: 1.5, // px: a hairline, not a layout size
+                            height: context.rem(0.5625),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.40),
-                              borderRadius: BorderRadius.circular(1),
+                              borderRadius: BorderRadius.circular(context.rem(0.0625)),
                             ),
                           ),
                         ),
 
                         // Filled track
                         Container(
-                          height: 6,
+                          height: context.rem(AppRem.snug),
                           width: _trackWidth * fillFraction,
                           decoration: BoxDecoration(
                             gradient: isBoosting
@@ -189,17 +190,17 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                             color: isBoosting
                                 ? null
                                 : Colors.white.withValues(alpha: 0.9),
-                            borderRadius: BorderRadius.circular(999),
+                            borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
                           ),
                         ),
 
                         // Thumb dot
                         Positioned(
-                          left: (_trackWidth * fillFraction - 6)
-                              .clamp(0.0, _trackWidth - 12),
+                          left: (_trackWidth * fillFraction - context.rem(AppRem.snug))
+                              .clamp(0.0, _trackWidth - context.rem(AppRem.ms)),
                           child: Container(
-                            width: 12,
-                            height: 12,
+                            width: context.rem(AppRem.ms),
+                            height: context.rem(AppRem.ms),
                             decoration: BoxDecoration(
                               color: isBoosting ? boostColor : Colors.white,
                               shape: BoxShape.circle,
@@ -208,9 +209,9 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                                   color: isBoosting
                                       ? boostColor.withValues(alpha: 0.6)
                                       : Colors.black54,
-                                  blurRadius: isBoosting ? 6 : 4,
-                                  spreadRadius: isBoosting ? 1 : 0,
-                                  offset: const Offset(0, 1),
+                                  blurRadius: context.rem(isBoosting ? AppRem.snug : AppRem.xs),
+                                  spreadRadius: context.rem(isBoosting ? 0.0625 : 0),
+                                  offset: Offset(0, context.rem(0.0625)),
                                 ),
                               ],
                             ),
@@ -225,18 +226,18 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
 
             // Percentage Readout
             if (isBoosting || _isHovered || _isFocused) ...[
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
               Container(
-                constraints: const BoxConstraints(minWidth: 38),
+                constraints: BoxConstraints(minWidth: context.rem(2.375)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (isBoosting)
                       Padding(
-                        padding: const EdgeInsetsDirectional.only(end: 2),
+                        padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.xxs)),
                         child: Icon(
                           Icons.bolt_rounded,
-                          size: 13,
+                          size: context.rem(0.8125),
                           color: boostColor,
                         ),
                       ),
@@ -244,7 +245,7 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                       '$pct%',
                       style: TextStyle(
                         color: isBoosting ? boostColor : PlayerTheme.inkMuted,
-                        fontSize: 11.5,
+                        fontSize: AppType.tinyPlus,
                         fontWeight: FontWeight.w800,
                         fontFeatures: const [FontFeature.tabularFigures()],
                       ),

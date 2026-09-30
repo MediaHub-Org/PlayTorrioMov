@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// One selectable row in a player menu.
 ///
@@ -40,18 +41,18 @@ class PlayerMenuRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 3),
+      padding: EdgeInsets.only(bottom: context.rem(0.1875)),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(context.rem(0.5625)),
           onTap: onTap,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 38),
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+            constraints: BoxConstraints(minHeight: context.rem(2.375)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.5625), vertical: context.rem(0.3125)),
             decoration: BoxDecoration(
               color: isSelected ? PlayerTheme.raised : Colors.transparent,
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(context.rem(0.5625)),
               border: Border.all(
                 color: isSelected ? PlayerTheme.edge : Colors.transparent,
               ),
@@ -65,13 +66,13 @@ class PlayerMenuRow extends StatelessWidget {
                   isSelected
                       ? Icons.radio_button_checked_rounded
                       : Icons.radio_button_unchecked_rounded,
-                  size: 15,
+                  size: context.rem(0.9375),
                   color:
                       isSelected ? PlayerTheme.accent : PlayerTheme.inkDisabled,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 leading,
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 Expanded(
                   child: Text(
                     title,
@@ -80,18 +81,18 @@ class PlayerMenuRow extends StatelessWidget {
                     style: TextStyle(
                       color:
                           isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                      fontSize: 12.5,
+                      fontSize: AppType.captionPlus,
                       fontWeight:
                           isSelected ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                 ),
                 for (final badge in badges) ...[
-                  const SizedBox(width: 5),
+                  SizedBox(width: context.rem(0.3125)),
                   _MiniBadge(badge),
                 ],
                 if (trailing != null) ...[
-                  const SizedBox(width: 4),
+                  SizedBox(width: context.rem(AppRem.xs)),
                   trailing!,
                 ],
               ],
@@ -111,16 +112,16 @@ class _MiniBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
       decoration: BoxDecoration(
         color: PlayerTheme.raised,
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(context.rem(0.3125)),
       ),
       child: Text(
         text,
         style: TextStyle(
           color: PlayerTheme.inkSubtle,
-          fontSize: TvType.scale(9),
+          fontSize: TvType.scale(AppType.nano),
           fontWeight: FontWeight.w700,
         ),
       ),
@@ -137,12 +138,12 @@ class PlayerSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 6),
+      padding: EdgeInsets.fromLTRB(context.rem(AppRem.sm), context.rem(AppRem.xs), context.rem(AppRem.sm), context.rem(AppRem.snug)),
       child: Text(
         text.toUpperCase(),
         style: TextStyle(
           color: PlayerTheme.inkSubtle,
-          fontSize: TvType.scale(10),
+          fontSize: TvType.scale(AppType.micro),
           fontWeight: FontWeight.w800,
           letterSpacing: 1.1,
         ),
@@ -160,10 +161,10 @@ class PlayerMenuEmptyRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(9, 6, 9, 10),
+      padding: EdgeInsets.fromLTRB(context.rem(0.5625), context.rem(AppRem.snug), context.rem(0.5625), context.rem(0.625)),
       child: Text(
         text,
-        style: const TextStyle(color: PlayerTheme.inkDisabled, fontSize: 12),
+        style: const TextStyle(color: PlayerTheme.inkDisabled, fontSize: AppType.caption),
       ),
     );
   }

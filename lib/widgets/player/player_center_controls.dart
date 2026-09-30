@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart' show FocusRing;
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused control in this file. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
@@ -137,7 +138,7 @@ class _CenterButtonState extends State<_CenterButton> {
         },
         child: FocusRing(
           visible: _focused,
-          borderRadius: widget.size / 2,
+          borderRadius: widget.size / 2, // ratio: half the button, a circle
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             onEnter: (_) => setState(() => _hovered = true),
@@ -155,7 +156,7 @@ class _CenterButtonState extends State<_CenterButton> {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.2),
-                    width: 1,
+                    width: 1, // px: a hairline, not a layout size
                   ),
                 ),
                 alignment: Alignment.center,
@@ -211,7 +212,7 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
       },
       child: FocusRing(
         visible: _focused,
-        borderRadius: widget.size / 2,
+        borderRadius: widget.size / 2, // ratio: half the button, a circle
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           onEnter: (_) => setState(() => _hovered = true),
@@ -229,13 +230,13 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: Colors.white.withValues(alpha: 0.25),
-                  width: 1.2,
+                  width: 1.2, // px: a hairline, not a layout size
                 ),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x66000000),
-                    offset: Offset(0, 4),
-                    blurRadius: 16,
+                    color: const Color(0x66000000),
+                    offset: Offset(0, context.rem(AppRem.xs)),
+                    blurRadius: context.rem(AppRem.md),
                   ),
                 ],
               ),

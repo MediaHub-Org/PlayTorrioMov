@@ -6,6 +6,7 @@ import '../../services/theme/app_colors.dart';
 import '../../models/movie/video.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused episode card. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
@@ -274,8 +275,8 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     // right in Arabic. `BoxShadow.offset` has no directional form, so the sign
     // is read off the direction rather than written down (#68).
     final towardsContent = Directionality.of(context) == TextDirection.rtl
-        ? const Offset(8, 0)
-        : const Offset(-8, 0);
+        ? Offset(context.rem(AppRem.sm), 0)
+        : Offset(-context.rem(AppRem.sm), 0);
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Container(
@@ -284,13 +285,13 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
         decoration: BoxDecoration(
           color: const Color(0xF2080C14),
           border: const BorderDirectional(
-            start: BorderSide(color: Color(0x33FFFFFF), width: 1.2),
+            start: BorderSide(color: Color(0x33FFFFFF), width: 1.2), // px: a hairline, not a layout size
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.85),
               offset: towardsContent,
-              blurRadius: 36,
+              blurRadius: context.rem(2.25),
             ),
           ],
         ),
@@ -306,7 +307,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                 // ── Season Tabs Row (if multi-season) ──
                 if (_seasons.length > 1) _buildSeasonTabs(isCompact),
 
-                const Divider(height: 1, color: Color(0x1AFFFFFF)),
+                const Divider(height: 1, color: Color(0x1AFFFFFF)), // px: a hairline, not a layout size
 
                 // ── Scrollable Episodes List ──
                 Expanded(
@@ -316,11 +317,11 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                         controller: _scrollController,
                         physics: const BouncingScrollPhysics(),
                         padding: EdgeInsets.symmetric(
-                          horizontal: isCompact ? 12 : 16,
-                          vertical: 14,
+                          horizontal: context.rem(isCompact ? AppRem.ms : AppRem.md),
+                          vertical: context.rem(0.875),
                         ),
                         itemCount: episodes.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        separatorBuilder: (_, __) => SizedBox(height: context.rem(0.625)),
                         itemBuilder: (context, index) {
                           final video = episodes[index];
                           final isCurrentPlaying = widget.currentEpisode?.id == video.id ||
@@ -341,8 +342,8 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                       // Floating Quick Scroll Controls (Desktop / TV friendly)
                       if (!isCompact && episodes.length > 4) ...[
                         Positioned(
-                          right: 12,
-                          top: 12,
+                          right: context.rem(AppRem.ms),
+                          top: context.rem(AppRem.ms),
                           child: _buildScrollFloatingButton(
                             icon: Icons.keyboard_arrow_up_rounded,
                             tooltip: context.l10n.playerScrollUp,
@@ -350,8 +351,8 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                           ),
                         ),
                         Positioned(
-                          right: 12,
-                          bottom: 12,
+                          right: context.rem(AppRem.ms),
+                          bottom: context.rem(AppRem.ms),
                           child: _buildScrollFloatingButton(
                             icon: Icons.keyboard_arrow_down_rounded,
                             tooltip: context.l10n.playerScrollDown,
@@ -373,30 +374,30 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
   Widget _buildHeader(int episodeCount, bool isCompact) {
     return Container(
       padding: EdgeInsetsDirectional.only(
-        top: MediaQuery.paddingOf(context).top + 12,
-        start: isCompact ? 14 : 20,
-        end: isCompact ? 14 : 18,
-        bottom: 12,
+        top: MediaQuery.paddingOf(context).top + context.rem(AppRem.ms),
+        start: context.rem(isCompact ? 0.875 : 1.25),
+        end: context.rem(isCompact ? 0.875 : 1.125),
+        bottom: context.rem(AppRem.ms),
       ),
       color: const Color(0x66000000),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(7),
+            padding: EdgeInsets.all(context.rem(0.4375)),
             decoration: BoxDecoration(
               color: PlayerTheme.accent.withValues(alpha: 0.20),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               border: Border.all(
                 color: PlayerTheme.accent.withValues(alpha: 0.40),
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.video_library_rounded,
-              color: Color(0xFF9D84FF),
-              size: 20,
+              color: const Color(0xFF9D84FF),
+              size: context.rem(AppRem.icon),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: context.rem(AppRem.ms)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,7 +407,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   context.l10n.detailsEpisodes,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 17,
+                    fontSize: AppType.subhead,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.3,
                   ),
@@ -415,7 +416,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   '${_seasonLabels[_selectedSeason] ?? context.l10n.playerSeasonN(_selectedSeason)} • ${context.l10n.playerEpisodeCount(episodeCount)}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.55),
-                    fontSize: 12,
+                    fontSize: AppType.caption,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -423,8 +424,8 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
             ),
           ),
           PlayerIconButton(
-            size: 36,
-            iconSize: 18,
+            size: context.rem(2.25),
+            iconSize: context.rem(1.125),
             icon: const Icon(Icons.close_rounded),
             tooltip: context.l10n.playerClose,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
@@ -439,15 +440,15 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     final showArrows = !isCompact && _seasons.length > 2;
 
     return Container(
-      height: 48,
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      height: context.rem(3),
+      padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.snug), horizontal: context.rem(AppRem.xs)),
       color: const Color(0x33000000),
       child: Row(
         children: [
           // Desktop Left Season Arrow
           if (showArrows)
             Padding(
-              padding: const EdgeInsetsDirectional.only(start: 4, end: 2),
+              padding: EdgeInsetsDirectional.only(start: context.rem(AppRem.xs), end: context.rem(AppRem.xxs)),
               child: _buildSeasonArrowButton(
                 icon: Icons.chevron_left_rounded,
                 tooltip: context.l10n.playerPreviousSeasons,
@@ -461,9 +462,9 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               controller: _seasonScrollController,
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.symmetric(horizontal: isCompact ? 12 : 6),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(isCompact ? AppRem.ms : AppRem.snug)),
               itemCount: _seasons.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, __) => SizedBox(width: context.rem(AppRem.sm)),
               itemBuilder: (context, index) {
                 final season = _seasons[index];
                 final isActive = season == _selectedSeason;
@@ -473,27 +474,27 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () => _selectSeason(season),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 180),
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
                       decoration: BoxDecoration(
                         color: isActive
                             ? PlayerTheme.accent.withValues(alpha: 0.28)
                             : Colors.white.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                         border: Border.all(
                           color: isActive
                               ? PlayerTheme.accent.withValues(alpha: 0.80)
                               : Colors.white.withValues(alpha: 0.10),
-                          width: 1.2,
+                          width: 1.2, // px: a hairline, not a layout size
                         ),
                         boxShadow: isActive
                             ? [
                                 BoxShadow(
                                   color: PlayerTheme.accent.withValues(alpha: 0.35),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
+                                  blurRadius: context.rem(0.625),
+                                  offset: Offset(0, context.rem(AppRem.xxs)),
                                 ),
                               ]
                             : null,
@@ -503,7 +504,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                         tabLabel,
                         style: TextStyle(
                           color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.70),
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                         ),
                       ),
@@ -517,7 +518,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
           // Desktop Right Season Arrow
           if (showArrows)
             Padding(
-              padding: const EdgeInsetsDirectional.only(start: 2, end: 4),
+              padding: EdgeInsetsDirectional.only(start: context.rem(AppRem.xxs), end: context.rem(AppRem.xs)),
               child: _buildSeasonArrowButton(
                 icon: Icons.chevron_right_rounded,
                 tooltip: context.l10n.playerNextSeasons,
@@ -540,22 +541,22 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           child: Container(
-            width: 28,
-            height: 28,
+            width: context.rem(1.75),
+            height: context.rem(1.75),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.14),
-                width: 1,
+                width: 1, // px: a hairline, not a layout size
               ),
             ),
             alignment: Alignment.center,
             child: Icon(
               icon,
-              size: 20,
+              size: context.rem(AppRem.icon),
               color: Colors.white.withValues(alpha: 0.85),
             ),
           ),
@@ -592,7 +593,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
       },
       child: FocusRing(
         visible: _focusedIndex == index,
-        borderRadius: 16,
+        borderRadius: context.rem(AppRem.radiusLg),
         child: MouseRegion(
           onEnter: (_) => setState(() => _hoveredIndex = index),
           onExit: (_) => setState(() => _hoveredIndex = null),
@@ -612,7 +613,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   : (isHovered
                       ? const Color(0x331E2435)
                       : const Color(0x1F121722)),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(context.rem(0.875)),
               border: Border.all(
                 color: isSelected
                     ? PlayerTheme.accent
@@ -621,24 +622,24 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                         : (isHovered
                             ? Colors.white.withValues(alpha: 0.28)
                             : Colors.white.withValues(alpha: 0.10))),
-                width: isSelected ? 1.8 : 1.0,
+                width: isSelected ? 1.8 : 1.0, // px: a hairline, not a layout size
               ),
               boxShadow: [
                 if (isSelected)
                   BoxShadow(
                     color: PlayerTheme.accent.withValues(alpha: 0.30),
-                    blurRadius: 18,
-                    offset: const Offset(0, 4),
+                    blurRadius: context.rem(1.125),
+                    offset: Offset(0, context.rem(AppRem.xs)),
                   )
                 else if (isHovered)
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.50),
-                    blurRadius: 12,
-                    offset: const Offset(0, 3),
+                    blurRadius: context.rem(AppRem.ms),
+                    offset: Offset(0, context.rem(0.1875)),
                   ),
               ],
             ),
-            padding: EdgeInsets.all(isCompact ? 10 : 12),
+            padding: EdgeInsets.all(context.rem(isCompact ? 0.625 : AppRem.ms)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -648,10 +649,10 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   children: [
                     // Thumbnail Container
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       child: Container(
-                        width: isSelected ? 116 : (isCompact ? 92 : 104),
-                        height: isSelected ? 68 : (isCompact ? 56 : 62),
+                        width: context.rem(isSelected ? 7.25 : (isCompact ? 5.75 : 6.5)),
+                        height: context.rem(isSelected ? 4.25 : (isCompact ? 3.5 : 3.875)),
                         color: const Color(0xFF1A1F2C),
                         child: Stack(
                           fit: StackFit.expand,
@@ -678,19 +679,19 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
 
                             // Episode Badge on Thumbnail
                             Positioned(
-                              left: 5,
-                              bottom: 5,
+                              left: context.rem(0.3125),
+                              bottom: context.rem(0.3125),
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
                                 decoration: BoxDecoration(
                                   color: Colors.black.withValues(alpha: 0.75),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                                 ),
                                 child: Text(
                                   context.l10n.playerEpShort(epNum),
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: TvType.scale(10),
+                                    fontSize: TvType.scale(AppType.micro),
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.4,
                                   ),
@@ -702,16 +703,16 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                             if (isSelected || isHovered)
                               Center(
                                 child: Container(
-                                  padding: const EdgeInsets.all(6),
+                                  padding: EdgeInsets.all(context.rem(AppRem.snug)),
                                   decoration: BoxDecoration(
                                     color: (isSelected ? PlayerTheme.accent : Colors.black)
                                         .withValues(alpha: 0.85),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.play_arrow_rounded,
                                     color: Colors.white,
-                                    size: 16,
+                                    size: context.rem(AppRem.iconXs),
                                   ),
                                 ),
                               ),
@@ -720,7 +721,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    SizedBox(width: context.rem(AppRem.ms)),
 
                     // Episode Title & Details
                     Expanded(
@@ -732,11 +733,11 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                               // "NOW PLAYING" Badge
                               if (isCurrentPlaying) ...[
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  margin: const EdgeInsetsDirectional.only(end: 6),
+                                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
+                                  margin: EdgeInsetsDirectional.only(end: context.rem(AppRem.snug)),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF10B981).withValues(alpha: 0.20),
-                                    borderRadius: BorderRadius.circular(5),
+                                    borderRadius: BorderRadius.circular(context.rem(0.3125)),
                                     border: Border.all(
                                       color: const Color(0xFF10B981).withValues(alpha: 0.60),
                                     ),
@@ -745,19 +746,19 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Container(
-                                        width: 6,
-                                        height: 6,
+                                        width: context.rem(AppRem.snug),
+                                        height: context.rem(AppRem.snug),
                                         decoration: const BoxDecoration(
                                           color: Color(0xFF10B981),
                                           shape: BoxShape.circle,
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
+                                      SizedBox(width: context.rem(AppRem.xs)),
                                       Text(
                                         context.l10n.playerPlaying.toUpperCase(),
                                         style: TextStyle(
                                           color: const Color(0xFF34D399),
-                                          fontSize: TvType.scale(9.5),
+                                          fontSize: TvType.scale(AppType.nanoPlus),
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: 0.5,
                                         ),
@@ -772,7 +773,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                                   video.released!,
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.50),
-                                    fontSize: 11,
+                                    fontSize: AppType.tiny,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -780,7 +781,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                             ],
                           ),
 
-                          const SizedBox(height: 3),
+                          SizedBox(height: context.rem(0.1875)),
 
                           // Episode Title
                           Text(
@@ -789,7 +790,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                               color: isSelected
                                   ? const Color(0xFF9D84FF)
                                   : (isCurrentPlaying ? const Color(0xFF34D399) : Colors.white),
-                              fontSize: isSelected ? 14.5 : 13.5,
+                              fontSize: isSelected ? AppType.bodyPlus : AppType.smallPlus,
                               fontWeight: isSelected || isCurrentPlaying
                                   ? FontWeight.w700
                                   : FontWeight.w600,
@@ -800,13 +801,13 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                           ),
 
                           if (!isSelected && hasOverview) ...[
-                            const SizedBox(height: 3),
+                            SizedBox(height: context.rem(0.1875)),
                             Text(
                               video.overview!,
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.55),
-                                fontSize: 11.5,
-                                height: 1.25,
+                                fontSize: AppType.tinyPlus,
+                                height: 1.25, // ratio: a line height, not a size
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -820,19 +821,19 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
 
                 // Expanded Section for Selected Episode
                 if (isSelected) ...[
-                  const SizedBox(height: 10),
+                  SizedBox(height: context.rem(0.625)),
                   if (hasOverview) ...[
                     Text(
                       video.overview!,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
-                        fontSize: 12.0,
-                        height: 1.35,
+                        fontSize: AppType.caption,
+                        height: 1.35, // ratio: a line height, not a size
                       ),
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: context.rem(AppRem.ms)),
                   ],
 
                   // "SELECT SOURCE / PLAY" Action Button
@@ -840,32 +841,32 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                     color: Colors.transparent,
                     child: InkWell(
                       onTap: () => widget.onEpisodeSelected(video),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       child: Container(
-                        constraints: const BoxConstraints(minHeight: 38),
+                        constraints: BoxConstraints(minHeight: context.rem(2.375)),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [AppColors.accent, const Color(0xFF9D84FF)],
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.accent.withValues(alpha: 0.45),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
+                              blurRadius: context.rem(0.625),
+                              offset: Offset(0, context.rem(AppRem.xxs)),
                             ),
                           ],
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: 18),
-                            const SizedBox(width: 8),
+                            Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: context.rem(AppRem.iconSm)),
+                            SizedBox(width: context.rem(AppRem.sm)),
                             Text(
                               context.l10n.playerSelectSources,
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 13,
+                                fontSize: AppType.small,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.1,
                               ),
@@ -893,7 +894,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
       child: Icon(
         Icons.tv_rounded,
         color: Colors.white.withValues(alpha: 0.20),
-        size: 26,
+        size: context.rem(1.625),
       ),
     );
   }
@@ -909,22 +910,22 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
           child: Container(
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(context.rem(AppRem.snug)),
             decoration: BoxDecoration(
               color: const Color(0xD9080C14),
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
                   color: Colors.black54,
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
+                  blurRadius: context.rem(AppRem.sm),
+                  offset: Offset(0, context.rem(AppRem.xxs)),
                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: Icon(icon, color: Colors.white, size: context.rem(AppRem.icon)),
           ),
         ),
       ),
