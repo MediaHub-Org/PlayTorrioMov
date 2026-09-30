@@ -5,11 +5,27 @@ import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../models/anime/anime_media.dart';
+import '../../services/app_units.dart';
 import '../../services/titles/title_display.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+
+// This card's own sizes, in rem (the shared poster ones are in AppRem).
+const double _kBadgePadX = 0.4375;
+const double _kBadgePadY = 0.21875;
+const double _kBadgeRadius = 0.5;
+const double _kTagPadY = 0.1875;
+const double _kTagRadius = 0.4375;
+const double _kDotGap = 0.4375;
+const double _kStarSize = 0.8125;
+const double _kPlayPad = 0.4375;
+const double _kPlayIcon = 1;
+const double _kLift = 0.375;
+const double _kTitleFont = 15.5;
+const double _kScoreFont = 11;
+const double _kTagFont = 9.5;
 
 /// The keys that activate a focused [AnimeCard]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -80,7 +96,7 @@ class _AnimeCardState extends State<AnimeCard> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 170),
               curve: Curves.easeOutCubic,
-              transform: Matrix4.translationValues(0, hovered ? -6 : 0, 0),
+              transform: Matrix4.translationValues(0, hovered ? -context.rem(_kLift) : 0, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -93,22 +109,22 @@ class _AnimeCardState extends State<AnimeCard> {
                   ),
 
                   // Title
-                  const SizedBox(height: 9),
+                  SizedBox(height: context.rem(AppRem.posterInset)),
                   Text(
                     animeDisplayTitle(anime),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 15.5,
-                      height: 1.15,
+                      fontSize: _kTitleFont,
+                      height: 1.15, // ratio: a line height, not a size
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -0.25,
+                      letterSpacing: -0.25, // px: tracking, not a layout size
                       color: AppColors.ink,
                     ),
                   ),
 
                   // Year / Format / Genre
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.rem(AppRem.xs)),
                   Row(
                     children: [
                       if (anime.seasonYear > 0) ...[
@@ -121,17 +137,17 @@ class _AnimeCardState extends State<AnimeCard> {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: AppType.small,
                               color: AppColors.inkAlpha(0.52),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 7),
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(_kDotGap)),
                           child: Container(
-                            width: 4,
-                            height: 4,
+                            width: context.rem(AppRem.xs),
+                            height: context.rem(AppRem.xs),
                             decoration: BoxDecoration(
                               color: AppColors.inkAlpha(0.26),
                               shape: BoxShape.circle,
@@ -147,7 +163,7 @@ class _AnimeCardState extends State<AnimeCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppType.small,
                             color: AppColors.inkAlpha(0.42),
                             fontWeight: FontWeight.w600,
                           ),
@@ -180,29 +196,31 @@ class _AnimePosterFrame extends StatelessWidget {
     AppColors.dependOn(context);
     final posterUrl = anime.coverUrl;
     final hasPoster = posterUrl.isNotEmpty;
+    final radius = context.rem(AppRem.radiusXl);
+    final inset = context.rem(AppRem.posterInset);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 170),
       curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: hovered ? 0.60 : 0.34),
-            blurRadius: hovered ? 32 : 20,
-            offset: Offset(0, hovered ? 18 : 10),
+            blurRadius: context.rem(hovered ? AppRem.blurXl : AppRem.blurLg),
+            offset: Offset(0, context.rem(hovered ? AppRem.posterHoverOffset : AppRem.posterRestOffset)),
           ),
           if (hovered)
             BoxShadow(
               color: AppThemeService.currentPalette.value.primaryColor.withValues(alpha: 0.28),
-              blurRadius: 34,
-              spreadRadius: 1,
-              offset: const Offset(0, 8),
+              blurRadius: context.rem(AppRem.posterGlow),
+              spreadRadius: 1, // px: a hairline of glow, not a size
+              offset: Offset(0, context.rem(AppRem.sm)),
             ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(radius),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -242,31 +260,34 @@ class _AnimePosterFrame extends StatelessWidget {
             // Top Left Rating Badge
             if (anime.averageScore > 0)
               Positioned(
-                top: 9,
-                left: 9,
+                top: inset,
+                left: inset,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3.5),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.rem(_kBadgePadX),
+                    vertical: context.rem(_kBadgePadY),
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(context.rem(_kBadgeRadius)),
                     border: Border.all(
                       color: const Color(0xFFFFD700).withValues(alpha: 0.35),
-                      width: 1,
+                      width: 1, // px: a hairline border
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star_rounded,
-                        size: 13,
-                        color: Color(0xFFFFD700),
+                        size: context.rem(_kStarSize),
+                        color: const Color(0xFFFFD700),
                       ),
-                      const SizedBox(width: 3),
+                      SizedBox(width: context.rem(AppRem.xxs)),
                       Text(
                         anime.formattedScore,
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: _kScoreFont,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFFFFD700),
                         ),
@@ -279,18 +300,21 @@ class _AnimePosterFrame extends StatelessWidget {
             // Bottom Overlay with Episode Count
             if (anime.totalEpisodes > 0)
               Positioned(
-                bottom: 9,
-                left: 9,
+                bottom: inset,
+                left: inset,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.rem(_kBadgePadX),
+                    vertical: context.rem(_kTagPadY),
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.72),
-                    borderRadius: BorderRadius.circular(7),
+                    borderRadius: BorderRadius.circular(context.rem(_kTagRadius)),
                   ),
                   child: Text(
                     context.l10n.animeEpsShort(anime.totalEpisodes),
                     style: TextStyle(
-                      fontSize: TvType.scale(9.5),
+                      fontSize: TvType.scale(_kTagFont),
                       fontWeight: FontWeight.bold,
                       color: AppColors.onAccent.withValues(alpha: 0.70),
                     ),
@@ -301,18 +325,18 @@ class _AnimePosterFrame extends StatelessWidget {
             // Hover Play Glow Icon
             if (hovered)
               Positioned(
-                bottom: 9,
-                right: 9,
+                bottom: inset,
+                right: inset,
                 child: Container(
-                  padding: const EdgeInsets.all(7),
+                  padding: EdgeInsets.all(context.rem(_kPlayPad)),
                   decoration: BoxDecoration(
                     color: AppColors.accent,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.play_arrow_rounded,
                     color: AppColors.onAccent,
-                    size: 16,
+                    size: context.rem(_kPlayIcon),
                   ),
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../movie/movie_card.dart';
 import 'browse_row_view.dart';
 import 'error_view.dart';
@@ -12,6 +13,24 @@ import 'pill_filter_header_bar.dart' show pillFilterHeaderHeightOf;
 import 'poster_skeleton.dart';
 import 'slider_arrow.dart';
 import '../../services/theme/app_colors.dart';
+
+// The hero's height bounds, in rem: the window's own height decides where a
+// hero lands between them, these only stop a short window leaving a sliver
+// and a tall one a hero taller than any poster is worth.
+const double _kHeroMinPhone = 21.25;
+const double _kHeroMinTablet = 22.5;
+const double _kHeroMinDesktop = 23.75;
+const double _kFillMaxPhone = 35;
+const double _kFillMaxTablet = 43.75;
+const double _kFillMaxDesktop = 56.25;
+const double _kDefaultMaxPhone = 26.25;
+const double _kDefaultMaxTablet = 30;
+const double _kDefaultMaxDesktop = 35;
+
+// The carousel's page dots, and the loading skeleton's title bar.
+const double _kDotMargin = 0.1875;
+const double _kDotActive = 1.125;
+const double _kTitleBoneWidth = 8.75;
 
 /// One horizontal row of a [BrowseScaffold].
 class BrowseRow<T> {
@@ -61,7 +80,7 @@ class BrowseScaffold<T> extends StatefulWidget {
   final Widget Function(BuildContext context, T item) itemBuilder;
 
   /// Overrides [rows]' default poster sizing -- see [BrowseRowView.sizingOf].
-  final RowCardSizing Function(double screenWidth)? rowSizingOf;
+  final RowCardSizing Function(double screenWidth, double scale)? rowSizingOf;
 
   /// A search button, filters, a sub-tab bar.
   ///
@@ -218,24 +237,35 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
   /// taller than any poster is worth. Between those the size is exact, which
   /// is what makes it adapt to the window instead of to a breakpoint.
   double _fillHeroHeight(double width, double remaining) {
-    if (width < 600) return remaining.clamp(340.0, 560.0);
-    if (width < 1100) return remaining.clamp(360.0, 700.0);
-    return remaining.clamp(380.0, 900.0);
+    if (width < 600) {
+      return remaining.clamp(context.rem(_kHeroMinPhone), context.rem(_kFillMaxPhone));
+    }
+    if (width < 1100) {
+      return remaining.clamp(context.rem(_kHeroMinTablet), context.rem(_kFillMaxTablet));
+    }
+    return remaining.clamp(context.rem(_kHeroMinDesktop), context.rem(_kFillMaxDesktop));
   }
 
   // Height-relative like Anime's and Live TV's hero carousels, not the flat
   // 240/320/420 width tiers this used to have -- those capped out well under
   // upstream's own pre-fork hero (up to 680px on desktop).
   double _defaultHeroHeight(double width, double screenHeight) {
-    if (width < 600) return (screenHeight * 0.42).clamp(340.0, 420.0);
-    if (width < 1100) return (screenHeight * 0.48).clamp(360.0, 480.0);
-    return (screenHeight * 0.52).clamp(380.0, 560.0);
+    if (width < 600) {
+      return (screenHeight * 0.42).clamp(context.rem(_kHeroMinPhone), context.rem(_kDefaultMaxPhone));
+    }
+    if (width < 1100) {
+      return (screenHeight * 0.48).clamp(context.rem(_kHeroMinTablet), context.rem(_kDefaultMaxTablet));
+    }
+    return (screenHeight * 0.52).clamp(context.rem(_kHeroMinDesktop), context.rem(_kDefaultMaxDesktop));
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final sizing = MovieCardSizing.fromWidth(width);
+    final sizing = MovieCardSizing.fromWidth(
+      width,
+      scale: AppUnits.scaleOf(context),
+    );
 
     final hasContent =
         widget.error == null &&
@@ -371,7 +401,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
           if (widget.afterRows != null)
             SliverToBoxAdapter(child: widget.afterRows!),
         ],
-        const SliverToBoxAdapter(child: SizedBox(height: 96)),
+        SliverToBoxAdapter(child: SizedBox(height: context.rem(AppRem.pageTail))),
       ],
     );
 
@@ -416,7 +446,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                 top: 0,
                 left: 0,
                 right: 0,
-                height: pillFilterHeaderHeightOf(context) * 2,
+                height: pillFilterHeaderHeightOf(context) * 2, // ratio: two bars tall
                 child: const IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
@@ -442,7 +472,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutCubic,
-                left: isHoveringCarousel ? 12 : -60,
+                left: context.rem(isHoveringCarousel ? AppRem.ms : -AppRem.arrowParked),
                 top: 0,
                 bottom: 0,
                 child: Center(
@@ -462,7 +492,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               AnimatedPositioned(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeOutCubic,
-                right: isHoveringCarousel ? 12 : -60,
+                right: context.rem(isHoveringCarousel ? AppRem.ms : -AppRem.arrowParked),
                 top: 0,
                 bottom: 0,
                 child: Center(
@@ -482,7 +512,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
             ],
             if (widget.heroItems.length > 1)
               Positioned(
-                bottom: 12,
+                bottom: context.rem(AppRem.ms),
                 left: 0,
                 right: 0,
                 child: Row(
@@ -495,14 +525,14 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                         onTap: () => goToHeroPage(i),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.symmetric(horizontal: 3),
-                          width: i == currentHeroIndex ? 18 : 6,
-                          height: 6,
+                          margin: EdgeInsets.symmetric(horizontal: context.rem(_kDotMargin)),
+                          width: context.rem(i == currentHeroIndex ? _kDotActive : AppRem.snug),
+                          height: context.rem(AppRem.snug),
                           decoration: BoxDecoration(
                             color: i == currentHeroIndex
                                 ? AppColors.onAccent
                                 : AppColors.onAccent.withValues(alpha: 0.38),
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius: BorderRadius.circular(context.rem(_kDotMargin)),
                           ),
                         ),
                       ),
@@ -531,23 +561,23 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
             MediaQuery.sizeOf(context).height,
             viewportHeight,
           ),
-          margin: const EdgeInsets.only(bottom: AppSpacing.md),
+          margin: EdgeInsets.only(bottom: context.rem(AppRem.md)),
           color: AppColors.inkAlpha(0.04),
         ),
         for (var r = 0; r < 2; r++) ...[
           Padding(
             padding: EdgeInsets.fromLTRB(
               AppSpacing.pageInset(context),
-              8,
+              context.rem(AppRem.sm),
               AppSpacing.pageInset(context),
-              12,
+              context.rem(AppRem.ms),
             ),
             child: Container(
-              width: 140,
-              height: 20,
+              width: context.rem(_kTitleBoneWidth),
+              height: context.rem(AppRem.icon),
               decoration: BoxDecoration(
                 color: AppColors.inkAlpha(0.06),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
               ),
             ),
           ),
@@ -565,7 +595,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: context.rem(AppRem.md)),
         ],
       ],
     );

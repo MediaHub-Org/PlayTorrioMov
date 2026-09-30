@@ -87,6 +87,25 @@ abstract final class AppRem {
   static const double ruleWidthCompact = 2.125;
   static const double ruleWidth = 2.5;
 
+  // A poster card's width bounds and the text block (title and year) under
+  // its poster; see MovieCardSizing.
+  static const double cardMin = 6.75;
+  static const double cardMax = 10.5;
+  static const double cardText = 4.125;
+
+  // A poster's inset for what is drawn on it and the gap under it, and the
+  // lift and glow of its shadow when it is hovered or focused.
+  static const double posterInset = 0.5625;
+  static const double posterRestOffset = 0.625;
+  static const double posterHoverOffset = 1.125;
+  static const double posterGlow = 2.125;
+
+  // Clear space under the last row, so the mini player never covers it.
+  static const double pageTail = 6;
+
+  // How far a hidden slider arrow is parked past the row's edge.
+  static const double arrowParked = 3.75;
+
   // The music mini-player's least height.
   static const double miniPlayer = 3.75;
 
@@ -94,6 +113,7 @@ abstract final class AppRem {
   static const double blurSm = 0.625;
   static const double blur = 0.75;
   static const double blurLg = 1.25;
+  static const double blurXl = 2;
 
   // The TV side menu's width bounds, which the window width sits between.
   static const double menuMin = 9.25;

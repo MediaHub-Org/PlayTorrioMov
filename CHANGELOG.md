@@ -30,7 +30,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   headers (`TopBar.height` is now optional and defaults to `AppRem.bar`).
   The third finishes the chrome: the phone's bottom tab bar, the pill filter
   bar, the music mini-player bar and the logo. The mini-player's height is a
-  floor now, so its text can grow. The rest of the code is not migrated yet;
+  floor now, so its text can grow. The fourth moves the poster cards and rows:
+  `MovieCard`, `AnimeCard`, `BrowseRowView`, `BrowseScaffold` and the card
+  sizing (`MovieCardSizing.of(context)` / `fromWidth(width, scale:)`, and
+  `sizingOf` now also receives the text-size factor), so a card's bounds, its
+  text block and the row gaps follow the text size; at the default size they
+  are the same 108-168 px as before. The rest of the code is not migrated yet;
   see the roadmap. Unverified on a device: the hero buttons and side menu
   keep their look at the default text size apart from a few pixels (the anime
   Play button is now the same size as the movie one).

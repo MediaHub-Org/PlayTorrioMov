@@ -99,7 +99,7 @@ void main() {
       await tester.pumpWidget(wrap(BrowseRowView<String>(
         title: 'Channels',
         items: const ['one'],
-        sizingOf: (_) => const RowCardSizing(
+        sizingOf: (_, __) => const RowCardSizing(
           cardWidth: 77,
           totalHeight: 140,
           spacing: 16,

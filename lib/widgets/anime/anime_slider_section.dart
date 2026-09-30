@@ -36,8 +36,7 @@ class AnimeSliderSection extends StatelessWidget {
       onSeeAll: onSeeAll,
       itemBuilder: (context, anime) => AnimeCard(
         anime: anime,
-        width: MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width)
-            .cardWidth,
+        width: MovieCardSizing.of(context).cardWidth,
         onTap: () => onAnimeTap(anime),
       ),
     );

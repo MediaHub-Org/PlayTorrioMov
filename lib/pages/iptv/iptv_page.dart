@@ -300,7 +300,8 @@ class _IptvPageState extends State<IptvPage> {
       ),
       // Channel art is a logo or a banner, not a poster, so these rows keep
       // their own card shape rather than being forced into the 2:3 default.
-      rowSizingOf: (width) => IptvCardSizing.fromWidth(width).toRowSizing(),
+      rowSizingOf: (width, scale) =>
+          IptvCardSizing.fromWidth(width, scale: scale).toRowSizing(),
       heroInterval: IptvSettings.heroAutoRotate.value
           ? Duration(seconds: IptvSettings.heroRotateSeconds.value)
           : null,

@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import '../../models/movie/movie.dart';
 import '../../models/movie/movie_year.dart';
 import '../../pages/details/details_page.dart';
@@ -18,14 +19,18 @@ import '../../services/tv_type.dart';
 // instead of stepping between fixed pixel values (see
 // AppSpacing.cardWidthForScreenWidth, and #80 for why).
 //
-//   Up to 900px wide : a flat 108 px.
-//   900 – 1400px wide: scales linearly from 108 to 168 px.
-//   1400px and up    : a flat 168 px -- desktop browser windows and TVs
+//   Up to 900px wide : a flat 6.75 rem (108 px at the default text size).
+//   900 – 1400px wide: scales linearly from 6.75 to 10.5 rem (168 px).
+//   1400px and up    : a flat 10.5 rem -- desktop browser windows and TVs
 //                      both land here, and both used to get 205 px before
 //                      real TV testing said that read as oversized.
 //
 // Aspect ratio 1:1.48  (width × 1.48 = poster height).
-// Total card height = poster + 66 px for title / year.
+// Total card height = poster + 4.125 rem for title / year.
+//
+// The bounds are rem, so a larger text size grows the cards with it; the
+// window width still decides where between them a card lands. [scale] is the
+// text-size factor (AppUnits.scaleOf); the default is the 1x layout.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class MovieCardSizing {
@@ -43,21 +48,29 @@ class MovieCardSizing {
     required this.sidePadding,
   });
 
-  factory MovieCardSizing.fromWidth(double screenWidth) {
+  /// Sized for this context's window and text size: what a caller that has
+  /// no measured width of its own should use.
+  factory MovieCardSizing.of(BuildContext context) => MovieCardSizing.fromWidth(
+        MediaQuery.sizeOf(context).width,
+        scale: AppUnits.scaleOf(context),
+      );
+
+  factory MovieCardSizing.fromWidth(double screenWidth, {double scale = 1}) {
+    final rem = AppUnits.remPixels * scale;
     final cardWidth = AppSpacing.cardWidthForScreenWidth(
       screenWidth,
-      min: 108,
-      max: 168,
+      min: AppRem.cardMin * rem,
+      max: AppRem.cardMax * rem,
     );
 
     final posterHeight = cardWidth * 1.48;
-    final totalHeight = posterHeight + 66;
+    final totalHeight = posterHeight + AppRem.cardText * rem;
 
     return MovieCardSizing(
       cardWidth: cardWidth,
       posterHeight: posterHeight,
       totalHeight: totalHeight,
-      spacing: 16,
+      spacing: AppRem.md * rem,
       // The page gutter, not a number of its own: a row's first card has
       // to line up with the section title above it and the filter bar
       // above that.
@@ -69,6 +82,23 @@ class MovieCardSizing {
 // ─────────────────────────────────────────────────────────────────────────────
 // Movie Card
 // ─────────────────────────────────────────────────────────────────────────────
+
+// This card's own sizes, in rem: too specific to belong in AppRem, too
+// numerous to leave as bare numbers.
+const double _kBadgeRadius = 0.4375;
+const double _kBadgePadX = 0.375;
+const double _kBadgePadY = 0.21875;
+const double _kDotGap = 0.4375;
+const double _kPlayInset = 0.625;
+const double _kPlaySize = 2.4375;
+const double _kPlayIcon = 1.8125;
+const double _kPlayBlur = 1;
+const double _kPlayOffset = 0.4375;
+
+/// The card's title size, a touch above [AppType.bodyLg] so a one-line name
+/// still reads at a poster's width.
+const double _kTitleFont = 15.5;
+const double _kRatingFont = 10.5;
 
 class MovieCard extends StatelessWidget {
   final Movie movie;
@@ -105,21 +135,21 @@ class MovieCard extends StatelessWidget {
             ),
 
             // ── Title ───────────────────────────────────────────────
-            const SizedBox(height: 9),
+            SizedBox(height: context.rem(AppRem.posterInset)),
             Text(
               movie.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 15.5,
-                height: 1.15,
+                fontSize: _kTitleFont,
+                height: 1.15, // ratio: a line height, not a size
                 fontWeight: FontWeight.w800,
-                letterSpacing: -0.25,
+                letterSpacing: -0.25, // px: tracking, not a layout size
               ),
             ),
 
             // ── Year / type ─────────────────────────────────────────
-            const SizedBox(height: 4),
+            SizedBox(height: context.rem(AppRem.xs)),
             Row(
               children: [
                 if (movie.year != null && movie.year!.isNotEmpty)
@@ -132,7 +162,7 @@ class MovieCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: AppType.small,
                         color: AppColors.ink.withOpacity(0.52),
                         fontWeight: FontWeight.w600,
                       ),
@@ -140,10 +170,10 @@ class MovieCard extends StatelessWidget {
                   ),
                 if (movie.year != null && movie.year!.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(_kDotGap)),
                     child: Container(
-                      width: 4,
-                      height: 4,
+                      width: context.rem(AppRem.xs),
+                      height: context.rem(AppRem.xs),
                       decoration: BoxDecoration(
                         color: AppColors.ink.withOpacity(0.26),
                         shape: BoxShape.circle,
@@ -156,7 +186,7 @@ class MovieCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: AppType.small,
                       color: AppColors.ink.withOpacity(0.42),
                       fontWeight: FontWeight.w600,
                     ),
@@ -191,29 +221,30 @@ class _PosterFrame extends StatelessWidget {
     AppColors.dependOn(context);
     final hasPoster = posterUrl != null && posterUrl!.isNotEmpty;
     final palette = AppThemeService.currentPalette.value;
+    final radius = context.rem(AppRem.radiusXl);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 170),
       curve: Curves.easeOutCubic,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(hovered ? 0.60 : 0.34),
-            blurRadius: hovered ? 32 : 20,
-            offset: Offset(0, hovered ? 18 : 10),
+            blurRadius: context.rem(hovered ? AppRem.blurXl : AppRem.blurLg),
+            offset: Offset(0, context.rem(hovered ? AppRem.posterHoverOffset : AppRem.posterRestOffset)),
           ),
           if (hovered)
             BoxShadow(
               color: palette.primaryColor.withOpacity(0.35),
-              blurRadius: 34,
-              spreadRadius: 1,
-              offset: const Offset(0, 8),
+              blurRadius: context.rem(AppRem.posterGlow),
+              spreadRadius: 1, // px: a hairline of glow, not a size
+              offset: Offset(0, context.rem(AppRem.sm)),
             ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(radius),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -280,27 +311,30 @@ class _PosterFrame extends StatelessWidget {
                   final parsed = double.tryParse(imdbRating!);
                   final displayRating = parsed != null ? (parsed % 1 == 0 ? parsed.toInt().toString() : parsed.toStringAsFixed(1)) : imdbRating!;
                   return Positioned(
-                    right: 9,
-                    top: 9,
+                    right: context.rem(AppRem.posterInset),
+                    top: context.rem(AppRem.posterInset),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3.5),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.rem(_kBadgePadX),
+                        vertical: context.rem(_kBadgePadY),
+                      ),
                       decoration: BoxDecoration(
                         // A scrim over the poster, not a theme surface: it
                         // stays dark so the onAccent-white rating on it reads
                         // in either theme.
                         color: const Color(0xE6080A0F),
-                        borderRadius: BorderRadius.circular(7),
+                        borderRadius: BorderRadius.circular(context.rem(_kBadgeRadius)),
                         border: Border.all(color: AppColors.onAccent.withValues(alpha: 0.15)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star_rounded, color: Color(0xFFFFB800), size: 12),
-                          const SizedBox(width: 3),
+                          Icon(Icons.star_rounded, color: const Color(0xFFFFB800), size: context.rem(AppRem.ms)),
+                          SizedBox(width: context.rem(AppRem.xxs)),
                           Text(
                             displayRating,
                             style: TextStyle(
-                              fontSize: TvType.scale(10.5),
+                              fontSize: TvType.scale(_kRatingFont),
                               fontWeight: FontWeight.w800,
                               color: AppColors.onAccent,
                             ),
@@ -318,12 +352,12 @@ class _PosterFrame extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 170),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(radius),
                     border: Border.all(
                       color: hovered
                           ? AppColors.onAccent.withValues(alpha: 0.28)
                           : AppColors.onAccent.withValues(alpha: 0.08),
-                      width: hovered ? 1.35 : 1,
+                      width: hovered ? 1.35 : 1, // px: a hairline border
                     ),
                   ),
                 ),
@@ -332,8 +366,8 @@ class _PosterFrame extends StatelessWidget {
 
             // Play button (bottom-right, hover reveal)
             Positioned(
-              right: 10,
-              bottom: 10,
+              right: context.rem(_kPlayInset),
+              bottom: context.rem(_kPlayInset),
               child: AnimatedOpacity(
                 opacity: hovered ? 1 : 0,
                 duration: const Duration(milliseconds: 150),
@@ -342,25 +376,25 @@ class _PosterFrame extends StatelessWidget {
                   duration: const Duration(milliseconds: 150),
                   curve: Curves.easeOutBack,
                   child: Container(
-                    width: 39,
-                    height: 39,
+                    width: context.rem(_kPlaySize),
+                    height: context.rem(_kPlaySize),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.onAccent.withValues(alpha: 0.95),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.40),
-                          blurRadius: 16,
-                          offset: const Offset(0, 7),
+                          blurRadius: context.rem(_kPlayBlur),
+                          offset: Offset(0, context.rem(_kPlayOffset)),
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       // Dark glyph on the white circle above, which is itself
                       // onAccent over the poster -- fixed in either theme.
                       Icons.play_arrow_rounded,
-                      color: Color(0xFF11131B),
-                      size: 29,
+                      color: const Color(0xFF11131B),
+                      size: context.rem(_kPlayIcon),
                     ),
                   ),
                 ),

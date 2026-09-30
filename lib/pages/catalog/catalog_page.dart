@@ -223,7 +223,7 @@ class _CatalogPageState extends State<CatalogPage> {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final topPadding = MediaQuery.of(context).padding.top;
-    final sizing = MovieCardSizing.fromWidth(MediaQuery.sizeOf(context).width);
+    final sizing = MovieCardSizing.of(context);
     final isDesktop = AppBreakpoints.of(context) == ScreenTier.desktop;
     
     // Calculate safe top padding for grid based on if filters are available

@@ -23,6 +23,11 @@ const migratedFiles = <String>[
   'lib/widgets/common/pill_filter_header_bar.dart',
   'lib/widgets/common/universal_play_bar.dart',
   'lib/widgets/common/sidebar_logo.dart',
+  'lib/widgets/movie/movie_card.dart',
+  'lib/widgets/anime/anime_card.dart',
+  'lib/widgets/common/browse_row_view.dart',
+  'lib/widgets/common/browse_scaffold.dart',
+  'lib/widgets/iptv/iptv_slider_section.dart',
 ];
 
 /// A size written as a number. A line that must keep one -- a hairline border,
