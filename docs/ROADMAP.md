@@ -21,8 +21,12 @@ The first item is code work, in batches; the rest need a device.
 - **Sizes in rem and tokens (batches).** The convention is in CONVENTIONS
   ("Sizes") and `lib/services/app_units.dart`; `units_no_raw_pixels_test`
   lists the migrated files. Done: the TV side menu, hero Play/Details, focus
-  helpers. Next, each its own PR: (1) the hub chrome: top bar, section chips,
-  nav shell, filter pills, page headers; (2) cards and rows: `MovieCard`,
+  helpers, and the hub chrome (top bar, section chips, filter dropdown, header
+  pill style, section header). Left in the chrome, because tests and the hero
+  math lean on their static constants: `AdaptiveNavShell`'s bottom bar,
+  `pill_filter_header_bar.dart` (`pillFilterHeaderContentHeight`),
+  `universal_play_bar.dart`, the sidebar logo. Next, each its own PR: (1) those
+  four; (2) cards and rows: `MovieCard`,
   `AnimeCard`, `BrowseRowView`, `BrowseScaffold`, the card sizing; (3) details
   and anime details; (4) the player and its menus; (5) settings; (6) the rest
   of `lib/pages` and `lib/widgets`. Judge each against a device at the default

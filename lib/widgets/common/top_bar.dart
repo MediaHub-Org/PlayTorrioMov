@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 
 import '../../services/app_breakpoints.dart';
-import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import 'section_chips.dart';
 import 'sidebar_logo.dart';
 import '../../services/theme/app_colors.dart';
@@ -38,9 +38,10 @@ import '../../services/theme/app_colors.dart';
 /// be safe as long as desktop always had room to spare, but was never a
 /// definition mobile could have reused.
 class TopBar extends StatelessWidget {
-  /// The height available to the bar. Callers should inset their content by
-  /// this amount so nothing sits beneath the bar.
-  final double height;
+  /// The height available to the bar, or null for the standard one,
+  /// [AppRem.bar] at the current text size. Callers should inset their content
+  /// by this amount so nothing sits beneath the bar.
+  final double? height;
 
   /// Invoked when the settings (gear) button is tapped.
   final VoidCallback? onSettingsTap;
@@ -48,11 +49,13 @@ class TopBar extends StatelessWidget {
   /// Invoked when the search button is tapped.
   final VoidCallback? onSearchTap;
 
-  static const double sharedHeight = 56;
+  /// The standard bar's height at the default text size; it grows with the
+  /// text (see [AppRem.bar]).
+  static const double sharedHeight = AppRem.bar * AppUnits.remPixels;
 
   const TopBar({
     super.key,
-    this.height = sharedHeight,
+    this.height,
     this.onSettingsTap,
     this.onSearchTap,
   });
@@ -66,7 +69,7 @@ class TopBar extends StatelessWidget {
     final tier = AppBreakpoints.of(context);
     final hasSections = tier != ScreenTier.mobile;
     return Container(
-      height: height,
+      height: height ?? context.rem(AppRem.bar),
       decoration: BoxDecoration(
         color: AppColors.bar,
         border: Border(
@@ -78,12 +81,12 @@ class TopBar extends StatelessWidget {
             // white bar reads as a smudge, where the same alpha under a dark
             // one is the lift this bar was designed with.
             color: AppColors.inkAlpha(0.35),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: context.rem(AppRem.blur),
+            offset: Offset(0, context.rem(AppRem.xs)),
           ),
         ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md)),
       // spaceBetween, not a Spacer() alongside Flexible: both default to
       // flex 1, so a Spacer sibling splits the remaining width evenly with
       // the logo's Flexible allocation instead of yielding it all -- since
@@ -103,7 +106,7 @@ class TopBar extends StatelessWidget {
                 const Expanded(child: SectionChips()),
                 if (onSearchTap != null) ...[
                   SearchIconButton(onTap: onSearchTap!),
-                  const SizedBox(width: 8),
+                  SizedBox(width: context.rem(AppRem.sm)),
                 ],
                 if (onSettingsTap != null)
                   SettingsIconButton(onTap: onSettingsTap!),
@@ -118,7 +121,7 @@ class TopBar extends StatelessWidget {
                   children: [
                     if (onSearchTap != null) ...[
                       SearchIconButton(onTap: onSearchTap!),
-                      const SizedBox(width: 8),
+                      SizedBox(width: context.rem(AppRem.sm)),
                     ],
                     if (onSettingsTap != null)
                       SettingsIconButton(onTap: onSettingsTap!),
@@ -146,12 +149,15 @@ class SettingsIconButton extends StatelessWidget {
         onPressed: onTap,
         tooltip: context.l10n.commonSettings,
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+        constraints: BoxConstraints.tightFor(
+        width: context.rem(AppRem.target),
+        height: context.rem(AppRem.target),
+      ),
         style: IconButton.styleFrom(
           backgroundColor: AppColors.inkAlpha(0.04),
           foregroundColor: AppColors.inkMuted,
         ),
-        icon: const Icon(Icons.settings_rounded, size: 20),
+        icon: Icon(Icons.settings_rounded, size: context.rem(AppRem.icon)),
       ),
     );
   }
@@ -172,12 +178,15 @@ class SearchIconButton extends StatelessWidget {
         onPressed: onTap,
         tooltip: context.l10n.commonSearch,
         padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+        constraints: BoxConstraints.tightFor(
+        width: context.rem(AppRem.target),
+        height: context.rem(AppRem.target),
+      ),
         style: IconButton.styleFrom(
           backgroundColor: AppColors.inkAlpha(0.04),
           foregroundColor: AppColors.inkMuted,
         ),
-        icon: const Icon(Icons.search_rounded, size: 20),
+        icon: Icon(Icons.search_rounded, size: context.rem(AppRem.icon)),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/app_units.dart';
 import 'focus_highlight.dart';
 import 'over_artwork.dart';
 
@@ -20,14 +21,13 @@ BoxDecoration headerPillDecoration(BuildContext context) {
   final tint = headerPillTint(context);
   return BoxDecoration(
     color: tint.withValues(alpha: 0.06),
-    borderRadius: const BorderRadius.all(Radius.circular(10)),
+    borderRadius: BorderRadius.all(Radius.circular(context.rem(AppRem.radiusPill))),
     border: Border.fromBorderSide(
       BorderSide(color: tint.withValues(alpha: 0.10)),
     ),
   );
 }
 
-const double headerPillIconSize = 15;
 
 /// Minimum width/height every header pill control (icon-only or not) keeps
 /// as its tap target, even where its visible padding+content would draw
@@ -35,7 +35,7 @@ const double headerPillIconSize = 15;
 /// Material's 48px and iOS HIG's 44px minimum touch target guidance. Set to
 /// 40 to match this app's other small square icon buttons (e.g.
 /// `SettingsIconButton`) rather than inventing a third size.
-const double headerPillMinSize = 40;
+const double headerPillMinSize = AppRem.target * AppUnits.remPixels;
 
 /// A non-interactive pill carrying a label, and optionally an icon before
 /// it -- Live TV's "LIVE TV" and "60+ CHANNELS" markers.
@@ -59,7 +59,7 @@ class HeaderPillLabel extends StatelessWidget {
     required this.label,
     this.icon,
     this.emphasized = true,
-    this.fontSize = 12,
+    this.fontSize = AppType.caption,
     this.letterSpacing = 0.6,
   });
 
@@ -69,7 +69,10 @@ class HeaderPillLabel extends StatelessWidget {
     return DecoratedBox(
       decoration: headerPillDecoration(context),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: EdgeInsets.symmetric(
+          horizontal: context.rem(AppRem.radiusPill),
+          vertical: context.rem(AppRem.sm),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -77,9 +80,9 @@ class HeaderPillLabel extends StatelessWidget {
               Icon(
                 icon,
                 color: tint.withValues(alpha: 0.70),
-                size: headerPillIconSize,
+                size: context.rem(AppRem.iconXs),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
             ],
             Text(
               label,
@@ -115,25 +118,25 @@ class HeaderPillIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FocusHighlight(
-      borderRadius: 14,
+      borderRadius: context.rem(AppRem.radiusPill + AppRem.xs),
       child: Tooltip(
         message: tooltip,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             onTap: onTap,
             child: Container(
-              constraints: const BoxConstraints(
-                minWidth: headerPillMinSize,
-                minHeight: headerPillMinSize,
+              constraints: BoxConstraints(
+                minWidth: context.rem(AppRem.target),
+                minHeight: context.rem(AppRem.target),
               ),
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: headerPillDecoration(context),
               alignment: Alignment.center,
               child: Icon(
                 icon,
-                size: headerPillIconSize,
+                size: context.rem(AppRem.iconXs),
                 color: headerPillTint(context).withValues(alpha: 0.70),
               ),
             ),

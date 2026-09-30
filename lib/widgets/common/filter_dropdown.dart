@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/app_breakpoints.dart';
+import '../../services/app_units.dart';
 import 'focus_highlight.dart';
 import 'header_pill_style.dart';
 import '../../services/theme/app_colors.dart';
@@ -32,7 +33,7 @@ class FilterDropdown<T> extends StatelessWidget {
     // its own band they follow the theme. See the OverArtwork marker.
     final tint = headerPillTint(context);
     return FocusHighlight(
-      borderRadius: 14,
+      borderRadius: context.rem(AppRem.radiusPill + AppRem.xs),
       child: PopupMenuButton<T>(
       itemBuilder: (context) => items,
       onSelected: onSelected,
@@ -41,18 +42,18 @@ class FilterDropdown<T> extends StatelessWidget {
       // menu that opens from it reads as the same shape grown, not a
       // rounder box that starts somewhere else.
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
         side: BorderSide(color: tint.withValues(alpha: 0.10)),
       ),
       tooltip: isMobile ? label : '',
       child: Container(
-        constraints: const BoxConstraints(
-          minWidth: headerPillMinSize,
-          minHeight: headerPillMinSize,
+        constraints: BoxConstraints(
+          minWidth: context.rem(AppRem.target),
+          minHeight: context.rem(AppRem.target),
         ),
         padding: EdgeInsets.symmetric(
-          horizontal: isMobile ? 8 : 12,
-          vertical: 8,
+          horizontal: context.rem(isMobile ? AppRem.sm : AppRem.ms),
+          vertical: context.rem(AppRem.sm),
         ),
         decoration: headerPillDecoration(context),
         alignment: Alignment.center,
@@ -61,16 +62,16 @@ class FilterDropdown<T> extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: headerPillIconSize,
+              size: context.rem(AppRem.iconXs),
               color: tint.withValues(alpha: 0.70),
             ),
             if (!isMobile) ...[
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
               Text(
                 label,
                 style: TextStyle(
                   color: tint,
-                  fontSize: 12.5,
+                  fontSize: AppType.caption,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -78,7 +79,7 @@ class FilterDropdown<T> extends StatelessWidget {
             Icon(
               Icons.arrow_drop_down_rounded,
               color: tint.withValues(alpha: 0.54),
-              size: 18,
+              size: context.rem(AppRem.iconSm),
             ),
           ],
         ),
