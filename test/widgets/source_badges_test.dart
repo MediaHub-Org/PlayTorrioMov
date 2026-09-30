@@ -37,16 +37,16 @@ void main() {
   });
 
   group('sourceDeliveryBadges', () {
-    testWidgets('an HTTP source gets one HTTP badge and no seed count', (
-      tester,
-    ) async {
+    testWidgets('an HTTP source gets no badge at all', (tester) async {
+      // The neutral HTTP/P2P pills were on every row and said nothing; only
+      // the seed count is worth the room (#80).
       await tester.pumpWidget(wrap(sourceDeliveryBadges(http())));
 
-      expect(find.text('HTTP'), findsOneWidget);
-      expect(find.text('P2P'), findsNothing);
+      expect(find.byType(SourceBadge), findsNothing);
+      expect(find.text('HTTP'), findsNothing);
     });
 
-    testWidgets('a torrent gets P2P plus its parsed seed count', (
+    testWidgets('a torrent gets its parsed seed count and nothing else', (
       tester,
     ) async {
       // The count is parsed out of the source title, which is where every
@@ -55,19 +55,19 @@ void main() {
         wrap(sourceDeliveryBadges(torrent(title: 'Movie 1080p 👤 137 seeders'))),
       );
 
-      expect(find.text('P2P'), findsOneWidget);
+      expect(find.byType(SourceBadge), findsOneWidget);
+      expect(find.text('P2P'), findsNothing);
       expect(find.text('137'), findsOneWidget);
     });
 
-    testWidgets('a torrent with no parseable count shows P2P alone', (
+    testWidgets('a torrent with no parseable count shows no badge', (
       tester,
     ) async {
       await tester.pumpWidget(
         wrap(sourceDeliveryBadges(torrent(title: 'Movie 1080p x265'))),
       );
 
-      expect(find.text('P2P'), findsOneWidget);
-      expect(find.byType(SourceBadge), findsOneWidget);
+      expect(find.byType(SourceBadge), findsNothing);
     });
 
     testWidgets('does not invent a seed count from unrelated numbers', (
@@ -85,10 +85,9 @@ void main() {
         await tester.pumpWidget(wrap(sourceDeliveryBadges(torrent(title: title))));
         expect(
           find.byType(SourceBadge),
-          findsOneWidget,
-          reason: 'only the P2P badge should show for: $title',
+          findsNothing,
+          reason: 'no seed badge should show for: $title',
         );
-        expect(find.text('P2P'), findsOneWidget);
       }
     });
 
@@ -114,17 +113,18 @@ void main() {
       }
     });
 
-    testWidgets('a magnet URL with no infoHash still reads as P2P', (
+    testWidgets('a magnet URL with no infoHash still gets its seed count', (
       tester,
     ) async {
       final source = StreamSource(
         name: 'Magnet',
+        title: 'Movie 1080p 👤 12',
         url: 'magnet:?xt=urn:btih:deadbeef',
         addonName: 'Test',
       );
       await tester.pumpWidget(wrap(sourceDeliveryBadges(source)));
 
-      expect(find.text('P2P'), findsOneWidget);
+      expect(find.text('12'), findsOneWidget);
     });
   });
 }

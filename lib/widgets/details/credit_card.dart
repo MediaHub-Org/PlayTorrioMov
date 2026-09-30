@@ -24,8 +24,10 @@ class CreditCard extends StatelessWidget {
   final VoidCallback onTap;
 
   /// The rail's fixed height, which is the whole reason the text below is
-  /// capped. Named rather than assumed so a probe can state it.
-  static const double railHeight = 148;
+  /// capped. Named rather than assumed so a probe can state it. In rem, so
+  /// the avatar and gaps that fill it grow with the text size by the same
+  /// factor as the box.
+  static double railHeightOf(BuildContext context) => context.rem(9.25);
 
   const CreditCard({super.key, required this.credit, required this.onTap});
 
@@ -45,8 +47,8 @@ class CreditCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: context.rem(AppRem.snug)),
-          // The rail is a fixed 148 and the column is avatar + 6 + name + 2 +
-          // role (12, already capped at 1.0). At 3x this 12px name alone wants
+          // The rail is a fixed 148 (at 1x) and the column is avatar + 6 + name +
+          // 2 + role (12, already capped at 1.0). At 3x this 12px name alone wants
           // ~43px and the column asks ~151 of a 148 box. Capped like its
           // sibling rather than the whole rail, because the avatar above it
           // should keep its size (#69).

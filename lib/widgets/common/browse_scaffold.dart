@@ -151,7 +151,7 @@ class BrowseScaffold<T> extends StatefulWidget {
   ///
   /// Sections that size their hero themselves use [heroHeightOf], which
   /// still wins over this.
-  final double Function(double width)? belowHeroExtent;
+  final double Function(double width, double scale)? belowHeroExtent;
 
   final Future<void> Function()? onRefresh;
 
@@ -223,7 +223,10 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
     if (custom != null) return custom;
     final extent = widget.belowHeroExtent;
     if (extent != null && viewportHeight.isFinite && viewportHeight > 0) {
-      return _fillHeroHeight(width, viewportHeight - extent(width));
+      return _fillHeroHeight(
+        width,
+        viewportHeight - extent(width, AppUnits.scaleOf(context)),
+      );
     }
     return _defaultHeroHeight(width, screenHeight);
   }

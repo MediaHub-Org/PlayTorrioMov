@@ -23,19 +23,16 @@ The first item is code work, in batches; the rest need a device.
   the convention is in CONVENTIONS ("Sizes") and `lib/services/app_units.dart`.
   It was made without a device, so a visual drift is the risk: look at the
   default text size (should be unchanged) and at 130% (should grow, not clip).
-  Left in pixels on purpose, each because a test measures a fixed budget:
-  `CreditCard`, `SimilarCard` and `ContinueWatchingSlider` (whose
-  `bandHeight` sizes the hero), plus a few static APIs with no context
-  (`PlayerTheme.menuWidth`, `SettingsScrollView.gutterFor`'s default, the
-  preferred size in `library_tabs`). Moving those means changing their
-  probes in `text_scale_overflow_test` together with them.
+  The fixed-height budgets (`CreditCard`, `SimilarCard`,
+  `ContinueWatchingSlider`) are rem too, each taking the text-size factor so
+  `BrowseScaffold` can still derive the band without building it.
 
 - **D-pad on a TV (#80).** Confirmed on a TV: rows, the side menu and reaching
   every element. Not yet: the menu's new icon-rail form (opens on focus), the
   player's controls coming back on an arrow/OK (and Left/Right seeking with
   them hidden), the trimmed Watch Sources rows, and cards without a ring.
-  Report what the remote does. Open question: the in-player sources panel and
-  the anime episode sheet still show the longer tag set.
+  Report what the remote does. The in-player sources panel and the anime
+  episode sheet now carry the lean tag set too.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
   says so). Cast a direct/CDN source with no header requirement: if it plays,

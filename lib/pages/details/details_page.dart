@@ -1434,7 +1434,7 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           DetailsSectionHeader(context.l10n.detailsCastCrew),
           SizedBox(
-            height: context.rem(DetailsDim.creditsHeight),
+            height: CreditCard.railHeightOf(context),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -1870,7 +1870,7 @@ class _DetailsPageState extends State<DetailsPage>
       min: context.rem(AppRem.cardMin),
       max: context.rem(AppRem.cardMax),
     );
-    final cardHeight = SimilarCard.heightFor(cardWidth);
+    final cardHeight = SimilarCard.heightFor(cardWidth, AppUnits.scaleOf(context));
     final fadeWidth = context.rem(isDesktop ? DetailsDim.fadeDesktop : DetailsDim.fadeMobile);
 
     return MouseRegion(

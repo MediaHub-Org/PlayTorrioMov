@@ -18,11 +18,14 @@ class PlayerTheme {
   /// made grouping any two of them under a single icon a layout change
   /// rather than a wiring change. A menu that needs more room than this
   /// should say why in its own file.
-  static const double menuWidth = 320;
+  static const double menuWidthRem = 20;
 
   /// The width a popover clamps to on a narrow screen, leaving a gutter.
   static double menuWidthFor(BuildContext context) =>
-      menuWidth.clamp(240.0, MediaQuery.sizeOf(context).width - 32);
+      context.rem(menuWidthRem).clamp(
+        context.rem(15),
+        MediaQuery.sizeOf(context).width - context.rem(AppRem.xl),
+      );
 
   // Backgrounds & Surfaces
   static const Color canvas = Color(0xFF080C12);

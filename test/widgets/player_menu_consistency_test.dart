@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
+import 'package:playtorriomov/services/app_units.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
@@ -69,7 +70,7 @@ void main() {
         final card = tester.getSize(find.byType(PlayerGlassCard));
         expect(
           card.width,
-          PlayerTheme.menuWidth,
+          PlayerTheme.menuWidthRem * AppUnits.remPixels,
           reason:
               '${entry.key} is a different width from the rest, so the panel '
               'moves when a viewer switches menus',

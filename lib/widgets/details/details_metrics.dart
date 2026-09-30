@@ -38,7 +38,6 @@ abstract final class DetailsDim {
   static const ratingRadius = 0.3125;
   static const ratingStar = 0.875;
   static const synopsisWidth = 45.0;
-  static const creditsHeight = 9.25;
   static const railArrowTop = 0.625;
   static const railArrowBottom = 2.5;
   static const seasonPadX = 1.375;
