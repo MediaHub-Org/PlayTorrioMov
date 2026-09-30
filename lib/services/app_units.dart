@@ -78,6 +78,9 @@ abstract final class AppRem {
   // The slim bar across the top of the hub.
   static const double bar = 3.5;
 
+  // A rail of chips (the season selector).
+  static const double chipRail = 2.75;
+
   // The phone's bottom tab bar.
   static const double bottomBar = 4;
 
@@ -138,6 +141,7 @@ abstract final class AppType {
   static const double caption = 12;
   static const double small = 13;
   static const double body = 14;
+  static const double bodyMd = 15;
   static const double bodyLg = 16;
   static const double lead = 18;
   static const double title = 21;
