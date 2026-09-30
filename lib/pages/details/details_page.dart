@@ -32,6 +32,7 @@ import '../discover/discover_page.dart';
 import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused [_EpisodeCard]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -46,14 +47,64 @@ final _activators = {
 // ---------------------------------------------------------------------------
 // Design tokens
 // ---------------------------------------------------------------------------
+/// This page's own spacing scale, in rem (one rem is 16 px at the default
+/// text size; see AppUnits). Read through `context.rem(context.rem(_Space.md))`.
 class _Space {
-  static const xs = 8.0;
-  static const sm = 12.0;
-  static const md = 16.0;
-  static const lg = 24.0;
-  static const xl = 32.0;
-  static const xxl = 48.0;
+  static const xs = 0.5;
+  static const sm = 0.75;
+  static const md = 1.0;
+  static const lg = 1.5;
+  static const xl = 2.0;
+  static const xxl = 3.0;
 }
+
+/// This page's other sizes, in rem. Read through `context.rem(_Dim.x)`.
+class _Dim {
+  static const backButton = 2.75; // the floating back button's footprint
+  static const errorIcon = 4.0;
+  static const spinnerPadding = 2.5;
+  static const desktopPoster = 17.5;
+  static const mobilePoster = 6.875;
+  static const posterRadius = 0.875;
+  static const glowBlur = 2.875;
+  static const glowSpread = 0.375;
+  static const posterShadowBlur = 1.875;
+  static const posterShadowLift = 0.875;
+  static const mobileGlowBlur = 1.75;
+  static const logoWidthDesktop = 23.75;
+  static const logoWidthMobile = 13.75;
+  static const logoHeightDesktop = 8.125;
+  static const logoHeightMobile = 5.0;
+  static const ratingPadX = 0.4375;
+  static const ratingPadY = 0.1875;
+  static const ratingRadius = 0.3125;
+  static const ratingStar = 0.875;
+  static const synopsisWidth = 45.0;
+  static const creditsHeight = 9.25;
+  static const railArrowTop = 0.625;
+  static const railArrowBottom = 2.5;
+  static const seasonPadX = 1.375;
+  static const seasonRadius = 1.375;
+  static const episodeWidthDesktop = 18.75;
+  static const episodeWidthMobile = 14.375;
+  static const episodeRailDesktop = 17.1875;
+  static const episodeRailMobile = 15.3125;
+  static const fadeDesktop = 3.75;
+  static const fadeMobile = 2.5;
+  static const fadeOverlap = 0.625;
+  static const similarArrowBottom = 3.75;
+  static const arrowSize = 2.625;
+  static const playGlyphPad = 0.625;
+  static const episodeRadius = 0.75;
+  static const episodeShadowBlur = 1.125;
+  static const contentMaxWidth = 90.0;
+}
+
+// Font sizes without an AppType step, as plain constants (see AppType).
+const double _kTitleDesktop = 40;
+const double _kTitleMobile = 28;
+const double _kEpisodeTitle = 13.5;
+const double _kEpisodeBlurb = 11.5;
 
 class _Palette {
   // Getters, not constants: these follow the theme now that the backdrop is
@@ -189,10 +240,10 @@ class _DetailsPageState extends State<DetailsPage>
     );
     _fadeAnimation = Tween<double>(
       begin: 0.0,
-      end: 1.0,
+      end: 1.0, // ratio: an animation's end value
     ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0, 0.04), end: Offset.zero).animate( // ratio: a slide as a fraction of the widget's own size
           CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
         );
 
@@ -595,15 +646,15 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           Icon(
             Icons.broken_image_rounded,
-            size: 64,
+            size: context.rem(_Dim.errorIcon),
             color: AppColors.inkFaint,
           ),
-          const SizedBox(height: _Space.md),
+          SizedBox(height: context.rem(_Space.md)),
           Text(
             context.l10n.detailsUnavailable,
-            style: TextStyle(color: AppColors.inkSubtle, fontSize: 18),
+            style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.lead),
           ),
-          const SizedBox(height: _Space.lg),
+          SizedBox(height: context.rem(_Space.lg)),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
@@ -624,7 +675,8 @@ class _DetailsPageState extends State<DetailsPage>
     final isDesktop = _isDesktop(context);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    final contentMaxWidth = isDesktop ? 1440.0 : double.infinity;
+    final contentMaxWidth =
+        isDesktop ? context.rem(_Dim.contentMaxWidth) : double.infinity;
     // How far down the poster/title block starts. Previously a fraction of
     // a "hero height" left over from when this page sat below the hub's top
     // bar -- once the page went fullscreen that read as an oversized empty
@@ -633,7 +685,9 @@ class _DetailsPageState extends State<DetailsPage>
     // button (see FloatingBackButton), so size to its own footprint
     // instead: status-bar inset down to its top edge, its own ~44px circle,
     // a little breathing room after it.
-    final topGap = AppSpacing.floatingTopInset(context) + 44 + _Space.md;
+    final topGap = AppSpacing.floatingTopInset(context) +
+        context.rem(_Dim.backButton) +
+        context.rem(_Space.md);
 
     // The backdrop is part of the scroll content and only as tall as the
     // hero block, rather than a pinned layer filling the viewport forever.
@@ -670,7 +724,7 @@ class _DetailsPageState extends State<DetailsPage>
                             isDesktop
                                 ? _buildDesktopLayout(meta, posterUrl)
                                 : _buildMobileLayout(meta, posterUrl),
-                            const SizedBox(height: _Space.xl),
+                            SizedBox(height: context.rem(_Space.xl)),
                           ],
                         ),
                       ),
@@ -679,11 +733,11 @@ class _DetailsPageState extends State<DetailsPage>
                   _contentColumn(
                     isDesktop: isDesktop,
                     maxWidth: contentMaxWidth,
-                    bottomPadding: _Space.xxl + bottomInset,
+                    bottomPadding: context.rem(_Space.xxl) + bottomInset,
                     children: [
                         if (_credits(meta).isNotEmpty) ...[
                           _buildCreditsRow(meta),
-                          const SizedBox(height: _Space.xl),
+                          SizedBox(height: context.rem(_Space.xl)),
                         ],
                         if (meta.videos.isNotEmpty) ...[
                           if (meta.videos
@@ -693,7 +747,7 @@ class _DetailsPageState extends State<DetailsPage>
                                   .length >
                               1) ...[
                             _buildSeasonSelector(meta),
-                            const SizedBox(height: _Space.lg),
+                            SizedBox(height: context.rem(_Space.lg)),
                           ] else ...[
                             DetailsSectionHeader(
                               _isCollection
@@ -734,11 +788,11 @@ class _DetailsPageState extends State<DetailsPage>
                                   // Incoming starts offset, Outgoing ends offset
                                   final Offset beginOffset = isIncoming
                                       ? (slidingRight
-                                            ? const Offset(0.12, 0.0)
-                                            : const Offset(-0.12, 0.0))
+                                            ? const Offset(0.12, 0.0) // ratio
+                                            : const Offset(-0.12, 0.0)) // ratio
                                       : (slidingRight
-                                            ? const Offset(-0.12, 0.0)
-                                            : const Offset(0.12, 0.0));
+                                            ? const Offset(-0.12, 0.0) // ratio
+                                            : const Offset(0.12, 0.0)); // ratio
 
                                   final slideAnimation =
                                       Tween<Offset>(
@@ -754,7 +808,7 @@ class _DetailsPageState extends State<DetailsPage>
                                   final scaleAnimation =
                                       Tween<double>(
                                         begin: 0.94,
-                                        end: 1.0,
+                                        end: 1.0, // ratio
                                       ).animate(
                                         CurvedAnimation(
                                           parent: animation,
@@ -777,34 +831,36 @@ class _DetailsPageState extends State<DetailsPage>
                               key: ValueKey(_selectedSeason),
                             ),
                           ),
-                          const SizedBox(height: _Space.xl),
+                          SizedBox(height: context.rem(_Space.xl)),
                         ],
                         if (widget.relatedItems != null &&
                             widget.relatedItems!.isNotEmpty) ...[
                           _buildRelatedRow(widget.relatedItems!),
-                          const SizedBox(height: _Space.xl),
+                          SizedBox(height: context.rem(_Space.xl)),
                         ],
                         if (_similarItems.isNotEmpty) ...[
                           _buildSimilarRow(),
-                          const SizedBox(height: _Space.xl),
+                          SizedBox(height: context.rem(_Space.xl)),
                         ] else if (_isFetchingSimilar) ...[
                           DetailsSectionHeader(context.l10n.detailsSimilarContent),
-                          const Center(
+                          Center(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40),
+                              padding: EdgeInsets.symmetric(
+                                vertical: context.rem(_Dim.spinnerPadding),
+                              ),
                               child: SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
+                                width: context.rem(AppRem.lg),
+                                height: context.rem(AppRem.lg),
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2.5, // px: a stroke, not a layout size
                                   color: _Palette.accent,
                                 ),
                               ),
                             ),
                           ),
-                          const SizedBox(height: _Space.xl),
+                          SizedBox(height: context.rem(_Space.xl)),
                         ],
-                        const SizedBox(height: _Space.xxl),
+                        SizedBox(height: context.rem(_Space.xxl)),
                     ],
                   ),
                 ],
@@ -832,9 +888,9 @@ class _DetailsPageState extends State<DetailsPage>
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            isDesktop ? _Space.xxl : _Space.lg,
+            isDesktop ? context.rem(_Space.xxl) : context.rem(_Space.lg),
             0,
-            isDesktop ? _Space.xxl : _Space.lg,
+            isDesktop ? context.rem(_Space.xxl) : context.rem(_Space.lg),
             bottomPadding,
           ),
           child: Column(
@@ -936,32 +992,32 @@ class _DetailsPageState extends State<DetailsPage>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 280,
+          width: context.rem(_Dim.desktopPoster),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (posterUrl != null)
                 DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(context.rem(_Dim.posterRadius)),
                     boxShadow: [
                       // subtle accent-tinted glow behind the poster, on top
                       // of the usual drop shadow, so it reads as "lit" rather
                       // than just floating on black
                       BoxShadow(
                         color: _Palette.accent.withOpacity(0.18),
-                        blurRadius: 46,
-                        spreadRadius: -6,
+                        blurRadius: context.rem(_Dim.glowBlur),
+                        spreadRadius: -context.rem(_Dim.glowSpread),
                       ),
                       BoxShadow(
                         color: Colors.black.withOpacity(0.55),
-                        blurRadius: 30,
-                        offset: const Offset(0, 14),
+                        blurRadius: context.rem(_Dim.posterShadowBlur),
+                        offset: Offset(0, context.rem(_Dim.posterShadowLift)),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(context.rem(_Dim.posterRadius)),
                     child: AspectRatio(
                       aspectRatio: 2 / 3,
                       child: CachedNetworkImage(
@@ -975,27 +1031,27 @@ class _DetailsPageState extends State<DetailsPage>
                     ),
                   ),
                 ),
-              const SizedBox(height: _Space.lg),
+              SizedBox(height: context.rem(_Space.lg)),
               _buildPlayButton(fullWidth: true),
-              const SizedBox(height: _Space.sm),
+              SizedBox(height: context.rem(_Space.sm)),
               _buildLibraryButton(),
             ],
           ),
         ),
-        const SizedBox(width: _Space.xl),
+        SizedBox(width: context.rem(_Space.xl)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildLogoOrTitle(meta, isDesktop: true),
-              const SizedBox(height: _Space.md),
+              SizedBox(height: context.rem(_Space.md)),
               _buildMetadataRow(meta),
               if (_synopsisText(meta).isNotEmpty) ...[
-                const SizedBox(height: _Space.lg),
+                SizedBox(height: context.rem(_Space.lg)),
                 _buildSynopsis(_synopsisText(meta)),
               ],
               if (meta.genres.isNotEmpty) ...[
-                const SizedBox(height: _Space.lg),
+                SizedBox(height: context.rem(_Space.lg)),
                 _buildGenreChips(meta.genres),
               ],
             ],
@@ -1015,49 +1071,49 @@ class _DetailsPageState extends State<DetailsPage>
             if (posterUrl != null)
               DecoratedBox(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   boxShadow: [
                     BoxShadow(
                       color: _Palette.accent.withOpacity(0.16),
-                      blurRadius: 28,
-                      spreadRadius: -4,
+                      blurRadius: context.rem(_Dim.mobileGlowBlur),
+                      spreadRadius: -context.rem(AppRem.xs),
                     ),
                     BoxShadow(
                       color: Colors.black.withOpacity(0.5),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
+                      blurRadius: context.rem(AppRem.md),
+                      offset: Offset(0, context.rem(AppRem.sm)),
                     ),
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   child: CachedNetworkImage(
                     imageUrl: posterUrl,
-                    width: 110,
+                    width: context.rem(_Dim.mobilePoster),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-            const SizedBox(width: _Space.md),
+            SizedBox(width: context.rem(_Space.md)),
             Expanded(child: _buildLogoOrTitle(meta, isDesktop: false)),
           ],
         ),
-        const SizedBox(height: _Space.lg),
+        SizedBox(height: context.rem(_Space.lg)),
         _buildMetadataRow(meta),
-        const SizedBox(height: _Space.lg),
+        SizedBox(height: context.rem(_Space.lg)),
         // Play on its own line, the library actions under it. They used to
         // share one Row, which shrank the primary action to make room for the
         // secondary ones and left nothing for a fourth. Stacked, Play gets the
         // full width and the four actions split it between them.
         _buildPlayButton(fullWidth: true),
-        const SizedBox(height: _Space.sm),
+        SizedBox(height: context.rem(_Space.sm)),
         _buildLibraryButton(),
         if (_synopsisText(meta).isNotEmpty) ...[
-          const SizedBox(height: _Space.lg),
+          SizedBox(height: context.rem(_Space.lg)),
           _buildSynopsis(_synopsisText(meta)),
         ],
         if (meta.genres.isNotEmpty) ...[
-          const SizedBox(height: _Space.md),
+          SizedBox(height: context.rem(_Space.md)),
           _buildGenreChips(meta.genres),
         ],
       ],
@@ -1071,8 +1127,8 @@ class _DetailsPageState extends State<DetailsPage>
     if (meta.logo != null && meta.logo!.isNotEmpty) {
       return ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: isDesktop ? 380 : 220,
-          maxHeight: isDesktop ? 130 : 80,
+          maxWidth: context.rem(isDesktop ? _Dim.logoWidthDesktop : _Dim.logoWidthMobile),
+          maxHeight: context.rem(isDesktop ? _Dim.logoHeightDesktop : _Dim.logoHeightMobile),
         ),
         child: CachedNetworkImage(
           imageUrl: meta.logo!,
@@ -1089,16 +1145,16 @@ class _DetailsPageState extends State<DetailsPage>
     return Text(
       text,
       style: TextStyle(
-        fontSize: isDesktop ? 40 : 28,
+        fontSize: isDesktop ? _kTitleDesktop : _kTitleMobile,
         fontWeight: FontWeight.w800,
-        height: 1.1,
-        letterSpacing: -1.0,
+        height: 1.1, // ratio: a line height, not a size
+        letterSpacing: -1.0, // px: tracking, not a layout size
         color: Colors.white,
         shadows: [
           Shadow(
             color: Colors.black.withOpacity(0.7),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
+            blurRadius: context.rem(AppRem.blurLg),
+            offset: Offset(0, context.rem(AppRem.snug)),
           ),
         ],
       ),
@@ -1124,7 +1180,7 @@ class _DetailsPageState extends State<DetailsPage>
           displayYearRange(meta.year),
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 15,
+            fontSize: AppType.bodyMd,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1141,7 +1197,7 @@ class _DetailsPageState extends State<DetailsPage>
         items.add(
           Text(
             context.l10n.detailsSeasonCount(seasonCount),
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
+            style: const TextStyle(color: Colors.white70, fontSize: AppType.body),
           ),
         );
       }
@@ -1149,7 +1205,7 @@ class _DetailsPageState extends State<DetailsPage>
       items.add(
         Text(
           meta.runtime!,
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: const TextStyle(color: Colors.white70, fontSize: AppType.body),
         ),
       );
     }
@@ -1157,22 +1213,25 @@ class _DetailsPageState extends State<DetailsPage>
     if (meta.imdbRating != null && meta.imdbRating!.isNotEmpty) {
       items.add(
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+          padding: EdgeInsets.symmetric(
+            horizontal: context.rem(_Dim.ratingPadX),
+            vertical: context.rem(_Dim.ratingPadY),
+          ),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(context.rem(_Dim.ratingRadius)),
             border: Border.all(color: Colors.white.withOpacity(0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.star_rounded, color: _Palette.gold, size: 14),
-              const SizedBox(width: 4),
+              Icon(Icons.star_rounded, color: _Palette.gold, size: context.rem(_Dim.ratingStar)),
+              SizedBox(width: context.rem(AppRem.xs)),
               Text(
                 meta.imdbRating!,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1186,7 +1245,7 @@ class _DetailsPageState extends State<DetailsPage>
       items.add(
         Text(
           meta.genres.take(3).join(' · '),
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          style: const TextStyle(color: Colors.white70, fontSize: AppType.body),
         ),
       );
     }
@@ -1196,11 +1255,11 @@ class _DetailsPageState extends State<DetailsPage>
       spaced.add(items[i]);
       if (i < items.length - 1) {
         spaced.add(
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: _Space.sm),
-            child: Text(
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.rem(_Space.sm)),
+            child: const Text(
               '•',
-              style: TextStyle(color: Colors.white30, fontSize: 16),
+              style: TextStyle(color: Colors.white30, fontSize: AppType.bodyLg),
             ),
           ),
         );
@@ -1209,7 +1268,7 @@ class _DetailsPageState extends State<DetailsPage>
 
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.center,
-      runSpacing: 6,
+      runSpacing: context.rem(AppRem.snug),
       children: spaced,
     );
   }
@@ -1226,17 +1285,20 @@ class _DetailsPageState extends State<DetailsPage>
       ),
       child: Container(
         width: fullWidth ? double.infinity : null,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        padding: EdgeInsets.symmetric(
+          horizontal: context.rem(AppRem.controlX),
+          vertical: context.rem(AppRem.controlY),
+        ),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [_Palette.accent, _Palette.accentDim],
           ),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           boxShadow: [
             BoxShadow(
               color: _Palette.accent.withOpacity(0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
+              blurRadius: context.rem(AppRem.md),
+              offset: Offset(0, context.rem(AppRem.xs)),
             ),
           ],
         ),
@@ -1244,8 +1306,8 @@ class _DetailsPageState extends State<DetailsPage>
           mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 24),
-            const SizedBox(width: 6),
+            Icon(Icons.play_arrow_rounded, color: Colors.white, size: context.rem(AppRem.iconLg)),
+            SizedBox(width: context.rem(AppRem.snug)),
             // Flexible as well as the icon's fixed size: the label is the
             // only part that grows with text scale, and without this it takes
             // the line and paints past the button.
@@ -1260,7 +1322,7 @@ class _DetailsPageState extends State<DetailsPage>
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: AppType.bodyMd,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1304,15 +1366,16 @@ class _DetailsPageState extends State<DetailsPage>
   Widget _buildSynopsis(String text) {
     const style = TextStyle(
       color: Colors.white70,
-      fontSize: 15,
-      height: 1.55,
-      letterSpacing: 0.2,
+      fontSize: AppType.bodyMd,
+      height: 1.55, // ratio: a line height, not a size
+      letterSpacing: 0.2, // px: tracking, not a layout size
     );
     const maxLines = 3;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth.clamp(0.0, 720.0);
+        final maxWidth =
+            constraints.maxWidth.clamp(0.0, context.rem(_Dim.synopsisWidth));
         final tp = TextPainter(
           text: TextSpan(text: text, style: style),
           maxLines: maxLines,
@@ -1325,7 +1388,7 @@ class _DetailsPageState extends State<DetailsPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
+              constraints: BoxConstraints(maxWidth: context.rem(_Dim.synopsisWidth)),
               child: AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
@@ -1341,7 +1404,7 @@ class _DetailsPageState extends State<DetailsPage>
               ),
             ),
             if (isOverflowing) ...[
-              const SizedBox(height: _Space.xs),
+              SizedBox(height: context.rem(_Space.xs)),
               HoverButton(
                 scaleAmount: 1.05,
                 showFocusRing: true,
@@ -1353,7 +1416,7 @@ class _DetailsPageState extends State<DetailsPage>
                       : context.l10n.detailsReadMore,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: AppType.body,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -1423,7 +1486,7 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           DetailsSectionHeader(context.l10n.detailsCastCrew),
           SizedBox(
-            height: 148,
+            height: context.rem(_Dim.creditsHeight),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -1433,7 +1496,7 @@ class _DetailsPageState extends State<DetailsPage>
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   itemCount: credits.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: _Space.lg),
+                  separatorBuilder: (_, __) => SizedBox(width: context.rem(_Space.lg)),
                   itemBuilder: (context, index) {
                     final credit = credits[index];
                     return CreditCard(
@@ -1449,8 +1512,8 @@ class _DetailsPageState extends State<DetailsPage>
                   if (_canScrollCastLeft)
                     PositionedDirectional(
                       start: 0,
-                      top: 10,
-                      bottom: 40,
+                      top: context.rem(_Dim.railArrowTop),
+                      bottom: context.rem(_Dim.railArrowBottom),
                       child: _buildScrollArrow(
                         Icons.arrow_back_ios_new_rounded,
                         () => _scrollList(_castScrollController, -1),
@@ -1460,8 +1523,8 @@ class _DetailsPageState extends State<DetailsPage>
                   if (_canScrollCastRight)
                     PositionedDirectional(
                       end: 0,
-                      top: 10,
-                      bottom: 40,
+                      top: context.rem(_Dim.railArrowTop),
+                      bottom: context.rem(_Dim.railArrowBottom),
                       child: _buildScrollArrow(
                         Icons.arrow_forward_ios_rounded,
                         () => _scrollList(_castScrollController, 1),
@@ -1489,7 +1552,7 @@ class _DetailsPageState extends State<DetailsPage>
       onEnter: (_) => setState(() => _isHoveringSeasons = true),
       onExit: (_) => setState(() => _isHoveringSeasons = false),
       child: SizedBox(
-        height: AppSpacing.textScaledHeight(context, 44),
+        height: context.rem(AppRem.chipRail),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -1499,7 +1562,7 @@ class _DetailsPageState extends State<DetailsPage>
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               itemCount: seasons.length,
-              separatorBuilder: (_, __) => const SizedBox(width: _Space.sm),
+              separatorBuilder: (_, __) => SizedBox(width: context.rem(_Space.sm)),
               itemBuilder: (context, index) {
                 final season = seasons[index];
                 final isSelected = _selectedSeason == season;
@@ -1517,13 +1580,13 @@ class _DetailsPageState extends State<DetailsPage>
                   scaleAmount: 1.02,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(_Dim.seasonPadX)),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.ink
                           : AppColors.ink.withOpacity(0.07),
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(context.rem(_Dim.seasonRadius)),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.ink
@@ -1534,7 +1597,7 @@ class _DetailsPageState extends State<DetailsPage>
                       context.l10n.playerSeasonN(season),
                       style: TextStyle(
                         color: isSelected ? Colors.black : AppColors.ink,
-                        fontSize: 15,
+                        fontSize: AppType.bodyMd,
                         fontWeight: isSelected
                             ? FontWeight.w800
                             : FontWeight.w600,
@@ -1576,15 +1639,17 @@ class _DetailsPageState extends State<DetailsPage>
 
   Widget _buildEpisodeSlider({Key? key}) {
     final isDesktop = _isDesktop();
-    final cardWidth = isDesktop ? 300.0 : 230.0;
-    final fadeWidth = isDesktop ? 60.0 : 40.0;
+    final cardWidth = context.rem(
+      isDesktop ? _Dim.episodeWidthDesktop : _Dim.episodeWidthMobile,
+    );
+    final fadeWidth = context.rem(isDesktop ? _Dim.fadeDesktop : _Dim.fadeMobile);
 
     return MouseRegion(
       key: key,
       onEnter: (_) => setState(() => _isHoveringEpisodes = true),
       onExit: (_) => setState(() => _isHoveringEpisodes = false),
       child: SizedBox(
-        height: isDesktop ? 275 : 245,
+        height: context.rem(isDesktop ? _Dim.episodeRailDesktop : _Dim.episodeRailMobile),
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
@@ -1616,7 +1681,7 @@ class _DetailsPageState extends State<DetailsPage>
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: _currentSeasonEpisodes.length,
-                separatorBuilder: (_, __) => const SizedBox(width: _Space.md),
+                separatorBuilder: (_, __) => SizedBox(width: context.rem(_Space.md)),
                 itemBuilder: (context, index) {
                   final ep = _currentSeasonEpisodes[index];
                   return SizedBox(
@@ -1641,7 +1706,7 @@ class _DetailsPageState extends State<DetailsPage>
                   top: 0,
                   bottom: 0,
                   child: Container(
-                    width: fadeWidth + 10,
+                    width: fadeWidth + context.rem(_Dim.fadeOverlap),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: AlignmentDirectional.centerStart,
@@ -1668,7 +1733,7 @@ class _DetailsPageState extends State<DetailsPage>
                   top: 0,
                   bottom: 0,
                   child: Container(
-                    width: fadeWidth + 10,
+                    width: fadeWidth + context.rem(_Dim.fadeOverlap),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: AlignmentDirectional.centerEnd,
@@ -1704,10 +1769,10 @@ class _DetailsPageState extends State<DetailsPage>
     // own two-value guess.
     final cardWidth = AppSpacing.cardWidthForScreenWidth(
       MediaQuery.sizeOf(context).width,
-      min: 108,
-      max: 168,
+      min: context.rem(AppRem.cardMin),
+      max: context.rem(AppRem.cardMax),
     );
-    final fadeWidth = isDesktop ? 60.0 : 40.0;
+    final fadeWidth = context.rem(isDesktop ? _Dim.fadeDesktop : _Dim.fadeMobile);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringRelated = true),
@@ -1717,7 +1782,7 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           DetailsSectionHeader(context.l10n.detailsMoreLikeThis),
           SizedBox(
-            height: cardWidth * 1.5 + 8,
+            height: cardWidth * 1.5 + context.rem(AppRem.sm), // ratio: a 2:3 poster
             child: Stack(
               clipBehavior: Clip.hardEdge,
               children: [
@@ -1754,7 +1819,7 @@ class _DetailsPageState extends State<DetailsPage>
                     physics: const BouncingScrollPhysics(),
                     itemCount: related.length,
                     separatorBuilder: (_, __) =>
-                        const SizedBox(width: _Space.md),
+                        SizedBox(width: context.rem(_Space.md)),
                     itemBuilder: (context, index) {
                       final item = related[index];
                       return SizedBox(
@@ -1768,7 +1833,7 @@ class _DetailsPageState extends State<DetailsPage>
                           },
                           scaleAmount: 1.05,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                             child: AspectRatio(
                               aspectRatio: 2 / 3,
                               child: item.poster != null
@@ -1791,7 +1856,7 @@ class _DetailsPageState extends State<DetailsPage>
                       top: 0,
                       bottom: 0,
                       child: Container(
-                        width: fadeWidth + 10,
+                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerStart,
@@ -1818,7 +1883,7 @@ class _DetailsPageState extends State<DetailsPage>
                       top: 0,
                       bottom: 0,
                       child: Container(
-                        width: fadeWidth + 10,
+                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerEnd,
@@ -1854,11 +1919,11 @@ class _DetailsPageState extends State<DetailsPage>
     // own two-value guess.
     final cardWidth = AppSpacing.cardWidthForScreenWidth(
       MediaQuery.sizeOf(context).width,
-      min: 108,
-      max: 168,
+      min: context.rem(AppRem.cardMin),
+      max: context.rem(AppRem.cardMax),
     );
     final cardHeight = SimilarCard.heightFor(cardWidth);
-    final fadeWidth = isDesktop ? 60.0 : 40.0;
+    final fadeWidth = context.rem(isDesktop ? _Dim.fadeDesktop : _Dim.fadeMobile);
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringSimilar = true),
@@ -1905,7 +1970,7 @@ class _DetailsPageState extends State<DetailsPage>
                     physics: const BouncingScrollPhysics(),
                     itemCount: _similarItems.length,
                     separatorBuilder: (_, __) =>
-                        const SizedBox(width: _Space.md),
+                        SizedBox(width: context.rem(_Space.md)),
                     itemBuilder: (context, index) {
                       final item = _similarItems[index];
                       return SimilarCard(
@@ -1921,9 +1986,9 @@ class _DetailsPageState extends State<DetailsPage>
                     PositionedDirectional(
                       start: 0,
                       top: 0,
-                      bottom: 60,
+                      bottom: context.rem(_Dim.similarArrowBottom),
                       child: Container(
-                        width: fadeWidth + 10,
+                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerStart,
@@ -1948,9 +2013,9 @@ class _DetailsPageState extends State<DetailsPage>
                     PositionedDirectional(
                       end: 0,
                       top: 0,
-                      bottom: 60,
+                      bottom: context.rem(_Dim.similarArrowBottom),
                       child: Container(
-                        width: fadeWidth + 10,
+                        width: fadeWidth + context.rem(_Dim.fadeOverlap),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: AlignmentDirectional.centerEnd,
@@ -2000,8 +2065,8 @@ class _DetailsPageState extends State<DetailsPage>
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                 child: Container(
-                  width: 42,
-                  height: 42,
+                  width: context.rem(_Dim.arrowSize),
+                  height: context.rem(_Dim.arrowSize),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.6),
                     shape: BoxShape.circle,
@@ -2010,7 +2075,7 @@ class _DetailsPageState extends State<DetailsPage>
                   child: Icon(
                     readingOrderArrow(context, icon),
                     color: AppColors.ink,
-                    size: 18,
+                    size: context.rem(AppRem.iconSm),
                   ),
                 ),
               ),
@@ -2076,7 +2141,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
           child: Container(
             decoration: BoxDecoration(
               color: _Palette.surface,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(context.rem(_Dim.episodeRadius)),
               border: Border.all(
                 color: hovered
                     ? AppColors.ink.withOpacity(0.22)
@@ -2086,14 +2151,14 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                   ? [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.4),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
+                        blurRadius: context.rem(_Dim.episodeShadowBlur),
+                        offset: Offset(0, context.rem(AppRem.sm)),
                       ),
                     ]
                   : [],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(context.rem(_Dim.episodeRadius)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -2129,21 +2194,21 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             opacity: hovered ? 1.0 : 0.0,
                             duration: const Duration(milliseconds: 150),
                             child: Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: EdgeInsets.all(context.rem(_Dim.playGlyphPad)),
                               decoration: BoxDecoration(
                                 color: AppColors.ink,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.5),
-                                    blurRadius: 10,
+                                    blurRadius: context.rem(AppRem.radiusPill),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.play_arrow_rounded,
                                 color: Colors.black,
-                                size: 24,
+                                size: context.rem(AppRem.iconLg),
                               ),
                             ),
                           ),
@@ -2152,7 +2217,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(_Space.sm),
+                    padding: EdgeInsets.all(context.rem(_Space.sm)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -2164,7 +2229,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                               style: const TextStyle(
                                 color: _Palette.accent,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: AppType.caption,
                               ),
                             ),
                             const Spacer(),
@@ -2175,12 +2240,12 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                                     : (ep.released!.length >= 10 ? ep.released!.substring(0, 10) : ep.released!),
                                 style: TextStyle(
                                   color: AppColors.inkDisabled,
-                                  fontSize: 11,
+                                  fontSize: AppType.tiny,
                                 ),
                               ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: context.rem(AppRem.xs)),
                         Text(
                           ep.title,
                           maxLines: 1,
@@ -2188,19 +2253,19 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           style: TextStyle(
                             color: AppColors.ink,
                             fontWeight: FontWeight.w600,
-                            fontSize: 13.5,
+                            fontSize: _kEpisodeTitle,
                           ),
                         ),
                         if (ep.overview != null) ...[
-                          const SizedBox(height: 3),
+                          SizedBox(height: context.rem(AppRem.xxs)),
                           Text(
                             ep.overview!,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: AppColors.inkSubtle,
-                              fontSize: 11.5,
-                              height: 1.3,
+                              fontSize: _kEpisodeBlurb,
+                              height: 1.3, // ratio: a line height, not a size
                             ),
                           ),
                         ],

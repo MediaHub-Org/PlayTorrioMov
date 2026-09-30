@@ -27,9 +27,11 @@ The first item is code work, in batches; the rest need a device.
   tests (`TopBar.sharedHeight`, `pillFilterHeaderContentHeight`); layout reads
   the rem versions (`pillFilterHeaderHeightOf`). The poster cards and rows are
   done too (`MovieCard`, `AnimeCard`, `BrowseRowView`, `BrowseScaffold`, the
-  card sizing; `SliderArrow` and the IPTV channel card are not). Next, each its own PR: (1) details and anime
-  details; (2) the player and its menus; (3) settings; (4) the rest
-  of `lib/pages` and `lib/widgets`. Judge each against a device at the default
+  card sizing; `SliderArrow` and the IPTV channel card are not), and the
+  movie/series details page itself (not its `CreditCard` / `SimilarCard`).
+  Next, each its own PR: (1) anime details and the details cards; (2) the
+  player and its menus; (3) settings; (4) the rest of `lib/pages` and
+  `lib/widgets`. Judge each against a device at the default
   text size: the batches are made without one, so a visual drift is the risk.
 
 - **D-pad on a TV (#80).** Confirmed on a TV: rows, the side menu and reaching

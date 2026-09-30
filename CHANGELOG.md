@@ -53,8 +53,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   sizing (`MovieCardSizing.of(context)` / `fromWidth(width, scale:)`, and
   `sizingOf` now also receives the text-size factor), so a card's bounds, its
   text block and the row gaps follow the text size; at the default size they
-  are the same 108-168 px as before. The rest of the code is not migrated yet;
-  see the roadmap. Unverified on a device: the hero buttons and side menu
+  are the same 108-168 px as before. The fifth starts the pages with the movie/series
+  details page (its spacing scale and every size are rem now; its credit and
+  similar cards are separate widgets and not yet migrated). The rest of the
+  code is not migrated yet; see the roadmap. Unverified on a device: the hero buttons and side menu
   keep their look at the default text size apart from a few pixels (the anime
   Play button is now the same size as the movie one).
 - **Poster cards are smaller, and no longer plateau at one flat size on a
