@@ -393,7 +393,6 @@ class _DiscoverPageState extends State<DiscoverPage> {
     final mediaQuery = MediaQuery.of(context);
     final topPadding = mediaQuery.padding.top;
     final bottomInset = mediaQuery.padding.bottom;
-    final screenWidth = mediaQuery.size.width;
     final screenHeight = mediaQuery.size.height;
     final isCompactScreen = screenHeight < 520;
 
