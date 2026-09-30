@@ -9,6 +9,7 @@ import '../../widgets/common/glass_back_button.dart';
 import '../../widgets/common/library_tabs.dart' show LibraryEmptyState;
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// Everything watched, newest first — the full log behind the Continue
 /// Watching row.
@@ -47,14 +48,14 @@ class WatchHistoryPage extends StatelessWidget {
         // Same leading inset and shared button as every other pushed page
         // -- AppBar's own 56px slot would center it somewhere else, and a
         // narrower slot clamps the 48x48 button into an ellipse.
-        leadingWidth: inset + 48,
+        leadingWidth: inset + context.rem(3),
         leading: Padding(
           padding: EdgeInsetsDirectional.only(start: inset),
           child: const Center(child: GlassBackButton()),
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: ValueListenableBuilder<List<ContinueWatchingItem>>(
@@ -90,10 +91,10 @@ class WatchHistoryPage extends StatelessWidget {
                   : 180.0;
 
               return SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(inset, 16, inset, 32),
+                padding: EdgeInsets.fromLTRB(inset, context.rem(AppRem.md), inset, context.rem(AppRem.xl)),
                 child: Wrap(
-                  spacing: 14,
-                  runSpacing: 18,
+                  spacing: context.rem(0.875),
+                  runSpacing: context.rem(1.125),
                   children: [
                     for (final item in items)
                       ContinueWatchingCard(

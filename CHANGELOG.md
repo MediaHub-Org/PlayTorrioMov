@@ -34,7 +34,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   torrent's seed count, size and audio language. Container, release source,
   codec and P2P/HTTP are in the file name. The other two source pickers (in
   the player, anime episodes) are unchanged. New `StreamSource.releaseName`.
-- **Sizes are moving to `rem` and named tokens, in batches.** The code
+- **Sizes are `rem` and named tokens, done in batches.** The code
   measured layout in bare numbers (`SizedBox(width: 12)`, `height: 40`), so a
   larger text size grew the text and left every gap, bar and button where it
   was. `lib/services/app_units.dart` adds `context.rem(AppRem.md)` (one rem is
@@ -58,7 +58,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   similar cards are separate widgets and not yet migrated). The sixth does the
   anime details page the same way; the two pages now share one set of sizes
   (`lib/widgets/details/details_metrics.dart`) instead of each keeping a copy.
-  The seventh does the video player: every widget in `lib/widgets/player`, both
+  The ninth and last does everything still in pixels (the remaining pages and
+  widgets), and the guard test now scans all of `lib/pages` and `lib/widgets`
+  instead of a list; three files stay in pixels on purpose because their
+  height is a measured budget (see the roadmap). The eighth does settings and
+  the update/P2P dialogs (every page under
+  `lib/pages/settings`, `lib/widgets/updater`, `lib/widgets/p2p`). The seventh
+  does the video player: every widget in `lib/widgets/player`, both
   player pages and the Live TV player. `AppType` is now a half-step ramp, and
   the player menus' shadow lists are functions of the context
   (`PlayerTheme.menuShadowOf`) because their sizes are rem. The rest of the

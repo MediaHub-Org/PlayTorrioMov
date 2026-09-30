@@ -9,6 +9,7 @@ import '../../../services/theme/app_colors.dart';
 import '../../../widgets/common/setting_choice_chip.dart';
 import '../../../widgets/iptv/default_portal_tab_picker.dart';
 import '../../../pages/iptv/iptv_sources_page.dart';
+import '../../../services/app_units.dart';
 
 class LiveTvSettingsPage extends StatefulWidget {
   const LiveTvSettingsPage({super.key});
@@ -30,12 +31,12 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           context.l10n.liveTvSettingsTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: SettingsScrollView(
@@ -46,76 +47,76 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
           Text(
             context.l10n.liveTvSecSpotlight.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           _buildHeroSpotlightCard(palette),
 
-          const SizedBox(height: 28),
+          SizedBox(height: context.rem(1.75)),
 
           // ── 2. Card Layout & Poster Density ──
           Text(
             context.l10n.liveTvSecCards.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           _buildCardDensityCard(palette),
 
-          const SizedBox(height: 28),
+          SizedBox(height: context.rem(1.75)),
 
           // ── 3. Category Visibility & Ordering ──
           Text(
             context.l10n.liveTvSecSections.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           _buildCategoryManagerCard(palette),
 
-          const SizedBox(height: 28),
+          SizedBox(height: context.rem(1.75)),
 
           // ── 4. Portals Modal Customization ──
           Text(
             context.l10n.liveTvSecPortalsModal.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           _buildPortalsModalCustomizerCard(palette),
 
-          const SizedBox(height: 28),
+          SizedBox(height: context.rem(1.75)),
 
           // ── 5. Portal Browser Customization ──
           Text(
             context.l10n.liveTvSecBrowser.toUpperCase(),
             style: TextStyle(
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.35),
               letterSpacing: 1.1,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           _buildPortalBrowserCustomizerCard(palette),
 
-          const SizedBox(height: 36),
+          SizedBox(height: context.rem(2.25)),
         ],
       ),
     );
@@ -126,10 +127,10 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
       valueListenable: IptvSettings.enableSpotlight,
       builder: (context, enabled, _) {
         return Container(
-          padding: const EdgeInsets.all(18),
+          padding: EdgeInsets.all(context.rem(1.125)),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             border: Border.all(
               color: enabled
                   ? palette.primaryColor.withValues(alpha: 0.35)
@@ -143,19 +144,19 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
               Row(
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: context.rem(2.625),
+                    height: context.rem(2.625),
                     decoration: BoxDecoration(
                       color: palette.primaryColor.withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     ),
                     child: Icon(
                       Icons.tv_rounded,
                       color: palette.primaryColor,
-                      size: 22,
+                      size: context.rem(AppRem.iconMd),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: context.rem(0.875)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,15 +164,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowSpotlight,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: AppType.bodyMd,
                             fontWeight: FontWeight.w800,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowSpotlightSub,
-                          style: TextStyle(fontSize: 12, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.caption, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -188,9 +189,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
               ),
 
               if (enabled) ...[
-                const SizedBox(height: 16),
+                SizedBox(height: context.rem(AppRem.md)),
                 Divider(color: AppColors.inkAlpha(0.06)),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
 
                 // Auto Rotate
                 ValueListenableBuilder<bool>(
@@ -205,15 +206,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                               Text(
                                 context.l10n.liveTvAutoRotate,
                                 style: TextStyle(
-                                  fontSize: 13.5,
+                                  fontSize: AppType.smallPlus,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.ink,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              SizedBox(height: context.rem(AppRem.xxs)),
                               Text(
                                 context.l10n.liveTvAutoRotateSub,
-                                style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                                style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                               ),
                             ],
                           ),
@@ -239,7 +240,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 10),
+                            SizedBox(height: context.rem(0.625)),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -248,25 +249,25 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                                 Expanded(child: Text(
                                   context.l10n.liveTvRotationInterval,
                                   style: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: AppType.captionPlus,
                                     color: AppColors.inkAlpha(0.7),
                                   ),
                                 )),
-                                const SizedBox(width: 8),
+                                SizedBox(width: context.rem(AppRem.sm)),
                                 Text(
                                   context.l10n.liveTvSecondsN(seconds),
                                   // The value has nowhere to go; the label beside it is the part that
                                   // wraps, so this one is clamped instead.
                                   textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                                   style: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: AppType.captionPlus,
                                     fontWeight: FontWeight.w800,
                                     color: palette.primaryColor,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: context.rem(AppRem.xs)),
                             SliderTheme(
                               data: SliderTheme.of(context).copyWith(
                                 activeTrackColor: palette.primaryColor,
@@ -298,10 +299,10 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
   Widget _buildCardDensityCard(AppThemePalette palette) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -311,18 +312,18 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
           Text(
             context.l10n.liveTvCardSize,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppType.small,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.8),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           ValueListenableBuilder<CardDensity>(
             valueListenable: IptvSettings.cardDensity,
             builder: (context, currentDensity, _) {
               return Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: context.rem(AppRem.sm),
+                runSpacing: context.rem(AppRem.sm),
                 children: CardDensity.values.map((density) {
                   final isSelected = density == currentDensity;
                   return SettingChoiceChip(
@@ -338,9 +339,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // Hover Zoom Slider
           ValueListenableBuilder<double>(
@@ -359,7 +360,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       Expanded(child: Text(
                         context.l10n.liveTvHoverZoom,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppType.small,
                           fontWeight: FontWeight.w700,
                           color: AppColors.inkAlpha(0.8),
                         ),
@@ -367,14 +368,14 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       Text(
                         '+$percent%',
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w800,
                           color: palette.primaryColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.rem(AppRem.xs)),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       activeTrackColor: palette.primaryColor,
@@ -395,9 +396,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // HD Badge Toggle
           ValueListenableBuilder<bool>(
@@ -412,15 +413,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowHdBadge,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowHdBadgeSub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -435,9 +436,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // Category Tag Toggle
           ValueListenableBuilder<bool>(
@@ -452,15 +453,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowCategoryTag,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowCategoryTagSub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -484,10 +485,10 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
       valueListenable: IptvSettings.visibleCategories,
       builder: (context, visibleList, _) {
         return Container(
-          padding: const EdgeInsets.all(18),
+          padding: EdgeInsets.all(context.rem(1.125)),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             border: Border.all(color: AppColors.inkAlpha(0.08)),
           ),
           child: Column(
@@ -502,31 +503,31 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       Text(
                         context.l10n.liveTvCategoriesSections,
                         style: TextStyle(
-                          fontSize: 14.5,
+                          fontSize: AppType.bodyPlus,
                           fontWeight: FontWeight.w800,
                           color: AppColors.ink,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: context.rem(AppRem.xxs)),
                       Text(
                         context.l10n.liveTvToggleRows,
-                        style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                        style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                       ),
                     ],
                   ),
                   TextButton.icon(
                     onPressed: () => IptvSettings.resetCategories(),
-                    icon: const Icon(Icons.refresh_rounded, size: 16),
-                    label: Text(context.l10n.liveTvResetAll, style: const TextStyle(fontSize: 12)),
+                    icon: Icon(Icons.refresh_rounded, size: context.rem(AppRem.iconXs)),
+                    label: Text(context.l10n.liveTvResetAll, style: const TextStyle(fontSize: AppType.caption)),
                     style: TextButton.styleFrom(
                       foregroundColor: palette.primaryColor,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: context.rem(AppRem.ms)),
               Divider(color: AppColors.inkAlpha(0.06)),
-              const SizedBox(height: 6),
+              SizedBox(height: context.rem(AppRem.snug)),
 
               ...IptvSettings.defaultCategories.map((cat) {
                 final isVisible = visibleList.contains(cat);
@@ -535,7 +536,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   title: Text(
                     cat,
                     style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: AppType.smallPlus,
                       fontWeight: isVisible ? FontWeight.w700 : FontWeight.w500,
                       color: isVisible ? AppColors.ink : AppColors.inkDisabled,
                     ),
@@ -560,10 +561,10 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
   /// in. Management happens on the page, configuration stays here.
   Widget _buildPortalsModalCustomizerCard(AppThemePalette palette) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -571,22 +572,22 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
         children: [
           InkWell(
             onTap: () => pushPage(context, const IptvSourcesPage()),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.snug)),
               child: Row(
                 children: [
                   Icon(
                     Icons.settings_input_antenna_rounded,
                     color: palette.primaryColor,
-                    size: 20,
+                    size: context.rem(AppRem.icon),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: context.rem(AppRem.ms)),
                   Expanded(
                     child: Text(
                       context.l10n.iptvManagePortals,
                       style: TextStyle(
-                        fontSize: 13.5,
+                        fontSize: AppType.smallPlus,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
@@ -595,30 +596,30 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   Icon(
                     Icons.chevron_right_rounded,
                     color: AppColors.inkSubtle,
-                    size: 20,
+                    size: context.rem(AppRem.icon),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Text(
             context.l10n.iptvCardDisplayStyle,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppType.small,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.8),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           ValueListenableBuilder<PortalCardStyle>(
             valueListenable: IptvSettings.portalCardStyle,
             builder: (context, style, _) {
               return Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: context.rem(AppRem.sm),
+                runSpacing: context.rem(AppRem.sm),
                 children: PortalCardStyle.values.map((s) {
                   final isSelected = s == style;
                   return SettingChoiceChip(
@@ -634,9 +635,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           ValueListenableBuilder<bool>(
             valueListenable: IptvSettings.showPortalExpiry,
@@ -650,15 +651,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.iptvShowExpiry,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowExpirySub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -673,9 +674,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           ValueListenableBuilder<bool>(
             valueListenable: IptvSettings.showPortalConnections,
@@ -689,15 +690,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowConnTag,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowConnTagSub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -712,19 +713,19 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           Text(
             context.l10n.iptvDefaultTab,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppType.small,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.8),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           const DefaultPortalTabPicker(),
         ],
       ),
@@ -733,10 +734,10 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
 
   Widget _buildPortalBrowserCustomizerCard(AppThemePalette palette) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -745,18 +746,18 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
           Text(
             context.l10n.iptvStreamLayoutMode,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppType.small,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.8),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
           ValueListenableBuilder<PortalBrowserLayout>(
             valueListenable: IptvSettings.browserLayout,
             builder: (context, layout, _) {
               return Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: context.rem(AppRem.sm),
+                runSpacing: context.rem(AppRem.sm),
                 children: PortalBrowserLayout.values.map((l) {
                   final isSelected = l == layout;
                   return SettingChoiceChip(
@@ -772,9 +773,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           ValueListenableBuilder<PortalBrowserLayout>(
             valueListenable: IptvSettings.browserLayout,
@@ -794,26 +795,26 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                           Expanded(child: Text(
                             context.l10n.liveTvGridColumns,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: AppType.small,
                               fontWeight: FontWeight.w700,
                               color: AppColors.inkAlpha(0.8),
                             ),
                           )),
-                          const SizedBox(width: 8),
+                          SizedBox(width: context.rem(AppRem.sm)),
                           Text(
                             context.l10n.liveTvColumnsN(cols),
                             // The value has nowhere to go; the label beside it is the part that
                             // wraps, so this one is clamped instead.
                             textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                             style: TextStyle(
-                              fontSize: 12.5,
+                              fontSize: AppType.captionPlus,
                               fontWeight: FontWeight.w800,
                               color: palette.primaryColor,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: context.rem(AppRem.xs)),
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           activeTrackColor: palette.primaryColor,
@@ -829,9 +830,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                           onChanged: (val) => IptvSettings.setBrowserGridColumns(val.round()),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: context.rem(AppRem.ms)),
                       Divider(color: AppColors.inkAlpha(0.06)),
-                      const SizedBox(height: 12),
+                      SizedBox(height: context.rem(AppRem.ms)),
                     ],
                   );
                 },
@@ -853,26 +854,26 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                       Expanded(child: Text(
                         context.l10n.liveTvSidebarWidth,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppType.small,
                           fontWeight: FontWeight.w700,
                           color: AppColors.inkAlpha(0.8),
                         ),
                       )),
-                      const SizedBox(width: 8),
+                      SizedBox(width: context.rem(AppRem.sm)),
                       Text(
                         '${width.round()} px',
                         // The value has nowhere to go; the label beside it is the part that
                         // wraps, so this one is clamped instead.
                         textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w800,
                           color: palette.primaryColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.rem(AppRem.xs)),
                   SliderTheme(
                     data: SliderTheme.of(context).copyWith(
                       activeTrackColor: palette.primaryColor,
@@ -893,9 +894,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           ValueListenableBuilder<bool>(
             valueListenable: IptvSettings.showStreamLogos,
@@ -909,15 +910,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowLogos,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowLogosSub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -932,9 +933,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           ValueListenableBuilder<bool>(
             valueListenable: IptvSettings.showEpgSnippet,
@@ -948,15 +949,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowEpg,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowEpgSub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),
@@ -971,9 +972,9 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
             },
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
           Divider(color: AppColors.inkAlpha(0.06)),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
 
           ValueListenableBuilder<bool>(
             valueListenable: IptvSettings.showCategoryCount,
@@ -987,15 +988,15 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         Text(
                           context.l10n.liveTvShowCounts,
                           style: TextStyle(
-                            fontSize: 13.5,
+                            fontSize: AppType.smallPlus,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: context.rem(AppRem.xxs)),
                         Text(
                           context.l10n.liveTvShowCountsSub,
-                          style: TextStyle(fontSize: 11.5, color: AppColors.inkSubtle),
+                          style: TextStyle(fontSize: AppType.tinyPlus, color: AppColors.inkSubtle),
                         ),
                       ],
                     ),

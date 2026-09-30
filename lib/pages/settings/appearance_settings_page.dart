@@ -6,6 +6,7 @@ import 'appearance/live_tv_settings_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/app_units.dart';
 
 class AppearanceSettingsPage extends StatefulWidget {
   const AppearanceSettingsPage({super.key});
@@ -31,12 +32,12 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           l10n.appearanceTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: SettingsScrollView(
@@ -45,13 +46,13 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
         children: [
           // Header description
           Padding(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: EdgeInsets.only(bottom: context.rem(1.25)),
             child: Text(
               l10n.appearanceSubtitle,
               style: TextStyle(
-                fontSize: 13.5,
+                fontSize: AppType.smallPlus,
                 color: onSurface.withValues(alpha: 0.5),
-                height: 1.4,
+                height: 1.4, // ratio: a line height, not a size
               ),
             ),
           ),
@@ -61,15 +62,15 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
           // whichever mode you land in.
           const _ThemeModeSelector(),
 
-          const SizedBox(height: 20),
+          SizedBox(height: context.rem(1.25)),
 
           const _TextScaleSelector(),
 
-          const SizedBox(height: 20),
+          SizedBox(height: context.rem(1.25)),
 
           const _LanguageSelector(),
 
-          const SizedBox(height: 20),
+          SizedBox(height: context.rem(1.25)),
 
           // Button: Live TV & Sports UI
           ValueListenableBuilder<bool>(
@@ -115,26 +116,26 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: EdgeInsets.all(context.rem(1.125)),
           decoration: BoxDecoration(
             color: theme.cardTheme.color,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             border: Border.all(color: onSurface.withValues(alpha: 0.08)),
           ),
           child: Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: context.rem(2.875),
+                height: context.rem(2.875),
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 ),
-                child: Icon(icon, color: iconColor, size: 24),
+                child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconLg)),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: context.rem(0.875)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,24 +146,24 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                           child: Text(
                             title,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: AppType.bodyLg,
                               fontWeight: FontWeight.w700,
                               color: onSurface,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: context.rem(AppRem.sm)),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
                           decoration: BoxDecoration(
                             color: badgeColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                           ),
                           child: Text(
                             badgeText,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                               fontWeight: FontWeight.w800,
                               color: badgeColor,
                             ),
@@ -170,22 +171,22 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: context.rem(AppRem.xs)),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         color: onSurface.withValues(alpha: 0.45),
-                        height: 1.35,
+                        height: 1.35, // ratio: a line height, not a size
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              SizedBox(width: context.rem(0.625)),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 16,
+                size: context.rem(AppRem.iconXs),
                 color: onSurface.withValues(alpha: 0.3),
               ),
             ],
@@ -224,10 +225,10 @@ class _ThemeModeSelector extends StatelessWidget {
             ];
 
             return Container(
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(context.rem(1.125)),
               decoration: BoxDecoration(
                 color: theme.cardTheme.color,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                 border: Border.all(color: onSurface.withValues(alpha: 0.08)),
               ),
               child: Column(
@@ -238,9 +239,9 @@ class _ThemeModeSelector extends StatelessWidget {
                       Icon(
                         Icons.contrast_rounded,
                         color: palette.primaryColor,
-                        size: 22,
+                        size: context.rem(AppRem.iconMd),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: context.rem(AppRem.ms)),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,12 +249,12 @@ class _ThemeModeSelector extends StatelessWidget {
                             Text(
                               l10n.appearanceThemeTitle,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: AppType.bodyLg,
                                 fontWeight: FontWeight.w800,
                                 color: onSurface,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: context.rem(AppRem.xs)),
                             Text(
                               mode == ThemeMode.system
                                   ? l10n.appearanceThemeFollowingDevice
@@ -261,8 +262,8 @@ class _ThemeModeSelector extends StatelessWidget {
                                       ? l10n.appearanceThemeAlwaysLight
                                       : l10n.appearanceThemeAlwaysDark),
                               style: TextStyle(
-                                fontSize: 12.5,
-                                height: 1.35,
+                                fontSize: AppType.captionPlus,
+                                height: 1.35, // ratio: a line height, not a size
                                 color: onSurface.withValues(alpha: 0.55),
                               ),
                             ),
@@ -271,7 +272,7 @@ class _ThemeModeSelector extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: context.rem(AppRem.md)),
                   Row(
                     children: [
                       for (final (value, label, icon) in options) ...[
@@ -285,7 +286,7 @@ class _ThemeModeSelector extends StatelessWidget {
                           ),
                         ),
                         if (value != options.last.$1)
-                          const SizedBox(width: 8),
+                          SizedBox(width: context.rem(AppRem.sm)),
                       ],
                     ],
                   ),
@@ -324,10 +325,10 @@ class _TextScaleSelector extends StatelessWidget {
             final l10n = AppLocalizations.of(context);
 
             return Container(
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(context.rem(1.125)),
               decoration: BoxDecoration(
                 color: theme.cardTheme.color,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                 border: Border.all(color: onSurface.withValues(alpha: 0.08)),
               ),
               child: Column(
@@ -338,9 +339,9 @@ class _TextScaleSelector extends StatelessWidget {
                       Icon(
                         Icons.text_fields_rounded,
                         color: palette.primaryColor,
-                        size: 22,
+                        size: context.rem(AppRem.iconMd),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: context.rem(AppRem.ms)),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,19 +349,19 @@ class _TextScaleSelector extends StatelessWidget {
                             Text(
                               l10n.appearanceTextSizeTitle,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: AppType.bodyLg,
                                 fontWeight: FontWeight.w800,
                                 color: onSurface,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: context.rem(AppRem.xs)),
                             Text(
                               scale == 1.0
                                   ? l10n.appearanceTextSizeDefault
                                   : l10n.appearanceTextSizePercent((scale * 100).round()),
                               style: TextStyle(
-                                fontSize: 12.5,
-                                height: 1.35,
+                                fontSize: AppType.captionPlus,
+                                height: 1.35, // ratio: a line height, not a size
                                 color: onSurface.withValues(alpha: 0.55),
                               ),
                             ),
@@ -369,10 +370,10 @@ class _TextScaleSelector extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: context.rem(AppRem.ms)),
                   Row(
                     children: [
-                      Text('A', style: TextStyle(fontSize: 13, color: onSurface.withValues(alpha: 0.5))),
+                      Text('A', style: TextStyle(fontSize: AppType.small, color: onSurface.withValues(alpha: 0.5))),
                       Expanded(
                         child: Slider(
                           value: scale,
@@ -384,7 +385,7 @@ class _TextScaleSelector extends StatelessWidget {
                           onChanged: (value) => AppThemeService.setTextScale(value),
                         ),
                       ),
-                      Text('A', style: TextStyle(fontSize: 20, color: onSurface.withValues(alpha: 0.5))),
+                      Text('A', style: TextStyle(fontSize: AppType.titleSm, color: onSurface.withValues(alpha: 0.5))),
                     ],
                   ),
                 ],
@@ -430,10 +431,10 @@ class _LanguageSelector extends StatelessWidget {
             final l10n = AppLocalizations.of(context);
 
             return Container(
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(context.rem(1.125)),
               decoration: BoxDecoration(
                 color: theme.cardTheme.color,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                 border: Border.all(color: onSurface.withValues(alpha: 0.08)),
               ),
               child: Column(
@@ -441,30 +442,30 @@ class _LanguageSelector extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.translate_rounded, color: palette.primaryColor, size: 22),
-                      const SizedBox(width: 12),
+                      Icon(Icons.translate_rounded, color: palette.primaryColor, size: context.rem(AppRem.iconMd)),
+                      SizedBox(width: context.rem(AppRem.ms)),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               l10n.appearanceLanguageTitle,
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: onSurface),
+                              style: TextStyle(fontSize: AppType.bodyLg, fontWeight: FontWeight.w800, color: onSurface),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: context.rem(AppRem.xs)),
                             Text(
                               l10n.appearanceLanguageSubtitle,
-                              style: TextStyle(fontSize: 12.5, height: 1.35, color: onSurface.withValues(alpha: 0.55)),
+                              style: TextStyle(fontSize: AppType.captionPlus, height: 1.35, color: onSurface.withValues(alpha: 0.55)), // ratio: a line height, not a size
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: context.rem(0.875)),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: context.rem(AppRem.sm),
+                    runSpacing: context.rem(AppRem.sm),
                     children: [
                       _LanguageChip(
                         label: l10n.appearanceLanguageSystem,
@@ -486,7 +487,7 @@ class _LanguageSelector extends StatelessWidget {
                   // does not decide it. Someone reading the app in Spanish may
                   // still want a show's English title, because that is the one
                   // they will recognize and the one they would search for.
-                  const Divider(height: 26),
+                  Divider(height: context.rem(1.625)),
                   ValueListenableBuilder<bool>(
                     valueListenable: AppThemeService.preferNativeTitles,
                     builder: (context, native, _) => SwitchListTile.adaptive(
@@ -497,7 +498,7 @@ class _LanguageSelector extends StatelessWidget {
                       title: Text(
                         l10n.appearanceNativeTitlesTitle,
                         style: TextStyle(
-                          fontSize: 13.5,
+                          fontSize: AppType.smallPlus,
                           fontWeight: FontWeight.w600,
                           color: onSurface,
                         ),
@@ -505,8 +506,8 @@ class _LanguageSelector extends StatelessWidget {
                       subtitle: Text(
                         l10n.appearanceNativeTitlesSubtitle,
                         style: TextStyle(
-                          fontSize: 12,
-                          height: 1.35,
+                          fontSize: AppType.caption,
+                          height: 1.35, // ratio: a line height, not a size
                           color: onSurface.withValues(alpha: 0.55),
                         ),
                       ),
@@ -543,22 +544,22 @@ class _LanguageChip extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.5625)),
           decoration: BoxDecoration(
             color: selected ? color.withValues(alpha: 0.18) : onSurface.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             border: Border.all(
               color: selected ? color.withValues(alpha: 0.7) : onSurface.withValues(alpha: 0.10),
-              width: 1.2,
+              width: 1.2, // px: a hairline, not a layout size
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13,
+              fontSize: AppType.small,
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
             ),
@@ -592,20 +593,20 @@ class _ThemeModeSegment extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
           decoration: BoxDecoration(
             color: selected
                 ? color.withValues(alpha: 0.18)
                 : onSurface.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             border: Border.all(
               color: selected
                   ? color.withValues(alpha: 0.7)
                   : onSurface.withValues(alpha: 0.10),
-              width: 1.2,
+              width: 1.2, // px: a hairline, not a layout size
             ),
           ),
           child: Column(
@@ -613,14 +614,14 @@ class _ThemeModeSegment extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 20,
+                size: context.rem(AppRem.icon),
                 color: selected ? color : onSurface.withValues(alpha: 0.5),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: context.rem(AppRem.snug)),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12.5,
+                  fontSize: AppType.captionPlus,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                   color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
                 ),

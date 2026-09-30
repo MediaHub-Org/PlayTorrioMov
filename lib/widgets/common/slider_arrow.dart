@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
 import 'arrow_affordance.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused [SliderArrow]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -72,8 +73,8 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 48,
-                height: 48,
+                width: context.rem(3),
+                height: context.rem(3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: isHighlighted
@@ -83,14 +84,14 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
                     color: isHighlighted
                         ? AppColors.inkAlpha(0.3)
                         : AppColors.inkAlpha(0.1),
-                    width: 1.5,
+                    width: 1.5, // px: a hairline, not a layout size
                   ),
                   boxShadow: isHighlighted
                       ? [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            blurRadius: context.rem(0.625),
+                            offset: Offset(0, context.rem(AppRem.xs)),
                           )
                         ]
                       : [],
@@ -98,7 +99,7 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
                 child: Icon(
                   readingOrderArrow(context, widget.icon),
                   color: AppColors.ink.withValues(alpha: isHighlighted ? 1.0 : 0.7),
-                  size: 20,
+                  size: context.rem(AppRem.icon),
                 ),
               ),
             ),

@@ -7,6 +7,7 @@ import './movie_card.dart';
 import '../common/horizontal_slider_scroll.dart';
 import '../common/section_header.dart';
 import '../common/slider_arrow.dart';
+import '../../services/app_units.dart';
 
 class MovieSliderSection extends StatefulWidget {
   final MovieSection section;
@@ -30,7 +31,7 @@ class _MovieSliderSectionState extends State<MovieSliderSection>
     final isDesktop = isDesktopPlatform();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 26),
+      padding: EdgeInsets.only(bottom: context.rem(1.625)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -73,7 +74,7 @@ class _MovieSliderSectionState extends State<MovieSliderSection>
                     AnimatedPositioned(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      left: canScrollLeft && _isHoveringSlider ? 10 : -60,
+                      left: context.rem(canScrollLeft && _isHoveringSlider ? 0.625 : -3.75),
                       top: 0,
                       bottom: 0,
                       child: Center(
@@ -88,7 +89,7 @@ class _MovieSliderSectionState extends State<MovieSliderSection>
                     AnimatedPositioned(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeOutCubic,
-                      right: canScrollRight && _isHoveringSlider ? 10 : -60,
+                      right: context.rem(canScrollRight && _isHoveringSlider ? 0.625 : -3.75),
                       top: 0,
                       bottom: 0,
                       child: Center(

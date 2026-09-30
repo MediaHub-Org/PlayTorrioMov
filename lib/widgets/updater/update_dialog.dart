@@ -13,6 +13,7 @@ import '../../l10n/l10n.dart';
 import '../../services/updater/app_updater_service.dart';
 import '../../app_info.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 class UpdateDialog extends StatefulWidget {
   final UpdateInfo updateInfo;
@@ -54,19 +55,19 @@ class _UpdateDialogState extends State<UpdateDialog> {
       child: Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
+          constraints: BoxConstraints(maxWidth: context.rem(31.25)),
           decoration: BoxDecoration(
             color: _surfaceColor,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(context.rem(1.25)),
             border: Border.all(
               color: _accentColor.withValues(alpha: 0.3),
-              width: 1.5,
+              width: 1.5, // px: a hairline, not a layout size
             ),
           boxShadow: [
             BoxShadow(
               color: _accentColor.withValues(alpha: 0.2),
-              blurRadius: 40,
-              spreadRadius: 5,
+              blurRadius: context.rem(2.5),
+              spreadRadius: context.rem(0.3125),
             ),
           ],
         ),
@@ -75,7 +76,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
           children: [
             // Header with gradient
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(context.rem(AppRem.lg)),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -83,26 +84,26 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     _accentColor.withValues(alpha: 0.05),
                   ],
                 ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(context.rem(1.25)),
+                  topRight: Radius.circular(context.rem(1.25)),
                 ),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
                     decoration: BoxDecoration(
                       color: _accentColor.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     ),
                     child: Icon(
                       Icons.system_update_rounded,
                       color: _accentColor,
-                      size: 32,
+                      size: context.rem(2),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: context.rem(AppRem.md)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,17 +111,17 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         Text(
                           context.l10n.updateAvailable.toUpperCase(),
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: AppType.tiny,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2,
                             color: _accentColor,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: context.rem(AppRem.xs)),
                         Text(
                           context.l10n.updateVersion(widget.updateInfo.latestVersion),
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: AppType.titleMd,
                             fontWeight: FontWeight.bold,
                             color: AppColors.ink,
                           ),
@@ -134,16 +135,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
 
             // Content
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(context.rem(AppRem.lg)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Version details container
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(context.rem(AppRem.md)),
                     decoration: BoxDecoration(
                       color: AppColors.inkAlpha(0.05),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                       border: Border.all(
                         color: AppColors.inkAlpha(0.08),
                       ),
@@ -157,16 +158,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             Text(
                               context.l10n.updateCurrent,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: AppType.tiny,
                                 color: AppColors.inkDisabled,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: context.rem(AppRem.xs)),
                             Text(
                               widget.updateInfo.currentVersion,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: AppType.bodyLg,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.inkMuted,
                               ),
@@ -183,16 +184,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             Text(
                               context.l10n.updateLatest,
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: AppType.tiny,
                                 color: AppColors.inkDisabled,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: context.rem(AppRem.xs)),
                             Text(
                               widget.updateInfo.latestVersion,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: AppType.bodyLg,
                                 fontWeight: FontWeight.bold,
                                 color: _accentColor,
                               ),
@@ -203,25 +204,25 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: context.rem(1.25)),
 
                   // Release notes header & box
                   Text(
                     context.l10n.updateWhatsNew.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: AppType.tiny,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.5,
                       color: AppColors.inkDisabled,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: context.rem(0.625)),
                   Container(
-                    constraints: const BoxConstraints(maxHeight: 180),
-                    padding: const EdgeInsets.all(16),
+                    constraints: BoxConstraints(maxHeight: context.rem(11.25)),
+                    padding: EdgeInsets.all(context.rem(AppRem.md)),
                     decoration: BoxDecoration(
                       color: _backgroundColor.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                       border: Border.all(
                         color: AppColors.inkAlpha(0.08),
                       ),
@@ -230,21 +231,21 @@ class _UpdateDialogState extends State<UpdateDialog> {
                       child: Text(
                         widget.updateInfo.releaseNotes,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppType.small,
                           color: AppColors.inkMuted,
-                          height: 1.5,
+                          height: 1.5, // ratio: a line height, not a size
                         ),
                       ),
                     ),
                   ),
 
                   if (widget.updateInfo.isFlatpak) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.rem(AppRem.md)),
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(context.rem(AppRem.ms)),
                       decoration: BoxDecoration(
                         color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                         border: Border.all(
                           color: Colors.orange.withValues(alpha: 0.3),
                         ),
@@ -254,14 +255,14 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           Icon(
                             Icons.info_outline,
                             color: Colors.orange.shade300,
-                            size: 20,
+                            size: context.rem(AppRem.icon),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: context.rem(AppRem.ms)),
                           Expanded(
                             child: Text(
                               context.l10n.updateFlatpakNote,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: AppType.caption,
                                 color: Colors.orange.shade200,
                               ),
                             ),
@@ -271,12 +272,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
                     ),
                   ] else if (widget.updateInfo.isMacOS ||
                       widget.updateInfo.isIOS) ...[
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.rem(AppRem.md)),
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(context.rem(AppRem.ms)),
                       decoration: BoxDecoration(
                         color: Colors.orange.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                         border: Border.all(
                           color: Colors.orange.withValues(alpha: 0.3),
                         ),
@@ -286,16 +287,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           Icon(
                             Icons.info_outline,
                             color: Colors.orange.shade300,
-                            size: 20,
+                            size: context.rem(AppRem.icon),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: context.rem(AppRem.ms)),
                           Expanded(
                             child: Text(
                               widget.updateInfo.isIOS
                                   ? "iOS: You'll be redirected to GitHub to download the IPA"
                                   : "macOS: You'll be redirected to GitHub to download",
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: AppType.caption,
                                 color: Colors.orange.shade200,
                               ),
                             ),
@@ -306,7 +307,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   ],
 
                   if (_isDownloading) ...[
-                    const SizedBox(height: 20),
+                    SizedBox(height: context.rem(1.25)),
                     Column(
                       children: [
                         Row(
@@ -315,7 +316,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             Text(
                               context.l10n.updateDownloading,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: AppType.small,
                                 fontWeight: FontWeight.bold,
                                 color: _accentColor,
                               ),
@@ -323,16 +324,16 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             Text(
                               '${(_downloadProgress * 100).toStringAsFixed(0)}%',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: AppType.small,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.inkMuted,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: context.rem(AppRem.sm)),
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                           child: LinearProgressIndicator(
                             value: _downloadProgress,
                             backgroundColor: AppColors.ink.withValues(
@@ -341,7 +342,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             valueColor: AlwaysStoppedAnimation<Color>(
                               _accentColor,
                             ),
-                            minHeight: 8,
+                            minHeight: context.rem(AppRem.sm),
                           ),
                         ),
                       ],
@@ -354,7 +355,7 @@ class _UpdateDialogState extends State<UpdateDialog> {
             // Buttons
             if (!_isDownloading)
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                padding: EdgeInsets.fromLTRB(context.rem(AppRem.lg), 0, context.rem(AppRem.lg), context.rem(AppRem.lg)),
                 child: Row(
                   children: [
                     Expanded(
@@ -364,9 +365,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
                           Navigator.of(context).pop();
                         },
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.md)),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                             side: BorderSide(
                               color: AppColors.inkAlpha(0.15),
                             ),
@@ -375,14 +376,14 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         child: Text(
                           context.l10n.updateLater,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: AppType.body,
                             fontWeight: FontWeight.bold,
                             color: AppColors.inkMuted,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: context.rem(AppRem.ms)),
                     Expanded(
                       flex: 2,
                       child: ElevatedButton(
@@ -390,9 +391,9 @@ class _UpdateDialogState extends State<UpdateDialog> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _accentColor,
                           foregroundColor: AppColors.onAccent,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.md)),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                           ),
                           elevation: 0,
                         ),
@@ -402,12 +403,12 @@ class _UpdateDialogState extends State<UpdateDialog> {
                             Text(
                               context.l10n.updateNow,
                               style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: AppType.body,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.download_rounded, size: 20),
+                            SizedBox(width: context.rem(AppRem.sm)),
+                            Icon(Icons.download_rounded, size: context.rem(AppRem.icon)),
                           ],
                         ),
                       ),
@@ -600,8 +601,8 @@ class _UpdateDialogState extends State<UpdateDialog> {
             backgroundColor: _surfaceColor,
             title: Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.green, size: 32),
-                const SizedBox(width: 12),
+                Icon(Icons.check_circle, color: Colors.green, size: context.rem(2)),
+                SizedBox(width: context.rem(AppRem.ms)),
                 Text(
                   context.l10n.updateDownloadComplete,
                   style: TextStyle(color: AppColors.ink),
@@ -616,41 +617,41 @@ class _UpdateDialogState extends State<UpdateDialog> {
                   context.l10n.updateDownloadedTo,
                   style: TextStyle(color: AppColors.inkMuted),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: context.rem(AppRem.sm)),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(context.rem(AppRem.ms)),
                   decoration: BoxDecoration(
                     color: _backgroundColor.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                   ),
                   child: SelectableText(
                     filePath,
                     style: TextStyle(
                       color: _accentColor,
-                      fontSize: 12,
+                      fontSize: AppType.caption,
                       fontFamily: 'monospace',
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: context.rem(AppRem.md)),
                 if (widget.updateInfo.isFlatpak) ...[
                   Text(
                     context.l10n.updateReinstallBundle,
                     style: TextStyle(color: AppColors.inkMuted),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.rem(AppRem.sm)),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
                     decoration: BoxDecoration(
                       color: _backgroundColor.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                     ),
                     child: SelectableText(
                       'flatpak install --user --reinstall "$filePath"',
                       style: TextStyle(
                         color: _accentColor,
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         fontFamily: 'monospace',
                       ),
                     ),

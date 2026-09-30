@@ -14,6 +14,7 @@ import '../../services/tmdb/tmdb_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 /// Every third-party account or key the app talks to, in one place: Trakt,
 /// Simkl and TMDB. Trakt/Simkl used to be the whole page (two nearly
@@ -33,21 +34,21 @@ class SyncSettingsPage extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           tooltip: context.l10n.commonBack,
-          icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+          icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           context.l10n.settingsCategoryConnect,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.titleSm),
         ),
       ),
-      body: const SettingsScrollView(
+      body: SettingsScrollView(
         children: [
-          _TraktSyncCard(),
-          SizedBox(height: 16),
-          _SimklSyncCard(),
-          SizedBox(height: 16),
-          _TmdbConnectCard(),
+          const _TraktSyncCard(),
+          SizedBox(height: context.rem(AppRem.md)),
+          const _SimklSyncCard(),
+          SizedBox(height: context.rem(AppRem.md)),
+          const _TmdbConnectCard(),
         ],
       ),
     );
@@ -125,10 +126,10 @@ class _SyncCardChrome extends StatelessWidget {
     AppColors.dependOn(context);
     final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(context.rem(1.25)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(
           color: isAuthed
               ? color.withValues(alpha: 0.35)
@@ -141,15 +142,15 @@ class _SyncCardChrome extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: context.rem(2.75),
+                height: context.rem(2.75),
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 ),
-                child: Icon(icon, color: color, size: 24),
+                child: Icon(icon, color: color, size: context.rem(AppRem.iconLg)),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: context.rem(0.875)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,21 +161,21 @@ class _SyncCardChrome extends StatelessWidget {
                     // that can move to a second line.
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
+                      spacing: context.rem(AppRem.sm),
+                      runSpacing: context.rem(AppRem.xs),
                       children: [
                         Text(
                           name,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: AppType.bodyLg,
                             fontWeight: FontWeight.w800,
                             color: AppColors.ink,
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.rem(AppRem.sm),
+                            vertical: context.rem(AppRem.xxs),
                           ),
                           decoration: BoxDecoration(
                             color:
@@ -182,14 +183,14 @@ class _SyncCardChrome extends StatelessWidget {
                                         ? const Color(0xFF10B981)
                                         : AppColors.inkFaint)
                                     .withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                           ),
                           child: Text(
                             isAuthed
                                 ? l10n.syncConnected
                                 : l10n.syncDisconnected,
                             style: TextStyle(
-                              fontSize: TvType.scale(10),
+                              fontSize: TvType.scale(AppType.micro),
                               fontWeight: FontWeight.w800,
                               color: isAuthed
                                   ? const Color(0xFF10B981)
@@ -201,11 +202,11 @@ class _SyncCardChrome extends StatelessWidget {
                       ],
                     ),
                     if (isAuthed && username != null) ...[
-                      const SizedBox(height: 4),
+                      SizedBox(height: context.rem(AppRem.xs)),
                       Text(
                         username!,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppType.small,
                           color: AppColors.inkAlpha(0.5),
                         ),
                       ),
@@ -226,11 +227,11 @@ class _SyncCardChrome extends StatelessWidget {
                       color: const Color(0xFFEF4444).withValues(alpha: 0.4),
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(0.875),
+                      vertical: context.rem(0.625),
                     ),
                   ),
                   onPressed: onDisconnect,
@@ -245,11 +246,11 @@ class _SyncCardChrome extends StatelessWidget {
                     backgroundColor: color,
                     foregroundColor: AppColors.onAccent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(AppRem.md),
+                      vertical: context.rem(0.625),
                     ),
                   ),
                   onPressed: onConnect,
@@ -261,12 +262,12 @@ class _SyncCardChrome extends StatelessWidget {
             ],
           ),
           if (unavailableNote != null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: context.rem(AppRem.md)),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(context.rem(AppRem.ms)),
               decoration: BoxDecoration(
                 color: Colors.orange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                 border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
               ),
               child: Row(
@@ -274,14 +275,14 @@ class _SyncCardChrome extends StatelessWidget {
                   Icon(
                     Icons.info_outline,
                     color: Colors.orange.shade300,
-                    size: 20,
+                    size: context.rem(AppRem.icon),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: context.rem(AppRem.ms)),
                   Expanded(
                     child: Text(
                       unavailableNote!,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         color: Colors.orange.shade200,
                       ),
                     ),
@@ -294,14 +295,14 @@ class _SyncCardChrome extends StatelessWidget {
           // client ID the note is gone, but they still need a way back to
           // the field to change or clear it.
           if (onUnavailableAction != null) ...[
-            const SizedBox(height: 10),
+            SizedBox(height: context.rem(0.625)),
             Align(
               alignment: AlignmentDirectional.centerEnd,
               // Wrap: two labels in a translated language do not share a
               // phone-width row, and a Row would run off the card.
               child: Wrap(
                 alignment: WrapAlignment.end,
-                spacing: 4,
+                spacing: context.rem(AppRem.xs),
                 children: [
                   if (onUnavailableSecondary != null)
                     TextButton(
@@ -311,7 +312,7 @@ class _SyncCardChrome extends StatelessWidget {
                         style: TextStyle(
                           color: AppColors.inkMuted,
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: AppType.small,
                         ),
                       ),
                     ),
@@ -322,7 +323,7 @@ class _SyncCardChrome extends StatelessWidget {
                       style: TextStyle(
                         color: color,
                         fontWeight: FontWeight.w700,
-                        fontSize: 13,
+                        fontSize: AppType.small,
                       ),
                     ),
                   ),
@@ -335,23 +336,23 @@ class _SyncCardChrome extends StatelessWidget {
           // ID, an ID the provider rejected, and a dead network all read
           // the same, though only two of those are the user's to fix.
           if (statusNote != null) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: context.rem(AppRem.ms)),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.info_outline_rounded,
-                  size: 15,
+                  size: context.rem(0.9375),
                   color: AppColors.inkAlpha(0.4),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 Expanded(
                   child: Text(
                     statusNote!,
                     style: TextStyle(
                       color: AppColors.inkAlpha(0.55),
-                      fontSize: 12,
-                      height: 1.35,
+                      fontSize: AppType.caption,
+                      height: 1.35, // ratio: a line height, not a size
                     ),
                   ),
                 ),
@@ -359,28 +360,28 @@ class _SyncCardChrome extends StatelessWidget {
             ),
           ],
           if (pairing && userCode != null) ...[
-            const SizedBox(height: 20),
+            SizedBox(height: context.rem(1.25)),
             Divider(color: AppColors.inkAlpha(0.10)),
-            const SizedBox(height: 16),
+            SizedBox(height: context.rem(AppRem.md)),
             Center(
               child: Column(
                 children: [
                   Text(
                     pairingHint,
-                    style: TextStyle(fontSize: 13, color: AppColors.inkMuted),
+                    style: TextStyle(fontSize: AppType.small, color: AppColors.inkMuted),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: context.rem(AppRem.ms)),
                   InkWell(
                     onTap: onCopyCode,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.rem(AppRem.lg),
+                        vertical: context.rem(0.875),
                       ),
                       decoration: BoxDecoration(
                         color: Colors.black45,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                         border: Border.all(color: color.withValues(alpha: 0.5)),
                       ),
                       child: Row(
@@ -389,63 +390,63 @@ class _SyncCardChrome extends StatelessWidget {
                           Text(
                             userCode!,
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: AppType.heading,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 4,
                               color: AppColors.ink,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: context.rem(AppRem.ms)),
                           Icon(
                             Icons.copy_rounded,
                             color: AppColors.inkMuted,
-                            size: 20,
+                            size: context.rem(AppRem.icon),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: context.rem(0.875)),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.inkAlpha(0.12),
                       foregroundColor: AppColors.ink,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.rem(AppRem.md),
+                        vertical: context.rem(AppRem.sm),
                       ),
                     ),
                     onPressed: onOpenVerifyUrl,
-                    icon: const Icon(Icons.open_in_browser_rounded, size: 16),
+                    icon: Icon(Icons.open_in_browser_rounded, size: context.rem(AppRem.iconXs)),
                     label: Text(
                       verifyUrlLabel,
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: context.rem(0.875)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
-                        width: 16,
-                        height: 16,
+                        width: context.rem(AppRem.md),
+                        height: context.rem(AppRem.md),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: color,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: context.rem(0.625)),
                       Text(
                         l10n.syncWaiting,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: AppType.caption,
                           color: AppColors.inkAlpha(0.6),
                         ),
                       ),
@@ -737,7 +738,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
           return AlertDialog(
             backgroundColor: AppColors.raised,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             ),
             title: Text(
               l10n.syncSimklClientIdTitle,
@@ -754,11 +755,11 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
                   l10n.syncSimklClientIdBody,
                   style: TextStyle(
                     color: AppColors.inkAlpha(0.7),
-                    fontSize: 13,
-                    height: 1.4,
+                    fontSize: AppType.small,
+                    height: 1.4, // ratio: a line height, not a size
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: context.rem(AppRem.snug)),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
@@ -766,16 +767,16 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
                       'https://simkl.com/settings/developer/',
                       'Simkl',
                     ),
-                    icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                    icon: Icon(Icons.open_in_new_rounded, size: context.rem(AppRem.iconXs)),
                     label: Text(l10n.syncSimklOpenDeveloper),
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: context.rem(AppRem.snug)),
                 TextField(
                   controller: controller,
                   autofocus: true,
                   onChanged: (_) => setDialogState(() {}),
-                  style: TextStyle(color: AppColors.ink, fontSize: 14),
+                  style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
                   decoration: InputDecoration(
                     hintText: l10n.syncClientIdHint,
                     hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
@@ -784,12 +785,12 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
                     filled: true,
                     fillColor: AppColors.bar,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       borderSide: BorderSide.none,
                     ),
                     suffixIcon: IconButton(
                       tooltip: l10n.syncSimklPaste,
-                      icon: const Icon(Icons.content_paste_rounded, size: 18),
+                      icon: Icon(Icons.content_paste_rounded, size: context.rem(AppRem.iconSm)),
                       onPressed: () async {
                         final data = await Clipboard.getData(
                           Clipboard.kTextPlain,
@@ -819,7 +820,7 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF00ADFF),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   ),
                 ),
                 child: Text(
@@ -905,7 +906,7 @@ class _TmdbConnectCard extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
         title: Text(
           l10n.syncTmdbTitle,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
@@ -916,20 +917,20 @@ class _TmdbConnectCard extends StatelessWidget {
           children: [
             Text(
               l10n.syncTmdbBody,
-              style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: 13),
+              style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: AppType.small),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: context.rem(0.875)),
             TextField(
               controller: controller,
               autofocus: true,
-              style: TextStyle(color: AppColors.ink, fontSize: 14),
+              style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
               decoration: InputDecoration(
                 hintText: l10n.syncTmdbKeyHint,
                 hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
                 filled: true,
                 fillColor: AppColors.bar,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -949,7 +950,7 @@ class _TmdbConnectCard extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF01B4E4),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
             ),
             child: Text(
@@ -981,10 +982,10 @@ class _TmdbConnectCard extends StatelessWidget {
         final bundled = TmdbSettings.bundledApiKey != null;
         final connected = ownKey || bundled;
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(context.rem(AppRem.md)),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
             border: Border.all(
               color: connected
                   ? const Color(0xFF01B4E4).withValues(alpha: 0.3)
@@ -997,18 +998,18 @@ class _TmdbConnectCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: context.rem(2.625),
+                    height: context.rem(2.625),
                     decoration: BoxDecoration(
                       color: const Color(0xFF01B4E4).withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                     ),
                     child: const Icon(
                       Icons.theaters_rounded,
                       color: Color(0xFF01B4E4),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: context.rem(0.875)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1016,11 +1017,11 @@ class _TmdbConnectCard extends StatelessWidget {
                         Text(
                           l10n.syncTmdbCardTitle,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: AppType.bodyLg,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: context.rem(AppRem.xs)),
                         Text(
                           ownKey
                               ? l10n.syncTmdbOwnKey
@@ -1029,8 +1030,8 @@ class _TmdbConnectCard extends StatelessWidget {
                               : l10n.syncTmdbNoKey,
                           style: TextStyle(
                             color: AppColors.inkSubtle,
-                            fontSize: 12.5,
-                            height: 1.35,
+                            fontSize: AppType.captionPlus,
+                            height: 1.35, // ratio: a line height, not a size
                           ),
                         ),
                       ],
@@ -1045,7 +1046,7 @@ class _TmdbConnectCard extends StatelessWidget {
                         l10n.syncDisconnect,
                         style: TextStyle(
                           color: AppColors.inkAlpha(0.5),
-                          fontSize: 13,
+                          fontSize: AppType.small,
                         ),
                       ),
                     )
@@ -1055,18 +1056,18 @@ class _TmdbConnectCard extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF01B4E4),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(AppRem.md),
+                          vertical: context.rem(0.625),
                         ),
                       ),
                       child: Text(
                         bundled ? l10n.syncTmdbUseMyKey : l10n.syncConnect,
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                          fontSize: AppType.small,
                         ),
                       ),
                     ),
@@ -1085,7 +1086,7 @@ class _TmdbConnectCard extends StatelessWidget {
                       status.contains('Could not reach') ||
                       status.contains('rate-limited');
                   return Padding(
-                    padding: const EdgeInsets.only(top: 12),
+                    padding: EdgeInsets.only(top: context.rem(AppRem.ms)),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1093,12 +1094,12 @@ class _TmdbConnectCard extends StatelessWidget {
                           bad
                               ? Icons.error_outline_rounded
                               : Icons.check_circle_outline_rounded,
-                          size: 15,
+                          size: context.rem(0.9375),
                           color: bad
                               ? const Color(0xFFEF4444)
                               : const Color(0xFF10B981),
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: context.rem(AppRem.sm)),
                         Expanded(
                           child: Text(
                             status,
@@ -1106,8 +1107,8 @@ class _TmdbConnectCard extends StatelessWidget {
                               color: bad
                                   ? const Color(0xFFEF4444)
                                   : AppColors.inkSubtle,
-                              fontSize: 12,
-                              height: 1.35,
+                              fontSize: AppType.caption,
+                              height: 1.35, // ratio: a line height, not a size
                             ),
                           ),
                         ),

@@ -5,6 +5,7 @@ import '../../models/details/credit.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../common/hover_button.dart';
+import '../../services/app_units.dart';
 
 /// One person on a details page's credits rail: avatar, name, and what they
 /// did on this title.
@@ -32,7 +33,7 @@ class CreditCard extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return SizedBox(
-      width: 88,
+      width: context.rem(5.5),
       child: Column(
         children: [
           HoverButton(
@@ -43,7 +44,7 @@ class CreditCard extends StatelessWidget {
               name: credit.name,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: context.rem(AppRem.snug)),
           // The rail is a fixed 148 and the column is avatar + 6 + name + 2 +
           // role (12, already capped at 1.0). At 3x this 12px name alone wants
           // ~43px and the column asks ~151 of a 148 box. Capped like its
@@ -58,12 +59,12 @@ class CreditCard extends StatelessWidget {
                 MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
             style: TextStyle(
               color: AppColors.ink,
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w600,
-              height: 1.2,
+              height: 1.2, // ratio: a line height, not a size
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: context.rem(AppRem.xxs)),
           // Fixed height, not a conditional child: a card whose role is
           // unknown has to occupy the same box as one whose role is known, or
           // a single uncredited actor shortens their column and the whole
@@ -71,7 +72,7 @@ class CreditCard extends StatelessWidget {
           // shrinks with a smaller system setting) so a large accessibility
           // text size cannot outgrow this fixed 12px (#69).
           SizedBox(
-            height: 12,
+            height: context.rem(AppRem.ms),
             child: Text(
               credit.role ?? '',
               textAlign: TextAlign.center,
@@ -81,8 +82,8 @@ class CreditCard extends StatelessWidget {
                   MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.0),
               style: TextStyle(
                 color: AppColors.inkSubtle,
-                fontSize: TvType.scale(10.5),
-                height: 1.1,
+                fontSize: TvType.scale(AppType.microPlus),
+                height: 1.1, // ratio: a line height, not a size
               ),
             ),
           ),
@@ -128,8 +129,8 @@ class _PersonAvatar extends StatelessWidget {
     final fallback = _InitialsCircle(initials: _initials, colors: pair);
 
     return Container(
-      width: 76,
-      height: 76,
+      width: context.rem(4.75),
+      height: context.rem(4.75),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: profileUrl == null
@@ -139,15 +140,15 @@ class _PersonAvatar extends StatelessWidget {
                 colors: pair,
               )
             : null,
-        border: Border.all(color: AppColors.inkAlpha(0.1), width: 1.5),
+        border: Border.all(color: AppColors.inkAlpha(0.1), width: 1.5), // px: a hairline, not a layout size
       ),
       clipBehavior: Clip.antiAlias,
       alignment: Alignment.center,
       child: profileUrl != null
           ? CachedNetworkImage(
               imageUrl: profileUrl!,
-              width: 76,
-              height: 76,
+              width: context.rem(4.75),
+              height: context.rem(4.75),
               fit: BoxFit.cover,
               placeholder: (_, __) => fallback,
               errorWidget: (_, __, ___) => fallback,
@@ -156,7 +157,7 @@ class _PersonAvatar extends StatelessWidget {
               _initials,
               style: TextStyle(
                 color: AppColors.ink,
-                fontSize: 24,
+                fontSize: AppType.heading,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -187,7 +188,7 @@ class _InitialsCircle extends StatelessWidget {
         initials,
         style: TextStyle(
           color: AppColors.ink,
-          fontSize: 24,
+          fontSize: AppType.heading,
           fontWeight: FontWeight.bold,
         ),
       ),

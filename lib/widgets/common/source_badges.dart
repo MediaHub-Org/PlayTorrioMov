@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/stream/stream_model.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 /// Neutral badge tint, for facts that describe a source rather than rank it
 /// (codec, file size, how it is delivered).
@@ -34,24 +35,24 @@ class SourceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 10, color: color),
-            const SizedBox(width: 3),
+            Icon(icon, size: context.rem(0.625), color: color),
+            SizedBox(width: context.rem(0.1875)),
           ],
           Text(
             text,
             style: TextStyle(
               color: color,
-              fontSize: TvType.scale(10),
+              fontSize: TvType.scale(AppType.micro),
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
             ),

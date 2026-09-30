@@ -343,7 +343,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         emptyState: Center(
           child: Text(
             context.l10n.catalogNoContent,
-            style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+            style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
           ),
         ),
       );
@@ -382,8 +382,8 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           ),
           if (_loadingGenre)
             SizedBox(
-              width: 16,
-              height: 16,
+              width: context.rem(AppRem.md),
+              height: context.rem(AppRem.md),
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: AppColors.accent,
@@ -486,7 +486,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
               AppSpacing.pageInset(context),
               0,
               AppSpacing.pageInset(context),
-              34,
+              context.rem(2.125),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -496,15 +496,15 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                   children: [
                     if ((movie.imdbRating ?? '').isNotEmpty) ...[
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 11,
-                          vertical: 6,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(0.6875),
+                          vertical: context.rem(AppRem.snug),
                         ),
                         decoration: BoxDecoration(
                           color: const Color(
                             0xFFFFD700,
                           ).withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(9),
+                          borderRadius: BorderRadius.circular(context.rem(0.5625)),
                           border: Border.all(
                             color: const Color(
                               0xFFFFD700,
@@ -514,16 +514,16 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.star_rounded,
-                              size: 17,
-                              color: Color(0xFFFFD700),
+                              size: context.rem(1.0625),
+                              color: const Color(0xFFFFD700),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: context.rem(AppRem.xs)),
                             Text(
                               movie.imdbRating!,
                               style: const TextStyle(
-                                fontSize: 15,
+                                fontSize: AppType.bodyMd,
                                 fontWeight: FontWeight.w800,
                                 color: Color(0xFFFFD700),
                               ),
@@ -531,29 +531,29 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: context.rem(0.625)),
                     ],
                     if ((movie.year ?? '').isNotEmpty)
                       Text(
                         movie.year!,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: AppType.bodyMd,
                           color: AppColors.onAccent.withValues(alpha: 0.55),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 520),
+                  constraints: BoxConstraints(maxWidth: context.rem(32.5)),
                   child: Text(
                     movie.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: AppColors.onAccent,
-                      fontSize: 26,
+                      fontSize: AppType.headingLg,
                       fontWeight: FontWeight.w900,
                       letterSpacing: -0.5,
                     ),
@@ -561,26 +561,26 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                 ),
                 if (detail != null &&
                     (detail.description ?? '').isNotEmpty) ...[
-                  const SizedBox(height: 10),
+                  SizedBox(height: context.rem(0.625)),
                   ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 520),
+                    constraints: BoxConstraints(maxWidth: context.rem(32.5)),
                     child: Text(
                       detail.description!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 13.5,
+                        fontSize: AppType.smallPlus,
                         color: AppColors.onAccent.withValues(alpha: 0.7),
-                        height: 1.4,
+                        height: 1.4, // ratio: a line height, not a size
                       ),
                     ),
                   ),
                 ],
                 if (detail != null && detail.genres.isNotEmpty) ...[
-                  const SizedBox(height: 14),
+                  SizedBox(height: context.rem(0.875)),
                   GenreTagRow(genres: detail.genres.take(4).toList()),
                 ],
-                SizedBox(height: isCompact ? 18 : 22),
+                SizedBox(height: context.rem(isCompact ? 1.125 : 1.375)),
                 Row(
                   children: [
                     HeroActionButton(
@@ -627,7 +627,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     return Column(
       children: [
         _buildHeader(context),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: context.rem(AppRem.sm)),
         Expanded(
           child: CustomScrollView(
             slivers: [
@@ -641,7 +641,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                           : _genreFilter != null
                           ? context.l10n.catalogNoTitlesForGenre(_genreFilter!)
                           : context.l10n.catalogNoTitlesInDecade(_decadeFilter ?? 0),
-                      style: TextStyle(color: AppColors.inkSubtle, fontSize: 16),
+                      style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
                     ),
                   ),
                 )
@@ -651,13 +651,13 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                     AppSpacing.pageInset(context),
                     0,
                     AppSpacing.pageInset(context),
-                    120,
+                    context.rem(7.5),
                   ),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 16,
+                      mainAxisSpacing: context.rem(1.25),
+                      crossAxisSpacing: context.rem(AppRem.md),
                       childAspectRatio: 0.62,
                     ),
                     delegate: SliverChildBuilderDelegate(

@@ -17,6 +17,7 @@ import '../../widgets/common/hover_button.dart';
 import 'anime_details_page.dart';
 
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 class AnimeSearchPage extends StatefulWidget {
   /// Pre-fills the field and searches straight away. Set when the unified
@@ -255,8 +256,8 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
     final picked = await showAdaptiveSheet<_PickResult<T>>(
       context: context,
       backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(context.rem(AppRem.lg))),
       ),
       isScrollControlled: true,
       builder: (ctx) {
@@ -269,25 +270,25 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
             children: [
               // Top drag indicator
               Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 44,
-                height: 4,
+                margin: EdgeInsets.only(top: context.rem(AppRem.ms), bottom: context.rem(AppRem.sm)),
+                width: context.rem(2.75),
+                height: context.rem(AppRem.xs),
                 decoration: BoxDecoration(
                   color: AppColors.inkAlpha(0.25),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.xxs)),
                 ),
               ),
 
               // Header
               Padding(
-                padding: const EdgeInsets.fromLTRB(22, 6, 16, 12),
+                padding: EdgeInsets.fromLTRB(context.rem(1.375), context.rem(AppRem.snug), context.rem(AppRem.md), context.rem(AppRem.ms)),
                 child: Row(
                   children: [
                     Text(
                       title,
                       style: TextStyle(
                         color: AppColors.ink,
-                        fontSize: 17,
+                        fontSize: AppType.subhead,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -300,14 +301,14 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                           style: TextStyle(
                             color: AppThemeService.currentPalette.value.primaryColor,
                             fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                            fontSize: AppType.body,
                           ),
                         ),
                       ),
                   ],
                 ),
               ),
-              Divider(color: AppColors.inkAlpha(0.10), height: 1),
+              Divider(color: AppColors.inkAlpha(0.10), height: 1), // px: a hairline, not a layout size
 
               // Options list
               Expanded(
@@ -322,7 +323,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                       child: InkWell(
                         onTap: () => Navigator.of(ctx).pop(_PickResult<T>(v, false)),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(1.375), vertical: context.rem(0.875)),
                           decoration: BoxDecoration(
                             color: selected
                                 ? AppThemeService.currentPalette.value.primaryColor.withValues(alpha: 0.12)
@@ -340,7 +341,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                   label(v),
                                   style: TextStyle(
                                     color: selected ? AppThemeService.currentPalette.value.primaryColor : AppColors.ink,
-                                    fontSize: 15,
+                                    fontSize: AppType.bodyMd,
                                     fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
                                   ),
                                 ),
@@ -349,7 +350,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                 Icon(
                                   Icons.check_rounded,
                                   color: AppThemeService.currentPalette.value.primaryColor,
-                                  size: 20,
+                                  size: context.rem(AppRem.icon),
                                 ),
                             ],
                           ),
@@ -403,45 +404,45 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
   }) {
     final primaryColor = AppThemeService.currentPalette.value.primaryColor;
     return Padding(
-      padding: const EdgeInsetsDirectional.only(end: 8),
+      padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
       child: Material(
         color: active
             ? primaryColor.withValues(alpha: 0.22)
             : AppColors.inkAlpha(0.06),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(context.rem(1.25)),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(context.rem(1.25)),
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.sm)),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(context.rem(1.25)),
               border: Border.all(
                 color: active
                     ? primaryColor.withValues(alpha: 0.65)
                     : AppColors.inkAlpha(0.10),
-                width: 1.1,
+                width: 1.1, // px: a hairline, not a layout size
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(icon, size: 14, color: AppColors.inkMuted),
-                  const SizedBox(width: 6),
+                  Icon(icon, size: context.rem(0.875), color: AppColors.inkMuted),
+                  SizedBox(width: context.rem(AppRem.snug)),
                 ],
                 Text(
                   label,
                   style: TextStyle(
                     color: active ? AppColors.ink : AppColors.inkMuted,
-                    fontSize: 12.5,
+                    fontSize: AppType.captionPlus,
                     fontWeight: active ? FontWeight.w800 : FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: context.rem(AppRem.xs)),
                 Icon(
                   Icons.expand_more_rounded,
-                  size: 15,
+                  size: context.rem(0.9375),
                   color: active ? primaryColor : AppColors.inkDisabled,
                 ),
               ],
@@ -490,7 +491,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 child: Container(
                   padding: EdgeInsets.only(
                     top: AppSpacing.floatingTopInset(context),
-                    bottom: 8,
+                    bottom: context.rem(AppRem.sm),
                   ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -518,15 +519,15 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     child: Row(
                       children: [
                         const GlassBackButton(),
-                        const SizedBox(width: 10),
+                        SizedBox(width: context.rem(0.625)),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 8),
+                            padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
                             child: Container(
-                              height: 42,
+                              height: context.rem(2.625),
                               decoration: BoxDecoration(
                                 color: AppColors.inkAlpha(0.06),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                                 border: Border.all(
                                   color: AppColors.inkAlpha(0.1),
                                 ),
@@ -537,7 +538,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                 autofocus: true,
                                 style: TextStyle(
                                   color: AppColors.ink,
-                                  fontSize: 15,
+                                  fontSize: AppType.bodyMd,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 textInputAction: TextInputAction.search,
@@ -547,17 +548,17 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                   hintText: context.l10n.animeSearchHint,
                                   hintStyle: TextStyle(
                                     color: AppColors.inkAlpha(0.35),
-                                    fontSize: 14,
+                                    fontSize: AppType.body,
                                   ),
                                   border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: context.rem(AppRem.md),
+                                    vertical: context.rem(AppRem.ms),
                                   ),
                                   suffixIcon: _searchController.text.isNotEmpty
                                       ? IconButton(
                                           tooltip: context.l10n.commonClose,
-                                          icon: const Icon(Icons.close_rounded, size: 18),
+                                          icon: Icon(Icons.close_rounded, size: context.rem(AppRem.iconSm)),
                                           color: AppColors.inkAlpha(0.60),
                                           onPressed: () {
                                             _searchController.clear();
@@ -566,7 +567,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                         )
                                       : Icon(
                                           Icons.search_rounded,
-                                          size: 20,
+                                          size: context.rem(AppRem.icon),
                                           color: AppColors.inkSubtle,
                                         ),
                                 ),
@@ -578,24 +579,24 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
 
                         // 18+ Adult Toggle Pill
                         Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 8),
+                            padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
                             child: HoverButton(
                               scaleAmount: 1.05,
                               showFocusRing: true,
                               onTap: () => _toggleAdult(!_allowAdult),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                                padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.4375)),
                                 decoration: BoxDecoration(
                                   color: _allowAdult
                                       ? const Color(0xFFEF4444).withValues(alpha: 0.20)
                                       : AppColors.inkAlpha(0.06),
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                                   border: Border.all(
                                     color: _allowAdult
                                         ? const Color(0xFFEF4444)
                                         : AppColors.inkAlpha(0.12),
-                                    width: 1.2,
+                                    width: 1.2, // px: a hairline, not a layout size
                                   ),
                                 ),
                                 child: Row(
@@ -605,15 +606,15 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                                       _allowAdult
                                           ? Icons.check_box_rounded
                                           : Icons.check_box_outline_blank_rounded,
-                                      size: 16,
+                                      size: context.rem(AppRem.iconXs),
                                       color: _allowAdult ? const Color(0xFFEF4444) : AppColors.inkSubtle,
                                     ),
-                                    const SizedBox(width: 5),
+                                    SizedBox(width: context.rem(0.3125)),
                                     Text(
                                       '18+',
                                       style: TextStyle(
                                         color: _allowAdult ? const Color(0xFFEF4444) : AppColors.inkMuted,
-                                        fontSize: 12,
+                                        fontSize: AppType.caption,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -626,7 +627,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: context.rem(AppRem.sm)),
 
                   // Row 2: Custom Dropdown Menu Buttons
                   SizedBox(
@@ -634,7 +635,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md)),
                       children: [
                         // Sort Dropdown
                         _buildFilterDropdownButton(
@@ -711,29 +712,29 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                         // Reset Button
                         if (_hasActiveFilters)
                           Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 8),
+                            padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
                             child: Material(
                               color: AppColors.inkAlpha(0.05),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(context.rem(1.25)),
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(context.rem(1.25)),
                                 onTap: _resetFilters,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.sm)),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
+                                    borderRadius: BorderRadius.circular(context.rem(1.25)),
                                     border: Border.all(color: AppColors.inkFaint),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.close_rounded, size: 14, color: AppColors.inkMuted),
-                                      const SizedBox(width: 4),
+                                      Icon(Icons.close_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
+                                      SizedBox(width: context.rem(AppRem.xs)),
                                       Text(
                                         context.l10n.animeReset,
                                         style: TextStyle(
                                           color: AppColors.inkMuted,
-                                          fontSize: 12,
+                                          fontSize: AppType.caption,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -767,24 +768,24 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                   children: [
                     Icon(
                       Icons.search_off_rounded,
-                      size: 64,
+                      size: context.rem(4),
                       color: AppColors.inkAlpha(0.2),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: context.rem(AppRem.md)),
                     Text(
                       context.l10n.animeNoMatch,
                       style: TextStyle(
                         color: AppColors.inkMuted,
-                        fontSize: 16,
+                        fontSize: AppType.bodyLg,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: context.rem(AppRem.sm)),
                     Text(
                       context.l10n.animeNoMatchHint,
                       style: TextStyle(
                         color: AppColors.inkAlpha(0.4),
-                        fontSize: 13,
+                        fontSize: AppType.small,
                       ),
                     ),
                   ],
@@ -796,8 +797,8 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 child: ListView(
                 clipBehavior: Clip.none,
                 padding: EdgeInsets.only(
-                  top: topPadding + kToolbarHeight + 80,
-                  bottom: 40,
+                  top: topPadding + kToolbarHeight + context.rem(5),
+                  bottom: context.rem(2.5),
                 ),
                 physics: const BouncingScrollPhysics(),
                 children: [
@@ -832,8 +833,8 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                 child: ListView(
                 clipBehavior: Clip.none,
                 padding: EdgeInsets.only(
-                  top: topPadding + kToolbarHeight + 80,
-                  bottom: 40,
+                  top: topPadding + kToolbarHeight + context.rem(5),
+                  bottom: context.rem(2.5),
                 ),
                 physics: const BouncingScrollPhysics(),
                 children: [

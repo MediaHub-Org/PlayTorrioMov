@@ -10,6 +10,7 @@ import '../../widgets/player/player_sub_style_modal.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 class VideoPlayerSettingsPage extends StatefulWidget {
   const VideoPlayerSettingsPage({super.key});
@@ -56,20 +57,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
               tooltip: context.l10n.commonBack,
-              icon: const Icon(Icons.arrow_back_ios_rounded, size: 20),
+              icon: Icon(Icons.arrow_back_ios_rounded, size: context.rem(AppRem.icon)),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
               l10n.videoPlayerSettingsTitle,
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
             ),
             actions: [
               IconButton(
                 tooltip: l10n.videoResetTooltip,
-                icon: const Icon(Icons.restart_alt_rounded, size: 22),
+                icon: Icon(Icons.restart_alt_rounded, size: context.rem(AppRem.iconMd)),
                 onPressed: () => _confirmResetToDefaults(palette),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: context.rem(AppRem.sm)),
             ],
           ),
           body: AnimatedAmbientBackground(
@@ -80,54 +81,54 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 // ── Device & Platform Status Card ──
                 _buildDeviceStatusCard(palette),
 
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
 
                 // ── Section 1: Video Decoders & Hardware Acceleration ──
                 _buildSectionHeader(l10n.videoSectionDecoders),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildDecodersCard(palette),
 
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
 
                 // ── Section 2: Engine Performance & Fast Decode (AnymeX) ──
                 _buildSectionHeader(l10n.videoSectionOptimizations),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildPerformanceOptimizationCard(palette),
 
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
 
                 // ── Section 3: Buffer Cushion & Anti-Desync Engine ──
                 _buildSectionHeader(l10n.videoSectionBuffer),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildBufferCushionCard(palette),
 
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
 
                 // ── Section 4: Network Continuity & Auto-Reconnect ──
                 _buildSectionHeader(l10n.videoSectionNetwork),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildNetworkReconnectCard(palette),
 
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
 
                 // ── Section 5: A/V Master Clock & Sync Calibration ──
                 _buildSectionHeader(l10n.videoSectionClock),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildAudioSyncCard(palette),
 
-                const SizedBox(height: 24),
+                SizedBox(height: context.rem(AppRem.lg)),
 
                 // ── Section 6: Subtitle Appearance & libass Styling ──
                 _buildSectionHeader(l10n.videoSectionSubtitles),
-                const SizedBox(height: 12),
+                SizedBox(height: context.rem(AppRem.ms)),
                 _buildSubtitleAppearanceCard(palette),
 
-                const SizedBox(height: 32),
+                SizedBox(height: context.rem(AppRem.xl)),
 
                 // ── Reset to Defaults ──
                 _buildResetButton(palette),
 
-                const SizedBox(height: 16),
+                SizedBox(height: context.rem(AppRem.md)),
               ],
             ),
           ),
@@ -142,11 +143,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsetsDirectional.only(start: 4),
+      padding: EdgeInsetsDirectional.only(start: context.rem(AppRem.xs)),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: AppType.caption,
           fontWeight: FontWeight.w700,
           color: AppColors.inkAlpha(0.35),
           letterSpacing: 1.1,
@@ -160,7 +161,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     final effectiveDecoders = PlayerSettings.getEffectiveDecoders();
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(context.rem(1.125)),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -170,7 +171,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
         border: Border.all(color: palette.primaryColor.withValues(alpha: 0.25)),
       ),
       child: Column(
@@ -179,11 +180,11 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           Row(
             children: [
               Container(
-                width: 46,
-                height: 46,
+                width: context.rem(2.875),
+                height: context.rem(2.875),
                 decoration: BoxDecoration(
                   color: palette.primaryColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(context.rem(0.875)),
                 ),
                 child: Icon(
                   Platform.isAndroid
@@ -194,10 +195,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                   ? Icons.apple_rounded
                                   : Icons.computer_rounded)),
                   color: palette.primaryColor,
-                  size: 26,
+                  size: context.rem(1.625),
                 ),
               ),
-              const SizedBox(width: 14),
+              SizedBox(width: context.rem(0.875)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,43 +208,43 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     // the badge is the part that can move to a second line.
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
+                      spacing: context.rem(AppRem.sm),
+                      runSpacing: context.rem(AppRem.xs),
                       children: [
                         Text(
                           l10n.videoEngineTitle(_platformLabel(l10n)),
                           style: TextStyle(
-                            fontSize: 16.5,
+                            fontSize: AppType.bodyLgPlus,
                             fontWeight: FontWeight.w800,
                             color: AppColors.ink,
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.rem(AppRem.sm),
+                            vertical: context.rem(AppRem.xxs),
                           ),
                           decoration: BoxDecoration(
                             color: const Color(
                               0xFF10B981,
                             ).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                             border: Border.all(
                               color: const Color(
                                 0xFF10B981,
                               ).withValues(alpha: 0.4),
-                              width: 0.8,
+                              width: 0.8, // px: a hairline, not a layout size
                             ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.shield_rounded,
-                                color: Color(0xFF10B981),
-                                size: 12,
+                                color: const Color(0xFF10B981),
+                                size: context.rem(0.75),
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: context.rem(AppRem.xs)),
                               // The badge is a fixed-width pill with a
                               // single-line label; at 3x the label alone is
                               // wider than the card, so it scales down
@@ -255,7 +256,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                   child: Text(
                                     l10n.videoCrashFreeBadge,
                                     style: TextStyle(
-                                      fontSize: TvType.scale(10.5),
+                                      fontSize: TvType.scale(AppType.microPlus),
                                       fontWeight: FontWeight.w700,
                                       color: const Color(0xFF10B981),
                                     ),
@@ -267,13 +268,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: context.rem(0.1875)),
                     Text(
                       l10n.videoEngineBody,
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: AppType.captionPlus,
                         color: AppColors.inkAlpha(0.55),
-                        height: 1.3,
+                        height: 1.3, // ratio: a line height, not a size
                       ),
                     ),
                   ],
@@ -281,18 +282,18 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.sm)),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.35),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               border: Border.all(color: AppColors.inkAlpha(0.06)),
             ),
             child: Row(
               children: [
-                Icon(Icons.hub_rounded, size: 14, color: AppColors.inkSubtle),
-                const SizedBox(width: 8),
+                Icon(Icons.hub_rounded, size: context.rem(0.875), color: AppColors.inkSubtle),
+                SizedBox(width: context.rem(AppRem.sm)),
                 // Both halves flex: at 3x the label alone is wider than the
                 // row, and it is a fixed phrase that cannot wrap usefully.
                 Flexible(
@@ -300,7 +301,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     l10n.videoActiveDecoderChain,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppType.caption,
                       fontWeight: FontWeight.w600,
                       color: AppColors.inkMuted,
                     ),
@@ -311,7 +312,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     effectiveDecoders.join(' → '),
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppType.caption,
                       fontWeight: FontWeight.w700,
                       color: palette.primaryColor,
                     ),
@@ -332,10 +333,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     final isForceSoftware = PlayerSettings.forceSoftwareDecoding.value;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -345,25 +346,25 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: isForceSoftware
                     ? const Color(0xFFF59E0B).withValues(alpha: 0.15)
                     : AppColors.inkAlpha(0.05),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
               child: Icon(
                 Icons.memory_rounded,
                 color: isForceSoftware
                     ? const Color(0xFFF59E0B)
                     : AppColors.inkSubtle,
-                size: 20,
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoSoftwareSafeTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -371,9 +372,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoSoftwareSafeBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: isForceSoftware,
@@ -381,20 +382,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             onChanged: (val) => PlayerSettings.setForceSoftwareDecoding(val),
           ),
 
-          const SizedBox(height: 14),
-          Divider(color: AppColors.inkAlpha(0.06), height: 1),
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(0.875)),
 
           Text(
             l10n.videoDecoderPresetHeader(_platformLabel(l10n).toUpperCase()),
             style: TextStyle(
-              fontSize: 11,
+              fontSize: AppType.tiny,
               fontWeight: FontWeight.w700,
               color: AppColors.inkAlpha(0.4),
               letterSpacing: 0.8,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
 
           // Preset Options
           ...presets.map((preset) {
@@ -402,7 +403,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             final isCustom = preset == DecoderPreset.custom;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -415,20 +416,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                             PlayerSettings.setDecoderPreset(preset);
                           }
                         },
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? palette.primaryColor.withValues(alpha: 0.12)
                           : AppColors.inkAlpha(0.02),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                       border: Border.all(
                         color: isSelected
                             ? palette.primaryColor.withValues(alpha: 0.5)
                             : AppColors.inkAlpha(0.06),
-                        width: isSelected ? 1.2 : 0.8,
+                        width: isSelected ? 1.2 : 0.8, // px: a hairline, not a layout size
                       ),
                     ),
                     child: Row(
@@ -440,9 +441,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           color: isSelected
                               ? palette.primaryColor
                               : AppColors.inkDisabled,
-                          size: 18,
+                          size: context.rem(AppRem.iconSm),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: context.rem(AppRem.ms)),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,20 +451,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                               Text(
                                 preset.title(l10n),
                                 style: TextStyle(
-                                  fontSize: 13.5,
+                                  fontSize: AppType.smallPlus,
                                   fontWeight: FontWeight.w700,
                                   color: isForceSoftware
                                       ? AppColors.inkDisabled
                                       : AppColors.ink,
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              SizedBox(height: context.rem(AppRem.xxs)),
                               Text(
                                 preset.description(l10n),
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: AppType.tinyPlus,
                                   color: AppColors.inkAlpha(0.45),
-                                  height: 1.25,
+                                  height: 1.25, // ratio: a line height, not a size
                                 ),
                               ),
                             ],
@@ -474,7 +475,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                             tooltip: context.l10n.videoCustomChainTitle,
                             icon: Icon(
                               Icons.tune_rounded,
-                              size: 18,
+                              size: context.rem(AppRem.iconSm),
                               color: AppColors.inkMuted,
                             ),
                             onPressed: isForceSoftware
@@ -496,10 +497,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   Widget _buildPerformanceOptimizationCard(AppThemePalette palette) {
     final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -509,21 +510,21 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: palette.primaryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
               child: Icon(
                 Icons.flash_on_rounded,
                 color: palette.primaryColor,
-                size: 20,
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoFastDecodeTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -531,9 +532,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoFastDecodeBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: PlayerSettings.enableFastDecode.value,
@@ -541,26 +542,26 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             onChanged: (val) => PlayerSettings.setEnableFastDecode(val),
           ),
 
-          const SizedBox(height: 12),
-          Divider(color: AppColors.inkAlpha(0.06), height: 1),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // 2. Loop Filter Skipping
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(context.rem(AppRem.sm)),
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.filter_alt_rounded,
-                  color: Color(0xFF10B981),
-                  size: 20,
+                  color: const Color(0xFF10B981),
+                  size: context.rem(AppRem.icon),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -568,7 +569,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     Text(
                       l10n.videoLoopFilterTitle,
                       style: TextStyle(
-                        fontSize: 14.5,
+                        fontSize: AppType.bodyPlus,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
@@ -576,7 +577,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     Text(
                       l10n.videoLoopFilterBody,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         color: AppColors.inkAlpha(0.5),
                       ),
                     ),
@@ -594,7 +595,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   dropdownColor: AppColors.raised,
                   underline: const SizedBox(),
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppType.small,
                     fontWeight: FontWeight.w700,
                     color: AppColors.ink,
                   ),
@@ -624,26 +625,26 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ],
           ),
 
-          const SizedBox(height: 12),
-          Divider(color: AppColors.inkAlpha(0.06), height: 1),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // 3. Decoding Threads
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(context.rem(AppRem.sm)),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.developer_board_rounded,
-                  color: Color(0xFFF59E0B),
-                  size: 20,
+                  color: const Color(0xFFF59E0B),
+                  size: context.rem(AppRem.icon),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,7 +652,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     Text(
                       l10n.videoThreadsTitle,
                       style: TextStyle(
-                        fontSize: 14.5,
+                        fontSize: AppType.bodyPlus,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
@@ -659,7 +660,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     Text(
                       l10n.videoThreadsBody,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: AppType.caption,
                         color: AppColors.inkAlpha(0.5),
                       ),
                     ),
@@ -673,7 +674,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   dropdownColor: AppColors.raised,
                   underline: const SizedBox(),
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: AppType.small,
                     fontWeight: FontWeight.w700,
                     color: AppColors.ink,
                   ),
@@ -707,29 +708,29 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ],
           ),
 
-          const SizedBox(height: 12),
-          Divider(color: AppColors.inkAlpha(0.06), height: 1),
-          const SizedBox(height: 12),
+          SizedBox(height: context.rem(AppRem.ms)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(AppRem.ms)),
 
           // 4. Disk Stream Cache
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: const Color(0xFF8B5CF6).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.disc_full_rounded,
-                color: Color(0xFF8B5CF6),
-                size: 20,
+                color: const Color(0xFF8B5CF6),
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoDiskCacheTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -737,9 +738,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoDiskCacheBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: PlayerSettings.enableDiskCache.value,
@@ -756,10 +757,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     final currentBuffer = PlayerSettings.bufferPreset.value;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -768,18 +769,18 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(context.rem(AppRem.sm)),
                 decoration: BoxDecoration(
                   color: const Color(0xFF00E5FF).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.speed_rounded,
-                  color: Color(0xFF00E5FF),
-                  size: 20,
+                  color: const Color(0xFF00E5FF),
+                  size: context.rem(AppRem.icon),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -787,7 +788,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     Text(
                       l10n.videoPreloadTitle,
                       style: TextStyle(
-                        fontSize: 14.5,
+                        fontSize: AppType.bodyPlus,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink,
                       ),
@@ -795,7 +796,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     Text(
                       l10n.videoPreloadBody,
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: AppType.tinyPlus,
                         color: AppColors.inkSubtle,
                       ),
                     ),
@@ -804,34 +805,34 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: context.rem(AppRem.md)),
 
           // Buffer Presets
           ...BufferResiliencePreset.values.map((preset) {
             final isSelected = currentBuffer == preset;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: () {
                     PlayerSettings.setBufferPreset(preset);
                   },
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF00E5FF).withValues(alpha: 0.1)
                           : AppColors.inkAlpha(0.02),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                       border: Border.all(
                         color: isSelected
                             ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
                             : AppColors.inkAlpha(0.06),
-                        width: isSelected ? 1.2 : 0.8,
+                        width: isSelected ? 1.2 : 0.8, // px: a hairline, not a layout size
                       ),
                     ),
                     child: Row(
@@ -843,9 +844,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           color: isSelected
                               ? const Color(0xFF00E5FF)
                               : AppColors.inkDisabled,
-                          size: 18,
+                          size: context.rem(AppRem.iconSm),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: context.rem(AppRem.ms)),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -856,13 +857,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                               // line.
                               Wrap(
                                 crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: 8,
-                                runSpacing: 4,
+                                spacing: context.rem(AppRem.sm),
+                                runSpacing: context.rem(AppRem.xs),
                                 children: [
                                   Text(
                                     preset.label(l10n),
                                     style: TextStyle(
-                                      fontSize: 13.5,
+                                      fontSize: AppType.smallPlus,
                                       fontWeight: FontWeight.w700,
                                       color: AppColors.ink,
                                     ),
@@ -872,20 +873,20 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                               .highResilience &&
                                       Platform.isAndroid)
                                     Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 1.5,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: context.rem(AppRem.snug),
+                                        vertical: context.rem(0.0938),
                                       ),
                                       decoration: BoxDecoration(
                                         color: const Color(
                                           0xFF10B981,
                                         ).withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                                       ),
                                       child: Text(
                                         l10n.videoRecommendedBadge,
                                         style: TextStyle(
-                                          fontSize: TvType.scale(9.5),
+                                          fontSize: TvType.scale(AppType.nanoPlus),
                                           fontWeight: FontWeight.w800,
                                           color: const Color(0xFF10B981),
                                         ),
@@ -893,13 +894,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                                     ),
                                 ],
                               ),
-                              const SizedBox(height: 2),
+                              SizedBox(height: context.rem(AppRem.xxs)),
                               Text(
                                 preset.subtitle(l10n),
                                 style: TextStyle(
-                                  fontSize: 11.5,
+                                  fontSize: AppType.tinyPlus,
                                   color: AppColors.inkAlpha(0.45),
-                                  height: 1.25,
+                                  height: 1.25, // ratio: a line height, not a size
                                 ),
                               ),
                             ],
@@ -915,12 +916,12 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
           // If Custom Buffer is selected, show sliders
           if (currentBuffer == BufferResiliencePreset.custom) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: context.rem(AppRem.ms)),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(context.rem(AppRem.ms)),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                 border: Border.all(color: AppColors.inkAlpha(0.06)),
               ),
               child: Column(
@@ -932,7 +933,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       Text(
                         l10n.videoBufferDuration,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w600,
                           color: AppColors.inkMuted,
                         ),
@@ -940,7 +941,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       Text(
                         '${PlayerSettings.customBufferMs.value} ms (${(PlayerSettings.customBufferMs.value / 1000).toStringAsFixed(1)}s)',
                         style: const TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF00E5FF),
                         ),
@@ -966,7 +967,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       Text(
                         l10n.videoPacketCount,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w600,
                           color: AppColors.inkMuted,
                         ),
@@ -974,7 +975,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       Text(
                         '${PlayerSettings.customBufferCount.value} pkts',
                         style: const TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF00E5FF),
                         ),
@@ -1006,10 +1007,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   Widget _buildNetworkReconnectCard(AppThemePalette palette) {
     final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -1018,21 +1019,21 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.sync_problem_rounded,
-                color: Color(0xFF10B981),
-                size: 20,
+                color: const Color(0xFF10B981),
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoReconnectTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -1040,9 +1041,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoReconnectBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: PlayerSettings.enableNetworkReconnect.value,
@@ -1050,12 +1051,12 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             onChanged: (val) => PlayerSettings.setEnableNetworkReconnect(val),
           ),
           if (PlayerSettings.enableNetworkReconnect.value) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: context.rem(AppRem.ms)),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(context.rem(AppRem.ms)),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1066,7 +1067,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       Text(
                         l10n.videoReconnectDelay,
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w600,
                           color: AppColors.inkMuted,
                         ),
@@ -1074,7 +1075,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       Text(
                         '${PlayerSettings.reconnectDelayMax.value}s',
                         style: const TextStyle(
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF10B981),
                         ),
@@ -1102,10 +1103,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   Widget _buildAudioSyncCard(AppThemePalette palette) {
     final l10n = context.l10n;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -1114,21 +1115,21 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: palette.primaryColor.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
               child: Icon(
                 Icons.lock_clock_rounded,
                 color: palette.primaryColor,
-                size: 20,
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoResyncTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -1136,9 +1137,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoResyncBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: PlayerSettings.autoResyncOnStall.value,
@@ -1146,28 +1147,28 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             onChanged: (val) => PlayerSettings.setAutoResyncOnStall(val),
           ),
 
-          const SizedBox(height: 8),
-          Divider(color: AppColors.inkAlpha(0.06), height: 1),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(AppRem.sm)),
 
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: AppColors.accent.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
               child: Icon(
                 Icons.graphic_eq_rounded,
                 color: AppColors.accent,
-                size: 20,
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoAudioClockTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -1175,9 +1176,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoAudioClockBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: PlayerSettings.hardwareAudioClock.value,
@@ -1185,28 +1186,28 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             onChanged: (val) => PlayerSettings.setHardwareAudioClock(val),
           ),
 
-          const SizedBox(height: 8),
-          Divider(color: AppColors.inkAlpha(0.06), height: 1),
-          const SizedBox(height: 8),
+          SizedBox(height: context.rem(AppRem.sm)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(AppRem.sm)),
 
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             secondary: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
               decoration: BoxDecoration(
                 color: AppColors.inkAlpha(0.06),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
               child: Icon(
                 Icons.bolt_rounded,
                 color: AppColors.inkMuted,
-                size: 20,
+                size: context.rem(AppRem.icon),
               ),
             ),
             title: Text(
               l10n.videoLowLatencyTitle,
               style: TextStyle(
-                fontSize: 14.5,
+                fontSize: AppType.bodyPlus,
                 fontWeight: FontWeight.w700,
                 color: AppColors.ink,
               ),
@@ -1214,9 +1215,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             subtitle: Text(
               l10n.videoLowLatencyBody,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: AppType.caption,
                 color: AppColors.inkAlpha(0.5),
-                height: 1.3,
+                height: 1.3, // ratio: a line height, not a size
               ),
             ),
             value: PlayerSettings.lowLatency.value,
@@ -1225,28 +1226,28 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           ),
 
           if (Platform.isAndroid) ...[
-            const SizedBox(height: 8),
-            Divider(color: AppColors.inkAlpha(0.06), height: 1),
-            const SizedBox(height: 8),
+            SizedBox(height: context.rem(AppRem.sm)),
+            Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+            SizedBox(height: context.rem(AppRem.sm)),
 
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               secondary: Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(context.rem(AppRem.sm)),
                 decoration: BoxDecoration(
                   color: palette.primaryColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
                 child: Icon(
                   Icons.layers_rounded,
                   color: palette.primaryColor,
-                  size: 20,
+                  size: context.rem(AppRem.icon),
                 ),
               ),
               title: Text(
                 l10n.videoSurfaceTitle,
                 style: TextStyle(
-                  fontSize: 14.5,
+                  fontSize: AppType.bodyPlus,
                   fontWeight: FontWeight.w700,
                   color: AppColors.ink,
                 ),
@@ -1254,9 +1255,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               subtitle: Text(
                 l10n.videoSurfaceBody,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   color: AppColors.inkAlpha(0.5),
-                  height: 1.3,
+                  height: 1.3, // ratio: a line height, not a size
                 ),
               ),
               value: PlayerSettings.enableSurfaceProducer.value,
@@ -1302,10 +1303,10 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
     );
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.08)),
       ),
       child: Column(
@@ -1321,19 +1322,19 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 child: Row(
                   children: [
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: context.rem(2.375),
+                      height: context.rem(2.375),
                       decoration: BoxDecoration(
                         color: palette.primaryColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                       ),
                       child: Icon(
                         Icons.subtitles_rounded,
                         color: palette.primaryColor,
-                        size: 20,
+                        size: context.rem(AppRem.icon),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: context.rem(AppRem.ms)),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1341,7 +1342,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           Text(
                             l10n.videoSubtitleCardTitle,
                             style: TextStyle(
-                              fontSize: 14.5,
+                              fontSize: AppType.bodyPlus,
                               fontWeight: FontWeight.w700,
                               color: AppColors.ink,
                             ),
@@ -1354,7 +1355,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                               scale,
                             ),
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: AppType.caption,
                               color: AppColors.inkAlpha(0.5),
                             ),
                           ),
@@ -1369,7 +1370,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                   _subtitleEditorExpanded
                       ? Icons.expand_less_rounded
                       : Icons.tune_rounded,
-                  size: 16,
+                  size: context.rem(AppRem.iconXs),
                 ),
                 label: Text(
                   _subtitleEditorExpanded
@@ -1379,12 +1380,12 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
                   foregroundColor: AppColors.onAccent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.rem(0.875),
+                    vertical: context.rem(0.625),
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   ),
                 ),
                 onPressed: () => setState(
@@ -1394,15 +1395,15 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ],
           ),
 
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
 
           // Mini preview bar
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            padding: EdgeInsets.symmetric(vertical: context.rem(0.625), horizontal: context.rem(AppRem.md)),
             decoration: BoxDecoration(
               color: AppColors.canvas,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               border: Border.all(color: AppColors.inkAlpha(0.06)),
             ),
             child: Row(
@@ -1410,13 +1411,13 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               children: [
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(0.625),
+                      vertical: context.rem(AppRem.xs),
                     ),
                     decoration: BoxDecoration(
                       color: boxColor,
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                     ),
                     child: Text(
                       l10n.videoSubtitlePreview,
@@ -1425,7 +1426,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                         fontFamily: PlayerSettings.subFont.value == 'subfont'
                             ? 'Poppins'
                             : PlayerSettings.subFont.value,
-                        fontSize: 14,
+                        fontSize: AppType.body,
                         fontWeight: PlayerSettings.subBold.value
                             ? FontWeight.bold
                             : FontWeight.w600,
@@ -1437,19 +1438,19 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                           if (PlayerSettings.subBorderSize.value > 0) ...[
                             Shadow(
                               color: borderColor,
-                              offset: const Offset(-1.2, -1.2),
+                              offset: Offset(-context.rem(0.075), -context.rem(0.075)),
                             ),
                             Shadow(
                               color: borderColor,
-                              offset: const Offset(1.2, -1.2),
+                              offset: Offset(context.rem(0.075), -context.rem(0.075)),
                             ),
                             Shadow(
                               color: borderColor,
-                              offset: const Offset(1.2, 1.2),
+                              offset: Offset(context.rem(0.075), context.rem(0.075)),
                             ),
                             Shadow(
                               color: borderColor,
-                              offset: const Offset(-1.2, 1.2),
+                              offset: Offset(-context.rem(0.075), context.rem(0.075)),
                             ),
                           ],
                         ],
@@ -1473,9 +1474,9 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 : CrossFadeState.showFirst,
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Padding(
-              padding: const EdgeInsets.only(top: 14),
+              padding: EdgeInsets.only(top: context.rem(0.875)),
               child: SizedBox(
-                height: 560,
+                height: context.rem(35),
                 child: Container(
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
@@ -1485,7 +1486,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                     // would go unreadable (white-on-white) in light mode
                     // against a theme-adaptive background.
                     color: PlayerTheme.elevated,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(context.rem(0.875)),
                     border: Border.all(color: PlayerTheme.edge),
                   ),
                   child: const SubtitleStyleEditor(),
@@ -1504,7 +1505,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
         title: Text(l10n.videoResetConfirmTitle),
         content: Text(
           l10n.videoResetConfirmBody(_platformLabel(l10n)),
@@ -1548,14 +1549,14 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   Widget _buildResetButton(AppThemePalette palette) {
     return Center(
       child: OutlinedButton.icon(
-        icon: const Icon(Icons.restart_alt_rounded, size: 18),
+        icon: Icon(Icons.restart_alt_rounded, size: context.rem(AppRem.iconSm)),
         label: Text(context.l10n.videoResetButton),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.inkMuted,
           side: BorderSide(color: AppColors.inkAlpha(0.15)),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(0.875)),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(context.rem(0.875)),
           ),
         ),
         onPressed: () => _confirmResetToDefaults(palette),
@@ -1579,16 +1580,16 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
           return AlertDialog(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
             ),
             title: Row(
               children: [
                 Icon(Icons.tune_rounded, color: AppColors.ink),
-                const SizedBox(width: 10),
+                SizedBox(width: context.rem(0.625)),
                 Text(
                   l10n.videoCustomChainTitle,
                   style: const TextStyle(
-                    fontSize: 17,
+                    fontSize: AppType.subhead,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -1600,16 +1601,16 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               // on exactly the devices the app is mostly used on. Clamped
               // to what is actually available, and still 400 wherever
               // there is room.
-              width: (MediaQuery.sizeOf(context).width - 80).clamp(0.0, 400.0),
+              width: (MediaQuery.sizeOf(context).width - context.rem(AppRem.xl + 3)).clamp(0.0, context.rem(25)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     l10n.videoCustomChainBody,
-                    style: TextStyle(fontSize: 12, color: AppColors.inkSubtle),
+                    style: TextStyle(fontSize: AppType.caption, color: AppColors.inkSubtle),
                   ),
-                  const SizedBox(height: 14),
+                  SizedBox(height: context.rem(0.875)),
                   ...available.map((d) {
                     final isChecked = selected.contains(d);
                     final isFfmpeg = d == 'FFmpeg';
@@ -1620,7 +1621,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                       title: Text(
                         d + (isFfmpeg ? l10n.videoGuaranteedFallback : ''),
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppType.small,
                           fontWeight: isChecked
                               ? FontWeight.w700
                               : FontWeight.w500,
@@ -1659,7 +1660,7 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: palette.primaryColor,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   ),
                 ),
                 child: Text(

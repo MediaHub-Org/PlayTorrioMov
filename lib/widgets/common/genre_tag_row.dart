@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'over_artwork.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused genre tag. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -118,7 +119,7 @@ class GenreTagRow extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         shrinkWrap: true,
         itemCount: genres.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => SizedBox(width: context.rem(AppRem.sm)),
         itemBuilder: (context, index) {
           final g = genres[index];
           return Tooltip(

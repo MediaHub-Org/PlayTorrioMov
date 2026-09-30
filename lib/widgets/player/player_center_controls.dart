@@ -54,11 +54,11 @@ class PlayerCenterControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    final sideSize = isCompact ? 52.0 : 64.0;
-    final sideIconSize = isCompact ? 26.0 : 32.0;
-    final playSize = isCompact ? 68.0 : 84.0;
-    final playIconSize = isCompact ? 34.0 : 42.0;
-    final gap = isCompact ? 28.0 : 44.0;
+    final sideSize = context.rem(isCompact ? 3.25 : 4);
+    final sideIconSize = context.rem(isCompact ? 1.625 : 2);
+    final playSize = context.rem(isCompact ? 4.25 : 5.25);
+    final playIconSize = context.rem(isCompact ? 2.125 : 2.625);
+    final gap = context.rem(isCompact ? 1.75 : 2.75);
 
     final seekBack = onSeekBack30;
     final seekForward = onSeekForward30;

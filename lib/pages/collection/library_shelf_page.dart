@@ -19,6 +19,7 @@ import '../../widgets/iptv/iptv_channel_card.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../details/details_page.dart';
 import '../iptv/iptv_channel_sheet.dart';
+import '../../services/app_units.dart';
 
 /// One shelf of the Library, opened from its card.
 ///
@@ -75,7 +76,6 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
 
   /// Same cap as the Library tabs: shelf content centers past this instead
   /// of sprawling, so a shelf looks like the tab that opened it.
-  static const double _maxContentWidth = 1200;
 
   // ── Titles ────────────────────────────────────────────────────────────────
 
@@ -156,7 +156,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
         title: Text(
           title,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
@@ -178,7 +178,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE50914),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
               ),
             ),
             child: Text(
@@ -229,7 +229,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
         title: Text(
           l10n.libraryRenameCollection,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
@@ -314,7 +314,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontWeight: FontWeight.w800,
-                fontSize: 19,
+                fontSize: AppType.headline,
               ),
             ),
             actions: [
@@ -374,15 +374,15 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(shelf.icon, color: shelf.color, size: 20),
-            const SizedBox(width: 10),
+            Icon(shelf.icon, color: shelf.color, size: context.rem(AppRem.icon)),
+            SizedBox(width: context.rem(0.625)),
             Text(
               shelf.localizedLabel(context),
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
             ),
           ],
         ),
-        actions: [_buildSortButton(), const SizedBox(width: 8)],
+        actions: [_buildSortButton(), SizedBox(width: context.rem(AppRem.sm))],
       ),
       body: _buildBuiltInBody(shelf),
     );
@@ -466,17 +466,17 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         : 7;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        constraints: BoxConstraints(maxWidth: context.rem(75)),
         child: FirstFocusScope(
           // Only called once the caller has confirmed items is non-empty.
           ready: true,
           child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(6.25)),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: 0.62,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 20,
+            crossAxisSpacing: context.rem(AppRem.md),
+            mainAxisSpacing: context.rem(1.25),
           ),
           itemCount: items.length,
           itemBuilder: (context, index) {
@@ -502,9 +502,9 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   Widget _buildReorderList(MediaCollection collection) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        constraints: BoxConstraints(maxWidth: context.rem(75)),
         child: ReorderableListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(6.25)),
       itemCount: collection.items.length,
       onReorder: (from, to) {
         // ReorderableListView reports the destination as an insertion index
@@ -519,21 +519,21 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         final item = collection.items[index];
         return Padding(
           key: ValueKey(item.uniqueKey),
-          padding: const EdgeInsets.only(bottom: 10),
+          padding: EdgeInsets.only(bottom: context.rem(0.625)),
           child: Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(context.rem(AppRem.sm)),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
               border: Border.all(color: AppColors.inkAlpha(0.08)),
             ),
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                   child: SizedBox(
-                    width: 40,
-                    height: 60,
+                    width: context.rem(2.5),
+                    height: context.rem(3.75),
                     child: item.poster != null && item.poster!.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: item.poster!,
@@ -544,19 +544,19 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
                         : const ColoredBox(color: Color(0xFF15171F)),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: context.rem(AppRem.ms)),
                 Expanded(
                   child: Text(
                     item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: AppColors.ink, fontSize: 14),
+                    style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
                   ),
                 ),
                 ReorderableDragStartListener(
                   index: index,
                   child: Padding(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(context.rem(AppRem.sm)),
                     child: Icon(
                       Icons.drag_handle_rounded,
                       color: AppColors.inkMuted,
@@ -578,24 +578,24 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
   Widget _buildFilterBar(LibraryShelf shelf) {
     final l10n = context.l10n;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         child: Row(
           children: [
             _buildChoiceChip('All', 'all', shelf),
-            const SizedBox(width: 6),
+            SizedBox(width: context.rem(AppRem.snug)),
             _buildChoiceChip(l10n.libraryFilterMovies, 'movie', shelf),
-            const SizedBox(width: 6),
+            SizedBox(width: context.rem(AppRem.snug)),
             _buildChoiceChip(l10n.libraryFilterSeries, 'series', shelf),
-            const SizedBox(width: 6),
+            SizedBox(width: context.rem(AppRem.snug)),
             _buildChoiceChip(l10n.libraryFilterAnime, 'anime', shelf),
             // Only under Liked: a channel cannot be watchlisted or marked
             // watched, so offering the chip elsewhere would promise a filter
             // with nothing behind it.
             if (shelf == LibraryShelf.liked) ...[
-              const SizedBox(width: 6),
+              SizedBox(width: context.rem(AppRem.snug)),
               _buildChoiceChip(l10n.libraryFilterLiveTv, 'livetv', shelf),
             ],
           ],
@@ -611,15 +611,15 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       showFocusRing: true,
       onTap: () => setState(() => _filterType = value),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.accent : AppColors.raised,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 11.5,
+            fontSize: AppType.tinyPlus,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
           ),
@@ -645,28 +645,28 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       onSelected: (val) => setState(() => _sortBy = val),
       color: AppColors.raised,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
         decoration: BoxDecoration(
           color: AppColors.raised,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           border: Border.all(color: AppColors.inkAlpha(0.08)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sort_rounded, size: 14, color: AppColors.inkMuted),
-            const SizedBox(width: 4),
+            Icon(Icons.sort_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
+            SizedBox(width: context.rem(AppRem.xs)),
             // Capped like the tab sort pill: the name is a label, and at a
             // large text scale it names its natural width whatever the row
             // offers. The tooltip carries the full name.
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 120),
+              constraints: BoxConstraints(maxWidth: context.rem(7.5)),
               child: Text(
                 activeLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: AppType.tiny,
                   fontWeight: FontWeight.bold,
                   color: AppColors.inkMuted,
                 ),
@@ -736,20 +736,20 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         : 6;
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        constraints: BoxConstraints(maxWidth: context.rem(75)),
         child: FirstFocusScope(
           // Only called once the caller has confirmed channels is non-empty.
           ready: true,
           child: GridView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+          padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(6.25)),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             // Matches IptvCardSizing's own cardWidth/totalHeight ratio, so a
             // favorited channel looks the same size and shape here as it does in
             // Live TV's own rows.
             childAspectRatio: 0.58,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 20,
+            crossAxisSpacing: context.rem(AppRem.md),
+            mainAxisSpacing: context.rem(1.25),
           ),
           itemCount: channels.length,
           itemBuilder: (context, index) {

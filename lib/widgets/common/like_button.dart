@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused [LikeButton]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -139,12 +140,12 @@ class _LikeButtonState extends State<LikeButton> {
   Widget _buildPill(String label) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(AppRem.ms)),
       decoration: BoxDecoration(
         color: widget.isLiked
             ? kLikedColor
             : AppColors.inkAlpha(0.12),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         border: Border.all(
           color: widget.isLiked
               ? kLikedColor
@@ -165,7 +166,7 @@ class _LikeButtonState extends State<LikeButton> {
             color: widget.isLiked ? AppColors.onAccent : AppColors.inkMuted,
             size: widget.size,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: context.rem(AppRem.sm)),
           Text(
             label,
             style: TextStyle(
@@ -181,7 +182,7 @@ class _LikeButtonState extends State<LikeButton> {
 
   Widget _buildIcon() {
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(context.rem(0.625)),
       child: Icon(
         widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
         // Red, not white: there is no fill to sit against.
@@ -196,12 +197,12 @@ class _LikeButtonState extends State<LikeButton> {
     // border, corner radius, inactive colors) so all three status buttons
     // in that row read as one consistent set.
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(context.rem(0.625)),
       decoration: BoxDecoration(
         color: widget.isLiked
             ? kLikedColor.withValues(alpha: 0.18)
             : AppColors.inkAlpha(0.08),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
         border: Border.all(
           color: widget.isLiked
               ? kLikedColor.withValues(alpha: 0.35)

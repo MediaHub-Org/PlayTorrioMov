@@ -21,6 +21,7 @@ import 'iptv_multiview_page.dart';
 import 'iptv_player_page.dart';
 import 'iptv_sources_page.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 class IptvPage extends StatefulWidget {
   const IptvPage({super.key});
@@ -351,7 +352,7 @@ class _IptvGlassAppBar extends StatelessWidget {
         HeaderPillLabel(
           label: context.l10n.iptvChannelsBadge.toUpperCase(),
           emphasized: false,
-          fontSize: TvType.scale(10.5),
+          fontSize: TvType.scale(AppType.microPlus),
           letterSpacing: 0.4,
         ),
       ],

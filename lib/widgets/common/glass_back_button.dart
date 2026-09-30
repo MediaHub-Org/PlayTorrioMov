@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../services/app_spacing.dart';
 import '../../services/theme/app_colors.dart';
 import '../../l10n/l10n.dart';
+import '../../services/app_units.dart';
 
 /// The single back-navigation button design used across every page that
 /// pushes content on top of the hub (Details, Search, and so on). Used to
@@ -46,7 +47,7 @@ class GlassBackButton extends StatelessWidget {
           onPressed: onPressed ?? () => Navigator.pop(context),
           style: IconButton.styleFrom(
             backgroundColor: tint.withValues(alpha: 0.1),
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(context.rem(AppRem.ms)),
             side: BorderSide(color: tint.withValues(alpha: 0.12)),
           ),
         ),

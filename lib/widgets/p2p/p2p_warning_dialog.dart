@@ -3,6 +3,7 @@ import '../../l10n/l10n.dart';
 import '../../services/p2p/p2p_settings_service.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 class P2pWarningDialog extends StatelessWidget {
   const P2pWarningDialog({super.key});
@@ -23,42 +24,42 @@ class P2pWarningDialog extends StatelessWidget {
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      insetPadding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.lg)),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: 540,
+            maxWidth: context.rem(33.75),
             maxHeight: size.height * 0.90,
           ),
           child: Container(
             decoration: BoxDecoration(
               color: _surfaceColor,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.lg)),
               border: Border.all(
                 color: _warningColor.withValues(alpha: 0.35),
-                width: 1.5,
+                width: 1.5, // px: a hairline, not a layout size
               ),
               boxShadow: [
                 BoxShadow(
                   color: _warningColor.withValues(alpha: 0.15),
-                  blurRadius: 40,
-                  spreadRadius: 2,
+                  blurRadius: context.rem(2.5),
+                  spreadRadius: context.rem(AppRem.xxs),
                 ),
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.70),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
+                  blurRadius: context.rem(1.875),
+                  offset: Offset(0, context.rem(0.625)),
                 ),
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.lg)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 1. Header Banner
                   Container(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 16, 18),
+                    padding: EdgeInsets.fromLTRB(context.rem(1.25), context.rem(1.25), context.rem(AppRem.md), context.rem(1.125)),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
@@ -77,21 +78,21 @@ class P2pWarningDialog extends StatelessWidget {
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(context.rem(AppRem.ms)),
                           decoration: BoxDecoration(
                             color: _warningColor.withValues(alpha: 0.20),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(context.rem(0.875)),
                             border: Border.all(
                               color: _warningColor.withValues(alpha: 0.35),
                             ),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.shield_outlined,
                             color: _warningColor,
-                            size: 28,
+                            size: context.rem(1.75),
                           ),
                         ),
-                        const SizedBox(width: 14),
+                        SizedBox(width: context.rem(0.875)),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,18 +100,18 @@ class P2pWarningDialog extends StatelessWidget {
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 7,
-                                      vertical: 3,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: context.rem(0.4375),
+                                      vertical: context.rem(0.1875),
                                     ),
                                     decoration: BoxDecoration(
                                       color: _warningColor.withValues(alpha: 0.20),
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                                     ),
                                     child: Text(
                                       context.l10n.p2pAdvisoryBadge.toUpperCase(),
                                       style: TextStyle(
-                                        fontSize: TvType.scale(10),
+                                        fontSize: TvType.scale(AppType.micro),
                                         fontWeight: FontWeight.w800,
                                         letterSpacing: 1.1,
                                         color: _warningColor,
@@ -119,11 +120,11 @@ class P2pWarningDialog extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 5),
+                              SizedBox(height: context.rem(0.3125)),
                               Text(
                                 context.l10n.p2pTitle,
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: AppType.lead,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.ink,
                                   letterSpacing: -0.2,
@@ -144,7 +145,7 @@ class P2pWarningDialog extends StatelessWidget {
                   // 2. Scrollable Body
                   Flexible(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+                      padding: EdgeInsets.symmetric(horizontal: context.rem(1.375), vertical: context.rem(1.125)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -152,19 +153,19 @@ class P2pWarningDialog extends StatelessWidget {
                           Text(
                             context.l10n.p2pBody,
                             style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: AppType.smallPlus,
                               color: AppColors.inkAlpha(0.88),
-                              height: 1.45,
+                              height: 1.45, // ratio: a line height, not a size
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: context.rem(AppRem.md)),
 
                           // Engine Breakdown Box
                           Container(
-                            padding: const EdgeInsets.all(14),
+                            padding: EdgeInsets.all(context.rem(0.875)),
                             decoration: BoxDecoration(
                               color: _backgroundColor.withValues(alpha: 0.7),
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(context.rem(0.875)),
                               border: Border.all(
                                 color: AppColors.inkAlpha(0.08),
                               ),
@@ -172,19 +173,21 @@ class P2pWarningDialog extends StatelessWidget {
                             child: Column(
                               children: [
                                 _buildSourceInfoRow(
+                                  context,
                                   icon: Icons.cloud_done_rounded,
                                   iconColor: const Color(0xFF10B981),
                                   title: context.l10n.p2pHttpTitle,
                                   subtitle: context.l10n.p2pHttpSubtitle,
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  padding: EdgeInsets.symmetric(vertical: context.rem(0.625)),
                                   child: Divider(
-                                    height: 1,
+                                    height: 1, // px: a hairline, not a layout size
                                     color: AppColors.inkAlpha(0.06),
                                   ),
                                 ),
                                 _buildSourceInfoRow(
+                                  context,
                                   icon: Icons.hub_rounded,
                                   iconColor: _warningColor,
                                   title: context.l10n.p2pEngineTitle,
@@ -194,45 +197,45 @@ class P2pWarningDialog extends StatelessWidget {
                             ),
                           ),
 
-                          const SizedBox(height: 16),
+                          SizedBox(height: context.rem(AppRem.md)),
 
                           // Prompt question
                           Container(
-                            padding: const EdgeInsets.all(14),
+                            padding: EdgeInsets.all(context.rem(0.875)),
                             decoration: BoxDecoration(
                               color: _warningColor.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(context.rem(0.875)),
                               border: Border.all(
                                 color: _warningColor.withValues(alpha: 0.25),
                               ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.help_outline_rounded,
                                   color: _warningColor,
-                                  size: 22,
+                                  size: context.rem(AppRem.iconMd),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: context.rem(AppRem.ms)),
                                 Expanded(
                                   child: Text(
                                     context.l10n.p2pQuestion,
                                     style: TextStyle(
-                                      fontSize: 13,
+                                      fontSize: AppType.small,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.inkAlpha(0.95),
-                                      height: 1.35,
+                                      height: 1.35, // ratio: a line height, not a size
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          SizedBox(height: context.rem(0.625)),
                           Text(
                             context.l10n.p2pNote,
                             style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: AppType.tinyPlus,
                               color: AppColors.inkAlpha(0.45),
                               fontStyle: FontStyle.italic,
                             ),
@@ -244,7 +247,7 @@ class P2pWarningDialog extends StatelessWidget {
 
                   // 3. Responsive Action Buttons Footer
                   Container(
-                    padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+                    padding: EdgeInsets.fromLTRB(context.rem(1.125), context.rem(0.875), context.rem(1.125), context.rem(1.125)),
                     decoration: BoxDecoration(
                       color: _backgroundColor.withValues(alpha: 0.95),
                       border: Border(
@@ -266,7 +269,8 @@ class P2pWarningDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildSourceInfoRow({
+  Widget _buildSourceInfoRow(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -276,14 +280,14 @@ class P2pWarningDialog extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(7),
+          padding: EdgeInsets.all(context.rem(0.4375)),
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
           ),
-          child: Icon(icon, color: iconColor, size: 18),
+          child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconSm)),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: context.rem(AppRem.ms)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,18 +295,18 @@ class P2pWarningDialog extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: AppType.small,
                   fontWeight: FontWeight.w700,
                   color: AppColors.ink,
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: context.rem(AppRem.xxs)),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: AppType.caption,
                   color: AppColors.inkAlpha(0.55),
-                  height: 1.25,
+                  height: 1.25, // ratio: a line height, not a size
                 ),
               ),
             ],
@@ -319,7 +323,7 @@ class P2pWarningDialog extends StatelessWidget {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
             foregroundColor: AppColors.inkAlpha(0.60),
           ),
           child: Text(
@@ -338,15 +342,15 @@ class P2pWarningDialog extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             side: BorderSide(color: AppColors.inkAlpha(0.20)),
             foregroundColor: AppColors.inkMuted,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.ms)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd))),
           ),
           child: Text(
             context.l10n.p2pDontShowAgain,
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: AppType.captionPlus, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: context.rem(0.625)),
 
         // Yes, Turn Off P2P button
         ElevatedButton.icon(
@@ -364,16 +368,16 @@ class P2pWarningDialog extends StatelessWidget {
               Navigator.of(context).pop();
             }
           },
-          icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+          icon: Icon(Icons.check_circle_outline_rounded, size: context.rem(AppRem.iconSm)),
           label: Text(
             context.l10n.p2pTurnOff,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.small),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: _warningColor,
             foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd))),
             elevation: 0,
           ),
         ),
@@ -402,20 +406,20 @@ class P2pWarningDialog extends StatelessWidget {
               Navigator.of(context).pop();
             }
           },
-          icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
+          icon: Icon(Icons.check_circle_outline_rounded, size: context.rem(AppRem.iconSm)),
           label: Text(
             context.l10n.p2pTurnOff,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.smallPlus),
           ),
           style: ElevatedButton.styleFrom(
             backgroundColor: _warningColor,
             foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(vertical: 13),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: EdgeInsets.symmetric(vertical: context.rem(0.8125)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd))),
             elevation: 0,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: context.rem(AppRem.sm)),
 
         Row(
           children: [
@@ -428,20 +432,20 @@ class P2pWarningDialog extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: AppColors.inkAlpha(0.20)),
                   foregroundColor: AppColors.inkMuted,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd))),
                 ),
                 child: Text(
                   context.l10n.p2pDontShowAgain,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: context.rem(AppRem.sm)),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.ms)),
                 foregroundColor: AppColors.inkAlpha(0.60),
               ),
               child: Text(

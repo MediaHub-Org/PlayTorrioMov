@@ -38,7 +38,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
   /// The widest a time label may grow before its text scales down: room for
   /// "-1:50:23" at the default text size, so it only shrinks when the user's
   /// text scale asks for more.
-  static const double _labelMaxWidth = 72;
+  double get _labelMaxWidth => context.rem(4.5);
 
   bool _isHovered = false;
   bool _isScrubbing = false;

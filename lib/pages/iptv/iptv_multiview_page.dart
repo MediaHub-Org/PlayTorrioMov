@@ -9,6 +9,7 @@ import '../../services/playback_coordinator.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
+import '../../services/app_units.dart';
 
 /// Watch up to 4 live channels at once in a grid.
 ///
@@ -96,32 +97,32 @@ class _IptvMultiViewPageState extends State<IptvMultiViewPage> {
           : _available.isEmpty
               ? Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(32),
+                    padding: EdgeInsets.all(context.rem(AppRem.xl)),
                     child: Text(
                       context.l10n.iptvMultiViewEmpty,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white54, fontSize: 15),
+                      style: const TextStyle(color: Colors.white54, fontSize: AppType.bodyMd),
                     ),
                   ),
                 )
               : Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(context.rem(AppRem.md)),
                       child: Text(
                         context.l10n.iptvPickUpTo(_maxTiles),
-                        style: const TextStyle(color: Colors.white70, fontSize: 13),
+                        style: const TextStyle(color: Colors.white70, fontSize: AppType.small),
                       ),
                     ),
                     Expanded(
                       child: FirstFocusScope(
                         ready: true,
                         child: GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            mainAxisSpacing: 12,
-                            crossAxisSpacing: 12,
+                          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md)),
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: context.rem(12.5),
+                            mainAxisSpacing: context.rem(AppRem.ms),
+                            crossAxisSpacing: context.rem(AppRem.ms),
                             childAspectRatio: 1.3,
                           ),
                           itemCount: _available.length,
@@ -172,26 +173,26 @@ class _ChannelPickTile extends StatelessWidget {
     final primary = channel.gradient.isNotEmpty ? channel.gradient.first : AppColors.accent;
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(context.rem(0.875)),
       child: Container(
         decoration: BoxDecoration(
           color: selected ? primary.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(context.rem(0.875)),
           border: Border.all(
             color: selected ? primary : Colors.white.withValues(alpha: 0.1),
-            width: selected ? 2 : 1,
+            width: selected ? 2 : 1, // px: a hairline, not a layout size
           ),
         ),
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(context.rem(AppRem.ms)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               selected ? Icons.check_circle_rounded : Icons.live_tv_rounded,
               color: selected ? primary : Colors.white38,
-              size: 22,
+              size: context.rem(AppRem.iconMd),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: context.rem(AppRem.sm)),
             Text(
               channel.name,
               maxLines: 2,
@@ -199,7 +200,7 @@ class _ChannelPickTile extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: selected ? Colors.white : Colors.white70,
-                fontSize: 13,
+                fontSize: AppType.small,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -284,11 +285,11 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
         title: Text(context.l10n.iptvMultiView),
       ),
       body: GridView.builder(
-        padding: const EdgeInsets.all(4),
+        padding: EdgeInsets.all(context.rem(AppRem.xs)),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 4,
-          crossAxisSpacing: 4,
+          mainAxisSpacing: context.rem(AppRem.xs),
+          crossAxisSpacing: context.rem(AppRem.xs),
           childAspectRatio: 16 / 9,
         ),
         itemCount: count,
@@ -305,15 +306,15 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
               decoration: BoxDecoration(
                 border: Border.all(
                   color: isFocused ? AppColors.accent : Colors.white24,
-                  width: isFocused ? 3 : 1,
+                  width: isFocused ? 3 : 1, // px: a hairline, not a layout size
                 ),
               ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   if (hasError)
-                    const Center(
-                      child: Icon(Icons.error_outline_rounded, color: Colors.white38, size: 32),
+                    Center(
+                      child: Icon(Icons.error_outline_rounded, color: Colors.white38, size: context.rem(2)),
                     )
                   else if (controller != null && controller.value.isInitialized)
                     FittedBox(
@@ -327,30 +328,30 @@ class _IptvMultiViewGridState extends State<_IptvMultiViewGrid> {
                   else
                     Center(
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: context.rem(1.25),
+                        height: context.rem(1.25),
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
                       ),
                     ),
                   Positioned(
-                    left: 6,
-                    bottom: 6,
+                    left: context.rem(AppRem.snug),
+                    bottom: context.rem(AppRem.snug),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
                       decoration: BoxDecoration(
                         color: Colors.black54,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (isFocused) ...[
-                            const Icon(Icons.volume_up_rounded, color: Colors.white, size: 12),
-                            const SizedBox(width: 4),
+                            Icon(Icons.volume_up_rounded, color: Colors.white, size: context.rem(0.75)),
+                            SizedBox(width: context.rem(AppRem.xs)),
                           ],
                           Text(
                             ch.channel.name,
-                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700),
+                            style: const TextStyle(color: Colors.white, fontSize: AppType.tiny, fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),

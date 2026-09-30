@@ -267,7 +267,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     // 94% drawer this replaced left a 6% sliver of video down one edge: too
     // little to watch, enough to make the panel read as covering the player
     // rather than replacing it.
-    final drawerWidth = isCompact ? screenWidth : 440.0;
+    final drawerWidth = isCompact ? screenWidth : context.rem(27.5);
     final episodes = _seasonEpisodes[_selectedSeason] ?? [];
 
     // The drawer slides in from the trailing edge, so its edge line and its

@@ -8,6 +8,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../widgets/iptv/iptv_channel_card.dart';
 import 'iptv_channel_sheet.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 class IptvSearchPage extends StatefulWidget {
   const IptvSearchPage({super.key});
@@ -78,30 +79,30 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
         // own 56px leading slot would center it somewhere else again.
         // + kMinInteractiveDimension: GlassBackButton is a 48x48
         // IconButton, and a narrower slot clamps it into an ellipse.
-        leadingWidth: AppSpacing.pageInset(context) + 48,
+        leadingWidth: AppSpacing.pageInset(context) + context.rem(3),
         leading: Padding(
           padding: EdgeInsetsDirectional.only(start: AppSpacing.pageInset(context)),
           child: const Center(child: GlassBackButton()),
         ),
         title: Container(
-          height: 44,
+          height: context.rem(2.75),
           decoration: BoxDecoration(
             color: AppColors.inkAlpha(0.08),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(context.rem(0.875)),
             border: Border.all(color: AppColors.inkAlpha(0.15)),
           ),
           child: TextField(
             controller: _searchCtrl,
             autofocus: true,
-            style: TextStyle(color: AppColors.ink, fontSize: 14),
+            style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
             decoration: InputDecoration(
               hintText: context.l10n.iptvSearchLiveHint,
-              hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: 13.5),
-              prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: 20),
+              hintStyle: TextStyle(color: AppColors.inkAlpha(0.4), fontSize: AppType.smallPlus),
+              prefixIcon: Icon(Icons.search_rounded, color: AppColors.accent, size: context.rem(AppRem.icon)),
               suffixIcon: _query.isNotEmpty
                   ? IconButton(
                       tooltip: context.l10n.commonClose,
-                      icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: 18),
+                      icon: Icon(Icons.close_rounded, color: AppColors.inkSubtle, size: context.rem(AppRem.iconSm)),
                       onPressed: () {
                         _searchCtrl.clear();
                         setState(() => _query = '');
@@ -109,7 +110,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                     )
                   : null,
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(vertical: 11),
+              contentPadding: EdgeInsets.symmetric(vertical: context.rem(0.6875)),
             ),
             onChanged: (val) => setState(() => _query = val),
           ),
@@ -122,9 +123,9 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
             height: AppSpacing.textScaledHeight(context, 48),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(AppRem.sm)),
               itemCount: _categories.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => SizedBox(width: context.rem(AppRem.sm)),
               itemBuilder: (context, index) {
                 final cat = _categories[index];
                 final isSelected = _selectedCategory == cat;
@@ -135,12 +136,12 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                   onTap: () => setState(() => _selectedCategory = cat),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.accent
                           : AppColors.inkAlpha(0.06),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(context.rem(1.25)),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.accent
@@ -152,7 +153,7 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                         cat,
                         style: TextStyle(
                           color: isSelected ? AppColors.ink : AppColors.inkMuted,
-                          fontSize: 12.5,
+                          fontSize: AppType.captionPlus,
                           fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                         ),
                       ),
@@ -173,13 +174,13 @@ class _IptvSearchPageState extends State<IptvSearchPage> {
                     // The isEmpty branch above already handles the other case.
                     ready: true,
                     child: GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
+                    padding: EdgeInsets.fromLTRB(context.rem(1.25), context.rem(AppRem.ms), context.rem(1.25), context.rem(1.875)),
                     physics: const BouncingScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
                       childAspectRatio: 0.72,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 16,
+                      crossAxisSpacing: context.rem(0.875),
+                      mainAxisSpacing: context.rem(AppRem.md),
                     ),
                     itemCount: channels.length,
                     itemBuilder: (context, index) {

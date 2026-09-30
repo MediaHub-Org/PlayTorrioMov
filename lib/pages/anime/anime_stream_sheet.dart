@@ -15,6 +15,7 @@ import '../player/player_screen.dart';
 import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 class AnimeStreamSheet extends StatefulWidget {
   final AnimeMedia anime;
@@ -182,25 +183,25 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(context.rem(AppRem.lg))),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag handle
           Container(
-            margin: const EdgeInsets.only(top: 12, bottom: 8),
-            width: 40,
-            height: 4,
+            margin: EdgeInsets.only(top: context.rem(AppRem.ms), bottom: context.rem(AppRem.sm)),
+            width: context.rem(2.5),
+            height: context.rem(AppRem.xs),
             decoration: BoxDecoration(
               color: AppColors.inkFaint,
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.xxs)),
             ),
           ),
 
           // Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(0.625)),
             child: Row(
               children: [
                 Expanded(
@@ -211,30 +212,30 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                         '${animeDisplayTitle(widget.anime)} • Ep ${widget.episodeNumber}',
                         style: TextStyle(
                           color: AppColors.ink,
-                          fontSize: 16,
+                          fontSize: AppType.bodyLg,
                           fontWeight: FontWeight.w900,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: context.rem(AppRem.xxs)),
                       Row(
                         children: [
                           if (_isScraping) ...[
                             SizedBox(
-                              width: 12,
-                              height: 12,
+                              width: context.rem(AppRem.ms),
+                              height: context.rem(AppRem.ms),
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: AppThemeService.currentPalette.value.primaryColor,
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: context.rem(AppRem.sm)),
                             Text(
                               context.l10n.animeCascading,
                               style: TextStyle(
                                 color: AppThemeService.currentPalette.value.primaryColor,
-                                fontSize: 12,
+                                fontSize: AppType.caption,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -245,7 +246,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                               ),
                               style: TextStyle(
                                 color: AppColors.inkSubtle,
-                                fontSize: 12,
+                                fontSize: AppType.caption,
                               ),
                             ),
                         ],
@@ -266,17 +267,17 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
           // empty one is dimmed and inert rather than a tap that leads to
           // a "no sources" dead end -- most episodes ship no dub at all.
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(1.25), vertical: context.rem(AppRem.xs)),
             child: Row(
               children: [
                 _buildFilterChip('All (${_allSources.length})', 'all'),
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 _buildFilterChip(
                   'Sub (${_allSources.where((s) => !isDubSource(s)).length})',
                   'sub',
                   enabled: _allSources.any((s) => !isDubSource(s)),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: context.rem(AppRem.sm)),
                 _buildFilterChip(
                   'Dub (${_allSources.where(isDubSource).length})',
                   'dub',
@@ -286,47 +287,47 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
             ),
           ),
 
-          const SizedBox(height: 6),
-          Divider(color: AppColors.inkAlpha(0.10), height: 1),
+          SizedBox(height: context.rem(AppRem.snug)),
+          Divider(color: AppColors.inkAlpha(0.10), height: 1), // px: a hairline, not a layout size
 
           // Stream list
           Flexible(
             child: _allSources.isEmpty && _isScraping
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    padding: EdgeInsets.symmetric(vertical: context.rem(2.5)),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         CircularProgressIndicator(color: AppColors.accent),
-                        const SizedBox(height: 14),
+                        SizedBox(height: context.rem(0.875)),
                         Text(
                           context.l10n.animeExtracting,
-                          style: TextStyle(color: AppColors.inkMuted, fontSize: 13),
+                          style: TextStyle(color: AppColors.inkMuted, fontSize: AppType.small),
                         ),
                       ],
                     ),
                   )
                 : _allSources.isEmpty && _error != null
                     ? Padding(
-                        padding: const EdgeInsets.all(28),
+                        padding: EdgeInsets.all(context.rem(1.75)),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.error_outline_rounded,
                               color: Colors.redAccent,
-                              size: 40,
+                              size: context.rem(2.5),
                             ),
-                            const SizedBox(height: 10),
+                            SizedBox(height: context.rem(0.625)),
                             Text(
                               _error!,
                               style: TextStyle(
                                 color: AppColors.inkMuted,
-                                fontSize: 13,
+                                fontSize: AppType.small,
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 14),
+                            SizedBox(height: context.rem(0.875)),
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.accent,
@@ -339,21 +340,21 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                       )
                     : filtered.isEmpty
                         ? Padding(
-                            padding: const EdgeInsets.all(32),
+                            padding: EdgeInsets.all(context.rem(AppRem.xl)),
                             child: Text(
                               context.l10n.animeNoCategorySources(
                                 _selectedCategory.toUpperCase(),
                               ),
                               style: TextStyle(
-                                  color: AppColors.inkSubtle, fontSize: 13),
+                                  color: AppColors.inkSubtle, fontSize: AppType.small),
                             ),
                           )
                         : ListView.separated(
                             shrinkWrap: true,
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.all(context.rem(AppRem.md)),
                             itemCount: filtered.length,
                             separatorBuilder: (_, __) =>
-                                const SizedBox(height: 10),
+                                SizedBox(height: context.rem(0.625)),
                             itemBuilder: (context, index) {
                               final s = filtered[index];
                               final isDub = isDubSource(s);
@@ -362,15 +363,15 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                 color: Colors.transparent,
                                 child: InkWell(
                                   onTap: () => _playSource(s),
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(context.rem(0.875)),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: context.rem(AppRem.md),
+                                      vertical: context.rem(AppRem.ms),
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.raised,
-                                      borderRadius: BorderRadius.circular(14),
+                                      borderRadius: BorderRadius.circular(context.rem(0.875)),
                                       border: Border.all(
                                         color:
                                             AppColors.inkAlpha(0.08),
@@ -379,20 +380,20 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                     child: Row(
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.all(8),
+                                          padding: EdgeInsets.all(context.rem(AppRem.sm)),
                                           decoration: BoxDecoration(
                                             color: AppColors.accent
                                                 .withValues(alpha: 0.2),
                                             borderRadius:
-                                                BorderRadius.circular(10),
+                                                BorderRadius.circular(context.rem(AppRem.radiusPill)),
                                           ),
                                           child: Icon(
                                             Icons.play_circle_fill_rounded,
                                             color: AppColors.accent,
-                                            size: 24,
+                                            size: context.rem(AppRem.iconLg),
                                           ),
                                         ),
-                                        const SizedBox(width: 14),
+                                        SizedBox(width: context.rem(0.875)),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment:
@@ -402,26 +403,26 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                                 s.name ?? context.l10n.playerStreamSourceFallback,
                                                 style: TextStyle(
                                                   color: AppColors.ink,
-                                                  fontSize: 14,
+                                                  fontSize: AppType.body,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                              const SizedBox(height: 3),
+                                              SizedBox(height: context.rem(0.1875)),
                                               Text(
                                                 s.description ?? s.addonName,
                                                 style: TextStyle(
                                                   color: AppColors.inkSubtle,
-                                                  fontSize: 11,
+                                                  fontSize: AppType.tiny,
                                                 ),
                                               ),
                                               // Same delivery/seed badges
                                               // the movie and series picker
                                               // shows, so a torrent source
                                               // reads the same here.
-                                              const SizedBox(height: 6),
+                                              SizedBox(height: context.rem(AppRem.snug)),
                                               Wrap(
-                                                spacing: 6,
-                                                runSpacing: 4,
+                                                spacing: context.rem(AppRem.snug),
+                                                runSpacing: context.rem(AppRem.xs),
                                                 children:
                                                     sourceDeliveryBadges(s),
                                               ),
@@ -429,9 +430,9 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                           ),
                                         ),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 4,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: context.rem(AppRem.sm),
+                                            vertical: context.rem(AppRem.xs),
                                           ),
                                           decoration: BoxDecoration(
                                             color: isDub
@@ -440,7 +441,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                                 : Colors.blue
                                                     .withValues(alpha: 0.2),
                                             borderRadius:
-                                                BorderRadius.circular(6),
+                                                BorderRadius.circular(context.rem(AppRem.snug)),
                                           ),
                                           child: Text(
                                             isDub ? 'DUB' : 'SUB',
@@ -448,7 +449,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
                                               color: isDub
                                                   ? Colors.orangeAccent
                                                   : Colors.lightBlueAccent,
-                                              fontSize: TvType.scale(10),
+                                              fontSize: TvType.scale(AppType.micro),
                                               fontWeight: FontWeight.w900,
                                             ),
                                           ),
@@ -481,12 +482,12 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
           onTap: () => setState(() => _selectedCategory = category),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
             decoration: BoxDecoration(
               color: isSelected
                   ? primaryColor
                   : AppColors.inkAlpha(0.08),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
               border: Border.all(
                 color: isSelected
                     ? primaryColor
@@ -497,7 +498,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
               label,
               style: TextStyle(
                 color: isSelected ? AppColors.ink : AppColors.inkMuted,
-                fontSize: 12,
+                fontSize: AppType.caption,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),
             ),

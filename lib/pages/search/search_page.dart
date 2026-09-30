@@ -23,6 +23,7 @@ import '../anime/anime_search_page.dart';
 import '../../widgets/search/magnet_files_view.dart';
 import '../player/player_screen.dart';
 import '../../services/theme/app_colors.dart';
+import '../../services/app_units.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -283,13 +284,13 @@ class _SearchPageState extends State<SearchPage> {
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.pageInset(context),
-          vertical: 6,
+          vertical: context.rem(AppRem.snug),
         ),
         physics: const BouncingScrollPhysics(),
         children: [
           for (final filter in SearchFilter.values) ...[
             _buildChoiceChip(filter),
-            const SizedBox(width: 6),
+            SizedBox(width: context.rem(AppRem.snug)),
           ],
           if (_typeFilter == SearchFilter.anime)
             FilterDropdown<String?>(
@@ -319,13 +320,13 @@ class _SearchPageState extends State<SearchPage> {
               showFocusRing: true,
               onTap: _openAnimeFilters,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.rem(0.625),
+                  vertical: context.rem(AppRem.snug),
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.raised,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
                   border: Border.all(
                     color: AppColors.inkAlpha(0.12),
                   ),
@@ -335,14 +336,14 @@ class _SearchPageState extends State<SearchPage> {
                   children: [
                     Icon(
                       Icons.tune_rounded,
-                      size: 13,
+                      size: context.rem(0.8125),
                       color: AppColors.inkMuted,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: context.rem(AppRem.xs)),
                     Text(
                       context.l10n.searchAnimeFilters,
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: AppType.tinyPlus,
                         fontWeight: FontWeight.w500,
                         color: AppColors.inkMuted,
                       ),
@@ -364,15 +365,15 @@ class _SearchPageState extends State<SearchPage> {
       onTap: () => _onTypeChanged(filter),
       child: Container(
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.accent : AppColors.raised,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
         ),
         child: Text(
           filter.label(context.l10n),
           style: TextStyle(
-            fontSize: 11.5,
+            fontSize: AppType.tinyPlus,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
           ),
@@ -397,7 +398,7 @@ class _SearchPageState extends State<SearchPage> {
             child: Container(
               padding: EdgeInsets.only(
                 top: AppSpacing.floatingTopInset(context),
-                bottom: 8,
+                bottom: context.rem(AppRem.sm),
               ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -418,15 +419,15 @@ class _SearchPageState extends State<SearchPage> {
                 children: [
                   SizedBox(width: AppSpacing.pageInset(context)),
                   const GlassBackButton(),
-                  const SizedBox(width: 10),
+                  SizedBox(width: context.rem(0.625)),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 16),
+                      padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.md)),
                       child: Container(
-                        height: 42,
+                        height: context.rem(2.625),
                         decoration: BoxDecoration(
                           color: AppColors.inkAlpha(0.06),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                           border: Border.all(
                             color: AppColors.inkAlpha(0.1),
                           ),
@@ -437,7 +438,7 @@ class _SearchPageState extends State<SearchPage> {
                           autofocus: true,
                           style: TextStyle(
                             color: AppColors.ink,
-                            fontSize: 16,
+                            fontSize: AppType.bodyLg,
                             fontWeight: FontWeight.w500,
                           ),
                           textInputAction: TextInputAction.search,
@@ -449,17 +450,17 @@ class _SearchPageState extends State<SearchPage> {
                             ),
                             hintStyle: TextStyle(
                               color: AppColors.inkAlpha(0.35),
-                              fontSize: 14,
+                              fontSize: AppType.body,
                             ),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: context.rem(AppRem.md),
+                              vertical: context.rem(AppRem.ms),
                             ),
                             suffixIcon: _searchController.text.isNotEmpty
                                 ? IconButton(
                                     tooltip: context.l10n.commonClose,
-                                    icon: const Icon(Icons.close_rounded, size: 18),
+                                    icon: Icon(Icons.close_rounded, size: context.rem(AppRem.iconSm)),
                                     color: AppColors.inkAlpha(0.60),
                                     onPressed: () {
                                       _searchController.clear();
@@ -468,7 +469,7 @@ class _SearchPageState extends State<SearchPage> {
                                   )
                                 : Icon(
                                     Icons.search_rounded,
-                                    size: 20,
+                                    size: context.rem(AppRem.icon),
                                     color: AppColors.inkSubtle,
                                   ),
                           ),
@@ -488,7 +489,7 @@ class _SearchPageState extends State<SearchPage> {
           // the band is reserved here rather than as scroll padding -- that
           // keeps the chips fixed under it instead of scrolling away with
           // the results.
-          SizedBox(height: topPadding + kToolbarHeight + 10),
+          SizedBox(height: topPadding + kToolbarHeight + context.rem(0.625)),
           if (!_isMagnetMode) _buildTypeChips(),
           Expanded(
             child: _buildResults(),
@@ -515,8 +516,8 @@ class _SearchPageState extends State<SearchPage> {
         child: ListView.builder(
           clipBehavior: Clip.none,
           padding: EdgeInsets.only(
-            top: 8,
-            bottom: 40 + MediaQuery.paddingOf(context).bottom,
+            top: context.rem(AppRem.sm),
+            bottom: context.rem(2.5) + MediaQuery.paddingOf(context).bottom,
           ),
           physics: const BouncingScrollPhysics(),
           itemCount: sections.length,
@@ -556,13 +557,13 @@ class _SearchPageState extends State<SearchPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: size, color: AppColors.ink.withValues(alpha: iconAlpha)),
-            const SizedBox(height: 16),
+            SizedBox(height: context.rem(AppRem.md)),
             Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: AppColors.inkAlpha(0.5),
-                fontSize: 16,
+                fontSize: AppType.bodyLg,
                 fontWeight: FontWeight.w500,
               ),
             ),

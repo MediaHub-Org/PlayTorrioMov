@@ -41,7 +41,7 @@ class PlayerTopBar extends StatelessWidget {
     // buttons by 4px, and the Episodes badge to its icon -- and leaves the
     // title the rest.
     final isCompact = MediaQuery.sizeOf(context).width < 480;
-    final buttonSize = isCompact ? 36.0 : 40.0;
+    final buttonSize = context.rem(isCompact ? 2.25 : 2.5);
     final gap = SizedBox(width: context.rem(isCompact ? AppRem.snug : AppRem.sm));
 
     return Container(

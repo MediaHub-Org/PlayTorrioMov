@@ -11,6 +11,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../services/tv_type.dart';
 import '../../widgets/common/pill_tab_row.dart';
 import 'iptv_portal_browser_page.dart';
+import '../../services/app_units.dart';
 
 /// Live TV's sources, as a page rather than a modal.
 ///
@@ -91,7 +92,7 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.raised,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
         title: Text(
           context.l10n.iptvRemoveSourceTitle,
           style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
@@ -144,14 +145,14 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
         // glass circle here rendered oversized against the plain bar.
         title: Text(
           context.l10n.iptvManagePortals,
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 19),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: AppType.headline),
         ),
       ),
       body: AnimatedBuilder(
         animation: _ctrl,
         builder: (context, _) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.md), context.rem(AppRem.md), context.rem(6.25)),
             physics: const BouncingScrollPhysics(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -172,7 +173,7 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   activeId: _view,
                   onSelected: (id) => setState(() => _view = id),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: context.rem(1.25)),
                 if (_view == 'xtream')
                   _buildPortalSection(context)
                 else
@@ -202,35 +203,35 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   }
                 },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: context.rem(AppRem.ms)),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: context.rem(AppRem.sm),
+          runSpacing: context.rem(AppRem.sm),
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: palette.primaryColor,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.rem(0.875),
+                  vertical: context.rem(0.625),
                 ),
               ),
               icon: _ctrl.isScraping
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
+                  ? SizedBox(
+                      width: context.rem(0.875),
+                      height: context.rem(0.875),
+                      child: const CircularProgressIndicator(
                         strokeWidth: 2,
                         color: AppColors.onAccent,
                       ),
                     )
-                  : const Icon(
+                  : Icon(
                       Icons.radar_rounded,
-                      size: 16,
+                      size: context.rem(AppRem.iconXs),
                       color: AppColors.onAccent,
                     ),
               label: Text(
@@ -257,14 +258,14 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                 foregroundColor: AppColors.ink,
                 side: BorderSide(color: AppColors.inkAlpha(0.2)),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.rem(0.875),
+                  vertical: context.rem(0.625),
                 ),
               ),
-              icon: const Icon(Icons.add_rounded, size: 16),
+              icon: Icon(Icons.add_rounded, size: context.rem(AppRem.iconXs)),
               label: Text(
                 context.l10n.iptvAddPortal,
                 style: const TextStyle(fontWeight: FontWeight.w700),
@@ -275,18 +276,18 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
           ],
         ),
         if (_ctrl.statusText.isNotEmpty) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: context.rem(0.625)),
           Text(
             _ctrl.statusText,
             style: const TextStyle(
               color: Color(0xFF00D2EF),
-              fontSize: 12,
+              fontSize: AppType.caption,
               fontWeight: FontWeight.w600,
             ),
           ),
         ],
         if (_showPortalForm) ...[
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
           _FormCard(
             children: [
               Text(
@@ -296,23 +297,23 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: context.rem(0.625)),
               TextField(
                 controller: _urlCtrl,
-                style: TextStyle(color: AppColors.ink, fontSize: 13),
+                style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
                 decoration: InputDecoration(
                   labelText: context.l10n.iptvServerUrl,
                   isDense: true,
                   border: const OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: context.rem(AppRem.sm)),
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _userCtrl,
-                      style: TextStyle(color: AppColors.ink, fontSize: 13),
+                      style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
                       decoration: InputDecoration(
                         labelText: context.l10n.iptvUsername,
                         isDense: true,
@@ -320,11 +321,11 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: context.rem(AppRem.sm)),
                   Expanded(
                     child: TextField(
                       controller: _passCtrl,
-                      style: TextStyle(color: AppColors.ink, fontSize: 13),
+                      style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
                       decoration: InputDecoration(
                         labelText: context.l10n.iptvPassword,
                         isDense: true,
@@ -335,16 +336,16 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                 ],
               ),
               if (_ctrl.addError != null) ...[
-                const SizedBox(height: 6),
+                SizedBox(height: context.rem(AppRem.snug)),
                 Text(
                   _ctrl.addError!,
                   style: const TextStyle(
                     color: Colors.redAccent,
-                    fontSize: 12,
+                    fontSize: AppType.caption,
                   ),
                 ),
               ],
-              const SizedBox(height: 10),
+              SizedBox(height: context.rem(0.625)),
               Align(
                 alignment: AlignmentDirectional.centerEnd,
                 child: ElevatedButton(
@@ -353,10 +354,10 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   ),
                   onPressed: _ctrl.isAdding ? null : _submitPortal,
                   child: _ctrl.isAdding
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
+                      ? SizedBox(
+                          width: context.rem(0.875),
+                          height: context.rem(0.875),
+                          child: const CircularProgressIndicator(
                             strokeWidth: 2,
                             color: AppColors.onAccent,
                           ),
@@ -367,7 +368,7 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
             ],
           ),
         ],
-        const SizedBox(height: 14),
+        SizedBox(height: context.rem(0.875)),
         if (_ctrl.verified.isEmpty)
           _EmptyLine(
             text: context.l10n.iptvNoVerified(
@@ -378,7 +379,7 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
           )
         else
           for (var i = 0; i < _ctrl.verified.length; i++) ...[
-            if (i > 0) const SizedBox(height: 8),
+            if (i > 0) SizedBox(height: context.rem(AppRem.sm)),
             _PortalRow(
               index: i,
               onOpen: () => pushPage(
@@ -415,17 +416,17 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   }
                 },
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: context.rem(AppRem.ms)),
         OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.ink,
             side: BorderSide(color: AppColors.inkAlpha(0.2)),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.625)),
           ),
-          icon: const Icon(Icons.playlist_add_rounded, size: 16),
+          icon: Icon(Icons.playlist_add_rounded, size: context.rem(AppRem.iconXs)),
           label: Text(
             context.l10n.iptvAddM3uUrl,
             style: const TextStyle(fontWeight: FontWeight.w700),
@@ -433,7 +434,7 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
           onPressed: () => setState(() => _showM3uForm = !_showM3uForm),
         ),
         if (_showM3uForm) ...[
-          const SizedBox(height: 14),
+          SizedBox(height: context.rem(0.875)),
           _FormCard(
             children: [
               Text(
@@ -443,27 +444,27 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: context.rem(0.625)),
               TextField(
                 controller: _m3uNameCtrl,
-                style: TextStyle(color: AppColors.ink, fontSize: 13),
+                style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
                 decoration: InputDecoration(
                   labelText: context.l10n.iptvPlaylistName,
                   isDense: true,
                   border: const OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: context.rem(AppRem.sm)),
               TextField(
                 controller: _m3uUrlCtrl,
-                style: TextStyle(color: AppColors.ink, fontSize: 13),
+                style: TextStyle(color: AppColors.ink, fontSize: AppType.small),
                 decoration: InputDecoration(
                   labelText: context.l10n.iptvM3uUrl,
                   isDense: true,
                   border: const OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: context.rem(0.625)),
               Align(
                 alignment: AlignmentDirectional.centerEnd,
                 child: ElevatedButton(
@@ -472,10 +473,10 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
                   ),
                   onPressed: _ctrl.isM3uLoading ? null : _submitM3u,
                   child: _ctrl.isM3uLoading
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
+                      ? SizedBox(
+                          width: context.rem(0.875),
+                          height: context.rem(0.875),
+                          child: const CircularProgressIndicator(
                             strokeWidth: 2,
                             color: AppColors.onAccent,
                           ),
@@ -486,12 +487,12 @@ class _IptvSourcesPageState extends State<IptvSourcesPage> {
             ],
           ),
         ],
-        const SizedBox(height: 14),
+        SizedBox(height: context.rem(0.875)),
         if (_ctrl.m3uPlaylists.isEmpty)
           _EmptyLine(text: context.l10n.iptvNoM3u)
         else
           for (var i = 0; i < _ctrl.m3uPlaylists.length; i++) ...[
-            if (i > 0) const SizedBox(height: 8),
+            if (i > 0) SizedBox(height: context.rem(AppRem.sm)),
             _M3uRow(
               index: i,
               onOpen: () => pushPage(
@@ -531,7 +532,7 @@ class _SectionHeader extends StatelessWidget {
             title,
             style: TextStyle(
               color: AppColors.ink,
-              fontSize: 16,
+              fontSize: AppType.bodyLg,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -542,10 +543,10 @@ class _SectionHeader extends StatelessWidget {
               foregroundColor: Colors.redAccent,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            icon: const Icon(Icons.delete_sweep_outlined, size: 16),
+            icon: Icon(Icons.delete_sweep_outlined, size: context.rem(AppRem.iconXs)),
             label: Text(
               context.l10n.iptvDeleteAll,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              style: const TextStyle(fontSize: AppType.caption, fontWeight: FontWeight.w700),
             ),
             onPressed: onDeleteAll,
           ),
@@ -571,15 +572,15 @@ class _ScrapeSourcePicker extends StatelessWidget {
       initialValue: source,
       onSelected: onSelected,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(context.rem(0.875)),
         side: BorderSide(color: AppColors.inkAlpha(0.12)),
       ),
       color: AppColors.raised,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9.5),
+        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.5938)),
         decoration: BoxDecoration(
           color: AppColors.inkAlpha(0.08),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
           border: Border.all(color: AppColors.inkAlpha(0.15)),
         ),
         child: Row(
@@ -589,12 +590,12 @@ class _ScrapeSourcePicker extends StatelessWidget {
               source == CatalogSource.cloudVault
                   ? Icons.cloud_done_rounded
                   : Icons.forum_rounded,
-              size: 15,
+              size: context.rem(0.9375),
               color: source == CatalogSource.cloudVault
                   ? const Color(0xFF00E5FF)
                   : const Color(0xFFFF5722),
             ),
-            const SizedBox(width: 6),
+            SizedBox(width: context.rem(AppRem.snug)),
             // Flexible: at a large text scale the source name outgrows the
             // rail, and a min-size Row sizes its children to their natural
             // width unless one may give.
@@ -605,15 +606,15 @@ class _ScrapeSourcePicker extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: AppColors.ink,
-                  fontSize: 12.5,
+                  fontSize: AppType.captionPlus,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: context.rem(AppRem.xs)),
             Icon(
               Icons.arrow_drop_down_rounded,
-              size: 18,
+              size: context.rem(AppRem.iconSm),
               color: AppColors.inkMuted,
             ),
           ],
@@ -649,10 +650,10 @@ class _FormCard extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
       decoration: BoxDecoration(
         color: AppColors.inkAlpha(0.05),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
         border: Border.all(color: AppColors.inkAlpha(0.1)),
       ),
       child: Column(
@@ -674,7 +675,7 @@ class _EmptyLine extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.sm)),
       child: Text(text, style: TextStyle(color: AppColors.inkSubtle)),
     );
   }
@@ -740,23 +741,23 @@ class _PortalRow extends StatelessWidget {
           icon: Icon(
             isFav ? Icons.star_rounded : Icons.star_outline_rounded,
             color: isFav ? const Color(0xFFFFC107) : AppColors.inkDisabled,
-            size: 20,
+            size: context.rem(AppRem.icon),
           ),
           onPressed: () => ctrl.toggleFavoritePortal(p.key),
         ),
         IconButton(
           tooltip: context.l10n.iptvCopyLogin,
-          icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: 18),
+          icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: context.rem(AppRem.iconSm)),
           onPressed: () => onCopyLogin(
             '${p.portal.url}:${p.portal.username}:${p.portal.password}',
           ),
         ),
         IconButton(
           tooltip: context.l10n.iptvDeletePortal,
-          icon: const Icon(
+          icon: Icon(
             Icons.delete_outline_rounded,
             color: Colors.redAccent,
-            size: 20,
+            size: context.rem(AppRem.icon),
           ),
           onPressed: onDelete,
         ),
@@ -796,7 +797,7 @@ class _M3uRow extends StatelessWidget {
       actions: [
         IconButton(
           tooltip: context.l10n.iptvCopyPlaylistUrl,
-          icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: 18),
+          icon: Icon(Icons.copy_rounded, color: AppColors.inkSubtle, size: context.rem(AppRem.iconSm)),
           onPressed: () {
             final text = pl.sourceUrl ?? '';
             if (text.isNotEmpty) onCopyUrl(text);
@@ -804,10 +805,10 @@ class _M3uRow extends StatelessWidget {
         ),
         IconButton(
           tooltip: context.l10n.iptvDeletePlaylist,
-          icon: const Icon(
+          icon: Icon(
             Icons.delete_outline_rounded,
             color: Colors.redAccent,
-            size: 20,
+            size: context.rem(AppRem.icon),
           ),
           onPressed: onDelete,
         ),
@@ -830,13 +831,13 @@ class _SourceIconTile extends StatelessWidget {
     AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
     return Container(
-      width: 40,
-      height: 40,
+      width: context.rem(2.5),
+      height: context.rem(2.5),
       decoration: BoxDecoration(
         color: palette.primaryColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
       ),
-      child: Icon(icon, color: palette.primaryColor, size: 20),
+      child: Icon(icon, color: palette.primaryColor, size: context.rem(AppRem.icon)),
     );
   }
 }
@@ -870,19 +871,19 @@ class _SourceRowShell extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onOpen,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.ms)),
           decoration: BoxDecoration(
             color: AppColors.inkAlpha(0.04),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
             border: Border.all(color: AppColors.inkAlpha(0.08)),
           ),
           child: Row(
             children: [
               if (leading != null) ...[
                 leading!,
-                const SizedBox(width: 12),
+                SizedBox(width: context.rem(AppRem.ms)),
               ],
               Expanded(
                 child: Column(
@@ -895,22 +896,22 @@ class _SourceRowShell extends StatelessWidget {
                       style: TextStyle(
                         color: AppColors.ink,
                         fontWeight: FontWeight.w700,
-                        fontSize: 13.5,
+                        fontSize: AppType.smallPlus,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: context.rem(0.1875)),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: AppColors.inkAlpha(0.45),
-                        fontSize: 11,
+                        fontSize: AppType.tiny,
                       ),
                     ),
                     if (badges.isNotEmpty) ...[
-                      const SizedBox(height: 5),
-                      Wrap(spacing: 6, runSpacing: 4, children: badges),
+                      SizedBox(height: context.rem(0.3125)),
+                      Wrap(spacing: context.rem(AppRem.snug), runSpacing: context.rem(AppRem.xs), children: badges),
                     ],
                   ],
                 ),
@@ -936,16 +937,16 @@ class _Badge extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
       ),
       child: Text(
         text,
         style: TextStyle(
           color: color,
-          fontSize: TvType.scale(10),
+          fontSize: TvType.scale(AppType.micro),
           fontWeight: FontWeight.w700,
         ),
       ),

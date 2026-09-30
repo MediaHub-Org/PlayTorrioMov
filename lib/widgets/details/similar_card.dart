@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../services/metadata/bestsimilar_scraper.dart' show BSItem;
 import '../../services/theme/app_colors.dart';
 import '../common/hover_button.dart';
+import '../../services/app_units.dart';
 
 /// The details page's brand red, which the similarity chip outlines itself in.
 /// Duplicated from `_Palette` rather than exported from it: that class is the
@@ -61,7 +62,7 @@ class SimilarCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   child: AspectRatio(
                     aspectRatio: 2 / 3,
                     child: item.thumbUrl.isNotEmpty
@@ -75,8 +76,8 @@ class SimilarCard extends StatelessWidget {
                 ),
                 if (item.similarityPercent != null)
                   PositionedDirectional(
-                    top: 6,
-                    end: 6,
+                    top: context.rem(AppRem.snug),
+                    end: context.rem(AppRem.snug),
                     child: _Badge(
                       // The similarity chip is the one with an outline: it is
                       // this rail's own number rather than the title's, so it
@@ -87,7 +88,7 @@ class SimilarCard extends StatelessWidget {
                         '${item.similarityPercent}%',
                         style: TextStyle(
                           color: AppColors.ink,
-                          fontSize: 11,
+                          fontSize: AppType.tiny,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -95,24 +96,24 @@ class SimilarCard extends StatelessWidget {
                   ),
                 if (item.rating != null)
                   PositionedDirectional(
-                    bottom: 6,
-                    start: 6,
+                    bottom: context.rem(AppRem.snug),
+                    start: context.rem(AppRem.snug),
                     child: _Badge(
                       horizontal: 6,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.star_rounded,
-                            color: Color(0xFFFFC107),
-                            size: 13,
+                            color: const Color(0xFFFFC107),
+                            size: context.rem(0.8125),
                           ),
-                          const SizedBox(width: 3),
+                          SizedBox(width: context.rem(0.1875)),
                           Text(
                             item.rating!.toStringAsFixed(1),
                             style: TextStyle(
                               color: AppColors.ink,
-                              fontSize: 11,
+                              fontSize: AppType.tiny,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -122,7 +123,7 @@ class SimilarCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: context.rem(AppRem.sm)),
             // The poster takes the 2:3, so the title and the line under it
             // share a flat 64px. Capped the same way the Continue Watching
             // card's title block is, and for the same reason: the box is sized
@@ -135,11 +136,11 @@ class SimilarCard extends StatelessWidget {
                   MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
               style: TextStyle(
                 color: AppColors.ink,
-                fontSize: 13,
+                fontSize: AppType.small,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: context.rem(AppRem.xxs)),
             Text(
               subtitle,
               maxLines: 1,
@@ -148,7 +149,7 @@ class SimilarCard extends StatelessWidget {
                   MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
               style: TextStyle(
                 color: AppColors.inkDisabled,
-                fontSize: 11,
+                fontSize: AppType.tiny,
               ),
             ),
           ],
@@ -168,7 +169,7 @@ class _PosterFallback extends StatelessWidget {
     return Container(
       color: AppColors.surface,
       child: Center(
-        child: Icon(Icons.movie_rounded, color: AppColors.inkFaint, size: 36),
+        child: Icon(Icons.movie_rounded, color: AppColors.inkFaint, size: context.rem(2.25)),
       ),
     );
   }
@@ -187,10 +188,10 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: context.rem(0.1875)),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.75),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
         border: border == null ? null : Border.all(color: border!),
       ),
       child: child,
