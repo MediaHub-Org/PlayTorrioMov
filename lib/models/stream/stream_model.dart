@@ -495,6 +495,22 @@ class StreamSource {
     return 'Unknown source';
   }
 
+  /// The release's own file name, the way a torrent or a scraper called it:
+  /// the first line of the title (Stremio stacks the file name over the
+  /// seeders, size and provider lines), else the name, else
+  /// [displayTitle]. What a source row shows as its title, so a viewer can
+  /// read the codec, the group and the cut off the name itself instead of off
+  /// a row of tags.
+  String get releaseName {
+    for (final raw in [title, name]) {
+      for (final line in (raw ?? '').split('\n')) {
+        final trimmed = line.trim();
+        if (trimmed.isNotEmpty) return trimmed;
+      }
+    }
+    return displayTitle;
+  }
+
   /// Whether this source is a magnet link or torrent stream.
   bool get isMagnet =>
       (infoHash != null && infoHash!.isNotEmpty) ||

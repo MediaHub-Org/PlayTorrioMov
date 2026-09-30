@@ -36,12 +36,17 @@ class PlayerCenterControls extends StatelessWidget {
   final VoidCallback? onSeekBack30;
   final VoidCallback? onSeekForward30;
 
+  /// The play/pause button's focus node, so the screen can hand a remote's
+  /// first arrow press to it when the controls come back on screen.
+  final FocusNode? playPauseFocusNode;
+
   const PlayerCenterControls({
     super.key,
     required this.isPlaying,
     required this.onPlayPause,
     this.onSeekBack30,
     this.onSeekForward30,
+    this.playPauseFocusNode,
   });
 
   @override
@@ -76,6 +81,7 @@ class PlayerCenterControls extends StatelessWidget {
           size: playSize,
           iconSize: playIconSize,
           onTap: onPlayPause,
+          focusNode: playPauseFocusNode,
         ),
         if (seekForward != null) ...[
           SizedBox(width: gap),
@@ -172,12 +178,14 @@ class _PlayPauseButton extends StatefulWidget {
   final double size;
   final double iconSize;
   final VoidCallback onTap;
+  final FocusNode? focusNode;
 
   const _PlayPauseButton({
     required this.isPlaying,
     required this.size,
     required this.iconSize,
     required this.onTap,
+    this.focusNode,
   });
 
   @override
@@ -191,6 +199,7 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
   @override
   Widget build(BuildContext context) {
     final button = Focus(
+      focusNode: widget.focusNode,
       onFocusChange: (focused) => setState(() => _focused = focused),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;

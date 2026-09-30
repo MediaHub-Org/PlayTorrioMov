@@ -1724,6 +1724,7 @@ class _SourceCardState extends State<_SourceCard> {
   @override
   Widget build(BuildContext context) {
     final s = widget.source;
+    final provider = ScraperManager.instance.providerDisplayName(s);
     final badges = <Widget>[];
     // On TV the copy-magnet, download and play-chevron icons are three more
     // separately focusable targets crammed into one row, on top of the
@@ -1753,18 +1754,23 @@ class _SourceCardState extends State<_SourceCard> {
       badges.add(_badge(s.quality!, badgeColor));
     }
 
-    // How it's delivered, and for a torrent its seed count -- the health
-    // signal that decides between two otherwise identical 1080p sources.
-    badges.addAll(sourceDeliveryBadges(s));
-
+    // A few tags, not every fact: the container, the release source, the
+    // codec and how it is delivered are all in the file name shown as the
+    // title, and up to eight pills a row made the list hard to scan. What stays is what the name does not say reliably, and
+    // what decides between two sources -- quality, HDR, a torrent's seed
+    // count (its health, the signal that separates two otherwise identical
+    // 1080p sources), the size and the audio language.
+    final seeders = s.isMagnet ? s.seeders : null;
     if (s.isHDR) badges.add(_badge('HDR', const Color(0xFFFFD43B)));
-    if (s.containerLabel != null) {
-      badges.add(_badge(s.containerLabel!, _C.textTertiary));
+    if (seeders != null) {
+      badges.add(
+        SourceBadge(
+          '$seeders',
+          seedHealthColor(seeders),
+          icon: Icons.arrow_upward_rounded,
+        ),
+      );
     }
-    if (s.releaseSource != null) {
-      badges.add(_badge(s.releaseSource!, _C.textTertiary));
-    }
-    if (s.codec != null) badges.add(_badge(s.codec!, _C.textTertiary));
     if (s.fileSize != null) badges.add(_badge(s.fileSize!, _C.textTertiary));
 
     // Audio Language / Dub badge
@@ -1905,24 +1911,38 @@ class _SourceCardState extends State<_SourceCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // One title: the site behind the source, then quality
-                        // and container. The raw release name and description
-                        // repeated the same long string twice, and every fact
-                        // in it already reads as a badge below. The site comes
-                        // from the registered roster, not the delivery label
-                        // most scrapers stamp.
+                        // The release's own file name, as the title: the
+                        // codec, the group and the cut are read off it
+                        // directly, which is why the tags below can be few.
+                        // Its description stays out -- it repeated the same
+                        // string a second time. Two lines, so a long release
+                        // name is mostly there without taking the row over.
                         Text(
-                          s.compactTitleFor(
-                            ScraperManager.instance.providerDisplayName(s),
-                          ),
+                          s.releaseName,
                           style: const TextStyle(
                             color: _C.textPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        // The site behind the source, from the registered
+                        // roster, not the delivery label most scrapers stamp.
+                        // Not repeated when the title already is that name.
+                        if (provider.toLowerCase() !=
+                            s.releaseName.toLowerCase()) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            provider,
+                            style: const TextStyle(
+                              color: _C.textTertiary,
+                              fontSize: 11,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                         if (badges.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Wrap(spacing: 4, runSpacing: 4, children: badges),

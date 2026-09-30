@@ -82,6 +82,20 @@ void main() {
         expect(source.compactTitle, 'Some Release');
       });
     });
+    group('releaseName', () {
+      test('is the first line of the title, the file name', () {
+        final source = StreamSource(addonName: 'A', name: 'Torrentio\n1080p', title: 'Movie.2024.1080p.WEB-DL.x265-GRP\n👤 12 💾 2.1 GB ⚙️ Site', url: '');
+        expect(source.releaseName, 'Movie.2024.1080p.WEB-DL.x265-GRP');
+      });
+      test('skips a blank leading line', () {
+        final source = StreamSource(addonName: 'A', title: '\n  Movie.mkv  \nSite', url: '');
+        expect(source.releaseName, 'Movie.mkv');
+      });
+      test('falls back to the name, then to the display title', () {
+        expect(StreamSource(addonName: 'A', name: 'VixSrc 1080p', url: '').releaseName, 'VixSrc 1080p');
+        expect(StreamSource(addonName: 'A', url: '').releaseName, 'Unknown source');
+      });
+    });
     group('displayProvider', () {
       test('a numeric file id shows the scraper instead', () {
         final source = StreamSource(addonName: 'MyScraper', name: '111477', title: 'Movie.mkv', url: '');
