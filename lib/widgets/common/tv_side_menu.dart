@@ -108,6 +108,7 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final accent = AppThemeService.currentPalette.value.primaryColor;
     final foreground = selected ? AppColors.onAccent : AppColors.inkSubtle;
     return Padding(
