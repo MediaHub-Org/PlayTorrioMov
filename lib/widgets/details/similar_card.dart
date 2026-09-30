@@ -36,12 +36,14 @@ class SimilarCard extends StatelessWidget {
   });
 
   /// The card's full height for a given [width]: the poster's 2:3 plus a flat
-  /// 64 for the two text lines.
+  /// 4 rem (64 px at 1x) for the two text lines. [scale] is the text-size
+  /// factor ([AppUnits.scaleOf]); the default is the 1x layout.
   ///
   /// The rail sizes its `SizedBox` with this, which is why the text below is
-  /// capped: those two lines want ~39px at 1.0 and ~96px at 3x, and 64 is all
-  /// they get.
-  static double heightFor(double width) => width * 1.5 + 64;
+  /// capped: those two lines want ~39px at 1.0 and ~96px at 3x, and this is
+  /// all they get.
+  static double heightFor(double width, [double scale = 1]) =>
+      width * 1.5 + 4 * AppUnits.remPixels * scale; // ratio: a 2:3 poster
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +101,7 @@ class SimilarCard extends StatelessWidget {
                     bottom: context.rem(AppRem.snug),
                     start: context.rem(AppRem.snug),
                     child: _Badge(
-                      horizontal: 6,
+                      horizontal: AppRem.snug,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -180,15 +182,19 @@ class _PosterFallback extends StatelessWidget {
 /// class.
 class _Badge extends StatelessWidget {
   final Widget child;
+  /// In rem.
   final double horizontal;
   final Color? border;
 
-  const _Badge({required this.child, this.horizontal = 7, this.border});
+  const _Badge({required this.child, this.horizontal = 0.4375, this.border});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: horizontal, vertical: context.rem(0.1875)),
+      padding: EdgeInsets.symmetric(
+        horizontal: context.rem(horizontal),
+        vertical: context.rem(0.1875),
+      ),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.75),
         borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),

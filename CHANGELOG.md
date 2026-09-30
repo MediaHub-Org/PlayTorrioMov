@@ -60,8 +60,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (`lib/widgets/details/details_metrics.dart`) instead of each keeping a copy.
   The ninth and last does everything still in pixels (the remaining pages and
   widgets), and the guard test now scans all of `lib/pages` and `lib/widgets`
-  instead of a list; three files stay in pixels on purpose because their
-  height is a measured budget (see the roadmap). The eighth does settings and
+  instead of a list, with no file exempt: the three widgets whose height is a
+  measured budget (the credit and similar cards, the Continue Watching band)
+  take the text-size factor, and `BrowseScaffold`'s `belowHeroExtent` now
+  receives it too. The eighth does settings and
   the update/P2P dialogs (every page under
   `lib/pages/settings`, `lib/widgets/updater`, `lib/widgets/p2p`). The seventh
   does the video player: every widget in `lib/widgets/player`, both

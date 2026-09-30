@@ -38,6 +38,7 @@ import 'package:playtorriomov/widgets/movie/upcoming_calendar_row.dart';
 import 'package:playtorriomov/widgets/player/player_seek_bar.dart';
 import 'package:playtorriomov/widgets/player/sub_sync_bar.dart';
 import 'package:playtorriomov/widgets/details/credit_card.dart';
+import 'package:playtorriomov/services/app_units.dart';
 import 'package:playtorriomov/widgets/details/similar_card.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
@@ -136,8 +137,12 @@ void main() {
       // scale. Artwork takes `width * 0.58`, so the text gets what is left.
       // This reproduces that box rather than approximating it.
       const screenWidth = 360.0;
-      final cardWidth = ContinueWatchingSlider.cardWidthFor(screenWidth);
-      final cardHeight = ContinueWatchingSlider.cardHeightFor(screenWidth);
+      // At the largest rem factor the layout uses, which is what 3x text
+      // resolves to.
+      final cardWidth =
+          ContinueWatchingSlider.cardWidthFor(screenWidth, AppUnits.maxScale);
+      final cardHeight =
+          ContinueWatchingSlider.cardHeightFor(screenWidth, AppUnits.maxScale);
 
       await pumpAtScale(
         tester,
@@ -772,8 +777,9 @@ void main() {
       await pumpAtScale(
         tester,
         child: Scaffold(
-          body: SizedBox(
-            height: CreditCard.railHeight,
+          body: Builder(
+            builder: (context) => SizedBox(
+            height: CreditCard.railHeightOf(context),
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
@@ -793,6 +799,7 @@ void main() {
                 ),
               ],
             ),
+            ),
           ),
         ),
       );
@@ -800,7 +807,7 @@ void main() {
       expect(
         tester.takeException(),
         isNull,
-        reason: 'the rail is a fixed ${CreditCard.railHeight}px and the avatar '
+        reason: 'the rail is a fixed 9.25 rem and the avatar '
             'keeps its size, so the two text lines are what has to give',
       );
     },
@@ -816,7 +823,7 @@ void main() {
         tester,
         child: Scaffold(
           body: SizedBox(
-            height: SimilarCard.heightFor(cardWidth),
+            height: SimilarCard.heightFor(cardWidth, AppUnits.maxScale),
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [

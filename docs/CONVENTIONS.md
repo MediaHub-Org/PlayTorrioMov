@@ -522,8 +522,12 @@ then move with the text, and a change of spacing is made in one place.
   fixed number; give their bounds as rem too.
 - **The guard covers the whole UI.** `test/units_no_raw_pixels_test.dart` scans
   every file under `lib/pages` and `lib/widgets` and fails on a bare size. A
-  file that must keep pixels (a widget whose height is a budget a test
-  measures) goes in its `exemptFiles`, with the reason. `lib/services` is not
+  file that must keep pixels goes in its `exemptFiles`, with the reason (none
+  does today). A widget whose height is a budget that a test measures takes the
+  text-size factor instead: `SimilarCard.heightFor(width, scale)`,
+  `CreditCard.railHeightOf(context)` and
+  `ContinueWatchingSlider.bandHeight(width, scale)`, where `scale` is
+  `AppUnits.scaleOf(context)`. `lib/services` is not
   scanned: a number there is data, not the size of something on screen.
 
 ### Text scale: the box must be able to grow

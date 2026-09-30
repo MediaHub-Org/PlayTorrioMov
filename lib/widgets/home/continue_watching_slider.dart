@@ -18,6 +18,7 @@ import '../common/hover_button.dart';
 import '../common/slider_arrow.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/app_units.dart';
 
 /// The keys that activate a focused continue-watching card. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
@@ -49,26 +50,39 @@ class ContinueWatchingSlider extends StatefulWidget {
   /// measured whenever the button was there -- a Material tap target with the
   /// default padded sizing -- so pinning it keeps the look the button case
   /// already had rather than imposing a new one.
-  static const double headerHeight = 48;
+  ///
+  /// Every size here is rem and every function below takes the text-size
+  /// factor ([AppUnits.scaleOf]; the default is the 1x layout), so the band
+  /// stays a pure function of the window and the text size and
+  /// [BrowseScaffold] can still derive it without building the widget.
+  static const double _headerHeightRem = 3;
 
   /// Gap between the header line and the cards.
-  static const double headerGap = 12;
+  static const double _headerGapRem = 0.75;
 
   /// Space below the cards, before whatever row comes next.
-  static const double bottomGap = 28;
+  static const double _bottomGapRem = 1.75;
+
+  /// The title and progress block under a card's artwork.
+  static const double _textBlockRem = 3.75;
+
+  static double _px(double rem, double scale) => rem * AppUnits.remPixels * scale;
 
   /// Width of one card at [screenWidth]. The row's card size is a step
   /// function of the window, not of the card count.
-  static double cardWidthFor(double screenWidth) => screenWidth > 900
-      ? 280.0
-      : screenWidth > 600
-      ? 240.0
-      : 200.0;
+  static double cardWidthFor(double screenWidth, [double scale = 1]) => _px(
+        screenWidth > 900
+            ? 17.5
+            : screenWidth > 600
+                ? 15
+                : 12.5,
+        scale,
+      );
 
   /// Height of one card: artwork at 0.62 of its width, plus the fixed
   /// title/progress block beneath it.
-  static double cardHeightFor(double screenWidth) =>
-      cardWidthFor(screenWidth) * 0.62 + 60.0;
+  static double cardHeightFor(double screenWidth, [double scale = 1]) =>
+      cardWidthFor(screenWidth, scale) * 0.62 + _px(_textBlockRem, scale); // ratio: artwork's share of the card
 
   /// Total vertical space this widget occupies when it has anything to show.
   ///
@@ -76,8 +90,9 @@ class ContinueWatchingSlider extends StatefulWidget {
   /// hero and this one row fill the screen exactly, which is why the number
   /// has to be derivable without building the widget. Every term is used by
   /// [build] too, so the two cannot drift.
-  static double bandHeight(double screenWidth) =>
-      headerHeight + headerGap + cardHeightFor(screenWidth) + bottomGap;
+  static double bandHeight(double screenWidth, [double scale = 1]) =>
+      _px(_headerHeightRem + _headerGapRem + _bottomGapRem, scale) +
+      cardHeightFor(screenWidth, scale);
 
   @override
   State<ContinueWatchingSlider> createState() => _ContinueWatchingSliderState();
@@ -164,19 +179,20 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
         if (items.isEmpty) return const SizedBox.shrink();
 
         final screenWidth = MediaQuery.sizeOf(context).width;
-        final cardWidth = ContinueWatchingSlider.cardWidthFor(screenWidth);
-        final cardHeight = ContinueWatchingSlider.cardHeightFor(screenWidth);
+        final scale = AppUnits.scaleOf(context);
+        final cardWidth = ContinueWatchingSlider.cardWidthFor(screenWidth, scale);
+        final cardHeight = ContinueWatchingSlider.cardHeightFor(screenWidth, scale);
 
         return Padding(
-          padding: const EdgeInsets.only(
-            bottom: ContinueWatchingSlider.bottomGap,
+          padding: EdgeInsets.only(
+            bottom: ContinueWatchingSlider._px(ContinueWatchingSlider._bottomGapRem, scale),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section Header
               SizedBox(
-                height: ContinueWatchingSlider.headerHeight,
+                height: ContinueWatchingSlider._px(ContinueWatchingSlider._headerHeightRem, scale),
                 // headerHeight is pinned so bandHeight stays exact whether
                 // or not "See all" is showing -- see its doc. Pinned means
                 // the 18px title, the count pill and the button have
@@ -186,24 +202,24 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                 // Same 1.3 ceiling the nav bar and the pill rows use.
                 child: ClampedTextScale(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(1.125)),
                     child: Row(
                       children: [
                         Container(
-                          width: 4,
-                          height: 18,
+                          width: context.rem(AppRem.xs),
+                          height: context.rem(1.125),
                           decoration: BoxDecoration(
                             color: palette.primaryColor,
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.xxs)),
                             boxShadow: [
                               BoxShadow(
                                 color: palette.primaryColor.withValues(alpha: 0.5),
-                                blurRadius: 8,
+                                blurRadius: context.rem(AppRem.sm),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        SizedBox(width: context.rem(0.625)),
                         // Title and count take the space "See all" does not,
                         // and the title gives way first. Laid out flat with a
                         // Spacer, the title demanded its natural width and
@@ -219,35 +235,35 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: AppType.lead,
                                     fontWeight: FontWeight.w700,
                                     color: AppColors.ink,
                                     letterSpacing: -0.3,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: context.rem(AppRem.sm)),
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 7,
-                                  vertical: 2,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: context.rem(0.4375),
+                                  vertical: context.rem(AppRem.xxs),
                                 ),
                                 decoration: BoxDecoration(
                                   color: palette.primaryColor.withValues(
                                     alpha: 0.15,
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                                   border: Border.all(
                                     color: palette.primaryColor.withValues(
                                       alpha: 0.3,
                                     ),
-                                    width: 0.8,
+                                    width: 0.8, // px: a hairline, not a layout size
                                   ),
                                 ),
                                 child: Text(
                                   '${items.length}',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: AppType.tiny,
                                     fontWeight: FontWeight.w700,
                                     color: palette.primaryColor,
                                   ),
@@ -285,7 +301,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                   )),
               ),
 
-              const SizedBox(height: ContinueWatchingSlider.headerGap),
+              SizedBox(height: ContinueWatchingSlider._px(ContinueWatchingSlider._headerGapRem, scale)),
 
               // Horizontal Card Slider with Desktop Floating Arrows
               MouseRegion(
@@ -300,10 +316,10 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         clipBehavior: Clip.none,
                         controller: _scrollController,
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        padding: EdgeInsets.symmetric(horizontal: context.rem(1.125)),
                         physics: const BouncingScrollPhysics(),
                         itemCount: items.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 14),
+                        separatorBuilder: (_, __) => SizedBox(width: context.rem(0.875)),
                         itemBuilder: (context, index) {
                           final item = items[index];
                           return ContinueWatchingCard(
@@ -325,7 +341,7 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         AnimatedPositioned(
                           duration: const Duration(milliseconds: 250),
                           curve: Curves.easeOutCubic,
-                          left: _canScrollLeft && _isHoveringSlider ? 10 : -60,
+                          left: context.rem(_canScrollLeft && _isHoveringSlider ? 0.625 : -3.75),
                           top: 0,
                           bottom: 0,
                           child: Center(
@@ -338,9 +354,8 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                         AnimatedPositioned(
                           duration: const Duration(milliseconds: 250),
                           curve: Curves.easeOutCubic,
-                          right: _canScrollRight && _isHoveringSlider
-                              ? 10
-                              : -60,
+                          right: context.rem(_canScrollRight && _isHoveringSlider
+                              ? 0.625 : -3.75),
                           top: 0,
                           bottom: 0,
                           child: Center(
@@ -461,27 +476,27 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
           transformAlignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.surface.withValues(alpha: 0.75),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(context.rem(0.875)),
             border: Border.all(
               color: hovered
                   ? widget.palette.primaryColor.withValues(alpha: 0.5)
                   : AppColors.inkAlpha(0.08),
-              width: hovered ? 1.4 : 1.0,
-            ),
+              width: hovered ? 1.4 : 1.0, // px: a border weight
+            ), // px: a hairline, not a layout size
             boxShadow: hovered
                 ? [
                     BoxShadow(
                       color: widget.palette.primaryColor.withValues(
                         alpha: 0.18,
                       ),
-                      blurRadius: 18,
-                      offset: const Offset(0, 4),
+                      blurRadius: context.rem(1.125),
+                      offset: Offset(0, context.rem(AppRem.xs)),
                     ),
                   ]
                 : [],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(context.rem(0.875)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -530,8 +545,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             opacity: hovered ? 1.0 : 0.0,
                             duration: const Duration(milliseconds: 180),
                             child: Container(
-                              width: 44,
-                              height: 44,
+                              width: context.rem(2.75),
+                              height: context.rem(2.75),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: widget.palette.primaryColor,
@@ -539,14 +554,14 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   BoxShadow(
                                     color: widget.palette.primaryColor
                                         .withValues(alpha: 0.5),
-                                    blurRadius: 14,
+                                    blurRadius: context.rem(0.875),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.play_arrow_rounded,
                                 color: AppColors.onAccent,
-                                size: 28,
+                                size: context.rem(1.75),
                               ),
                             ),
                           ),
@@ -560,8 +575,8 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                             defaultTargetPlatform == TargetPlatform.macOS ||
                             defaultTargetPlatform == TargetPlatform.linux))
                       Positioned(
-                        top: 6,
-                        right: 6,
+                        top: context.rem(AppRem.snug),
+                        right: context.rem(AppRem.snug),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -573,7 +588,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                 showFocusRing: true,
                                 onTap: () => _openDetails(context),
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: EdgeInsets.all(context.rem(AppRem.xs)),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
@@ -582,17 +597,17 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                         alpha: 0.25,
                                       ),
                                       width: 0.8,
-                                    ),
+                                    ), // px: a hairline, not a layout size
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.info_outline_rounded,
-                                    size: 14,
+                                    size: context.rem(0.875),
                                     color: AppColors.onAccent,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: context.rem(AppRem.snug)),
                             // Dismiss / Remove Button
                             Tooltip(
                               message: context.l10n.homeRemoveFromContinue,
@@ -601,7 +616,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                 showFocusRing: true,
                                 onTap: widget.onRemove,
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: EdgeInsets.all(context.rem(AppRem.xs)),
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     color: Colors.black.withValues(alpha: 0.75),
@@ -610,11 +625,11 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                         alpha: 0.25,
                                       ),
                                       width: 0.8,
-                                    ),
+                                    ), // px: a hairline, not a layout size
                                   ),
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.close_rounded,
-                                    size: 14,
+                                    size: context.rem(0.875),
                                     color: AppColors.onAccent,
                                   ),
                                 ),
@@ -626,20 +641,20 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
 
                     // Source Tag (Top-Left)
                     Positioned(
-                      top: 6,
-                      left: 6,
+                      top: context.rem(AppRem.snug),
+                      left: context.rem(AppRem.snug),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(AppRem.snug),
+                          vertical: context.rem(AppRem.xxs),
                         ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.65),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
                           border: Border.all(
                             color: AppColors.onAccent.withValues(alpha: 0.15),
                             width: 0.6,
-                          ),
+                          ), // px: a hairline, not a layout size
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -648,19 +663,19 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                               item.isTorrent
                                   ? Icons.cloud_download_rounded
                                   : Icons.link_rounded,
-                              size: 10,
+                              size: context.rem(0.625),
                               color: item.isTorrent
                                   ? const Color(0xFF00E5FF)
                                   : const Color(0xFF10B981),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: context.rem(AppRem.xs)),
                             Text(
                               item.addonName ??
                                   (item.isTorrent
                                       ? context.l10n.continueTorrent
                                       : context.l10n.continueStream),
                               style: TextStyle(
-                                fontSize: TvType.scale(9),
+                                fontSize: TvType.scale(AppType.nano),
                                 fontWeight: FontWeight.w600,
                                 color: AppColors.onAccent,
                               ),
@@ -672,16 +687,16 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
 
                     // Remaining time / Percentage (Bottom-Right)
                     Positioned(
-                      bottom: 6,
-                      right: 6,
+                      bottom: context.rem(AppRem.snug),
+                      right: context.rem(AppRem.snug),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(AppRem.snug),
+                          vertical: context.rem(AppRem.xxs),
                         ),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.75),
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(context.rem(0.3125)),
                         ),
                         child: Text(
                           item.remainingMinutes > 0
@@ -690,7 +705,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                 )
                               : '${(progress * 100).toInt()}%',
                           style: TextStyle(
-                            fontSize: TvType.scale(10),
+                            fontSize: TvType.scale(AppType.micro),
                             fontWeight: FontWeight.w600,
                             color: AppColors.onAccent,
                           ),
@@ -704,7 +719,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                       right: 0,
                       bottom: 0,
                       child: Container(
-                        height: 3.5,
+                        height: context.rem(0.2188),
                         color: AppColors.onAccent.withValues(alpha: 0.15),
                         alignment: Alignment.centerLeft,
                         child: FractionallySizedBox(
@@ -717,7 +732,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                                   color: widget.palette.primaryColor.withValues(
                                     alpha: 0.6,
                                   ),
-                                  blurRadius: 4,
+                                  blurRadius: context.rem(AppRem.xs),
                                 ),
                               ],
                             ),
@@ -740,7 +755,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                 // so 1.3 keeps real slack rather than sitting on the edge.
                 ClampedTextScale(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                    padding: EdgeInsets.fromLTRB(context.rem(0.625), context.rem(AppRem.sm), context.rem(0.625), context.rem(AppRem.sm)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -750,12 +765,12 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: AppType.small,
                             fontWeight: FontWeight.w700,
                             color: AppColors.ink,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        SizedBox(height: context.rem(0.1875)),
                         Text(
                           item.type == 'series' &&
                                   item.season != null &&
@@ -767,7 +782,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 11,
+                            fontSize: AppType.tiny,
                             fontWeight: FontWeight.w500,
                             color: AppColors.inkAlpha(0.55),
                           ),
@@ -789,7 +804,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
       // Artwork stand-in, not a theme surface: stays dark in either theme.
       color: const Color(0xFF1A1D27),
       child: Center(
-        child: Icon(Icons.movie_rounded, color: AppColors.onAccent.withValues(alpha: 0.24), size: 36),
+        child: Icon(Icons.movie_rounded, color: AppColors.onAccent.withValues(alpha: 0.24), size: context.rem(2.25)),
       ),
     );
   }

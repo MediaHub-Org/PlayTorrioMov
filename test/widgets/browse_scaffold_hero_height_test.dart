@@ -12,7 +12,7 @@ Widget card(BuildContext context, String item) =>
 Future<void> pumpScaffold(
   WidgetTester tester, {
   double Function(double, double)? heroHeightOf,
-  double Function(double)? belowHeroExtent,
+  double Function(double, double)? belowHeroExtent,
   double bandHeight = 0,
   double chromeHeight = 0,
   Size surface = const Size(1200, 900),
@@ -102,7 +102,7 @@ void main() {
       // What the sizing is for: hero + Continue Watching come to exactly one
       // screen, so that row is the last thing above the fold rather than a
       // strip with the start of two more rows under it.
-      await pumpScaffold(tester, bandHeight: 300, belowHeroExtent: (_) => 300);
+      await pumpScaffold(tester, bandHeight: 300, belowHeroExtent: (_, __) => 300);
 
       expect(heroHeight(tester), closeTo(600, 0.5));
     });
@@ -116,7 +116,7 @@ void main() {
         tester,
         chromeHeight: 140,
         bandHeight: 300,
-        belowHeroExtent: (_) => 300,
+        belowHeroExtent: (_, __) => 300,
       );
 
       expect(heroHeight(tester), closeTo(460, 0.5));
@@ -128,7 +128,7 @@ void main() {
         tester,
         surface: const Size(430, 800),
         bandHeight: 260,
-        belowHeroExtent: (width) {
+        belowHeroExtent: (width, _) {
           seenWidth = width;
           return 260;
         },
@@ -145,7 +145,7 @@ void main() {
         tester,
         surface: const Size(1200, 520),
         bandHeight: 300,
-        belowHeroExtent: (_) => 300,
+        belowHeroExtent: (_, __) => 300,
       );
 
       expect(heroHeight(tester), 380);
@@ -161,7 +161,7 @@ void main() {
         tester,
         surface: const Size(1200, 2000),
         bandHeight: 300,
-        belowHeroExtent: (_) => 300,
+        belowHeroExtent: (_, __) => 300,
       );
 
       expect(heroHeight(tester), 900);
@@ -173,7 +173,7 @@ void main() {
       await pumpScaffold(
         tester,
         bandHeight: 300,
-        belowHeroExtent: (_) => 300,
+        belowHeroExtent: (_, __) => 300,
         heroHeightOf: (_, __) => 240,
       );
 

@@ -11,17 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// `lib/services` is not scanned: a number there is data or an engine
 /// parameter (an image size asked of a cast receiver, a subtitle shadow), not
 /// the size of something on screen.
-const exemptFiles = <String, String>{
-  'lib/widgets/details/credit_card.dart':
-      'sits in a rail whose height is a measured budget, asserted at 3x text '
-          'by text_scale_overflow_test',
-  'lib/widgets/details/similar_card.dart':
-      'same: SimilarCard.heightFor is the rail\'s measured text budget',
-  'lib/widgets/home/continue_watching_slider.dart':
-      'its band height is a pure function of the window width, which '
-          'BrowseScaffold sizes its hero from (bandHeight), asserted at 3x '
-          'text by text_scale_overflow_test',
-};
+const exemptFiles = <String, String>{};
 
 List<String> _uiFiles() {
   final files = <String>[];
