@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 
 import '../../services/app_spacing.dart';
+import '../../services/app_units.dart';
 import 'header_pill_style.dart';
 import '../../services/theme/app_colors.dart';
 
 /// Vertical breathing room above and below the pill row.
-const double _kBarVerticalPadding = 12;
+const double _kBarVerticalPadding = AppRem.ms;
 
-/// Height of the bar's content, excluding the status-bar inset. The pills
-/// themselves keep [headerPillMinSize] as their tap target, so the row is
-/// exactly that tall.
+/// Height of the bar's content, excluding the status-bar inset, at the
+/// default text size. The pills themselves keep [headerPillMinSize] as their
+/// tap target, so the row is exactly that tall.
 const double pillFilterHeaderContentHeight =
-    headerPillMinSize + _kBarVerticalPadding * 2;
+    headerPillMinSize + _kBarVerticalPadding * AppUnits.remPixels * 2;
+
+/// [pillFilterHeaderContentHeight] for this context's text size: the bar is
+/// drawn in rem, so anything laid out against its height (the hero's top
+/// scrim) has to follow it rather than use the constant.
+double pillFilterHeaderHeightOf(BuildContext context) =>
+    context.rem(AppRem.target + _kBarVerticalPadding * 2);
 
 /// The filter/search pill row at the top of every browse page (Movies,
 /// Series, Anime, Live TV), so the row sits at the same inset and behaves
@@ -66,6 +73,7 @@ class PillFilterHeaderBar extends StatelessWidget {
     AppColors.dependOn(context);
     final resolvedShowDivider = showDivider ?? !transparent;
     final inset = AppSpacing.pageInset(context);
+    final verticalPadding = context.rem(_kBarVerticalPadding);
 
     // No SafeArea here: every page that uses this bar renders inside the
     // hub's content area, and AdaptiveNavShell has already inset past the
@@ -73,24 +81,22 @@ class PillFilterHeaderBar extends StatelessWidget {
     // Wrapping again double-counted the notch, and made this bar taller
     // than pillFilterHeaderContentHeight claims.
     final bar = SizedBox(
-      height: pillFilterHeaderContentHeight,
+      height: pillFilterHeaderHeightOf(context),
       child: LayoutBuilder(
         builder: (context, constraints) {
           // minWidth keeps the row right-aligned while the pills fit,
           // and lets it grow past the viewport (so the SingleChildScroll
           // View actually scrolls) once they do not.
+          final rowWidth = constraints.maxWidth - inset * 2;
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(
               horizontal: inset,
-              vertical: _kBarVerticalPadding,
+              vertical: verticalPadding,
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minWidth: (constraints.maxWidth - inset * 2).clamp(
-                  0.0,
-                  double.infinity,
-                ),
+                minWidth: rowWidth.clamp(0.0, double.infinity),
               ),
               // No Spacer/Expanded in here: the row is laid out with an
               // unbounded max width so it can scroll, and a flex child
@@ -103,8 +109,8 @@ class PillFilterHeaderBar extends StatelessWidget {
                     : MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  if (leading.isNotEmpty) _group(leading),
-                  _group(pills),
+                  if (leading.isNotEmpty) _group(context, leading),
+                  _group(context, pills),
                 ],
               ),
             ),
@@ -128,13 +134,13 @@ class PillFilterHeaderBar extends StatelessWidget {
   }
 
   /// One run of pills, evenly spaced, sized to its content.
-  static Widget _group(List<Widget> items) {
+  static Widget _group(BuildContext context, List<Widget> items) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         for (var i = 0; i < items.length; i++) ...[
-          if (i > 0) const SizedBox(width: 10),
+          if (i > 0) SizedBox(width: context.rem(AppRem.pillGap)),
           items[i],
         ],
       ],

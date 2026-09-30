@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app_info.dart';
 import '../../services/app_breakpoints.dart';
+import '../../services/app_units.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/theme/app_colors.dart';
 
@@ -23,7 +24,7 @@ class SidebarLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
-    final iconSize = isMobile ? 26.0 : 32.0;
+    final iconSize = context.rem(isMobile ? AppRem.logoCompact : AppRem.logo);
     if (!showWordmark) {
       return Image.asset(
         'assets/icon.png',
@@ -41,7 +42,7 @@ class SidebarLogo extends StatelessWidget {
           height: iconSize,
           fit: BoxFit.contain,
         ),
-        SizedBox(width: isMobile ? 8 : 10),
+        SizedBox(width: context.rem(isMobile ? AppRem.sm : AppRem.pillGap)),
         Flexible(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -52,7 +53,7 @@ class SidebarLogo extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 // Clamped: this sits inside TopBar's fixed
-                // height (TopBar.sharedHeight, 56) — a constant every
+                // height (TopBar.height, AppRem.bar) -- the size every
                 // caller uses to inset content below the bar. Unclamped, a
                 // large accessibility text size grows the wordmark past
                 // that fixed height and overflows it (#69).
@@ -60,19 +61,19 @@ class SidebarLogo extends StatelessWidget {
                 style: TextStyle(
                   color: AppColors.ink,
                   fontWeight: FontWeight.w900,
-                  fontSize: isMobile ? 16 : 18,
-                  letterSpacing: -0.5,
+                  fontSize: isMobile ? AppType.bodyLg : AppType.lead,
+                  letterSpacing: -0.5, // px: tracking, not a layout size
                 ),
               ),
-              SizedBox(height: isMobile ? 3 : 4),
+              SizedBox(height: context.rem(AppRem.xs)),
               // The accent sits under the wordmark rather than beside it:
               // the icon already occupies the left, and a second mark there
               // would crowd a phone header that also carries Settings.
               // Underlining it reads as part of the wordmark and costs no
               // horizontal room, which is the scarce dimension here.
               _FilmStripRule(
-                width: isMobile ? 34 : 40,
-                height: isMobile ? 4 : 5,
+                width: context.rem(isMobile ? AppRem.ruleWidthCompact : AppRem.ruleWidth),
+                height: context.rem(isMobile ? AppRem.xs : AppRem.snug),
               ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 
+import '../../services/app_units.dart';
 import '../../services/playback_coordinator.dart';
 import 'hover_button.dart';
 import 'like_button.dart';
@@ -49,21 +50,23 @@ class UniversalPlayBar extends StatelessWidget {
           scaleAmount: 1.01,
           onTap: PlaybackCoordinator.expand,
           child: Container(
-            height: 60,
+            // A floor, not a height: the title and artist lines grow with the
+            // text size and would overflow a fixed box.
+            constraints: BoxConstraints(minHeight: context.rem(AppRem.miniPlayer)),
             clipBehavior: Clip.antiAlias,
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            margin: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms)),
             decoration: BoxDecoration(
               color: AppColors.surface.withValues(alpha: 0.96),
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
               border: Border.all(
                 color: AppColors.accent.withValues(alpha: 0.35),
               ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.6),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
+                  blurRadius: context.rem(AppRem.blurLg),
+                  offset: Offset(0, context.rem(AppRem.snug)),
                 ),
               ],
             ),
@@ -73,18 +76,18 @@ class UniversalPlayBar extends StatelessWidget {
                   children: [
               // Cover / icon
               ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                 child: coverUrl != null && coverUrl.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: coverUrl,
-                        width: 40,
-                        height: 40,
+                        width: context.rem(AppRem.target),
+                        height: context.rem(AppRem.target),
                         fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) => _kindIcon(kind),
+                        errorWidget: (_, __, ___) => _kindIcon(context, kind),
                       )
-                    : _kindIcon(kind),
+                    : _kindIcon(context, kind),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rem(AppRem.ms)),
               // Title / artist — independently tappable.
               Expanded(
                 child: Column(
@@ -100,7 +103,7 @@ class UniversalPlayBar extends StatelessWidget {
                         style: TextStyle(
                           color: AppColors.ink,
                           fontWeight: FontWeight.bold,
-                          fontSize: 13,
+                          fontSize: AppType.small,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -115,7 +118,7 @@ class UniversalPlayBar extends StatelessWidget {
                           subtitle,
                           style: TextStyle(
                             color: AppColors.inkSubtle,
-                            fontSize: 11,
+                            fontSize: AppType.tiny,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -129,12 +132,12 @@ class UniversalPlayBar extends StatelessWidget {
                   _kindLabel(kind),
                   style: TextStyle(
                     color: AppColors.inkDisabled,
-                    fontSize: 11,
+                    fontSize: AppType.tiny,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.5, // px: tracking, not a layout size
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: context.rem(AppRem.ms)),
               ],
               // Like (music tracks only)
               if (PlaybackCoordinator.canLike)
@@ -142,7 +145,7 @@ class UniversalPlayBar extends StatelessWidget {
                   isLiked: PlaybackCoordinator.isLiked,
                   onTap: PlaybackCoordinator.toggleLike,
                   style: LikeButtonStyle.icon,
-                  size: 20,
+                  size: context.rem(AppRem.icon),
                 ),
               // Skip back / forward, for a source with a queue. Same pair
               // the media-session notification publishes, so the bar and the
@@ -153,7 +156,7 @@ class UniversalPlayBar extends StatelessWidget {
                   icon: Icon(
                     Icons.skip_previous_rounded,
                     color: AppColors.inkMuted,
-                    size: 24,
+                    size: context.rem(AppRem.iconLg),
                   ),
                   onPressed: PlaybackCoordinator.skipToPrevious,
                 ),
@@ -165,7 +168,7 @@ class UniversalPlayBar extends StatelessWidget {
                       ? Icons.pause_circle_filled_rounded
                       : Icons.play_circle_fill_rounded,
                   color: AppColors.accent,
-                  size: 34,
+                  size: context.rem(AppRem.iconXl),
                 ),
                 onPressed: PlaybackCoordinator.togglePlayPause,
               ),
@@ -175,7 +178,7 @@ class UniversalPlayBar extends StatelessWidget {
                   icon: Icon(
                     Icons.skip_next_rounded,
                     color: AppColors.inkMuted,
-                    size: 24,
+                    size: context.rem(AppRem.iconLg),
                   ),
                   onPressed: PlaybackCoordinator.skipToNext,
                 ),
@@ -185,7 +188,7 @@ class UniversalPlayBar extends StatelessWidget {
                 icon: Icon(
                   Icons.close_rounded,
                   color: AppColors.inkSubtle,
-                  size: 20,
+                  size: context.rem(AppRem.icon),
                 ),
                 onPressed: PlaybackCoordinator.dismiss,
               ),
@@ -198,7 +201,7 @@ class UniversalPlayBar extends StatelessWidget {
                   bottom: 0,
                   child: LinearProgressIndicator(
                     value: durMs > 0 ? progress : null,
-                    minHeight: 3,
+                    minHeight: 3, // px: a progress hairline
                     backgroundColor: AppColors.inkAlpha(0.10),
                     color: AppColors.accent,
                   ),
@@ -211,16 +214,16 @@ class UniversalPlayBar extends StatelessWidget {
     );
   }
 
-  Widget _kindIcon(String? kind) {
+  Widget _kindIcon(BuildContext context, String? kind) {
     final icon = switch (kind) {
       'video' => Icons.movie_rounded,
       _ => Icons.play_arrow_rounded,
     };
     return Container(
-      width: 40,
-      height: 40,
+      width: context.rem(AppRem.target),
+      height: context.rem(AppRem.target),
       color: AppColors.accent.withValues(alpha: 0.25),
-      child: Icon(icon, color: AppColors.accent, size: 22),
+      child: Icon(icon, color: AppColors.accent, size: context.rem(AppRem.iconMd)),
     );
   }
 

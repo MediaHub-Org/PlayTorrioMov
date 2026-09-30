@@ -8,7 +8,7 @@ import 'error_view.dart';
 import 'over_artwork.dart';
 import 'hero_carousel_auto_rotate.dart';
 import 'hover_button.dart';
-import 'pill_filter_header_bar.dart' show pillFilterHeaderContentHeight;
+import 'pill_filter_header_bar.dart' show pillFilterHeaderHeightOf;
 import 'poster_skeleton.dart';
 import 'slider_arrow.dart';
 import '../../services/theme/app_colors.dart';
@@ -412,12 +412,12 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               // own (most only fade left-to-right, for the title text), so
               // a transparent header floating over it needs one here,
               // centralized, rather than every heroBuilder adding its own.
-              const Positioned(
+              Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
-                height: pillFilterHeaderContentHeight * 2,
-                child: IgnorePointer(
+                height: pillFilterHeaderHeightOf(context) * 2,
+                child: const IgnorePointer(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       // Fixed dark, not a theme surface: this is the scrim
