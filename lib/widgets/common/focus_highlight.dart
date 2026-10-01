@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'focus_ring.dart';
 
-/// Draws a [FocusRing] around a control that owns its own focus node -- a
+/// Marks focus on a control that owns its own focus node -- a
 /// Material `IconButton`, a `PopupMenuButton`, an `InkWell` -- when anything
 /// inside it holds focus.
 ///
@@ -37,7 +37,14 @@ class _FocusHighlightState extends State<FocusHighlight> {
       child: FocusRing(
         visible: _focused,
         borderRadius: widget.borderRadius,
-        child: widget.child,
+        // A soft wash, not a ring: see [FocusRing.soft].
+        soft: true,
+        child: AnimatedScale(
+          scale: _focused ? 1.05 : 1.0,
+          duration: const Duration(milliseconds: 140),
+          curve: Curves.easeOutCubic,
+          child: widget.child,
+        ),
       ),
     );
   }

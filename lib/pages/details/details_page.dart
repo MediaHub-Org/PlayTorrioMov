@@ -34,6 +34,7 @@ import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
+import '../../widgets/details/details_poster_fit.dart';
 
 /// The keys that activate a focused [_EpisodeCard]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -945,36 +946,38 @@ class _DetailsPageState extends State<DetailsPage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (posterUrl != null)
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    boxShadow: [
-                      // subtle accent-tinted glow behind the poster, on top
-                      // of the usual drop shadow, so it reads as "lit" rather
-                      // than just floating on black
-                      BoxShadow(
-                        color: _Palette.accent.withOpacity(0.18),
-                        blurRadius: context.rem(DetailsDim.glowBlur),
-                        spreadRadius: -context.rem(DetailsDim.glowSpread),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.55),
-                        blurRadius: context.rem(DetailsDim.posterShadowBlur),
-                        offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    child: AspectRatio(
-                      aspectRatio: 2 / 3,
-                      child: CachedNetworkImage(
-                        imageUrl: posterUrl,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            // Artwork stand-in while the poster loads, so it keeps a fixed
-            // dark fill in either theme -- it is standing in for a picture.
-            const ColoredBox(color: Color(0xFF15171F)),
+                DetailsPosterFit(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      boxShadow: [
+                        // subtle accent-tinted glow behind the poster, on top
+                        // of the usual drop shadow, so it reads as "lit" rather
+                        // than just floating on black
+                        BoxShadow(
+                          color: _Palette.accent.withOpacity(0.18),
+                          blurRadius: context.rem(DetailsDim.glowBlur),
+                          spreadRadius: -context.rem(DetailsDim.glowSpread),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.55),
+                          blurRadius: context.rem(DetailsDim.posterShadowBlur),
+                          offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      child: AspectRatio(
+                        aspectRatio: 2 / 3,
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) =>
+                              // Artwork stand-in while the poster loads, so it keeps a fixed
+              // dark fill in either theme -- it is standing in for a picture.
+              const ColoredBox(color: Color(0xFF15171F)),
+                        ),
                       ),
                     ),
                   ),
@@ -1222,8 +1225,12 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildPlayButton({required bool fullWidth}) {
+    // No [HoverButton] ring here: it is a pill-shaped line, and this button is
+    // a rounded rectangle, so on a TV the two never lined up (#80). Focus is
+    // the button itself getting brighter, glowing and growing -- the same
+    // colors, read as "lit" rather than "outlined".
     return HoverButton(
-      showFocusRing: true,
+      scaleAmount: 1.08,
       onTap: () => _handlePlayAction(
         _currentSeasonEpisodes.isNotEmpty
             ? _currentSeasonEpisodes.first
@@ -1231,21 +1238,28 @@ class _DetailsPageState extends State<DetailsPage>
                   ? _detail!.videos.first
                   : null),
       ),
-      child: Container(
+      child: Builder(builder: (context) {
+        final focused = Focus.of(context).hasFocus;
+        return Container(
         width: fullWidth ? double.infinity : null,
         padding: EdgeInsets.symmetric(
           horizontal: context.rem(AppRem.controlX),
           vertical: context.rem(AppRem.controlY),
         ),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [_Palette.accent, _Palette.accentDim],
+          gradient: LinearGradient(
+            colors: focused
+                ? [
+                    Color.lerp(_Palette.accent, Colors.white, 0.18)!,
+                    Color.lerp(_Palette.accentDim, Colors.white, 0.18)!,
+                  ]
+                : const [_Palette.accent, _Palette.accentDim],
           ),
           borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           boxShadow: [
             BoxShadow(
-              color: _Palette.accent.withOpacity(0.35),
-              blurRadius: context.rem(AppRem.md),
+              color: _Palette.accent.withOpacity(focused ? 0.75 : 0.35),
+              blurRadius: context.rem(focused ? AppRem.lg : AppRem.md),
               offset: Offset(0, context.rem(AppRem.xs)),
             ),
           ],
@@ -1277,7 +1291,8 @@ class _DetailsPageState extends State<DetailsPage>
             ),
           ],
         ),
-      ),
+      );
+      }),
     );
   }
 

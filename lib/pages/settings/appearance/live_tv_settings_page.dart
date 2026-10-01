@@ -1,3 +1,4 @@
+import '../../../widgets/common/focus_fill.dart';
 import 'package:flutter/material.dart';
 import '../../../l10n/l10n.dart';
 import '../../../services/theme/app_theme_service.dart';
@@ -570,35 +571,38 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () => pushPage(context, const IptvSourcesPage()),
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.snug)),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.settings_input_antenna_rounded,
-                    color: palette.primaryColor,
-                    size: context.rem(AppRem.icon),
-                  ),
-                  SizedBox(width: context.rem(AppRem.ms)),
-                  Expanded(
-                    child: Text(
-                      context.l10n.iptvManagePortals,
-                      style: TextStyle(
-                        fontSize: AppType.smallPlus,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+          FocusFill(
+            radius: context.rem(AppRem.radiusPill),
+            child: InkWell(
+              onTap: () => pushPage(context, const IptvSourcesPage()),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.snug)),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.settings_input_antenna_rounded,
+                      color: palette.primaryColor,
+                      size: context.rem(AppRem.icon),
+                    ),
+                    SizedBox(width: context.rem(AppRem.ms)),
+                    Expanded(
+                      child: Text(
+                        context.l10n.iptvManagePortals,
+                        style: TextStyle(
+                          fontSize: AppType.smallPlus,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                        ),
                       ),
                     ),
-                  ),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: AppColors.inkSubtle,
-                    size: context.rem(AppRem.icon),
-                  ),
-                ],
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: AppColors.inkSubtle,
+                      size: context.rem(AppRem.icon),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

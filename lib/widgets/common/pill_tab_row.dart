@@ -92,6 +92,9 @@ class _SubTabButton extends StatelessWidget {
     AppColors.dependOn(context);
     return InkWell(
       onTap: onTap,
+      // Material's own focus tint is a few percent of the foreground, which
+      // vanishes on a violet selected tab; a remote needs a stronger one.
+      focusColor: AppColors.inkAlpha(0.22),
       borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),

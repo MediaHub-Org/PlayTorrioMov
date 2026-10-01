@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
@@ -638,80 +639,83 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
     final isEnabled = widget.isEnabled;
     final hovered = _hovered || _focused;
 
-    return Focus(
-      onFocusChange: (focused) => setState(() => _focused = focused),
-      onKeyEvent: _handleKey,
-      child: MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
-          decoration: BoxDecoration(
-            color: isEnabled
-                ? (hovered
-                    ? activeColor.withValues(alpha: 0.25)
-                    : activeColor.withValues(alpha: 0.15))
-                : (hovered
-                    ? AppColors.inkAlpha(0.08)
-                    : AppColors.inkAlpha(0.03)),
-            borderRadius: BorderRadius.circular(context.rem(0.5625)),
-            border: Border.all(
+    return FocusFill(
+      radius: context.rem(0.5625),
+      child: Focus(
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        onKeyEvent: _handleKey,
+        child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
+            decoration: BoxDecoration(
               color: isEnabled
-                  ? activeColor.withValues(alpha: 0.50)
-                  : AppColors.inkAlpha(0.08),
-              width: 1, // px: a hairline, not a layout size
+                  ? (hovered
+                      ? activeColor.withValues(alpha: 0.25)
+                      : activeColor.withValues(alpha: 0.15))
+                  : (hovered
+                      ? AppColors.inkAlpha(0.08)
+                      : AppColors.inkAlpha(0.03)),
+              borderRadius: BorderRadius.circular(context.rem(0.5625)),
+              border: Border.all(
+                color: isEnabled
+                    ? activeColor.withValues(alpha: 0.50)
+                    : AppColors.inkAlpha(0.08),
+                width: 1, // px: a hairline, not a layout size
+              ),
+              boxShadow: isEnabled && hovered
+                  ? [
+                      BoxShadow(
+                        color: activeColor.withValues(alpha: 0.25),
+                        blurRadius: context.rem(AppRem.sm),
+                        offset: Offset(0, context.rem(AppRem.xxs)),
+                      ),
+                    ]
+                  : null,
             ),
-            boxShadow: isEnabled && hovered
-                ? [
-                    BoxShadow(
-                      color: activeColor.withValues(alpha: 0.25),
-                      blurRadius: context.rem(AppRem.sm),
-                      offset: Offset(0, context.rem(AppRem.xxs)),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                widget.icon,
-                size: context.rem(0.875),
-                color: isEnabled
-                    ? activeColor
-                    : AppColors.inkAlpha(0.35),
-              ),
-              SizedBox(width: context.rem(AppRem.snug)),
-              Text(
-                widget.count != null
-                    ? '${widget.label} (${widget.count})'
-                    : widget.label,
-                style: TextStyle(
-                  fontSize: AppType.caption,
-                  fontWeight: isEnabled ? FontWeight.w600 : FontWeight.w500,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  widget.icon,
+                  size: context.rem(0.875),
                   color: isEnabled
-                      ? AppColors.ink
-                      : AppColors.inkAlpha(0.45),
+                      ? activeColor
+                      : AppColors.inkAlpha(0.35),
                 ),
-              ),
-              SizedBox(width: context.rem(AppRem.snug)),
-              Icon(
-                isEnabled
-                    ? Icons.check_circle_rounded
-                    : Icons.cancel_outlined,
-                size: context.rem(0.8125),
-                color: isEnabled
-                    ? const Color(0xFF34D399)
-                    : AppColors.inkAlpha(0.25),
-              ),
-            ],
+                SizedBox(width: context.rem(AppRem.snug)),
+                Text(
+                  widget.count != null
+                      ? '${widget.label} (${widget.count})'
+                      : widget.label,
+                  style: TextStyle(
+                    fontSize: AppType.caption,
+                    fontWeight: isEnabled ? FontWeight.w600 : FontWeight.w500,
+                    color: isEnabled
+                        ? AppColors.ink
+                        : AppColors.inkAlpha(0.45),
+                  ),
+                ),
+                SizedBox(width: context.rem(AppRem.snug)),
+                Icon(
+                  isEnabled
+                      ? Icons.check_circle_rounded
+                      : Icons.cancel_outlined,
+                  size: context.rem(0.8125),
+                  color: isEnabled
+                      ? const Color(0xFF34D399)
+                      : AppColors.inkAlpha(0.25),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+        ),
       ),
     );
   }
@@ -737,6 +741,7 @@ class _AddAddonButton extends StatelessWidget {
         child: HoverButton(
       scaleAmount: 1.02,
       showFocusRing: true,
+      focusRingBorderRadius: context.rem(AppRem.radiusLg) + context.rem(AppRem.xxs),
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

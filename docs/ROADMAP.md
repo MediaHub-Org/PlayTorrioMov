@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-09-29**, on `v1.9.0+47` plus the unreleased work in CHANGELOG.
+Last reconciled: **2026-10-01**, on `v1.9.1+48`.
 
 ---
 
@@ -31,7 +31,10 @@ The first item is code work, in batches; the rest need a device.
   every element. Not yet: the menu's new icon-rail form (opens on focus), the
   player's controls coming back on an arrow/OK (and Left/Right seeking with
   them hidden), the trimmed Watch Sources rows, and cards without a ring.
-  Report what the remote does. The in-player sources panel and the anime
+  Report what the remote does. Also unconfirmed: the second focus pass (soft
+  wash on the filter pills, the side menu's cue across icon and name, the
+  play button's lit state, the seek bar's stronger violet, and the volume as
+  one stop with Left/Right and OK), and the player's Back ladder (panel, then bars, then a second press to leave). The in-player sources panel and the anime
   episode sheet now carry the lean tag set too.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`

@@ -13,13 +13,12 @@ import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
 import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/glass_back_button.dart';
-import '../../widgets/common/filter_dropdown.dart';
-import '../../widgets/common/hover_button.dart';
 import '../../utils/navigation/route_transitions.dart';
+import '../../utils/search_result_filters.dart';
 import '../../widgets/anime/anime_slider_section.dart';
+import '../../widgets/search/search_filter_bar.dart';
 import '../../widgets/movie/movie_slider_section.dart';
 import '../anime/anime_details_page.dart';
-import '../anime/anime_search_page.dart';
 import '../../widgets/search/magnet_files_view.dart';
 import '../player/player_screen.dart';
 import '../../services/theme/app_colors.dart';
@@ -55,38 +54,14 @@ class _SearchPageState extends State<SearchPage> {
     SearchScope.contentType,
   );
 
-  /// Inline AniList narrowing, so the common case never leaves this page.
-  /// Genre answers most anime searches; season, format, status and sort
-  /// stay one tap away on the Anime Filters page. (Sort is not offered
-  /// here on purpose: the service ranks text matches first whenever a
-  /// query is present, so a sort pill beside a search field would promise
-  /// an order it cannot give.) Changing the genre re-runs the query in
-  /// place -- the _searchSeq guard already covers a chip change racing a
-  /// keystroke.
-  String? _animeGenre;
+  /// The two narrowing filters, the same on every type (see
+  /// [SearchFilterBar]). Applied to the results that came back, so changing
+  /// one is instant and costs no request.
+  int? _decade;
+  int? _minRating;
 
   bool _isMagnetMode = false;
   String _magnetQuery = '';
-
-  /// The genres worth a pill here. The app's Anime section lists thirteen;
-  /// the search page carries the same thirteen rather than the filter
-  /// page's nineteen, because those six extra need the adult gate the full
-  /// page owns and this row must not open.
-  static const _animeGenres = [
-    'Action',
-    'Adventure',
-    'Comedy',
-    'Drama',
-    'Fantasy',
-    'Horror',
-    'Mystery',
-    'Romance',
-    'Sci-Fi',
-    'Slice of Life',
-    'Sports',
-    'Supernatural',
-    'Thriller',
-  ];
 
   static bool _isMagnetLink(String text) {
     final trimmed = text.trim();
@@ -217,7 +192,7 @@ class _SearchPageState extends State<SearchPage> {
         : Future<List<MovieSection>>.value(const []);
     final animeFuture = _typeFilter.searchesAnime
         ? AnilistService.instance
-              .searchAnime(trimmed, genre: _animeGenre)
+              .searchAnime(trimmed)
               .catchError((Object _) => <AnimeMedia>[])
         : Future<List<AnimeMedia>>.value(const []);
 
@@ -250,136 +225,30 @@ class _SearchPageState extends State<SearchPage> {
   /// Anime rows lead when the Anime chip is active and trail otherwise, so
   /// whichever catalog the user asked for is the one at the top.
   List<Widget> _resultSections() {
-    final animeSection = _animeResults.isEmpty
+    final anime = filterAnime(
+      _animeResults,
+      decade: _decade,
+      minRating: _minRating?.toDouble(),
+    );
+    final sections = filterSections(
+      _results,
+      decade: _decade,
+      minRating: _minRating?.toDouble(),
+    );
+    final animeSection = anime.isEmpty
         ? null
         : AnimeSliderSection(
             title: context.l10n.navAnime,
             subtitle: context.l10n.searchFromAniList,
-            animeList: _animeResults,
+            animeList: anime,
             onAnimeTap: (anime) =>
                 pushPage(context, AnimeDetailsPage(anime: anime)),
-            onSeeAll: _openAnimeFilters,
           );
     return [
       if (_typeFilter == SearchFilter.anime && animeSection != null) animeSection,
-      for (final section in _results) MovieSliderSection(section: section),
+      for (final section in sections) MovieSliderSection(section: section),
       if (_typeFilter != SearchFilter.anime && animeSection != null) animeSection,
     ];
-  }
-
-  /// The AniList-native filters (genre, season, format, status, sort) live
-  /// on their own page and stay there -- reaching them from here carries the
-  /// query across so nothing has to be retyped.
-  void _openAnimeFilters() {
-    pushPage(
-      context,
-      AnimeSearchPage(initialQuery: _lastQuery.isEmpty ? null : _lastQuery),
-    );
-  }
-
-  Widget _buildTypeChips() {
-    return SizedBox(
-      height: AppSpacing.textScaledHeight(context, 44),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.pageInset(context),
-          vertical: context.rem(AppRem.snug),
-        ),
-        physics: const BouncingScrollPhysics(),
-        children: [
-          for (final filter in SearchFilter.values) ...[
-            _buildChoiceChip(filter),
-            SizedBox(width: context.rem(AppRem.snug)),
-          ],
-          if (_typeFilter == SearchFilter.anime)
-            FilterDropdown<String?>(
-              label: _animeGenre ?? context.l10n.animeAllGenres,
-              icon: Icons.category_rounded,
-              items: [
-                PopupMenuItem(
-                  value: '',
-                  child: Text(context.l10n.animeAllGenres),
-                ),
-                for (final g in _animeGenres)
-                  PopupMenuItem(value: g, child: Text(g)),
-              ],
-              // Null never arrives from a menu tap (it reads as a
-              // dismissal), so reset carries the empty sentinel like the
-              // other filter dropdowns.
-              onSelected: (v) {
-                final genre = (v == null || v.isEmpty) ? null : v;
-                if (genre == _animeGenre) return;
-                setState(() => _animeGenre = genre);
-                if (_lastQuery.isNotEmpty) _performSearch(_lastQuery);
-              },
-            ),
-          if (_typeFilter == SearchFilter.anime)
-            HoverButton(
-              scaleAmount: 1.05,
-              showFocusRing: true,
-              onTap: _openAnimeFilters,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: context.rem(0.625),
-                  vertical: context.rem(AppRem.snug),
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.raised,
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-                  border: Border.all(
-                    color: AppColors.inkAlpha(0.12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.tune_rounded,
-                      size: context.rem(0.8125),
-                      color: AppColors.inkMuted,
-                    ),
-                    SizedBox(width: context.rem(AppRem.xs)),
-                    Text(
-                      context.l10n.searchAnimeFilters,
-                      style: TextStyle(
-                        fontSize: AppType.tinyPlus,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.inkMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChoiceChip(SearchFilter filter) {
-    final isSelected = _typeFilter == filter;
-    return HoverButton(
-      scaleAmount: 1.05,
-      showFocusRing: true,
-      onTap: () => _onTypeChanged(filter),
-      child: Container(
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.raised,
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-        ),
-        child: Text(
-          filter.label(context.l10n),
-          style: TextStyle(
-            fontSize: AppType.tinyPlus,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected ? AppColors.ink : AppColors.inkAlpha(0.60),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -490,7 +359,15 @@ class _SearchPageState extends State<SearchPage> {
           // keeps the chips fixed under it instead of scrolling away with
           // the results.
           SizedBox(height: topPadding + kToolbarHeight + context.rem(0.625)),
-          if (!_isMagnetMode) _buildTypeChips(),
+          if (!_isMagnetMode)
+            SearchFilterBar(
+              type: _typeFilter,
+              onTypeChanged: _onTypeChanged,
+              decade: _decade,
+              onDecadeChanged: (v) => setState(() => _decade = v),
+              minRating: _minRating,
+              onMinRatingChanged: (v) => setState(() => _minRating = v),
+            ),
           Expanded(
             child: _buildResults(),
           ),

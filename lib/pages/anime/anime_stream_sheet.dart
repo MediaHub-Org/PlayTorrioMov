@@ -484,6 +484,7 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
         child: HoverButton(
           scaleAmount: 1.05,
           showFocusRing: true,
+          focusRingBorderRadius: context.rem(AppRem.radiusLg) + context.rem(AppRem.xxs),
           onTap: () => setState(() => _selectedCategory = category),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),

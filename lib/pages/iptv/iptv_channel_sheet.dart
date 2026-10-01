@@ -564,6 +564,7 @@ class _IptvChannelSheetState extends State<IptvChannelSheet> {
                               return HoverButton(
                                 scaleAmount: 1.02,
                                 showFocusRing: true,
+                                focusRingBorderRadius: context.rem(AppRem.radiusLg) + context.rem(AppRem.xxs),
                                 onTap: () => _isSelecting
                                     ? _toggleSelection(hit.streamUrl)
                                     : _playHit(hit),

@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -371,38 +372,41 @@ class _SyncCardChrome extends StatelessWidget {
                     style: TextStyle(fontSize: AppType.small, color: AppColors.inkMuted),
                   ),
                   SizedBox(height: context.rem(AppRem.ms)),
-                  InkWell(
-                    onTap: onCopyCode,
-                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: context.rem(AppRem.lg),
-                        vertical: context.rem(0.875),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black45,
-                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                        border: Border.all(color: color.withValues(alpha: 0.5)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            userCode!,
-                            style: TextStyle(
-                              fontSize: AppType.heading,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 4,
-                              color: AppColors.ink,
+                  FocusFill(
+                    radius: context.rem(AppRem.radiusMd),
+                    child: InkWell(
+                      onTap: onCopyCode,
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rem(AppRem.lg),
+                          vertical: context.rem(0.875),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black45,
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                          border: Border.all(color: color.withValues(alpha: 0.5)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              userCode!,
+                              style: TextStyle(
+                                fontSize: AppType.heading,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 4,
+                                color: AppColors.ink,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: context.rem(AppRem.ms)),
-                          Icon(
-                            Icons.copy_rounded,
-                            color: AppColors.inkMuted,
-                            size: context.rem(AppRem.icon),
-                          ),
-                        ],
+                            SizedBox(width: context.rem(AppRem.ms)),
+                            Icon(
+                              Icons.copy_rounded,
+                              color: AppColors.inkMuted,
+                              size: context.rem(AppRem.icon),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

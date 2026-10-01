@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -540,50 +541,53 @@ class _LinkTile extends StatelessWidget {
     AppColors.dependOn(context);
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _open(context),
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-        child: Container(
-          padding: EdgeInsets.all(context.rem(0.875)),
-          decoration: BoxDecoration(
-            color: _kSurface,
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-            border: Border.all(color: AppColors.inkAlpha(0.05)),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, size: context.rem(AppRem.icon), color: _kAccent),
-              SizedBox(width: context.rem(0.875)),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: AppType.smallPlus,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusMd),
+        child: InkWell(
+          onTap: () => _open(context),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+          child: Container(
+            padding: EdgeInsets.all(context.rem(0.875)),
+            decoration: BoxDecoration(
+              color: _kSurface,
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              border: Border.all(color: AppColors.inkAlpha(0.05)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: context.rem(AppRem.icon), color: _kAccent),
+                SizedBox(width: context.rem(0.875)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: AppType.smallPlus,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: context.rem(AppRem.xxs)),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: AppType.caption,
-                        height: 1.35, // ratio: a line height, not a size
-                        color: AppColors.inkAlpha(0.4),
+                      SizedBox(height: context.rem(AppRem.xxs)),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: AppType.caption,
+                          height: 1.35, // ratio: a line height, not a size
+                          color: AppColors.inkAlpha(0.4),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.open_in_new_rounded,
-                size: context.rem(AppRem.iconXs),
-                color: AppColors.inkAlpha(0.3),
-              ),
-            ],
+                Icon(
+                  Icons.open_in_new_rounded,
+                  size: context.rem(AppRem.iconXs),
+                  color: AppColors.inkAlpha(0.3),
+                ),
+              ],
+            ),
           ),
         ),
       ),

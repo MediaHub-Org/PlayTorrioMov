@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
@@ -406,83 +407,86 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
               child: Material(
                 color: Colors.transparent,
-                child: InkWell(
-                  onTap: isForceSoftware
-                      ? null
-                      : () {
-                          if (isCustom) {
-                            _showCustomDecodersDialog(palette);
-                          } else {
-                            PlayerSettings.setDecoderPreset(preset);
-                          }
-                        },
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? palette.primaryColor.withValues(alpha: 0.12)
-                          : AppColors.inkAlpha(0.02),
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                      border: Border.all(
+                child: FocusFill(
+                  radius: context.rem(AppRem.radiusMd),
+                  child: InkWell(
+                    onTap: isForceSoftware
+                        ? null
+                        : () {
+                            if (isCustom) {
+                              _showCustomDecodersDialog(palette);
+                            } else {
+                              PlayerSettings.setDecoderPreset(preset);
+                            }
+                          },
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: EdgeInsets.all(context.rem(AppRem.ms)),
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? palette.primaryColor.withValues(alpha: 0.5)
-                            : AppColors.inkAlpha(0.06),
-                        width: isSelected ? 1.2 : 0.8, // px: a hairline, not a layout size
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isSelected
-                              ? Icons.radio_button_checked_rounded
-                              : Icons.radio_button_off_rounded,
+                            ? palette.primaryColor.withValues(alpha: 0.12)
+                            : AppColors.inkAlpha(0.02),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                        border: Border.all(
                           color: isSelected
-                              ? palette.primaryColor
-                              : AppColors.inkDisabled,
-                          size: context.rem(AppRem.iconSm),
+                              ? palette.primaryColor.withValues(alpha: 0.5)
+                              : AppColors.inkAlpha(0.06),
+                          width: isSelected ? 1.2 : 0.8, // px: a hairline, not a layout size
                         ),
-                        SizedBox(width: context.rem(AppRem.ms)),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                preset.title(l10n),
-                                style: TextStyle(
-                                  fontSize: AppType.smallPlus,
-                                  fontWeight: FontWeight.w700,
-                                  color: isForceSoftware
-                                      ? AppColors.inkDisabled
-                                      : AppColors.ink,
-                                ),
-                              ),
-                              SizedBox(height: context.rem(AppRem.xxs)),
-                              Text(
-                                preset.description(l10n),
-                                style: TextStyle(
-                                  fontSize: AppType.tinyPlus,
-                                  color: AppColors.inkAlpha(0.45),
-                                  height: 1.25, // ratio: a line height, not a size
-                                ),
-                              ),
-                            ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected
+                                ? Icons.radio_button_checked_rounded
+                                : Icons.radio_button_off_rounded,
+                            color: isSelected
+                                ? palette.primaryColor
+                                : AppColors.inkDisabled,
+                            size: context.rem(AppRem.iconSm),
                           ),
-                        ),
-                        if (isCustom)
-                          IconButton(
-                            tooltip: context.l10n.videoCustomChainTitle,
-                            icon: Icon(
-                              Icons.tune_rounded,
-                              size: context.rem(AppRem.iconSm),
-                              color: AppColors.inkMuted,
+                          SizedBox(width: context.rem(AppRem.ms)),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  preset.title(l10n),
+                                  style: TextStyle(
+                                    fontSize: AppType.smallPlus,
+                                    fontWeight: FontWeight.w700,
+                                    color: isForceSoftware
+                                        ? AppColors.inkDisabled
+                                        : AppColors.ink,
+                                  ),
+                                ),
+                                SizedBox(height: context.rem(AppRem.xxs)),
+                                Text(
+                                  preset.description(l10n),
+                                  style: TextStyle(
+                                    fontSize: AppType.tinyPlus,
+                                    color: AppColors.inkAlpha(0.45),
+                                    height: 1.25, // ratio: a line height, not a size
+                                  ),
+                                ),
+                              ],
                             ),
-                            onPressed: isForceSoftware
-                                ? null
-                                : () => _showCustomDecodersDialog(palette),
                           ),
-                      ],
+                          if (isCustom)
+                            IconButton(
+                              tooltip: context.l10n.videoCustomChainTitle,
+                              icon: Icon(
+                                Icons.tune_rounded,
+                                size: context.rem(AppRem.iconSm),
+                                color: AppColors.inkMuted,
+                              ),
+                              onPressed: isForceSoftware
+                                  ? null
+                                  : () => _showCustomDecodersDialog(palette),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -815,98 +819,101 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
               child: Material(
                 color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    PlayerSettings.setBufferPreset(preset);
-                  },
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: EdgeInsets.all(context.rem(AppRem.ms)),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF00E5FF).withValues(alpha: 0.1)
-                          : AppColors.inkAlpha(0.02),
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                      border: Border.all(
+                child: FocusFill(
+                  radius: context.rem(AppRem.radiusMd),
+                  child: InkWell(
+                    onTap: () {
+                      PlayerSettings.setBufferPreset(preset);
+                    },
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: EdgeInsets.all(context.rem(AppRem.ms)),
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
-                            : AppColors.inkAlpha(0.06),
-                        width: isSelected ? 1.2 : 0.8, // px: a hairline, not a layout size
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isSelected
-                              ? Icons.radio_button_checked_rounded
-                              : Icons.radio_button_off_rounded,
+                            ? const Color(0xFF00E5FF).withValues(alpha: 0.1)
+                            : AppColors.inkAlpha(0.02),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                        border: Border.all(
                           color: isSelected
-                              ? const Color(0xFF00E5FF)
-                              : AppColors.inkDisabled,
-                          size: context.rem(AppRem.iconSm),
+                              ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
+                              : AppColors.inkAlpha(0.06),
+                          width: isSelected ? 1.2 : 0.8, // px: a hairline, not a layout size
                         ),
-                        SizedBox(width: context.rem(AppRem.ms)),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // A Wrap, not a Row: at 3x the preset label and
-                              // the RECOMMENDED badge together are wider than
-                              // the row, and the badge can move to a second
-                              // line.
-                              Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.center,
-                                spacing: context.rem(AppRem.sm),
-                                runSpacing: context.rem(AppRem.xs),
-                                children: [
-                                  Text(
-                                    preset.label(l10n),
-                                    style: TextStyle(
-                                      fontSize: AppType.smallPlus,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.ink,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            isSelected
+                                ? Icons.radio_button_checked_rounded
+                                : Icons.radio_button_off_rounded,
+                            color: isSelected
+                                ? const Color(0xFF00E5FF)
+                                : AppColors.inkDisabled,
+                            size: context.rem(AppRem.iconSm),
+                          ),
+                          SizedBox(width: context.rem(AppRem.ms)),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // A Wrap, not a Row: at 3x the preset label and
+                                // the RECOMMENDED badge together are wider than
+                                // the row, and the badge can move to a second
+                                // line.
+                                Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  spacing: context.rem(AppRem.sm),
+                                  runSpacing: context.rem(AppRem.xs),
+                                  children: [
+                                    Text(
+                                      preset.label(l10n),
+                                      style: TextStyle(
+                                        fontSize: AppType.smallPlus,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.ink,
+                                      ),
                                     ),
-                                  ),
-                                  if (preset ==
-                                          BufferResiliencePreset
-                                              .highResilience &&
-                                      Platform.isAndroid)
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: context.rem(AppRem.snug),
-                                        vertical: context.rem(0.0938),
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(
-                                          0xFF10B981,
-                                        ).withValues(alpha: 0.2),
-                                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-                                      ),
-                                      child: Text(
-                                        l10n.videoRecommendedBadge,
-                                        style: TextStyle(
-                                          fontSize: TvType.scale(AppType.nanoPlus),
-                                          fontWeight: FontWeight.w800,
-                                          color: const Color(0xFF10B981),
+                                    if (preset ==
+                                            BufferResiliencePreset
+                                                .highResilience &&
+                                        Platform.isAndroid)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: context.rem(AppRem.snug),
+                                          vertical: context.rem(0.0938),
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(
+                                            0xFF10B981,
+                                          ).withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+                                        ),
+                                        child: Text(
+                                          l10n.videoRecommendedBadge,
+                                          style: TextStyle(
+                                            fontSize: TvType.scale(AppType.nanoPlus),
+                                            fontWeight: FontWeight.w800,
+                                            color: const Color(0xFF10B981),
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                ],
-                              ),
-                              SizedBox(height: context.rem(AppRem.xxs)),
-                              Text(
-                                preset.subtitle(l10n),
-                                style: TextStyle(
-                                  fontSize: AppType.tinyPlus,
-                                  color: AppColors.inkAlpha(0.45),
-                                  height: 1.25, // ratio: a line height, not a size
+                                  ],
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: context.rem(AppRem.xxs)),
+                                Text(
+                                  preset.subtitle(l10n),
+                                  style: TextStyle(
+                                    fontSize: AppType.tinyPlus,
+                                    color: AppColors.inkAlpha(0.45),
+                                    height: 1.25, // ratio: a line height, not a size
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -118,4 +118,38 @@ void main() {
     final ring = tester.widget<FocusRing>(find.byType(FocusRing));
     expect(ring.visible, isTrue);
   });
+
+  testWidgets('focusFillRadius lightens the chip inside its own bounds',
+      (tester) async {
+    // For a chip in a scrolling row: no ring, which needs room outside the
+    // child, and which is the same color as a selected chip's fill (#80).
+    await tester.pumpWidget(wrap(
+      HoverButton(
+        focusFillRadius: 8,
+        onTap: () {},
+        child: const SizedBox(key: Key('chip'), width: 40, height: 40),
+      ),
+    ));
+
+    Color? fill() => (tester
+            .widget<AnimatedContainer>(find.byType(AnimatedContainer))
+            .decoration as BoxDecoration)
+        .color;
+    expect(fill(), Colors.transparent);
+
+    final box = tester.getSize(find.byKey(const Key('chip')));
+    final node = Focus.of(tester.element(find.byKey(const Key('chip'))));
+    node.requestFocus();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(fill(), isNot(Colors.transparent));
+    // Inside the child's own box: nothing outside it, nothing shifted.
+    expect(tester.getSize(find.byKey(const Key('chip'))), box);
+    expect(
+      tester.getSize(find.byType(AnimatedContainer)),
+      box,
+      reason: 'the fill is the chip\'s size, not larger',
+    );
+  });
 }

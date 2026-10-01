@@ -128,6 +128,7 @@ class _UpcomingCalendarRowState extends State<UpcomingCalendarRow> {
                 return HoverButton(
                   scaleAmount: 1.03,
                   showFocusRing: true,
+                  focusRingBorderRadius: context.rem(0.875) + context.rem(AppRem.xxs),
                   onTap: () => _openDetails(entry),
                   child: Container(
                     width: context.rem(13.75),

@@ -7,6 +7,7 @@ import '../../services/titles/title_display.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
+import '../../widgets/details/details_poster_fit.dart';
 import '../../widgets/details/details_metrics.dart';
 import '../../widgets/common/details_section_header.dart';
 import '../../models/anime/anime_media.dart';
@@ -477,31 +478,33 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (posterUrl.isNotEmpty)
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _Palette.accent.withValues(alpha: 0.22),
-                        blurRadius: context.rem(DetailsDim.glowBlur),
-                        spreadRadius: -context.rem(DetailsDim.glowSpread),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        blurRadius: context.rem(DetailsDim.posterShadowBlur),
-                        offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    child: AspectRatio(
-                      aspectRatio: 2 / 3,
-                      child: CachedNetworkImage(
-                        imageUrl: posterUrl,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            ColoredBox(color: _Palette.surface),
+                DetailsPosterFit(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _Palette.accent.withValues(alpha: 0.22),
+                          blurRadius: context.rem(DetailsDim.glowBlur),
+                          spreadRadius: -context.rem(DetailsDim.glowSpread),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          blurRadius: context.rem(DetailsDim.posterShadowBlur),
+                          offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      child: AspectRatio(
+                        aspectRatio: 2 / 3,
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) =>
+                              ColoredBox(color: _Palette.surface),
+                        ),
                       ),
                     ),
                   ),
@@ -864,6 +867,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return HoverButton(
       scaleAmount: 1.02,
       showFocusRing: true,
+      // A paragraph, not a pill: the default ring's 9999 radius would curve
+      // around four lines of text.
+      focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
       onTap: () => setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
       child: AnimatedCrossFade(
         duration: const Duration(milliseconds: 200),
@@ -1130,6 +1136,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         HoverButton(
                           scaleAmount: 1.05,
                           showFocusRing: true,
+                          focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
                           onTap: () => setState(() => _isDub = false),
                           child: Container(
                             padding: EdgeInsets.symmetric(
@@ -1153,6 +1160,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         HoverButton(
                           scaleAmount: 1.05,
                           showFocusRing: true,
+                          focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
                           onTap: () => setState(() => _isDub = true),
                           child: Container(
                             padding: EdgeInsets.symmetric(

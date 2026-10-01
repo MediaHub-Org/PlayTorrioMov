@@ -139,6 +139,69 @@ void main() {
     expect(labels.evaluate().map(opacityOf), everyElement(0));
   });
 
+  testWidgets('the focus cue spans the icon and its name, not the icon alone',
+      (tester) async {
+    setSurface(tester, 1280);
+    final card = FocusNode(debugLabel: 'card');
+    addTearDown(card.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: TvHubFrame(
+          menu: TvSideMenu(onSearchTap: () {}, onSettingsTap: () {}),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Focus(
+              focusNode: card,
+              child: const SizedBox(width: 120, height: 180),
+            ),
+          ),
+        ),
+      ),
+    ));
+    await tester.pump();
+    card.requestFocus();
+    await tester.pump();
+
+    // The cue is an AnimatedContainer whose border is drawn, i.e. not
+    // transparent. Nothing is focused in the menu yet, so there is none.
+    Iterable<AnimatedContainer> cues() => find
+        .descendant(
+          of: find.byType(TvSideMenu),
+          matching: find.byType(AnimatedContainer),
+        )
+        .evaluate()
+        .map((e) => e.widget as AnimatedContainer)
+        .where((c) {
+          final d = c.decoration;
+          if (d is! BoxDecoration) return false;
+          final border = d.border;
+          return border is Border && border.isUniform && border.top.color.a > 0;
+        });
+    expect(cues(), isEmpty);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    // Twice: the first frame rebuilds with the new width, the second lets
+    // the animation to it run.
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final drawn = cues().toList();
+    expect(drawn, hasLength(1));
+    final pill = TvSideMenu.railWidthFor(tester.element(find.byType(TvSideMenu)));
+    final cueFinder = find.byWidget(
+      find
+          .descendant(
+            of: find.byType(TvSideMenu),
+            matching: find.byType(AnimatedContainer),
+          )
+          .evaluate()
+          .map((e) => e.widget)
+          .firstWhere((w) => identical(w, drawn.single)),
+    );
+    // Wider than the resting rail: it reaches across to the label.
+    expect(tester.getSize(cueFinder).width, greaterThan(pill));
+  });
+
   testWidgets('a TV layout draws no top bar and no bottom tab bar',
       (tester) async {
     setSurface(tester, 400);

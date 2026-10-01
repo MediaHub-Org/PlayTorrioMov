@@ -1034,6 +1034,7 @@ class _WatchScreenState extends State<WatchScreen>
     return HoverButton(
       scaleAmount: 1.03,
       showFocusRing: true,
+      focusRingBorderRadius: context.rem(AppRem.radiusMd) + context.rem(AppRem.xxs),
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),

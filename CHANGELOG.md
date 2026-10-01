@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.9.1+48] - 2026-10-01
+
+The TV polish release: everything the first Android TV device tests of
+v1.9.0 turned up -- the icon-rail side menu, the player's bars and D-pad,
+focus cues on every kind of control, a poster that leaves room for Play --
+plus the whole `rem` size migration, so a larger text size now scales gaps,
+bars and buttons along with the text. Driven on a TV through the dev builds (up to
+v1.9.0-dev.7); the changes after that (the second focus pass, the poster,
+the chips) have not been seen on a device.
+
 ### Added
 - **The app now has a proper Android TV banner (#78).** Device testing of
   v1.9.0 found the app listed on a TV's home screen, as intended, but with
@@ -16,6 +26,81 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   manifest.
 
 ### Changed
+- **Search has the same three filters on Films, Series and Anime.** The type
+  chips (All, Movies, Series, Anime) are joined by a decade menu and a minimum
+  rating menu, the same on every type; anime used to be the only one with a
+  menu (a genre list). They are the two filters every catalog can answer --
+  addons' search results carry a name, poster, year and rating but no genres,
+  so a genre filter would have worked for anime and quietly matched nothing
+  elsewhere -- and they are applied to the results that came back, so changing
+  one is instant. A title that does not state its year or rating is left out
+  while that filter is on. The row stays on one line at every width: it
+  measures the words and uses the widest of three layouts that fits
+  (everything in words; the type in words and the menus as icons; everything as
+  icons, with the names as tooltips and semantics labels). Test fonts are wide,
+  so the real breakpoints on a device are narrower than in the widget tests.
+  Removed: the anime genre menu on Search.
+- **Settings rows show which one the remote is on (#80).** Settings tiles are
+  an `InkWell` over an opaque container, so the `InkWell`'s own focus tint was
+  painted underneath the container and never seen: a D-pad moved down a
+  settings page with no cue at all. The ten tiles and cards in the settings
+  pages (categories, appearance, decoders, buffer presets, About links, the
+  Trakt/Simkl code, the add-on toggle) now draw a soft violet wash, with no
+  border, over themselves (`FocusFill`). The theme also gives every control that takes its
+  cue from it a visible one -- list tiles, checkboxes, radios, switches and
+  slider thumbs a 30% tint of the palette color, dialog and form buttons a
+  clear wash. Not confirmed on a TV.
+- **Back peels one layer at a time in the players (#80).** Back used to leave
+  the player outright, so on a TV a remote's Back with the subtitle panel open
+  threw away the film instead of the panel. Now one press closes whatever
+  panel or menu is open (subtitles, audio, speed, sleep timer, episodes,
+  sources, sync); with nothing open and the bars showing, a TV's Back puts the
+  top and bottom bars away; with those away, the first press shows "Press Back
+  again to exit" and a second within two seconds leaves. Off a TV only the
+  first layer applies (a phone's Back or Esc closes a panel, then leaves).
+  Esc on a keyboard follows the same ladder. The decision is a pure function
+  (`decideBackPress`) with a test per row; the Movies/Series/Anime player and
+  the Live TV player share it. A widget test also holds that the D-pad can
+  walk from play/pause down through the seek bar to the bottom row and back.
+  Not confirmed on a TV.
+- **The genre, catalog and category chips show where the remote is (#80).**
+  Discover and Catalog's genre/catalog chips, the Live TV search categories,
+  the magnet file filters and the anime adult toggle drew a ring around the
+  chip, which a scrolling row has no room for and which is the same violet as a
+  selected chip. Focus now lightens the chip inside its own bounds (new
+  `HoverButton.focusFillRadius`). The library and Live TV sources tabs and the
+  Settings choice chips, whose own focus tint is a few percent of the text
+  color, got a stronger tint and the soft wash respectively. Not confirmed on a
+  TV.
+- **The details poster no longer pushes Play off a TV screen (#80).** The
+  poster column was a fixed 17.5 rem wide and the poster 2:3, so it was always
+  26 rem tall: on a 960x540 TV layout it filled the screen and left the Play
+  button under it at the bottom edge. The poster now gives up width to keep
+  Play and the library row on screen (down to a floor), centered above the
+  full-width buttons. A window tall enough for both is unchanged. Movies/series
+  and anime details share it (`DetailsPosterFit`). Not confirmed on a TV.
+- **TV focus cues, second pass (#80).** Device testing of dev.7 found five
+  things, now fixed (not yet confirmed on a TV):
+  - The side menu's violet border hugged the icon and left its name outside
+    it; it now surrounds the icon and the name together, with a faint violet
+    fill.
+  - Details' play button drew a pill-shaped ring around a rounded rectangle, so
+    the two never lined up. It has no ring now: it grows, brightens and glows
+    in its own colors. The same mismatch was in twenty other buttons that wrap
+    a rounded rectangle (cards, chips, hero dots, search and library buttons);
+    their ring now follows the button's own corner radius.
+  - The filter pills, Search and Settings showed focus with a hard ring that
+    was hard to tell apart on a row of pills. They now get a soft violet wash
+    behind them and a slight lift, painted outside the pill's box so the row
+    does not shift as focus moves along it.
+  - The player's seek bar has no border when focused: the bar turns a stronger
+    violet, thicker, with a violet thumb. Left/Right still seek, and holding
+    them repeats.
+  - On a TV the volume is one stop: Left/Right change the player's own level
+    (0-250%, boost above 100%, separate from the TV's volume that the remote's
+    volume keys change), holding repeats, and OK mutes and unmutes. Up and Down
+    are no longer taken by the slider, which had made it a trap: all four
+    arrows were spoken for, so a remote that reached it could not leave.
 - **The TV side menu rests as a rail of icons and opens on focus (#80).** The
   first device test confirmed it works; the feedback was that a permanently
   wide menu takes room from the posters. It is now a narrow icon rail
@@ -258,6 +343,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   text scale. Unprobed: `text_scale_overflow_test` does not cover them.
 
 ### Removed
+- **The separate Anime search page is gone: anime is searched in the one
+  search.** Search already asked AniList alongside the addons and offered an
+  Anime chip with a genre menu; the Anime Filters button led to a second page
+  with its own search box, 18+ gate, season/format/status/sort/year pickers
+  (bottom sheets that slid up from below) and a duplicate set of rows. All of
+  it (`AnimeSearchPage`, about 870 lines, and its test) is removed, along with
+  that button and the anime row's "See all". What remains is one search box,
+  the type chips, and the genre menu under the Anime chip (a popup, not a
+  sheet). Not kept: season, format, status, year and the 18+ browse. The
+  strings only that page used are still in the ARB files, like the 80-odd
+  other orphans listed by a scan; they are a separate cleanup.
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,
   alongside the existing global gear in the top bar. It just duplicated a

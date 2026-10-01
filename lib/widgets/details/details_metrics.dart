@@ -22,6 +22,10 @@ abstract final class DetailsDim {
   static const errorIcon = 4.0;
   static const spinnerPadding = 2.5;
   static const desktopPoster = 17.5;
+  // What the poster column needs below the poster: the gap, Play, the library
+  // row and a margin. The poster gives up width to keep these on screen.
+  static const belowPoster = 9.5;
+  static const posterFloor = 9.0;
   static const mobilePoster = 6.875;
   static const posterRadius = 0.875;
   static const glowBlur = 2.875;

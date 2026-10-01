@@ -297,6 +297,42 @@ abstract final class AppThemeService {
     return HSLColor.fromAHSL(1, hsl.hue, 0.45, lightness).toColor();
   }
 
+  /// The tint a switch, checkbox or radio's halo takes while focused.
+  static WidgetStateProperty<Color?> _focusOverlay(AppThemePalette palette) {
+    return WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.focused)) {
+        return palette.primaryColor.withValues(alpha: 0.35);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return palette.primaryColor.withValues(alpha: 0.12);
+      }
+      return null;
+    });
+  }
+
+  /// A button's overlay: Material's own is ten percent of its text color,
+  /// which cannot be seen on a filled button whose text is already the
+  /// contrasting color. Focus gets a clear wash of the page's ink instead;
+  /// hover and press keep to Material's own strengths.
+  static WidgetStateProperty<Color?> _buttonFocusOverlay(
+    AppThemePalette palette,
+    Brightness brightness,
+  ) {
+    final ink = brightness == Brightness.dark ? Colors.white : Colors.black;
+    return WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.pressed)) {
+        return ink.withValues(alpha: 0.16);
+      }
+      if (states.contains(WidgetState.focused)) {
+        return ink.withValues(alpha: 0.26);
+      }
+      if (states.contains(WidgetState.hovered)) {
+        return ink.withValues(alpha: 0.08);
+      }
+      return null;
+    });
+  }
+
   static ThemeData createThemeData(
     AppThemePalette palette, [
     Brightness brightness = Brightness.dark,
@@ -312,6 +348,30 @@ abstract final class AppThemeService {
       colorScheme: ColorScheme.fromSeed(
         seedColor: palette.primaryColor,
         brightness: brightness,
+      ),
+      // A remote's focus has to read from across a room. Material's default is
+      // a few percent of the foreground color, which on a dark card is no
+      // change at all, so every control that takes its focus cue from the
+      // theme -- list tiles, checkboxes, switches, sliders, dialog and form
+      // buttons -- got a tint of the palette color strong enough to see (#80).
+      focusColor: palette.primaryColor.withValues(alpha: 0.30),
+      switchTheme: SwitchThemeData(overlayColor: _focusOverlay(palette)),
+      checkboxTheme: CheckboxThemeData(overlayColor: _focusOverlay(palette)),
+      radioTheme: RadioThemeData(overlayColor: _focusOverlay(palette)),
+      sliderTheme: SliderThemeData(
+        overlayColor: palette.primaryColor.withValues(alpha: 0.30),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(overlayColor: _buttonFocusOverlay(palette, brightness)),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(overlayColor: _buttonFocusOverlay(palette, brightness)),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(overlayColor: _buttonFocusOverlay(palette, brightness)),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: ButtonStyle(overlayColor: _buttonFocusOverlay(palette, brightness)),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: surfaceFor(
