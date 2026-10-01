@@ -6,6 +6,8 @@ import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../common/focus_ring.dart';
 import '../../services/app_units.dart';
+import '../../services/tv_mode_service.dart';
+import 'player_panel.dart';
 
 export '../common/focus_ring.dart';
 
@@ -107,6 +109,19 @@ class PlayerGlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // In a sheet the sheet is the card: it draws the surface, the edge and the
+    // shadow, and is as wide as it is, so a menu's own chrome and fixed width
+    // would be a card inside a card. A menu that asked for a height (the
+    // subtitle panel, whose rows share it) keeps asking, of the room the
+    // sheet has.
+    final scope = PlayerPanelScope.maybeOf(context);
+    if (scope != null && scope.style != PlayerPanelStyle.popover) {
+      return SizedBox(
+        width: double.infinity,
+        height: height == null ? null : scope.contentHeight,
+        child: Padding(padding: padding, child: child),
+      );
+    }
     return Container(
       width: width,
       height: height,
@@ -149,7 +164,12 @@ class PlayerGlassCard extends StatelessWidget {
 class PlayerMenuAnchor extends StatelessWidget {
   final Widget child;
 
-  const PlayerMenuAnchor({super.key, required this.child});
+  /// Closes the menu, for the ways a sheet can be sent away: the scrim, the
+  /// close button, a swipe. Null leaves those off; the popover never uses it
+  /// (it is dismissed by the barrier behind it and by Back).
+  final VoidCallback? onClose;
+
+  const PlayerMenuAnchor({super.key, required this.child, this.onClose});
 
   /// Clearance for the transport bar the popover sits above, plus whatever
   /// the system puts below it (gesture bar, home indicator).
@@ -194,14 +214,28 @@ class PlayerMenuAnchor extends StatelessWidget {
   /// its two columns can share one [Expanded] -- should clamp to this
   /// rather than to a number of its own, or it picks a height the anchor
   /// cannot give it and scrolls for the difference.
-  static double availableHeight(BuildContext context) =>
-      (MediaQuery.sizeOf(context).height -
-              topInset(context) -
-              bottomInset(context))
-          .clamp(160.0, double.infinity);
+  static double availableHeight(BuildContext context) {
+    // In a sheet the room is the sheet's, not the popover's gap above the bar.
+    final scope = PlayerPanelScope.maybeOf(context);
+    if (scope != null && scope.style != PlayerPanelStyle.popover) {
+      return scope.contentHeight;
+    }
+    return (MediaQuery.sizeOf(context).height -
+            topInset(context) -
+            bottomInset(context))
+        .clamp(160.0, double.infinity);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final style = playerPanelStyleFor(
+      size: MediaQuery.sizeOf(context),
+      isTv: TvModeService.isTv.value,
+      isTouch: playerPanelIsTouch(),
+    );
+    if (style != PlayerPanelStyle.popover) {
+      return PlayerSheet(style: style, onClose: onClose, child: child);
+    }
     final isNarrow = MediaQuery.sizeOf(context).width < 560;
     final top = topInset(context);
     final bottom = bottomInset(context);
@@ -227,7 +261,7 @@ class PlayerMenuAnchor extends StatelessWidget {
         // the rows -- so the audio, speed, sleep timer and aspect menus
         // opened and could not be used (#80). Inside a scope the arrows stay
         // on the menu's own rows; closing it hands focus back to the button.
-        child: _FocusOnOpen(
+        child: PlayerFocusOnOpen(
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             child: child,
@@ -238,22 +272,23 @@ class PlayerMenuAnchor extends StatelessWidget {
   }
 }
 
-/// A focus scope that takes focus when it is first built.
+/// A focus scope that takes focus when it is first built. Public so the
+/// sheets in `player_panel.dart` can use it as the popover does.
 ///
 /// `FocusScope(autofocus: true)` is not enough: autofocus does nothing when
 /// the enclosing scope already has a focused child, and in the player it always
 /// does -- the button that opened the menu. So the request is made by hand,
 /// after the first frame, once the rows exist for it to land on.
-class _FocusOnOpen extends StatefulWidget {
+class PlayerFocusOnOpen extends StatefulWidget {
   final Widget child;
 
-  const _FocusOnOpen({required this.child});
+  const PlayerFocusOnOpen({super.key, required this.child});
 
   @override
-  State<_FocusOnOpen> createState() => _FocusOnOpenState();
+  State<PlayerFocusOnOpen> createState() => _PlayerFocusOnOpenState();
 }
 
-class _FocusOnOpenState extends State<_FocusOnOpen> {
+class _PlayerFocusOnOpenState extends State<PlayerFocusOnOpen> {
   final FocusScopeNode _scope = FocusScopeNode(debugLabel: 'PlayerMenu');
 
   @override
@@ -298,11 +333,13 @@ class _FocusOnOpenState extends State<_FocusOnOpen> {
 /// navigable, so the deepest thing in it is two taps from the gear and one
 /// tap from anywhere else.
 ///
-/// There is deliberately no close button. Tapping anywhere off the panel
-/// dismisses it (player_screen.dart puts a full-screen barrier behind every
-/// open menu), so an X was a third way to do what the barrier and the back
-/// arrow already did -- and it cost the header's whole right end, which on a
-/// narrow card is the room the title needed.
+/// There is deliberately no close button *in the header*. Tapping off the panel
+/// dismisses it (a scrim or a barrier sits behind every open menu), so an X
+/// here was a third way to do what the barrier and the back arrow already
+/// did -- and it cost the header's whole right end, which on a narrow card is
+/// the room the title needed. A side sheet on a touch screen does carry an X,
+/// but in a strip of its own above the menu, and a bottom sheet a grabber;
+/// see `PlayerSheet` in `player_panel.dart` for who gets what and why.
 class PlayerMenuHeader extends StatelessWidget {
   final String title;
 

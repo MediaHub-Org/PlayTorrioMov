@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_panel.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
@@ -14,6 +15,12 @@ Widget wrap(Widget child) => MaterialApp(
 );
 
 void main() {
+  // These hold the popover, the desktop presentation. A touch platform (what
+  // flutter_test defaults to) gets a sheet on these sizes; those are in
+  // player_panel_test.dart.
+  setUp(() => PlayerPanelPolicy.touchOverride = false);
+  tearDown(() => PlayerPanelPolicy.touchOverride = null);
+
   group('PlayerMenuAnchor', () {
     testWidgets('a menu taller than a short landscape phone scrolls', (
       tester,
