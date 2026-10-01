@@ -7,6 +7,7 @@ import '../../services/titles/title_display.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
+import '../../widgets/details/details_poster_fit.dart';
 import '../../widgets/details/details_metrics.dart';
 import '../../widgets/common/details_section_header.dart';
 import '../../models/anime/anime_media.dart';
@@ -477,31 +478,33 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (posterUrl.isNotEmpty)
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _Palette.accent.withValues(alpha: 0.22),
-                        blurRadius: context.rem(DetailsDim.glowBlur),
-                        spreadRadius: -context.rem(DetailsDim.glowSpread),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.55),
-                        blurRadius: context.rem(DetailsDim.posterShadowBlur),
-                        offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    child: AspectRatio(
-                      aspectRatio: 2 / 3,
-                      child: CachedNetworkImage(
-                        imageUrl: posterUrl,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            ColoredBox(color: _Palette.surface),
+                DetailsPosterFit(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _Palette.accent.withValues(alpha: 0.22),
+                          blurRadius: context.rem(DetailsDim.glowBlur),
+                          spreadRadius: -context.rem(DetailsDim.glowSpread),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.55),
+                          blurRadius: context.rem(DetailsDim.posterShadowBlur),
+                          offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      child: AspectRatio(
+                        aspectRatio: 2 / 3,
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) =>
+                              ColoredBox(color: _Palette.surface),
+                        ),
                       ),
                     ),
                   ),

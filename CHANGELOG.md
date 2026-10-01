@@ -16,6 +16,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   manifest.
 
 ### Changed
+- **The details poster no longer pushes Play off a TV screen (#80).** The
+  poster column was a fixed 17.5 rem wide and the poster 2:3, so it was always
+  26 rem tall: on a 960x540 TV layout it filled the screen and left the Play
+  button under it at the bottom edge. The poster now gives up width to keep
+  Play and the library row on screen (down to a floor), centered above the
+  full-width buttons. A window tall enough for both is unchanged. Movies/series
+  and anime details share it (`DetailsPosterFit`). Not confirmed on a TV.
 - **TV focus cues, second pass (#80).** Device testing of dev.7 found five
   things, now fixed (not yet confirmed on a TV):
   - The side menu's violet border hugged the icon and left its name outside

@@ -34,6 +34,7 @@ import '../player/watch_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
+import '../../widgets/details/details_poster_fit.dart';
 
 /// The keys that activate a focused [_EpisodeCard]. `final`, not `const`:
 /// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
@@ -945,36 +946,38 @@ class _DetailsPageState extends State<DetailsPage>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (posterUrl != null)
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    boxShadow: [
-                      // subtle accent-tinted glow behind the poster, on top
-                      // of the usual drop shadow, so it reads as "lit" rather
-                      // than just floating on black
-                      BoxShadow(
-                        color: _Palette.accent.withOpacity(0.18),
-                        blurRadius: context.rem(DetailsDim.glowBlur),
-                        spreadRadius: -context.rem(DetailsDim.glowSpread),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.55),
-                        blurRadius: context.rem(DetailsDim.posterShadowBlur),
-                        offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
-                    child: AspectRatio(
-                      aspectRatio: 2 / 3,
-                      child: CachedNetworkImage(
-                        imageUrl: posterUrl,
-                        fit: BoxFit.cover,
-                        errorWidget: (_, __, ___) =>
-                            // Artwork stand-in while the poster loads, so it keeps a fixed
-            // dark fill in either theme -- it is standing in for a picture.
-            const ColoredBox(color: Color(0xFF15171F)),
+                DetailsPosterFit(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      boxShadow: [
+                        // subtle accent-tinted glow behind the poster, on top
+                        // of the usual drop shadow, so it reads as "lit" rather
+                        // than just floating on black
+                        BoxShadow(
+                          color: _Palette.accent.withOpacity(0.18),
+                          blurRadius: context.rem(DetailsDim.glowBlur),
+                          spreadRadius: -context.rem(DetailsDim.glowSpread),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.55),
+                          blurRadius: context.rem(DetailsDim.posterShadowBlur),
+                          offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(context.rem(DetailsDim.posterRadius)),
+                      child: AspectRatio(
+                        aspectRatio: 2 / 3,
+                        child: CachedNetworkImage(
+                          imageUrl: posterUrl,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) =>
+                              // Artwork stand-in while the poster loads, so it keeps a fixed
+              // dark fill in either theme -- it is standing in for a picture.
+              const ColoredBox(color: Color(0xFF15171F)),
+                        ),
                       ),
                     ),
                   ),
