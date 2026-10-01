@@ -26,6 +26,19 @@ the chips) have not been seen on a device.
   manifest.
 
 ### Changed
+- **Back peels one layer at a time in the players (#80).** Back used to leave
+  the player outright, so on a TV a remote's Back with the subtitle panel open
+  threw away the film instead of the panel. Now one press closes whatever
+  panel or menu is open (subtitles, audio, speed, sleep timer, episodes,
+  sources, sync); with nothing open and the bars showing, a TV's Back puts the
+  top and bottom bars away; with those away, the first press shows "Press Back
+  again to exit" and a second within two seconds leaves. Off a TV only the
+  first layer applies (a phone's Back or Esc closes a panel, then leaves).
+  Esc on a keyboard follows the same ladder. The decision is a pure function
+  (`decideBackPress`) with a test per row; the Movies/Series/Anime player and
+  the Live TV player share it. A widget test also holds that the D-pad can
+  walk from play/pause down through the seek bar to the bottom row and back.
+  Not confirmed on a TV.
 - **The genre, catalog and category chips show where the remote is (#80).**
   Discover and Catalog's genre/catalog chips, the Live TV search categories,
   the magnet file filters and the anime adult toggle drew a ring around the

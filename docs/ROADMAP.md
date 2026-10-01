@@ -34,7 +34,7 @@ The first item is code work, in batches; the rest need a device.
   Report what the remote does. Also unconfirmed: the second focus pass (soft
   wash on the filter pills, the side menu's cue across icon and name, the
   play button's lit state, the seek bar's stronger violet, and the volume as
-  one stop with Left/Right and OK). The in-player sources panel and the anime
+  one stop with Left/Right and OK), and the player's Back ladder (panel, then bars, then a second press to leave). The in-player sources panel and the anime
   episode sheet now carry the lean tag set too.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`

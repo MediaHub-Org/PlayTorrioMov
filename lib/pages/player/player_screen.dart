@@ -27,6 +27,7 @@ import '../../services/sources/source_filter_settings.dart';
 
 import '../../widgets/player/player_glass.dart';
 import '../../widgets/player/player_top_bar.dart';
+import '../../widgets/player/back_press_decision.dart';
 import '../../widgets/player/remote_key_decision.dart';
 import '../../widgets/player/player_transport.dart';
 import '../../widgets/player/player_center_controls.dart';
@@ -1161,18 +1162,84 @@ class _PlayerScreenState extends State<PlayerScreen>
           !_showSubSyncBar &&
           !_showTextSyncOverlay) {
         setState(() => _showControls = false);
-        // The hidden controls stop taking focus (see _controlsFocusable), so a
-        // remote's focus that was on one of them falls back to the screen's own
-        // node, where the key handler lives.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          final primary = FocusManager.instance.primaryFocus;
-          if (primary == null || primary is FocusScopeNode) {
-            _focusNode.requestFocus();
-          }
-        });
+        _restoreScreenFocus();
       }
     });
+  }
+
+  /// The hidden controls stop taking focus (see [_controlsFocusable]), so a
+  /// remote's focus that was on one of them falls back to the screen's own
+  /// node, where the key handler lives.
+  void _restoreScreenFocus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final primary = FocusManager.instance.primaryFocus;
+      if (primary == null || primary is FocusScopeNode) {
+        _focusNode.requestFocus();
+      }
+    });
+  }
+
+  /// Whether a menu, a side panel or a sync control is up. Back closes these
+  /// before it does anything else; see [decideBackPress].
+  bool get _hasBackableOverlay =>
+      _activeMenu != null ||
+      _showEpisodesPanel ||
+      _showSourcesPanel ||
+      _showSubSyncBar ||
+      _showTextSyncOverlay;
+
+  /// Set by the first of two Back presses, so a second within a couple of
+  /// seconds leaves; cleared by [_exitArmTimer].
+  bool _exitArmed = false;
+  Timer? _exitArmTimer;
+
+  BackAction get _backAction => decideBackPress(
+        hasOverlayOpen: _hasBackableOverlay,
+        controlsVisible: _showControls,
+        exitArmed: _exitArmed,
+        isTv: TvModeService.isTv.value,
+        isLoading: _isLoading,
+      );
+
+  /// Acts on a Back press that is not "leave". Leaving is the route's own pop
+  /// (see the [PopScope] in `build`), which only goes through when
+  /// [_backAction] says [BackAction.exit].
+  void _applyBackAction(BackAction action) {
+    switch (action) {
+      case BackAction.closeOverlay:
+        setState(() {
+          _activeMenu = null;
+          _menuParent = null;
+          _showEpisodesPanel = false;
+          _showSourcesPanel = false;
+          _sourcesErrorMessage = null;
+          _showSubSyncBar = false;
+          _showTextSyncOverlay = false;
+        });
+        _startHideControlsTimer();
+        _restoreScreenFocus();
+      case BackAction.hideControls:
+        _hideTimer?.cancel();
+        setState(() => _showControls = false);
+        _restoreScreenFocus();
+      case BackAction.armExit:
+        setState(() => _exitArmed = true);
+        _exitArmTimer?.cancel();
+        _exitArmTimer = Timer(const Duration(seconds: 2), () {
+          if (mounted) setState(() => _exitArmed = false);
+        });
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.playerPressBackToExit),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+      case BackAction.exit:
+        Navigator.pop(context);
+    }
   }
 
   /// Brings the controls back and keeps them up a while longer. Any key a
@@ -2113,6 +2180,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     _progressSaveTimer?.cancel();
     _volumeHudTimer?.cancel();
     _audioHudTimer?.cancel();
+    _exitArmTimer?.cancel();
     _savePlaybackProgress();
     WakelockPlus.disable();
     _hideTimer?.cancel();
@@ -2189,8 +2257,14 @@ class _PlayerScreenState extends State<PlayerScreen>
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
+      // Back peels one layer at a time (see [decideBackPress]): the route only
+      // pops once there is nothing left to close.
+      canPop: _backAction == BackAction.exit,
       onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          _applyBackAction(_backAction);
+          return;
+        }
         if (!_wasFullscreenBeforeEntering && WindowService.instance.isFullscreen) {
           WindowService.instance.exitFullscreen();
         }
@@ -2324,7 +2398,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                 _toggleMenu('aspect');
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.escape) {
-                Navigator.pop(context);
+                // The same ladder as the system Back, so Esc on a keyboard and
+                // Back on a remote agree.
+                _applyBackAction(_backAction);
                 return KeyEventResult.handled;
               }
             }

@@ -182,6 +182,7 @@
   "@playerBack": {"description": "Tooltip on the player screen's back button"},
   "playerMute": "Mute",
   "playerUnmute": "Unmute",
+  "playerPressBackToExit": "Press Back again to exit",
   "playerSleepTimer": "Sleep timer",
   "@playerSleepTimer": {"description": "Name of the timer that pauses playback after a set time"},
   "playerSleepTimerLeft": "Sleep timer: {minutes} min left",

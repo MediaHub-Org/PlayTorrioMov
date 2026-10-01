@@ -140,6 +140,7 @@
   "playerBack": "Atrás",
   "playerMute": "Silenciar",
   "playerUnmute": "Activar sonido",
+  "playerPressBackToExit": "Pulsa Atrás otra vez para salir",
   "playerSleepTimer": "Temporizador de apagado",
   "playerSleepTimerLeft": "Temporizador: quedan {minutes} min",
   "playerDownload": "Descargar",

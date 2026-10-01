@@ -140,6 +140,7 @@
   "playerBack": "Voltar",
   "playerMute": "Silenciar",
   "playerUnmute": "Ativar som",
+  "playerPressBackToExit": "Pressione Voltar novamente para sair",
   "playerSleepTimer": "Timer de sono",
   "playerSleepTimerLeft": "Timer de sono: {minutes} min restantes",
   "playerDownload": "Baixar",
