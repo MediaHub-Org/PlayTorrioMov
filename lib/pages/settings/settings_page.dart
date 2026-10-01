@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -251,80 +252,83 @@ class _SettingsCategoryTile extends StatelessWidget {
     AppColors.dependOn(context);
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-        child: Container(
-          // A minimum, not a fixed 76. The title and the badge both grow
-          // with text scale and the box had nowhere to put them -- 286px
-          // past the tile at 3x on the longest title. The page scrolls, so
-          // growing here is safe.
-          constraints: BoxConstraints(minHeight: context.rem(4.75)),
-          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.sm)),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-            border: Border.all(
-              color: AppColors.inkAlpha(0.08),
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusLg),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+          child: Container(
+            // A minimum, not a fixed 76. The title and the badge both grow
+            // with text scale and the box had nowhere to put them -- 286px
+            // past the tile at 3x on the longest title. The page scrolls, so
+            // growing here is safe.
+            constraints: BoxConstraints(minHeight: context.rem(4.75)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.sm)),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+              border: Border.all(
+                color: AppColors.inkAlpha(0.08),
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: context.rem(2.75),
-                height: context.rem(2.75),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                ),
-                child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconMd)),
-              ),
-              SizedBox(width: context.rem(0.875)),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: AppType.bodyMd,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.ink,
+            child: Row(
+              children: [
+                Container(
+                  width: context.rem(2.75),
+                  height: context.rem(2.75),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconMd)),
                 ),
-              ),
-              if (badgeText != null) ...[
-                SizedBox(width: context.rem(AppRem.sm)),
-                // Flexible, and the badge itself is the widest thing in the
-                // row after the title: "Built-in Providers" plus "Connected"
-                // asked for 64px more than the tile had at 3x.
-                Flexible(
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
-                    decoration: BoxDecoration(
-                      color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+                SizedBox(width: context.rem(0.875)),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: AppType.bodyMd,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.ink,
                     ),
-                    child: Text(
-                      badgeText!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: TvType.scale(AppType.microPlus),
-                        fontWeight: FontWeight.w700,
-                        color: badgeColor ?? iconColor,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (badgeText != null) ...[
+                  SizedBox(width: context.rem(AppRem.sm)),
+                  // Flexible, and the badge itself is the widest thing in the
+                  // row after the title: "Built-in Providers" plus "Connected"
+                  // asked for 64px more than the tile had at 3x.
+                  Flexible(
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
+                      decoration: BoxDecoration(
+                        color: (badgeColor ?? iconColor).withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+                      ),
+                      child: Text(
+                        badgeText!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: TvType.scale(AppType.microPlus),
+                          fontWeight: FontWeight.w700,
+                          color: badgeColor ?? iconColor,
+                        ),
                       ),
                     ),
                   ),
+                ],
+                SizedBox(width: context.rem(AppRem.sm)),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: context.rem(0.875),
+                  color: AppColors.inkAlpha(0.25),
                 ),
               ],
-              SizedBox(width: context.rem(AppRem.sm)),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: context.rem(0.875),
-                color: AppColors.inkAlpha(0.25),
-              ),
-            ],
+            ),
           ),
         ),
       ),

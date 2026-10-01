@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -114,82 +115,85 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-        child: Container(
-          padding: EdgeInsets.all(context.rem(1.125)),
-          decoration: BoxDecoration(
-            color: theme.cardTheme.color,
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-            border: Border.all(color: onSurface.withValues(alpha: 0.08)),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: context.rem(2.875),
-                height: context.rem(2.875),
-                decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusLg),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+          child: Container(
+            padding: EdgeInsets.all(context.rem(1.125)),
+            decoration: BoxDecoration(
+              color: theme.cardTheme.color,
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+              border: Border.all(color: onSurface.withValues(alpha: 0.08)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: context.rem(2.875),
+                  height: context.rem(2.875),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                  ),
+                  child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconLg)),
                 ),
-                child: Icon(icon, color: iconColor, size: context.rem(AppRem.iconLg)),
-              ),
-              SizedBox(width: context.rem(0.875)),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: AppType.bodyLg,
-                              fontWeight: FontWeight.w700,
-                              color: onSurface,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(width: context.rem(AppRem.sm)),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
-                          decoration: BoxDecoration(
-                            color: badgeColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-                          ),
-                          child: Text(
-                            badgeText,
-                            style: TextStyle(
-                              fontSize: AppType.tiny,
-                              fontWeight: FontWeight.w800,
-                              color: badgeColor,
+                SizedBox(width: context.rem(0.875)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: AppType.bodyLg,
+                                fontWeight: FontWeight.w700,
+                                color: onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: context.rem(AppRem.xs)),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: AppType.caption,
-                        color: onSurface.withValues(alpha: 0.45),
-                        height: 1.35, // ratio: a line height, not a size
+                          SizedBox(width: context.rem(AppRem.sm)),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
+                            decoration: BoxDecoration(
+                              color: badgeColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+                            ),
+                            child: Text(
+                              badgeText,
+                              style: TextStyle(
+                                fontSize: AppType.tiny,
+                                fontWeight: FontWeight.w800,
+                                color: badgeColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      SizedBox(height: context.rem(AppRem.xs)),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: AppType.caption,
+                          color: onSurface.withValues(alpha: 0.45),
+                          height: 1.35, // ratio: a line height, not a size
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(width: context.rem(0.625)),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: context.rem(AppRem.iconXs),
-                color: onSurface.withValues(alpha: 0.3),
-              ),
-            ],
+                SizedBox(width: context.rem(0.625)),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: context.rem(AppRem.iconXs),
+                  color: onSurface.withValues(alpha: 0.3),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -542,26 +546,29 @@ class _LanguageChip extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.5625)),
-          decoration: BoxDecoration(
-            color: selected ? color.withValues(alpha: 0.18) : onSurface.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-            border: Border.all(
-              color: selected ? color.withValues(alpha: 0.7) : onSurface.withValues(alpha: 0.10),
-              width: 1.2, // px: a hairline, not a layout size
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusPill),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.5625)),
+            decoration: BoxDecoration(
+              color: selected ? color.withValues(alpha: 0.18) : onSurface.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              border: Border.all(
+                color: selected ? color.withValues(alpha: 0.7) : onSurface.withValues(alpha: 0.10),
+                width: 1.2, // px: a hairline, not a layout size
+              ),
             ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: AppType.small,
-              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-              color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: AppType.small,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ),
         ),
@@ -591,42 +598,45 @@ class _ThemeModeSegment extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
-          decoration: BoxDecoration(
-            color: selected
-                ? color.withValues(alpha: 0.18)
-                : onSurface.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-            border: Border.all(
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusMd),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
+            decoration: BoxDecoration(
               color: selected
-                  ? color.withValues(alpha: 0.7)
-                  : onSurface.withValues(alpha: 0.10),
-              width: 1.2, // px: a hairline, not a layout size
+                  ? color.withValues(alpha: 0.18)
+                  : onSurface.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              border: Border.all(
+                color: selected
+                    ? color.withValues(alpha: 0.7)
+                    : onSurface.withValues(alpha: 0.10),
+                width: 1.2, // px: a hairline, not a layout size
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: context.rem(AppRem.icon),
-                color: selected ? color : onSurface.withValues(alpha: 0.5),
-              ),
-              SizedBox(height: context.rem(AppRem.snug)),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: AppType.captionPlus,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: context.rem(AppRem.icon),
+                  color: selected ? color : onSurface.withValues(alpha: 0.5),
                 ),
-              ),
-            ],
+                SizedBox(height: context.rem(AppRem.snug)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: AppType.captionPlus,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    color: selected ? onSurface : onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

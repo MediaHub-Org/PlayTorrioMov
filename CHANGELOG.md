@@ -26,6 +26,16 @@ the chips) have not been seen on a device.
   manifest.
 
 ### Changed
+- **Settings rows show which one the remote is on (#80).** Settings tiles are
+  an `InkWell` over an opaque container, so the `InkWell`'s own focus tint was
+  painted underneath the container and never seen: a D-pad moved down a
+  settings page with no cue at all. The ten tiles and cards in the settings
+  pages (categories, appearance, decoders, buffer presets, About links, the
+  Trakt/Simkl code, the add-on toggle) now draw a violet border and wash over
+  themselves (`FocusFill`). The theme also gives every control that takes its
+  cue from it a visible one -- list tiles, checkboxes, radios, switches and
+  slider thumbs a 30% tint of the palette color, dialog and form buttons a
+  clear wash. Not confirmed on a TV.
 - **Back peels one layer at a time in the players (#80).** Back used to leave
   the player outright, so on a TV a remote's Back with the subtitle panel open
   threw away the film instead of the panel. Now one press closes whatever

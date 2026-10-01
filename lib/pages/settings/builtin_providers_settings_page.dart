@@ -1,3 +1,4 @@
+import '../../widgets/common/focus_fill.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
@@ -296,73 +297,76 @@ class _BuiltinProvidersSettingsPageState
         return Material(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-            onTap: () =>
-                BuiltinProvidersService.setEnabled(provider.id, !enabled),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.625)),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                border: Border.all(
-                  color: live
-                      ? const Color(0xFF10B981).withValues(alpha: 0.25)
-                      : AppColors.inkAlpha(0.06),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    provider.isTorrent
-                        ? Icons.hub_rounded
-                        : Icons.cloud_outlined,
-                    size: context.rem(AppRem.icon),
+          child: FocusFill(
+            radius: context.rem(AppRem.radiusMd),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              onTap: () =>
+                  BuiltinProvidersService.setEnabled(provider.id, !enabled),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.625)),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                  border: Border.all(
                     color: live
-                        ? const Color(0xFF10B981)
-                        : AppColors.inkAlpha(0.35),
+                        ? const Color(0xFF10B981).withValues(alpha: 0.25)
+                        : AppColors.inkAlpha(0.06),
                   ),
-                  SizedBox(width: context.rem(AppRem.ms)),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          provider.displayName,
-                          style: const TextStyle(
-                            fontSize: AppType.bodyPlus,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        SizedBox(height: context.rem(AppRem.xxs)),
-                        Text(
-                          mutedByP2p
-                              ? l10n.builtinProvidersTorrentSilenced
-                              : (provider.isTorrent
-                                    ? l10n.builtinProvidersTorrent
-                                    : l10n.builtinProvidersDirect),
-                          style: TextStyle(
-                            fontSize: AppType.caption,
-                            color: mutedByP2p
-                                ? const Color(0xFFF59E0B)
-                                : AppColors.inkAlpha(0.45),
-                          ),
-                        ),
-                      ],
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      provider.isTorrent
+                          ? Icons.hub_rounded
+                          : Icons.cloud_outlined,
+                      size: context.rem(AppRem.icon),
+                      color: live
+                          ? const Color(0xFF10B981)
+                          : AppColors.inkAlpha(0.35),
                     ),
-                  ),
-                  SizedBox(width: context.rem(AppRem.sm)),
-                  Switch.adaptive(
-                    value: enabled,
-                    activeColor: const Color(0xFF10B981),
-                    activeTrackColor: const Color(
-                      0xFF10B981,
-                    ).withValues(alpha: 0.35),
-                    inactiveThumbColor: AppColors.inkAlpha(0.60),
-                    inactiveTrackColor: AppColors.inkAlpha(0.10),
-                    onChanged: (v) =>
-                        BuiltinProvidersService.setEnabled(provider.id, v),
-                  ),
-                ],
+                    SizedBox(width: context.rem(AppRem.ms)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            provider.displayName,
+                            style: const TextStyle(
+                              fontSize: AppType.bodyPlus,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: context.rem(AppRem.xxs)),
+                          Text(
+                            mutedByP2p
+                                ? l10n.builtinProvidersTorrentSilenced
+                                : (provider.isTorrent
+                                      ? l10n.builtinProvidersTorrent
+                                      : l10n.builtinProvidersDirect),
+                            style: TextStyle(
+                              fontSize: AppType.caption,
+                              color: mutedByP2p
+                                  ? const Color(0xFFF59E0B)
+                                  : AppColors.inkAlpha(0.45),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: context.rem(AppRem.sm)),
+                    Switch.adaptive(
+                      value: enabled,
+                      activeColor: const Color(0xFF10B981),
+                      activeTrackColor: const Color(
+                        0xFF10B981,
+                      ).withValues(alpha: 0.35),
+                      inactiveThumbColor: AppColors.inkAlpha(0.60),
+                      inactiveTrackColor: AppColors.inkAlpha(0.10),
+                      onChanged: (v) =>
+                          BuiltinProvidersService.setEnabled(provider.id, v),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
