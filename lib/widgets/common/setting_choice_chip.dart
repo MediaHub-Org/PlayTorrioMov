@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/app_units.dart';
+import 'focus_highlight.dart';
 
 /// One option in a short row of mutually exclusive choices — hero style,
 /// card density, which tab a screen opens on.
@@ -52,24 +53,29 @@ class SettingChoiceChip extends StatelessWidget {
     // widget, so this is what makes a chip follow a theme change.
     AppColors.dependOn(context);
     final palette = AppThemeService.currentPalette.value;
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      selectedColor: palette.primaryColor.withValues(alpha: 0.25),
-      backgroundColor: AppColors.bar,
-      labelStyle: TextStyle(
-        color: selected ? palette.primaryColor : AppColors.inkMuted,
-        fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-        fontSize: AppType.caption,
+    // The chip's own focus tint is faint on its dark bar, so the choice a
+    // remote is on read as no choice at all; [FocusHighlight] adds the wash.
+    return FocusHighlight(
+      borderRadius: context.rem(AppRem.radiusSm),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        selectedColor: palette.primaryColor.withValues(alpha: 0.25),
+        backgroundColor: AppColors.bar,
+        labelStyle: TextStyle(
+          color: selected ? palette.primaryColor : AppColors.inkMuted,
+          fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
+          fontSize: AppType.caption,
+        ),
+        side: BorderSide(
+          color: selected
+              ? palette.primaryColor.withValues(alpha: 0.6)
+              : AppColors.inkAlpha(0.08),
+        ),
+        onSelected: (isSelected) {
+          if (isSelected || multiSelect) onSelect();
+        },
       ),
-      side: BorderSide(
-        color: selected
-            ? palette.primaryColor.withValues(alpha: 0.6)
-            : AppColors.inkAlpha(0.08),
-      ),
-      onSelected: (isSelected) {
-        if (isSelected || multiSelect) onSelect();
-      },
     );
   }
 }

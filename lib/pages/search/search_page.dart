@@ -19,7 +19,6 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_slider_section.dart';
 import '../../widgets/movie/movie_slider_section.dart';
 import '../anime/anime_details_page.dart';
-import '../anime/anime_search_page.dart';
 import '../../widgets/search/magnet_files_view.dart';
 import '../player/player_screen.dart';
 import '../../services/theme/app_colors.dart';
@@ -55,14 +54,14 @@ class _SearchPageState extends State<SearchPage> {
     SearchScope.contentType,
   );
 
-  /// Inline AniList narrowing, so the common case never leaves this page.
-  /// Genre answers most anime searches; season, format, status and sort
-  /// stay one tap away on the Anime Filters page. (Sort is not offered
-  /// here on purpose: the service ranks text matches first whenever a
-  /// query is present, so a sort pill beside a search field would promise
-  /// an order it cannot give.) Changing the genre re-runs the query in
-  /// place -- the _searchSeq guard already covers a chip change racing a
-  /// keystroke.
+  /// Inline AniList narrowing: the one anime filter, because it answers most
+  /// anime searches. The separate Anime Filters page (season, format, status,
+  /// sort, an 18+ gate, its own search box and bottom sheets) is gone -- anime
+  /// is searched here, with everything else. Sort is not offered on purpose:
+  /// the service ranks text matches first whenever a query is present, so a
+  /// sort pill beside a search field would promise an order it cannot give.
+  /// Changing the genre re-runs the query in place -- the _searchSeq guard
+  /// already covers a chip change racing a keystroke.
   String? _animeGenre;
 
   bool _isMagnetMode = false;
@@ -258,23 +257,12 @@ class _SearchPageState extends State<SearchPage> {
             animeList: _animeResults,
             onAnimeTap: (anime) =>
                 pushPage(context, AnimeDetailsPage(anime: anime)),
-            onSeeAll: _openAnimeFilters,
           );
     return [
       if (_typeFilter == SearchFilter.anime && animeSection != null) animeSection,
       for (final section in _results) MovieSliderSection(section: section),
       if (_typeFilter != SearchFilter.anime && animeSection != null) animeSection,
     ];
-  }
-
-  /// The AniList-native filters (genre, season, format, status, sort) live
-  /// on their own page and stay there -- reaching them from here carries the
-  /// query across so nothing has to be retyped.
-  void _openAnimeFilters() {
-    pushPage(
-      context,
-      AnimeSearchPage(initialQuery: _lastQuery.isEmpty ? null : _lastQuery),
-    );
   }
 
   Widget _buildTypeChips() {
@@ -313,45 +301,6 @@ class _SearchPageState extends State<SearchPage> {
                 setState(() => _animeGenre = genre);
                 if (_lastQuery.isNotEmpty) _performSearch(_lastQuery);
               },
-            ),
-          if (_typeFilter == SearchFilter.anime)
-            HoverButton(
-              scaleAmount: 1.05,
-              showFocusRing: true,
-              focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
-              onTap: _openAnimeFilters,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: context.rem(0.625),
-                  vertical: context.rem(AppRem.snug),
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.raised,
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-                  border: Border.all(
-                    color: AppColors.inkAlpha(0.12),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.tune_rounded,
-                      size: context.rem(0.8125),
-                      color: AppColors.inkMuted,
-                    ),
-                    SizedBox(width: context.rem(AppRem.xs)),
-                    Text(
-                      context.l10n.searchAnimeFilters,
-                      style: TextStyle(
-                        fontSize: AppType.tinyPlus,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.inkMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ),
         ],
       ),

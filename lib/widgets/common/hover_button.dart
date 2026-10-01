@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../services/theme/app_colors.dart';
 import 'focus_ring.dart';
 
 /// The keys that activate a focused [HoverButton]. `final`, not `const`:
@@ -64,6 +65,13 @@ class HoverButton extends StatefulWidget {
   /// or a short line of text; a rounded-rectangle [child] passes its own.
   final double focusRingBorderRadius;
 
+  /// Marks focus by lightening the child *inside* its own bounds, with this
+  /// corner radius -- the child's own. For a chip in a scrolling row, where
+  /// the ring is the wrong tool: it needs room outside the child, which a
+  /// row with no padding clips, and on a violet selected chip a violet ring
+  /// is the same color as what it surrounds (#80). Null leaves it off.
+  final double? focusFillRadius;
+
   const HoverButton({
     super.key,
     required this.child,
@@ -72,6 +80,7 @@ class HoverButton extends StatefulWidget {
     this.autofocus = false,
     this.showFocusRing = false,
     this.focusRingBorderRadius = 9999,
+    this.focusFillRadius,
   });
 
   @override
@@ -112,6 +121,7 @@ class _HoverButtonState extends State<HoverButton> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Focus(
       autofocus: widget.autofocus,
       onFocusChange: _onFocusChange,
@@ -137,7 +147,31 @@ class _HoverButtonState extends State<HoverButton> {
                   : (_isHovered || _isFocused ? widget.scaleAmount : 1.0),
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeOutCubic,
-              child: widget.child,
+              child: widget.focusFillRadius == null
+                  ? widget.child
+                  : Stack(
+                      // Passthrough, so the child keeps the constraints it
+                      // would have had without the overlay.
+                      fit: StackFit.passthrough,
+                      children: [
+                        widget.child,
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 140),
+                              decoration: BoxDecoration(
+                                color: _isFocused
+                                    ? AppColors.inkAlpha(0.20)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(
+                                  widget.focusFillRadius!,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           ),
         ),

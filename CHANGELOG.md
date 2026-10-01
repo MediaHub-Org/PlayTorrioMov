@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.9.1+48] - 2026-10-01
+
+The TV polish release: everything the first Android TV device tests of
+v1.9.0 turned up -- the icon-rail side menu, the player's bars and D-pad,
+focus cues on every kind of control, a poster that leaves room for Play --
+plus the whole `rem` size migration, so a larger text size now scales gaps,
+bars and buttons along with the text. Driven on a TV through the dev builds (up to
+v1.9.0-dev.7); the changes after that (the second focus pass, the poster,
+the chips) have not been seen on a device.
+
 ### Added
 - **The app now has a proper Android TV banner (#78).** Device testing of
   v1.9.0 found the app listed on a TV's home screen, as intended, but with
@@ -16,6 +26,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   manifest.
 
 ### Changed
+- **The genre, catalog and category chips show where the remote is (#80).**
+  Discover and Catalog's genre/catalog chips, the Live TV search categories,
+  the magnet file filters and the anime adult toggle drew a ring around the
+  chip, which a scrolling row has no room for and which is the same violet as a
+  selected chip. Focus now lightens the chip inside its own bounds (new
+  `HoverButton.focusFillRadius`). The library and Live TV sources tabs and the
+  Settings choice chips, whose own focus tint is a few percent of the text
+  color, got a stronger tint and the soft wash respectively. Not confirmed on a
+  TV.
 - **The details poster no longer pushes Play off a TV screen (#80).** The
   poster column was a fixed 17.5 rem wide and the poster 2:3, so it was always
   26 rem tall: on a 960x540 TV layout it filled the screen and left the Play
@@ -287,6 +306,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   text scale. Unprobed: `text_scale_overflow_test` does not cover them.
 
 ### Removed
+- **The separate Anime search page is gone: anime is searched in the one
+  search.** Search already asked AniList alongside the addons and offered an
+  Anime chip with a genre menu; the Anime Filters button led to a second page
+  with its own search box, 18+ gate, season/format/status/sort/year pickers
+  (bottom sheets that slid up from below) and a duplicate set of rows. All of
+  it (`AnimeSearchPage`, about 870 lines, and its test) is removed, along with
+  that button and the anime row's "See all". What remains is one search box,
+  the type chips, and the genre menu under the Anime chip (a popup, not a
+  sheet). Not kept: season, format, status, year and the 18+ browse. The
+  strings only that page used are still in the ARB files, like the 80-odd
+  other orphans listed by a scan; they are a separate cleanup.
 - **The Profile tab's own Settings button is gone again.** v1.9.0 gave the
   renamed Profile tab a second Settings entry point in its own header,
   alongside the existing global gear in the top bar. It just duplicated a
