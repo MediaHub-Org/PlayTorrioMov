@@ -190,53 +190,84 @@ class _MenuItem extends StatelessWidget {
     final foreground = selected ? AppColors.onAccent : AppColors.inkSubtle;
     final radius = context.rem(AppRem.radiusMd);
     final pill = context.rem(AppRem.railItem);
+    final gap = context.rem(AppRem.sm);
+    final halo = context.rem(AppRem.xxs);
     return Padding(
       padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.xxs)),
       child: HoverButton(
         scaleAmount: 1.03,
-        showFocusRing: true,
-        focusRingBorderRadius: radius + context.rem(AppRem.xs),
         onTap: onTap,
         // The pill is the whole of what takes focus; the label is laid out
-        // past its edge (see the class doc of [TvSideMenu]).
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: pill,
-              height: pill,
-              decoration: BoxDecoration(
-                color: selected ? accent : AppColors.inkAlpha(0.05),
-                borderRadius: BorderRadius.circular(radius),
-              ),
-              child: Icon(icon, size: context.rem(AppRem.icon), color: foreground),
-            ),
-            Positioned(
-              left: pill + context.rem(AppRem.sm),
-              top: 0,
-              bottom: 0,
-              width: labelWidth,
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 120),
-                  opacity: open ? 1 : 0,
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: selected ? AppColors.ink : AppColors.inkSubtle,
-                        fontSize: AppType.body,
-                        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+        // past its edge (see the class doc of [TvSideMenu]). The focus cue is
+        // not [HoverButton]'s own ring for that reason: it would hug the pill
+        // and leave the label outside it, which read on a TV as the icon
+        // being selected and its name not. It is drawn here instead, across
+        // the pill and the label together (#80).
+        child: Builder(
+          builder: (context) {
+            final focused = Focus.of(context).hasFocus;
+            // Pill and label together, plus the halo on both sides.
+            final reach = (open ? pill + gap + labelWidth : pill) + halo + halo;
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: -halo,
+                  top: -halo,
+                  bottom: -halo,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 160),
+                    curve: Curves.easeOutCubic,
+                    width: reach,
+                    decoration: BoxDecoration(
+                      color: focused
+                          ? accent.withValues(alpha: 0.16)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(radius + halo),
+                      border: Border.all(
+                        color: focused ? AppColors.accent : Colors.transparent,
+                        width: 2, // px: a hairline, not a layout size
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ],
+                Container(
+                  width: pill,
+                  height: pill,
+                  decoration: BoxDecoration(
+                    color: selected ? accent : AppColors.inkAlpha(0.05),
+                    borderRadius: BorderRadius.circular(radius),
+                  ),
+                  child: Icon(icon, size: context.rem(AppRem.icon), color: foreground),
+                ),
+                Positioned(
+                  left: pill + gap,
+                  top: 0,
+                  bottom: 0,
+                  width: labelWidth,
+                  child: IgnorePointer(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 120),
+                      opacity: open ? 1 : 0,
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: selected ? AppColors.ink : AppColors.inkSubtle,
+                            fontSize: AppType.body,
+                            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

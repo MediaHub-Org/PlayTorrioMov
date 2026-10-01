@@ -163,7 +163,10 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                 onFocusChange: (focused) =>
                     setState(() => _isFocused = focused),
                 onKeyEvent: (node, event) {
-                  if (event is! KeyDownEvent) return KeyEventResult.ignored;
+                  // Repeats too: holding Right on a remote keeps scrubbing.
+                  if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+                    return KeyEventResult.ignored;
+                  }
                   if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
                     _nudge(-1, currentPosition);
                     return KeyEventResult.handled;
@@ -174,231 +177,243 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                   }
                   return KeyEventResult.ignored;
                 },
-                child: FocusRing(
-                  visible: _isFocused,
-                  borderRadius: 999, // px: a hairline, not a layout size
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    onEnter: (e) => setState(() {
-                      _isHovered = true;
-                      _hoverFraction =
-                          (e.localPosition.dx / trackWidth).clamp(0.0, 1.0);
-                    }),
-                    onHover: (e) => setState(() {
-                      _hoverFraction =
-                          (e.localPosition.dx / trackWidth).clamp(0.0, 1.0);
-                    }),
-                    onExit: (_) => setState(() {
-                      _isHovered = false;
-                      _hoverFraction = null;
-                    }),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onHorizontalDragStart: (e) {
-                        setState(() {
-                          _isScrubbing = true;
-                        });
-                        widget.onScrubbingChanged?.call(true);
-                        _updateScrub(e.localPosition.dx, trackWidth);
-                      },
-                      onHorizontalDragUpdate: (e) {
-                        _updateScrub(e.localPosition.dx, trackWidth);
-                      },
-                      onHorizontalDragEnd: (_) => _commitSeek(),
-                      onTapDown: (e) {
-                        setState(() {
-                          _isScrubbing = true;
-                        });
-                        widget.onScrubbingChanged?.call(true);
-                        _updateScrub(e.localPosition.dx, trackWidth);
-                      },
-                      onTapUp: (_) => _commitSeek(),
-                      child: Container(
-                        height: context.rem(2.25),
-                        alignment: Alignment.center,
-                        child: Stack(
-                          clipBehavior: Clip.none,
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            // Track Background
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 150),
-                              height:
-                                  context.rem((_isHovered || _isScrubbing || _isFocused)
-                                      ? AppRem.sm : AppRem.snug),
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
-                              ), // px: a hairline, not a layout size
-                              child: Stack(
-                                children: [
-                                  // Buffered Track
-                                  if (bufferedFraction > 0)
-                                    FractionallySizedBox(
-                                      widthFactor: bufferedFraction,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  onEnter: (e) => setState(() {
+                    _isHovered = true;
+                    _hoverFraction =
+                        (e.localPosition.dx / trackWidth).clamp(0.0, 1.0);
+                  }),
+                  onHover: (e) => setState(() {
+                    _hoverFraction =
+                        (e.localPosition.dx / trackWidth).clamp(0.0, 1.0);
+                  }),
+                  onExit: (_) => setState(() {
+                    _isHovered = false;
+                    _hoverFraction = null;
+                  }),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onHorizontalDragStart: (e) {
+                      setState(() {
+                        _isScrubbing = true;
+                      });
+                      widget.onScrubbingChanged?.call(true);
+                      _updateScrub(e.localPosition.dx, trackWidth);
+                    },
+                    onHorizontalDragUpdate: (e) {
+                      _updateScrub(e.localPosition.dx, trackWidth);
+                    },
+                    onHorizontalDragEnd: (_) => _commitSeek(),
+                    onTapDown: (e) {
+                      setState(() {
+                        _isScrubbing = true;
+                      });
+                      widget.onScrubbingChanged?.call(true);
+                      _updateScrub(e.localPosition.dx, trackWidth);
+                    },
+                    onTapUp: (_) => _commitSeek(),
+                    child: Container(
+                      height: context.rem(2.25),
+                      alignment: Alignment.center,
+                      child: Stack(
+                        clipBehavior: Clip.none,
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          // Track Background
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            height:
+                                context.rem((_isHovered || _isScrubbing || _isFocused)
+                                    ? AppRem.sm : AppRem.snug),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
+                            ), // px: a hairline, not a layout size
+                            child: Stack(
+                              children: [
+                                // Buffered Track
+                                if (bufferedFraction > 0)
+                                  FractionallySizedBox(
+                                    widthFactor: bufferedFraction,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white
+                                            .withValues(alpha: 0.3),
+                                        borderRadius:
+                                            BorderRadius.circular(999), // px: a hairline, not a layout size
+                                      ), // px: a hairline, not a layout size
+                                    ),
+                                  ),
+
+                                // Skip Segments Highlights (Intro, Recap, Credits)
+                                if (totalMs > 0 &&
+                                    widget.skipSegments.isNotEmpty)
+                                  ...widget.skipSegments.map((seg) {
+                                    final sFrac =
+                                        ((seg.startMs ?? 0) / totalMs)
+                                            .clamp(0.0, 1.0);
+                                    final eFrac =
+                                        ((seg.endMs ?? totalMs) / totalMs)
+                                            .clamp(0.0, 1.0);
+                                    final segWidth =
+                                        ((eFrac - sFrac) * trackWidth)
+                                            .clamp(2.0, trackWidth);
+                                    final isCredits = seg.type == 'credits';
+                                    final color = isCredits
+                                        ? const Color(0x9910B981)
+                                        : const Color(0x99F59E0B);
+
+                                    return Positioned(
+                                      left: sFrac * trackWidth,
+                                      width: segWidth,
+                                      top: 0,
+                                      bottom: 0,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.3),
+                                          color: color,
                                           borderRadius:
-                                              BorderRadius.circular(999), // px: a hairline, not a layout size
-                                        ), // px: a hairline, not a layout size
-                                      ),
-                                    ),
-
-                                  // Skip Segments Highlights (Intro, Recap, Credits)
-                                  if (totalMs > 0 &&
-                                      widget.skipSegments.isNotEmpty)
-                                    ...widget.skipSegments.map((seg) {
-                                      final sFrac =
-                                          ((seg.startMs ?? 0) / totalMs)
-                                              .clamp(0.0, 1.0);
-                                      final eFrac =
-                                          ((seg.endMs ?? totalMs) / totalMs)
-                                              .clamp(0.0, 1.0);
-                                      final segWidth =
-                                          ((eFrac - sFrac) * trackWidth)
-                                              .clamp(2.0, trackWidth);
-                                      final isCredits = seg.type == 'credits';
-                                      final color = isCredits
-                                          ? const Color(0x9910B981)
-                                          : const Color(0x99F59E0B);
-
-                                      return Positioned(
-                                        left: sFrac * trackWidth,
-                                        width: segWidth,
-                                        top: 0,
-                                        bottom: 0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: color,
-                                            borderRadius:
-                                                BorderRadius.circular(context.rem(AppRem.xxs)),
-                                          ),
+                                              BorderRadius.circular(context.rem(AppRem.xxs)),
                                         ),
-                                      );
-                                    }),
-                                ],
-                              ),
+                                      ),
+                                    );
+                                  }),
+                              ],
                             ),
+                          ),
 
-                            // Played Progress Bar (Gradient)
-                            AnimatedContainer(
+                          // Played Progress Bar (Gradient)
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            height:
+                                context.rem((_isHovered || _isScrubbing || _isFocused)
+                                    ? AppRem.sm : AppRem.snug),
+                            width: trackWidth * activeFraction,
+                            decoration: BoxDecoration(
+                              // Focus is the stronger violet, not a ring: a border
+                              // around a thin track read as a box drawn on the
+                              // bar, where the bar itself getting brighter and
+                              // thicker says "this is the one" (#80).
+                              gradient: LinearGradient(
+                                colors: _isFocused
+                                    ? [AppColors.accent, AppColors.accent]
+                                    : [
+                                        AppColors.accent,
+                                        const Color(0xFF9D84FF),
+                                      ],
+                              ),
+                              borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
+                              boxShadow: [
+                                BoxShadow( // px: a hairline, not a layout size
+                                  color: AppColors.accent
+                                      .withValues(alpha: _isFocused ? 0.9 : 0.5),
+                                  blurRadius: context.rem(
+                                    _isFocused ? AppRem.ms : AppRem.snug,
+                                  ),
+                                  offset: Offset(0, context.rem(0.0625)),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Interactive Scrubber Thumb Dot
+                          Positioned(
+                            left: (trackWidth * activeFraction -
+                                    ((_isHovered ||
+                                            _isScrubbing ||
+                                            _isFocused)
+                                        ? context.rem(AppRem.sm)
+                                        : context.rem(AppRem.snug)))
+                                .clamp(0.0, trackWidth - context.rem(AppRem.md)),
+                            child: AnimatedContainer(
                               duration: const Duration(milliseconds: 150),
+                              width:
+                                  context.rem((_isHovered || _isScrubbing || _isFocused)
+                                      ? AppRem.md : AppRem.ms),
                               height:
                                   context.rem((_isHovered || _isScrubbing || _isFocused)
-                                      ? AppRem.sm : AppRem.snug),
-                              width: trackWidth * activeFraction,
+                                      ? AppRem.md : AppRem.ms),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.accent,
-                                    const Color(0xFF9D84FF),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
+                                color: _isFocused
+                                    ? AppColors.accent
+                                    : Colors.white,
+                                border: _isFocused
+                                    ? Border.all(
+                                        color: Colors.white,
+                                        width: 2, // px: a hairline, not a layout size
+                                      )
+                                    : null,
+                                shape: BoxShape.circle,
                                 boxShadow: [
-                                  BoxShadow( // px: a hairline, not a layout size
+                                  BoxShadow(
                                     color:
-                                        AppColors.accent.withValues(alpha: 0.5),
-                                    blurRadius: context.rem(AppRem.snug),
-                                    offset: Offset(0, context.rem(0.0625)),
+                                        Colors.black.withValues(alpha: 0.6),
+                                    blurRadius: context.rem(AppRem.sm),
+                                    offset: Offset(0, context.rem(AppRem.xxs)),
+                                  ),
+                                  BoxShadow(
+                                    color: AppColors.accent
+                                        .withValues(alpha: 0.8),
+                                    blurRadius: context.rem(AppRem.xs),
+                                    spreadRadius: context.rem(0.0625),
                                   ),
                                 ],
                               ),
                             ),
+                          ),
 
-                            // Interactive Scrubber Thumb Dot
+                          // Floating Timestamp Preview Bubble on Hover / Scrub
+                          if ((_isHovered || _isScrubbing) &&
+                              (_hoverFraction != null ||
+                                  _scrubFraction != null)) ...[
                             Positioned(
-                              left: (trackWidth * activeFraction -
-                                      ((_isHovered ||
-                                              _isScrubbing ||
-                                              _isFocused)
-                                          ? context.rem(AppRem.sm)
-                                          : context.rem(AppRem.snug)))
-                                  .clamp(0.0, trackWidth - context.rem(AppRem.md)),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                width:
-                                    context.rem((_isHovered || _isScrubbing || _isFocused)
-                                        ? AppRem.md : AppRem.ms),
-                                height:
-                                    context.rem((_isHovered || _isScrubbing || _isFocused)
-                                        ? AppRem.md : AppRem.ms),
+                              left: (trackWidth *
+                                          (_scrubFraction ??
+                                              _hoverFraction!) -
+                                      context.rem(1.75))
+                                  .clamp(0.0, trackWidth - context.rem(3.5)),
+                              top: -context.rem(AppRem.xl),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: context.rem(AppRem.sm),
+                                  vertical: context.rem(AppRem.xs),
+                                ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
+                                  color: const Color(0xF0080C12),
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+                                  border:
+                                      Border.all(color: PlayerTheme.edge),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
-                                      blurRadius: context.rem(AppRem.sm),
-                                      offset: Offset(0, context.rem(AppRem.xxs)),
-                                    ),
-                                    BoxShadow(
-                                      color: AppColors.accent
-                                          .withValues(alpha: 0.8),
-                                      blurRadius: context.rem(AppRem.xs),
-                                      spreadRadius: context.rem(0.0625),
+                                      color: Colors.black54,
+                                      blurRadius: context.rem(0.625),
+                                      offset: Offset(0, context.rem(AppRem.xs)),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-
-                            // Floating Timestamp Preview Bubble on Hover / Scrub
-                            if ((_isHovered || _isScrubbing) &&
-                                (_hoverFraction != null ||
-                                    _scrubFraction != null)) ...[
-                              Positioned(
-                                left: (trackWidth *
-                                            (_scrubFraction ??
-                                                _hoverFraction!) -
-                                        context.rem(1.75))
-                                    .clamp(0.0, trackWidth - context.rem(3.5)),
-                                top: -context.rem(AppRem.xl),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: context.rem(AppRem.sm),
-                                    vertical: context.rem(AppRem.xs),
+                                child: Text(
+                                  _formatDuration(
+                                    Duration(
+                                      milliseconds: ((_scrubFraction ??
+                                                  _hoverFraction!) *
+                                              totalMs)
+                                          .round(),
+                                    ),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xF0080C12),
-                                    borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-                                    border:
-                                        Border.all(color: PlayerTheme.edge),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black54,
-                                        blurRadius: context.rem(0.625),
-                                        offset: Offset(0, context.rem(AppRem.xs)),
-                                      ),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: AppType.tinyPlus,
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: [
+                                      FontFeature.tabularFigures(),
                                     ],
-                                  ),
-                                  child: Text(
-                                    _formatDuration(
-                                      Duration(
-                                        milliseconds: ((_scrubFraction ??
-                                                    _hoverFraction!) *
-                                                totalMs)
-                                            .round(),
-                                      ),
-                                    ),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: AppType.tinyPlus,
-                                      fontWeight: FontWeight.w700,
-                                      fontFeatures: [
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
                                   ),
                                 ),
                               ),
-                            ],
+                            ),
                           ],
-                        ),
+                        ],
                       ),
                     ),
                   ),

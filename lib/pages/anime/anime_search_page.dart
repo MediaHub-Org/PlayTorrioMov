@@ -583,6 +583,7 @@ class _AnimeSearchPageState extends State<AnimeSearchPage> {
                             child: HoverButton(
                               scaleAmount: 1.05,
                               showFocusRing: true,
+                              focusRingBorderRadius: context.rem(AppRem.radiusPill) + context.rem(AppRem.xxs),
                               onTap: () => _toggleAdult(!_allowAdult),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),

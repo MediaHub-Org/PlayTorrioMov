@@ -20,16 +20,55 @@ class FocusRing extends StatelessWidget {
   final double borderRadius;
   final Widget child;
 
+  /// A soft filled backdrop behind [child] instead of a line around it. For
+  /// a row of pills the ring read as a hard violet box, and a D-pad user
+  /// could not tell the pills apart from their own borders; a lighter wash
+  /// behind the pill is the usual TV convention and is unmistakable without
+  /// shouting (#80). Unlike the ring it takes no layout room -- it is painted
+  /// outside the child's box -- so focus moving along the row does not shift
+  /// the pills beside it.
+  final bool soft;
+
   const FocusRing({
     super.key,
     required this.visible,
     this.borderRadius = 9999,
+    this.soft = false,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    if (soft) {
+      final reach = context.rem(AppRem.xs);
+      // Always a Stack, even when hidden: swapping the wrapper in and out
+      // would rebuild the child's subtree on every focus change, which loses
+      // the state of a popup button or a text field inside it.
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: -reach,
+            right: -reach,
+            top: -reach,
+            bottom: -reach,
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 140),
+                decoration: BoxDecoration(
+                  color: visible
+                      ? AppColors.accent.withValues(alpha: 0.30)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(borderRadius),
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      );
+    }
     if (!visible) return child;
     return Container(
       decoration: BoxDecoration(

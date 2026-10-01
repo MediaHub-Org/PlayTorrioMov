@@ -16,6 +16,28 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   manifest.
 
 ### Changed
+- **TV focus cues, second pass (#80).** Device testing of dev.7 found five
+  things, now fixed (not yet confirmed on a TV):
+  - The side menu's violet border hugged the icon and left its name outside
+    it; it now surrounds the icon and the name together, with a faint violet
+    fill.
+  - Details' play button drew a pill-shaped ring around a rounded rectangle, so
+    the two never lined up. It has no ring now: it grows, brightens and glows
+    in its own colors. The same mismatch was in twenty other buttons that wrap
+    a rounded rectangle (cards, chips, hero dots, search and library buttons);
+    their ring now follows the button's own corner radius.
+  - The filter pills, Search and Settings showed focus with a hard ring that
+    was hard to tell apart on a row of pills. They now get a soft violet wash
+    behind them and a slight lift, painted outside the pill's box so the row
+    does not shift as focus moves along it.
+  - The player's seek bar has no border when focused: the bar turns a stronger
+    violet, thicker, with a violet thumb. Left/Right still seek, and holding
+    them repeats.
+  - On a TV the volume is one stop: Left/Right change the player's own level
+    (0-250%, boost above 100%, separate from the TV's volume that the remote's
+    volume keys change), holding repeats, and OK mutes and unmutes. Up and Down
+    are no longer taken by the slider, which had made it a trap: all four
+    arrows were spoken for, so a remote that reached it could not leave.
 - **The TV side menu rests as a rail of icons and opens on focus (#80).** The
   first device test confirmed it works; the feedback was that a permanently
   wide menu takes room from the posters. It is now a narrow icon rail

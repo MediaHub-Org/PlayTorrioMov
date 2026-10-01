@@ -864,6 +864,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return HoverButton(
       scaleAmount: 1.02,
       showFocusRing: true,
+      // A paragraph, not a pill: the default ring's 9999 radius would curve
+      // around four lines of text.
+      focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
       onTap: () => setState(() => _isSynopsisExpanded = !_isSynopsisExpanded),
       child: AnimatedCrossFade(
         duration: const Duration(milliseconds: 200),
@@ -1130,6 +1133,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         HoverButton(
                           scaleAmount: 1.05,
                           showFocusRing: true,
+                          focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
                           onTap: () => setState(() => _isDub = false),
                           child: Container(
                             padding: EdgeInsets.symmetric(
@@ -1153,6 +1157,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                         HoverButton(
                           scaleAmount: 1.05,
                           showFocusRing: true,
+                          focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
                           onTap: () => setState(() => _isDub = true),
                           child: Container(
                             padding: EdgeInsets.symmetric(

@@ -96,6 +96,7 @@ class _CollectionPageState extends State<CollectionPage> {
       return HoverButton(
         scaleAmount: 1.05,
         showFocusRing: true,
+        focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
         onTap: () => onPick(value),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),

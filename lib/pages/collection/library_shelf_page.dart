@@ -609,6 +609,7 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
     return HoverButton(
       scaleAmount: 1.05,
       showFocusRing: true,
+      focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
       onTap: () => setState(() => _filterType = value),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),

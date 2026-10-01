@@ -916,6 +916,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                               child: HoverButton(
                                 scaleAmount: 1.05,
                                 showFocusRing: true,
+                                focusRingBorderRadius: context.rem(1.25) + context.rem(AppRem.xxs),
                                 onTap: () => _onCatalogChanged(entry),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
@@ -1084,6 +1085,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
                         child: HoverButton(
                           scaleAmount: 1.05,
                           showFocusRing: true,
+                          focusRingBorderRadius: context.rem(1.25) + context.rem(AppRem.xxs),
                           onTap: () => _showCustomExtraDialog(extra.name),
                           child: Container(
                             padding: EdgeInsets.symmetric(

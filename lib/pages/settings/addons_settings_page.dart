@@ -737,6 +737,7 @@ class _AddAddonButton extends StatelessWidget {
         child: HoverButton(
       scaleAmount: 1.02,
       showFocusRing: true,
+      focusRingBorderRadius: context.rem(AppRem.radiusLg) + context.rem(AppRem.xxs),
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

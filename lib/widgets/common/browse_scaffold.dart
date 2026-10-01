@@ -525,6 +525,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
                       HoverButton(
                         scaleAmount: 1.3,
                         showFocusRing: true,
+                        focusRingBorderRadius: context.rem(_kDotMargin) + context.rem(AppRem.xxs),
                         onTap: () => goToHeroPage(i),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),

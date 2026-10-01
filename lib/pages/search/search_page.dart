@@ -318,6 +318,7 @@ class _SearchPageState extends State<SearchPage> {
             HoverButton(
               scaleAmount: 1.05,
               showFocusRing: true,
+              focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
               onTap: _openAnimeFilters,
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -362,6 +363,7 @@ class _SearchPageState extends State<SearchPage> {
     return HoverButton(
       scaleAmount: 1.05,
       showFocusRing: true,
+      focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
       onTap: () => _onTypeChanged(filter),
       child: Container(
         alignment: Alignment.center,

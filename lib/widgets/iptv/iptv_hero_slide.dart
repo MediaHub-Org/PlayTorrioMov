@@ -244,6 +244,7 @@ class IptvHeroSlide extends StatelessWidget {
                   HoverButton(
                     scaleAmount: 1.04,
                     showFocusRing: true,
+                    focusRingBorderRadius: context.rem(0.875) + context.rem(AppRem.xxs),
                     onTap: onWatchNow,
                     child: Container(
                         padding: EdgeInsets.symmetric(
@@ -294,6 +295,7 @@ class IptvHeroSlide extends StatelessWidget {
                   HoverButton(
                     scaleAmount: 1.04,
                     showFocusRing: true,
+                    focusRingBorderRadius: context.rem(0.875) + context.rem(AppRem.xxs),
                     onTap: onSourcesTap,
                     child: Container(
                         padding: EdgeInsets.symmetric(
