@@ -45,14 +45,13 @@ void main() {
     await tester.pumpWidget(tile(node));
 
     expect(cue(tester).color, Colors.transparent);
-    expect((cue(tester).border! as Border).top.color, Colors.transparent);
 
     node.requestFocus();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     expect(cue(tester).color, isNot(Colors.transparent));
-    expect((cue(tester).border! as Border).top.color, isNot(Colors.transparent));
+    expect(cue(tester).border, isNull, reason: 'a wash, not an outline');
     // In the row's own box: nothing grows or moves.
     expect(tester.getSize(find.byKey(const Key('tile'))), const Size(200, 60));
     expect(tester.getSize(find.byType(FocusFill)), const Size(200, 60));

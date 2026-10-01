@@ -45,8 +45,8 @@ the chips) have not been seen on a device.
   painted underneath the container and never seen: a D-pad moved down a
   settings page with no cue at all. The ten tiles and cards in the settings
   pages (categories, appearance, decoders, buffer presets, About links, the
-  Trakt/Simkl code, the add-on toggle) now draw a violet border and wash over
-  themselves (`FocusFill`). The theme also gives every control that takes its
+  Trakt/Simkl code, the add-on toggle) now draw a soft violet wash, with no
+  border, over themselves (`FocusFill`). The theme also gives every control that takes its
   cue from it a visible one -- list tiles, checkboxes, radios, switches and
   slider thumbs a 30% tint of the palette color, dialog and form buttons a
   clear wash. Not confirmed on a TV.

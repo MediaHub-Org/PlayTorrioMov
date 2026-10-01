@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../services/theme/app_colors.dart';
 
-/// Marks a row that holds focus with a wash and a border drawn *over* it, in
-/// its own bounds.
+/// Marks a row that holds focus with a soft wash drawn *over* it, in its own
+/// bounds. No border: on a settings page the fill alone reads clearly, and the
+/// outline made every row look like a button box (#80).
 ///
 /// For the settings rows and cards, which are an `InkWell` over an opaque
 /// `Container`: the `InkWell`'s focus tint is painted on the `Material`
@@ -45,14 +46,12 @@ class _FocusFillState extends State<FocusFill> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 140),
                 decoration: BoxDecoration(
+                  // Stronger than a bordered cue would need, since the fill is
+                  // all there is to see.
                   color: _focused
-                      ? AppColors.accent.withValues(alpha: 0.14)
+                      ? AppColors.accent.withValues(alpha: 0.22)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(widget.radius),
-                  border: Border.all(
-                    color: _focused ? AppColors.accent : Colors.transparent,
-                    width: 2, // px: a focus ring keeps its weight at any text size
-                  ),
                 ),
               ),
             ),
