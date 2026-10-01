@@ -65,23 +65,23 @@ void main() {
   setUp(() => TvModeService.isTv.value = true);
   tearDown(() => TvModeService.isTv.value = false);
 
-  testWidgets('Left and Right move the level in steps, past 100%', (
+  testWidgets('on a TV Up and Down move the level in steps, past 100%', (
     tester,
   ) async {
     final log = <String>[];
     await tester.pumpWidget(app(_Host(initialVolume: 1.0, log: log)));
     await focusSlider(tester);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.pump();
     // Above 100% is the point of the boost range; the readout shows it.
     expect(find.text('105%'), findsOneWidget);
 
     // A frame between presses, as a real remote has: the level is read back
     // from the widget, so a second press in the same frame sees the old one.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
     expect(find.text('95%'), findsOneWidget);
   });
@@ -92,7 +92,7 @@ void main() {
     await focusSlider(tester);
 
     for (var i = 0; i < 3; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
     }
     expect(find.text('250%'), findsOneWidget);
@@ -111,20 +111,44 @@ void main() {
     expect(log, ['mute', 'mute']);
   });
 
-  testWidgets('Up and Down are not claimed, so focus can leave the slider', (
-    tester,
-  ) async {
-    // They were, and a remote that reached the slider was stuck on it.
-    final log = <String>[];
-    await tester.pumpWidget(app(_Host(initialVolume: 1.0, log: log)));
+  testWidgets('on a TV Left and Right are not claimed, so the buttons beyond '
+      'it can be reached', (tester) async {
+    // They were: every arrow was the slider's, and a remote could not get
+    // from the volume to speed, audio, the sleep timer or aspect (#80).
+    final bubbled = <LogicalKeyboardKey>[];
+    await tester.pumpWidget(
+      app(
+        Focus(
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent) bubbled.add(event.logicalKey);
+            return KeyEventResult.ignored;
+          },
+          child: const _Host(initialVolume: 1.0, log: []),
+        ),
+      ),
+    );
     await focusSlider(tester);
-    final before = FocusManager.instance.primaryFocus;
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
 
-    expect(FocusManager.instance.primaryFocus, isNot(before));
-    expect(log, isEmpty);
+    expect(bubbled, contains(LogicalKeyboardKey.arrowRight));
+    expect(bubbled, contains(LogicalKeyboardKey.arrowLeft));
+  });
+
+  testWidgets('off a TV Left and Right are the slider\'s', (tester) async {
+    TvModeService.isTv.value = false;
+    await tester.pumpWidget(app(const _Host(initialVolume: 1.0, log: [])));
+    // Above, the mute button, then the slider.
+    for (var i = 0; i < 3; i++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    }
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(find.text('105%'), findsOneWidget);
   });
 
   testWidgets('on a TV the mute button is not a separate stop', (tester) async {

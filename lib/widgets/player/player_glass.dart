@@ -221,13 +221,63 @@ class PlayerMenuAnchor extends StatelessWidget {
         alignment: isNarrow
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.bottomEnd,
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: child,
+        // A scope of its own that takes focus when the menu opens. Without
+        // it focus stayed on the button that opened the menu, and a remote's
+        // arrows went to whatever was nearest that button -- the seek bar, not
+        // the rows -- so the audio, speed, sleep timer and aspect menus
+        // opened and could not be used (#80). Inside a scope the arrows stay
+        // on the menu's own rows; closing it hands focus back to the button.
+        child: _FocusOnOpen(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: child,
+          ),
         ),
       ),
     );
   }
+}
+
+/// A focus scope that takes focus when it is first built.
+///
+/// `FocusScope(autofocus: true)` is not enough: autofocus does nothing when
+/// the enclosing scope already has a focused child, and in the player it always
+/// does -- the button that opened the menu. So the request is made by hand,
+/// after the first frame, once the rows exist for it to land on.
+class _FocusOnOpen extends StatefulWidget {
+  final Widget child;
+
+  const _FocusOnOpen({required this.child});
+
+  @override
+  State<_FocusOnOpen> createState() => _FocusOnOpenState();
+}
+
+class _FocusOnOpenState extends State<_FocusOnOpen> {
+  final FocusScopeNode _scope = FocusScopeNode(debugLabel: 'PlayerMenu');
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Asking the scope itself leaves the scope as the focused node, with
+      // nothing in it focused; the first row has to be asked for by name.
+      final policy =
+          FocusTraversalGroup.maybeOf(context) ?? ReadingOrderTraversalPolicy();
+      policy.findFirstFocus(_scope, ignoreCurrentFocus: true)?.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scope.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      FocusScope(node: _scope, child: widget.child);
 }
 
 /// Interactive button with smooth hover effects, tooltips, and badges.

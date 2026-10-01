@@ -154,6 +154,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   @override
   void initState() {
     super.initState();
+    HardwareKeyboard.instance.addHandler(_keepControlsUpOnKey);
     WakelockPlus.enable();
     _activeHitIndex = widget.initialHitIndex.clamp(0, widget.hits.length - 1);
     _sourcesScrollController = ScrollController();
@@ -199,6 +200,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     for (final s in _subscriptions) {
       s.cancel();
     }
+    HardwareKeyboard.instance.removeHandler(_keepControlsUpOnKey);
     PlayerSettings.changeNotifier.removeListener(_onPlayerSettingsChanged);
     WakelockPlus.disable();
     _hideControlsTimer?.cancel();
@@ -381,6 +383,19 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
         _initPlayer();
       }
     });
+  }
+
+  /// Any key press keeps the bars up another few seconds, including the ones a
+  /// control handles itself (the volume's Up/Down) and so never reach this
+  /// screen's own handler. Only watches: returns false.
+  bool _keepControlsUpOnKey(KeyEvent event) {
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        mounted &&
+        _showControls &&
+        _activeMenu == null) {
+      _startHideControlsTimer();
+    }
+    return false;
   }
 
   void _startHideControlsTimer() {

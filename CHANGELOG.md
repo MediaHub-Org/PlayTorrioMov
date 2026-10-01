@@ -5,6 +5,36 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **The player's D-pad reaches everything on the TV (#80).** Device testing of
+  v1.9.1 found four things, now fixed (not yet confirmed on a TV):
+  - **The audio, speed, sleep timer and aspect menus could be opened but not
+    used.** Focus stayed on the button that opened the menu, so the arrows went
+    to whatever was nearest that button (the seek bar), not to the menu's rows.
+    A menu now takes focus when it opens (`PlayerMenuAnchor`), keeps the arrows
+    on its own rows until it closes, and its rows show the focus wash even when
+    selected.
+  - **The volume could not be changed or muted.** Its slider claimed all four
+    arrows, so a remote that reached it could neither leave it nor act on it
+    sensibly. On a TV the volume is one stop: OK mutes and unmutes, Up and Down
+    change the level through the boost range (to 250%) like a volume rocker, and
+    Left/Right move on to the next control. Off a TV Left/Right are the
+    slider's, as before. The buttons beyond it (speed, audio, subtitles, sleep
+    timer, aspect) can be reached with Right.
+  - **Seeking with the arrows showed no change.** Ten seconds is about a pixel
+    on a two-hour bar. A key seek now moves the thumb at once and shows the new
+    time in the bubble for a moment; a held key goes in growing steps (10 s, 30 s,
+    1 min, 2 min) and commits when it pauses.
+  - **Up from the seek bar had an extra stop before play/pause.** Directional
+    traversal picks the nearest control above a full-width bar, which was a seek
+    button when the bar was reached from the side. On a TV the hops between the
+    rows are named: Down from the centered buttons is the seek bar, Down from the
+    bar is the volume, Up from the bottom row is the bar, Up from the bar is
+    play/pause.
+  Also: any key press now keeps the bars up another four seconds, including
+  the ones a control handles itself, which never reached the timer before and
+  let the bars vanish mid-press.
+
 ## [1.9.1+48] - 2026-10-01
 
 The TV polish release: everything the first Android TV device tests of

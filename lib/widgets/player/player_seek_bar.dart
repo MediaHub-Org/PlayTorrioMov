@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +20,19 @@ class PlayerSeekBar extends StatefulWidget {
   final ValueChanged<Duration> onSeek;
   final ValueChanged<bool>? onScrubbingChanged;
 
+  /// The scrubber's own focus node, so the control above and below it can
+  /// name it as a destination.
+  final FocusNode? focusNode;
+
+  /// Where Up and Down go from the scrubber, when named. Directional
+  /// traversal picks the nearest candidate in that direction, and above a
+  /// full-width bar that is whichever of the centered buttons it happens to
+  /// be nearest to: a remote reaching the bar from the side landed on a seek
+  /// button first and needed a second press to get to play/pause (#80). A TV
+  /// names its destinations instead of leaving it to geometry.
+  final FocusNode? upFocusNode;
+  final FocusNode? downFocusNode;
+
   const PlayerSeekBar({
     super.key,
     required this.position,
@@ -28,6 +43,9 @@ class PlayerSeekBar extends StatefulWidget {
     this.skipSegments = const [],
     required this.onSeek,
     this.onScrubbingChanged,
+    this.focusNode,
+    this.upFocusNode,
+    this.downFocusNode,
   });
 
   @override
@@ -52,12 +70,76 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
   /// is the fine-grained nudge a drag gesture gives everyone else.
   static const _keyboardSeekStep = Duration(seconds: 10);
 
-  void _nudge(int direction, Duration current) {
-    final target = current + _keyboardSeekStep * direction;
+  /// How long a key-driven seek keeps the thumb and its time bubble up after
+  /// the last press. Ten seconds is a pixel on a two-hour bar, so without the
+  /// bubble naming the new time there was nothing to see on a TV (#80).
+  static const _previewHold = Duration(milliseconds: 1400);
+
+  /// Held keys seek in bigger steps the longer they are held, and commit
+  /// after a short pause instead of on every repeat.
+  static const _repeatCommitDelay = Duration(milliseconds: 300);
+
+  Duration? _pendingTarget;
+  bool _keyPreview = false;
+  int _repeats = 0;
+  Timer? _commitTimer;
+  Timer? _previewTimer;
+
+  @override
+  void dispose() {
+    _commitTimer?.cancel();
+    _previewTimer?.cancel();
+    super.dispose();
+  }
+
+  Duration _stepFor(int repeats) {
+    if (repeats < 4) return _keyboardSeekStep;
+    if (repeats < 12) return const Duration(seconds: 30);
+    if (repeats < 24) return const Duration(minutes: 1);
+    return const Duration(minutes: 2);
+  }
+
+  /// Moves by [direction] steps. A new press seeks at once; a held key
+  /// accumulates a target, shown on the bar, and seeks when it pauses.
+  void _nudge(int direction, Duration current, {required bool isRepeat}) {
+    _repeats = isRepeat ? _repeats + 1 : 0;
+    // From the pending target while one is moving, not from the playhead:
+    // the player reports its new position a moment after a seek, so reading
+    // it back between presses made a held key crawl.
+    final base = _pendingTarget ?? current;
+    final target = base + _stepFor(_repeats) * direction;
     final clamped = target < Duration.zero
         ? Duration.zero
         : (target > widget.duration ? widget.duration : target);
-    widget.onSeek(clamped);
+    _pendingTarget = clamped;
+
+    final total = widget.duration.inMilliseconds;
+    setState(() {
+      _keyPreview = true;
+      if (total > 0) _scrubFraction = clamped.inMilliseconds / total;
+    });
+
+    _commitTimer?.cancel();
+    if (isRepeat) {
+      _commitTimer = Timer(_repeatCommitDelay, _commitNudge);
+    } else {
+      _commitNudge();
+    }
+  }
+
+  void _commitNudge() {
+    final target = _pendingTarget;
+    if (target != null) widget.onSeek(target);
+    _previewTimer?.cancel();
+    _previewTimer = Timer(_previewHold, () {
+      if (!mounted) return;
+      setState(() {
+        _keyPreview = false;
+        _pendingTarget = null;
+        // Only the preview's own fraction: a drag in progress owns it.
+        if (!_isScrubbing) _scrubFraction = null;
+      });
+    });
   }
 
   String _formatDuration(Duration d) {
@@ -160,6 +242,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
               final trackWidth = constraints.maxWidth;
 
               return Focus(
+                focusNode: widget.focusNode,
                 onFocusChange: (focused) =>
                     setState(() => _isFocused = focused),
                 onKeyEvent: (node, event) {
@@ -167,13 +250,26 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                   if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
                     return KeyEventResult.ignored;
                   }
-                  if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-                    _nudge(-1, currentPosition);
+                  final isRepeat = event is KeyRepeatEvent;
+                  final key = event.logicalKey;
+                  if (key == LogicalKeyboardKey.arrowLeft) {
+                    _nudge(-1, currentPosition, isRepeat: isRepeat);
                     return KeyEventResult.handled;
                   }
-                  if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-                    _nudge(1, currentPosition);
+                  if (key == LogicalKeyboardKey.arrowRight) {
+                    _nudge(1, currentPosition, isRepeat: isRepeat);
                     return KeyEventResult.handled;
+                  }
+                  if (!isRepeat) {
+                    final target = key == LogicalKeyboardKey.arrowUp
+                        ? widget.upFocusNode
+                        : key == LogicalKeyboardKey.arrowDown
+                            ? widget.downFocusNode
+                            : null;
+                    if (target != null) {
+                      target.requestFocus();
+                      return KeyEventResult.handled;
+                    }
                   }
                   return KeyEventResult.ignored;
                 },
@@ -364,7 +460,7 @@ class _PlayerSeekBarState extends State<PlayerSeekBar> {
                           ),
 
                           // Floating Timestamp Preview Bubble on Hover / Scrub
-                          if ((_isHovered || _isScrubbing) &&
+                          if ((_isHovered || _isScrubbing || _keyPreview) &&
                               (_hoverFraction != null ||
                                   _scrubFraction != null)) ...[
                             Positioned(

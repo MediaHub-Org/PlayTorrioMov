@@ -13,6 +13,10 @@ class PlayerVolumeControl extends StatefulWidget {
   final ValueChanged<double> onVolumeChanged;
   final VoidCallback onToggleMute;
 
+  /// The control's own focus node, so the seek bar above it can name it as
+  /// where Down goes.
+  final FocusNode? focusNode;
+
   static const double maxVolume = 2.50;
 
   const PlayerVolumeControl({
@@ -21,6 +25,7 @@ class PlayerVolumeControl extends StatefulWidget {
     required this.isMuted,
     required this.onVolumeChanged,
     required this.onToggleMute,
+    this.focusNode,
   });
 
   @override
@@ -125,28 +130,40 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
 
             // Volume Slider Track
             Focus(
+              focusNode: widget.focusNode,
               onFocusChange: (focused) =>
                   setState(() => _isFocused = focused),
               onKeyEvent: (node, event) {
-                // Repeats too, so holding Right on a remote keeps climbing
-                // instead of needing fifty presses to reach 100%.
+                // Repeats too, so holding a key keeps climbing instead of
+                // needing fifty presses to reach 100%.
                 if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
                   return KeyEventResult.ignored;
                 }
                 final key = event.logicalKey;
-                if (key == LogicalKeyboardKey.arrowLeft) {
+                final isTv = TvModeService.isTv.value;
+                // Which keys change the level depends on what the row needs
+                // the others for. On a TV Left/Right are how a remote gets
+                // from this control to its neighbors, so claiming them made
+                // the buttons beyond it unreachable -- speed, audio, sleep
+                // timer and aspect, all of them, with nothing to say why --
+                // and Up/Down adjust instead, as a volume rocker would
+                // (#80). Off a TV the row is a mouse's, and the arrows a
+                // slider's.
+                final lower = isTv
+                    ? LogicalKeyboardKey.arrowDown
+                    : LogicalKeyboardKey.arrowLeft;
+                final raise = isTv
+                    ? LogicalKeyboardKey.arrowUp
+                    : LogicalKeyboardKey.arrowRight;
+                if (key == lower) {
                   _nudgeVolume(-1);
                   return KeyEventResult.handled;
                 }
-                if (key == LogicalKeyboardKey.arrowRight) {
+                if (key == raise) {
                   _nudgeVolume(1);
                   return KeyEventResult.handled;
                 }
-                // OK mutes. Up and Down are deliberately not claimed: they
-                // were, and a remote that reached this slider could never
-                // leave it, because all four arrows were spoken for. Off a
-                // TV they fall through to the screen's own handler, which
-                // still turns Up/Down into volume.
+                // OK mutes.
                 if (event is KeyDownEvent &&
                     (key == LogicalKeyboardKey.select ||
                         key == LogicalKeyboardKey.enter ||
@@ -263,6 +280,17 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                           Icons.bolt_rounded,
                           size: context.rem(0.8125),
                           color: boostColor,
+                        ),
+                      ),
+                    // Up and Down change the level on a TV; the glyph says so,
+                    // since the slider itself is not where the arrows point.
+                    if (_isFocused && TvModeService.isTv.value)
+                      Padding(
+                        padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.xxs)),
+                        child: Icon(
+                          Icons.unfold_more_rounded,
+                          size: context.rem(AppRem.iconXs),
+                          color: PlayerTheme.inkMuted,
                         ),
                       ),
                     Text(
