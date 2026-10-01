@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
-import 'package:playtorriomov/services/tv_mode_service.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_volume_control.dart';
 
@@ -50,49 +49,43 @@ Widget app(Widget body) => MaterialApp(
   home: Scaffold(body: body),
 );
 
-/// Puts primary focus on the slider by walking there with Tab, the way a
-/// remote does: on a TV the mute button is excluded, so the slider is the one
-/// stop after the focusable above it.
+/// Tabs onto the slider: the focusable above, the mute button, the slider.
 Future<void> focusSlider(WidgetTester tester) async {
-  await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-  await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+  for (var i = 0; i < 3; i++) {
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+  }
   await tester.pump();
 }
 
+/// This is the pointer-and-keyboard control. A TV opens `PlayerVolumeMenu`
+/// instead (see `player_volume_menu_test.dart`), because a slider that claims
+/// Left/Right cannot be left with a remote.
 void main() {
-  // The flag is read when the control builds, so it is set before each test
-  // pumps the widget. TV is the case these keys are for.
-  setUp(() => TvModeService.isTv.value = true);
-  tearDown(() => TvModeService.isTv.value = false);
-
-  testWidgets('on a TV Up and Down move the level in steps, past 100%', (
+  testWidgets('Left and Right move the level in steps, past 100%', (
     tester,
   ) async {
-    final log = <String>[];
-    await tester.pumpWidget(app(_Host(initialVolume: 1.0, log: log)));
+    await tester.pumpWidget(app(const _Host(initialVolume: 1.0, log: [])));
     await focusSlider(tester);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     // Above 100% is the point of the boost range; the readout shows it.
     expect(find.text('105%'), findsOneWidget);
 
-    // A frame between presses, as a real remote has: the level is read back
-    // from the widget, so a second press in the same frame sees the old one.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    // A frame between presses: the level is read back from the widget.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pump();
     expect(find.text('95%'), findsOneWidget);
   });
 
   testWidgets('the level stops at the ends of its range', (tester) async {
-    final log = <String>[];
-    await tester.pumpWidget(app(_Host(initialVolume: 2.48, log: log)));
+    await tester.pumpWidget(app(const _Host(initialVolume: 2.48, log: [])));
     await focusSlider(tester);
 
     for (var i = 0; i < 3; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
     }
     expect(find.text('250%'), findsOneWidget);
@@ -111,10 +104,7 @@ void main() {
     expect(log, ['mute', 'mute']);
   });
 
-  testWidgets('on a TV Left and Right are not claimed, so the buttons beyond '
-      'it can be reached', (tester) async {
-    // They were: every arrow was the slider's, and a remote could not get
-    // from the volume to speed, audio, the sleep timer or aspect (#80).
+  testWidgets('Up and Down are not claimed by the slider', (tester) async {
     final bubbled = <LogicalKeyboardKey>[];
     await tester.pumpWidget(
       app(
@@ -129,58 +119,26 @@ void main() {
     );
     await focusSlider(tester);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
-    expect(bubbled, contains(LogicalKeyboardKey.arrowRight));
-    expect(bubbled, contains(LogicalKeyboardKey.arrowLeft));
+    expect(bubbled, contains(LogicalKeyboardKey.arrowUp));
+    expect(bubbled, contains(LogicalKeyboardKey.arrowDown));
   });
 
-  testWidgets('off a TV Left and Right are the slider\'s', (tester) async {
-    TvModeService.isTv.value = false;
+  testWidgets('the mute button is its own stop', (tester) async {
     await tester.pumpWidget(app(const _Host(initialVolume: 1.0, log: [])));
-    // Above, the mute button, then the slider.
-    for (var i = 0; i < 3; i++) {
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    }
-    await tester.pump();
-
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-    await tester.pump();
-    expect(find.text('105%'), findsOneWidget);
-  });
-
-  testWidgets('on a TV the mute button is not a separate stop', (tester) async {
-    await tester.pumpWidget(app(const _Host(initialVolume: 1.0, log: [])));
-
     final button = find.descendant(
       of: find.byType(PlayerVolumeControl),
       matching: find.byType(PlayerIconButton),
     );
-    final excluding = find.ancestor(
-      of: button,
-      matching: find.byWidgetPredicate(
-        (w) => w is ExcludeFocus && w.excluding,
+    expect(
+      find.ancestor(
+        of: button,
+        matching: find.byWidgetPredicate((w) => w is ExcludeFocus && w.excluding),
       ),
+      findsNothing,
     );
-    expect(excluding, findsOneWidget);
-  });
-
-  testWidgets('off a TV the mute button keeps its own focus', (tester) async {
-    TvModeService.isTv.value = false;
-    await tester.pumpWidget(app(const _Host(initialVolume: 1.0, log: [])));
-
-    final button = find.descendant(
-      of: find.byType(PlayerVolumeControl),
-      matching: find.byType(PlayerIconButton),
-    );
-    final excluding = find.ancestor(
-      of: button,
-      matching: find.byWidgetPredicate(
-        (w) => w is ExcludeFocus && w.excluding,
-      ),
-    );
-    expect(excluding, findsNothing);
   });
 }

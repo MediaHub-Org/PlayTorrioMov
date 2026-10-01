@@ -43,6 +43,7 @@ import 'package:playtorriomov/widgets/details/similar_card.dart';
 import 'package:playtorriomov/widgets/home/continue_watching_slider.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
+import 'package:playtorriomov/widgets/player/player_volume_menu.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/models/download/download_task_model.dart';
 import 'package:playtorriomov/services/download/download_service.dart';
@@ -1012,6 +1013,33 @@ void main() {
                   ],
                   selectedIndex: 1,
                   onTrackSelected: (_) {},
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the player volume menu does not overflow at 3x text scale',
+    (tester) async {
+      // A readout, a button and a slider in a fixed-width card, with the
+      // TV's hint line under them; the readout is the large text.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: Stack(
+            children: [
+              PlayerMenuAnchor(
+                child: PlayerVolumeMenu(
+                  volume: 2.1,
+                  isMuted: false,
+                  onVolumeChanged: (_) {},
+                  onToggleMute: () {},
                 ),
               ),
             ],

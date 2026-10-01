@@ -261,11 +261,18 @@ class _FocusOnOpenState extends State<_FocusOnOpen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      // Asking the scope itself leaves the scope as the focused node, with
-      // nothing in it focused; the first row has to be asked for by name.
-      final policy =
-          FocusTraversalGroup.maybeOf(context) ?? ReadingOrderTraversalPolicy();
-      policy.findFirstFocus(_scope, ignoreCurrentFocus: true)?.requestFocus();
+      // Asking the scope honors a child that asked for focus (a slider that is
+      // the menu's main control); but it can also leave the scope itself as
+      // the focused node, with nothing in it focused, so then the first row
+      // has to be asked for by name.
+      _scope.requestFocus();
+      // Focus changes apply a microtask later, so the answer is read then.
+      Future.microtask(() {
+        if (!mounted || FocusManager.instance.primaryFocus != _scope) return;
+        final policy = FocusTraversalGroup.maybeOf(context) ??
+            ReadingOrderTraversalPolicy();
+        policy.findFirstFocus(_scope, ignoreCurrentFocus: true)?.requestFocus();
+      });
     });
   }
 
@@ -382,6 +389,10 @@ class PlayerIconButton extends StatefulWidget {
   /// buttons sit in a row where nothing should jump ahead of the others.
   final bool autofocus;
 
+  /// The button's own focus node, for a neighbor that names it as where an
+  /// arrow goes (the seek bar's Down is the volume button).
+  final FocusNode? focusNode;
+
   const PlayerIconButton({
     super.key,
     required this.icon,
@@ -396,6 +407,7 @@ class PlayerIconButton extends StatefulWidget {
     this.backgroundColor,
     this.borderRadius = 9999,
     this.autofocus = false,
+    this.focusNode,
   });
 
   @override
@@ -459,6 +471,7 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
     );
 
     Widget button = Focus(
+      focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       onFocusChange: (focused) => setState(() => _focused = focused),
       onKeyEvent: (node, event) {

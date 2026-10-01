@@ -183,6 +183,8 @@
   "playerMute": "Mute",
   "playerUnmute": "Unmute",
   "playerPressBackToExit": "Press Back again to exit",
+  "playerVolume": "Volume",
+  "playerVolumeHint": "Left/Right to adjust · OK to mute",
   "playerSleepTimer": "Sleep timer",
   "@playerSleepTimer": {"description": "Name of the timer that pauses playback after a set time"},
   "playerSleepTimerLeft": "Sleep timer: {minutes} min left",

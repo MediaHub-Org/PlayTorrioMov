@@ -70,6 +70,7 @@ Widget _player(_Nodes n) => MaterialApp(
             onOpenAudioMenu: () {},
             onOpenAspectMenu: () {},
             onOpenSleepTimerMenu: () {},
+            onOpenVolumeMenu: () {},
             seekFocusNode: n.seek,
             volumeFocusNode: n.volume,
             playPauseFocusNode: n.playPause,
@@ -160,7 +161,7 @@ void main() {
       if (stops.contains(here)) break;
       stops.add(here);
     }
-    // The volume, then speed, audio, subtitles, sleep timer and aspect.
+    // The volume button, then speed, audio, subtitles, sleep timer, aspect.
     expect(stops.length, 6, reason: 'the volume and five buttons');
 
     for (var i = 0; i < stops.length - 1; i++) {

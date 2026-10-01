@@ -30,6 +30,7 @@ import '../../widgets/player/player_top_bar.dart';
 import '../../widgets/player/back_press_decision.dart';
 import '../../widgets/player/remote_key_decision.dart';
 import '../../widgets/player/player_transport.dart';
+import '../../widgets/player/player_volume_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_seek_feedback.dart';
 import '../../widgets/player/sleep_timer_menu.dart';
@@ -2856,6 +2857,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onOpenAudioMenu: () => _toggleMenu('audio'),
                     onOpenAspectMenu: () => _toggleMenu('aspect'),
                     onOpenSleepTimerMenu: () => _toggleMenu('sleep'),
+                    onOpenVolumeMenu: () => _toggleMenu('volume'),
                     seekFocusNode: _seekFocus,
                     volumeFocusNode: _volumeFocus,
                     playPauseFocusNode: _playPauseFocus,
@@ -2948,6 +2950,18 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Sleep Timer Popover
         if (_activeMenu == 'sleep' && !_isLoading)
           const PlayerMenuAnchor(child: SleepTimerMenu()),
+
+        // Floating Volume Popover (a TV's way in; see PlayerVolumeMenu)
+        if (_activeMenu == 'volume' && !_isLoading)
+          PlayerMenuAnchor(
+            child: PlayerVolumeMenu(
+              onBack: _backToSettings,
+              volume: _volume,
+              isMuted: _isMuted || _volume == 0,
+              onVolumeChanged: (vol) => _applyVolume(vol),
+              onToggleMute: () => _toggleMute(),
+            ),
+          ),
 
         // Floating Speed Menu Popover
         if (_activeMenu == 'speed' && !_isLoading)

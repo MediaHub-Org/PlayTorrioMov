@@ -2,13 +2,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_menu_row.dart';
+import 'package:playtorriomov/widgets/player/player_volume_menu.dart';
 
 class _Host extends StatefulWidget {
   final FocusNode opener;
   final List<String> picked;
-  const _Host({required this.opener, required this.picked});
+
+  /// The menu's contents; the default is three plain rows.
+  final Widget? menu;
+  const _Host({required this.opener, required this.picked, this.menu});
 
   @override
   State<_Host> createState() => _HostState();
@@ -20,6 +25,8 @@ class _HostState extends State<_Host> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Stack(
           children: [
@@ -46,7 +53,7 @@ class _HostState extends State<_Host> {
             ),
             if (open)
               PlayerMenuAnchor(
-                child: Column(
+                child: widget.menu ?? Column(
                   children: [
                     for (final label in ['0.5x', '1x', '2x'])
                       PlayerMenuRow(
@@ -117,5 +124,40 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.select);
     await tester.pump();
     expect(picked, hasLength(1));
+  });
+
+  testWidgets('a menu whose main control is a slider opens with focus on it, '
+      'so Left/Right work at once', (tester) async {
+    tester.view.physicalSize = const Size(1280, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final opener = FocusNode(debugLabel: 'opener');
+    addTearDown(opener.dispose);
+    final rates = <double>[];
+
+    await tester.pumpWidget(
+      _Host(
+        opener: opener,
+        picked: const [],
+        menu: PlayerVolumeMenu(
+          volume: 1.0,
+          isMuted: false,
+          onVolumeChanged: rates.add,
+          onToggleMute: () {},
+        ),
+      ),
+    );
+    opener.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.select);
+    await tester.pump();
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+
+    // The slider, not the mute button to its left, took the first press.
+    expect(rates, isNotEmpty, reason: 'Right adjusted the level');
+    expect(rates.last, greaterThan(1.0));
   });
 }

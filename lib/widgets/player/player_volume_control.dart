@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
-import '../../services/tv_mode_service.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 
@@ -13,10 +12,6 @@ class PlayerVolumeControl extends StatefulWidget {
   final ValueChanged<double> onVolumeChanged;
   final VoidCallback onToggleMute;
 
-  /// The control's own focus node, so the seek bar above it can name it as
-  /// where Down goes.
-  final FocusNode? focusNode;
-
   static const double maxVolume = 2.50;
 
   const PlayerVolumeControl({
@@ -25,7 +20,6 @@ class PlayerVolumeControl extends StatefulWidget {
     required this.isMuted,
     required this.onVolumeChanged,
     required this.onToggleMute,
-    this.focusNode,
   });
 
   @override
@@ -108,13 +102,8 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Mute / Unmute Button. On a TV it is not a stop of its own: the
-            // slider is, and OK on it mutes. A separate stop left of the
-            // slider could only be reached by pressing Left, which the slider
-            // uses to lower the volume.
-            ExcludeFocus(
-              excluding: TvModeService.isTv.value,
-              child: PlayerIconButton(
+            // Mute / Unmute Button
+            PlayerIconButton(
               size: context.rem(2.5),
               iconSize: context.rem(1.375),
               icon: Icon(
@@ -123,14 +112,12 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
               ),
               tooltip: widget.isMuted ? context.l10n.playerUnmute : context.l10n.playerMute,
               onPressed: widget.onToggleMute,
-              ),
             ),
 
             SizedBox(width: context.rem(AppRem.xs)),
 
             // Volume Slider Track
             Focus(
-              focusNode: widget.focusNode,
               onFocusChange: (focused) =>
                   setState(() => _isFocused = focused),
               onKeyEvent: (node, event) {
@@ -140,26 +127,11 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                   return KeyEventResult.ignored;
                 }
                 final key = event.logicalKey;
-                final isTv = TvModeService.isTv.value;
-                // Which keys change the level depends on what the row needs
-                // the others for. On a TV Left/Right are how a remote gets
-                // from this control to its neighbors, so claiming them made
-                // the buttons beyond it unreachable -- speed, audio, sleep
-                // timer and aspect, all of them, with nothing to say why --
-                // and Up/Down adjust instead, as a volume rocker would
-                // (#80). Off a TV the row is a mouse's, and the arrows a
-                // slider's.
-                final lower = isTv
-                    ? LogicalKeyboardKey.arrowDown
-                    : LogicalKeyboardKey.arrowLeft;
-                final raise = isTv
-                    ? LogicalKeyboardKey.arrowUp
-                    : LogicalKeyboardKey.arrowRight;
-                if (key == lower) {
+                if (key == LogicalKeyboardKey.arrowLeft) {
                   _nudgeVolume(-1);
                   return KeyEventResult.handled;
                 }
-                if (key == raise) {
+                if (key == LogicalKeyboardKey.arrowRight) {
                   _nudgeVolume(1);
                   return KeyEventResult.handled;
                 }
@@ -280,17 +252,6 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                           Icons.bolt_rounded,
                           size: context.rem(0.8125),
                           color: boostColor,
-                        ),
-                      ),
-                    // Up and Down change the level on a TV; the glyph says so,
-                    // since the slider itself is not where the arrows point.
-                    if (_isFocused && TvModeService.isTv.value)
-                      Padding(
-                        padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.xxs)),
-                        child: Icon(
-                          Icons.unfold_more_rounded,
-                          size: context.rem(AppRem.iconXs),
-                          color: PlayerTheme.inkMuted,
                         ),
                       ),
                     Text(

@@ -53,6 +53,11 @@ class PlayerTransport extends StatelessWidget {
   final VoidCallback onOpenAudioMenu;
   final VoidCallback onOpenAspectMenu;
   final VoidCallback onOpenSleepTimerMenu;
+
+  /// Opens the volume panel. A TV shows a button for it where a pointer shows
+  /// the slider: the slider's arrows are the ones a remote needs to move
+  /// around the row, so it could not be used and could not be left (#80).
+  final VoidCallback? onOpenVolumeMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
   /// Named stops, so a remote's Up and Down go where they should rather than
@@ -84,6 +89,7 @@ class PlayerTransport extends StatelessWidget {
     required this.onOpenAudioMenu,
     required this.onOpenAspectMenu,
     required this.onOpenSleepTimerMenu,
+    this.onOpenVolumeMenu,
     this.onScrubbingChanged,
     this.seekFocusNode,
     this.volumeFocusNode,
@@ -98,6 +104,7 @@ class PlayerTransport extends StatelessWidget {
     final btnIconSize = context.rem(isCompact ? AppRem.icon : AppRem.iconMd);
     final gap = context.rem(isCompact ? AppRem.xxs : AppRem.xs);
     final isTv = TvModeService.isTv.value;
+    final tvVolume = isTv && onOpenVolumeMenu != null;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -132,7 +139,7 @@ class PlayerTransport extends StatelessWidget {
             onScrubbingChanged: onScrubbingChanged,
             focusNode: seekFocusNode,
             upFocusNode: isTv ? playPauseFocusNode : null,
-            downFocusNode: isTv && !isCompact ? volumeFocusNode : null,
+            downFocusNode: isTv ? volumeFocusNode : null,
           ),
 
           SizedBox(height: context.rem(isCompact ? AppRem.xs : AppRem.sm)),
@@ -157,16 +164,16 @@ class PlayerTransport extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Volume Control (Full slider on wide screens, Mute button on compact)
-                if (!isCompact)
+                if (!isCompact && !tvVolume)
                   PlayerVolumeControl(
                     volume: volume,
                     isMuted: isMuted,
                     onVolumeChanged: onVolumeChanged,
                     onToggleMute: onToggleMute,
-                    focusNode: volumeFocusNode,
                   )
                 else
                   PlayerIconButton(
+                    focusNode: volumeFocusNode,
                     size: btnSize,
                     iconSize: btnIconSize,
                     icon: Icon(
@@ -176,8 +183,10 @@ class PlayerTransport extends StatelessWidget {
                                 ? Icons.volume_up_rounded
                                 : Icons.volume_down_rounded),
                     ),
-                    tooltip: isMuted ? context.l10n.playerUnmute : context.l10n.playerMute,
-                    onPressed: onToggleMute,
+                    tooltip: tvVolume
+                        ? context.l10n.playerVolume
+                        : (isMuted ? context.l10n.playerUnmute : context.l10n.playerMute),
+                    onPressed: tvVolume ? onOpenVolumeMenu : onToggleMute,
                   ),
 
                 // Right Group: speed, audio, subtitles, sleep timer, aspect --

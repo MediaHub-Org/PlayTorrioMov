@@ -14,13 +14,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     A menu now takes focus when it opens (`PlayerMenuAnchor`), keeps the arrows
     on its own rows until it closes, and its rows show the focus wash even when
     selected.
-  - **The volume could not be changed or muted.** Its slider claimed all four
-    arrows, so a remote that reached it could neither leave it nor act on it
-    sensibly. On a TV the volume is one stop: OK mutes and unmutes, Up and Down
-    change the level through the boost range (to 250%) like a volume rocker, and
-    Left/Right move on to the next control. Off a TV Left/Right are the
-    slider's, as before. The buttons beyond it (speed, audio, subtitles, sleep
-    timer, aspect) can be reached with Right.
+  - **The volume could not be changed or muted.** Its slider claimed the arrows
+    a remote moves around the bottom row with, so it could neither be used nor
+    left. On a TV the bottom row has a volume button instead, which opens a
+    panel like speed and audio do (`PlayerVolumeMenu`): the slider takes focus,
+    Left/Right change the level through the boost range (to 250%), OK mutes and
+    unmutes, Back closes it; the panel says so on a TV. The Live TV player does
+    the same. Off a TV the bar keeps its slider. The buttons beyond it (speed,
+    audio, subtitles, sleep timer, aspect) can be reached with Right.
   - **Seeking with the arrows showed no change.** Ten seconds is about a pixel
     on a two-hour bar. A key seek now moves the thumb at once and shows the new
     time in the bubble for a moment; a held key goes in growing steps (10 s, 30 s,
@@ -29,7 +30,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     traversal picks the nearest control above a full-width bar, which was a seek
     button when the bar was reached from the side. On a TV the hops between the
     rows are named: Down from the centered buttons is the seek bar, Down from the
-    bar is the volume, Up from the bottom row is the bar, Up from the bar is
+    bar is the volume button, Up from the bottom row is the bar, Up from the bar is
     play/pause.
   Also: any key press now keeps the bars up another four seconds, including
   the ones a control handles itself, which never reached the timer before and
