@@ -278,6 +278,7 @@
   "catalogNoContent": "Nenhum conteúdo encontrado. Instale mais addons em Configurações.",
   "catalogAllGenres": "Todos os gêneros",
   "catalogAllDecades": "Todas as décadas",
+  "searchAnyRating": "Qualquer nota",
   "catalogNewest": "Mais recentes",
   "catalogOldest": "Mais antigos",
   "catalogNoTitlesForGenre": "Nenhum título encontrado para {genre}.",

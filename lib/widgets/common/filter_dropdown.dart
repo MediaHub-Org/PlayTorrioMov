@@ -17,18 +17,26 @@ class FilterDropdown<T> extends StatelessWidget {
   final List<PopupMenuEntry<T>> items;
   final ValueChanged<T?> onSelected;
 
+  /// Whether the label shows beside the icon. Null follows the screen tier
+  /// (icon-only on a phone); a caller that has measured its own row passes
+  /// the answer instead -- the search bar does, so a phone wide enough for
+  /// the words gets them and a narrow one gets icons.
+  final bool? showLabel;
+
   const FilterDropdown({
     super.key,
     required this.label,
     required this.icon,
     required this.items,
     required this.onSelected,
+    this.showLabel,
   });
 
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    final isMobile = AppBreakpoints.of(context) == ScreenTier.mobile;
+    final isMobile = !(showLabel ??
+        AppBreakpoints.of(context) != ScreenTier.mobile);
     // Over a hero this pill sits on a photo, so its glyphs stay white; in
     // its own band they follow the theme. See the OverArtwork marker.
     final tint = headerPillTint(context);

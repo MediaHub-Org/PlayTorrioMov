@@ -26,6 +26,20 @@ the chips) have not been seen on a device.
   manifest.
 
 ### Changed
+- **Search has the same three filters on Films, Series and Anime.** The type
+  chips (All, Movies, Series, Anime) are joined by a decade menu and a minimum
+  rating menu, the same on every type; anime used to be the only one with a
+  menu (a genre list). They are the two filters every catalog can answer --
+  addons' search results carry a name, poster, year and rating but no genres,
+  so a genre filter would have worked for anime and quietly matched nothing
+  elsewhere -- and they are applied to the results that came back, so changing
+  one is instant. A title that does not state its year or rating is left out
+  while that filter is on. The row stays on one line at every width: it
+  measures the words and uses the widest of three layouts that fits
+  (everything in words; the type in words and the menus as icons; everything as
+  icons, with the names as tooltips and semantics labels). Test fonts are wide,
+  so the real breakpoints on a device are narrower than in the widget tests.
+  Removed: the anime genre menu on Search.
 - **Settings rows show which one the remote is on (#80).** Settings tiles are
   an `InkWell` over an opaque container, so the `InkWell`'s own focus tint was
   painted underneath the container and never seen: a D-pad moved down a
