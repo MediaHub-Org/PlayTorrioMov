@@ -170,6 +170,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
     _subscriptions.addAll([
       _player.stream.playing.listen((playing) {
+        // Straight to the coordinator, not via _onPlaybackUpdate: that only
+        // runs on position ticks, and a paused video emits none, so the
+        // notification kept showing Pause and its Play press was ignored.
+        PlaybackCoordinator.setPlaying(playing);
         if (mounted && _isPlaying != playing) {
           setState(() => _isPlaying = playing);
         }
@@ -294,6 +298,8 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
             _player.play();
           }
         },
+        onPlay: () => _player.play(),
+        onPause: () => _player.pause(),
         onSeek: (position) => _player.seek(position),
         // See PlaybackCoordinator.activate's onShutdownDispose doc -- a
         // native window close never runs this screen's own dispose(),

@@ -79,6 +79,35 @@ class MovieCardSizing {
   }
 }
 
+/// A grid delegate that gives every poster card its real proportions.
+///
+/// The grids used to pass `childAspectRatio: 0.62`. A card is a poster that
+/// is 1.48x its width plus a text block of fixed height, so no single ratio
+/// fits: at 3 columns on a phone the cell is ~98 px wide, the ~66 px of text
+/// takes a far bigger share than at 7 columns on a TV, and the poster is
+/// whatever is left -- close to square. Fixing the main-axis extent instead
+/// (poster = width x 1.48, plus the text) keeps the poster portrait at every
+/// column count.
+///
+/// [contentWidth] is the width the grid lays out in, after its own padding.
+SliverGridDelegateWithFixedCrossAxisCount posterGridDelegate({
+  required double contentWidth,
+  required int crossAxisCount,
+  required double crossAxisSpacing,
+  required double mainAxisSpacing,
+  double scale = 1,
+}) {
+  final cellWidth =
+      (contentWidth - crossAxisSpacing * (crossAxisCount - 1)) / crossAxisCount;
+  final textHeight = AppRem.cardText * AppUnits.remPixels * scale;
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: crossAxisCount,
+    crossAxisSpacing: crossAxisSpacing,
+    mainAxisSpacing: mainAxisSpacing,
+    mainAxisExtent: cellWidth * 1.48 + textHeight,
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Movie Card
 // ─────────────────────────────────────────────────────────────────────────────

@@ -175,18 +175,14 @@ class _CoordinatorAudioHandler extends BaseAudioHandler with SeekHandler {
     return uri;
   }
 
-  // The coordinator exposes a single toggle rather than separate play/pause
-  // callbacks, so each of these guards on the current state — a "play" press
-  // while already playing must not pause.
+  // Play and Pause are separate coordinator calls so a "play" press while
+  // already playing can never pause: that happened when both were a guarded
+  // toggle and the guard read a stale `isPlaying`.
   @override
-  Future<void> play() async {
-    if (!PlaybackCoordinator.isPlaying) PlaybackCoordinator.togglePlayPause();
-  }
+  Future<void> play() async => PlaybackCoordinator.play();
 
   @override
-  Future<void> pause() async {
-    if (PlaybackCoordinator.isPlaying) PlaybackCoordinator.togglePlayPause();
-  }
+  Future<void> pause() async => PlaybackCoordinator.pause();
 
   @override
   Future<void> stop() async {

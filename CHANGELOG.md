@@ -33,7 +33,38 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   The popover and the episodes and sources panels (already full-screen on a
   phone) are unchanged.
 
+### Added
+- **The player's loading screen is the app logo filling up, with a percentage.**
+  It replaces the title logo pulsing over a backdrop. The bar only moves
+  forward: it jumps to a mark for each step it can name (asking for the
+  stream, resolving it, handing it to the player) and then fills the rest
+  from real numbers, mpv's buffer and, for a torrent, TorrServer's preload.
+  The screen now stays up until the first frame is decoded (the old one went
+  away when mpv *accepted* the URL, leaving a black video while it buffered),
+  with a 45 s safety so it can never hide a picture for good. The controls
+  still work underneath, so you can back out. Not yet seen on a device; the
+  Live TV player keeps its old loading state.
+
 ### Fixed
+- **The Android playback notification's Play/Pause now follows the player.**
+  The coordinator only learned the player had paused when a position tick
+  arrived, and a paused video sends none, so the notification kept showing
+  Pause and pressing Play was ignored as "already playing". The player now
+  reports play and pause as they happen, and the notification's Play and
+  Pause call the player directly. Also, Android 13+ hides every notification
+  until `POST_NOTIFICATIONS` is granted and nothing asked for it, so the
+  notification may never have appeared there; the app now asks on launch.
+  Not confirmed on a device.
+- **"Similar Content" on the detail pages loads again.** It depended on one
+  scraped site alone. It now asks TMDB first (its recommendations, then
+  similar titles) and falls back to the old source. The parsing is tested
+  offline; the live request is not (the build sandbox could not reach either
+  service), so check a movie and a series on a device.
+- **Posters in a collection (and the catalog and anime grids) are portrait
+  again.** The grids gave every card a fixed shape (0.62), but a card is a
+  poster plus a fixed block of text, so on a phone's three columns the text
+  ate the poster down to nearly square. The cell height is now worked out from
+  its width (`posterGridDelegate`), keeping the poster 1:1.48.
 - **The player's D-pad reaches everything on the TV (#80).** Device testing of
   v1.9.1 found four things, now fixed (not yet confirmed on a TV):
   - **The audio, speed, sleep timer and aspect menus could be opened but not

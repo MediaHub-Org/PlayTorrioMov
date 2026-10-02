@@ -18,6 +18,12 @@ class TorrentStats {
   final String hash;
   final bool isConnected;
 
+  /// How full the engine's start-up preload is, 0..100. This is the number
+  /// that says "enough has arrived to begin playing", unlike [cachePercent],
+  /// which is the share of the whole file and stays near zero for the first
+  /// minute of a movie.
+  final double preloadPercent;
+
   const TorrentStats({
     required this.speedMbps,
     required this.activePeers,
@@ -27,6 +33,7 @@ class TorrentStats {
     required this.totalBytes,
     required this.hash,
     required this.isConnected,
+    this.preloadPercent = 0,
   });
 
   double get speedKbps => speedMbps * 1024;
@@ -406,6 +413,9 @@ class TorrentStreamService {
       totalBytes: total,
       hash: hash,
       isConnected: info.activePeers > 0 || info.downloadSpeed > 0,
+      preloadPercent: info.preloadSize > 0
+          ? (info.preloadedBytes / info.preloadSize * 100).clamp(0.0, 100.0)
+          : 0.0,
     );
   }
 

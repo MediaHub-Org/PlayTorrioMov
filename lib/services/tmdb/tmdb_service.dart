@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/movie/cast_member.dart';
+import '../metadata/bestsimilar_scraper.dart' show BSItem;
 import 'tmdb_settings.dart';
 
 /// One TMDB `/credits` response: the people in front of the camera and the
@@ -353,6 +354,117 @@ abstract final class TmdbService {
       creators.add(member);
     }
     return creators;
+  }
+
+  /// TMDB's genre ids, movie and TV together, to the name the card shows. The
+  /// list endpoints return ids only, and a lookup per card is a request the
+  /// row does not need to make: these change about once a decade.
+  static const _genreNames = <int, String>{
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime',
+    99: 'Documentary', 18: 'Drama', 10751: 'Family', 14: 'Fantasy',
+    36: 'History', 27: 'Horror', 10402: 'Music', 9648: 'Mystery',
+    10749: 'Romance', 878: 'Science Fiction', 10770: 'TV Movie',
+    53: 'Thriller', 10752: 'War', 37: 'Western', 10759: 'Action & Adventure',
+    10762: 'Kids', 10763: 'News', 10764: 'Reality', 10765: 'Sci-Fi & Fantasy',
+    10766: 'Soap', 10767: 'Talk', 10768: 'War & Politics',
+  };
+
+  /// Titles viewers of [tmdbId] also watch, for the details page's Similar
+  /// Content row.
+  ///
+  /// TMDB's own recommendations first (what people who watched this went on
+  /// to watch), then its `/similar` (same genres and keywords) when there
+  /// are none. This replaced scraping a third-party site as the only source:
+  /// the scrape fails quietly whenever that site changes its markup or blocks
+  /// the request, and the row simply never appeared. An empty list is the
+  /// answer when no key is set, the id is wrong or the request fails.
+  static Future<List<BSItem>> fetchSimilar(
+    String tmdbId, {
+    required bool isTvShow,
+    String? localeCode,
+  }) async {
+    final key = TmdbSettings.effectiveApiKey;
+    if (key == null || tmdbId.isEmpty) return const [];
+    final kind = isTvShow ? 'tv' : 'movie';
+    final language = languageTagFor(localeCode);
+
+    for (final endpoint in const ['recommendations', 'similar']) {
+      final uri = Uri.parse('$_baseUrl/$kind/$tmdbId/$endpoint').replace(
+        queryParameters: {'api_key': key, 'language': language},
+      );
+      try {
+        final response =
+            await http.get(uri).timeout(const Duration(seconds: 10));
+        if (response.statusCode != 200) {
+          _note(_describeStatus(response.statusCode));
+          continue;
+        }
+        final items = parseSimilar(
+          jsonDecode(response.body),
+          isTvShow: isTvShow,
+        );
+        if (items.isNotEmpty) return items;
+      } catch (e) {
+        debugPrint('[TmdbService] fetchSimilar($endpoint) failed: $e');
+        _note('Could not reach TMDB: $e');
+      }
+    }
+    return const [];
+  }
+
+  /// Turns a decoded `/recommendations` or `/similar` body into cards.
+  /// Separate from the request so it is testable without a network round-trip
+  /// or an API key. Titles without a poster are dropped: a card with nothing
+  /// to look at is worse than a shorter row.
+  @visibleForTesting
+  static List<BSItem> parseSimilar(dynamic body, {required bool isTvShow}) {
+    if (body is! Map) return const [];
+    final results = body['results'];
+    if (results is! List) return const [];
+
+    final out = <BSItem>[];
+    for (final entry in results.whereType<Map>()) {
+      final id = entry['id'];
+      final poster = entry['poster_path']?.toString() ?? '';
+      final title = (entry['title'] ?? entry['name'] ?? '').toString().trim();
+      if (id is! int || poster.isEmpty || title.isEmpty) continue;
+
+      final date =
+          (entry['release_date'] ?? entry['first_air_date'] ?? '').toString();
+      final year = date.length >= 4 ? int.tryParse(date.substring(0, 4)) : null;
+      final votes = entry['vote_average'];
+      final rating = votes is num && votes > 0 ? votes.toDouble() : null;
+      final genreIds = entry['genre_ids'];
+      final genre = genreIds is List && genreIds.isNotEmpty
+          ? _genreNames[genreIds.first]
+          : null;
+
+      out.add(
+        BSItem(
+          id: id,
+          slug: '$id',
+          title: title,
+          year: year,
+          rating: rating,
+          voteCount: null,
+          thumbUrl: 'https://image.tmdb.org/t/p/w342$poster',
+          similarityPercent: null,
+          genre: genre,
+          country: null,
+          duration: null,
+          story: entry['overview']?.toString(),
+          styleTags: const [],
+          plotTags: const [],
+          audienceTags: const [],
+          timeTags: const [],
+          placeTags: const [],
+        )
+          ..tmdbId = id
+          ..tmdbMediaType = isTvShow ? 'tv' : 'movie',
+      );
+      if (out.length >= 20) break;
+    }
+    return out;
   }
 
   /// Clears the IMDb -> TMDB cache and the status line, for tests.
