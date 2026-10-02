@@ -17,6 +17,8 @@ abstract final class PlaybackCoordinator {
   static VoidCallback? _onFullStop;
   static VoidCallback? _onShutdownDispose;
   static VoidCallback? _onTogglePlayPause;
+  static VoidCallback? _onPlay;
+  static VoidCallback? _onPause;
   static VoidCallback? _onExpand;
   static VoidCallback? _onOpenArtist;
   static ValueChanged<Duration>? _onSeek;
@@ -62,6 +64,10 @@ abstract final class PlaybackCoordinator {
   /// (dispose controllers, free network/torrent resources, clear state),
   /// not just pause. Falls back to [onStop] if not provided.
   /// [onTogglePlayPause] lets the universal play bar toggle this source.
+  /// [onPlay]/[onPause] are the idempotent halves of it, for callers that
+  /// mean one specific thing -- the notification's Play and Pause buttons,
+  /// a headset key. Without them those fall back to the toggle guarded by
+  /// [isPlaying], which is only as right as the source's last report.
   /// [onOpenArtist] lets the play bar's artist label open the artist view.
   /// [onNext]/[onPrevious] advance within the source's own queue or chapter
   /// list. Leave both null for a source with nothing to skip to (a single
@@ -90,6 +96,8 @@ abstract final class PlaybackCoordinator {
     String? subtitle,
     String? coverUrl,
     VoidCallback? onTogglePlayPause,
+    VoidCallback? onPlay,
+    VoidCallback? onPause,
     VoidCallback? onExpand,
     VoidCallback? onOpenArtist,
     ValueChanged<Duration>? onSeek,
@@ -112,6 +120,8 @@ abstract final class PlaybackCoordinator {
     _onFullStop = onFullStop;
     _onShutdownDispose = onShutdownDispose ?? onFullStop;
     _onTogglePlayPause = onTogglePlayPause;
+    _onPlay = onPlay;
+    _onPause = onPause;
     _onExpand = onExpand;
     _onOpenArtist = onOpenArtist;
     _onSeek = onSeek;
@@ -138,6 +148,8 @@ abstract final class PlaybackCoordinator {
       _onFullStop = null;
       _onShutdownDispose = null;
       _onTogglePlayPause = null;
+      _onPlay = null;
+      _onPause = null;
       _onExpand = null;
       _onOpenArtist = null;
       _onSeek = null;
@@ -170,6 +182,8 @@ abstract final class PlaybackCoordinator {
     _onFullStop = null;
     _onShutdownDispose = null;
     _onTogglePlayPause = null;
+    _onPlay = null;
+    _onPause = null;
     _onExpand = null;
     _onOpenArtist = null;
     _onSeek = null;
@@ -200,6 +214,8 @@ abstract final class PlaybackCoordinator {
     _onFullStop = null;
     _onShutdownDispose = null;
     _onTogglePlayPause = null;
+    _onPlay = null;
+    _onPause = null;
     _onExpand = null;
     _onOpenArtist = null;
     _onSeek = null;
@@ -253,6 +269,26 @@ abstract final class PlaybackCoordinator {
   /// Toggles play/pause on the active source via the universal play bar.
   static void togglePlayPause() => _onTogglePlayPause?.call();
 
+  /// Starts the active source; does nothing if it is already playing.
+  static void play() {
+    final onPlay = _onPlay;
+    if (onPlay != null) {
+      onPlay();
+    } else if (!_isPlaying) {
+      _onTogglePlayPause?.call();
+    }
+  }
+
+  /// Pauses the active source; does nothing if it is already paused.
+  static void pause() {
+    final onPause = _onPause;
+    if (onPause != null) {
+      onPause();
+    } else if (_isPlaying) {
+      _onTogglePlayPause?.call();
+    }
+  }
+
   /// Expands the active source (e.g. opens the full music player).
   static void expand() => _onExpand?.call();
 
@@ -282,6 +318,8 @@ abstract final class PlaybackCoordinator {
     _onStopActive = null;
     _onFullStop = null;
     _onTogglePlayPause = null;
+    _onPlay = null;
+    _onPause = null;
     _onExpand = null;
     _onOpenArtist = null;
     _onSeek = null;

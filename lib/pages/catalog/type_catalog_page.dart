@@ -654,11 +654,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                     context.rem(7.5),
                   ),
                   sliver: SliverGrid(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: posterGridDelegate(
+                      contentWidth: MediaQuery.sizeOf(context).width - AppSpacing.pageInset(context) * 2,
                       crossAxisCount: crossAxisCount,
                       mainAxisSpacing: context.rem(1.25),
                       crossAxisSpacing: context.rem(AppRem.md),
-                      childAspectRatio: 0.62,
+                      scale: AppUnits.scaleOf(context),
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => MovieCard(movie: visible[index]),

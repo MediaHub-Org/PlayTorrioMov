@@ -500,6 +500,16 @@ class _DetailsPageState extends State<DetailsPage>
     setState(() => _isFetchingSimilar = true);
 
     try {
+      // TMDB first: an API with a key, not a scrape of another site's
+      // markup. That scrape stopped producing a row for people, silently, and
+      // is kept below as the fallback for a title TMDB has nothing for.
+      final fromTmdb = await _fetchTmdbSimilar();
+      if (!mounted) return;
+      if (fromTmdb.isNotEmpty) {
+        _showSimilar(fromTmdb);
+        return;
+      }
+
       final title = _detail?.name ?? widget.movie.name;
       final yearStr = _detail?.year ?? widget.movie.year;
       final year = yearStr != null
@@ -523,19 +533,41 @@ class _DetailsPageState extends State<DetailsPage>
         slug: hit.slug,
       );
 
-      if (mounted) {
-        setState(() {
-          _similarItems = details?.similar ?? [];
-          _isFetchingSimilar = false;
-        });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _updateSimilarScrollButtons();
-        });
-      }
+      if (mounted) _showSimilar(details?.similar ?? []);
     } catch (e) {
       debugPrint('[Similar] fetch failed: $e');
       if (mounted) setState(() => _isFetchingSimilar = false);
     }
+  }
+
+  /// The title's TMDB recommendations, or an empty list.
+  Future<List<BSItem>> _fetchTmdbSimilar() async {
+    final meta = _detail;
+    if (meta == null) return const [];
+    final isTvShow = _isSeries;
+    var tmdbId = meta.tmdbId;
+    if (tmdbId == null || tmdbId.isEmpty) {
+      tmdbId = await TmdbService.resolveTmdbIdFromImdb(
+        meta.id,
+        isTvShow: isTvShow,
+      );
+    }
+    if (tmdbId == null || tmdbId.isEmpty) return const [];
+    return TmdbService.fetchSimilar(
+      tmdbId,
+      isTvShow: isTvShow,
+      localeCode: AppThemeService.locale.value?.languageCode,
+    );
+  }
+
+  void _showSimilar(List<BSItem> items) {
+    setState(() {
+      _similarItems = items;
+      _isFetchingSimilar = false;
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _updateSimilarScrollButtons();
+    });
   }
 
   Future<void> _openSimilarItem(BSItem item) async {

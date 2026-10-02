@@ -10,6 +10,7 @@ import '../../services/anime/anime_library_service.dart';
 import '../../services/app_units.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
+import '../../widgets/movie/movie_card.dart' show posterGridDelegate;
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/first_focus_scope.dart';
@@ -322,11 +323,12 @@ class _AnimePageState extends State<AnimePage> {
       // No floating header to clear anymore -- _withHeader (see build())
       // already reserves real space for the pill row above this grid.
       padding: EdgeInsets.fromLTRB(context.rem(AppRem.lg), context.rem(AppRem.md), context.rem(AppRem.lg), context.rem(7.5)),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: posterGridDelegate(
+        contentWidth: width - context.rem(AppRem.lg) * 2,
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: context.rem(1.25),
         crossAxisSpacing: context.rem(AppRem.md),
-        childAspectRatio: 0.62,
+        scale: AppUnits.scaleOf(context),
       ),
       itemCount: items.length,
       itemBuilder: (context, index) => AnimeCard(

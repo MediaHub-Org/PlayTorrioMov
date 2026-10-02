@@ -43,6 +43,14 @@ The first item is code work, in batches; the rest need a device.
   tested in widget tests only. Look at: the breakpoints (a tablet upright, a
   large phone on its side), the swipe against a slider inside a menu, and
   whether the subtitle list now has the room it lacked.
+- **Check on a device: loading logo, notification, Similar Content.** The
+  player's loading logo (does the percentage move sensibly for a torrent, a
+  debrid link and a plain URL, and does it clear on the first frame), the
+  Android notification's Play/Pause (and whether Android 13+ now asks for
+  notifications), and "Similar Content" on a movie and a series (TMDB first,
+  BestSimilar as the fallback; its original failure was never reproduced, the
+  sandbox cannot reach the site). The Live TV player still has the old
+  loading state.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
   says so). Cast a direct/CDN source with no header requirement: if it plays,

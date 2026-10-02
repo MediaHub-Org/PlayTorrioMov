@@ -1,4 +1,5 @@
 // lib/pages/collection/library_shelf_page.dart
+import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../models/collection/media_collection.dart';
@@ -472,11 +473,12 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
           ready: true,
           child: GridView.builder(
           padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(6.25)),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: posterGridDelegate(
+            contentWidth: math.min(width, context.rem(75)) - context.rem(AppRem.md) * 2,
             crossAxisCount: crossAxisCount,
-            childAspectRatio: 0.62,
             crossAxisSpacing: context.rem(AppRem.md),
             mainAxisSpacing: context.rem(1.25),
+            scale: AppUnits.scaleOf(context),
           ),
           itemCount: items.length,
           itemBuilder: (context, index) {

@@ -4,7 +4,10 @@ import android.app.UiModeManager
 import android.content.Context
 import android.content.res.Configuration
 import android.net.wifi.WifiManager
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 import android.os.PowerManager
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -18,6 +21,19 @@ class MainActivity : AudioServiceActivity() {
     private val TV_MODE_CHANNEL = "com.example.playtorrio/tv_mode"
     private var wifiLock: WifiManager.WifiLock? = null
     private var wakeLock: PowerManager.WakeLock? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Android 13+ hides every notification until this is granted, and
+        // nothing else in the app asked. The foreground service ran, but the
+        // playback notification -- the whole point of the media session --
+        // never appeared, so there was nothing to press Play or Pause on.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
