@@ -65,6 +65,10 @@ class PlayerCastSheet extends StatefulWidget {
 }
 
 class _PlayerCastSheetState extends State<PlayerCastSheet> {
+  bool _isCasting = false;
+  bool _hasCastError = false;
+  String? _castingDeviceName;
+
   @override
   void initState() {
     super.initState();
@@ -82,11 +86,47 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
     super.dispose();
   }
 
+  Future<void> _castToDevice(GoogleCastDevice device) async {
+    if (_isCasting) return;
+    setState(() {
+      _isCasting = true;
+      _hasCastError = false;
+      _castingDeviceName = device.friendlyName;
+    });
+    try {
+      final sessionStarted = await CastService.connect(device);
+      if (!sessionStarted) {
+        throw StateError('The Cast session request was rejected.');
+      }
+      await CastService.waitUntilConnected();
+      await CastService.loadMedia(
+        url: widget.streamUrl,
+        isLive: widget.isLive,
+        title: widget.title,
+        posterUrl: widget.posterUrl,
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      debugPrint('[PlayerCastSheet] Cast attempt failed (${e.runtimeType}).');
+      if (!mounted) return;
+      setState(() {
+        _isCasting = false;
+        _castingDeviceName = null;
+        _hasCastError = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(AppRem.md)),
+        padding: EdgeInsets.fromLTRB(
+          context.rem(AppRem.md),
+          context.rem(AppRem.sm),
+          context.rem(AppRem.md),
+          context.rem(AppRem.md),
+        ),
         child: PlayerGlassCard(
           padding: EdgeInsets.all(context.rem(AppRem.md)),
           // The sheet had no scrollable at all: a Column(min) straight into
@@ -102,7 +142,11 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.cast_rounded, color: PlayerTheme.accent, size: context.rem(AppRem.icon)),
+                    Icon(
+                      Icons.cast_rounded,
+                      color: PlayerTheme.accent,
+                      size: context.rem(AppRem.icon),
+                    ),
                     SizedBox(width: context.rem(0.625)),
                     // Expanded, not Text + Spacer. Laid out flat the title
                     // demanded its natural width and pushed the close button
@@ -134,6 +178,18 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                   ],
                 ),
                 SizedBox(height: context.rem(AppRem.xs)),
+                if (_hasCastError) ...[
+                  Padding(
+                    padding: EdgeInsets.only(bottom: context.rem(AppRem.sm)),
+                    child: Text(
+                      context.l10n.playerCastFailed,
+                      style: const TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: AppType.small,
+                      ),
+                    ),
+                  ),
+                ],
                 StreamBuilder<GoogleCastSession?>(
                   stream: CastService.sessionStream,
                   builder: (context, sessionSnapshot) {
@@ -147,7 +203,9 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                           // a spinner. Before, the same words sat there
                           // motionless forever because nothing was searching.
                           return Padding(
-                            padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.lg)),
+                            padding: EdgeInsets.symmetric(
+                              vertical: context.rem(AppRem.lg),
+                            ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -187,21 +245,20 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                             return Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                                onTap: () async {
-                                  Navigator.pop(context);
-                                  await CastService.connect(device);
-                                  await CastService.loadMedia(
-                                    url: widget.streamUrl,
-                                    isLive: widget.isLive,
-                                    title: widget.title,
-                                    posterUrl: widget.posterUrl,
-                                  );
-                                },
+                                borderRadius: BorderRadius.circular(
+                                  context.rem(AppRem.radiusPill),
+                                ),
+                                onTap: _isCasting
+                                    ? null
+                                    : () => _castToDevice(device),
                                 child: Container(
                                   // A floor, not a fixed height: the device name grows with text scale.
-                                  constraints: BoxConstraints(minHeight: context.rem(3)),
-                                  padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
+                                  constraints: BoxConstraints(
+                                    minHeight: context.rem(3),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: context.rem(AppRem.sm),
+                                  ),
                                   child: Row(
                                     children: [
                                       Icon(
@@ -224,6 +281,18 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
+                                      if (_castingDeviceName ==
+                                          device.friendlyName) ...[
+                                        SizedBox(width: context.rem(AppRem.sm)),
+                                        SizedBox(
+                                          width: context.rem(1),
+                                          height: context.rem(1),
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: PlayerTheme.accent,
+                                          ),
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -236,7 +305,7 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                   },
                 ),
               ],
-            )
+            ),
           ),
         ),
       ),

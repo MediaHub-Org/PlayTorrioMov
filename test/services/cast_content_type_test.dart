@@ -34,6 +34,13 @@ void main() {
       );
     });
 
+    test('webm is not mislabeled as mp4', () {
+      expect(
+        CastService.contentTypeFor('https://x.invalid/movie.webm'),
+        'video/webm',
+      );
+    });
+
     test('anything else falls back to mp4', () {
       // Most scraper sources are progressive MP4, named or not.
       expect(CastService.contentTypeFor('https://x.invalid/a.mp4'), 'video/mp4');

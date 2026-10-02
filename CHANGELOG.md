@@ -34,18 +34,28 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   phone) are unchanged.
 
 ### Added
-- **The player's loading screen is the app logo filling up, with a percentage.**
+- **The player's loading screen is the app logo filling up, without a percentage number.**
   It replaces the title logo pulsing over a backdrop. The bar only moves
   forward: it jumps to a mark for each step it can name (asking for the
   stream, resolving it, handing it to the player) and then fills the rest
   from real numbers, mpv's buffer and, for a torrent, TorrServer's preload.
   The screen now stays up until the first frame is decoded (the old one went
   away when mpv *accepted* the URL, leaving a black video while it buffered),
-  with a 45 s safety so it can never hide a picture for good. The controls
-  still work underneath, so you can back out. Not yet seen on a device; the
-  Live TV player keeps its old loading state.
+  with a 45 s safety so it can never hide a picture for good. The logo fills
+  progressively like Stremio; the controls still work underneath, so you can
+  back out. Live TV now uses the same loading treatment while opening and
+  buffering a channel. Not yet seen on a device.
 
 ### Fixed
+- **Cast waits for the receiver before sending media.** The plugin reports
+  success as soon as it requests a connection, before the receiver session
+  exists; media was therefore sent too early. Cast now waits up to 20 seconds
+  for the connected event. The picker stays open while connecting/loading,
+  prevents duplicate attempts, and shows a translated retry message if the
+  receiver rejects or times out. WebM URLs are sent with their actual content
+  type instead of being mislabeled as MP4. Not yet confirmed against a real
+  receiver; streams requiring Referer/User-Agent headers remain unsupported
+  by the Cast SDK path.
 - **The Android playback notification's Play/Pause now follows the player.**
   The coordinator only learned the player had paused when a position tick
   arrived, and a paused video sends none, so the notification kept showing

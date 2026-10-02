@@ -27,6 +27,8 @@ import '../../widgets/player/sleep_timer_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
 import '../../widgets/player/player_volume_menu.dart';
+import '../../widgets/player/player_load_progress.dart';
+import '../../widgets/player/player_loading_logo.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/app_units.dart';
 
@@ -72,6 +74,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   final ValueNotifier<Duration?> _bufferedNotifier = ValueNotifier<Duration?>(
     null,
   );
+  final PlayerLoadProgress _loadProgress = PlayerLoadProgress();
+  bool _awaitingFirstFrame = false;
+  Timer? _firstFrameTimeout;
 
   /// The loading line as a function of the language: it is set from async
   /// code, where there is no context to translate with.
@@ -179,6 +184,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
         }
       }),
       _player.stream.position.listen((pos) {
+        if (_awaitingFirstFrame && pos > Duration.zero && mounted) {
+          setState(_endFirstFrameWait);
+        }
         _position = pos;
         _positionNotifier.value = pos;
         _onPlaybackUpdate();
@@ -188,6 +196,11 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       }),
       _player.stream.buffer.listen((buf) {
         _bufferedNotifier.value = buf;
+      }),
+      _player.stream.bufferingPercentage.listen((percent) {
+        if (_isLoading || _awaitingFirstFrame) {
+          _loadProgress.reachBuffering(percent / 100);
+        }
       }),
       _player.stream.error.listen((error) {
         debugPrint('[IPTV Player Error] $error');
@@ -209,6 +222,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     PlayerSettings.changeNotifier.removeListener(_onPlayerSettingsChanged);
     WakelockPlus.disable();
     _hideControlsTimer?.cancel();
+    _firstFrameTimeout?.cancel();
     _exitArmTimer?.cancel();
     _watchdogTimer?.cancel();
     _volumeHudTimer?.cancel();
@@ -217,6 +231,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     PlaybackCoordinator.release('iptv:${widget.channel.id}');
     _positionNotifier.dispose();
     _bufferedNotifier.dispose();
+    _loadProgress.dispose();
     _player.dispose();
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       WindowService.instance.exitFullscreen();
@@ -238,6 +253,10 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
   Future<void> _initPlayer() async {
     final myGeneration = ++_initGeneration;
+    _endFirstFrameWait();
+    _loadProgress
+      ..reset()
+      ..reach(PlayerLoadProgress.started);
     if (widget.hits.isEmpty) {
       setState(() {
         _isLoading = false;
@@ -264,6 +283,9 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       // afterwards let a muted channel blast a moment of full-volume audio.
       _player.setVolume(_isMuted ? 0.0 : _volume * 100.0);
 
+      _loadProgress
+        ..reach(PlayerLoadProgress.resolved)
+        ..reach(PlayerLoadProgress.opened);
       await _player.open(
         Media(
           streamUrl,
@@ -313,6 +335,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       if (!mounted || myGeneration != _initGeneration) return;
       setState(() {
         _isLoading = false;
+        _beginFirstFrameWait();
         _retryCount = 0;
         _lastPosition = Duration.zero;
         _lastPositionChange = DateTime.now();
@@ -340,6 +363,23 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
         });
       }
     }
+  }
+
+  void _beginFirstFrameWait() {
+    _awaitingFirstFrame = true;
+    _firstFrameTimeout?.cancel();
+    _firstFrameTimeout = Timer(const Duration(seconds: 45), () {
+      if (mounted && _awaitingFirstFrame) {
+        setState(_endFirstFrameWait);
+      }
+    });
+  }
+
+  void _endFirstFrameWait() {
+    if (_awaitingFirstFrame) _loadProgress.reach(1);
+    _awaitingFirstFrame = false;
+    _firstFrameTimeout?.cancel();
+    _firstFrameTimeout = null;
   }
 
   void _switchSource(int index) {
@@ -830,54 +870,39 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           },
                         ),
                       ),
-                    )
-                  else
-                    Center(
-                      child: Text(
-                        _status(context.l10n),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: AppType.bodyLg,
-                        ),
-                      ),
                     ),
-
-                  // Loading / Buffering Banner
-                  if (_isLoading)
-                    Center(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: context.rem(AppRem.lg),
-                          vertical: context.rem(0.875),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.75),
-                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-                          border: Border.all(
-                            color: AppColors.accent.withValues(alpha: 0.5),
+                  if (_isLoading || _awaitingFirstFrame)
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: ColoredBox(
+                          color: Colors.black,
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                ValueListenableBuilder<double>(
+                                  valueListenable: _loadProgress,
+                                  builder: (context, progress, _) =>
+                                      PlayerLoadingLogo(progress: progress),
+                                ),
+                                SizedBox(height: context.rem(AppRem.lg)),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: context.rem(AppRem.lg),
+                                  ),
+                                  child: Text(
+                                    _status(context.l10n),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: AppType.bodyLg,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: context.rem(1.25),
-                              height: context.rem(1.25),
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
-                                color: AppColors.accent,
-                              ),
-                            ),
-                            SizedBox(width: context.rem(0.875)),
-                            Text(
-                              _status(context.l10n),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: AppType.body,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ),

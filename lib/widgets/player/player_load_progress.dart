@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 /// first has no fraction of its own, so each step we can *name* moves the bar
 /// to a fixed mark, and the buffering step, which does report real progress
 /// (mpv's cache fill, TorrServer's preload), spreads across what is left.
-/// The bar therefore only moves forward and never claims a percentage it
-/// cannot back with something that actually happened.
+/// The bar therefore only moves forward and never claims progress it cannot
+/// back with something that actually happened.
 class PlayerLoadProgress extends ValueNotifier<double> {
   PlayerLoadProgress() : super(0);
 
@@ -38,9 +38,4 @@ class PlayerLoadProgress extends ValueNotifier<double> {
       reach(opened + (1 - opened) * fraction.clamp(0.0, 1.0));
 
   void reset() => value = 0;
-
-  /// The whole percent shown to the user. Rounds down so "100%" only ever
-  /// appears when the load really is done.
-  static int percentOf(double progress) =>
-      (progress * 100).floor().clamp(0, 100);
 }

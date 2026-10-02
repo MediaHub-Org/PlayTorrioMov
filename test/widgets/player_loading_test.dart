@@ -30,25 +30,24 @@ void main() {
       progress.reach(-1);
       expect(progress.value, 0);
     });
-
-    test('percent rounds down so 100 means done', () {
-      expect(PlayerLoadProgress.percentOf(0.999), 99);
-      expect(PlayerLoadProgress.percentOf(1), 100);
-      expect(PlayerLoadProgress.percentOf(0.4), 40);
-    });
   });
 
-  testWidgets('the logo shows the percent and settles on it', (tester) async {
+  testWidgets('the logo fills progressively without showing a percentage', (
+    tester,
+  ) async {
     Future<void> pump(double progress) => tester.pumpWidget(
-          MaterialApp(home: Scaffold(body: PlayerLoadingLogo(progress: progress))),
-        );
+      MaterialApp(
+        home: Scaffold(body: PlayerLoadingLogo(progress: progress)),
+      ),
+    );
 
     await pump(0.42);
     await tester.pumpAndSettle();
-    expect(find.text('42%'), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
+    expect(find.byType(ClipRect), findsOneWidget);
 
     await pump(1);
     await tester.pumpAndSettle();
-    expect(find.text('100%'), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
   });
 }

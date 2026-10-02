@@ -85,8 +85,24 @@ abstract final class CastService {
       GoogleCastSessionManager.instance.connectionState ==
       GoogleCastConnectState.connected;
 
-  static Future<void> connect(GoogleCastDevice device) =>
+  static Future<bool> connect(GoogleCastDevice device) =>
       GoogleCastSessionManager.instance.startSessionWithDevice(device);
+
+  /// The plugin's Android method returns true as soon as it requests the
+  /// route; the receiver session arrives later through [sessionStream].
+  /// Loading media before that event races the native session setup and can
+  /// leave the receiver on its idle screen.
+  static Future<void> waitUntilConnected({
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
+    if (isConnected) return;
+    await sessionStream
+        .firstWhere(
+          (session) =>
+              session?.connectionState == GoogleCastConnectState.connected,
+        )
+        .timeout(timeout);
+  }
 
   static Future<void> disconnect() =>
       GoogleCastSessionManager.instance.endSessionAndStopCasting();
@@ -152,11 +168,15 @@ abstract final class CastService {
   /// that cannot read it.
   @visibleForTesting
   static String contentTypeFor(String url) {
-    final lower = url.toLowerCase();
+    final uri = Uri.tryParse(url);
+    final lower = uri == null
+        ? url.toLowerCase()
+        : '${uri.path}?${uri.query}'.toLowerCase();
     if (lower.contains('.m3u8')) return 'application/x-mpegurl';
     if (lower.contains('.mpd')) return 'application/dash+xml';
     if (lower.contains('.mkv')) return 'video/x-matroska';
     if (lower.contains('.ts')) return 'video/mp2t';
+    if (lower.contains('.webm')) return 'video/webm';
     return 'video/mp4';
   }
 
