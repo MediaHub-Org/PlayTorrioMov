@@ -451,6 +451,12 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
 
   /// Opens the gear, or closes whatever it opened. Same contract as the
   /// Movies/Series/Anime player's `_toggleMenu`.
+  void _closeActiveMenu() {
+    if (!mounted || _activeMenu == null) return;
+    setState(() => _activeMenu = null);
+    _startHideControlsTimer();
+  }
+
   void _toggleSettingsMenu() {
     setState(() {
       _activeMenu = _activeMenu == null ? 'settings' : null;
@@ -1415,13 +1421,15 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                   // rows. Speed and aspect are transport-bar buttons here too,
                   // so the gear holds only the sleep timer.
                   if (_activeMenu == 'settings')
-                    const PlayerMenuAnchor(
-                      child: SleepTimerMenu(),
+                    PlayerMenuAnchor(
+                      onClose: _closeActiveMenu,
+                      child: const SleepTimerMenu(),
                     ),
 
                   // Floating Volume Popover, a TV's way in.
                   if (_activeMenu == 'volume')
                     PlayerMenuAnchor(
+                      onClose: _closeActiveMenu,
                       child: PlayerVolumeMenu(
                         volume: _volume,
                         isMuted: _isMuted || _volume == 0,
@@ -1433,6 +1441,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                   // Floating Aspect Ratio Popover
                   if (_activeMenu == 'aspect')
                     PlayerMenuAnchor(
+                      onClose: _closeActiveMenu,
                       child: PlayerAspectMenu(
                         onBack: () => setState(() => _activeMenu = 'settings'),
                         currentFit: _videoFit,

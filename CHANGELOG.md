@@ -5,6 +5,34 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **The player's menus come in the shape each screen is good at.** Subtitles,
+  audio, speed, volume, sleep timer and aspect were one 20 rem card anchored
+  bottom-right whatever they were shown on, so on a phone the subtitle list was
+  squeezed into what the video left, and on a TV it was a small card at the edge
+  of a large picture. They are now (`playerPanelStyleFor`, `PlayerSheet`):
+  - **a bottom sheet** on a phone held upright (or any narrow upright window),
+    the full width, up to 88% of the height;
+  - **a side sheet**, the full height, over a dimmed video, on a phone on its
+    side, a tablet and a TV (about 42% of the width, 22-32 rem);
+  - **the popover as before** on a pointer in a wide window (desktop).
+  The subtitle list takes the whole sheet. The sheet draws the surface, the
+  menus inside just lay out, and a menu still takes focus when it opens.
+  Not on a device yet: all of it is tested in widget tests only, and the
+  breakpoints (upright and under 900 wide, touch, TV) are a first guess.
+  **Closing**, decided per shape rather than the same everywhere:
+  - a bottom sheet has a **grabber** and a **drag down**, plus a tap on the
+    scrim and Back; no X (it would sit where a thumb has to cross to reach the
+    list, and the grabber already says "pull");
+  - a side sheet on a **touch screen** has an **X** in a strip of its own at the
+    top, a **swipe toward its edge** (left in a right-to-left layout), a tap on
+    the scrim and Back, since a side panel has no grabber to suggest the swipe;
+  - a side sheet on a **TV** has none of those: Back closes it, an X would be one
+    more stop for the D-pad, and a swipe means nothing.
+  A drag past a third of the way, or a fling, sends it away; less springs back.
+  The popover and the episodes and sources panels (already full-screen on a
+  phone) are unchanged.
+
 ### Fixed
 - **The player's D-pad reaches everything on the TV (#80).** Device testing of
   v1.9.1 found four things, now fixed (not yet confirmed on a TV):

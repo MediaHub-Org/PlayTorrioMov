@@ -5,6 +5,7 @@ import '../../models/subtitle/subtitle_model.dart';
 import '../../services/subtitles/subtitle_languages.dart';
 import 'language_flag.dart';
 import 'player_glass.dart';
+import 'player_panel.dart';
 import 'player_menu_row.dart';
 import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
 import '../../services/app_units.dart';
@@ -133,7 +134,11 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     // "More options" expands to -- is unreachable.
     final roomForCard = PlayerMenuAnchor.availableHeight(context);
     final preferred = (screen.height - 160).clamp(280.0, 460.0);
-    final cardHeight = preferred < roomForCard ? preferred : roomForCard;
+    // In a sheet there is no popover to fit under the title bar: the list
+    // gets the whole panel, which is the point of having one.
+    final cardHeight = PlayerPanelScope.isSheet(context)
+        ? roomForCard
+        : (preferred < roomForCard ? preferred : roomForCard);
 
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),

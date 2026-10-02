@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/services/player/player_settings.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_panel.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 import 'package:playtorriomov/widgets/player/subtitle_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,11 +71,13 @@ Future<({Rect before, Rect panel, Rect text})> openAppearance(
     ),
   );
   await tester.pump();
+  // A sheet slides in; measure once it is in place.
+  await tester.pump(const Duration(milliseconds: 400));
   final before = tester.getRect(find.byType(PlayerGlassCard));
 
   await tester.tap(find.byIcon(Icons.tune_rounded));
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pump(const Duration(milliseconds: 400));
 
   return (
     before: before,
@@ -113,18 +116,29 @@ void main() {
     'phone landscape 844x390': Size(844, 390),
   };
 
-  for (final entry in sizes.entries) {
-    testWidgets('${entry.key}: the panel stays put and the sample is centered',
-        (tester) async {
-      final r = await openAppearance(tester, entry.value);
+  // Both presentations: a touch platform gets a sheet on most of these sizes,
+  // a pointer gets the popover on the wide ones.
+  for (final touch in [true, false]) {
+    for (final entry in sizes.entries) {
+      testWidgets(
+          '${entry.key} ${touch ? 'touch' : 'pointer'}: the panel stays put '
+          'and the sample is centered', (tester) async {
+        PlayerPanelPolicy.touchOverride = touch;
+        try {
+          final r = await openAppearance(tester, entry.value);
 
-      expect(r.panel, r.before, reason: 'opening Appearance moved the panel');
-      expect(
-        r.text.center.dx,
-        closeTo(entry.value.width / 2, 0.5),
-        reason: 'the sample is off the center of the picture',
-      );
-    });
+          expect(r.panel, r.before,
+              reason: 'opening Appearance moved the panel');
+          expect(
+            r.text.center.dx,
+            closeTo(entry.value.width / 2, 0.5),
+            reason: 'the sample is off the center of the picture',
+          );
+        } finally {
+          PlayerPanelPolicy.touchOverride = null;
+        }
+      });
+    }
   }
 
   testWidgets('the sample follows the side and vertical position settings',

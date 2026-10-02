@@ -1309,6 +1309,17 @@ class _PlayerScreenState extends State<PlayerScreen>
     return (match ?? _audioTracks.first).language;
   }
 
+  /// Closes whichever menu is open: what the scrim, a sheet's close button and
+  /// its swipe all call.
+  void _closeActiveMenu() {
+    if (!mounted || _activeMenu == null) return;
+    setState(() {
+      _activeMenu = null;
+      _menuParent = null;
+    });
+    _startHideControlsTimer();
+  }
+
   void _toggleMenu(String menuName) {
     setState(() {
       if (_activeMenu == menuName) {
@@ -2873,6 +2884,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           // Floating Subtitle Menu Popover
         if (_activeMenu == 'subtitle' && !_isLoading)
           PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
             child: PlayerSubtitleMenu(
               onBack: _backToSettings,
               onAppearanceOpenChanged: (open) {
@@ -2920,6 +2932,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Audio Menu Popover
         if (_activeMenu == 'audio' && !_isLoading)
           PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
             child: PlayerAudioMenu(
               onBack: _backToSettings,
               audioTracks: _audioTracks,
@@ -2949,11 +2962,15 @@ class _PlayerScreenState extends State<PlayerScreen>
 
         // Floating Sleep Timer Popover
         if (_activeMenu == 'sleep' && !_isLoading)
-          const PlayerMenuAnchor(child: SleepTimerMenu()),
+          PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
+            child: const SleepTimerMenu(),
+          ),
 
         // Floating Volume Popover (a TV's way in; see PlayerVolumeMenu)
         if (_activeMenu == 'volume' && !_isLoading)
           PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
             child: PlayerVolumeMenu(
               onBack: _backToSettings,
               volume: _volume,
@@ -2966,6 +2983,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Speed Menu Popover
         if (_activeMenu == 'speed' && !_isLoading)
           PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
             child: PlayerSpeedMenu(
               onBack: _backToSettings,
               currentRate: _playbackRate,
@@ -2983,6 +3001,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Aspect Ratio Popover
         if (_activeMenu == 'aspect' && !_isLoading)
           PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
             child: PlayerAspectMenu(
               onBack: _backToSettings,
               currentFit: _videoFit,

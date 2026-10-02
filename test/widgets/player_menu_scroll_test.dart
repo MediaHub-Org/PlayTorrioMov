@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_panel.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 
 Widget wrap(Widget child) => MaterialApp(
@@ -37,6 +38,12 @@ Widget menu() => PlayerSubtitleMenu(
 );
 
 void main() {
+  // These hold the popover, the desktop presentation. A touch platform (what
+  // flutter_test defaults to) gets a sheet on these sizes; those are in
+  // player_panel_test.dart.
+  setUp(() => PlayerPanelPolicy.touchOverride = false);
+  tearDown(() => PlayerPanelPolicy.touchOverride = null);
+
   group('the panel never asks for more height than it is given', () {
     for (final size in const {
       'a short landscape phone': Size(880, 400),

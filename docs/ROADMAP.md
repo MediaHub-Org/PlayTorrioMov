@@ -36,6 +36,13 @@ The first item is code work, in batches; the rest need a device.
   play button's lit state, the seek bar's stronger violet, and the volume as
   one stop with Left/Right and OK), and the player's Back ladder (panel, then bars, then a second press to leave). From v1.9.1 on a TV it was reported that the player's menus (audio, speed, sleep timer, aspect), the volume and the seek bar's arrows did not work; these are reworked in Unreleased and not yet confirmed on a TV. The in-player sources panel and the anime
   episode sheet now carry the lean tag set too.
+- **Player menus as sheets: check the shapes on devices.** The menus are a
+  bottom sheet on a phone upright, a side sheet on a phone on its side, a
+  tablet and a TV, the popover on a desktop (`playerPanelStyleFor`), with a
+  close button, swipe and scrim chosen per shape (CHANGELOG, Unreleased). It is
+  tested in widget tests only. Look at: the breakpoints (a tablet upright, a
+  large phone on its side), the swipe against a slider inside a menu, and
+  whether the subtitle list now has the room it lacked.
 - **Casting a scraper source hangs on the loading splash (#79).** Likely the
   Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
   says so). Cast a direct/CDN source with no header requirement: if it plays,
