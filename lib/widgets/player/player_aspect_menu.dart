@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
+import '../common/focus_fill.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 
@@ -104,66 +105,69 @@ class PlayerAspectMenu extends StatelessWidget {
                       0.001;
               return Material(
                 color: Colors.transparent,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                  onTap: () {
-                    if (opt.fit != null) {
-                      onFitSelected(opt.fit!);
-                    } else {
-                      onRatioSelected(opt.forcedRatio!);
-                    }
-                    onClose();
-                  },
-                  child: Container(
-                    // A minimum, not a fixed height: the label grows with
-                    // text scale and the row had nowhere to put it -- 685px
-                    // past the card at 3x. PlayerMenuAnchor bounds and
-                    // scrolls the card, so growing here is safe.
-                    constraints: BoxConstraints(minHeight: context.rem(2.375)),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: context.rem(AppRem.ms),
-                      vertical: context.rem(AppRem.xs),
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected ? PlayerTheme.raised : Colors.transparent,
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                      border: Border.all(
-                        color: isSelected ? PlayerTheme.edge : Colors.transparent,
-                        width: 1, // px: a hairline, not a layout size
+                child: FocusFill(
+                  radius: context.rem(AppRem.radiusPill),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                    onTap: () {
+                      if (opt.fit != null) {
+                        onFitSelected(opt.fit!);
+                      } else {
+                        onRatioSelected(opt.forcedRatio!);
+                      }
+                      onClose();
+                    },
+                    child: Container(
+                      // A minimum, not a fixed height: the label grows with
+                      // text scale and the row had nowhere to put it -- 685px
+                      // past the card at 3x. PlayerMenuAnchor bounds and
+                      // scrolls the card, so growing here is safe.
+                      constraints: BoxConstraints(minHeight: context.rem(2.375)),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.rem(AppRem.ms),
+                        vertical: context.rem(AppRem.xs),
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        // A radio mark, matching the audio, subtitle and
-                        // sleep menus. This row used a trailing check while
-                        // those used a leading radio, so the same gesture --
-                        // pick one of these -- was drawn two ways depending
-                        // on which menu you happened to have open.
-                        Icon(
-                          isSelected
-                              ? Icons.radio_button_checked_rounded
-                              : Icons.radio_button_unchecked_rounded,
-                          size: context.rem(0.9375),
-                          color: isSelected
-                              ? PlayerTheme.accent
-                              : PlayerTheme.inkDisabled,
+                      decoration: BoxDecoration(
+                        color: isSelected ? PlayerTheme.raised : Colors.transparent,
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                        border: Border.all(
+                          color: isSelected ? PlayerTheme.edge : Colors.transparent,
+                          width: 1, // px: a hairline, not a layout size
                         ),
-                        SizedBox(width: context.rem(AppRem.sm)),
-                        // Flexible so the label yields to the mark rather
-                        // than pushing it off the edge.
-                        Flexible(
-                          child: Text(
-                            opt.label(context.l10n),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                              fontSize: AppType.smallPlus,
-                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      ),
+                      child: Row(
+                        children: [
+                          // A radio mark, matching the audio, subtitle and
+                          // sleep menus. This row used a trailing check while
+                          // those used a leading radio, so the same gesture --
+                          // pick one of these -- was drawn two ways depending
+                          // on which menu you happened to have open.
+                          Icon(
+                            isSelected
+                                ? Icons.radio_button_checked_rounded
+                                : Icons.radio_button_unchecked_rounded,
+                            size: context.rem(0.9375),
+                            color: isSelected
+                                ? PlayerTheme.accent
+                                : PlayerTheme.inkDisabled,
+                          ),
+                          SizedBox(width: context.rem(AppRem.sm)),
+                          // Flexible so the label yields to the mark rather
+                          // than pushing it off the edge.
+                          Flexible(
+                            child: Text(
+                              opt.label(context.l10n),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                                fontSize: AppType.smallPlus,
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

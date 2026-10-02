@@ -30,6 +30,7 @@ import '../../widgets/player/player_top_bar.dart';
 import '../../widgets/player/back_press_decision.dart';
 import '../../widgets/player/remote_key_decision.dart';
 import '../../widgets/player/player_transport.dart';
+import '../../widgets/player/player_volume_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_seek_feedback.dart';
 import '../../widgets/player/sleep_timer_menu.dart';
@@ -230,6 +231,10 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// The centered play/pause button's node: where a remote's first arrow
   /// press lands once the controls are back on screen.
   final FocusNode _playPauseFocus = FocusNode(debugLabel: 'PlayerPlayPause');
+  // Named stops for a remote's Up and Down (see PlayerTransport): without
+  // them the neighbor in each direction is whatever is geometrically nearest.
+  final FocusNode _seekFocus = FocusNode(debugLabel: 'PlayerSeekBar');
+  final FocusNode _volumeFocus = FocusNode(debugLabel: 'PlayerVolume');
 
   @override
   void initState() {
@@ -239,6 +244,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     // keyboard shortcut (J/L/C/A/S/R/F/space) silently dies until the user
     // clicks. Observing the lifecycle re-arms them on resume.
     WidgetsBinding.instance.addObserver(this);
+    HardwareKeyboard.instance.addHandler(_keepControlsUpOnKey);
     _wasFullscreenBeforeEntering = WindowService.instance.isFullscreen;
     // The sleep timer pauses playback when its countdown ends. The service
     // outlives this screen -- it is a singleton the transport bar's button
@@ -1242,6 +1248,24 @@ class _PlayerScreenState extends State<PlayerScreen>
     }
   }
 
+  /// Any key press keeps the bars up another few seconds.
+  ///
+  /// Keys the controls handle themselves -- Left/Right on the seek bar, Up/Down
+  /// on the volume, the hops between rows -- never reach the screen's own key
+  /// handler, which is where the hide timer used to be pushed back. Moving
+  /// along the bottom row with the remote then lost the bars four seconds in,
+  /// mid-press. Listening at the keyboard, ahead of the focus tree, covers
+  /// every key whoever ends up handling it. Returns false: it only watches.
+  bool _keepControlsUpOnKey(KeyEvent event) {
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        mounted &&
+        _showControls &&
+        _activeMenu == null) {
+      _startHideControlsTimer();
+    }
+    return false;
+  }
+
   /// Brings the controls back and keeps them up a while longer. Any key a
   /// remote sends means someone is watching, and a remote has no pointer to
   /// do it the way [_handlePointerActivity] does.
@@ -2186,8 +2210,11 @@ class _PlayerScreenState extends State<PlayerScreen>
     _hideTimer?.cancel();
     _autoNextTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
+    HardwareKeyboard.instance.removeHandler(_keepControlsUpOnKey);
     _focusNode.dispose();
     _playPauseFocus.dispose();
+    _seekFocus.dispose();
+    _volumeFocus.dispose();
     PlaybackCoordinator.release(
       'video:${widget.episode?.id ?? widget.detail?.id ?? widget.source.url}',
     );
@@ -2751,14 +2778,30 @@ class _PlayerScreenState extends State<PlayerScreen>
                 opacity: (_showControls && !_showTextSyncOverlay) ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
                 child: Center(
-                  child: PlayerCenterControls(
-                    playPauseFocusNode: _playPauseFocus,
-                    isPlaying: _isPlaying,
-                    onPlayPause: _togglePlayPause,
-                    onSeekBack30: () =>
-                        _seekRelative(const Duration(seconds: -30)),
-                    onSeekForward30: () =>
-                        _seekRelative(const Duration(seconds: 30)),
+                  // Down from the centered buttons is the seek bar, by name,
+                  // on a TV: the nearest thing below the left or right seek
+                  // button is not always it.
+                  child: Focus(
+                    canRequestFocus: false,
+                    skipTraversal: true,
+                    onKeyEvent: (node, event) {
+                      if (!TvModeService.isTv.value ||
+                          event is! KeyDownEvent ||
+                          event.logicalKey != LogicalKeyboardKey.arrowDown) {
+                        return KeyEventResult.ignored;
+                      }
+                      _seekFocus.requestFocus();
+                      return KeyEventResult.handled;
+                    },
+                    child: PlayerCenterControls(
+                      playPauseFocusNode: _playPauseFocus,
+                      isPlaying: _isPlaying,
+                      onPlayPause: _togglePlayPause,
+                      onSeekBack30: () =>
+                          _seekRelative(const Duration(seconds: -30)),
+                      onSeekForward30: () =>
+                          _seekRelative(const Duration(seconds: 30)),
+                    ),
                   ),
                 ),
               ),
@@ -2814,6 +2857,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onOpenAudioMenu: () => _toggleMenu('audio'),
                     onOpenAspectMenu: () => _toggleMenu('aspect'),
                     onOpenSleepTimerMenu: () => _toggleMenu('sleep'),
+                    onOpenVolumeMenu: () => _toggleMenu('volume'),
+                    seekFocusNode: _seekFocus,
+                    volumeFocusNode: _volumeFocus,
+                    playPauseFocusNode: _playPauseFocus,
                   ),
                 ),
               ),
@@ -2903,6 +2950,18 @@ class _PlayerScreenState extends State<PlayerScreen>
         // Floating Sleep Timer Popover
         if (_activeMenu == 'sleep' && !_isLoading)
           const PlayerMenuAnchor(child: SleepTimerMenu()),
+
+        // Floating Volume Popover (a TV's way in; see PlayerVolumeMenu)
+        if (_activeMenu == 'volume' && !_isLoading)
+          PlayerMenuAnchor(
+            child: PlayerVolumeMenu(
+              onBack: _backToSettings,
+              volume: _volume,
+              isMuted: _isMuted || _volume == 0,
+              onVolumeChanged: (vol) => _applyVolume(vol),
+              onToggleMute: () => _toggleMute(),
+            ),
+          ),
 
         // Floating Speed Menu Popover
         if (_activeMenu == 'speed' && !_isLoading)

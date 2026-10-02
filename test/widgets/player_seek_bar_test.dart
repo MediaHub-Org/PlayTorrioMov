@@ -68,4 +68,69 @@ void main() {
     expect(seeks, isNotEmpty);
     expect(seeks.last, greaterThan(const Duration(minutes: 5)));
   });
+
+  testWidgets('a key seek shows the new time, so ten seconds is visible',
+      (tester) async {
+    // Ten seconds is about a pixel on a two-hour bar: the thumb alone showed
+    // a TV viewer nothing (#80). The time bubble names where the key took it.
+    final seeks = <Duration>[];
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: PlayerSeekBar(
+          position: const Duration(minutes: 5),
+          duration: const Duration(hours: 2),
+          onSeek: seeks.add,
+        ),
+      ),
+    ));
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+
+    expect(seeks, [const Duration(minutes: 5, seconds: 10)]);
+    // The bubble and the start label both read the target.
+    expect(find.text('5:10'), findsWidgets);
+
+    // And it goes away on its own.
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('5:10'), findsNothing);
+  });
+
+  testWidgets('a held key seeks in growing steps and commits once it pauses',
+      (tester) async {
+    final seeks = <Duration>[];
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: PlayerSeekBar(
+          position: const Duration(minutes: 5),
+          duration: const Duration(hours: 2),
+          onSeek: seeks.add,
+        ),
+      ),
+    ));
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(seeks.length, 1, reason: 'the first press seeks at once');
+
+    for (var i = 0; i < 10; i++) {
+      await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowRight);
+      await tester.pump(const Duration(milliseconds: 30));
+    }
+    expect(seeks.length, 1, reason: 'repeats wait for a pause to commit');
+
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(seeks.length, 2);
+    // Ten repeats at bigger steps went further than ten times ten seconds.
+    expect(
+      seeks.last - const Duration(minutes: 5),
+      greaterThan(const Duration(seconds: 110)),
+    );
+
+    await tester.pump(const Duration(seconds: 2));
+  });
 }

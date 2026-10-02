@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
-import '../../services/tv_mode_service.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 
@@ -103,13 +102,8 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Mute / Unmute Button. On a TV it is not a stop of its own: the
-            // slider is, and OK on it mutes. A separate stop left of the
-            // slider could only be reached by pressing Left, which the slider
-            // uses to lower the volume.
-            ExcludeFocus(
-              excluding: TvModeService.isTv.value,
-              child: PlayerIconButton(
+            // Mute / Unmute Button
+            PlayerIconButton(
               size: context.rem(2.5),
               iconSize: context.rem(1.375),
               icon: Icon(
@@ -118,7 +112,6 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
               ),
               tooltip: widget.isMuted ? context.l10n.playerUnmute : context.l10n.playerMute,
               onPressed: widget.onToggleMute,
-              ),
             ),
 
             SizedBox(width: context.rem(AppRem.xs)),
@@ -128,8 +121,8 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
               onFocusChange: (focused) =>
                   setState(() => _isFocused = focused),
               onKeyEvent: (node, event) {
-                // Repeats too, so holding Right on a remote keeps climbing
-                // instead of needing fifty presses to reach 100%.
+                // Repeats too, so holding a key keeps climbing instead of
+                // needing fifty presses to reach 100%.
                 if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
                   return KeyEventResult.ignored;
                 }
@@ -142,11 +135,7 @@ class _PlayerVolumeControlState extends State<PlayerVolumeControl> {
                   _nudgeVolume(1);
                   return KeyEventResult.handled;
                 }
-                // OK mutes. Up and Down are deliberately not claimed: they
-                // were, and a remote that reached this slider could never
-                // leave it, because all four arrows were spoken for. Off a
-                // TV they fall through to the screen's own handler, which
-                // still turns Up/Down into volume.
+                // OK mutes.
                 if (event is KeyDownEvent &&
                     (key == LogicalKeyboardKey.select ||
                         key == LogicalKeyboardKey.enter ||

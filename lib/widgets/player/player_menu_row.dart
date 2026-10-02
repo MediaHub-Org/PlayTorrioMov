@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/tv_type.dart';
+import '../common/focus_fill.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 
@@ -44,58 +45,61 @@ class PlayerMenuRow extends StatelessWidget {
       padding: EdgeInsets.only(bottom: context.rem(0.1875)),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(context.rem(0.5625)),
-          onTap: onTap,
-          child: Container(
-            constraints: BoxConstraints(minHeight: context.rem(2.375)),
-            padding: EdgeInsets.symmetric(horizontal: context.rem(0.5625), vertical: context.rem(0.3125)),
-            decoration: BoxDecoration(
-              color: isSelected ? PlayerTheme.raised : Colors.transparent,
-              borderRadius: BorderRadius.circular(context.rem(0.5625)),
-              border: Border.all(
-                color: isSelected ? PlayerTheme.edge : Colors.transparent,
-              ),
-            ),
-            child: Row(
-              children: [
-                // A radio mark, not a filled row: which one of these is on is
-                // the question the list answers, and a tick says it without
-                // leaning on the accent color to carry the meaning alone.
-                Icon(
-                  isSelected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  size: context.rem(0.9375),
-                  color:
-                      isSelected ? PlayerTheme.accent : PlayerTheme.inkDisabled,
+        child: FocusFill(
+          radius: context.rem(0.5625),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
+            onTap: onTap,
+            child: Container(
+              constraints: BoxConstraints(minHeight: context.rem(2.375)),
+              padding: EdgeInsets.symmetric(horizontal: context.rem(0.5625), vertical: context.rem(0.3125)),
+              decoration: BoxDecoration(
+                color: isSelected ? PlayerTheme.raised : Colors.transparent,
+                borderRadius: BorderRadius.circular(context.rem(0.5625)),
+                border: Border.all(
+                  color: isSelected ? PlayerTheme.edge : Colors.transparent,
                 ),
-                SizedBox(width: context.rem(AppRem.sm)),
-                leading,
-                SizedBox(width: context.rem(AppRem.sm)),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color:
-                          isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                      fontSize: AppType.captionPlus,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
+              ),
+              child: Row(
+                children: [
+                  // A radio mark, not a filled row: which one of these is on is
+                  // the question the list answers, and a tick says it without
+                  // leaning on the accent color to carry the meaning alone.
+                  Icon(
+                    isSelected
+                        ? Icons.radio_button_checked_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    size: context.rem(0.9375),
+                    color:
+                        isSelected ? PlayerTheme.accent : PlayerTheme.inkDisabled,
+                  ),
+                  SizedBox(width: context.rem(AppRem.sm)),
+                  leading,
+                  SizedBox(width: context.rem(AppRem.sm)),
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color:
+                            isSelected ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                        fontSize: AppType.captionPlus,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-                for (final badge in badges) ...[
-                  SizedBox(width: context.rem(0.3125)),
-                  _MiniBadge(badge),
+                  for (final badge in badges) ...[
+                    SizedBox(width: context.rem(0.3125)),
+                    _MiniBadge(badge),
+                  ],
+                  if (trailing != null) ...[
+                    SizedBox(width: context.rem(AppRem.xs)),
+                    trailing!,
+                  ],
                 ],
-                if (trailing != null) ...[
-                  SizedBox(width: context.rem(AppRem.xs)),
-                  trailing!,
-                ],
-              ],
+              ),
             ),
           ),
         ),

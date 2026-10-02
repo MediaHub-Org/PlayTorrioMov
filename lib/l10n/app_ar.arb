@@ -141,6 +141,8 @@
   "playerMute": "كتم الصوت",
   "playerUnmute": "إلغاء الكتم",
   "playerPressBackToExit": "اضغط رجوع مرة أخرى للخروج",
+  "playerVolume": "مستوى الصوت",
+  "playerVolumeHint": "يمين/يسار للضبط · موافق للكتم",
   "playerSleepTimer": "مؤقت النوم",
   "playerSleepTimerLeft": "مؤقت النوم: متبقي {minutes} دقيقة",
   "playerDownload": "تنزيل",

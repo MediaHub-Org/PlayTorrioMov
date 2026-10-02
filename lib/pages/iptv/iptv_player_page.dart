@@ -26,6 +26,7 @@ import '../../widgets/player/player_aspect_menu.dart';
 import '../../widgets/player/sleep_timer_menu.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_volume_control.dart';
+import '../../widgets/player/player_volume_menu.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/app_units.dart';
 
@@ -154,6 +155,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
   @override
   void initState() {
     super.initState();
+    HardwareKeyboard.instance.addHandler(_keepControlsUpOnKey);
     WakelockPlus.enable();
     _activeHitIndex = widget.initialHitIndex.clamp(0, widget.hits.length - 1);
     _sourcesScrollController = ScrollController();
@@ -199,6 +201,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
     for (final s in _subscriptions) {
       s.cancel();
     }
+    HardwareKeyboard.instance.removeHandler(_keepControlsUpOnKey);
     PlayerSettings.changeNotifier.removeListener(_onPlayerSettingsChanged);
     WakelockPlus.disable();
     _hideControlsTimer?.cancel();
@@ -381,6 +384,19 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
         _initPlayer();
       }
     });
+  }
+
+  /// Any key press keeps the bars up another few seconds, including the ones a
+  /// control handles itself (the volume's Up/Down) and so never reach this
+  /// screen's own handler. Only watches: returns false.
+  bool _keepControlsUpOnKey(KeyEvent event) {
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        mounted &&
+        _showControls &&
+        _activeMenu == null) {
+      _startHideControlsTimer();
+    }
+    return false;
   }
 
   void _startHideControlsTimer() {
@@ -1266,12 +1282,41 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                                       // of the app boosts to 250% -- which
                                       // matters more here than anywhere, since
                                       // portal streams are often quiet.
-                                      PlayerVolumeControl(
-                                        volume: _volume,
-                                        isMuted: _isMuted || _volume == 0,
-                                        onVolumeChanged: _applyVolume,
-                                        onToggleMute: _toggleMute,
-                                      ),
+                                      // On a TV the slider's arrows are the
+                                      // ones a remote moves around the row
+                                      // with, so a button opens the volume
+                                      // panel instead (see PlayerVolumeMenu).
+                                      if (TvModeService.isTv.value)
+                                        PlayerIconButton(
+                                          size: context.rem(2.5),
+                                          iconSize: context.rem(1.375),
+                                          icon: Icon(
+                                            _isMuted || _volume == 0
+                                                ? Icons.volume_off_rounded
+                                                : (_volume > 1.0
+                                                      ? Icons.volume_up_rounded
+                                                      : Icons.volume_down_rounded),
+                                          ),
+                                          tooltip: context.l10n.playerVolume,
+                                          onPressed: () => setState(() {
+                                            _activeMenu = _activeMenu == 'volume'
+                                                ? null
+                                                : 'volume';
+                                            if (_activeMenu != null) {
+                                              _showSourcesDrawer = false;
+                                              _hideControlsTimer?.cancel();
+                                            } else {
+                                              _startHideControlsTimer();
+                                            }
+                                          }),
+                                        )
+                                      else
+                                        PlayerVolumeControl(
+                                          volume: _volume,
+                                          isMuted: _isMuted || _volume == 0,
+                                          onVolumeChanged: _applyVolume,
+                                          onToggleMute: _toggleMute,
+                                        ),
 
                                       const Spacer(),
 
@@ -1372,6 +1417,17 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                   if (_activeMenu == 'settings')
                     const PlayerMenuAnchor(
                       child: SleepTimerMenu(),
+                    ),
+
+                  // Floating Volume Popover, a TV's way in.
+                  if (_activeMenu == 'volume')
+                    PlayerMenuAnchor(
+                      child: PlayerVolumeMenu(
+                        volume: _volume,
+                        isMuted: _isMuted || _volume == 0,
+                        onVolumeChanged: _applyVolume,
+                        onToggleMute: _toggleMute,
+                      ),
                     ),
 
                   // Floating Aspect Ratio Popover

@@ -17,6 +17,7 @@ import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
+import 'package:playtorriomov/widgets/player/player_volume_menu.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
 Widget wrap(Widget child) => MaterialApp(
@@ -43,6 +44,12 @@ final menus = <String, Widget Function()>{
     onOpenSyncBar: () {},
   ),
   'sleep': () => const SleepTimerMenu(),
+  'volume': () => PlayerVolumeMenu(
+    volume: 1.0,
+    isMuted: false,
+    onVolumeChanged: (_) {},
+    onToggleMute: () {},
+  ),
   'speed': () => PlayerSpeedMenu(
     currentRate: 1.0,
     onRateSelected: (_) {},

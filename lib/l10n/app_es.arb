@@ -141,6 +141,8 @@
   "playerMute": "Silenciar",
   "playerUnmute": "Activar sonido",
   "playerPressBackToExit": "Pulsa Atrás otra vez para salir",
+  "playerVolume": "Volumen",
+  "playerVolumeHint": "Izquierda/Derecha para ajustar · OK para silenciar",
   "playerSleepTimer": "Temporizador de apagado",
   "playerSleepTimerLeft": "Temporizador: quedan {minutes} min",
   "playerDownload": "Descargar",

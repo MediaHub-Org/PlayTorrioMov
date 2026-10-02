@@ -221,13 +221,70 @@ class PlayerMenuAnchor extends StatelessWidget {
         alignment: isNarrow
             ? AlignmentDirectional.bottomCenter
             : AlignmentDirectional.bottomEnd,
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: child,
+        // A scope of its own that takes focus when the menu opens. Without
+        // it focus stayed on the button that opened the menu, and a remote's
+        // arrows went to whatever was nearest that button -- the seek bar, not
+        // the rows -- so the audio, speed, sleep timer and aspect menus
+        // opened and could not be used (#80). Inside a scope the arrows stay
+        // on the menu's own rows; closing it hands focus back to the button.
+        child: _FocusOnOpen(
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: child,
+          ),
         ),
       ),
     );
   }
+}
+
+/// A focus scope that takes focus when it is first built.
+///
+/// `FocusScope(autofocus: true)` is not enough: autofocus does nothing when
+/// the enclosing scope already has a focused child, and in the player it always
+/// does -- the button that opened the menu. So the request is made by hand,
+/// after the first frame, once the rows exist for it to land on.
+class _FocusOnOpen extends StatefulWidget {
+  final Widget child;
+
+  const _FocusOnOpen({required this.child});
+
+  @override
+  State<_FocusOnOpen> createState() => _FocusOnOpenState();
+}
+
+class _FocusOnOpenState extends State<_FocusOnOpen> {
+  final FocusScopeNode _scope = FocusScopeNode(debugLabel: 'PlayerMenu');
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Asking the scope honors a child that asked for focus (a slider that is
+      // the menu's main control); but it can also leave the scope itself as
+      // the focused node, with nothing in it focused, so then the first row
+      // has to be asked for by name.
+      _scope.requestFocus();
+      // Focus changes apply a microtask later, so the answer is read then.
+      Future.microtask(() {
+        if (!mounted || FocusManager.instance.primaryFocus != _scope) return;
+        final policy = FocusTraversalGroup.maybeOf(context) ??
+            ReadingOrderTraversalPolicy();
+        policy.findFirstFocus(_scope, ignoreCurrentFocus: true)?.requestFocus();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _scope.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      FocusScope(node: _scope, child: widget.child);
 }
 
 /// Interactive button with smooth hover effects, tooltips, and badges.
@@ -332,6 +389,10 @@ class PlayerIconButton extends StatefulWidget {
   /// buttons sit in a row where nothing should jump ahead of the others.
   final bool autofocus;
 
+  /// The button's own focus node, for a neighbor that names it as where an
+  /// arrow goes (the seek bar's Down is the volume button).
+  final FocusNode? focusNode;
+
   const PlayerIconButton({
     super.key,
     required this.icon,
@@ -346,6 +407,7 @@ class PlayerIconButton extends StatefulWidget {
     this.backgroundColor,
     this.borderRadius = 9999,
     this.autofocus = false,
+    this.focusNode,
   });
 
   @override
@@ -409,6 +471,7 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
     );
 
     Widget button = Focus(
+      focusNode: widget.focusNode,
       autofocus: widget.autofocus,
       onFocusChange: (focused) => setState(() => _focused = focused),
       onKeyEvent: (node, event) {
