@@ -21,8 +21,10 @@ import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
 import '../details/details_page.dart';
+import 'coming_soon.dart';
 import 'latest_releases.dart';
 import 'top_rated.dart';
+import '../../services/browse/home_rows_settings.dart';
 import '../../services/theme/app_colors.dart';
 
 /// One title, one row.
@@ -40,7 +42,13 @@ List<BrowseRow<Movie>> distinctBrowseRows(List<BrowseRow<Movie>> rows) {
         .toList();
     if (fresh.isEmpty) continue;
     distinct.add(
-      BrowseRow(title: row.title, subtitle: row.subtitle, items: fresh),
+      BrowseRow(
+        title: row.title,
+        subtitle: row.subtitle,
+        items: fresh,
+        onSeeAll: row.onSeeAll,
+        id: row.id,
+      ),
     );
   }
   return distinct;
@@ -227,7 +235,17 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         _loading = false;
       });
       _fetchHeroDetails(_heroItems);
-      if (widget.type == 'movie') _loadDocumentaries();
+      // Documentaries play on both pages now: the fetch already filters by
+      // this page's type, so series documentaries arrive the same way the
+      // films ones always did. Silent either way -- see _loadDocumentaries.
+      _loadDocumentaries();
+      // New addon catalogs register their sections for the Home-rows store,
+      // so a catalog installed later shows until hidden rather than hiding
+      // until found in settings.
+      HomeRowsSettings.registerRows(
+        widget.type == 'series' ? HomeSection.series : HomeSection.movies,
+        _sections.map((s) => 'catalog:${s.title}'),
+      );
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -299,7 +317,11 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     // page is the addon catalogs as rows; once a genre or decade is chosen
     // those rows stop being the right shape and it becomes one grid.
     if (!_isFiltered) {
-      return BrowseScaffold<Movie>(
+      final section =
+          widget.type == 'series' ? HomeSection.series : HomeSection.movies;
+      return ValueListenableBuilder<List<String>>(
+        valueListenable: HomeRowsSettings.visibleFor(section),
+        builder: (context, visible, _) => BrowseScaffold<Movie>(
         contentLabel: label,
         header: _buildHeader(context),
         belowHero: ContinueWatchingSlider(typeFilter: widget.type),
@@ -307,7 +329,9 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
         // is the one row on screen with it rather than a strip under a
         // hero that left room for the start of two more.
         belowHeroExtent: ContinueWatchingSlider.bandHeight,
-        afterRows: widget.type == 'series' ? const UpcomingCalendarRow() : null,
+        afterRows: widget.type == 'series' && visible.contains('upcomingCalendar')
+            ? const UpcomingCalendarRow()
+            : null,
         isLoading: _loading,
         heroItems: _heroItems,
         rows: distinctBrowseRows([
@@ -316,6 +340,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           // and re-sorting them by year would unrank them.
           if (topRated(_items).isNotEmpty)
             BrowseRow<Movie>(
+              id: 'topRated',
               title: '⭐ ${context.l10n.catalogTopRated}',
               subtitle: context.l10n.catalogTopRatedSub,
               items: topRated(_items),
@@ -323,20 +348,29 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           for (final section in _sections)
             if (section.movies.isNotEmpty)
               BrowseRow<Movie>(
+                id: 'catalog:${section.title}',
                 title: section.title,
                 items: _sorted(section.movies),
               ),
-          if (widget.type == 'movie' && _documentaries.isNotEmpty)
+          if (_documentaries.isNotEmpty)
             BrowseRow<Movie>(
+              id: 'documentaries',
               title: context.l10n.catalogDocumentaries,
               items: _documentaries,
             ),
           if (_items.isNotEmpty)
             BrowseRow<Movie>(
+              id: 'latestReleases',
               title: context.l10n.catalogLatestReleases,
               items: latestReleases(_items),
             ),
-        ]),
+          if (comingSoon(_items).isNotEmpty)
+            BrowseRow<Movie>(
+              id: 'comingSoon',
+              title: context.l10n.catalogComingSoon,
+              items: comingSoon(_items),
+            ),
+        ]).where((row) => row.id == null || visible.contains(row.id)).toList(),
         heroBuilder: _buildHeroSlide,
         itemBuilder: (context, movie) => MovieCard(movie: movie),
         onRefresh: _load,
@@ -346,7 +380,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
           ),
         ),
-      );
+      ));
     }
 
     return _buildFilteredGrid(context);

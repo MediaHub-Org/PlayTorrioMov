@@ -1049,5 +1049,8 @@
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "Tela cheia",
   "playerExitFullscreen": "Sair de tela cheia",
-  "detailsSpecials": "Especiais"
+  "detailsSpecials": "Especiais",
+  "homeRowsTitle": "Fileiras do início",
+  "homeRowsSub": "Escolha quais fileiras aparecem em Filmes, Séries e Anime. Por padrão, todas aparecem.",
+  "catalogComingSoon": "Em breve"
 }

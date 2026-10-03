@@ -1361,5 +1361,8 @@
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "Enter fullscreen",
   "playerExitFullscreen": "Exit fullscreen",
-  "detailsSpecials": "Specials"
+  "detailsSpecials": "Specials",
+  "homeRowsTitle": "Home rows",
+  "homeRowsSub": "Choose which rows appear on Films, Series and Anime. Everything shows by default.",
+  "catalogComingSoon": "Coming Soon"
 }

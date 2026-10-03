@@ -8,6 +8,7 @@ import '../../models/anime/anime_media.dart';
 import '../../services/anime/anilist_service.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/app_units.dart';
+import '../../services/browse/home_rows_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
 import '../../widgets/movie/movie_card.dart' show posterGridDelegate;
@@ -372,46 +373,55 @@ class _AnimePageState extends State<AnimePage> {
   List<BrowseRow<AnimeMedia>> get _rows {
     return [
       BrowseRow(
+        id: 'trending',
         title: '🔥 ${context.l10n.animeTrendingTitle}',
         subtitle: context.l10n.animeTrendingSub,
         items: _trending,
       ),
       BrowseRow(
+        id: 'season',
         title: '🌟 ${context.l10n.animeSeasonTitle(AnilistService.currentSeason())}',
         subtitle: context.l10n.animeSeasonSub,
         items: _popularSeason,
       ),
       BrowseRow(
+        id: 'top',
         title: '⭐ ${context.l10n.animeTopTitle}',
         subtitle: context.l10n.animeTopSub,
         items: _topRated,
       ),
       BrowseRow(
+        id: 'classics',
         title: '🏛️ ${context.l10n.animeClassicsTitle}',
         subtitle: context.l10n.animeClassicsSub,
         items: _classics,
       ),
       BrowseRow(
+        id: 'upcoming',
         title: '🚀 ${context.l10n.animeUpcomingTitle}',
         subtitle: context.l10n.animeUpcomingSub,
         items: _upcoming,
       ),
       BrowseRow(
+        id: 'action',
         title: '⚔️ ${context.l10n.animeActionTitle}',
         subtitle: context.l10n.animeActionSub,
         items: _actionAnime,
       ),
       BrowseRow(
+        id: 'romance',
         title: '💖 ${context.l10n.animeRomanceTitle}',
         subtitle: context.l10n.animeRomanceSub,
         items: _romanceAnime,
       ),
       BrowseRow(
+        id: 'fantasy',
         title: '🔮 ${context.l10n.animeFantasyTitle}',
         subtitle: context.l10n.animeFantasySub,
         items: _fantasyAnime,
       ),
       BrowseRow(
+        id: 'scifi',
         title: '🤖 ${context.l10n.animeSciFiTitle}',
         subtitle: context.l10n.animeSciFiSub,
         items: _sciFiAnime,
@@ -441,7 +451,9 @@ class _AnimePageState extends State<AnimePage> {
                   )
                 : _buildFilteredGrid(),
           )
-        : BrowseScaffold<AnimeMedia>(
+        : ValueListenableBuilder<List<String>>(
+            valueListenable: HomeRowsSettings.visibleAnime,
+            builder: (context, visible, _) => BrowseScaffold<AnimeMedia>(
             contentLabel: context.l10n.navAnime,
             header: pillHeader,
             belowHero: ContinueWatchingSlider(
@@ -453,7 +465,9 @@ class _AnimePageState extends State<AnimePage> {
             error: _error,
             onRetry: _loadAnimeData,
             heroItems: _heroItems,
-            rows: _rows,
+            rows: _rows
+                .where((row) => row.id == null || visible.contains(row.id))
+                .toList(),
             heroBuilder: (context, anime) => _AnimeHeroSlide(
               anime: anime,
               screenWidth: MediaQuery.sizeOf(context).width,
@@ -469,7 +483,8 @@ class _AnimePageState extends State<AnimePage> {
                 style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
               ),
             ),
-          );
+          ),
+        );
 
     return Scaffold(
       backgroundColor: AppColors.canvas,

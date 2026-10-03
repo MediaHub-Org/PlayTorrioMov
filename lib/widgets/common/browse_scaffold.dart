@@ -46,11 +46,17 @@ class BrowseRow<T> {
   /// Optional "See all" target for the row's full catalog.
   final VoidCallback? onSeeAll;
 
+  /// Stable key for the Home-rows visibility store. Rows without one are
+  /// always shown -- Live TV keeps its own category manager, so its rows
+  /// do not take part in this one.
+  final String? id;
+
   const BrowseRow({
     required this.title,
     required this.items,
     this.subtitle,
     this.onSeeAll,
+    this.id,
   });
 }
 

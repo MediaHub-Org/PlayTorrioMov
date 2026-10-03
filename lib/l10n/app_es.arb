@@ -1049,5 +1049,8 @@
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "Pantalla completa",
   "playerExitFullscreen": "Salir de pantalla completa",
-  "detailsSpecials": "Especiales"
+  "detailsSpecials": "Especiales",
+  "homeRowsTitle": "Filas del inicio",
+  "homeRowsSub": "Elige qué filas aparecen en Películas, Series y Anime. Por defecto se muestran todas.",
+  "catalogComingSoon": "Próximamente"
 }

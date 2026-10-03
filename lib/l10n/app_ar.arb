@@ -1049,5 +1049,8 @@
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "ملء الشاشة",
   "playerExitFullscreen": "الخروج من ملء الشاشة",
-  "detailsSpecials": "حلقات خاصة"
+  "detailsSpecials": "حلقات خاصة",
+  "homeRowsTitle": "صفوف الرئيسية",
+  "homeRowsSub": "اختر الصفوف التي تظهر في الأفلام والمسلسلات والأنمي. تظهر جميعها افتراضيًا.",
+  "catalogComingSoon": "قريبًا"
 }

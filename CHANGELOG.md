@@ -20,6 +20,12 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   episode and continues there.
 
 ### Added
+- **Home rows can be toggled per section.** Films, Series and Anime each get
+  a row manager under Appearance, shaped like the Live TV category manager:
+  everything shows by default, a checkbox hides a row, and rows from newly
+  installed catalogs appear until hidden. Series also gains the
+  Documentaries shelf, and Films and Series gain a Coming Soon rail for
+  dated unreleased titles -- all derived locally, no new fetches.
 - **Stream statistics in the transport bar, ahead of the speed button.** A
   torrent reports its swarm the way a client does -- download speed, peers,
   how much has arrived and the info hash -- while an HLS playlist or a plain

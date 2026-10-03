@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/iptv/iptv_settings.dart';
+import 'appearance/home_rows_settings_page.dart';
 import 'appearance/live_tv_settings_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
@@ -96,6 +97,27 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
               );
             },
           ),
+
+          SizedBox(height: context.rem(AppRem.md)),
+
+          // Button: Home rows for Films, Series and Anime. Same shape as
+          // the Live TV button above: one button per settings area, the
+          // toggles themselves live on the page behind it.
+          ValueListenableBuilder<AppThemePalette>(
+            valueListenable: AppThemeService.currentPalette,
+            builder: (context, currentPalette, _) {
+              return _buildSectionButton(
+                icon: Icons.view_carousel_rounded,
+                iconColor: currentPalette.primaryColor,
+                title: context.l10n.homeRowsTitle,
+                subtitle: context.l10n.homeRowsSub,
+                onTap: () async {
+                  await pushPage(context, const HomeRowsSettingsPage());
+                  setState(() {});
+                },
+              );
+            },
+          ),
         ],
       ),
     );
@@ -106,8 +128,8 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
     required Color iconColor,
     required String title,
     required String subtitle,
-    required String badgeText,
-    required Color badgeColor,
+    String? badgeText,
+    Color? badgeColor,
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
@@ -157,21 +179,22 @@ class _AppearanceSettingsPageState extends State<AppearanceSettingsPage> {
                             ),
                           ),
                           SizedBox(width: context.rem(AppRem.sm)),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
-                            decoration: BoxDecoration(
-                              color: badgeColor.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-                            ),
-                            child: Text(
-                              badgeText,
-                              style: TextStyle(
-                                fontSize: AppType.tiny,
-                                fontWeight: FontWeight.w800,
-                                color: badgeColor,
+                          if (badgeText != null && badgeColor != null)
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(0.1562)),
+                              decoration: BoxDecoration(
+                                color: badgeColor.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+                              ),
+                              child: Text(
+                                badgeText,
+                                style: TextStyle(
+                                  fontSize: AppType.tiny,
+                                  fontWeight: FontWeight.w800,
+                                  color: badgeColor,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       SizedBox(height: context.rem(AppRem.xs)),
