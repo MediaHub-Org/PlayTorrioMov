@@ -161,6 +161,7 @@ class SearchFilterBar extends StatelessWidget {
                     label: decadeLabel,
                     icon: Icons.calendar_today_rounded,
                     showLabel: showMenuLabels,
+                    selectedValue: decade ?? -1,
                     items: [
                       PopupMenuItem(
                         value: -1,
@@ -179,6 +180,7 @@ class SearchFilterBar extends StatelessWidget {
                     label: ratingLabel,
                     icon: Icons.star_rounded,
                     showLabel: showMenuLabels,
+                    selectedValue: minRating ?? 0,
                     items: [
                       PopupMenuItem(
                         value: 0,

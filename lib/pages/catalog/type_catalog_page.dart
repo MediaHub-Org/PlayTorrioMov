@@ -406,6 +406,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           FilterDropdown<String?>(
             label: _genreFilter ?? context.l10n.catalogAllGenres,
             icon: Icons.category_rounded,
+            selectedValue: _genreFilter ?? '',
             items: [
               PopupMenuItem(value: '', child: Text(context.l10n.catalogAllGenres)),
               for (final g in _availableGenres)
@@ -428,6 +429,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           FilterDropdown<int?>(
             label: _decadeFilter == null ? context.l10n.catalogAllDecades : '${_decadeFilter}s',
             icon: Icons.calendar_today_rounded,
+            selectedValue: _decadeFilter ?? -1,
             items: [
               PopupMenuItem(value: -1, child: Text(context.l10n.catalogAllDecades)),
               for (final d in decades)
@@ -442,6 +444,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
             _CatalogSort.yearOldest => context.l10n.catalogOldest,
           },
           icon: Icons.sort_rounded,
+          selectedValue: _sort,
           items: [
             PopupMenuItem(value: _CatalogSort.yearNewest, child: Text(context.l10n.catalogNewest)),
             PopupMenuItem(value: _CatalogSort.yearOldest, child: Text(context.l10n.catalogOldest)),

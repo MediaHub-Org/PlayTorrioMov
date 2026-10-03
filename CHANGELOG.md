@@ -11,6 +11,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   per-scene choices on a narrow phone; now they live one tap behind the gear,
   each row carrying its current value so the menu also reads as status. The
   gear's dot says something in there is off-default.
+- **Filter menus tick the active choice and cap their height.** Genre,
+  decade, rating and sort pills mark the current value with a check, and a
+  long list scrolls inside a fixed ceiling instead of running off the
+  screen.
 - **The player's popovers sit just above the playback line.** They used to
   clear only the buttons row, so a menu covered the seek bar it belongs to
   and the timeline could not be seen or scrubbed while one was open. The

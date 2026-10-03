@@ -248,6 +248,7 @@ class _AnimePageState extends State<AnimePage> {
         FilterDropdown<String?>(
           label: _genreFilter ?? context.l10n.animeAllGenres,
           icon: Icons.filter_list_rounded,
+          selectedValue: _genreFilter ?? '',
           items: [
             PopupMenuItem(value: '', child: Text(context.l10n.animeAllGenres)),
             for (final g in _kAnimeGenres)
@@ -262,6 +263,7 @@ class _AnimePageState extends State<AnimePage> {
                 ? context.l10n.catalogAllDecades
                 : '${_decadeFilter}s',
             icon: Icons.calendar_today_rounded,
+            selectedValue: _decadeFilter ?? -1,
             items: [
               PopupMenuItem(
                 value: -1,

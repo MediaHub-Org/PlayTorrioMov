@@ -781,6 +781,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
     return FilterDropdown<String?>(
       label: _regionFilter ?? context.l10n.iptvAllRegions,
       icon: Icons.language_rounded,
+      selectedValue: _regionFilter ?? '',
       items: [
         PopupMenuItem(value: '', child: Text(context.l10n.iptvAllRegions)),
         for (final r in regions) PopupMenuItem(value: r, child: Text(r)),
