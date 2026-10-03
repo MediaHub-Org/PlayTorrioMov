@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-01**, on `v1.9.1+48`.
+Last reconciled: **2026-10-03**, on `v1.9.2+49`.
 
 ---
 
@@ -34,27 +34,25 @@ The first item is code work, in batches; the rest need a device.
   Report what the remote does. Also unconfirmed: the second focus pass (soft
   wash on the filter pills, the side menu's cue across icon and name, the
   play button's lit state, the seek bar's stronger violet, and the volume as
-  one stop with Left/Right and OK), and the player's Back ladder (panel, then bars, then a second press to leave). From v1.9.1 on a TV it was reported that the player's menus (audio, speed, sleep timer, aspect), the volume and the seek bar's arrows did not work; these are reworked in Unreleased and not yet confirmed on a TV. The in-player sources panel and the anime
+  one stop with Left/Right and OK), and the player's Back ladder (panel, then bars, then a second press to leave). From v1.9.1 on a TV it was reported that the player's menus (audio, speed, sleep timer, aspect), the volume and the seek bar's arrows did not work; these are reworked in v1.9.2 and not yet confirmed on a TV. The in-player sources panel and the anime
   episode sheet now carry the lean tag set too.
 - **Player menus as sheets: check the shapes on devices.** The menus are a
   bottom sheet on a phone upright, a side sheet on a phone on its side, a
   tablet and a TV, the popover on a desktop (`playerPanelStyleFor`), with a
-  close button, swipe and scrim chosen per shape (CHANGELOG, Unreleased). It is
+  close button, swipe and scrim chosen per shape (CHANGELOG, v1.9.2). It is
   tested in widget tests only. Look at: the breakpoints (a tablet upright, a
   large phone on its side), the swipe against a slider inside a menu, and
   whether the subtitle list now has the room it lacked.
-- **Check on a device: loading logo, notification, Similar Content.** The
-  player's loading logo (does the percentage move sensibly for a torrent, a
-  debrid link and a plain URL, and does it clear on the first frame), the
-  Android notification's Play/Pause (and whether Android 13+ now asks for
-  notifications), and "Similar Content" on a movie and a series (TMDB first,
-  BestSimilar as the fallback; its original failure was never reproduced, the
-  sandbox cannot reach the site). The Live TV player still has the old
-  loading state.
-- **Casting a scraper source hangs on the loading splash (#79).** Likely the
-  Cast SDK's lack of a sender-side Referer/User-Agent (`CastService.loadMedia`
-  says so). Cast a direct/CDN source with no header requirement: if it plays,
-  the header is the cause and the only path is a local relay on the phone.
+- **Check on a device: loading logo, notification, Similar Content and Cast.**
+  The progressive loading logo is now shared by VOD and Live TV: verify real
+  buffering on a torrent, a debrid link and a plain URL, and that it clears on
+  the first frame. Also check the Android notification's Play/Pause (and
+  whether Android 13+ asks for notifications), and "Similar Content" on a
+  movie and a series (TMDB first, BestSimilar as the fallback; the sandbox
+  cannot reach the site). Cast now waits for the connected session before
+  sending media: verify discovery, a direct/CDN stream, a Live TV channel and
+  disconnect. Sources requiring Referer/User-Agent headers remain unsupported
+  by the Cast SDK path.
 - **Whether a phone can cast a torrent.** TorrServer binds `127.0.0.1` for
   the phone; a receiver needs the LAN. With a torrent playing, from a laptop
   on the same Wi-Fi: `curl http://<phone-LAN-IP>:<port>/echo`. An answer means
