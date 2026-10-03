@@ -10,24 +10,20 @@ import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
 import '../../services/app_units.dart';
 
-/// Bottom transport bar: timeline scrubber, volume, and one button per
-/// control -- stats, speed, audio, subtitles, sleep timer, aspect ratio.
+/// Bottom transport bar: timeline scrubber, volume, and three menu triggers --
+/// stats, subtitles, and the gear holding speed, audio, sleep timer and
+/// aspect ratio.
+///
 /// Play/pause and seek live in the centered overlay instead (see
 /// PlayerCenterControls), and episode switching lives in PlayerTopBar's own
 /// "Episodes" badge -- neither is duplicated here.
 ///
-/// There is no settings button. The gear used to be an index of every
-/// control here, then held only the subtitle entry and the sleep timer once
-/// those grew their own buttons -- a menu for one control is worse than a
-/// button for it, so the subtitle button opens the full subtitle panel
-/// (whose first pill is Off, keeping the toggle) and the sleep timer is a
-/// button of its own.
-///
-/// This bar briefly carried a ±30s pair of its own. It was removed once the
-/// centered buttons became ±30s: one amount, one affordance. Seeking now has
-/// exactly two ways in -- the double-tap side zones for ±10s and those
-/// centered buttons for ±30s -- instead of three, two of which did the same
-/// thing.
+/// Six buttons shared this row before (stats, speed, audio, subtitles, sleep
+/// timer, aspect). On a narrow phone the four set-once controls crowded out
+/// the ones reached for mid-scene, so they moved one tap behind the gear --
+/// each with its current value as a badge on its row -- while subtitles and
+/// stats keep their own buttons: they are per-scene choices, not
+/// set-once ones.
 class PlayerTransport extends StatelessWidget {
   final Duration position;
   final Duration duration;
@@ -49,10 +45,10 @@ class PlayerTransport extends StatelessWidget {
   /// first pill is Off, so turning subtitles off is still two taps rather
   /// than the one this button used to cost as a plain toggle.
   final VoidCallback onOpenSubtitleMenu;
-  final VoidCallback onOpenSpeedMenu;
-  final VoidCallback onOpenAudioMenu;
-  final VoidCallback onOpenAspectMenu;
-  final VoidCallback onOpenSleepTimerMenu;
+
+  /// Opens the gear: speed, audio, sleep timer and aspect ratio, each with
+  /// its current value on its row.
+  final VoidCallback onOpenSettingsMenu;
 
   /// Opens the stream statistics popover. Null hides the button, for screens
   /// that have no stream figures to report.
@@ -89,10 +85,7 @@ class PlayerTransport extends StatelessWidget {
     required this.onVolumeChanged,
     required this.onToggleMute,
     required this.onOpenSubtitleMenu,
-    required this.onOpenSpeedMenu,
-    required this.onOpenAudioMenu,
-    required this.onOpenAspectMenu,
-    required this.onOpenSleepTimerMenu,
+    required this.onOpenSettingsMenu,
     this.onOpenStatsMenu,
     this.onOpenVolumeMenu,
     this.onScrubbingChanged,
@@ -105,10 +98,8 @@ class PlayerTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    // Six buttons share the row on a narrow phone (stats joined speed,
-    // audio, subtitles, sleep timer and aspect), and the volume button
-    // takes the other end: at the 1.3 rem ceiling seven 2.25 rem buttons
-    // ran 17px past a 360px screen, so compact steps down to 2.0.
+    // Three buttons share the row on a narrow phone (stats, subtitles, the
+    // gear), and the volume button takes the other end.
     final btnSize = context.rem(isCompact ? 2.0 : 2.625);
     final btnIconSize = context.rem(isCompact ? AppRem.icon : AppRem.iconMd);
     final gap = context.rem(isCompact ? AppRem.xxs : AppRem.xs);
@@ -198,13 +189,11 @@ class PlayerTransport extends StatelessWidget {
                     onPressed: tvVolume ? onOpenVolumeMenu : onToggleMute,
                   ),
 
-                // Right Group: stats, speed, audio, subtitles, sleep timer,
-                // aspect -- one button each, in that order. They used to be
-                // two buttons (subtitles and a gear that held everything
-                // else), which made the gear a menu of menus: three taps to
-                // reach a speed that was one tap away on YouTube. Each of
-                // these is a set-once choice a viewer makes mid-scene, so
-                // each gets its own button.
+                // Right group: stats, subtitles, gear -- in that order. Speed,
+                // audio, sleep timer and aspect used to stand here as their
+                // own buttons, which crowded the per-scene choices on a
+                // narrow phone; now they live one tap behind the gear with
+                // their current values on their rows.
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -223,29 +212,6 @@ class PlayerTransport extends StatelessWidget {
                       SizedBox(width: gap),
                     ],
 
-                    // Playback Speed
-                    PlayerIconButton(
-                      size: btnSize,
-                      iconSize: btnIconSize,
-                      icon: const Icon(Icons.speed_rounded),
-                      tooltip: context.l10n.detailsPlaybackSpeed,
-                      showActiveBadge: playbackRate != 1.0,
-                      onPressed: onOpenSpeedMenu,
-                    ),
-
-                    SizedBox(width: gap),
-
-                    // Audio Track
-                    PlayerIconButton(
-                      size: btnSize,
-                      iconSize: btnIconSize,
-                      icon: const Icon(Icons.audiotrack_rounded),
-                      tooltip: context.l10n.detailsAudioTrack,
-                      onPressed: onOpenAudioMenu,
-                    ),
-
-                    SizedBox(width: gap),
-
                     // Subtitles: opens the full panel. Its first pill is Off,
                     // so the toggle this button used to be is still there --
                     // one tap further, in exchange for track and appearance
@@ -262,32 +228,21 @@ class PlayerTransport extends StatelessWidget {
 
                     SizedBox(width: gap),
 
-                    // Sleep Timer. A button rather than a menu row: it is one
-                    // control, and a menu for one control is worse than a
-                    // button for it. The badge counts down while it runs.
+                    // The gear: speed, audio, sleep timer, aspect. The dot
+                    // says something in there is off-default -- a speed, a
+                    // running timer -- so it also reads as status.
                     ValueListenableBuilder<int?>(
-                      valueListenable: SleepTimerService.instance.minutesRemaining,
+                      valueListenable:
+                          SleepTimerService.instance.minutesRemaining,
                       builder: (context, minutes, _) => PlayerIconButton(
                         size: btnSize,
                         iconSize: btnIconSize,
-                        icon: const Icon(Icons.bedtime_rounded),
-                        tooltip: minutes == null
-                            ? context.l10n.playerSleepTimer
-                            : context.l10n.playerSleepTimerLeft(minutes),
-                        showActiveBadge: minutes != null,
-                        onPressed: onOpenSleepTimerMenu,
+                        icon: const Icon(Icons.settings_rounded),
+                        tooltip: context.l10n.playerSettingsPanelTitle,
+                        showActiveBadge:
+                            playbackRate != 1.0 || minutes != null,
+                        onPressed: onOpenSettingsMenu,
                       ),
-                    ),
-
-                    SizedBox(width: gap),
-
-                    // Aspect Ratio
-                    PlayerIconButton(
-                      size: btnSize,
-                      iconSize: btnIconSize,
-                      icon: const Icon(Icons.aspect_ratio_rounded),
-                      tooltip: context.l10n.detailsAspectRatio,
-                      onPressed: onOpenAspectMenu,
                     ),
                   ],
                 ),

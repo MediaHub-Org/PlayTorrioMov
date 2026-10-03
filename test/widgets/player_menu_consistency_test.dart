@@ -16,6 +16,7 @@ import 'package:playtorriomov/services/stream/torrent_stream_service.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
+import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_stats_menu.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
@@ -78,6 +79,15 @@ final menus = <String, Widget Function()>{
     onFitSelected: (_) {},
     onRatioSelected: (_) {},
     onClose: () {},
+  ),
+  'settings': () => PlayerSettingsMenu(
+    currentRate: 1.0,
+    audioSummary: 'English',
+    aspectSummary: 'Original',
+    onOpenSpeed: () {},
+    onOpenAudio: () {},
+    onOpenSleep: () {},
+    onOpenAspect: () {},
   ),
 };
 

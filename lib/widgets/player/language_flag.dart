@@ -13,7 +13,9 @@
 //    contains "hi" so it drew the Indian flag, and the two menus disagreed on
 //    the same language. Keying on the display name settles all three, because
 //    there is a single canonical name per language (see
-//    subtitle_languages.dart).
+//    subtitle_languages.dart) -- and raw mpv tags (`eng`, `spa`) normalize
+//    through `subtitleLanguageName` first, since audio tracks carry the code
+//    while subtitles carry the name.
 //
 // 2. Rendering. A flag emoji is two regional-indicator letters that the
 //    system emoji font ligates into a picture. Android's and macOS's do;
@@ -26,6 +28,7 @@
 
 import 'package:flutter/material.dart';
 import '../../services/app_units.dart';
+import '../../services/subtitles/subtitle_languages.dart';
 
 /// Language-name keyword -> ISO 3166 country code of the flag that stands for
 /// it. Order matters only where one keyword contains another; none do today.
@@ -88,9 +91,14 @@ const Map<String, String> _languageCountry = {
 };
 
 /// The country code whose flag stands for [language] (a display name such as
-/// "Spanish (Latin America)"), or null when there is none.
+/// "Spanish (Latin America)", or a raw mpv tag such as "spa" -- audio tracks
+/// carry the code while subtitles carry the name, so both have to work).
+/// Codes resolve through [subtitleLanguageName] first, which is the one
+/// table that knows `eng` and "English" are the same language.
 String? languageCountryCode(String? language) {
-  final name = (language ?? '').toLowerCase();
+  final raw = (language ?? '').trim();
+  if (raw.isEmpty) return null;
+  final name = subtitleLanguageName(raw).toLowerCase();
   for (final entry in _languageCountry.entries) {
     if (name.contains(entry.key)) return entry.value;
   }

@@ -40,11 +40,12 @@ import '../../widgets/player/player_subtitle_menu.dart';
 import '../../widgets/player/player_audio_menu.dart';
 import '../../services/player/sleep_timer_service.dart';
 import '../../widgets/player/player_speed_menu.dart';
+import '../../widgets/player/player_settings_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/skip_segments_service.dart';
 import '../../services/tv_mode_service.dart';
-import '../../widgets/player/player_aspect_menu.dart' show PlayerAspectMenu;
+import '../../widgets/player/player_aspect_menu.dart';
 import '../../widgets/player/subtitle_overlay.dart';
 import '../../widgets/player/player_skip_button.dart';
 import '../../widgets/player/player_episodes_panel.dart';
@@ -140,9 +141,9 @@ class _PlayerScreenState extends State<PlayerScreen>
   Timer? _firstFrameTimeout;
 
   // Active Menu / Popover
-  // 'settings' is the gear; 'audio', 'speed' and 'aspect' are the popovers
-  // its rows open. 'subtitle' and 'style' are reached from the transport
-  // bar directly.
+  // 'settings' is the gear; 'audio', 'speed', 'aspect' and 'sleep' are the
+  // popovers its rows open. 'subtitle' and 'stats' keep their own transport
+  // bar buttons instead.
   String? _activeMenu;
 
   /// Whether the subtitle appearance editor is open. While it is, the video
@@ -2110,6 +2111,19 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// screen that does not exist.
   String? _menuParent;
 
+  /// Steps from the gear into one of its panels. Unlike [_toggleMenu], this
+  /// remembers where it came from, so the panel grows a back arrow to the
+  /// gear root.
+  void _openSubMenu(String menuName) {
+    setState(() {
+      _activeMenu = menuName;
+      _menuParent = 'settings';
+      _showSubSyncBar = false;
+      _showTextSyncOverlay = false;
+      _hideTimer?.cancel();
+    });
+  }
+
   /// The back action for a sub-menu, or null when it was not stepped into.
   VoidCallback? get _backToSettings => _menuParent == 'settings'
       ? () => setState(() {
@@ -3031,11 +3045,8 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
                     onOpenSubtitleMenu: () => _toggleMenu('subtitle'),
-                    onOpenSpeedMenu: () => _toggleMenu('speed'),
+                    onOpenSettingsMenu: () => _toggleMenu('settings'),
                     onOpenStatsMenu: () => _toggleMenu('stats'),
-                    onOpenAudioMenu: () => _toggleMenu('audio'),
-                    onOpenAspectMenu: () => _toggleMenu('aspect'),
-                    onOpenSleepTimerMenu: () => _toggleMenu('sleep'),
                     onOpenVolumeMenu: () => _toggleMenu('volume'),
                     seekFocusNode: _seekFocus,
                     volumeFocusNode: _volumeFocus,
@@ -3097,6 +3108,36 @@ class _PlayerScreenState extends State<PlayerScreen>
             ),
           ),
 
+        // The gear's root: speed, audio, sleep timer, aspect. Each row
+        // steps into its panel via _openSubMenu, which is what grows the
+        // back arrow there.
+        if (_activeMenu == 'settings' && !_isLoading)
+          PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
+            child: PlayerSettingsMenu(
+              currentRate: _playbackRate,
+              audioSummary: _audioTracks
+                  .where((t) => t.index == _selectedAudioTrackIndex)
+                  .firstOrNull
+                  ?.title,
+              aspectSummary: aspectOptions
+                  .where((opt) {
+                    if (opt.fit != null) {
+                      return _forcedAspectRatio == null &&
+                          _videoFit == opt.fit;
+                    }
+                    return _forcedAspectRatio != null &&
+                        (_forcedAspectRatio! - opt.forcedRatio!).abs() < 0.001;
+                  })
+                  .firstOrNull
+                  ?.label(context.l10n),
+              onOpenSpeed: () => _openSubMenu('speed'),
+              onOpenAudio: () => _openSubMenu('audio'),
+              onOpenSleep: () => _openSubMenu('sleep'),
+              onOpenAspect: () => _openSubMenu('aspect'),
+            ),
+          ),
+
         // Floating Audio Menu Popover
         if (_activeMenu == 'audio' && !_isLoading)
           PlayerMenuAnchor(
@@ -3132,7 +3173,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         if (_activeMenu == 'sleep' && !_isLoading)
           PlayerMenuAnchor(
             onClose: _closeActiveMenu,
-            child: const SleepTimerMenu(),
+            child: SleepTimerMenu(onBack: _backToSettings),
           ),
 
         // Floating Volume Popover (a TV's way in; see PlayerVolumeMenu)

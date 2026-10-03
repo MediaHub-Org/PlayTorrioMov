@@ -90,7 +90,15 @@ class PlayerAudioMenu extends StatelessWidget {
           else
             for (final track in audioTracks)
               PlayerMenuRow(
-                leading: LanguageFlag(track.language ?? '', height: context.rem(0.8125)),
+                // mpv often tags no language at all: fall back to the row
+                // title, which already prefers the language name and only
+                // then the container title or codec.
+                leading: LanguageFlag(
+                  track.language?.trim().isNotEmpty == true
+                      ? track.language
+                      : track.title,
+                  height: context.rem(0.8125),
+                ),
                 title: track.title,
                 isSelected: track.index == selectedIndex,
                 onTap: () => onTrackSelected(track.index),

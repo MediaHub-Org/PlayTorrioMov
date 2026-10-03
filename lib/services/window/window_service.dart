@@ -91,10 +91,20 @@ class WindowService with WindowListener {
     // Crucial for Windows: unmaximize first to drop the 8px DWM resize frame.
     // Remember that it was maximized, so leaving can put it back.
     _wasMaximizedBeforeFullscreen = await windowManager.isMaximized();
-    if (_wasMaximizedBeforeFullscreen) {
-      await windowManager.unmaximize();
+    // Flip the state while hidden: unmaximize-then-fullscreen paints every
+    // intermediate size otherwise -- the shrink-then-grow flash each toggle,
+    // even leaving from a maximized window. A brief hide/show blink reads
+    // as one cut instead of a window bouncing through sizes it never stays.
+    await windowManager.hide();
+    try {
+      if (_wasMaximizedBeforeFullscreen) {
+        await windowManager.unmaximize();
+      }
+      await windowManager.setFullScreen(true);
+    } finally {
+      await windowManager.show();
     }
-    await windowManager.setFullScreen(true);
+    await windowManager.focus();
     isFullscreenNotifier.value = true;
   }
 
@@ -105,13 +115,22 @@ class WindowService with WindowListener {
   Future<void> _leaveFullscreen() async {
     final restoreMaximized = _wasMaximizedBeforeFullscreen;
     _wasMaximizedBeforeFullscreen = false;
-    await windowManager.setFullScreen(false);
-    final isMaximized = await windowManager.isMaximized();
-    if (restoreMaximized && !isMaximized) {
-      await windowManager.maximize();
-    } else if (!restoreMaximized && isMaximized) {
-      await windowManager.unmaximize();
+    // Same hidden flip as entering: fullscreen-off lands on the small
+    // restored size before the maximize below puts it back, which is the
+    // second half of the toggle flash.
+    await windowManager.hide();
+    try {
+      await windowManager.setFullScreen(false);
+      final isMaximized = await windowManager.isMaximized();
+      if (restoreMaximized && !isMaximized) {
+        await windowManager.maximize();
+      } else if (!restoreMaximized && isMaximized) {
+        await windowManager.unmaximize();
+      }
+    } finally {
+      await windowManager.show();
     }
+    await windowManager.focus();
     isFullscreenNotifier.value = false;
   }
 

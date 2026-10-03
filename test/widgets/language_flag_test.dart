@@ -91,4 +91,19 @@ void main() {
       expect(find.text('🌐'), findsOneWidget);
     });
   });
+
+  group('raw mpv tags', () {
+    // Audio tracks carry codes (`eng`, `spa`) while subtitles carry display
+    // names ("English"): both must resolve to the same flag, or audio rows
+    // fall back to the globe.
+    test('codes and names agree', () {
+      expect(languageCountryCode('eng'), 'gb');
+      expect(languageCountryCode('English'), 'gb');
+      expect(languageCountryCode('English (US)'), 'gb');
+      expect(languageCountryCode('spa'), 'es');
+      expect(languageCountryCode('es'), 'es');
+      expect(languageCountryCode('jpn'), 'jp');
+      expect(languageCountryCode('Japanese'), 'jp');
+    });
+  });
 }

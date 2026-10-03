@@ -14,6 +14,7 @@ import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_menu_row.dart';
+import 'package:playtorriomov/widgets/player/player_settings_menu.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
 import 'package:playtorriomov/widgets/player/player_volume_menu.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
@@ -349,6 +350,15 @@ void main() {
         onFitSelected: (_) {},
         onRatioSelected: (_) {},
         onClose: () {},
+      ),
+      'settings': () => PlayerSettingsMenu(
+        currentRate: 1.0,
+        audioSummary: 'English',
+        aspectSummary: 'Original',
+        onOpenSpeed: () {},
+        onOpenAudio: () {},
+        onOpenSleep: () {},
+        onOpenAspect: () {},
       ),
       'volume': () => PlayerVolumeMenu(
         volume: 2.1,

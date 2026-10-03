@@ -66,10 +66,7 @@ Widget _player(_Nodes n) => MaterialApp(
             onVolumeChanged: (_) {},
             onToggleMute: () {},
             onOpenSubtitleMenu: () {},
-            onOpenSpeedMenu: () {},
-            onOpenAudioMenu: () {},
-            onOpenAspectMenu: () {},
-            onOpenSleepTimerMenu: () {},
+            onOpenSettingsMenu: () {},
             onOpenVolumeMenu: () {},
             seekFocusNode: n.seek,
             volumeFocusNode: n.volume,
@@ -145,7 +142,7 @@ void main() {
       here.requestFocus();
       await tester.pump();
     }
-    expect(buttons, greaterThanOrEqualTo(5));
+    expect(buttons, greaterThanOrEqualTo(2));
   });
 
   testWidgets('Right from the volume reaches every button, and Left comes '
@@ -161,8 +158,8 @@ void main() {
       if (stops.contains(here)) break;
       stops.add(here);
     }
-    // The volume button, then speed, audio, subtitles, sleep timer, aspect.
-    expect(stops.length, 6, reason: 'the volume and five buttons');
+    // The volume button, then subtitles and the gear (no stats menu here).
+    expect(stops.length, 3, reason: 'the volume and two buttons');
 
     for (var i = 0; i < stops.length - 1; i++) {
       await _press(tester, LogicalKeyboardKey.arrowLeft);

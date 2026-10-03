@@ -18,7 +18,11 @@ import '../../services/app_units.dart';
 /// armed. "End of video" is the last row because it is the one promise in
 /// the list that is not a number of minutes.
 class SleepTimerMenu extends StatelessWidget {
-  const SleepTimerMenu({super.key});
+  /// Back to the settings root, when this menu was stepped into from
+  /// there rather than opened directly.
+  final VoidCallback? onBack;
+
+  const SleepTimerMenu({super.key, this.onBack});
 
   static const minutes = [10, 15, 30, 45, 60];
 
@@ -33,6 +37,7 @@ class SleepTimerMenu extends StatelessWidget {
         children: [
           PlayerMenuHeader(
             title: context.l10n.playerSleepTimer.toUpperCase(),
+            onBack: onBack,
           ),
           SizedBox(height: context.rem(AppRem.snug)),
           ValueListenableBuilder<int?>(

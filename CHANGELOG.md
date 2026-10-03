@@ -6,6 +6,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- **The transport bar is three buttons: stats, subtitles, and a gear.**
+  Speed, audio, sleep timer and aspect shared the row before and crowded the
+  per-scene choices on a narrow phone; now they live one tap behind the gear,
+  each row carrying its current value so the menu also reads as status. The
+  gear's dot says something in there is off-default.
 - **The player's popovers sit just above the playback line.** They used to
   clear only the buttons row, so a menu covered the seek bar it belongs to
   and the timeline could not be seen or scrubbed while one was open. The
@@ -48,6 +53,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   edge-fade gradients never received the reading direction, which threw at
   paint time in debug builds and silently faded the wrong side in Arabic
   release builds.
+- **Audio rows show their flag, not the globe, for raw mpv tags.** Tracks
+  carry codes (`eng`, `spa`) while subtitles carry names ("English"), and
+  the flag lookup only knew names -- so the same language drew a flag in
+  one menu and a globe in the other. Codes normalize through the shared
+  language table first now.
+- **Fullscreen toggles without the shrink-then-grow flash.** Entering left
+  through unmaximize-then-fullscreen with the window visible, painting every
+  size between; both directions now flip while briefly hidden, so it reads
+  as one cut.
 
 ## [1.9.2+49] - 2026-10-03
 
