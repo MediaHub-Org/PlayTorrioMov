@@ -166,6 +166,11 @@
     "description": "Primary action on an anime's details page, resuming the last watched episode",
     "placeholders": {"number": {"type": "int"}}
   },
+  "detailsResumeSeasonEpisode": "Resume S{season} E{episode}",
+  "@detailsResumeSeasonEpisode": {
+    "description": "Primary action on a series details page, resuming the furthest started episode",
+    "placeholders": {"season": {"type": "int"}, "episode": {"type": "int"}}
+  },
   "detailsGoBack": "Go Back",
   "detailsEpisodes": "Episodes",
   "@detailsEpisodes": {"description": "Section heading listing a series' or anime's episodes"},

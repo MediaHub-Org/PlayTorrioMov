@@ -151,6 +151,19 @@ class DetailsPage extends StatefulWidget {
     );
   }
 
+  /// The episode Play resumes from: the furthest started pair mapped back
+  /// onto a video, or null when it is not in this list (stale history) or
+  /// nothing was started. The button then falls back to the season's first
+  /// episode, exactly as before.
+  @visibleForTesting
+  static Video? resumeEpisode(List<Video> videos, String? currentKey) {
+    if (currentKey == null) return null;
+    for (final video in videos) {
+      if ('${video.season}:${video.episode}' == currentKey) return video;
+    }
+    return null;
+  }
+
   @override
   State<DetailsPage> createState() => _DetailsPageState();
 }
@@ -1313,20 +1326,52 @@ class _DetailsPageState extends State<DetailsPage>
     );
   }
 
+  /// What Play starts: the resumed episode when history names one, else
+  /// the season's first episode, else the title's first video. Mirrors
+  /// [_playButtonLabel] below, so the button never promises one episode and
+  /// plays another.
+  Video? _playTarget(Video? resumeTarget) {
+    if (resumeTarget != null) return resumeTarget;
+    if (_currentSeasonEpisodes.isNotEmpty) return _currentSeasonEpisodes.first;
+    if (_detail?.videos.isNotEmpty == true) return _detail!.videos.first;
+    return null;
+  }
+
+  /// What the Play button offers: collections start at the first movie,
+  /// series resume where they were left (or start over), films just play.
+  /// The resume half is the parity with the anime page, whose button always
+  /// named its episode while this one said "Play Episodes" and started over.
+  String _playButtonLabel(Video? resumeTarget) {
+    if (_isCollection) return context.l10n.detailsPlayFirstMovie;
+    if (!_isSeries) return context.l10n.detailsPlayMovie;
+    final season = resumeTarget?.season;
+    final episode = resumeTarget?.episode;
+    if (season == null || episode == null) {
+      return context.l10n.detailsPlayEpisodes;
+    }
+    return context.l10n.detailsResumeSeasonEpisode(season, episode);
+  }
+
   Widget _buildPlayButton({required bool fullWidth}) {
     // No [HoverButton] ring here: it is a pill-shaped line, and this button is
     // a rounded rectangle, so on a TV the two never lined up (#80). Focus is
     // the button itself getting brighter, glowing and growing -- the same
     // colors, read as "lit" rather than "outlined".
+    //
+    // Resume parity with the anime page: its button names the episode it
+    // will continue from, while this one always said "Play Episodes" and
+    // started over. The target is the furthest started pair from the same
+    // watch state the rail marks, mapped back onto a video of this title.
+    final resumeTarget = DetailsPage.resumeEpisode(
+      _detail?.videos ?? const [],
+      DetailsPage.episodeWatchState(
+        ContinueWatchingService.historyItems.value,
+        _detail?.id ?? widget.movie.id,
+      ).current,
+    );
     return HoverButton(
       scaleAmount: 1.08,
-      onTap: () => _handlePlayAction(
-        _currentSeasonEpisodes.isNotEmpty
-            ? _currentSeasonEpisodes.first
-            : (_detail?.videos.isNotEmpty == true
-                  ? _detail!.videos.first
-                  : null),
-      ),
+      onTap: () => _handlePlayAction(_playTarget(resumeTarget)),
       child: Builder(builder: (context) {
         final focused = Focus.of(context).hasFocus;
         return Container(
@@ -1364,11 +1409,7 @@ class _DetailsPageState extends State<DetailsPage>
             // the line and paints past the button.
             Flexible(
               child: Text(
-                _isCollection
-                    ? context.l10n.detailsPlayFirstMovie
-                    : (_isSeries
-                          ? context.l10n.detailsPlayEpisodes
-                          : context.l10n.detailsPlayMovie),
+                _playButtonLabel(_isSeries && !_isCollection ? resumeTarget : null),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

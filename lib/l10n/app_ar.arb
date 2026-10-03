@@ -127,6 +127,7 @@
   "detailsPlayFirstMovie": "تشغيل الفيلم الأول",
   "detailsPlayEp": "تشغيل الحلقة {number}",
   "detailsResumeEp": "متابعة الحلقة {number}",
+  "detailsResumeSeasonEpisode": "متابعة S{season} E{episode}",
   "detailsGoBack": "رجوع",
   "detailsEpisodes": "الحلقات",
   "detailsCast": "طاقم التمثيل",

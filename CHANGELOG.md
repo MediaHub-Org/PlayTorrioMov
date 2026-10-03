@@ -15,6 +15,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Finishing an episode dims its card and accents the furthest one reached,
   read live from the same history log, so rewatching shows where you were
   on both kinds of details page.
+- **The series Play button resumes like the anime one.** It always said
+  "Play Episodes" and started over; now it names the furthest started
+  episode and continues there.
 
 ### Added
 - **Stream statistics in the transport bar, ahead of the speed button.** A

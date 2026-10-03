@@ -127,6 +127,7 @@
   "detailsPlayFirstMovie": "Reproducir la primera película",
   "detailsPlayEp": "Reproducir ep. {number}",
   "detailsResumeEp": "Continuar ep. {number}",
+  "detailsResumeSeasonEpisode": "Continuar S{season} E{episode}",
   "detailsGoBack": "Volver",
   "detailsEpisodes": "Episodios",
   "detailsCast": "Reparto",

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
+import 'package:playtorriomov/models/movie/video.dart';
 import 'package:playtorriomov/pages/details/details_page.dart';
 
 /// The season a details page opens on. Season 0 is specials, and most shows
@@ -105,6 +106,32 @@ void main() {
 
       expect(state.watched, isEmpty);
       expect(state.current, isNull);
+    });
+  });
+
+  group('DetailsPage.resumeEpisode', () {
+    Video video({required int season, required int episode}) {
+      return Video(
+        id: 'tt1:$season:$episode',
+        title: 'Episode $episode',
+        season: season,
+        episode: episode,
+      );
+    }
+
+    test('maps the furthest pair back onto its video', () {
+      final videos = [video(season: 1, episode: 1), video(season: 2, episode: 3)];
+      expect(
+        DetailsPage.resumeEpisode(videos, '2:3')?.episode,
+        3,
+      );
+    });
+
+    test('stale history and nothing watched fall back to null', () {
+      final videos = [video(season: 1, episode: 1)];
+      expect(DetailsPage.resumeEpisode(videos, '9:9'), isNull);
+      expect(DetailsPage.resumeEpisode(videos, null), isNull);
+      expect(DetailsPage.resumeEpisode(const [], '1:1'), isNull);
     });
   });
 }
