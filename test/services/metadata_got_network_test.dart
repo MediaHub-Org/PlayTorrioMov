@@ -1,10 +1,12 @@
+@Tags(['network'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/metadata/metadata_service.dart';
 
 /// Live check against Cinemeta for Game of Thrones: what the details page's
 /// episode rail actually has to work with. Tagged `network` like every test
 /// that leaves the machine, so CI skips it.
-@Tags(['network'])
 void main() {
   group('Game of Thrones meta (live)', () {
     test('carries seasons 0-8 with thumbnails', () async {

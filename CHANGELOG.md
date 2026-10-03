@@ -31,6 +31,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   "Season 0": it gets a pill of its own labeled Specials, here and in the
   player's episode panel, while the numbered list starts at 1. Only a title
   with nothing else still opens on what it has.
+- **The details rails fade the correct edge in right-to-left layouts.** The
+  edge-fade gradients never received the reading direction, which threw at
+  paint time in debug builds and silently faded the wrong side in Arabic
+  release builds.
 
 ## [1.9.2+49] - 2026-10-03
 

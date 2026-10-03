@@ -1691,7 +1691,14 @@ class _DetailsPageState extends State<DetailsPage>
                     _canScrollEpisodesRight ? Colors.transparent : Colors.black,
                   ],
                   stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
-                ).createShader(bounds);
+                ).createShader(
+                  bounds,
+                  // The fade marks the leading and trailing edges, so the
+                  // gradient needs the reading direction spelled out:
+                  // without it debug builds throw at paint time, and
+                  // release builds resolve left-to-right even in Arabic.
+                  textDirection: Directionality.of(context),
+                );
               },
               blendMode: BlendMode.dstIn,
               child: ListView.separated(
@@ -1828,7 +1835,12 @@ class _DetailsPageState extends State<DetailsPage>
                             : Colors.black,
                       ],
                       stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
-                    ).createShader(bounds);
+                    ).createShader(
+                      bounds,
+                      // See the episodes rail above: a directional fade needs
+                      // its direction, or debug throws and Arabic fades wrong.
+                      textDirection: Directionality.of(context),
+                    );
                   },
                   blendMode: BlendMode.dstIn,
                   child: ListView.separated(
@@ -1979,7 +1991,12 @@ class _DetailsPageState extends State<DetailsPage>
                             : Colors.black,
                       ],
                       stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
-                    ).createShader(bounds);
+                    ).createShader(
+                      bounds,
+                      // See the episodes rail above: a directional fade needs
+                      // its direction, or debug throws and Arabic fades wrong.
+                      textDirection: Directionality.of(context),
+                    );
                   },
                   blendMode: BlendMode.dstIn,
                   child: ListView.separated(
