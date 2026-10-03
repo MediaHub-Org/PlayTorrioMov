@@ -2124,6 +2124,24 @@ class _PlayerScreenState extends State<PlayerScreen>
     });
   }
 
+  /// The gear's Quality row opens the Sources panel: each quality of a
+  /// torrent or a direct file is a different release, so there is no variant
+  /// list to step into -- the panel with its seeders, sizes and source kinds
+  /// is the honest version of that list. Needs an episode behind the player;
+  /// without one the row is hidden instead of opening nowhere.
+  void _openSourcesFromSettings() {
+    final episode = _currentEpisode;
+    if (episode == null) return;
+    setState(() {
+      _activeMenu = null;
+      _menuParent = null;
+      _sourcesEpisode = episode;
+      _sourcesErrorMessage = null;
+      _showSourcesPanel = true;
+      _showControls = true;
+    });
+  }
+
   /// The back action for a sub-menu, or null when it was not stepped into.
   VoidCallback? get _backToSettings => _menuParent == 'settings'
       ? () => setState(() {
@@ -3116,6 +3134,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             onClose: _closeActiveMenu,
             child: PlayerSettingsMenu(
               currentRate: _playbackRate,
+              qualitySummary: _currentSource.quality,
               audioSummary: _audioTracks
                   .where((t) => t.index == _selectedAudioTrackIndex)
                   .firstOrNull
@@ -3135,6 +3154,9 @@ class _PlayerScreenState extends State<PlayerScreen>
               onOpenAudio: () => _openSubMenu('audio'),
               onOpenSleep: () => _openSubMenu('sleep'),
               onOpenAspect: () => _openSubMenu('aspect'),
+              onOpenQuality: _currentEpisode == null
+                  ? null
+                  : _openSourcesFromSettings,
             ),
           ),
 

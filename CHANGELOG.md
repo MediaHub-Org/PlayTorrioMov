@@ -15,6 +15,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   decade, rating and sort pills mark the current value with a check, and a
   long list scrolls inside a fixed ceiling instead of running off the
   screen.
+- **The gear leads with Quality, opening the Sources panel.** A torrent or
+  a direct file has no in-stream variants, so the row names the current
+  source's resolution and steps out to the release list instead of a variant
+  list that could never exist.
 - **The player's popovers sit just above the playback line.** They used to
   clear only the buttons row, so a menu covered the seek bar it belongs to
   and the timeline could not be seen or scrubbed while one was open. The

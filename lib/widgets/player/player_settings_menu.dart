@@ -6,8 +6,13 @@ import '../../services/player/sleep_timer_service.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
 
-/// The gear's root menu: the four set-once controls that used to share the
-/// transport bar with subtitles and stats.
+/// The gear's root menu: quality plus the four set-once controls that used
+/// to share the transport bar with subtitles and stats.
+///
+/// Quality leads, as on YouTube -- with one honest difference: a torrent or
+/// a direct file has no in-stream variants to switch between (each quality
+/// is a different release), so the row opens the Sources panel instead of a
+/// variant list. Its badge names the current source's detected resolution.
 ///
 /// Subtitles and stats keep their own buttons -- they are per-scene choices
 /// a viewer reaches for mid-sentence. Speed, audio, sleep and aspect are
@@ -17,8 +22,13 @@ import 'player_menu_row.dart';
 /// without opening anything.
 class PlayerSettingsMenu extends StatelessWidget {
   final double currentRate;
+  final String? qualitySummary;
   final String? audioSummary;
   final String? aspectSummary;
+
+  /// Opens the Sources panel. Null hides the Quality row entirely -- without
+  /// an episode behind the player there is no panel to open.
+  final VoidCallback? onOpenQuality;
   final VoidCallback onOpenSpeed;
   final VoidCallback onOpenAudio;
   final VoidCallback onOpenSleep;
@@ -27,8 +37,10 @@ class PlayerSettingsMenu extends StatelessWidget {
   const PlayerSettingsMenu({
     super.key,
     required this.currentRate,
+    this.qualitySummary,
     this.audioSummary,
     this.aspectSummary,
+    this.onOpenQuality,
     required this.onOpenSpeed,
     required this.onOpenAudio,
     required this.onOpenSleep,
@@ -48,6 +60,13 @@ class PlayerSettingsMenu extends StatelessWidget {
             title: context.l10n.playerSettingsPanelTitle.toUpperCase(),
           ),
           SizedBox(height: context.rem(AppRem.snug)),
+          if (onOpenQuality != null)
+            _NavRow(
+              icon: Icons.high_quality_rounded,
+              title: context.l10n.playerQuality,
+              summary: qualitySummary,
+              onTap: onOpenQuality!,
+            ),
           _NavRow(
             icon: Icons.speed_rounded,
             title: context.l10n.detailsPlaybackSpeed,

@@ -332,6 +332,7 @@
   "playerTryAgain": "Try again",
   "playerPickAnotherSource": "Pick another source",
   "playerSources": "Sources",
+  "playerQuality": "Quality",
   "@playerSources": {"description": "Action on the cast-unreachable message that opens the sources panel"},
   "playerCastUnreachable": "This source is served from this device, so a Cast receiver cannot reach it. Sources hosted elsewhere -- direct links, debrid, or a torrent server on another machine -- cast fine.",
   "playerSubSwitchedEmbedded": "Switched to embedded subtitle: {title}",

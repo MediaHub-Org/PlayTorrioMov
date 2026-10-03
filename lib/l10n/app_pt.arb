@@ -256,6 +256,7 @@
   "playerTryAgain": "Tentar novamente",
   "playerPickAnotherSource": "Escolher outra fonte",
   "playerSources": "Fontes",
+  "playerQuality": "Qualidade",
   "playerCastUnreachable": "Esta fonte é servida por este dispositivo, então um receptor Cast não consegue acessá-la. Fontes hospedadas em outro lugar -- links diretos, debrid ou um servidor de torrent em outra máquina -- transmitem normalmente.",
   "playerSubSwitchedEmbedded": "Alternado para a legenda incorporada: {title}",
   "playerNoSubtitlesForStream": "Nenhuma legenda disponível para esta transmissão",

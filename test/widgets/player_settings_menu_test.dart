@@ -7,6 +7,7 @@ Widget wrap(Widget child) =>
     MaterialApp(home: Scaffold(body: Center(child: child)));
 
 PlayerSettingsMenu menu({
+  void Function()? onQuality,
   void Function()? onSpeed,
   void Function()? onAudio,
   void Function()? onSleep,
@@ -14,8 +15,10 @@ PlayerSettingsMenu menu({
 }) =>
     PlayerSettingsMenu(
       currentRate: 1.5,
+      qualitySummary: '1080p',
       audioSummary: 'English',
       aspectSummary: 'Original',
+      onOpenQuality: onQuality,
       onOpenSpeed: onSpeed ?? () {},
       onOpenAudio: onAudio ?? () {},
       onOpenSleep: onSleep ?? () {},
@@ -57,6 +60,24 @@ void main() {
       expect(audio, isTrue);
       expect(sleep, isTrue);
       expect(aspect, isTrue);
+    });
+
+    testWidgets('the quality row opens Sources, with the current quality',
+        (tester) async {
+      var quality = false;
+      await tester.pumpWidget(wrap(menu(onQuality: () => quality = true)));
+
+      expect(find.text('Quality'), findsOneWidget);
+      expect(find.text('1080p'), findsOneWidget);
+
+      await tester.tap(find.text('Quality'));
+      expect(quality, isTrue);
+    });
+
+    testWidgets('without an episode there is no quality row', (tester) async {
+      await tester.pumpWidget(wrap(menu()));
+
+      expect(find.text('Quality'), findsNothing);
     });
 
     testWidgets('rows without a value show no badge', (tester) async {
