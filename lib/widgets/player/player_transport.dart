@@ -11,10 +11,10 @@ import 'player_volume_control.dart';
 import '../../services/app_units.dart';
 
 /// Bottom transport bar: timeline scrubber, volume, and one button per
-/// control -- speed, audio, subtitles, sleep timer, aspect ratio. Play/pause
-/// and seek live in the centered overlay instead (see PlayerCenterControls),
-/// and episode switching lives in PlayerTopBar's own "Episodes" badge --
-/// neither is duplicated here.
+/// control -- stats, speed, audio, subtitles, sleep timer, aspect ratio.
+/// Play/pause and seek live in the centered overlay instead (see
+/// PlayerCenterControls), and episode switching lives in PlayerTopBar's own
+/// "Episodes" badge -- neither is duplicated here.
 ///
 /// There is no settings button. The gear used to be an index of every
 /// control here, then held only the subtitle entry and the sleep timer once
@@ -54,6 +54,10 @@ class PlayerTransport extends StatelessWidget {
   final VoidCallback onOpenAspectMenu;
   final VoidCallback onOpenSleepTimerMenu;
 
+  /// Opens the stream statistics popover. Null hides the button, for screens
+  /// that have no stream figures to report.
+  final VoidCallback? onOpenStatsMenu;
+
   /// Opens the volume panel. A TV shows a button for it where a pointer shows
   /// the slider: the slider's arrows are the ones a remote needs to move
   /// around the row, so it could not be used and could not be left (#80).
@@ -89,6 +93,7 @@ class PlayerTransport extends StatelessWidget {
     required this.onOpenAudioMenu,
     required this.onOpenAspectMenu,
     required this.onOpenSleepTimerMenu,
+    this.onOpenStatsMenu,
     this.onOpenVolumeMenu,
     this.onScrubbingChanged,
     this.seekFocusNode,
@@ -100,7 +105,11 @@ class PlayerTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    final btnSize = context.rem(isCompact ? 2.25 : 2.625);
+    // Six buttons share the row on a narrow phone (stats joined speed,
+    // audio, subtitles, sleep timer and aspect), and the volume button
+    // takes the other end: at the 1.3 rem ceiling seven 2.25 rem buttons
+    // ran 17px past a 360px screen, so compact steps down to 2.0.
+    final btnSize = context.rem(isCompact ? 2.0 : 2.625);
     final btnIconSize = context.rem(isCompact ? AppRem.icon : AppRem.iconMd);
     final gap = context.rem(isCompact ? AppRem.xxs : AppRem.xs);
     final isTv = TvModeService.isTv.value;
@@ -189,15 +198,31 @@ class PlayerTransport extends StatelessWidget {
                     onPressed: tvVolume ? onOpenVolumeMenu : onToggleMute,
                   ),
 
-                // Right Group: speed, audio, subtitles, sleep timer, aspect --
-                // one button each, in that order. They used to be two buttons
-                // (subtitles and a gear that held everything else), which made
-                // the gear a menu of menus: three taps to reach a speed that
-                // was one tap away on YouTube. Each of these is a set-once
-                // choice a viewer makes mid-scene, so each gets its own button.
+                // Right Group: stats, speed, audio, subtitles, sleep timer,
+                // aspect -- one button each, in that order. They used to be
+                // two buttons (subtitles and a gear that held everything
+                // else), which made the gear a menu of menus: three taps to
+                // reach a speed that was one tap away on YouTube. Each of
+                // these is a set-once choice a viewer makes mid-scene, so
+                // each gets its own button.
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Stream statistics: swarm figures for a torrent, host
+                    // and buffer for anything else. First in the row, ahead
+                    // of the control it describes rather than among them.
+                    if (onOpenStatsMenu != null) ...[
+                      PlayerIconButton(
+                        size: btnSize,
+                        iconSize: btnIconSize,
+                        icon: const Icon(Icons.info_outline_rounded),
+                        tooltip: context.l10n.playerStats,
+                        onPressed: onOpenStatsMenu,
+                      ),
+
+                      SizedBox(width: gap),
+                    ],
+
                     // Playback Speed
                     PlayerIconButton(
                       size: btnSize,

@@ -55,8 +55,10 @@ import 'package:playtorriomov/widgets/player/player_episodes_panel.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_sources_panel.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
+import 'package:playtorriomov/widgets/player/player_stats_menu.dart';
 import 'package:playtorriomov/widgets/player/player_sub_style_modal.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
+import 'package:playtorriomov/widgets/player/player_top_bar.dart';
 import 'package:playtorriomov/widgets/player/player_transport.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
 
@@ -579,6 +581,7 @@ void main() {
                   onToggleMute: () {},
                   onOpenSubtitleMenu: () {},
                   onOpenSpeedMenu: () {},
+                  onOpenStatsMenu: () {},
                   onOpenAudioMenu: () {},
                   onOpenAspectMenu: () {},
                   onOpenSleepTimerMenu: () {},
@@ -595,6 +598,57 @@ void main() {
         reason: 'the seek bar time labels sit in fixed minWidth boxes, and a '
             'long timestamp at 3x wants more than the box has',
       );
+    },
+  );
+
+  testWidgets(
+    'the top bar does not overflow at 3x text scale',
+    (tester) async {
+      // The fifth action in the row: the fullscreen button joined download,
+      // copy link, cast and episodes, and a phone has to fit all of them
+      // beside the title.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: PlayerTopBar(
+            title: 'A Film With A Rather Long Title',
+            subtitle: 'S1:E2 • An Episode Title',
+            onBack: () {},
+            onToggleEpisodes: () {},
+            onCopyStreamUrl: () {},
+            onDownload: () {},
+            onToggleFullscreen: () {},
+            onCast: () {},
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'the stats popover does not overflow at 3x text scale',
+    (tester) async {
+      // The newest transport-bar popover, carrying the longest strings it
+      // can meet: a two-part source name, a host and a full info hash next
+      // to their labels.
+      await pumpAtScale(
+        tester,
+        child: Scaffold(
+          body: PlayerStatsMenu(
+            sourceLabel: 'A Very Long Addon Name · 1080p BluRay x264',
+            streamKind: 'Torrent',
+            host: 'a-very-long-hostname.example.com',
+            infoHash: '0123456789abcdef0123456789abcdef01234567',
+            buffered: ValueNotifier<Duration?>(
+              const Duration(seconds: 42),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
     },
   );
 

@@ -12,10 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/app_units.dart';
+import 'package:playtorriomov/services/stream/torrent_stream_service.dart';
 import 'package:playtorriomov/widgets/player/player_aspect_menu.dart';
 import 'package:playtorriomov/widgets/player/player_audio_menu.dart';
 import 'package:playtorriomov/widgets/player/player_glass.dart';
 import 'package:playtorriomov/widgets/player/player_speed_menu.dart';
+import 'package:playtorriomov/widgets/player/player_stats_menu.dart';
 import 'package:playtorriomov/widgets/player/player_subtitle_menu.dart';
 import 'package:playtorriomov/widgets/player/player_volume_menu.dart';
 import 'package:playtorriomov/widgets/player/sleep_timer_menu.dart';
@@ -54,6 +56,22 @@ final menus = <String, Widget Function()>{
     currentRate: 1.0,
     onRateSelected: (_) {},
     onClose: () {},
+  ),
+  'stats': () => const PlayerStatsMenu(
+    sourceLabel: 'Torrentio · 1080p',
+    streamKind: 'Torrent',
+    host: 'cdn.example.com',
+    infoHash: '0123456789abcdef',
+    initialStats: TorrentStats(
+      speedMbps: 1.5,
+      activePeers: 3,
+      totalPeers: 10,
+      cachePercent: 12.5,
+      loadedBytes: 100,
+      totalBytes: 800,
+      hash: '0123456789abcdef',
+      isConnected: true,
+    ),
   ),
   'aspect': () => PlayerAspectMenu(
     currentFit: BoxFit.contain,

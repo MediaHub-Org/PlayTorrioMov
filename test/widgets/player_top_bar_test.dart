@@ -39,10 +39,35 @@ void main() {
         onToggleEpisodes: () {},
         onCopyStreamUrl: () {},
         onDownload: () {},
+        onToggleFullscreen: () {},
         onCast: () {},
       )));
 
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('fullscreen sits next to download and fires its callback',
+        (tester) async {
+      // The button belongs beside download in the top bar, not hidden in a
+      // menu: entering and leaving fullscreen is a one-tap gesture either
+      // way, like everything else up there.
+      var toggles = 0;
+      await tester.pumpWidget(wrap(PlayerTopBar(
+        title: 'A Film',
+        onBack: () {},
+        onDownload: () {},
+        onToggleFullscreen: () => toggles++,
+      )));
+
+      final download = tester.getCenter(find.byIcon(Icons.download_rounded));
+      final fullscreen =
+          tester.getCenter(find.byIcon(Icons.fullscreen_rounded));
+      expect((fullscreen.dx - download.dx).abs(), lessThan(60),
+          reason: 'one button apart at most, not on the far side of the bar');
+      expect(fullscreen.dy, download.dy);
+
+      await tester.tap(find.byIcon(Icons.fullscreen_rounded));
+      expect(toggles, 1);
     });
 
     testWidgets('is absent when there is nothing to download', (tester) async {

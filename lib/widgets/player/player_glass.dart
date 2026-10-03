@@ -174,24 +174,21 @@ class PlayerMenuAnchor extends StatelessWidget {
   /// Clearance for the transport bar the popover sits above, plus whatever
   /// the system puts below it (gesture bar, home indicator).
   ///
-  /// Measured against the bar itself rather than guessed: on a compact
-  /// (phone) screen the bar is 32px top padding + 36px seek row + 8px gap +
-  /// 36px buttons + 14px bottom padding -- about 126px. The old 76 left the
-  /// bottom of a menu card sitting on top of the subtitle and settings
-  /// buttons, so the icons were hidden while the menu was open and the
-  /// first tap "missed" what the user could see. The wide-screen figure is
-  /// the same bar at its larger sizes.
+  /// Measured against the bar itself rather than guessed: the menu sits just
+  /// above the playback line, so the seek bar stays visible and scrubbable
+  /// while a menu is open. The figure mirrors the transport bar's own build
+  /// (its top padding, the 2.25 rem seek row, the gap, the buttons row and
+  /// the bottom padding) plus half a rem of air, in rem so it grows with the
+  /// text size exactly as the bar does.
   static double bottomInset(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final isShort = size.height < 500;
-    final isCompact = size.width < 680;
-    // The menu sits just above the transport bar's buttons -- close enough
-    // that the row it belongs to is visibly the row it floats over. The
-    // figure is the buttons row (36/42) plus the bar's bottom padding and a
-    // few px of air, not the whole bar: clearing everything put the card a
-    // hand's width above the icons, floating mid-screen.
-    return (isShort ? 46.0 : (isCompact ? 62.0 : 78.0)) +
-        MediaQuery.paddingOf(context).bottom;
+    final isCompact = MediaQuery.sizeOf(context).width < 680;
+    final bar =
+        (isCompact ? AppRem.xl : 3.0) +
+        2.25 +
+        (isCompact ? AppRem.xs : AppRem.sm) +
+        (isCompact ? 2.25 : 2.625) +
+        (isCompact ? 0.875 : AppRem.lg);
+    return context.rem(bar + 0.5) + MediaQuery.paddingOf(context).bottom;
   }
 
   /// Clearance for the title bar above. Being bounded at the top is the

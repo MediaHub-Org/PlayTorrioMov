@@ -53,6 +53,7 @@ import '../../widgets/player/player_volume_control.dart';
 import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
+import '../../widgets/player/player_stats_menu.dart';
 import '../../services/cast/cast_service.dart';
 import '../../services/tv_type.dart';
 import '../../l10n/app_localizations.dart';
@@ -216,6 +217,16 @@ class _PlayerScreenState extends State<PlayerScreen>
   // fails for them.
   String? _resolvedStreamUrl;
   bool _isCastableSource = false;
+
+  // What the stats popover reports about the stream being played. Set once
+  // per stream in [_initStream] and read when the popover opens: the magnet
+  // TorrServer is serving (only for a P2P torrent played through the local
+  // engine), the debrid service behind a resolved link, and the kind token
+  // the popover shows (`Torrent`, `Debrid`, `HLS`, `DASH`, `HTTPS`, `File`).
+  String? _statsMagnet;
+  String? _statsDebridService;
+  String _statsKind = 'HTTPS';
+  bool _statsIsLive = false;
 
   // Whether the app was already fullscreen (e.g. kiosk mode) before this
   // screen opened -- so leaving the player doesn't forcibly drop the user
@@ -463,6 +474,10 @@ class _PlayerScreenState extends State<PlayerScreen>
         // it afterwards let a muted or quietened video blast a moment of
         // full-volume audio first.
         _applyVolume(_isMuted ? 0.0 : _volume);
+        _statsMagnet = null;
+        _statsDebridService = null;
+        _statsKind = 'File';
+        _statsIsLive = false;
         _loadProgress.reach(PlayerLoadProgress.opened);
         await _player.open(Media(rawUrl), play: true);
         await PlayerSettings.applyPostOpenProperties(_player);
@@ -521,12 +536,16 @@ class _PlayerScreenState extends State<PlayerScreen>
 
           streamUrl = debridFiles.first.downloadUrl;
           debugPrint('[PlayerScreen] Debrid resolved stream URL: $streamUrl');
+          _statsMagnet = null;
+          _statsDebridService = activeService;
         } else {
           if (!mounted) return;
           setState(() => _status = (l10n) => l10n.playerStatusGathering);
           _loadProgress.reach(PlayerLoadProgress.resolving);
 
           preloadMagnet = magnet;
+          _statsMagnet = magnet;
+          _statsDebridService = null;
           streamUrl = await TorrentStreamService().streamTorrent(
             magnet,
             fileIdx: _currentSource.fileIdx,
@@ -534,6 +553,8 @@ class _PlayerScreenState extends State<PlayerScreen>
         }
       } else if (rawUrl != null && rawUrl.isNotEmpty) {
         streamUrl = rawUrl;
+        _statsMagnet = null;
+        _statsDebridService = null;
       } else {
         throw Exception('No valid stream source found.');
       }
@@ -587,6 +608,22 @@ class _PlayerScreenState extends State<PlayerScreen>
           sanitizedUrlStr.contains(':8090') ||
           sanitizedUrlStr.contains('/stream?link=') ||
           sanitizedUrlStr.contains('/stream?');
+
+      // The token the stats popover shows. A torrent name is not enough to
+      // tell one apart: a debrid link and a TorrServer one both started as
+      // a magnet, and only where the bytes come from now tells them apart.
+      if (_statsMagnet != null) {
+        _statsKind = 'Torrent';
+      } else if (_statsDebridService != null) {
+        _statsKind = 'Debrid';
+      } else if (lowerClean.contains('.m3u8')) {
+        _statsKind = 'HLS';
+      } else if (lowerClean.contains('.mpd')) {
+        _statsKind = 'DASH';
+      } else {
+        _statsKind = 'HTTPS';
+      }
+      _statsIsLive = isLive;
 
       await PlayerSettings.applyPreOpenProperties(
         _player,
@@ -2050,6 +2087,11 @@ class _PlayerScreenState extends State<PlayerScreen>
     _startHideControlsTimer();
   }
 
+  void _toggleFullscreen() {
+    WindowService.instance.toggleFullscreen();
+    _startHideControlsTimer();
+  }
+
   void _seekRelative(Duration offset) {
     final cur = _player.state.position;
     final dur = _player.state.duration;
@@ -2688,6 +2730,41 @@ class _PlayerScreenState extends State<PlayerScreen>
           .length >
       1;
 
+  /// The stats popover's source line: who serves this stream. Falls back to
+  /// the title when the source carries neither name.
+  String get _statsSourceLabel {
+    final parts = [
+      _currentSource.addonName,
+      _currentSource.name ?? '',
+    ].where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return _currentTitle;
+    return parts.join(' · ');
+  }
+
+  /// The host the player opened, for anything fetched over the network. A
+  /// P2P torrent resolves to this device's own loopback, which names no host
+  /// worth showing, so that case reports no host at all.
+  String? get _statsHost {
+    if (_statsMagnet != null) return null;
+    final uri = _resolvedStreamUrl == null
+        ? null
+        : Uri.tryParse(_resolvedStreamUrl!);
+    final host = uri?.host ?? '';
+    return host.isEmpty ? null : host;
+  }
+
+  /// The torrent hash behind a P2P stream, from the source or from its magnet
+  /// link. A debrid link started as a magnet too, but its bytes come from the
+  /// debrid host now, so a hash there would answer a question nobody asked.
+  String? get _statsHash {
+    if (_statsMagnet == null) return null;
+    final direct = _currentSource.infoHash;
+    if (direct != null && direct.isNotEmpty) return direct;
+    final raw = _currentSource.url;
+    if (raw == null) return null;
+    return RegExp(r'btih:([a-zA-Z0-9]+)').firstMatch(raw)?.group(1);
+  }
+
   void _handleCast() {
     final url = _resolvedStreamUrl;
     // A null url is the offline path: a downloaded file played straight off
@@ -2838,6 +2915,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                       ? null
                       : _handleCopyStreamUrl,
                   onDownload: (_isLoading || !_canDownload) ? null : _handleDownload,
+                  onToggleFullscreen: _toggleFullscreen,
                   onToggleEpisodes:
                       (!_isLoading &&
                           widget.detail?.videos.isNotEmpty == true)
@@ -2954,6 +3032,7 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onToggleMute: () => _toggleMute(),
                     onOpenSubtitleMenu: () => _toggleMenu('subtitle'),
                     onOpenSpeedMenu: () => _toggleMenu('speed'),
+                    onOpenStatsMenu: () => _toggleMenu('stats'),
                     onOpenAudioMenu: () => _toggleMenu('audio'),
                     onOpenAspectMenu: () => _toggleMenu('aspect'),
                     onOpenSleepTimerMenu: () => _toggleMenu('sleep'),
@@ -3084,6 +3163,21 @@ class _PlayerScreenState extends State<PlayerScreen>
                 _activeMenu = null;
                 _menuParent = null;
               }),
+            ),
+          ),
+
+        // Floating Stream Statistics Popover
+        if (_activeMenu == 'stats' && !_isLoading)
+          PlayerMenuAnchor(
+            onClose: _closeActiveMenu,
+            child: PlayerStatsMenu(
+              sourceLabel: _statsSourceLabel,
+              streamKind: _statsKind,
+              isLive: _statsIsLive,
+              host: _statsHost,
+              infoHash: _statsHash,
+              torrentMagnet: _statsMagnet,
+              buffered: _bufferNotifier,
             ),
           ),
 

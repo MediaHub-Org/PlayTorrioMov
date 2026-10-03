@@ -3,6 +3,26 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- **The player's popovers sit just above the playback line.** They used to
+  clear only the buttons row, so a menu covered the seek bar it belongs to
+  and the timeline could not be seen or scrubbed while one was open. The
+  clearance now mirrors the transport bar's own build, so the card reads as
+  attached to the timeline. Not seen on a device.
+
+### Added
+- **Stream statistics in the transport bar, ahead of the speed button.** A
+  torrent reports its swarm the way a client does -- download speed, peers,
+  how much has arrived and the info hash -- while an HLS playlist or a plain
+  HTTPS stream reports its host and how much is buffered instead. The swarm
+  poll starts when the panel opens and stops when it closes. Not seen on a
+  device.
+- **A fullscreen button in the player's top bar, next to Download.** The
+  icon follows the window itself, so F11, a double-tap and the button never
+  disagree about which way the window is.
+
 ## [1.9.2+49] - 2026-10-03
 
 ### Changed

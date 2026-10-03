@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/tv_type.dart';
+import '../../services/window/window_service.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 
@@ -20,6 +21,11 @@ class PlayerTopBar extends StatelessWidget {
   /// with no title behind it (a bare magnet opened from search).
   final VoidCallback? onDownload;
 
+  /// Toggles fullscreen. Null hides the button; the screen that owns this
+  /// bar passes its own toggle so the icon can stay out of the bar on
+  /// platforms where the window cannot go fullscreen.
+  final VoidCallback? onToggleFullscreen;
+
   const PlayerTopBar({
     super.key,
     required this.title,
@@ -31,17 +37,20 @@ class PlayerTopBar extends StatelessWidget {
     this.onCast,
     this.onCopyStreamUrl,
     this.onDownload,
+    this.onToggleFullscreen,
   });
 
   @override
   Widget build(BuildContext context) {
-    // A phone in portrait has no room for the title *and* four actions at
+    // A phone in portrait has no room for the title *and* five actions at
     // their desktop sizes: with the download button added the row ran 45px
-    // over at 360px wide. Compact trims what can give -- the margins, the
-    // buttons by 4px, and the Episodes badge to its icon -- and leaves the
-    // title the rest.
+    // over at 360px wide, and the fullscreen button is a fifth action after
+    // it. Compact trims what can give -- the margins, the buttons to 2.0
+    // rem, and the Episodes badge to its icon -- and leaves the title the
+    // rest, which at large text scales can shrink to nearly nothing rather
+    // than pushing the row past the edge.
     final isCompact = MediaQuery.sizeOf(context).width < 480;
-    final buttonSize = context.rem(isCompact ? 2.25 : 2.5);
+    final buttonSize = context.rem(isCompact ? 2.0 : 2.5);
     final gap = SizedBox(width: context.rem(isCompact ? AppRem.snug : AppRem.sm));
 
     return Container(
@@ -235,6 +244,31 @@ class PlayerTopBar extends StatelessWidget {
                   tooltip: context.l10n.playerDownload,
                   backgroundColor: const Color(0x22080C12),
                   onPressed: onDownload,
+                ),
+                gap,
+              ],
+              if (onToggleFullscreen != null) ...[
+                // The icon follows the window, not a local flag: F11, a
+                // double-tap and this button all flip the same notifier, so
+                // reading it here keeps the glyph honest whichever way the
+                // mode changed.
+                ValueListenableBuilder<bool>(
+                  valueListenable:
+                      WindowService.instance.isFullscreenNotifier,
+                  builder: (context, isFullscreen, _) => PlayerIconButton(
+                    size: buttonSize,
+                    iconSize: context.rem(1.25),
+                    icon: Icon(
+                      isFullscreen
+                          ? Icons.fullscreen_exit_rounded
+                          : Icons.fullscreen_rounded,
+                    ),
+                    tooltip: isFullscreen
+                        ? context.l10n.playerExitFullscreen
+                        : context.l10n.playerEnterFullscreen,
+                    backgroundColor: const Color(0x22080C12),
+                    onPressed: onToggleFullscreen,
+                  ),
                 ),
                 gap,
               ],

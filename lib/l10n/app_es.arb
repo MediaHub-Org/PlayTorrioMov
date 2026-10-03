@@ -1036,5 +1036,16 @@
   "commonClearSearch": "Borrar búsqueda",
 
   "appearanceNativeTitlesTitle": "Mostrar los títulos en su idioma original",
-  "appearanceNativeTitlesSubtitle": "Solo para anime, y solo en pantalla. La búsqueda, las coincidencias y tu biblioteca siguen usando el título en inglés, que es el que todas las fuentes comparten."
+  "appearanceNativeTitlesSubtitle": "Solo para anime, y solo en pantalla. La búsqueda, las coincidencias y tu biblioteca siguen usando el título en inglés, que es el que todas las fuentes comparten.",
+  "playerStats": "Estadísticas del stream",
+  "playerStatsSource": "Fuente",
+  "playerStatsType": "Tipo de stream",
+  "playerStatsSpeed": "Velocidad de descarga",
+  "playerStatsPeers": "Pares",
+  "playerStatsCompleted": "Completado",
+  "playerStatsHash": "Info hash",
+  "playerStatsBuffered": "En búfer",
+  "playerStatsHost": "Host",
+  "playerEnterFullscreen": "Pantalla completa",
+  "playerExitFullscreen": "Salir de pantalla completa"
 }

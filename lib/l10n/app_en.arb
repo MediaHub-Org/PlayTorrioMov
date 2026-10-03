@@ -1344,5 +1344,16 @@
 
   "appearanceNativeTitlesTitle": "Show titles in their own language",
   "@appearanceNativeTitlesTitle": {"description": "Appearance setting: display anime titles in the original script instead of English"},
-  "appearanceNativeTitlesSubtitle": "Anime only, and display only. Searching, matching and your library keep using the English title, which is the one every source agrees on."
+  "appearanceNativeTitlesSubtitle": "Anime only, and display only. Searching, matching and your library keep using the English title, which is the one every source agrees on.",
+  "playerStats": "Stream stats",
+  "playerStatsSource": "Source",
+  "playerStatsType": "Stream type",
+  "playerStatsSpeed": "Download speed",
+  "playerStatsPeers": "Peers",
+  "playerStatsCompleted": "Completed",
+  "playerStatsHash": "Info hash",
+  "playerStatsBuffered": "Buffered",
+  "playerStatsHost": "Host",
+  "playerEnterFullscreen": "Enter fullscreen",
+  "playerExitFullscreen": "Exit fullscreen"
 }
