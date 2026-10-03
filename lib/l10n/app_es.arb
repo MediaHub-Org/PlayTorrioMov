@@ -1047,5 +1047,6 @@
   "playerStatsBuffered": "En búfer",
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "Pantalla completa",
-  "playerExitFullscreen": "Salir de pantalla completa"
+  "playerExitFullscreen": "Salir de pantalla completa",
+  "detailsSpecials": "Especiales"
 }

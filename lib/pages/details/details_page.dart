@@ -90,6 +90,34 @@ class DetailsPage extends StatefulWidget {
     this.autoPlay = false,
   });
 
+  /// The season the page opens on: the first real season, not the specials.
+  /// Season 0 is extras most shows carry little or nothing for, and landing
+  /// on it reads as an empty page -- which is how "no episodes" reports
+  /// started. Only a title with nothing else opens on whatever it has.
+  @visibleForTesting
+  static int? initialSeason(Iterable<int?> seasons) {
+    final split = splitSeasons(seasons);
+    if (split.numbered.isNotEmpty) return split.numbered.first;
+    return split.hasSpecials ? 0 : null;
+  }
+
+  /// Season 0 (specials/extras) split from the numbered seasons. The data
+  /// counts extras as season 0, but on screen they are never "Season 0":
+  /// they get a pill of their own while the numbered list starts at 1.
+  @visibleForTesting
+  static ({List<int> numbered, bool hasSpecials}) splitSeasons(
+    Iterable<int?> seasons,
+  ) {
+    final numbered = seasons
+        .whereType<int>()
+        .where((s) => s > 0)
+        .toSet()
+        .toList()
+      ..sort();
+    final hasSpecials = seasons.whereType<int>().any((s) => s == 0);
+    return (numbered: numbered, hasSpecials: hasSpecials);
+  }
+
   @override
   State<DetailsPage> createState() => _DetailsPageState();
 }
@@ -387,14 +415,10 @@ class _DetailsPageState extends State<DetailsPage>
         if (meta != null &&
             (_isSeries || meta.videos.isNotEmpty) &&
             meta.videos.isNotEmpty) {
-          final seasons = meta.videos
-              .map((v) => v.season)
-              .where((s) => s != null)
-              .toSet()
-              .toList();
-          seasons.sort();
-          if (seasons.isNotEmpty) {
-            _selectedSeason = seasons.first;
+          _selectedSeason = DetailsPage.initialSeason(
+            meta.videos.map((v) => v.season),
+          );
+          if (_selectedSeason != null) {
             _updateEpisodesForSeason();
           } else {
             _currentSeasonEpisodes = List.from(meta.videos);
@@ -1536,12 +1560,10 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   Widget _buildSeasonSelector(MovieDetail meta) {
-    final seasons = meta.videos
-        .map((v) => v.season)
-        .whereType<int>()
-        .toSet()
-        .toList();
-    seasons.sort();
+    // Specials first when the data has them, then the numbered seasons from
+    // 1 up: season 0 exists in the data but is never shown as "Season 0".
+    final split = DetailsPage.splitSeasons(meta.videos.map((v) => v.season));
+    final pills = [if (split.hasSpecials) 0, ...split.numbered];
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringSeasons = true),
@@ -1556,10 +1578,10 @@ class _DetailsPageState extends State<DetailsPage>
               controller: _seasonScrollController,
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
-              itemCount: seasons.length,
+              itemCount: pills.length,
               separatorBuilder: (_, __) => SizedBox(width: context.rem(DetailsSpace.sm)),
               itemBuilder: (context, index) {
-                final season = seasons[index];
+                final season = pills[index];
                 final isSelected = _selectedSeason == season;
                 return HoverButton(
                   showFocusRing: true,
@@ -1589,7 +1611,9 @@ class _DetailsPageState extends State<DetailsPage>
                       ),
                     ),
                     child: Text(
-                      context.l10n.playerSeasonN(season),
+                      season == 0
+                          ? context.l10n.detailsSpecials
+                          : context.l10n.playerSeasonN(season),
                       style: TextStyle(
                         color: isSelected ? Colors.black : AppColors.ink,
                         fontSize: AppType.bodyMd,

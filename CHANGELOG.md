@@ -23,6 +23,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   icon follows the window itself, so F11, a double-tap and the button never
   disagree about which way the window is.
 
+### Fixed
+- **A series details page opens on Season 1, not the specials.** The opener
+  picked the lowest season number, so a show with extras landed on Season 0
+  -- which most shows carry little or nothing for, reading as an empty
+  episode rail. Season 0 still exists in the data but is never shown as
+  "Season 0": it gets a pill of its own labeled Specials, here and in the
+  player's episode panel, while the numbered list starts at 1. Only a title
+  with nothing else still opens on what it has.
+
 ## [1.9.2+49] - 2026-10-03
 
 ### Changed

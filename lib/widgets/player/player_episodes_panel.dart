@@ -58,7 +58,14 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
     _selectedEpisodeId = widget.currentEpisode?.id;
 
     // Find the season/batch containing the current episode
-    int initialSeason = _seasons.isNotEmpty ? _seasons.first : 1;
+    // Season 0 is specials in the data but never "Season 0" on screen; the
+    // panel opens on the first numbered season unless the playing episode
+    // pins it elsewhere below.
+    int initialSeason = 1;
+    if (_seasons.isNotEmpty) {
+      initialSeason =
+          _seasons.firstWhere((s) => s > 0, orElse: () => _seasons.first);
+    }
     if (widget.currentEpisode != null) {
       for (final entry in _seasonEpisodes.entries) {
         final hasEp = entry.value.any((v) =>
@@ -129,6 +136,14 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
       _seasonEpisodes = map;
       _seasonLabels = {};
     }
+  }
+
+  /// What a season tab reads: specials get their own name, everything else
+  /// the numbered season or its episode-range batch. Season 0 exists in the
+  /// data but is never shown as "Season 0".
+  String _seasonLabel(int season) {
+    if (season == 0) return context.l10n.detailsSpecials;
+    return _seasonLabels[season] ?? context.l10n.playerSeasonN(season);
   }
 
   void _scrollToCurrentEpisode({bool immediate = false}) {
@@ -413,7 +428,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   ),
                 ),
                 Text(
-                  '${_seasonLabels[_selectedSeason] ?? context.l10n.playerSeasonN(_selectedSeason)} • ${context.l10n.playerEpisodeCount(episodeCount)}',
+                  '${_seasonLabel(_selectedSeason)} • ${context.l10n.playerEpisodeCount(episodeCount)}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.55),
                     fontSize: AppType.caption,
@@ -468,7 +483,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
               itemBuilder: (context, index) {
                 final season = _seasons[index];
                 final isActive = season == _selectedSeason;
-                final tabLabel = _seasonLabels[season] ?? context.l10n.playerSeasonN(season);
+                final tabLabel = _seasonLabel(season);
 
                 return Material(
                   color: Colors.transparent,

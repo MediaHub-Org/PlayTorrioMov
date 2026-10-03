@@ -1047,5 +1047,6 @@
   "playerStatsBuffered": "Em buffer",
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "Tela cheia",
-  "playerExitFullscreen": "Sair de tela cheia"
+  "playerExitFullscreen": "Sair de tela cheia",
+  "detailsSpecials": "Especiais"
 }

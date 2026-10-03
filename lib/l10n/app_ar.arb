@@ -1047,5 +1047,6 @@
   "playerStatsBuffered": "التخزين المؤقت",
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "ملء الشاشة",
-  "playerExitFullscreen": "الخروج من ملء الشاشة"
+  "playerExitFullscreen": "الخروج من ملء الشاشة",
+  "detailsSpecials": "حلقات خاصة"
 }

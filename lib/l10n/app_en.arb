@@ -1355,5 +1355,6 @@
   "playerStatsBuffered": "Buffered",
   "playerStatsHost": "Host",
   "playerEnterFullscreen": "Enter fullscreen",
-  "playerExitFullscreen": "Exit fullscreen"
+  "playerExitFullscreen": "Exit fullscreen",
+  "detailsSpecials": "Specials"
 }
