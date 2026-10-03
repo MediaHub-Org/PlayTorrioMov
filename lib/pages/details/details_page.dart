@@ -19,6 +19,8 @@ import '../../models/movie/movie_year.dart';
 import '../../models/movie/video.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/my_list/my_list_item.dart';
+import '../../services/continue_watching/continue_watching_service.dart';
+import '../../models/continue_watching/continue_watching_item.dart';
 import '../../services/metadata/bestsimilar_scraper.dart';
 import '../../services/metadata/metadata_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
@@ -116,6 +118,37 @@ class DetailsPage extends StatefulWidget {
       ..sort();
     final hasSpecials = seasons.whereType<int>().any((s) => s == 0);
     return (numbered: numbered, hasSpecials: hasSpecials);
+  }
+
+  /// Watched state for the episode rail, from the same history log the anime
+  /// grid reads: which `season:episode` pairs were started, and which is
+  /// furthest (the one a resume would continue from). Seasons make anime's
+  /// flat "everything up to N" rule wrong here, so membership is explicit
+  /// per pair rather than inferred from a maximum.
+  @visibleForTesting
+  static ({Set<String> watched, String? current}) episodeWatchState(
+    List<ContinueWatchingItem> history,
+    String showId,
+  ) {
+    final watched = <String>{};
+    var bestSeason = -1;
+    var bestEpisode = -1;
+    for (final item in history) {
+      if (item.id != showId) continue;
+      final season = item.season;
+      final episode = item.episode;
+      if (season == null || episode == null) continue;
+      watched.add('$season:$episode');
+      if (season > bestSeason ||
+          (season == bestSeason && episode > bestEpisode)) {
+        bestSeason = season;
+        bestEpisode = episode;
+      }
+    }
+    return (
+      watched: watched,
+      current: bestSeason < 0 ? null : '$bestSeason:$bestEpisode',
+    );
   }
 
   @override
@@ -1701,26 +1734,44 @@ class _DetailsPageState extends State<DetailsPage>
                 );
               },
               blendMode: BlendMode.dstIn,
-              child: ListView.separated(
-                clipBehavior: Clip.hardEdge,
-                controller: _episodeScrollController,
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                itemCount: _currentSeasonEpisodes.length,
-                separatorBuilder: (_, __) => SizedBox(width: context.rem(DetailsSpace.md)),
-                itemBuilder: (context, index) {
-                  final ep = _currentSeasonEpisodes[index];
-                  return SizedBox(
-                    width: cardWidth,
-                    child: _EpisodeCard(
-                      episode: ep,
-                      fallbackImageUrl:
-                          _detail?.background ??
-                          _detail?.poster ??
-                          widget.movie.poster,
-                      onTap: () => _handlePlayAction(ep),
-                      isCollection: _isCollection,
-                    ),
+              // Watched marks follow the history log live: finishing an
+              // episode elsewhere updates this rail without reopening it.
+              // The builder sits inside the slider rather than around it so
+              // the AnimatedSwitcher above still sees the season-keyed
+              // child it animates between.
+              child: ValueListenableBuilder(
+                valueListenable: ContinueWatchingService.historyItems,
+                builder: (context, history, _) {
+                  final watch = DetailsPage.episodeWatchState(
+                    history,
+                    _detail?.id ?? widget.movie.id,
+                  );
+                  return ListView.separated(
+                    clipBehavior: Clip.hardEdge,
+                    controller: _episodeScrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _currentSeasonEpisodes.length,
+                    separatorBuilder: (_, __) =>
+                        SizedBox(width: context.rem(DetailsSpace.md)),
+                    itemBuilder: (context, index) {
+                      final ep = _currentSeasonEpisodes[index];
+                      final key = '${ep.season}:${ep.episode}';
+                      return SizedBox(
+                        width: cardWidth,
+                        child: _EpisodeCard(
+                          episode: ep,
+                          fallbackImageUrl:
+                              _detail?.background ??
+                              _detail?.poster ??
+                              widget.movie.poster,
+                          onTap: () => _handlePlayAction(ep),
+                          isCollection: _isCollection,
+                          isWatched: watch.watched.contains(key),
+                          isCurrent: watch.current == key,
+                        ),
+                      );
+                    },
                   );
                 },
               ),
@@ -2132,11 +2183,21 @@ class _EpisodeCard extends StatefulWidget {
   final VoidCallback? onTap;
   final bool isCollection;
 
+  /// Dimmed like the anime grid's watched cells: this episode is in the
+  /// history log.
+  final bool isWatched;
+
+  /// Accented like the anime grid's current cell: the furthest episode
+  /// reached, the one a resume would continue from.
+  final bool isCurrent;
+
   const _EpisodeCard({
     required this.episode,
     this.fallbackImageUrl,
     this.onTap,
     this.isCollection = false,
+    this.isWatched = false,
+    this.isCurrent = false,
   });
 
   @override
@@ -2179,9 +2240,12 @@ class _EpisodeCardState extends State<_EpisodeCard> {
               color: _Palette.surface,
               borderRadius: BorderRadius.circular(context.rem(DetailsDim.episodeRadius)),
               border: Border.all(
-                color: hovered
-                    ? AppColors.ink.withOpacity(0.22)
-                    : AppColors.ink.withOpacity(0.04),
+                color: widget.isCurrent
+                    ? AppColors.accent
+                    : hovered
+                        ? AppColors.ink.withOpacity(0.22)
+                        : AppColors.ink.withOpacity(0.04),
+                width: widget.isCurrent ? 1.5 : 1.0, // px: a selected weight, not a layout size
               ),
               boxShadow: hovered
                   ? [
@@ -2249,6 +2313,15 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                             ),
                           ),
                         ),
+                        // Watched episodes read dimmed, the way the anime
+                        // grid dims its watched cells. The current one keeps
+                        // its thumbnail: it is the resume point, not history.
+                        if (widget.isWatched && !widget.isCurrent)
+                          const DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -2262,8 +2335,12 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                           children: [
                             Text(
                               widget.isCollection ? 'PART ${ep.episode ?? "?"}' : 'EP ${ep.episode ?? "?"}',
-                              style: const TextStyle(
-                                color: _Palette.accent,
+                              style: TextStyle(
+                                color: widget.isCurrent
+                                    ? AppColors.accent
+                                    : (widget.isWatched
+                                          ? AppColors.inkMuted
+                                          : _Palette.accent),
                                 fontWeight: FontWeight.bold,
                                 fontSize: AppType.caption,
                               ),

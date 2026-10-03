@@ -11,6 +11,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and the timeline could not be seen or scrubbed while one was open. The
   clearance now mirrors the transport bar's own build, so the card reads as
   attached to the timeline. Not seen on a device.
+- **Series episode cards mark watched and current like the anime grid.**
+  Finishing an episode dims its card and accents the furthest one reached,
+  read live from the same history log, so rewatching shows where you were
+  on both kinds of details page.
 
 ### Added
 - **Stream statistics in the transport bar, ahead of the speed button.** A

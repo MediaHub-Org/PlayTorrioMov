@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 import 'package:playtorriomov/pages/details/details_page.dart';
 
 /// The season a details page opens on. Season 0 is specials, and most shows
@@ -55,6 +56,55 @@ void main() {
       final split = DetailsPage.splitSeasons(const <int?>[]);
       expect(split.numbered, isEmpty);
       expect(split.hasSpecials, isFalse);
+    });
+  });
+
+  group('DetailsPage.episodeWatchState', () {
+    ContinueWatchingItem entry({
+      required String id,
+      int? season,
+      int? episode,
+    }) {
+      return ContinueWatchingItem(
+        id: id,
+        title: 'A Show',
+        type: 'series',
+        season: season,
+        episode: episode,
+        positionSeconds: 30,
+        totalDurationSeconds: 100,
+        lastWatchedAt: DateTime(2026, 1, 1),
+        isTorrent: false,
+      );
+    }
+
+    test('marks exact pairs watched, only for this show', () {
+      final state = DetailsPage.episodeWatchState([
+        entry(id: 'tt1', season: 1, episode: 2),
+        entry(id: 'tt1', season: 2, episode: 1),
+        entry(id: 'tt2', season: 1, episode: 1),
+        entry(id: 'tt1'),
+      ], 'tt1');
+
+      expect(state.watched, {'1:2', '2:1'});
+      expect(state.current, '2:1');
+    });
+
+    test('current is the furthest episode, not the latest entry', () {
+      final state = DetailsPage.episodeWatchState([
+        entry(id: 'tt1', season: 1, episode: 10),
+        entry(id: 'tt1', season: 1, episode: 3),
+      ], 'tt1');
+
+      expect(state.watched, {'1:10', '1:3'});
+      expect(state.current, '1:10');
+    });
+
+    test('no history is nothing watched and no current', () {
+      final state = DetailsPage.episodeWatchState(const [], 'tt1');
+
+      expect(state.watched, isEmpty);
+      expect(state.current, isNull);
     });
   });
 }
