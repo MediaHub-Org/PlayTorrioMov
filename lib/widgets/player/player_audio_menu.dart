@@ -11,8 +11,9 @@ class PlayerAudioTrack {
   final int index;
 
   /// The clean language name, e.g. "English". The container's own title is
-  /// not used: it tends to carry codec and channel detail ("English [DD+
-  /// 5.1]"), which the row does not show at all.
+  /// not the title: it tends to carry codec and channel detail ("English
+  /// [DD+ 5.1]"), which the row shows as chips instead -- the language stays
+  /// the thing the eye lands on.
   final String title;
   final String? language;
   final String? codec;
@@ -27,6 +28,56 @@ class PlayerAudioTrack {
   });
 }
 
+/// The codec chip for an audio row ("AAC", "5.1" comes separately): mpv's
+/// codec names, shortened the way the subtitle formats are. Unknown codecs
+/// yield nothing -- a raw `pcm_s32le` on every row is noise, not info.
+String? audioCodecLabel(String? codec) {
+  switch (codec?.trim().toLowerCase()) {
+    case 'aac':
+      return 'AAC';
+    case 'ac3':
+    case 'ac-3':
+      return 'AC-3';
+    case 'eac3':
+    case 'e-ac-3':
+      return 'E-AC-3';
+    case 'dts':
+      return 'DTS';
+    case 'dts-hd':
+    case 'dtshd':
+      return 'DTS-HD';
+    case 'flac':
+      return 'FLAC';
+    case 'mp3':
+      return 'MP3';
+    case 'opus':
+      return 'Opus';
+    case 'vorbis':
+      return 'Vorbis';
+    case 'truehd':
+      return 'TrueHD';
+    case 'alac':
+      return 'ALAC';
+    default:
+      if ((codec?.trim().toLowerCase().startsWith('pcm') ?? false)) {
+        return 'PCM';
+      }
+      return null;
+  }
+}
+
+/// The channel chip ("Stereo", "5.1"): the count mpv reports, read as the
+/// layout it almost always is. Anything else renders as a bare count rather
+/// than a guessed layout -- "4 ch" states what is known, "Quad" would not.
+String? audioChannelsLabel(int? channels) => switch (channels) {
+      1 => 'Mono',
+      2 => 'Stereo',
+      6 => '5.1',
+      8 => '7.1',
+      null => null,
+      _ => '$channels ch',
+    };
+
 /// The audio tracks, on their own.
 ///
 /// This shared a panel with the subtitles and the sleep timer for a while.
@@ -35,10 +86,10 @@ class PlayerAudioTrack {
 /// side made a viewer answer all three to change one. Each has its own icon
 /// on the transport bar again.
 ///
-/// A row is the language and nothing else. Codec, channel count and the
-/// container's own track title are all gone: the list exists to answer "which
-/// language", and every extra field is another thing to read past on the way
-/// to that answer.
+/// A row leads with the language -- the list exists to answer "which
+/// language" -- and the file's own detail rides as chips behind it: codec
+/// and channel layout off the embedded tags. The container's own title
+/// stays out: it is the same detail written noisier ("English [DD+ 5.1]").
 class PlayerAudioMenu extends StatelessWidget {
   final List<PlayerAudioTrack> audioTracks;
   final int selectedIndex;
@@ -100,6 +151,15 @@ class PlayerAudioMenu extends StatelessWidget {
                   height: context.rem(0.8125),
                 ),
                 title: track.title,
+                // The embedded info the rows used to drop: what the file
+                // carries beyond the language -- format and layout -- as
+                // chips, so the language stays the thing the eye lands on.
+                badges: [
+                  if (audioCodecLabel(track.codec) case final codec?)
+                    codec,
+                  if (audioChannelsLabel(track.channels) case final layout?)
+                    layout,
+                ],
                 isSelected: track.index == selectedIndex,
                 onTap: () => onTrackSelected(track.index),
               ),

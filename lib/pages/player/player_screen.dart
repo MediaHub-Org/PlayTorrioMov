@@ -3063,8 +3063,8 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
                     onOpenSubtitleMenu: () => _toggleMenu('subtitle'),
+                    onOpenAudioMenu: () => _toggleMenu('audio'),
                     onOpenSettingsMenu: () => _toggleMenu('settings'),
-                    onOpenStatsMenu: () => _toggleMenu('stats'),
                     onOpenVolumeMenu: () => _toggleMenu('volume'),
                     seekFocusNode: _seekFocus,
                     volumeFocusNode: _volumeFocus,
@@ -3135,10 +3135,7 @@ class _PlayerScreenState extends State<PlayerScreen>
             child: PlayerSettingsMenu(
               currentRate: _playbackRate,
               qualitySummary: _currentSource.quality,
-              audioSummary: _audioTracks
-                  .where((t) => t.index == _selectedAudioTrackIndex)
-                  .firstOrNull
-                  ?.title,
+              statsSummary: _statsKind,
               aspectSummary: aspectOptions
                   .where((opt) {
                     if (opt.fit != null) {
@@ -3151,9 +3148,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                   .firstOrNull
                   ?.label(context.l10n),
               onOpenSpeed: () => _openSubMenu('speed'),
-              onOpenAudio: () => _openSubMenu('audio'),
               onOpenSleep: () => _openSubMenu('sleep'),
               onOpenAspect: () => _openSubMenu('aspect'),
+              onOpenStats: () => _openSubMenu('stats'),
               onOpenQuality: _currentEpisode == null
                   ? null
                   : _openSourcesFromSettings,

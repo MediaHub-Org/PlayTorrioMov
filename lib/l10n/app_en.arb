@@ -171,6 +171,11 @@
     "description": "Primary action on a series details page, resuming the furthest started episode",
     "placeholders": {"season": {"type": "int"}, "episode": {"type": "int"}}
   },
+  "detailsPlaySeasonEpisode": "Play S{season} E{episode}",
+  "@detailsPlaySeasonEpisode": {
+    "description": "Primary action on a series details page with nothing watched yet: the first episode it will play",
+    "placeholders": {"season": {"type": "int"}, "episode": {"type": "int"}}
+  },
   "detailsGoBack": "Go Back",
   "detailsEpisodes": "Episodes",
   "@detailsEpisodes": {"description": "Section heading listing a series' or anime's episodes"},

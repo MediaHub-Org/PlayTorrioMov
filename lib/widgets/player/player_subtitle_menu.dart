@@ -426,6 +426,15 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             badges: [
               if (track.isForced) context.l10n.subsForced,
               if (track.isHearingImpaired) context.l10n.subsSdhShort,
+              // Bitmap tracks ignore the appearance panel, so the format
+              // earns its chip: restyling a PGS is a dead end worth knowing
+              // before opening the editor.
+              if (embeddedFormatLabel(
+                    codec: track.codec,
+                    containerTitle: track.containerTitle,
+                    title: track.title,
+                  ) case final format?)
+                format,
             ],
             isSelected: widget.isSubtitleEnabled &&
                 widget.selectedEmbeddedIndex == track.index,

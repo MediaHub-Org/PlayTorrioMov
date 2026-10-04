@@ -486,14 +486,14 @@ String embeddedFallbackTitle({
 }) {
   final title = containerTitle?.trim() ?? '';
   if (title.isNotEmpty) return title;
-  final label = _codecShortLabel(codec);
+  final label = codecShortLabel(codec);
   if (label != null) return 'Track $index · $label';
   return 'Track $index';
 }
 
-/// A codec mpv reports, shortened for a row title. Unknown codecs yield
+/// A codec mpv reports, shortened for a row chip. Unknown codecs yield
 /// nothing rather than a shouty technical string.
-String? _codecShortLabel(String? codec) {
+String? codecShortLabel(String? codec) {
   switch (codec?.trim().toLowerCase()) {
     case 'subrip':
     case 'srt':
@@ -532,7 +532,44 @@ String? _codecShortLabel(String? codec) {
       return null;
   }
 }
-///
+
+/// The format chip for an embedded track ("SRT", "PGS"): the codec mpv
+/// reports, or the format muxers write into the title when the codec field
+/// is empty ("English (US) PGS" with no codec set). Null when neither names
+/// one -- no chip rather than a guess. Bitmap formats (PGS, VobSub) matter
+/// here beyond curiosity: they render through mpv's OSD and ignore the
+/// appearance panel, so knowing which rows are bitmaps saves restyling
+/// something unstyleable.
+String? embeddedFormatLabel({
+  String? codec,
+  String? containerTitle,
+  String? title,
+}) {
+  final label = codecShortLabel(codec);
+  if (label != null) return label;
+  final haystack = '${containerTitle ?? ''} ${title ?? ''}'.toLowerCase();
+  bool word(String w) => RegExp(
+    '(?:^|[^a-z])${RegExp.escape(w)}(?:[^a-z]|\$)',
+  ).hasMatch(haystack);
+  // Whole words only, same as the model's own sniffing: "bass" is not ASS.
+  const sniffed = <String, String>{
+    'srt': 'SRT',
+    'ass': 'ASS',
+    'ssa': 'ASS',
+    'vtt': 'VTT',
+    'pgs': 'PGS',
+    'vobsub': 'VobSub',
+    'sami': 'SAMI',
+    'mpl2': 'MPL2',
+    'microdvd': 'MicroDVD',
+    'dvb': 'DVB',
+  };
+  for (final entry in sniffed.entries) {
+    if (word(entry.key)) return entry.value;
+  }
+  return null;
+}
+
 /// Deliberately narrow: it looks for the region words and codes that appear
 /// in real track titles, and returns nothing rather than guessing. A wrong
 /// region here would label a track as a variant it is not, which is worse

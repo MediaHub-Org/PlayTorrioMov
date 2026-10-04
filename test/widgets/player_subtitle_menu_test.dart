@@ -801,5 +801,30 @@ void main() {
       expect(find.text('English'), findsOneWidget);
       expect(find.text('French'), findsNothing);
     });
+
+    testWidgets('embedded rows carry their format as a chip', (tester) async {
+      await tester.pumpWidget(
+        menu(
+          embedded: const [
+            PlayerEmbeddedSubtitle(
+              index: 1,
+              title: 'English',
+              language: 'English',
+              codec: 'subrip',
+            ),
+            PlayerEmbeddedSubtitle(
+              index: 2,
+              title: 'English (US) PGS',
+              language: 'English (US)',
+              containerTitle: 'English (US) PGS',
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('SRT'), findsOneWidget);
+      expect(find.text('PGS'), findsOneWidget);
+    });
   });
 }

@@ -145,4 +145,29 @@ void main() {
       expect(uniqueTrackLanguageNames(['und'], [null]), ['']);
     });
   });
+
+  group('embeddedFormatLabel', () {
+    test('prefers the codec mpv reports', () {
+      expect(embeddedFormatLabel(codec: 'hdmv_pgs_subtitle'), 'PGS');
+      expect(embeddedFormatLabel(codec: 'subrip'), 'SRT');
+    });
+
+    test('falls back to the format muxers write into the title', () {
+      // The codec field is empty here, as muxers routinely leave it.
+      expect(
+        embeddedFormatLabel(containerTitle: 'English (US) PGS'),
+        'PGS',
+      );
+    });
+
+    test('matches whole words only', () {
+      // "Bass" is not ASS.
+      expect(embeddedFormatLabel(containerTitle: 'Bass Boosted'), isNull);
+    });
+
+    test('yields nothing rather than a guess', () {
+      expect(embeddedFormatLabel(), isNull);
+      expect(embeddedFormatLabel(codec: 'av1'), isNull);
+    });
+  });
 }

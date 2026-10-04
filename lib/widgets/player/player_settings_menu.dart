@@ -8,45 +8,45 @@ import '../common/focus_fill.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
 
-/// The gear's root menu: quality plus the four set-once controls that used
-/// to share the transport bar with subtitles and stats.
+/// The gear's root menu: quality plus the four set-once controls in a 2x2
+/// of cards -- speed, sleep timer, aspect ratio and stats.
 ///
 /// Quality leads, as on YouTube -- with one honest difference: a torrent or
 /// a direct file has no in-stream variants to switch between (each quality
 /// is a different release), so the row opens the Sources panel instead of a
 /// variant list. Its badge names the current source's detected resolution.
 ///
-/// Subtitles and stats keep their own buttons -- they are per-scene choices
-/// a viewer reaches for mid-sentence. Speed, audio, sleep and aspect are
-/// set-once-per-session choices, so they live one tap behind the gear, each
-/// row stepping into its own panel with a back arrow. Each row carries its
-/// current value as a badge, so the menu also reads as a status glance
-/// without opening anything.
+/// Audio and subtitles skip this menu with their own transport buttons:
+/// they are the per-scene choices. Stats keeps a card here rather than a
+/// button out there -- diagnostics do not earn a per-scene button, and the
+/// fourth card keeps the grid symmetric. Each card carries its current
+/// value, so the menu also reads as a status glance without opening
+/// anything.
 class PlayerSettingsMenu extends StatelessWidget {
   final double currentRate;
   final String? qualitySummary;
-  final String? audioSummary;
   final String? aspectSummary;
+  final String? statsSummary;
 
   /// Opens the Sources panel. Null hides the Quality row entirely -- without
   /// an episode behind the player there is no panel to open.
   final VoidCallback? onOpenQuality;
   final VoidCallback onOpenSpeed;
-  final VoidCallback onOpenAudio;
   final VoidCallback onOpenSleep;
   final VoidCallback onOpenAspect;
+  final VoidCallback onOpenStats;
 
   const PlayerSettingsMenu({
     super.key,
     required this.currentRate,
     this.qualitySummary,
-    this.audioSummary,
     this.aspectSummary,
+    this.statsSummary,
     this.onOpenQuality,
     required this.onOpenSpeed,
-    required this.onOpenAudio,
     required this.onOpenSleep,
     required this.onOpenAspect,
+    required this.onOpenStats,
   });
 
   @override
@@ -88,22 +88,6 @@ class PlayerSettingsMenu extends StatelessWidget {
                 ),
                 SizedBox(width: context.rem(AppRem.sm)),
                 Expanded(
-                  child: _SettingCard(
-                    icon: Icons.audiotrack_rounded,
-                    label: context.l10n.detailsAudioTrack,
-                    value: audioSummary,
-                    onTap: onOpenAudio,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: context.rem(AppRem.sm)),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
                   child: ValueListenableBuilder<int?>(
                     valueListenable:
                         SleepTimerService.instance.minutesRemaining,
@@ -120,13 +104,29 @@ class PlayerSettingsMenu extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: context.rem(AppRem.sm)),
+              ],
+            ),
+          ),
+          SizedBox(height: context.rem(AppRem.sm)),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 Expanded(
                   child: _SettingCard(
                     icon: Icons.aspect_ratio_rounded,
                     label: context.l10n.detailsAspectRatio,
                     value: aspectSummary,
                     onTap: onOpenAspect,
+                  ),
+                ),
+                SizedBox(width: context.rem(AppRem.sm)),
+                Expanded(
+                  child: _SettingCard(
+                    icon: Icons.info_outline_rounded,
+                    label: context.l10n.playerStats,
+                    value: statsSummary,
+                    onTap: onOpenStats,
                   ),
                 ),
               ],

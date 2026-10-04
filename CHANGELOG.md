@@ -18,9 +18,20 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **The gear leads with Quality, opening the Sources panel.** A torrent or
   a direct file has no in-stream variants, so the row names the current
   source's resolution and steps out to the release list instead of a variant
-  list that could never exist. The four controls below it are rectangular
-  cards in a 2x2, each with its current value -- doors to their panels,
-  not choices among each other.
+  list that could never exist. The four cards below it are speed, sleep,
+  aspect and stats in a 2x2, each with its current value -- doors to their
+  panels, not choices among each other. Audio and subtitles keep their own
+  transport buttons as the two per-scene choices; the popups sit a quarter
+  rem closer to the bar.
+- **Audio and subtitle rows carry the file's own detail as chips.** Codec
+  and channel layout for audio (E-AC-3, 5.1), format for embedded
+  subtitles (SRT, PGS -- bitmaps ignore the appearance panel, so knowing
+  which rows are bitmaps saves restyling the unstyleable). The language
+  stays the lead; the container's own title stays out as the noisier
+  spelling of the same facts.
+- **A series with nothing watched offers its first episode by name.**
+  "Play Episodes" never said which one; now it reads "Play S1 E1" and
+  plays exactly that, mirroring the anime page's "Play Ep 1".
 - **Anime episodes are an EP rail like Series, and the dead SUB/DUB bar is
   gone.** The switcher set a flag nothing read (the sheet was never told),
   while the sheet itself filters by SUB/DUB with counts and per-source

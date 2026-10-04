@@ -353,12 +353,12 @@ void main() {
       ),
       'settings': () => PlayerSettingsMenu(
         currentRate: 1.0,
-        audioSummary: 'English',
         aspectSummary: 'Original',
+        statsSummary: 'Torrent',
         onOpenSpeed: () {},
-        onOpenAudio: () {},
         onOpenSleep: () {},
         onOpenAspect: () {},
+        onOpenStats: () {},
       ),
       'volume': () => PlayerVolumeMenu(
         volume: 2.1,

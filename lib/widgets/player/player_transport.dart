@@ -11,19 +11,18 @@ import 'player_volume_control.dart';
 import '../../services/app_units.dart';
 
 /// Bottom transport bar: timeline scrubber, volume, and three menu triggers --
-/// stats, subtitles, and the gear holding speed, audio, sleep timer and
-/// aspect ratio.
+/// audio, subtitles, and the gear holding quality, speed, sleep timer,
+/// aspect ratio and stats.
 ///
 /// Play/pause and seek live in the centered overlay instead (see
 /// PlayerCenterControls), and episode switching lives in PlayerTopBar's own
 /// "Episodes" badge -- neither is duplicated here.
 ///
-/// Six buttons shared this row before (stats, speed, audio, subtitles, sleep
-/// timer, aspect). On a narrow phone the four set-once controls crowded out
-/// the ones reached for mid-scene, so they moved one tap behind the gear --
-/// each with its current value as a badge on its row -- while subtitles and
-/// stats keep their own buttons: they are per-scene choices, not
-/// set-once ones.
+/// Audio and subtitles keep their own buttons because they are the two
+/// per-scene choices a viewer reaches for mid-sentence; everything
+/// set-once lives one tap behind the gear. Stats used to stand here too,
+/// but diagnostics do not earn a per-scene button, so they moved into the
+/// gear to keep the 2x2 symmetric.
 class PlayerTransport extends StatelessWidget {
   final Duration position;
   final Duration duration;
@@ -46,13 +45,13 @@ class PlayerTransport extends StatelessWidget {
   /// than the one this button used to cost as a plain toggle.
   final VoidCallback onOpenSubtitleMenu;
 
-  /// Opens the gear: speed, audio, sleep timer and aspect ratio, each with
-  /// its current value on its row.
-  final VoidCallback onOpenSettingsMenu;
+  /// Opens the audio track panel straight away: with subtitles, the other
+  /// per-scene choice, so both skip the gear.
+  final VoidCallback onOpenAudioMenu;
 
-  /// Opens the stream statistics popover. Null hides the button, for screens
-  /// that have no stream figures to report.
-  final VoidCallback? onOpenStatsMenu;
+  /// Opens the gear: quality, speed, sleep timer, aspect ratio and stats,
+  /// each with its current value on its card.
+  final VoidCallback onOpenSettingsMenu;
 
   /// Opens the volume panel. A TV shows a button for it where a pointer shows
   /// the slider: the slider's arrows are the ones a remote needs to move
@@ -85,8 +84,8 @@ class PlayerTransport extends StatelessWidget {
     required this.onVolumeChanged,
     required this.onToggleMute,
     required this.onOpenSubtitleMenu,
+    required this.onOpenAudioMenu,
     required this.onOpenSettingsMenu,
-    this.onOpenStatsMenu,
     this.onOpenVolumeMenu,
     this.onScrubbingChanged,
     this.seekFocusNode,
@@ -98,8 +97,8 @@ class PlayerTransport extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    // Three buttons share the row on a narrow phone (stats, subtitles, the
-    // gear), and the volume button takes the other end.
+    // Three buttons share the row on a narrow phone (audio, subtitles,
+    // the gear), and the volume button takes the other end.
     final btnSize = context.rem(isCompact ? 2.0 : 2.625);
     final btnIconSize = context.rem(isCompact ? AppRem.icon : AppRem.iconMd);
     final gap = context.rem(isCompact ? AppRem.xxs : AppRem.xs);
@@ -189,28 +188,24 @@ class PlayerTransport extends StatelessWidget {
                     onPressed: tvVolume ? onOpenVolumeMenu : onToggleMute,
                   ),
 
-                // Right group: stats, subtitles, gear -- in that order. Speed,
-                // audio, sleep timer and aspect used to stand here as their
-                // own buttons, which crowded the per-scene choices on a
-                // narrow phone; now they live one tap behind the gear with
-                // their current values on their rows.
+                // Right group: audio, subtitles, gear -- in that order. The two
+                // per-scene choices stand here because they are reached for
+                // mid-sentence; quality, speed, sleep timer, aspect and
+                // stats live one tap behind the gear with their current
+                // values on their cards.
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Stream statistics: swarm figures for a torrent, host
-                    // and buffer for anything else. First in the row, ahead
-                    // of the control it describes rather than among them.
-                    if (onOpenStatsMenu != null) ...[
-                      PlayerIconButton(
-                        size: btnSize,
-                        iconSize: btnIconSize,
-                        icon: const Icon(Icons.info_outline_rounded),
-                        tooltip: context.l10n.playerStats,
-                        onPressed: onOpenStatsMenu,
-                      ),
+                    // Audio tracks: the hearing twin of the subtitles button.
+                    PlayerIconButton(
+                      size: btnSize,
+                      iconSize: btnIconSize,
+                      icon: const Icon(Icons.audiotrack_rounded),
+                      tooltip: context.l10n.detailsAudioTrack,
+                      onPressed: onOpenAudioMenu,
+                    ),
 
-                      SizedBox(width: gap),
-                    ],
+                    SizedBox(width: gap),
 
                     // Subtitles: opens the full panel. Its first pill is Off,
                     // so the toggle this button used to be is still there --
@@ -228,9 +223,9 @@ class PlayerTransport extends StatelessWidget {
 
                     SizedBox(width: gap),
 
-                    // The gear: speed, audio, sleep timer, aspect. The dot
-                    // says something in there is off-default -- a speed, a
-                    // running timer -- so it also reads as status.
+                    // The gear: quality, speed, sleep timer, aspect, stats.
+                    // The dot says something in there is off-default -- a
+                    // speed, a running timer -- so it also reads as status.
                     ValueListenableBuilder<int?>(
                       valueListenable:
                           SleepTimerService.instance.minutesRemaining,

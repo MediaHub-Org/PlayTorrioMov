@@ -66,6 +66,7 @@ Widget _player(_Nodes n) => MaterialApp(
             onVolumeChanged: (_) {},
             onToggleMute: () {},
             onOpenSubtitleMenu: () {},
+            onOpenAudioMenu: () {},
             onOpenSettingsMenu: () {},
             onOpenVolumeMenu: () {},
             seekFocusNode: n.seek,
@@ -158,8 +159,8 @@ void main() {
       if (stops.contains(here)) break;
       stops.add(here);
     }
-    // The volume button, then subtitles and the gear (no stats menu here).
-    expect(stops.length, 3, reason: 'the volume and two buttons');
+    // The volume button, then audio, subtitles and the gear.
+    expect(stops.length, 4, reason: 'the volume and three buttons');
 
     for (var i = 0; i < stops.length - 1; i++) {
       await _press(tester, LogicalKeyboardKey.arrowLeft);

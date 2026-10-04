@@ -1,9 +1,8 @@
 // test/widgets/player_audio_menu_test.dart
 //
-// The menu is a list of languages and nothing else. Rows used to carry the
-// container's own title, the codec and the channel layout; all three are
-// gone, and this keeps them from creeping back -- each one is a thing to
-// read past on the way to the only question the list answers.
+// A row leads with its language, and the file's own detail rides behind it
+// as chips: codec and channel layout off the embedded tags. The container's
+// own title stays out -- it is the same detail written noisier.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
@@ -54,7 +53,9 @@ void main() {
       expect(find.text('Italian'), findsOneWidget);
     });
 
-    testWidgets('no codec or channel line under a row', (tester) async {
+    testWidgets('codec and channels ride as chips behind the language', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         menu(
           tracks: [track(1, 'English', codec: 'eac3', channels: 6)],
@@ -62,9 +63,25 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.textContaining('EAC3'), findsNothing);
-      expect(find.textContaining('5.1'), findsNothing);
-      expect(find.textContaining('eac3'), findsNothing);
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('E-AC-3'), findsOneWidget);
+      expect(find.text('5.1'), findsOneWidget);
+      // The raw tag never shows: the chip is the readable form of it.
+      expect(find.text('eac3'), findsNothing);
+    });
+
+    testWidgets('unknown codecs and missing counts leave no chip', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          tracks: [track(1, 'English', codec: 'av1')],
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('av1'), findsNothing);
     });
 
     testWidgets('tapping a row reports its track index', (tester) async {

@@ -1338,7 +1338,9 @@ class _DetailsPageState extends State<DetailsPage>
   }
 
   /// What the Play button offers: collections start at the first movie,
-  /// series resume where they were left (or start over), films just play.
+  /// series resume where they were left (or name the first episode when
+  /// there is nothing to resume -- a bare "Play Episodes" never says which
+  /// one it plays, and the choice sits right below it), films just play.
   /// The resume half is the parity with the anime page, whose button always
   /// named its episode while this one said "Play Episodes" and started over.
   String _playButtonLabel(Video? resumeTarget) {
@@ -1346,10 +1348,16 @@ class _DetailsPageState extends State<DetailsPage>
     if (!_isSeries) return context.l10n.detailsPlayMovie;
     final season = resumeTarget?.season;
     final episode = resumeTarget?.episode;
-    if (season == null || episode == null) {
-      return context.l10n.detailsPlayEpisodes;
+    if (season != null && episode != null) {
+      return context.l10n.detailsResumeSeasonEpisode(season, episode);
     }
-    return context.l10n.detailsResumeSeasonEpisode(season, episode);
+    final first = _playTarget(null);
+    final firstSeason = first?.season;
+    final firstEpisode = first?.episode;
+    if (firstSeason != null && firstEpisode != null) {
+      return context.l10n.detailsPlaySeasonEpisode(firstSeason, firstEpisode);
+    }
+    return context.l10n.detailsPlayEpisodes;
   }
 
   Widget _buildPlayButton({required bool fullWidth}) {
