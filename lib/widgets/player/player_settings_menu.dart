@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 import '../../services/app_units.dart';
 import '../../services/player/sleep_timer_service.dart';
+import '../../services/tv_type.dart';
+import '../common/focus_fill.dart';
 import 'player_glass.dart';
 import 'player_menu_row.dart';
 
@@ -67,38 +69,156 @@ class PlayerSettingsMenu extends StatelessWidget {
               summary: qualitySummary,
               onTap: onOpenQuality!,
             ),
-          _NavRow(
-            icon: Icons.speed_rounded,
-            title: context.l10n.detailsPlaybackSpeed,
-            summary: '${currentRate.toStringAsFixed(2)}×',
-            onTap: onOpenSpeed,
-          ),
-          _NavRow(
-            icon: Icons.audiotrack_rounded,
-            title: context.l10n.detailsAudioTrack,
-            summary: audioSummary,
-            onTap: onOpenAudio,
-          ),
-          ValueListenableBuilder<int?>(
-            valueListenable: SleepTimerService.instance.minutesRemaining,
-            builder: (context, minutes, _) => _NavRow(
-              icon: Icons.bedtime_rounded,
-              title: context.l10n.playerSleepTimer,
-              // No badge when off: the row is navigation, and "Cancel timer"
-              // would read as an action rather than a status.
-              summary: minutes == null
-                  ? null
-                  : context.l10n.playerMinutesShort(minutes),
-              onTap: onOpenSleep,
+          SizedBox(height: context.rem(AppRem.xs)),
+          // The four set-once controls as a 2x2 of rectangular cards. They
+          // were radio rows before, which read as four choices among each
+          // other; they are four doors, so they draw as four cards filling
+          // the menu's width.
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _SettingCard(
+                    icon: Icons.speed_rounded,
+                    label: context.l10n.detailsPlaybackSpeed,
+                    value: '${currentRate.toStringAsFixed(2)}×',
+                    onTap: onOpenSpeed,
+                  ),
+                ),
+                SizedBox(width: context.rem(AppRem.sm)),
+                Expanded(
+                  child: _SettingCard(
+                    icon: Icons.audiotrack_rounded,
+                    label: context.l10n.detailsAudioTrack,
+                    value: audioSummary,
+                    onTap: onOpenAudio,
+                  ),
+                ),
+              ],
             ),
           ),
-          _NavRow(
-            icon: Icons.aspect_ratio_rounded,
-            title: context.l10n.detailsAspectRatio,
-            summary: aspectSummary,
-            onTap: onOpenAspect,
+          SizedBox(height: context.rem(AppRem.sm)),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ValueListenableBuilder<int?>(
+                    valueListenable:
+                        SleepTimerService.instance.minutesRemaining,
+                    builder: (context, minutes, _) => _SettingCard(
+                      icon: Icons.bedtime_rounded,
+                      label: context.l10n.playerSleepTimer,
+                      // No value when off: the card is navigation, and
+                      // "Cancel timer" would read as an action rather than
+                      // a status.
+                      value: minutes == null
+                          ? null
+                          : context.l10n.playerMinutesShort(minutes),
+                      onTap: onOpenSleep,
+                    ),
+                  ),
+                ),
+                SizedBox(width: context.rem(AppRem.sm)),
+                Expanded(
+                  child: _SettingCard(
+                    icon: Icons.aspect_ratio_rounded,
+                    label: context.l10n.detailsAspectRatio,
+                    value: aspectSummary,
+                    onTap: onOpenAspect,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// One card of the settings grid: an icon, a small label, and the current
+/// value -- the status glance the radio rows carried, in a shape that reads
+/// as a door to its panel rather than a choice among the four.
+class _SettingCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? value;
+  final VoidCallback onTap;
+
+  const _SettingCard({
+    required this.icon,
+    required this.label,
+    this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final summary = value;
+    return Material(
+      color: Colors.transparent,
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+          onTap: onTap,
+          child: Container(
+            constraints: BoxConstraints(minHeight: context.rem(3.75)),
+            padding: EdgeInsets.all(context.rem(AppRem.ms)),
+            decoration: BoxDecoration(
+              color: PlayerTheme.raised,
+              borderRadius:
+                  BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              border: Border.all(color: PlayerTheme.edgeSoft),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  size: context.rem(AppRem.icon),
+                  color: PlayerTheme.inkSubtle,
+                ),
+                SizedBox(width: context.rem(AppRem.sm)),
+                // Flexible, never fixed: the value can be a sentence
+                // ("Original (keeps the source shape)") and the label grows
+                // with text scale, so both ellipsize instead of pushing the
+                // card past its half of the menu.
+                Flexible(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label.toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: PlayerTheme.inkSubtle,
+                          fontSize: TvType.scale(AppType.micro),
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      if (summary != null && summary.isNotEmpty)
+                        Text(
+                          summary,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: PlayerTheme.ink,
+                            fontSize: AppType.captionPlus,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

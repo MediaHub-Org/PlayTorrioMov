@@ -18,7 +18,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **The gear leads with Quality, opening the Sources panel.** A torrent or
   a direct file has no in-stream variants, so the row names the current
   source's resolution and steps out to the release list instead of a variant
-  list that could never exist.
+  list that could never exist. The four controls below it are rectangular
+  cards in a 2x2, each with its current value -- doors to their panels,
+  not choices among each other.
+- **Anime episodes are an EP rail like Series, and the dead SUB/DUB bar is
+  gone.** The switcher set a flag nothing read (the sheet was never told),
+  while the sheet itself filters by SUB/DUB with counts and per-source
+  badges. Episodes now scroll horizontally as numbered cards with the
+  series rail's watched/current language and hover play, keeping the
+  50-chunking and jump for long anime. Characters and Staff sit closer,
+  as one credits group.
 - **The player's popovers sit just above the playback line.** They used to
   clear only the buttons row, so a menu covered the seek bar it belongs to
   and the timeline could not be seen or scrubbed while one was open. The

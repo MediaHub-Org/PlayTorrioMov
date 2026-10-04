@@ -31,10 +31,10 @@ void main() {
         (tester) async {
       await tester.pumpWidget(wrap(menu()));
 
-      expect(find.text('Playback speed'), findsOneWidget);
-      expect(find.text('Audio track'), findsOneWidget);
-      expect(find.text('Sleep timer'), findsOneWidget);
-      expect(find.text('Aspect ratio'), findsOneWidget);
+      expect(find.text('PLAYBACK SPEED'), findsOneWidget);
+      expect(find.text('AUDIO TRACK'), findsOneWidget);
+      expect(find.text('SLEEP TIMER'), findsOneWidget);
+      expect(find.text('ASPECT RATIO'), findsOneWidget);
       expect(find.text('1.50×'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
     });
@@ -51,10 +51,10 @@ void main() {
         onAspect: () => aspect = true,
       )));
 
-      await tester.tap(find.text('Playback speed'));
-      await tester.tap(find.text('Audio track'));
-      await tester.tap(find.text('Sleep timer'));
-      await tester.tap(find.text('Aspect ratio'));
+      await tester.tap(find.text('PLAYBACK SPEED'));
+      await tester.tap(find.text('AUDIO TRACK'));
+      await tester.tap(find.text('SLEEP TIMER'));
+      await tester.tap(find.text('ASPECT RATIO'));
 
       expect(speed, isTrue);
       expect(audio, isTrue);
@@ -80,6 +80,25 @@ void main() {
       expect(find.text('Quality'), findsNothing);
     });
 
+    testWidgets('the four controls are cards, not radio rows', (tester) async {
+      await tester.pumpWidget(wrap(menu(onQuality: () {})));
+
+      // Five labels, zero radios: quality plus the 2x2 of cards.
+      for (final label in [
+        'Quality',
+        'PLAYBACK SPEED',
+        'AUDIO TRACK',
+        'SLEEP TIMER',
+        'ASPECT RATIO',
+      ]) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      // The quality row keeps its (unselected) radio mark; what must not
+      // be there is a selected one -- nothing on this menu is a choice
+      // among the rows anymore.
+      expect(find.byIcon(Icons.radio_button_checked_rounded), findsNothing);
+    });
+
     testWidgets('rows without a value show no badge', (tester) async {
       await tester.pumpWidget(wrap(PlayerSettingsMenu(
         currentRate: 1.0,
@@ -90,9 +109,10 @@ void main() {
       )));
 
       expect(find.text('1.00×'), findsOneWidget);
-      // Audio and aspect summaries are null here: no badge beside them.
-      expect(find.text('Audio track'), findsOneWidget);
-      expect(find.text('Aspect ratio'), findsOneWidget);
+      // Audio and aspect summaries are null here: their cards show the
+      // label with no value beneath it.
+      expect(find.text('AUDIO TRACK'), findsOneWidget);
+      expect(find.text('ASPECT RATIO'), findsOneWidget);
     });
   });
 }

@@ -75,14 +75,17 @@ void main() {
     // Verify 50-chunk dropdown
     expect(find.text('1 – 50'), findsOneWidget);
 
-    // Type in Jump to Episode 534
-    await tester.enterText(find.byType(TextField), '534');
+    // Type in Jump to Episode 503
+    await tester.enterText(find.byType(TextField), '503');
     await tester.testTextInput.receiveAction(TextInputAction.go);
     await tester.pump();
 
-    // Verify it jumped to the chunk containing Episode 534 (501 - 550)
+    // Verify it jumped to the chunk containing Episode 503 (501 - 550).
+    // 503 sits in the rail's first viewport, so its card is built: the
+    // number in the box plus the field's own text.
     expect(find.text('501 – 550'), findsOneWidget);
-    expect(find.text('534'), findsNWidgets(2)); // 1 in TextField, 1 in Episode card
+    expect(find.text('503'), findsNWidgets(2)); // 1 in TextField, 1 in Episode card
+    expect(find.text('EP 503'), findsOneWidget); // the card's Series-style foot
 
     // Scroll down to check relations
     await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -600));

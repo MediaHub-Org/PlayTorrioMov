@@ -47,9 +47,8 @@ abstract final class _Dim {
   static const portraitHeight = 6.875;
   static const jumpWidth = 8.125;
   static const controlHeight = 2.125;
-  static const switchPad = 0.1875;
-  static const switchPadY = 0.3125;
-  static const gridExtent = 5.3125;
+  static const epCardWidth = 10.0;
+  static const epRailHeight = 8.5;
   static const cardDesktop = 10.3125;
   static const cardMobile = 8.4375;
   static const cardTextBudget = 4.25;
@@ -62,7 +61,7 @@ abstract final class _Dim {
 const double _kTitleDesktop = 38;
 const double _kTitleMobile = 26;
 const double _kSynopsis = 14.5;
-const double _kGridNumber = 13.5;
+const double _kEpNumber = 13.5;
 const double _kTagFont = 9.5;
 
 class _Palette {
@@ -88,7 +87,6 @@ class AnimeDetailsPage extends StatefulWidget {
 class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     with SingleTickerProviderStateMixin {
   late AnimeMedia _anime;
-  bool _isDub = false;
   bool _isSynopsisExpanded = false;
 
   int _selectedEpisodeBatch = 0; // 50 episodes per chunk
@@ -106,6 +104,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   final ScrollController _castScrollController = ScrollController();
   final ScrollController _relationsScrollController = ScrollController();
   final ScrollController _recsScrollController = ScrollController();
+  final ScrollController _epScrollController = ScrollController();
 
   bool _canScrollCastLeft = false;
   bool _canScrollCastRight = true;
@@ -118,6 +117,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   bool _canScrollRecsLeft = false;
   bool _canScrollRecsRight = true;
   bool _isHoveringRecs = false;
+
+  bool _canScrollEpLeft = false;
+  bool _canScrollEpRight = true;
+  bool _isHoveringEp = false;
 
   @override
   void initState() {
@@ -149,6 +152,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     _castScrollController.addListener(_updateCastScrollButtons);
     _relationsScrollController.addListener(_updateRelationsScrollButtons);
     _recsScrollController.addListener(_updateRecsScrollButtons);
+    _epScrollController.addListener(_updateEpScrollButtons);
   }
 
   @override
@@ -158,6 +162,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     _castScrollController.dispose();
     _relationsScrollController.dispose();
     _recsScrollController.dispose();
+    _epScrollController.dispose();
     super.dispose();
   }
 
@@ -173,6 +178,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           _updateCastScrollButtons();
           _updateRelationsScrollButtons();
           _updateRecsScrollButtons();
+          _updateEpScrollButtons();
         }
       });
     }
@@ -221,6 +227,19 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       setState(() {
         _canScrollCastLeft = canLeft;
         _canScrollCastRight = canRight;
+      });
+    }
+  }
+
+  void _updateEpScrollButtons() {
+    if (!_epScrollController.hasClients) return;
+    final canLeft = _epScrollController.position.pixels > 0;
+    final canRight = _epScrollController.position.pixels <
+        _epScrollController.position.maxScrollExtent;
+    if (_canScrollEpLeft != canLeft || _canScrollEpRight != canRight) {
+      setState(() {
+        _canScrollEpLeft = canLeft;
+        _canScrollEpRight = canRight;
       });
     }
   }
@@ -361,7 +380,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                             // rather than sitting beside it.
                             if (_anime.characters.isNotEmpty) ...[
                               _buildCharactersRow(),
-                              SizedBox(height: context.rem(DetailsSpace.xl)),
+                              // Tighter than the page's section rhythm: Cast
+                              // and Staff read as one credits group, not two
+                              // blocks that happen to follow each other.
+                              SizedBox(height: context.rem(DetailsSpace.md)),
                             ],
 
                             // Director & Staff: anime's one section-specific
@@ -1123,69 +1145,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               runSpacing: context.rem(AppRem.pillGap),
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                // SUB / DUB Switcher
-                Container(
-                    padding: EdgeInsets.all(context.rem(_Dim.switchPad)),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF141724),
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                      border: Border.all(color: Colors.white12),
-                    ),
-                    child: Row(
-                      children: [
-                        HoverButton(
-                          scaleAmount: 1.05,
-                          showFocusRing: true,
-                          focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
-                          onTap: () => setState(() => _isDub = false),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: context.rem(AppRem.pillGap),
-                              vertical: context.rem(_Dim.switchPadY),
-                            ),
-                            decoration: BoxDecoration(
-                              color: !_isDub ? _Palette.accent : Colors.transparent,
-                              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-                            ),
-                            child: Text(
-                              context.l10n.detailsSub,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: AppType.tiny,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ),
-                        HoverButton(
-                          scaleAmount: 1.05,
-                          showFocusRing: true,
-                          focusRingBorderRadius: context.rem(AppRem.radiusSm) + context.rem(AppRem.xxs),
-                          onTap: () => setState(() => _isDub = true),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: context.rem(AppRem.pillGap),
-                              vertical: context.rem(_Dim.switchPadY),
-                            ),
-                            decoration: BoxDecoration(
-                              color: _isDub ? _Palette.accent : Colors.transparent,
-                              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-                            ),
-                            child: Text(
-                              context.l10n.detailsDub,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: AppType.tiny,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Jump to Ep Input
+                // No SUB/DUB switcher here: it set a flag nothing read (the
+                // sheet was never told), while the sheet itself filters
+                // sources by SUB/DUB with counts and badges per source.
+                // Jump to Ep Input
                   Container(
                     width: context.rem(_Dim.jumpWidth),
                     height: context.rem(_Dim.controlHeight),
@@ -1280,8 +1243,11 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
 
         SizedBox(height: context.rem(DetailsSpace.md)),
 
-        // Episode Grid
-        _buildEpisodeGrid(
+        // Episode rail: Series speaks in EP cards, so anime does too. There
+        // is no title or thumbnail behind these -- an AniDb episode is a
+        // number -- so the card is the number, in the same 16:9 box, hover
+        // play and watched/current language as the series rail.
+        _buildEpisodeRail(
           totalEps,
           currentBatchSafe * _chunkSize,
           math.min((currentBatchSafe + 1) * _chunkSize, totalEps),
@@ -1291,7 +1257,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     );
   }
 
-  Widget _buildEpisodeGrid(
+  Widget _buildEpisodeRail(
     int total,
     int startIndex,
     int endIndex,
@@ -1299,66 +1265,80 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   ) {
     final count = endIndex - startIndex;
     if (count <= 0) return const SizedBox.shrink();
+    final isDesktop = _isDesktop();
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: context.rem(_Dim.gridExtent),
-        mainAxisSpacing: context.rem(AppRem.pillGap),
-        crossAxisSpacing: context.rem(AppRem.pillGap),
-        childAspectRatio: 1.4, // ratio: a cell's shape, not a size
-      ),
-      itemCount: count,
-      itemBuilder: (context, index) {
-        final epNum = startIndex + index + 1;
-        final isWatched = lastWatchedEp != null && epNum <= lastWatchedEp;
-        final isCurrent = lastWatchedEp == epNum;
-        final isHighlighted = _highlightedEpisode == epNum;
-
-        return _HoverScale(
-          onTap: () => _playEpisode(epNum),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color: isHighlighted
-                  ? const Color(0xFFEF4444).withValues(alpha: 0.30)
-                  : isCurrent
-                      ? _Palette.accent.withValues(alpha: 0.35)
-                      : (isWatched
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : const Color(0xFF141724)),
-              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-              border: Border.all(
-                color: isHighlighted
-                    ? const Color(0xFFEF4444)
-                    : isCurrent
-                        ? _Palette.accent
-                        : (isWatched
-                            ? Colors.white24
-                            : Colors.white.withValues(alpha: 0.08)),
-                width: (isCurrent || isHighlighted) ? 1.5 : 1, // px: a border weight
-              ),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHoveringEp = true),
+      onExit: (_) => setState(() => _isHoveringEp = false),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SizedBox(
+            height: context.rem(_Dim.epRailHeight),
+            child: ListView.separated(
+              clipBehavior: Clip.none,
+              controller: _epScrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: count,
+              separatorBuilder: (_, __) =>
+                  SizedBox(width: context.rem(DetailsSpace.md)),
+              itemBuilder: (context, index) {
+                final epNum = startIndex + index + 1;
+                return SizedBox(
+                  width: context.rem(_Dim.epCardWidth),
+                  child: _AnimeEpisodeCard(
+                    epNum: epNum,
+                    isWatched:
+                        lastWatchedEp != null && epNum <= lastWatchedEp,
+                    isCurrent: lastWatchedEp == epNum,
+                    isHighlighted: _highlightedEpisode == epNum,
+                    onTap: () => _playEpisode(epNum),
+                  ),
+                );
+              },
             ),
-            child: Center(
-              child: Text(
-                '$epNum',
-                style: TextStyle(
-                  color: isHighlighted
-                      ? const Color(0xFFEF4444)
-                      : isCurrent
-                          ? _Palette.accent
-                          : (isWatched ? Colors.white70 : Colors.white),
-                  fontSize: _kGridNumber,
-                  fontWeight: (isCurrent || isHighlighted)
-                      ? FontWeight.w900
-                      : FontWeight.bold,
+          ),
+
+          // Desktop Floating Scroll Arrows, same as the credits rails above.
+          if (isDesktop) ...[
+            AnimatedPositionedDirectional(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              start: context.rem(
+                _canScrollEpLeft && _isHoveringEp
+                    ? AppRem.pillGap
+                    : -AppRem.arrowParked,
+              ),
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: SliderArrow(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () => _scrollList(_epScrollController, -1),
                 ),
               ),
             ),
-          ),
-        );
-      },
+            AnimatedPositionedDirectional(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+              end: context.rem(
+                _canScrollEpRight && _isHoveringEp
+                    ? AppRem.pillGap
+                    : -AppRem.arrowParked,
+              ),
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: SliderArrow(
+                  icon: Icons.arrow_forward_ios_rounded,
+                  onTap: () => _scrollList(_epScrollController, 1),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -1718,6 +1698,169 @@ class _HoverScaleState extends State<_HoverScale> {
           child: widget.child,
         ),
       ),
+      ),
+    );
+  }
+}
+
+/// One anime episode in the rail: the number in a 16:9 box, an "EP N" foot,
+/// and the series rail's watched/current language. There is no thumbnail
+/// or title behind these -- an AniDb episode is a number -- so the number
+/// is the artwork, and the hover play glyph is what says it plays.
+class _AnimeEpisodeCard extends StatefulWidget {
+  final int epNum;
+  final bool isWatched;
+  final bool isCurrent;
+  final bool isHighlighted;
+  final VoidCallback onTap;
+
+  const _AnimeEpisodeCard({
+    required this.epNum,
+    required this.isWatched,
+    required this.isCurrent,
+    required this.isHighlighted,
+    required this.onTap,
+  });
+
+  @override
+  State<_AnimeEpisodeCard> createState() => _AnimeEpisodeCardState();
+}
+
+class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
+  bool _hovered = false;
+  bool _focused = false;
+
+  KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    widget.onTap();
+    return KeyEventResult.handled;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hovered = _hovered || _focused;
+    final numberColor = widget.isHighlighted
+        ? const Color(0xFFEF4444)
+        : widget.isCurrent
+            ? _Palette.accent
+            : (widget.isWatched ? Colors.white70 : Colors.white);
+
+    return Focus(
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: _handleKey,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedScale(
+            scale: hovered ? 1.03 : 1.0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AspectRatio(
+                  aspectRatio: 16 / 9, // ratio: the series rail's box shape
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: widget.isHighlighted
+                          ? const Color(0xFFEF4444).withValues(alpha: 0.30)
+                          : widget.isCurrent
+                              ? _Palette.accent.withValues(alpha: 0.35)
+                              : (widget.isWatched
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : const Color(0xFF141724)),
+                      borderRadius:
+                          BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                      border: Border.all(
+                        color: widget.isHighlighted
+                            ? const Color(0xFFEF4444)
+                            : widget.isCurrent
+                                ? _Palette.accent
+                                : (widget.isWatched
+                                    ? Colors.white24
+                                    : Colors.white.withValues(alpha: 0.08)),
+                        width: (widget.isCurrent || widget.isHighlighted)
+                            ? 1.5
+                            : 1, // px: a border weight, not a layout size
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Center(
+                            child: Text(
+                              '${widget.epNum}',
+                              style: TextStyle(
+                                color: numberColor,
+                                fontSize: _kEpNumber,
+                                fontWeight: (widget.isCurrent ||
+                                        widget.isHighlighted)
+                                    ? FontWeight.w900
+                                    : FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: AnimatedOpacity(
+                              opacity: hovered ? 1.0 : 0.0,
+                              duration: const Duration(milliseconds: 150),
+                              child: Container(
+                                padding: EdgeInsets.all(
+                                    context.rem(AppRem.iconXs)),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Colors.black,
+                                  size: context.rem(AppRem.icon),
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Watched episodes read dimmed, the way the series
+                          // rail dims its watched cards. The current one keeps
+                          // its face: it is the resume point, not history.
+                          if (widget.isWatched && !widget.isCurrent)
+                            const DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: context.rem(AppRem.snug)),
+                Text(
+                  'EP ${widget.epNum}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: widget.isCurrent
+                        ? _Palette.accent
+                        : (widget.isWatched
+                            ? Colors.white38
+                            : Colors.white),
+                    fontSize: AppType.caption,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
