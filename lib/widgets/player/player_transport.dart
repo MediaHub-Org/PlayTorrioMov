@@ -52,11 +52,6 @@ class PlayerTransport extends StatelessWidget {
   /// Opens the gear: quality, speed, sleep timer, aspect ratio and stats,
   /// each with its current value on its card.
   final VoidCallback onOpenSettingsMenu;
-
-  /// Opens the volume panel. A TV shows a button for it where a pointer shows
-  /// the slider: the slider's arrows are the ones a remote needs to move
-  /// around the row, so it could not be used and could not be left (#80).
-  final VoidCallback? onOpenVolumeMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
   /// Named stops, so a remote's Up and Down go where they should rather than
@@ -86,7 +81,6 @@ class PlayerTransport extends StatelessWidget {
     required this.onOpenSubtitleMenu,
     required this.onOpenAudioMenu,
     required this.onOpenSettingsMenu,
-    this.onOpenVolumeMenu,
     this.onScrubbingChanged,
     this.seekFocusNode,
     this.volumeFocusNode,
@@ -103,7 +97,13 @@ class PlayerTransport extends StatelessWidget {
     final btnIconSize = context.rem(isCompact ? AppRem.icon : AppRem.iconMd);
     final gap = context.rem(isCompact ? AppRem.xxs : AppRem.xs);
     final isTv = TvModeService.isTv.value;
-    final tvVolume = isTv && onOpenVolumeMenu != null;
+    // A phone's hardware buttons own its volume, and a TV remote owns its
+    // speaker: neither needs our slider or mute button, so volume stays a
+    // desktop tool. (Widget tests run as android, so the ones exercising
+    // the volume stops override the platform back to desktop.)
+    final showVolume = !isTv &&
+        defaultTargetPlatform != TargetPlatform.android &&
+        defaultTargetPlatform != TargetPlatform.iOS;
 
     return Container(
       padding: EdgeInsets.fromLTRB(
@@ -138,7 +138,7 @@ class PlayerTransport extends StatelessWidget {
             onScrubbingChanged: onScrubbingChanged,
             focusNode: seekFocusNode,
             upFocusNode: isTv ? playPauseFocusNode : null,
-            downFocusNode: isTv ? volumeFocusNode : null,
+            downFocusNode: showVolume ? volumeFocusNode : null,
           ),
 
           SizedBox(height: context.rem(isCompact ? AppRem.xs : AppRem.sm)),
@@ -162,8 +162,13 @@ class PlayerTransport extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Volume Control (Full slider on wide screens, Mute button on compact)
-                if (!isCompact && !tvVolume)
+                // Volume, desktop only (see showVolume above): the full
+                // slider on wide screens, a mute button on compact ones.
+                // The placeholder keeps the menus pinned to the row's end
+                // where there is no volume to balance them.
+                if (!showVolume)
+                  const SizedBox.shrink()
+                else if (!isCompact)
                   PlayerVolumeControl(
                     volume: volume,
                     isMuted: isMuted,
@@ -182,10 +187,10 @@ class PlayerTransport extends StatelessWidget {
                                 ? Icons.volume_up_rounded
                                 : Icons.volume_down_rounded),
                     ),
-                    tooltip: tvVolume
-                        ? context.l10n.playerVolume
-                        : (isMuted ? context.l10n.playerUnmute : context.l10n.playerMute),
-                    onPressed: tvVolume ? onOpenVolumeMenu : onToggleMute,
+                    tooltip: isMuted
+                        ? context.l10n.playerUnmute
+                        : context.l10n.playerMute,
+                    onPressed: onToggleMute,
                   ),
 
                 // Right group: audio, subtitles, gear -- in that order. The two

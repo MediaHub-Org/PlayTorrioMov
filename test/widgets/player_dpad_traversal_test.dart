@@ -68,7 +68,6 @@ Widget _player(_Nodes n) => MaterialApp(
             onOpenSubtitleMenu: () {},
             onOpenAudioMenu: () {},
             onOpenSettingsMenu: () {},
-            onOpenVolumeMenu: () {},
             seekFocusNode: n.seek,
             volumeFocusNode: n.volume,
             playPauseFocusNode: n.playPause,
@@ -98,8 +97,8 @@ void main() {
   setUp(() => TvModeService.isTv.value = true);
   tearDown(() => TvModeService.isTv.value = false);
 
-  testWidgets('Down from play/pause goes straight to the seek bar, then to '
-      'the volume', (tester) async {
+  testWidgets('Down from play/pause goes to the seek bar, then into the row',
+      (tester) async {
     final n = await _pumpPlayer(tester);
     n.playPause.requestFocus();
     await tester.pump();
@@ -107,8 +106,11 @@ void main() {
     await _press(tester, LogicalKeyboardKey.arrowDown);
     expect(n.seek.hasPrimaryFocus, isTrue);
 
+    // No volume stop on a TV: the remote owns its speaker, so the bar has
+    // no volume control and Down keeps going to the buttons row.
     await _press(tester, LogicalKeyboardKey.arrowDown);
-    expect(n.volume.hasPrimaryFocus, isTrue);
+    expect(n.seek.hasPrimaryFocus, isFalse);
+    expect(n.playPause.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('Up from the seek bar is play/pause, with no stop between, '
@@ -123,48 +125,67 @@ void main() {
     expect(n.playPause.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('Up from any button on the bottom row is the seek bar', (
-    tester,
-  ) async {
-    final n = await _pumpPlayer(tester);
-    n.volume.requestFocus();
+  /// Every button on the bottom row: Down from the seek bar lands in the
+  /// row, then both directions are walked to the edges. The seek bar eats
+  /// Left/Right itself (on a TV those seek), so the row cannot be entered
+  /// sideways from it -- Down is the way in.
+  Future<List<FocusNode>> _rowStops(WidgetTester tester, _Nodes n) async {
+    n.seek.requestFocus();
     await tester.pump();
-
-    // Right along the row: every stop after the volume is a button. From each
-    // one Up must reach the bar, not a seek button above its own column.
-    var buttons = 0;
-    for (var i = 0; i < 10; i++) {
-      await _press(tester, LogicalKeyboardKey.arrowRight);
-      final here = FocusManager.instance.primaryFocus!;
-      if (here == n.volume) continue;
-      buttons++;
-      await _press(tester, LogicalKeyboardKey.arrowUp);
-      expect(n.seek.hasPrimaryFocus, isTrue, reason: 'Up from button $buttons');
-      here.requestFocus();
-      await tester.pump();
-    }
-    expect(buttons, greaterThanOrEqualTo(2));
-  });
-
-  testWidgets('Right from the volume reaches every button, and Left comes '
-      'back to it', (tester) async {
-    final n = await _pumpPlayer(tester);
-    n.volume.requestFocus();
-    await tester.pump();
-
-    final stops = <FocusNode>[n.volume];
-    for (var i = 0; i < 8; i++) {
+    await _press(tester, LogicalKeyboardKey.arrowDown);
+    final stops = <FocusNode>[FocusManager.instance.primaryFocus!];
+    for (var i = 0; i < 5; i++) {
       await _press(tester, LogicalKeyboardKey.arrowRight);
       final here = FocusManager.instance.primaryFocus!;
       if (stops.contains(here)) break;
       stops.add(here);
     }
-    // The volume button, then audio, subtitles and the gear.
-    expect(stops.length, 4, reason: 'the volume and three buttons');
-
-    for (var i = 0; i < stops.length - 1; i++) {
+    for (var i = 0; i < 5; i++) {
       await _press(tester, LogicalKeyboardKey.arrowLeft);
+      final here = FocusManager.instance.primaryFocus!;
+      if (stops.contains(here)) break;
+      stops.add(here);
     }
-    expect(n.volume.hasPrimaryFocus, isTrue);
+    return stops;
+  }
+
+  testWidgets('Up from any button on the bottom row is the seek bar', (
+    tester,
+  ) async {
+    final n = await _pumpPlayer(tester);
+    final stops = await _rowStops(tester, n);
+    expect(stops.length, 3, reason: 'audio, subtitles and the gear');
+
+    // From each one Up must reach the bar, not a seek button above its own
+    // column.
+    var buttons = 0;
+    for (final stop in stops) {
+      stop.requestFocus();
+      await tester.pump();
+      await _press(tester, LogicalKeyboardKey.arrowUp);
+      buttons++;
+      expect(n.seek.hasPrimaryFocus, isTrue, reason: 'Up from button $buttons');
+    }
+  });
+
+  testWidgets('Left and Right walk the row edge to edge and back', (
+    tester,
+  ) async {
+    final n = await _pumpPlayer(tester);
+    final stops = await _rowStops(tester, n);
+    expect(stops.length, 3, reason: 'audio, subtitles and the gear');
+
+    // Exact counts, never past an edge: pressing past one escapes the row
+    // upward to the seek bar, which is right for a remote but not a walk.
+    for (var i = 0; i < 6; i++) {
+      await _press(tester, LogicalKeyboardKey.arrowRight);
+    }
+    final rightmost = FocusManager.instance.primaryFocus!;
+    await _press(tester, LogicalKeyboardKey.arrowLeft);
+    await _press(tester, LogicalKeyboardKey.arrowLeft);
+    expect(FocusManager.instance.primaryFocus, isNot(rightmost));
+    await _press(tester, LogicalKeyboardKey.arrowRight);
+    await _press(tester, LogicalKeyboardKey.arrowRight);
+    expect(FocusManager.instance.primaryFocus, rightmost);
   });
 }

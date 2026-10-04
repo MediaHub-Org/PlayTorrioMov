@@ -21,8 +21,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   list that could never exist. The four cards below it are speed, sleep,
   aspect and stats in a 2x2, each with its current value -- doors to their
   panels, not choices among each other. Audio and subtitles keep their own
-  transport buttons as the two per-scene choices; the popups sit a quarter
-  rem closer to the bar.
+  transport buttons as the two per-scene choices; volume stays a desktop
+  tool, since phones own their hardware buttons and TV remotes their
+  speaker. The popups sit a quarter rem closer to the bar.
 - **Audio and subtitle rows carry the file's own detail as chips.** Codec
   and channel layout for audio (E-AC-3, 5.1), format for embedded
   subtitles (SRT, PGS -- bitmaps ignore the appearance panel, so knowing
