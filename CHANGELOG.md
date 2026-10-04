@@ -15,15 +15,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   decade, rating and sort pills mark the current value with a check, and a
   long list scrolls inside a fixed ceiling instead of running off the
   screen.
-- **The gear leads with Quality, opening the Sources panel.** A torrent or
-  a direct file has no in-stream variants, so the row names the current
-  source's resolution and steps out to the release list instead of a variant
-  list that could never exist. The four cards below it are speed, sleep,
-  aspect and stats in a 2x2, each with its current value -- doors to their
-  panels, not choices among each other. Audio and subtitles keep their own
-  transport buttons as the two per-scene choices; volume stays a desktop
-  tool, since phones own their hardware buttons and TV remotes their
-  speaker. The popups sit a quarter rem closer to the bar.
+- **Every player control gets its own button; the gear is gone.** The bar
+  is stats, speed, audio, subtitles, sleep timer and aspect -- each reached
+  for mid-stream, each one tap. An earlier pass grouped the set-once ones
+  behind a gear, but use pulled them back out one by one until the menu
+  guarded only the rarely touched. Quality survives as the tappable badge
+  beside the title, opening the Sources panel (a torrent has no in-stream
+  variants -- each quality is a different release). Volume stays a desktop
+  tool, fullscreen leaves mobile and TV, and the popups sit a quarter rem
+  closer to the bar.
 - **Audio and subtitle rows carry the file's own detail as chips.** Codec
   and channel layout for audio (E-AC-3, 5.1), format for embedded
   subtitles (SRT, PGS -- bitmaps ignore the appearance panel, so knowing

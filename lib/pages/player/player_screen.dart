@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
@@ -39,7 +40,6 @@ import '../../widgets/player/player_subtitle_menu.dart';
 import '../../widgets/player/player_audio_menu.dart';
 import '../../services/player/sleep_timer_service.dart';
 import '../../widgets/player/player_speed_menu.dart';
-import '../../widgets/player/player_settings_menu.dart';
 import '../../services/window/window_service.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/player/skip_segments_service.dart';
@@ -2104,24 +2104,11 @@ class _PlayerScreenState extends State<PlayerScreen>
     _startHideControlsTimer();
   }
 
-  /// Which menu, if any, the open one was stepped into from. Only
-  /// 'settings' today: a sub-menu opened straight from the transport bar
-  /// has nothing to go back to, and offering an arrow there would promise a
-  /// screen that does not exist.
+  /// Which menu, if any, the open one was stepped into from. Every menu
+  /// opens straight from the transport bar, so there is never anything
+  /// behind one: a stale parent here would show a back arrow leading to a
+  /// panel the user never came from.
   String? _menuParent;
-
-  /// Steps from the gear into one of its panels. Unlike [_toggleMenu], this
-  /// remembers where it came from, so the panel grows a back arrow to the
-  /// gear root.
-  void _openSubMenu(String menuName) {
-    setState(() {
-      _activeMenu = menuName;
-      _menuParent = 'settings';
-      _showSubSyncBar = false;
-      _showTextSyncOverlay = false;
-      _hideTimer?.cancel();
-    });
-  }
 
   /// The gear's Quality row opens the Sources panel: each quality of a
   /// torrent or a direct file is a different release, so there is no variant
@@ -2946,7 +2933,20 @@ class _PlayerScreenState extends State<PlayerScreen>
                       ? null
                       : _handleCopyStreamUrl,
                   onDownload: (_isLoading || !_canDownload) ? null : _handleDownload,
-                  onToggleFullscreen: _toggleFullscreen,
+                  // The quality badge doubles as the Sources shortcut --
+                  // the gear's Quality row, without the gear.
+                  onOpenQuality: (_isLoading || _currentEpisode == null)
+                      ? null
+                      : _openSourcesFromSettings,
+                  // Fullscreen is a desktop window control: a phone is
+                  // already edge-to-edge behind its gesture bar, and a TV
+                  // never leaves fullscreen, so neither gets the button.
+                  onToggleFullscreen: (defaultTargetPlatform ==
+                              TargetPlatform.android ||
+                          defaultTargetPlatform == TargetPlatform.iOS ||
+                          TvModeService.isTv.value)
+                      ? null
+                      : _toggleFullscreen,
                   onToggleEpisodes:
                       (!_isLoading &&
                           widget.detail?.videos.isNotEmpty == true)
@@ -3062,8 +3062,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
                     onOpenSubtitleMenu: () => _toggleMenu('subtitle'),
+                    onOpenSpeedMenu: () => _toggleMenu('speed'),
                     onOpenAudioMenu: () => _toggleMenu('audio'),
-                    onOpenSettingsMenu: () => _toggleMenu('settings'),
+                    onOpenAspectMenu: () => _toggleMenu('aspect'),
+                    onOpenSleepTimerMenu: () => _toggleMenu('sleep'),
+                    onOpenStatsMenu: () => _toggleMenu('stats'),
                     seekFocusNode: _seekFocus,
                     volumeFocusNode: _volumeFocus,
                     playPauseFocusNode: _playPauseFocus,
@@ -3121,37 +3124,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                 });
               },
               player: _player,
-            ),
-          ),
-
-        // The gear's root: speed, audio, sleep timer, aspect. Each row
-        // steps into its panel via _openSubMenu, which is what grows the
-        // back arrow there.
-        if (_activeMenu == 'settings' && !_isLoading)
-          PlayerMenuAnchor(
-            onClose: _closeActiveMenu,
-            child: PlayerSettingsMenu(
-              currentRate: _playbackRate,
-              qualitySummary: _currentSource.quality,
-              statsSummary: _statsKind,
-              aspectSummary: aspectOptions
-                  .where((opt) {
-                    if (opt.fit != null) {
-                      return _forcedAspectRatio == null &&
-                          _videoFit == opt.fit;
-                    }
-                    return _forcedAspectRatio != null &&
-                        (_forcedAspectRatio! - opt.forcedRatio!).abs() < 0.001;
-                  })
-                  .firstOrNull
-                  ?.label(context.l10n),
-              onOpenSpeed: () => _openSubMenu('speed'),
-              onOpenSleep: () => _openSubMenu('sleep'),
-              onOpenAspect: () => _openSubMenu('aspect'),
-              onOpenStats: () => _openSubMenu('stats'),
-              onOpenQuality: _currentEpisode == null
-                  ? null
-                  : _openSourcesFromSettings,
             ),
           ),
 

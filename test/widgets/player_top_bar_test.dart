@@ -6,6 +6,32 @@ import 'package:playtorriomov/widgets/player/player_top_bar.dart';
 Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 
 void main() {
+  group('PlayerTopBar quality chip', () {
+    testWidgets('opens Sources when it has somewhere to open', (tester) async {
+      var opened = 0;
+      await tester.pumpWidget(wrap(PlayerTopBar(
+        title: 'A Film',
+        quality: '1080p',
+        onBack: () {},
+        onOpenQuality: () => opened++,
+      )));
+
+      await tester.tap(find.text('1080P'));
+      expect(opened, 1);
+    });
+
+    testWidgets('is display-only with nowhere to open', (tester) async {
+      await tester.pumpWidget(wrap(PlayerTopBar(
+        title: 'A Film',
+        quality: '1080p',
+        onBack: () {},
+      )));
+
+      expect(find.text('1080P'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('PlayerTopBar download button', () {
     testWidgets('sits next to Copy Stream URL and fires its callback',
         (tester) async {

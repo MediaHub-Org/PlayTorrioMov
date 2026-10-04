@@ -66,8 +66,11 @@ Widget _player(_Nodes n) => MaterialApp(
             onVolumeChanged: (_) {},
             onToggleMute: () {},
             onOpenSubtitleMenu: () {},
+            onOpenSpeedMenu: () {},
             onOpenAudioMenu: () {},
-            onOpenSettingsMenu: () {},
+            onOpenAspectMenu: () {},
+            onOpenSleepTimerMenu: () {},
+            onOpenStatsMenu: () {},
             seekFocusNode: n.seek,
             volumeFocusNode: n.volume,
             playPauseFocusNode: n.playPause,
@@ -154,7 +157,11 @@ void main() {
   ) async {
     final n = await _pumpPlayer(tester);
     final stops = await _rowStops(tester, n);
-    expect(stops.length, 3, reason: 'audio, subtitles and the gear');
+    expect(
+      stops.length,
+      6,
+      reason: 'stats, speed, audio, subtitles, sleep timer and aspect',
+    );
 
     // From each one Up must reach the bar, not a seek button above its own
     // column.
@@ -173,19 +180,26 @@ void main() {
   ) async {
     final n = await _pumpPlayer(tester);
     final stops = await _rowStops(tester, n);
-    expect(stops.length, 3, reason: 'audio, subtitles and the gear');
+    expect(
+      stops.length,
+      6,
+      reason: 'stats, speed, audio, subtitles, sleep timer and aspect',
+    );
 
     // Exact counts, never past an edge: pressing past one escapes the row
     // upward to the seek bar, which is right for a remote but not a walk.
+    // Five hops cross six stops.
     for (var i = 0; i < 6; i++) {
       await _press(tester, LogicalKeyboardKey.arrowRight);
     }
     final rightmost = FocusManager.instance.primaryFocus!;
-    await _press(tester, LogicalKeyboardKey.arrowLeft);
-    await _press(tester, LogicalKeyboardKey.arrowLeft);
+    for (var i = 0; i < 5; i++) {
+      await _press(tester, LogicalKeyboardKey.arrowLeft);
+    }
     expect(FocusManager.instance.primaryFocus, isNot(rightmost));
-    await _press(tester, LogicalKeyboardKey.arrowRight);
-    await _press(tester, LogicalKeyboardKey.arrowRight);
+    for (var i = 0; i < 5; i++) {
+      await _press(tester, LogicalKeyboardKey.arrowRight);
+    }
     expect(FocusManager.instance.primaryFocus, rightmost);
   });
 }

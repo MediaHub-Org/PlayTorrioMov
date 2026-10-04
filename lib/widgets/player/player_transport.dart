@@ -10,19 +10,16 @@ import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
 import '../../services/app_units.dart';
 
-/// Bottom transport bar: timeline scrubber, volume, and three menu triggers --
-/// audio, subtitles, and the gear holding quality, speed, sleep timer,
-/// aspect ratio and stats.
-///
+/// Bottom transport bar: timeline scrubber, volume, and one button per
+/// control -- stats, speed, audio, subtitles, sleep timer, aspect ratio.
 /// Play/pause and seek live in the centered overlay instead (see
 /// PlayerCenterControls), and episode switching lives in PlayerTopBar's own
 /// "Episodes" badge -- neither is duplicated here.
 ///
-/// Audio and subtitles keep their own buttons because they are the two
-/// per-scene choices a viewer reaches for mid-sentence; everything
-/// set-once lives one tap behind the gear. Stats used to stand here too,
-/// but diagnostics do not earn a per-scene button, so they moved into the
-/// gear to keep the 2x2 symmetric.
+/// Six buttons share the row on a narrow phone, and the volume button takes
+/// the other end only on desktop: phones own hardware buttons and TV
+/// remotes their speaker, so volume is a desktop tool and mobile/TV fit
+/// the six at the compact step without crowding.
 class PlayerTransport extends StatelessWidget {
   final Duration position;
   final Duration duration;
@@ -44,14 +41,14 @@ class PlayerTransport extends StatelessWidget {
   /// first pill is Off, so turning subtitles off is still two taps rather
   /// than the one this button used to cost as a plain toggle.
   final VoidCallback onOpenSubtitleMenu;
-
-  /// Opens the audio track panel straight away: with subtitles, the other
-  /// per-scene choice, so both skip the gear.
+  final VoidCallback onOpenSpeedMenu;
   final VoidCallback onOpenAudioMenu;
+  final VoidCallback onOpenAspectMenu;
+  final VoidCallback onOpenSleepTimerMenu;
 
-  /// Opens the gear: quality, speed, sleep timer, aspect ratio and stats,
-  /// each with its current value on its card.
-  final VoidCallback onOpenSettingsMenu;
+  /// Opens the stream statistics popover. Null hides the button, for screens
+  /// that have no stream figures to report.
+  final VoidCallback? onOpenStatsMenu;
   final ValueChanged<bool>? onScrubbingChanged;
 
   /// Named stops, so a remote's Up and Down go where they should rather than
@@ -79,8 +76,11 @@ class PlayerTransport extends StatelessWidget {
     required this.onVolumeChanged,
     required this.onToggleMute,
     required this.onOpenSubtitleMenu,
+    required this.onOpenSpeedMenu,
     required this.onOpenAudioMenu,
-    required this.onOpenSettingsMenu,
+    required this.onOpenAspectMenu,
+    required this.onOpenSleepTimerMenu,
+    this.onOpenStatsMenu,
     this.onScrubbingChanged,
     this.seekFocusNode,
     this.volumeFocusNode,
@@ -193,15 +193,41 @@ class PlayerTransport extends StatelessWidget {
                     onPressed: onToggleMute,
                   ),
 
-                // Right group: audio, subtitles, gear -- in that order. The two
-                // per-scene choices stand here because they are reached for
-                // mid-sentence; quality, speed, sleep timer, aspect and
-                // stats live one tap behind the gear with their current
-                // values on their cards.
+                // Right group: stats, speed, audio, subtitles, sleep timer,
+                // aspect -- one button each, in that order. Each of these is
+                // reached for mid-stream, so each gets its own button rather
+                // than a menu of menus two taps away.
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Audio tracks: the hearing twin of the subtitles button.
+                    // Stream statistics: swarm figures for a torrent, host
+                    // and buffer for anything else. First in the row, ahead
+                    // of the controls it describes rather than among them.
+                    if (onOpenStatsMenu != null) ...[
+                      PlayerIconButton(
+                        size: btnSize,
+                        iconSize: btnIconSize,
+                        icon: const Icon(Icons.info_outline_rounded),
+                        tooltip: context.l10n.playerStats,
+                        onPressed: onOpenStatsMenu,
+                      ),
+
+                      SizedBox(width: gap),
+                    ],
+
+                    // Playback Speed
+                    PlayerIconButton(
+                      size: btnSize,
+                      iconSize: btnIconSize,
+                      icon: const Icon(Icons.speed_rounded),
+                      tooltip: context.l10n.detailsPlaybackSpeed,
+                      showActiveBadge: playbackRate != 1.0,
+                      onPressed: onOpenSpeedMenu,
+                    ),
+
+                    SizedBox(width: gap),
+
+                    // Audio Track
                     PlayerIconButton(
                       size: btnSize,
                       iconSize: btnIconSize,
@@ -228,21 +254,31 @@ class PlayerTransport extends StatelessWidget {
 
                     SizedBox(width: gap),
 
-                    // The gear: quality, speed, sleep timer, aspect, stats.
-                    // The dot says something in there is off-default -- a
-                    // speed, a running timer -- so it also reads as status.
+                    // Sleep Timer. The badge counts down while it runs.
                     ValueListenableBuilder<int?>(
                       valueListenable:
                           SleepTimerService.instance.minutesRemaining,
                       builder: (context, minutes, _) => PlayerIconButton(
                         size: btnSize,
                         iconSize: btnIconSize,
-                        icon: const Icon(Icons.settings_rounded),
-                        tooltip: context.l10n.playerSettingsPanelTitle,
-                        showActiveBadge:
-                            playbackRate != 1.0 || minutes != null,
-                        onPressed: onOpenSettingsMenu,
+                        icon: const Icon(Icons.bedtime_rounded),
+                        tooltip: minutes == null
+                            ? context.l10n.playerSleepTimer
+                            : context.l10n.playerSleepTimerLeft(minutes),
+                        showActiveBadge: minutes != null,
+                        onPressed: onOpenSleepTimerMenu,
                       ),
+                    ),
+
+                    SizedBox(width: gap),
+
+                    // Aspect Ratio
+                    PlayerIconButton(
+                      size: btnSize,
+                      iconSize: btnIconSize,
+                      icon: const Icon(Icons.aspect_ratio_rounded),
+                      tooltip: context.l10n.detailsAspectRatio,
+                      onPressed: onOpenAspectMenu,
                     ),
                   ],
                 ),

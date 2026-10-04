@@ -16,6 +16,11 @@ class PlayerTopBar extends StatelessWidget {
   final VoidCallback? onCast;
   final VoidCallback? onCopyStreamUrl;
 
+  /// Opens the Sources panel for the episode playing. Null leaves the
+  /// quality chip as a display badge: without an episode behind the player
+  /// there is no panel to open.
+  final VoidCallback? onOpenQuality;
+
   /// Downloads the source being played. Null hides the button: there is
   /// nothing to download for a file that is already local, or for a video
   /// with no title behind it (a bare magnet opened from search).
@@ -36,6 +41,7 @@ class PlayerTopBar extends StatelessWidget {
     this.isEpisodesActive = false,
     this.onCast,
     this.onCopyStreamUrl,
+    this.onOpenQuality,
     this.onDownload,
     this.onToggleFullscreen,
   });
@@ -118,21 +124,9 @@ class PlayerTopBar extends StatelessWidget {
                     ),
                     if (quality != null && quality!.isNotEmpty) ...[
                       SizedBox(width: context.rem(AppRem.sm)),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.snug), vertical: context.rem(AppRem.xxs)),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-                        ),
-                        child: Text(
-                          quality!.toUpperCase(),
-                          style: TextStyle(
-                            color: const Color(0xDDFFFFFF),
-                            fontSize: TvType.scale(AppType.microPlus),
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
+                      _QualityChip(
+                        quality: quality!,
+                        onTap: onOpenQuality,
                       ),
                     ],
                   ],
@@ -284,6 +278,52 @@ class PlayerTopBar extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The resolution badge beside the title: display-only, unless [onTap]
+/// opens the Sources panel for the episode playing -- the gear's Quality
+/// row, without the gear.
+class _QualityChip extends StatelessWidget {
+  final String quality;
+  final VoidCallback? onTap;
+
+  const _QualityChip({required this.quality, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final chip = Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.rem(AppRem.snug),
+        vertical: context.rem(AppRem.xxs),
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+      ),
+      child: Text(
+        quality.toUpperCase(),
+        style: TextStyle(
+          color: const Color(0xDDFFFFFF),
+          fontSize: TvType.scale(AppType.microPlus),
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
+      ),
+    );
+    final tap = onTap;
+    if (tap == null) return chip;
+    return Tooltip(
+      message: context.l10n.playerSources,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+          onTap: tap,
+          child: chip,
+        ),
       ),
     );
   }
