@@ -14,7 +14,6 @@ class PlayerTopBar extends StatelessWidget {
   final VoidCallback? onToggleEpisodes;
   final bool isEpisodesActive;
   final VoidCallback? onCast;
-  final VoidCallback? onCopyStreamUrl;
 
   /// Opens the Sources panel for the episode playing. Null leaves the
   /// quality chip as a display badge: without an episode behind the player
@@ -40,7 +39,6 @@ class PlayerTopBar extends StatelessWidget {
     this.onToggleEpisodes,
     this.isEpisodesActive = false,
     this.onCast,
-    this.onCopyStreamUrl,
     this.onOpenQuality,
     this.onDownload,
     this.onToggleFullscreen,
@@ -218,17 +216,6 @@ class PlayerTopBar extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: context.rem(isCompact ? AppRem.sm : 0.625)),
-              ],
-              if (onCopyStreamUrl != null) ...[
-                PlayerIconButton(
-                  size: buttonSize,
-                  iconSize: context.rem(1.25),
-                  icon: const Icon(Icons.link_rounded),
-                  tooltip: context.l10n.playerCopyStreamUrl,
-                  backgroundColor: const Color(0x22080C12),
-                  onPressed: onCopyStreamUrl,
-                ),
-                gap,
               ],
               if (onDownload != null) ...[
                 PlayerIconButton(

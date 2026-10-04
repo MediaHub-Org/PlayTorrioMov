@@ -604,9 +604,9 @@ void main() {
   testWidgets(
     'the top bar does not overflow at 3x text scale',
     (tester) async {
-      // The fifth action in the row: the fullscreen button joined download,
-      // copy link, cast and episodes, and a phone has to fit all of them
-      // beside the title.
+      // Four actions in the row: download, cast, fullscreen and episodes
+      // beside the title -- copy link moved into the stats popover, and a
+      // phone has to fit the rest.
       await pumpAtScale(
         tester,
         child: Scaffold(
@@ -615,7 +615,6 @@ void main() {
             subtitle: 'S1:E2 • An Episode Title',
             onBack: () {},
             onToggleEpisodes: () {},
-            onCopyStreamUrl: () {},
             onDownload: () {},
             onToggleFullscreen: () {},
             onCast: () {},
@@ -644,6 +643,7 @@ void main() {
             buffered: ValueNotifier<Duration?>(
               const Duration(seconds: 42),
             ),
+            onCopyLink: () {},
           ),
         ),
       );

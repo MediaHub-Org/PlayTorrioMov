@@ -2929,9 +2929,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                   onCast: (_isLoading || !CastService.isSupported)
                       ? null
                       : _handleCast,
-                  onCopyStreamUrl: (_isLoading || _resolvedStreamUrl == null)
-                      ? null
-                      : _handleCopyStreamUrl,
                   onDownload: (_isLoading || !_canDownload) ? null : _handleDownload,
                   // The quality badge doubles as the Sources shortcut --
                   // the gear's Quality row, without the gear.
@@ -3195,6 +3192,9 @@ class _PlayerScreenState extends State<PlayerScreen>
               infoHash: _statsHash,
               torrentMagnet: _statsMagnet,
               buffered: _bufferNotifier,
+              onCopyLink: _resolvedStreamUrl == null
+                  ? null
+                  : _handleCopyStreamUrl,
             ),
           ),
 

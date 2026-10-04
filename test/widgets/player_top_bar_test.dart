@@ -33,21 +33,20 @@ void main() {
   });
 
   group('PlayerTopBar download button', () {
-    testWidgets('sits next to Copy Stream URL and fires its callback',
-        (tester) async {
+    testWidgets('sits next to cast and fires its callback', (tester) async {
       var downloads = 0;
       await tester.pumpWidget(wrap(PlayerTopBar(
         title: 'A Film',
         onBack: () {},
-        onCopyStreamUrl: () {},
+        onCast: () {},
         onDownload: () => downloads++,
       )));
 
-      final copy = tester.getCenter(find.byIcon(Icons.link_rounded));
+      final cast = tester.getCenter(find.byIcon(Icons.cast_rounded));
       final download = tester.getCenter(find.byIcon(Icons.download_rounded));
-      expect((download.dx - copy.dx).abs(), lessThan(60),
+      expect((download.dx - cast.dx).abs(), lessThan(60),
           reason: 'one button apart at most, not on the far side of the bar');
-      expect(download.dy, copy.dy);
+      expect(download.dy, cast.dy);
 
       await tester.tap(find.byIcon(Icons.download_rounded));
       expect(downloads, 1);
@@ -63,7 +62,6 @@ void main() {
         subtitle: 'S1:E2 • An Episode Title',
         onBack: () {},
         onToggleEpisodes: () {},
-        onCopyStreamUrl: () {},
         onDownload: () {},
         onToggleFullscreen: () {},
         onCast: () {},
@@ -100,11 +98,11 @@ void main() {
       await tester.pumpWidget(wrap(PlayerTopBar(
         title: 'A Film',
         onBack: () {},
-        onCopyStreamUrl: () {},
+        onCast: () {},
       )));
 
       expect(find.byIcon(Icons.download_rounded), findsNothing);
-      expect(find.byIcon(Icons.link_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.cast_rounded), findsOneWidget);
     });
   });
 }

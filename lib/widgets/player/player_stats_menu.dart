@@ -51,6 +51,10 @@ class PlayerStatsMenu extends StatefulWidget {
   /// the menu is open.
   final ValueListenable<Duration?>? buffered;
 
+  /// Copies the resolved stream URL. Null hides the action, for streams
+  /// with no URL worth passing on.
+  final VoidCallback? onCopyLink;
+
   const PlayerStatsMenu({
     super.key,
     required this.sourceLabel,
@@ -61,6 +65,7 @@ class PlayerStatsMenu extends StatefulWidget {
     this.torrentMagnet,
     this.initialStats,
     this.buffered,
+    this.onCopyLink,
   });
 
   @override
@@ -153,6 +158,26 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
             ),
           if (hash != null && hash.isNotEmpty)
             _StatRow(label: l10n.playerStatsHash, value: hash),
+          // The URL copier lives with the data it copies: the top bar kept
+          // it beside download, where it squeezed the title for a clipboard
+          // action used once per stream at most.
+          if (widget.onCopyLink != null) ...[
+            SizedBox(height: context.rem(AppRem.xs)),
+            const Divider(color: PlayerTheme.edgeSoft, height: 1), // px: a hairline, not a layout size
+            TextButton.icon(
+              onPressed: widget.onCopyLink,
+              icon: Icon(
+                Icons.link_rounded,
+                size: context.rem(AppRem.iconSm),
+              ),
+              label: Text(l10n.playerCopyStreamUrl),
+              style: TextButton.styleFrom(
+                foregroundColor: PlayerTheme.inkSubtle,
+                minimumSize: Size(0, context.rem(2.25)),
+                textStyle: const TextStyle(fontSize: AppType.caption),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -69,5 +69,30 @@ void main() {
 
       expect(find.text('HLS · Live'), findsOneWidget);
     });
+
+    testWidgets('the copy action fires and hides without a link', (
+      tester,
+    ) async {
+      var copies = 0;
+      await tester.pumpWidget(wrap(PlayerStatsMenu(
+        sourceLabel: 'Torrentio · 1080p',
+        streamKind: 'HTTPS',
+        host: 'cdn.example.com',
+        onCopyLink: () => copies++,
+      )));
+      await tester.pump();
+
+      await tester.tap(find.text('Copy Stream URL'));
+      expect(copies, 1);
+
+      await tester.pumpWidget(wrap(const PlayerStatsMenu(
+        sourceLabel: 'Torrentio · 1080p',
+        streamKind: 'HTTPS',
+        host: 'cdn.example.com',
+      )));
+      await tester.pump();
+
+      expect(find.text('Copy Stream URL'), findsNothing);
+    });
   });
 }

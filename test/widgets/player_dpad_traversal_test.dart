@@ -132,7 +132,7 @@ void main() {
   /// row, then both directions are walked to the edges. The seek bar eats
   /// Left/Right itself (on a TV those seek), so the row cannot be entered
   /// sideways from it -- Down is the way in.
-  Future<List<FocusNode>> _rowStops(WidgetTester tester, _Nodes n) async {
+  Future<List<FocusNode>> rowStops(WidgetTester tester, _Nodes n) async {
     n.seek.requestFocus();
     await tester.pump();
     await _press(tester, LogicalKeyboardKey.arrowDown);
@@ -156,7 +156,7 @@ void main() {
     tester,
   ) async {
     final n = await _pumpPlayer(tester);
-    final stops = await _rowStops(tester, n);
+    final stops = await rowStops(tester, n);
     expect(
       stops.length,
       6,
@@ -179,7 +179,7 @@ void main() {
     tester,
   ) async {
     final n = await _pumpPlayer(tester);
-    final stops = await _rowStops(tester, n);
+    final stops = await rowStops(tester, n);
     expect(
       stops.length,
       6,

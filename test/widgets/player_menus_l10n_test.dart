@@ -67,7 +67,6 @@ void main() {
       PlayerTopBar(
         title: 'A Film',
         onBack: () {},
-        onCopyStreamUrl: () {},
         onDownload: () {},
         onCast: () {},
       ),
@@ -75,7 +74,6 @@ void main() {
 
     expect(find.byTooltip('Voltar'), findsOneWidget);
     expect(find.byTooltip('Baixar'), findsOneWidget);
-    expect(find.byTooltip('Copiar URL da transmissão'), findsOneWidget);
     expect(find.byTooltip('Transmitir'), findsOneWidget);
   });
 

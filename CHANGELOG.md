@@ -21,9 +21,11 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   behind a gear, but use pulled them back out one by one until the menu
   guarded only the rarely touched. Quality survives as the tappable badge
   beside the title, opening the Sources panel (a torrent has no in-stream
-  variants -- each quality is a different release). Volume stays a desktop
-  tool, fullscreen leaves mobile and TV, and the popups sit a quarter rem
-  closer to the bar.
+  variants -- each quality is a different release). Copy Stream URL moves
+  into the stats popover beside the data it copies, freeing the top bar to
+  episodes, download, fullscreen and cast. Volume stays a desktop tool,
+  fullscreen leaves mobile and TV, and popovers clear the bar with visible
+  air so the seek row's end time stays uncovered.
 - **Audio and subtitle rows carry the file's own detail as chips.** Codec
   and channel layout for audio (E-AC-3, 5.1), format for embedded
   subtitles (SRT, PGS -- bitmaps ignore the appearance panel, so knowing

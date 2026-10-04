@@ -178,8 +178,9 @@ class PlayerMenuAnchor extends StatelessWidget {
   /// above the playback line, so the seek bar stays visible and scrubbable
   /// while a menu is open. The figure mirrors the transport bar's own build
   /// (its top padding, the 2.25 rem seek row, the gap, the buttons row and
-  /// the bottom padding) plus a quarter rem of air, in rem so it grows with
-  /// the text size exactly as the bar does.
+  /// the bottom padding) plus air you can see -- a tight gap read as the
+  /// card touching the bar and the seek row's end time with it -- in rem so
+  /// it grows with the text size exactly as the bar does.
   static double bottomInset(BuildContext context) {
     final isCompact = MediaQuery.sizeOf(context).width < 680;
     final bar =
@@ -188,7 +189,7 @@ class PlayerMenuAnchor extends StatelessWidget {
         (isCompact ? AppRem.xs : AppRem.sm) +
         (isCompact ? 2.25 : 2.625) +
         (isCompact ? 0.875 : AppRem.lg);
-    return context.rem(bar + 0.25) + MediaQuery.paddingOf(context).bottom;
+    return context.rem(bar + 0.75) + MediaQuery.paddingOf(context).bottom;
   }
 
   /// Clearance for the title bar above. Being bounded at the top is the
