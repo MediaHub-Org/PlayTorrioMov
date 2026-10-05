@@ -237,6 +237,7 @@
   "playerCastLooking": "Procurando dispositivos de transmissão na sua rede...",
   "playerCastSameWifi": "O celular e o receptor precisam estar na mesma rede Wi-Fi.",
   "playerCastFailed": "Não foi possível iniciar a transmissão. Verifique o dispositivo e tente novamente.",
+  "playerCastStop": "Parar transmissão",
   "playerDiscardChanges": "Descartar alterações",
   "playerDone": "Concluído",
   "playerBack30": "Voltar 30 segundos",

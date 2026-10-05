@@ -2816,6 +2816,12 @@ class _PlayerScreenState extends State<PlayerScreen>
       title: widget.detail?.name ?? _currentTitle,
       streamUrl: url,
       posterUrl: widget.detail?.poster,
+      startPosition: CastService.startPositionFor(
+        position: _position,
+        duration: _duration,
+      ),
+      // The phone stops so the TV is the only thing playing.
+      onCastStarted: () => _player.pause(),
     );
   }
 

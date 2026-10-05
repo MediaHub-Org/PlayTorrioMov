@@ -14,6 +14,24 @@ Last reconciled: **2026-10-04**, on `v1.9.3+50`.
 
 ---
 
+## Pending
+
+Device checks; none of these can be settled from the code.
+
+- **Cast.** Casting from the middle of a movie should start there and pause
+  the phone; "Stop casting" should end the session. A scraper source that
+  needs Referer/User-Agent still has no sender-side way to send them (#79),
+  and whether a phone can cast its own torrent is one `curl` away (see
+  `CastService.canCastUrl`).
+- **Android notification.** Play/Pause should follow the player, and Android
+  13+ should now ask for notification permission on launch.
+- **Similar Content** on a movie and a series (TMDB first, BestSimilar as the
+  fallback).
+- **The loading logo** with a torrent, a debrid link and a plain URL, and
+  that it clears on the first frame.
+
+---
+
 ## Not doing, so it stays decided
 
 | What                                                     | Why not                                                                                                                                                                                                                                                                                                                                               |

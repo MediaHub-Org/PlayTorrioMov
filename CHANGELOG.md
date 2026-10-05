@@ -5,7 +5,20 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- **Casting carries on from where the phone was, and the phone goes quiet.**
+  Every cast started at 0:00 and left the phone playing alongside the TV.
+  The picker now starts the receiver at the player's position (not within
+  the first 5 seconds, not within the last 15, and never for a live
+  channel), and pauses the phone once the receiver has accepted the stream.
+  While a session is live the picker shows a "Stop casting" row (nothing
+  called `disconnect` before) and marks which device is the connected one.
+  Not tried against a receiver.
+
 ### Fixed
+- **A `.tsv` or `.tsx` file is no longer announced to the receiver as a
+  transport stream.** `.ts` was matched anywhere in the path and query; it
+  now has to be a whole extension.
 - **The loading logo now actually fills.** It was cut with
   `Align(heightFactor)`, which the tight constraints of the `Stack` around it
   ignore, so the whole logo showed from the first frame and the progress was

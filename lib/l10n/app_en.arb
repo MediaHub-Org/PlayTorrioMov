@@ -309,6 +309,7 @@
   "playerCastLooking": "Looking for Cast devices on your network...",
   "playerCastSameWifi": "The phone and the receiver have to be on the same Wi-Fi.",
   "playerCastFailed": "Could not start casting. Check the receiver and try again.",
+  "playerCastStop": "Stop casting",
   "playerDiscardChanges": "Discard changes",
   "playerDone": "Done",
   "playerBack30": "Back 30 seconds",

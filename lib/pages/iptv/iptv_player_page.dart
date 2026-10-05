@@ -591,6 +591,7 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
       streamUrl: url,
       posterUrl: widget.channel.iconUrl,
       isLive: _isLiveStream,
+      onCastStarted: () => _player.pause(),
     );
   }
 
