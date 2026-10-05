@@ -43,9 +43,14 @@ void main() {
 
     test('anything else falls back to mp4', () {
       // Most scraper sources are progressive MP4, named or not.
-      expect(CastService.contentTypeFor('https://x.invalid/a.mp4'), 'video/mp4');
-      expect(CastService.contentTypeFor('https://x.invalid/no-extension'),
-          'video/mp4');
+      expect(
+        CastService.contentTypeFor('https://x.invalid/a.mp4'),
+        'video/mp4',
+      );
+      expect(
+        CastService.contentTypeFor('https://x.invalid/no-extension'),
+        'video/mp4',
+      );
     });
 
     test('the query string is read too', () {
@@ -57,10 +62,73 @@ void main() {
       );
     });
 
+    test('.ts is a whole extension, not the start of .tsv or .tsx', () {
+      expect(
+        CastService.contentTypeFor('https://x.invalid/a.tsv'),
+        'video/mp4',
+      );
+      expect(
+        CastService.contentTypeFor('http://p.invalid/live/1.ts?token=1'),
+        'video/mp2t',
+      );
+    });
+
     test('case does not matter', () {
       expect(
         CastService.contentTypeFor('https://X.invalid/STREAM.M3U8'),
         'application/x-mpegurl',
+      );
+    });
+  });
+
+  group('CastService.startPositionFor', () {
+    const hour = Duration(hours: 2);
+
+    test('carries the phone\'s place across', () {
+      expect(
+        CastService.startPositionFor(
+          position: const Duration(minutes: 40),
+          duration: hour,
+        ),
+        const Duration(minutes: 40),
+      );
+    });
+
+    test('a live channel and a just-started video begin at zero', () {
+      expect(
+        CastService.startPositionFor(
+          position: const Duration(minutes: 40),
+          duration: Duration.zero,
+          isLive: true,
+        ),
+        Duration.zero,
+      );
+      expect(
+        CastService.startPositionFor(
+          position: const Duration(seconds: 3),
+          duration: hour,
+        ),
+        Duration.zero,
+      );
+    });
+
+    test('a finished video does not cast as its credits', () {
+      expect(
+        CastService.startPositionFor(
+          position: hour - const Duration(seconds: 5),
+          duration: hour,
+        ),
+        Duration.zero,
+      );
+    });
+
+    test('an unknown duration does not block resuming', () {
+      expect(
+        CastService.startPositionFor(
+          position: const Duration(minutes: 10),
+          duration: Duration.zero,
+        ),
+        const Duration(minutes: 10),
       );
     });
   });
@@ -98,7 +166,10 @@ void main() {
     });
 
     test('a local file has no URL a receiver could open', () {
-      expect(CastService.canCastUrl('file:///storage/emulated/0/a.mp4'), isFalse);
+      expect(
+        CastService.canCastUrl('file:///storage/emulated/0/a.mp4'),
+        isFalse,
+      );
       expect(CastService.canCastUrl('/storage/emulated/0/a.mp4'), isFalse);
     });
 
@@ -126,8 +197,9 @@ void main() {
     // pumped here: touching `CastService` on a desktop host instantiates a
     // platform channel that does not exist. What matters is that the call is
     // present and paired.
-    final sheet = File('lib/widgets/player/player_cast_sheet.dart')
-        .readAsStringSync();
+    final sheet = File(
+      'lib/widgets/player/player_cast_sheet.dart',
+    ).readAsStringSync();
 
     test('the sheet asks the plugin to scan when it opens', () {
       expect(

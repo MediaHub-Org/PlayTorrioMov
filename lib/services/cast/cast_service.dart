@@ -104,6 +104,32 @@ abstract final class CastService {
         .timeout(timeout);
   }
 
+  /// The receiver the current session is with, or null when not connected.
+  /// The picker uses it to say which row is the live one and to offer a way
+  /// out; before, every row looked the same whether or not it was in use.
+  static String? get connectedDeviceId => isConnected
+      ? GoogleCastSessionManager.instance.currentSession?.device?.deviceID
+      : null;
+
+  /// Where a cast should start. Live streams have no position; one in the
+  /// first seconds is not worth a seek; and one in the last stretch belongs
+  /// to a video the viewer has finished, which should not cast as its
+  /// credits. The picker used to start every cast from 0:00 whatever the
+  /// phone had reached.
+  static Duration startPositionFor({
+    required Duration position,
+    required Duration duration,
+    bool isLive = false,
+  }) {
+    if (isLive) return Duration.zero;
+    if (position < const Duration(seconds: 5)) return Duration.zero;
+    if (duration > Duration.zero &&
+        duration - position < const Duration(seconds: 15)) {
+      return Duration.zero;
+    }
+    return position;
+  }
+
   static Future<void> disconnect() =>
       GoogleCastSessionManager.instance.endSessionAndStopCasting();
 
@@ -175,7 +201,9 @@ abstract final class CastService {
     if (lower.contains('.m3u8')) return 'application/x-mpegurl';
     if (lower.contains('.mpd')) return 'application/dash+xml';
     if (lower.contains('.mkv')) return 'video/x-matroska';
-    if (lower.contains('.ts')) return 'video/mp2t';
+    // `.ts` only as a whole extension: a bare `contains` also claimed `.tsv`
+    // and `.tsx`, naming a progressive file a transport stream.
+    if (RegExp(r'\.ts($|[?&/#])').hasMatch(lower)) return 'video/mp2t';
     if (lower.contains('.webm')) return 'video/webm';
     return 'video/mp4';
   }
@@ -202,6 +230,7 @@ abstract final class CastService {
     required String title,
     String? posterUrl,
     bool isLive = false,
+    Duration startPosition = Duration.zero,
   }) {
     final mediaInfo = GoogleCastMediaInformation(
       contentId: url,
@@ -223,6 +252,9 @@ abstract final class CastService {
               ],
       ),
     );
-    return GoogleCastRemoteMediaClient.instance.loadMedia(mediaInfo);
+    return GoogleCastRemoteMediaClient.instance.loadMedia(
+      mediaInfo,
+      playPosition: isLive ? Duration.zero : startPosition,
+    );
   }
 }

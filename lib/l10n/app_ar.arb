@@ -237,6 +237,7 @@
   "playerCastLooking": "جارٍ البحث عن أجهزة البث على شبكتك...",
   "playerCastSameWifi": "يجب أن يكون الهاتف والمستقبِل على شبكة Wi-Fi نفسها.",
   "playerCastFailed": "تعذّر بدء البث. تحقق من جهاز الاستقبال وحاول مرة أخرى.",
+  "playerCastStop": "إيقاف البث",
   "playerDiscardChanges": "تجاهل التغييرات",
   "playerDone": "تم",
   "playerBack30": "رجوع 30 ثانية",
