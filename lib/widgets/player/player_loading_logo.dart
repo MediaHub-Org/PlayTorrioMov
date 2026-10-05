@@ -41,17 +41,10 @@ class PlayerLoadingLogo extends StatelessWidget {
                       ),
                     ),
                     ClipRect(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        heightFactor: filled,
-                        child: SizedBox(
-                          width: size,
-                          height: size,
-                          child: Image.asset(
-                            'assets/icon.png',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
+                      clipper: _BottomFractionClipper(filled),
+                      child: Image.asset(
+                        'assets/icon.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ],
@@ -63,4 +56,24 @@ class PlayerLoadingLogo extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Keeps the bottom [fraction] of the box. `Align.heightFactor` cannot do
+/// this: under the tight constraints of a Stack's expanded child it is
+/// ignored, so the whole logo showed from the first frame and the loading
+/// screen never visibly filled.
+class _BottomFractionClipper extends CustomClipper<Rect> {
+  final double fraction;
+
+  const _BottomFractionClipper(this.fraction);
+
+  @override
+  Rect getClip(Size size) {
+    final height = size.height * fraction.clamp(0.0, 1.0);
+    return Rect.fromLTWH(0, size.height - height, size.width, height);
+  }
+
+  @override
+  bool shouldReclip(_BottomFractionClipper oldClipper) =>
+      oldClipper.fraction != fraction;
 }
