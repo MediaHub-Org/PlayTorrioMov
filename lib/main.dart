@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,7 @@ import './services/cast/cast_service.dart';
 import './services/theme/app_theme_service.dart';
 import './services/updater/app_updater_service.dart';
 import './services/backup/cloud_backup_settings.dart';
+import './services/backup/auto_backup_service.dart';
 import './services/download/download_service.dart';
 import './services/continue_watching/continue_watching_service.dart';
 import './services/iptv/custom_channels_service.dart';
@@ -38,6 +40,7 @@ import './services/tv_mode_service.dart';
 import './services/window/window_service.dart';
 import './services/p2p/p2p_settings_service.dart';
 import './services/sources/source_filter_settings.dart';
+import './services/player/video_quality_preference.dart';
 import './services/scraper/builtin_providers_service.dart';
 import './widgets/updater/update_dialog.dart';
 import './pages/hub/hub_page.dart';
@@ -99,6 +102,7 @@ void main() async {
     AppThemeService.initialize(),
     CastService.initialize(),
     CloudBackupSettings.initialize(),
+    AutoBackupSettings.initialize(),
     ContinueWatchingService.initialize(),
     CustomChannelsService.initialize(),
     FavoriteChannelsService.initialize(),
@@ -114,6 +118,7 @@ void main() async {
     // The remembered source filters. Must land before the first WatchScreen
     // builds, which reads them synchronously to seed its dropdowns.
     SourceFilterSettings.initialize(),
+    VideoQualityPreference.initialize(),
     // Loads which built-in scrapers the user switched off. Must land before
     // the first scrapeAll, which reads the result synchronously.
     BuiltinProvidersService.initialize(),
@@ -125,6 +130,10 @@ void main() async {
     // controls, not startup.
     MediaSessionService.init(),
   ]);
+  // Fire-and-forget: a possible network upload has no business delaying the
+  // first frame, and `maybeRunAutoBackup` never throws out to here either
+  // way.
+  unawaited(AutoBackupService.maybeRunAutoBackup());
   runApp(const PlayTorrioApp());
 }
 

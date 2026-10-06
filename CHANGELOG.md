@@ -5,7 +5,47 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **An anime episode's rail card shows its own art and name**, where AniList
+  has them (it does for some shows, not most) -- a thumbnail and a title
+  under "EP N", the same shape as the Series rail's TMDB stills. Falls back
+  to today's plain numbered card wherever AniList has nothing to show.
+  A sequel or split-cour season often numbers the data continuing the
+  franchise's whole count (My Hero Academia's later seasons, Solo Leveling's
+  season 2 -- that season's own episode 1 is titled "Episode 159" or
+  "Episode 25"), rather than restarting at 1 the way the season's own
+  episode count does; the matching reads that offset back out of the data
+  itself, so these still show art instead of silently missing every episode.
+  A one-release-for-the-whole-run show (One Piece: a single AniList id for
+  1000+ episodes) can carry a small, internally consistent but unrelated
+  fragment instead -- 69 entries numbered 62-130, nowhere near this
+  season's own episode 1 -- which an early version of this confidently (and
+  wrongly) matched to episode 1, showing episode 130's art under it. The
+  offset is now required to explain at least half of the season's own
+  episodes before it is trusted at all, which this fails and a real season's
+  data passes comfortably.
+- **Video Quality, in Settings -> Video Player**: Good / Better / Best, each
+  with its rough data cost per hour (0.38 / 1.40 / 6.84 GB), the way a
+  streaming app's own data-usage setting reads. It is a sort bias, not a
+  filter -- it decides which source the Sources list reaches for first on a
+  title with more than one, never hides any of them. Defaults to Best, which
+  sorts identically to the highest-quality-first order every build has
+  always used, so nobody sees a change until they open the setting.
+- **Dropbox backup, in Settings -> Backup**, alongside the existing WebDAV
+  option: a PKCE connection (no redirect URI, so the code Dropbox shows is
+  pasted back in, the same shape as Trakt's device code), then Upload/
+  Download of the same backup file every destination writes. Needs a
+  `DROPBOX_APP_KEY` this build does not carry yet -- see
+  docs/SYNC_AND_BACKUP.md.
+- **Auto-backup, in Settings -> Backup**: on by default once a destination
+  is connected, backing up at app open if it has been a day/week/month
+  (your choice) since the last one -- there is no background-task runner in
+  this app, so "at app open" is what "automatic" can mean without one.
+  Prefers Dropbox over WebDAV when both are connected.
+
 ### Changed
+
 - **Casting carries on from where the phone was, and the phone goes quiet.**
   Every cast started at 0:00 and left the phone playing alongside the TV.
   The picker now starts the receiver at the player's position (not within
@@ -16,6 +56,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Not tried against a receiver.
 
 ### Fixed
+
 - **A `.tsv` or `.tsx` file is no longer announced to the receiver as a
   transport stream.** `.ts` was matched anywhere in the path and query; it
   now has to be a whole extension.
@@ -25,6 +66,39 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   invisible. It is clipped to the filled fraction from the bottom now, and
   the test checks the visible rectangle instead of only that a clip exists.
   Not seen on a device.
+
+- **Fullscreen toggle flash (Windows)**: entering or leaving fullscreen
+  hides the window, changes its state, then shows it again, on purpose --
+  that swap is the fix for an older shrink-then-grow flash (see 1.8.6). But
+  Windows still played its own open/restore animation over that swap,
+  which could show a blank or briefly stretched frame as the window
+  reappeared, before Flutter had painted it at the new size. The window now
+  disables DWM's transition animations for itself, and the hide/show swap
+  waits a short moment before revealing the window, giving the engine time
+  to paint the new size first. Untested against every Windows build and
+  compositor setting -- say if it still flashes.
+- **The Library's Collections / Continue / Downloads bar filled the header's
+  full width**, with the three pills adrift in the middle of a near-empty
+  capsule. Setting `alignment` on the capsule's `Container` to center its
+  content made the whole `Container` -- border and fill included -- expand
+  to fill its own parent instead; centering now happens around it instead,
+  so the capsule hugs the pills. Shared by the IPTV sources page, which used
+  the same row.
+- **A rail's scroll arrows moved while you were clicking them.** Every
+  horizontally scrolling rail (Home's sliders, Browse's rows, Continue
+  Watching, and anime's cast/episodes/relations/recommendations) parked its
+  arrow 60px past the edge and slid it in over 250ms on hover -- a pointer
+  already moving toward where the arrow was about to land could click while
+  it was still travelling. The six copies of this are now one shared
+  `RailEdgeArrows` widget that fades the arrow in at a fixed position
+  instead of sliding it, so there is nothing left to chase. It also gives a
+  D-pad/remote proper `ExcludeFocus` on a hidden arrow everywhere, which
+  three of anime's four rails were missing.
+
+- **The anime episode rail's "Jump to ep #" box**: the hint text sat high in
+  its fixed-height box and the go-arrow's own default 48px tap target (more
+  than the whole 34px-tall box) forced the row taller than its border,
+  which is the "looks off" a fixed-height box cannot hide on its own.
 
 ## [1.9.3+50] - 2026-10-04
 

@@ -106,9 +106,6 @@ abstract final class AppRem {
   // Clear space under the last row, so the mini player never covers it.
   static const double pageTail = 6;
 
-  // How far a hidden slider arrow is parked past the row's edge.
-  static const double arrowParked = 3.75;
-
   // The music mini-player's least height.
   static const double miniPlayer = 3.75;
 

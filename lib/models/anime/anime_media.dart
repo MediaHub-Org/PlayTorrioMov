@@ -1,3 +1,60 @@
+/// One entry of AniList's `streamingEpisodes`: a thumbnail and a title for an
+/// episode, sourced from whatever legal streaming service AniList found one
+/// on (commonly Crunchyroll). The episode rail is the one place this is
+/// used -- see [AnimeMedia.episodeInfo].
+///
+/// AniList does not number these explicitly; [number] is parsed from the
+/// leading "Episode N" most entries carry in [title] itself, and is null
+/// when that parse fails (a title with no such prefix, or one this regex
+/// does not recognize). A null [number] cannot be matched to a rail card, so
+/// it is effectively unused data, kept rather than dropped in case a future
+/// caller wants the raw list.
+class AnimeStreamingEpisode {
+  final int? number;
+
+  /// With a recognized "Episode N" (or "Ep N", "N.") prefix stripped, so the
+  /// rail shows the episode's own name rather than repeating its number --
+  /// the number is already the card's own badge, the way the series rail's
+  /// "EP N" badge sits beside its own title rather than inside it.
+  final String title;
+  final String? thumbnail;
+
+  const AnimeStreamingEpisode({
+    this.number,
+    required this.title,
+    this.thumbnail,
+  });
+
+  /// Matches "Episode 3", "Ep. 3", "Ep 3 -", "3." etc. at the very start of
+  /// the string, case-insensitively. AniList's own convention (seen across
+  /// its streamingEpisodes data) is "Episode N - Title", but entries scraped
+  /// from a few different providers also show up as "Ep N: Title" or a bare
+  /// leading number -- all three are common enough to be worth the one regex
+  /// rather than silently losing their number.
+  static final RegExp _leadingNumber = RegExp(
+    r'^(?:episode|ep\.?)?\s*(\d+)\s*[-:.]?\s*',
+    caseSensitive: false,
+  );
+
+  factory AnimeStreamingEpisode.fromJson(Map<String, dynamic> json) {
+    final rawTitle = json['title']?.toString().trim() ?? '';
+    final match = _leadingNumber.firstMatch(rawTitle);
+    // A match with no digits captured is the empty string matching at
+    // position 0 (the whole prefix group is optional) -- not a real episode
+    // number, so it is told apart from a genuine parse by checking the
+    // digit group came back non-null.
+    final number = match != null && match.group(1) != null
+        ? int.tryParse(match.group(1)!)
+        : null;
+    final title = match != null ? rawTitle.substring(match.end).trim() : rawTitle;
+    return AnimeStreamingEpisode(
+      number: number,
+      title: title.isEmpty ? rawTitle : title,
+      thumbnail: json['thumbnail']?.toString(),
+    );
+  }
+}
+
 class AnimeMedia {
   final int id; // AniList ID
   final int? idMal; // MyAnimeList ID
@@ -32,6 +89,13 @@ class AnimeMedia {
   final List<AnimeMedia> recommendations;
   final String? slug;
 
+  /// Best-effort per-episode art and titles, keyed by [AnimeStreamingEpisode.number]
+  /// once matched -- see [episodeInfo]. Empty for most of the catalog: AniList
+  /// only has these where it found a legal streaming service carrying the
+  /// show, and most entries here do not have one. The episode rail falls
+  /// back to its plain numbered card when this has nothing for an episode.
+  final List<AnimeStreamingEpisode> streamingEpisodes;
+
   const AnimeMedia({
     required this.id,
     this.idMal,
@@ -65,6 +129,7 @@ class AnimeMedia {
     this.relations = const [],
     this.recommendations = const [],
     this.slug,
+    this.streamingEpisodes = const [],
   });
 
   /// The title that never moves: what scrapers query, what a saved item's
@@ -170,6 +235,59 @@ class AnimeMedia {
     return s;
   }
 
+  /// AniList sometimes numbers a sequel or split-cour season's
+  /// `streamingEpisodes` to continue the franchise's whole episode count --
+  /// a second season's own episode 1 arrives titled "Episode 25" or
+  /// "Episode 159" -- rather than restarting at 1 the way [seasonEpisodes]
+  /// does (confirmed against real ids while building this: My Hero
+  /// Academia's later seasons and Solo Leveling's season 2 both do this;
+  /// Attack on Titan's first season does not).
+  ///
+  /// The offset is read off the data's own lowest number, on the
+  /// assumption that whatever this season's episode 1 is, it is the
+  /// earliest absolute episode the data has -- then checked, not trusted
+  /// outright: a one-show ID that has collected only a fragment of the
+  /// franchise under some unrelated numbering (One Piece's is 69 entries
+  /// numbered 62-130, out of 1000+ -- found while building this) agrees
+  /// with itself perfectly, every number simply one more than the last,
+  /// and a position-based vote would have called that confident. It
+  /// explains almost none of the real season, which is the one thing
+  /// position cannot see and coverage against [seasonEpisodes] can: the
+  /// offset is kept only when it accounts for at least half of it.
+  int? _episodeNumberOffset(int seasonEpisodes) {
+    if (seasonEpisodes <= 0) return null;
+    final numbers = streamingEpisodes
+        .map((e) => e.number)
+        .whereType<int>()
+        .toSet();
+    if (numbers.isEmpty) return null;
+    final offset = numbers.reduce((a, b) => a < b ? a : b) - 1;
+    var covered = 0;
+    for (var n = 1; n <= seasonEpisodes; n++) {
+      if (numbers.contains(n + offset)) covered++;
+    }
+    return (covered / seasonEpisodes) >= 0.5 ? offset : null;
+  }
+
+  /// The streaming episode matched to episode [number] of [seasonEpisodes]
+  /// total, or null when AniList had nothing for this show, had nothing
+  /// this offset reaches, or gave every entry a title
+  /// [AnimeStreamingEpisode]'s parser could not number.
+  ///
+  /// [seasonEpisodes] is the count this season is actually understood to
+  /// have -- which may come from AniDB rather than this object's own
+  /// [totalEpisodes], so it is asked for rather than assumed; the offset
+  /// check above needs the real number to measure coverage against.
+  AnimeStreamingEpisode? episodeInfo(int number, {required int seasonEpisodes}) {
+    final offset = _episodeNumberOffset(seasonEpisodes);
+    if (offset == null) return null;
+    final target = number + offset;
+    for (final ep in streamingEpisodes) {
+      if (ep.number == target) return ep;
+    }
+    return null;
+  }
+
   factory AnimeMedia.fromAnilistJson(Map<String, dynamic> json) {
     final title = json['title'] is Map<String, dynamic>
         ? json['title'] as Map<String, dynamic>
@@ -237,6 +355,15 @@ class AnimeMedia {
       }
     }
 
+    final streamingEpisodeList = <AnimeStreamingEpisode>[];
+    if (json['streamingEpisodes'] is List) {
+      for (final ep in json['streamingEpisodes'] as List) {
+        if (ep is Map<String, dynamic>) {
+          streamingEpisodeList.add(AnimeStreamingEpisode.fromJson(ep));
+        }
+      }
+    }
+
     String rawDesc = json['description']?.toString() ?? '';
     // Strip HTML tags if any remain
     rawDesc = rawDesc.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), ' ').trim();
@@ -279,6 +406,7 @@ class AnimeMedia {
       staff: staffList,
       relations: relationList,
       recommendations: recList,
+      streamingEpisodes: streamingEpisodeList,
     );
   }
 

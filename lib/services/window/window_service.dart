@@ -101,6 +101,13 @@ class WindowService with WindowListener {
         await windowManager.unmaximize();
       }
       await windowManager.setFullScreen(true);
+      // These native calls return once Windows has applied the new window
+      // state, not once Flutter has actually painted a frame at the new
+      // size -- so showing right away could reveal a stale or half-resized
+      // frame underneath. A short wait while still hidden gives the engine,
+      // which keeps rendering even though nothing is on screen yet, time to
+      // catch up.
+      await _settleBeforeShowing();
     } finally {
       await windowManager.show();
     }
@@ -127,12 +134,22 @@ class WindowService with WindowListener {
       } else if (!restoreMaximized && isMaximized) {
         await windowManager.unmaximize();
       }
+      await _settleBeforeShowing();
     } finally {
       await windowManager.show();
     }
     await windowManager.focus();
     isFullscreenNotifier.value = false;
   }
+
+  /// Lets a couple of frames pass while the window is still hidden, so
+  /// `show()` reveals content already painted at the new size instead of
+  /// whatever was there before the resize. Three frames at a reasonable
+  /// refresh rate is a guess, not a measurement against a vsync signal --
+  /// cheap insurance that costs the toggle a few milliseconds nobody will
+  /// perceive as lag, against a flash that was very perceptible.
+  Future<void> _settleBeforeShowing() =>
+      Future.delayed(const Duration(milliseconds: 50));
 
   /// Alias for toggleFullscreen
   Future<void> toggleFullScreen() => toggleFullscreen();

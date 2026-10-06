@@ -43,30 +43,36 @@ class PillTabRow extends StatelessWidget {
     // in the middle. The min-width box is what makes both true -- narrow
     // content centers inside the viewport width, wide content keeps its
     // size and scrolls.
+    //
+    // The capsule itself hugs the pills rather than filling that width --
+    // `Center` positions a snug child, where `Container(alignment: ...)`
+    // would expand to fill its own parent and the border/fill would read
+    // as a near-empty bar with three pills adrift inside it.
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: ConstrainedBox(
             constraints: BoxConstraints(minWidth: constraints.maxWidth),
-            child: Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(context.rem(0.1875)),
-              decoration: BoxDecoration(
-                color: AppColors.inkAlpha(0.05),
-                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                border: Border.all(color: AppColors.inkAlpha(0.12)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final tab in tabs)
-                    _SubTabButton(
-                      tab: tab,
-                      selected: tab.id == activeId,
-                      onTap: () => onSelected(tab.id),
-                    ),
-                ],
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.all(context.rem(0.1875)),
+                decoration: BoxDecoration(
+                  color: AppColors.inkAlpha(0.05),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                  border: Border.all(color: AppColors.inkAlpha(0.12)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final tab in tabs)
+                      _SubTabButton(
+                        tab: tab,
+                        selected: tab.id == activeId,
+                        onTap: () => onSelected(tab.id),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

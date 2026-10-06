@@ -477,48 +477,17 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
             // Hover alone gates these: a touch device never fires onEnter, so
             // it never sees an arrow, and a device with a pointer does --
             // which is the actual question, unlike a width or platform check.
-            if (widget.heroItems.length > 1) ...[
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                left: context.rem(isHoveringCarousel ? AppRem.ms : -AppRem.arrowParked),
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: ExcludeFocus(
-                    // Hidden arrows are parked off-screen until a pointer hovers;
-                    // a D-pad must not be able to focus what it cannot see.
-                    excluding: !isHoveringCarousel,
-                    child: SliderArrow(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: () => goToHeroPage(
-                        (currentHeroIndex - 1) % widget.heroItems.length,
-                      ),
-                    ),
-                  ),
+            if (widget.heroItems.length > 1)
+              RailEdgeArrows(
+                visible: isHoveringCarousel,
+                insetRem: AppRem.ms,
+                onPrevious: () => goToHeroPage(
+                  (currentHeroIndex - 1) % widget.heroItems.length,
+                ),
+                onNext: () => goToHeroPage(
+                  (currentHeroIndex + 1) % widget.heroItems.length,
                 ),
               ),
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                right: context.rem(isHoveringCarousel ? AppRem.ms : -AppRem.arrowParked),
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: ExcludeFocus(
-                    // Hidden arrows are parked off-screen until a pointer hovers;
-                    // a D-pad must not be able to focus what it cannot see.
-                    excluding: !isHoveringCarousel,
-                    child: SliderArrow(
-                      icon: Icons.arrow_forward_ios_rounded,
-                      onTap: () => goToHeroPage(
-                        (currentHeroIndex + 1) % widget.heroItems.length,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
             if (widget.heroItems.length > 1)
               Positioned(
                 bottom: context.rem(AppRem.ms),

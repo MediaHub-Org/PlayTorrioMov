@@ -93,14 +93,18 @@ void main() {
       expect(find.text('Top popular series'), findsOneWidget);
     });
 
-    testWidgets('arrows stay off-screen until the row is hovered', (
+    testWidgets('arrows stay hidden until the row is hovered', (
       tester,
     ) async {
       // Arrows are gated on hover alone, not on width or platform: a touch
       // device never fires onEnter, so it never reveals one. That means they
-      // are *built* at every size, and what matters is that they sit outside
-      // the viewport until a pointer arrives — asserting they are absent
-      // would have been asserting the old width check, not the behavior.
+      // are *built* at every size (where there is something to scroll to),
+      // and what matters is that an un-hovered one cannot be seen or hit --
+      // faded out, not positioned off past the viewport edge. An older
+      // version parked them there instead, which meant a pointer already
+      // moving toward an arrow's resting spot could click while it was still
+      // sliding in, reading as the button moving out from under the cursor
+      // (see `RailEdgeArrows`'s own doc comment).
       setSurfaceWidth(tester, 400);
       await tester.pumpWidget(
         wrap(
@@ -112,18 +116,30 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final width =
-          tester.view.physicalSize.width / tester.view.devicePixelRatio;
       for (final arrow in tester.widgetList<SliderArrow>(
         find.byType(SliderArrow),
       )) {
-        final rect = tester.getRect(find.byWidget(arrow));
+        final opacity = tester.widget<AnimatedOpacity>(
+          find.ancestor(
+            of: find.byWidget(arrow),
+            matching: find.byType(AnimatedOpacity),
+          ).first,
+        );
         expect(
-          rect.right <= 0 || rect.left >= width,
+          opacity.opacity,
+          0.0,
+          reason: 'an un-hovered arrow must be invisible, not merely parked offscreen',
+        );
+        final ignore = tester.widget<IgnorePointer>(
+          find.ancestor(
+            of: find.byWidget(arrow),
+            matching: find.byType(IgnorePointer),
+          ).first,
+        );
+        expect(
+          ignore.ignoring,
           isTrue,
-          reason:
-              'an un-hovered arrow must be off-screen, not overlapping '
-              'the artwork it sits on (was at $rect on a ${width}px surface)',
+          reason: 'an un-hovered arrow must not be clickable either',
         );
       }
     });
@@ -141,8 +157,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Two per carousel: back and forward, for the hero and for the row.
-      expect(find.byType(SliderArrow), findsNWidgets(4));
+      // The hero wraps (always both arrows); the row starts scrolled all the
+      // way to its own left, so its own back arrow does not exist at all --
+      // same principle as the single-slide hero below, just reached by
+      // scroll position instead of item count. 2 (hero) + 1 (row's forward).
+      expect(find.byType(SliderArrow), findsNWidgets(3));
     });
 
     testWidgets('a single hero slide gets no hero arrows', (tester) async {

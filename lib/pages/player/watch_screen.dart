@@ -22,6 +22,7 @@ import './player_screen.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/tv_mode_service.dart';
+import '../../services/player/video_quality_preference.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../utils/download/download_launcher.dart';
@@ -132,6 +133,7 @@ class _WatchScreenState extends State<WatchScreen>
     _animController.forward();
     SourceFilterSettings.audioLanguages.addListener(_onSourceFilterChanged);
     SourceFilterSettings.qualities.addListener(_onSourceFilterChanged);
+    VideoQualityPreference.tier.addListener(_onSourceFilterChanged);
     _loadStreams();
   }
 
@@ -139,6 +141,7 @@ class _WatchScreenState extends State<WatchScreen>
   void dispose() {
     SourceFilterSettings.audioLanguages.removeListener(_onSourceFilterChanged);
     SourceFilterSettings.qualities.removeListener(_onSourceFilterChanged);
+    VideoQualityPreference.tier.removeListener(_onSourceFilterChanged);
     _sourceBatchTimer?.cancel();
     _animController.dispose();
     _sourcesScrollController.dispose();
@@ -325,7 +328,10 @@ class _WatchScreenState extends State<WatchScreen>
     } else if (_selectedSizeFilter == 'smallest') {
       list.sort((a, b) => (a.sizeBytes ?? double.infinity).compareTo(b.sizeBytes ?? double.infinity));
     } else {
-      list.sort((a, b) => b.qualityRank.compareTo(a.qualityRank));
+      // Closest to the data-usage tier set in Settings -> Video Player. See
+      // `qualityDistanceComparator`'s own doc comment for why this is the
+      // same order as before for anyone who has not touched that setting.
+      list.sort(qualityDistanceComparator(VideoQualityPreference.tier.value));
     }
     return list;
   }

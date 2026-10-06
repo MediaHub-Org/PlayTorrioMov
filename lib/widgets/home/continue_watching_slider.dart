@@ -337,35 +337,14 @@ class _ContinueWatchingSliderState extends State<ContinueWatchingSlider> {
                       ),
 
                       // Desktop Floating Scroll Arrows (Matching Anime/Movie Sections)
-                      if (isDesktop) ...[
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOutCubic,
-                          left: context.rem(_canScrollLeft && _isHoveringSlider ? 0.625 : -3.75),
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: SliderArrow(
-                              icon: Icons.arrow_back_ios_new_rounded,
-                              onTap: () => _scroll(-1),
-                            ),
-                          ),
+                      if (isDesktop)
+                        RailEdgeArrows(
+                          visible: _isHoveringSlider,
+                          canGoPrevious: _canScrollLeft,
+                          canGoNext: _canScrollRight,
+                          onPrevious: () => _scroll(-1),
+                          onNext: () => _scroll(1),
                         ),
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOutCubic,
-                          right: context.rem(_canScrollRight && _isHoveringSlider
-                              ? 0.625 : -3.75),
-                          top: 0,
-                          bottom: 0,
-                          child: Center(
-                            child: SliderArrow(
-                              icon: Icons.arrow_forward_ios_rounded,
-                              onTap: () => _scroll(1),
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),

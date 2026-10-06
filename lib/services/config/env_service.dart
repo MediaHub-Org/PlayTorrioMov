@@ -103,6 +103,17 @@ class EnvService {
     return get('SIMKL_CLIENT_ID');
   }
 
+  // Dropbox app key (checks compile-time dart-define first, then runtime
+  // .env). PKCE, so unlike Trakt this is the only credential needed -- no
+  // app secret, since a Dropbox "public client" (installed app) proves
+  // itself with the PKCE code verifier instead of a secret it could never
+  // keep safe baked into every copy of the app anyway.
+  static String get dropboxAppKey {
+    const compileVal = String.fromEnvironment('DROPBOX_APP_KEY');
+    if (compileVal.isNotEmpty) return compileVal;
+    return get('DROPBOX_APP_KEY');
+  }
+
   // TMDB API key (checks compile-time dart-define first, then runtime .env).
   //
   // A release build carries this via the ENV_FILE repository secret, the

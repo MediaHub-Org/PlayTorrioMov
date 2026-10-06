@@ -447,6 +447,15 @@ class AnilistService {
               }
             }
           }
+          # Per-episode art and titles, where AniList found a legal streaming
+          # service carrying the show (commonly Crunchyroll) -- missing for
+          # most of the catalog, which is why the episode rail still needs
+          # its plain numbered card as a fallback. Detail-only: the browse
+          # queries sharing \$_mediaFields do not ask for this.
+          streamingEpisodes {
+            title
+            thumbnail
+          }
         }
       }
     ''';

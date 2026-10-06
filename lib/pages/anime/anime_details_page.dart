@@ -48,7 +48,9 @@ abstract final class _Dim {
   static const jumpWidth = 8.125;
   static const controlHeight = 2.125;
   static const epCardWidth = 10.0;
-  static const epRailHeight = 8.5;
+  // +1 over the 16:9 box's own share: room for the optional second line
+  // (the streamed-in title, where AniList has one) below "EP N".
+  static const epRailHeight = 9.5;
   static const cardDesktop = 10.3125;
   static const cardMobile = 8.4375;
   static const cardTextBudget = 4.25;
@@ -62,6 +64,9 @@ const double _kTitleDesktop = 38;
 const double _kTitleMobile = 26;
 const double _kSynopsis = 14.5;
 const double _kEpNumber = 13.5;
+// Size of an episode's streamed-in title, where AniList has one -- same
+// weight class as the series rail's own blurb line.
+const double _kEpStreamTitle = 11.5;
 const double _kTagFont = 9.5;
 
 class _Palette {
@@ -1002,38 +1007,14 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               ),
 
               // Desktop Floating Scroll Arrows (Matching Home Page & Anime Slider)
-              if (isDesktop) ...[
-                AnimatedPositionedDirectional(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  start: context.rem(
-                    _canScrollCastLeft && _isHoveringCast ? AppRem.pillGap : -AppRem.arrowParked,
-                  ),
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: SliderArrow(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: () => _scrollList(_castScrollController, -1),
-                    ),
-                  ),
+              if (isDesktop)
+                RailEdgeArrows(
+                  visible: _isHoveringCast,
+                  canGoPrevious: _canScrollCastLeft,
+                  canGoNext: _canScrollCastRight,
+                  onPrevious: () => _scrollList(_castScrollController, -1),
+                  onNext: () => _scrollList(_castScrollController, 1),
                 ),
-                AnimatedPositionedDirectional(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  end: context.rem(
-                    _canScrollCastRight && _isHoveringCast ? AppRem.pillGap : -AppRem.arrowParked,
-                  ),
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: SliderArrow(
-                      icon: Icons.arrow_forward_ios_rounded,
-                      onTap: () => _scrollList(_castScrollController, 1),
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -1162,8 +1143,17 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                       keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.go,
                       onSubmitted: _jumpToEpisode,
+                      textAlignVertical: TextAlignVertical.center,
                       style: const TextStyle(color: Colors.white, fontSize: AppType.caption),
                       decoration: InputDecoration(
+                        // Dense, and the suffix icon's own min tap target
+                        // (48px by default) capped to the box: left as the
+                        // default, both fought the fixed 34px height above --
+                        // the hint sat high and the button's own invisible
+                        // hit area forced the row taller than its border,
+                        // which is the "looks off" a fixed-height box cannot
+                        // hide.
+                        isDense: true,
                         hintText: context.l10n.detailsJumpToEpisode,
                         hintStyle: const TextStyle(color: Colors.white38, fontSize: AppType.tiny),
                         border: InputBorder.none,
@@ -1171,8 +1161,16 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                           horizontal: context.rem(AppRem.sm),
                           vertical: context.rem(AppRem.pillGap),
                         ),
+                        // Loose, not the usual tap-target minimum: a
+                        // fixed-height box with a target that size would
+                        // have to grow around it again.
+                        suffixIconConstraints: BoxConstraints.tightFor(
+                          width: context.rem(1.75),
+                          height: context.rem(1.5),
+                        ),
                         suffixIcon: IconButton(
                           padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                           tooltip: context.l10n.detailsGoToEpisode,
                           icon: Icon(
                             Icons.arrow_forward_rounded,
@@ -1289,6 +1287,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                   width: context.rem(_Dim.epCardWidth),
                   child: _AnimeEpisodeCard(
                     epNum: epNum,
+                    info: _anime.episodeInfo(epNum, seasonEpisodes: total),
                     isWatched:
                         lastWatchedEp != null && epNum <= lastWatchedEp,
                     isCurrent: lastWatchedEp == epNum,
@@ -1301,42 +1300,14 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
           ),
 
           // Desktop Floating Scroll Arrows, same as the credits rails above.
-          if (isDesktop) ...[
-            AnimatedPositionedDirectional(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              start: context.rem(
-                _canScrollEpLeft && _isHoveringEp
-                    ? AppRem.pillGap
-                    : -AppRem.arrowParked,
-              ),
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: SliderArrow(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () => _scrollList(_epScrollController, -1),
-                ),
-              ),
+          if (isDesktop)
+            RailEdgeArrows(
+              visible: _isHoveringEp,
+              canGoPrevious: _canScrollEpLeft,
+              canGoNext: _canScrollEpRight,
+              onPrevious: () => _scrollList(_epScrollController, -1),
+              onNext: () => _scrollList(_epScrollController, 1),
             ),
-            AnimatedPositionedDirectional(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              end: context.rem(
-                _canScrollEpRight && _isHoveringEp
-                    ? AppRem.pillGap
-                    : -AppRem.arrowParked,
-              ),
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: SliderArrow(
-                  icon: Icons.arrow_forward_ios_rounded,
-                  onTap: () => _scrollList(_epScrollController, 1),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -1460,38 +1431,14 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
               ),
 
               // Desktop Floating Scroll Arrows (Matching Home Page & Anime Slider)
-              if (isDesktop) ...[
-                AnimatedPositionedDirectional(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  start: context.rem(
-                    _canScrollRelationsLeft && _isHoveringRelations ? AppRem.pillGap : -AppRem.arrowParked,
-                  ),
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: SliderArrow(
-                      icon: Icons.arrow_back_ios_new_rounded,
-                      onTap: () => _scrollList(_relationsScrollController, -1),
-                    ),
-                  ),
+              if (isDesktop)
+                RailEdgeArrows(
+                  visible: _isHoveringRelations,
+                  canGoPrevious: _canScrollRelationsLeft,
+                  canGoNext: _canScrollRelationsRight,
+                  onPrevious: () => _scrollList(_relationsScrollController, -1),
+                  onNext: () => _scrollList(_relationsScrollController, 1),
                 ),
-                AnimatedPositionedDirectional(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOutCubic,
-                  end: context.rem(
-                    _canScrollRelationsRight && _isHoveringRelations ? AppRem.pillGap : -AppRem.arrowParked,
-                  ),
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: SliderArrow(
-                      icon: Icons.arrow_forward_ios_rounded,
-                      onTap: () => _scrollList(_relationsScrollController, 1),
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -1604,38 +1551,14 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                   ),
 
                   // Desktop Floating Scroll Arrows (Matching Home Page & Anime Slider)
-                  if (isDesktop) ...[
-                    AnimatedPositionedDirectional(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOutCubic,
-                      start: context.rem(
-                        _canScrollRecsLeft && _isHoveringRecs ? AppRem.pillGap : -AppRem.arrowParked,
-                      ),
-                      top: 0,
-                      bottom: 0,
-                      child: Center(
-                        child: SliderArrow(
-                          icon: Icons.arrow_back_ios_new_rounded,
-                          onTap: () => _scrollList(_recsScrollController, -1),
-                        ),
-                      ),
+                  if (isDesktop)
+                    RailEdgeArrows(
+                      visible: _isHoveringRecs,
+                      canGoPrevious: _canScrollRecsLeft,
+                      canGoNext: _canScrollRecsRight,
+                      onPrevious: () => _scrollList(_recsScrollController, -1),
+                      onNext: () => _scrollList(_recsScrollController, 1),
                     ),
-                    AnimatedPositionedDirectional(
-                      duration: const Duration(milliseconds: 250),
-                      curve: Curves.easeOutCubic,
-                      end: context.rem(
-                        _canScrollRecsRight && _isHoveringRecs ? AppRem.pillGap : -AppRem.arrowParked,
-                      ),
-                      top: 0,
-                      bottom: 0,
-                      child: Center(
-                        child: SliderArrow(
-                          icon: Icons.arrow_forward_ios_rounded,
-                          onTap: () => _scrollList(_recsScrollController, 1),
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -1704,11 +1627,14 @@ class _HoverScaleState extends State<_HoverScale> {
 }
 
 /// One anime episode in the rail: the number in a 16:9 box, an "EP N" foot,
-/// and the series rail's watched/current language. There is no thumbnail
-/// or title behind these -- an AniDb episode is a number -- so the number
-/// is the artwork, and the hover play glyph is what says it plays.
+/// and the series rail's watched/current language. An AniDb episode is just
+/// a number, so that box is the number by default -- but when AniList's
+/// [info] has art and a name for it, the box shows that instead and a
+/// second line carries the name, the way the series rail does with its own
+/// TMDB stills.
 class _AnimeEpisodeCard extends StatefulWidget {
   final int epNum;
+  final AnimeStreamingEpisode? info;
   final bool isWatched;
   final bool isCurrent;
   final bool isHighlighted;
@@ -1716,6 +1642,7 @@ class _AnimeEpisodeCard extends StatefulWidget {
 
   const _AnimeEpisodeCard({
     required this.epNum,
+    this.info,
     required this.isWatched,
     required this.isCurrent,
     required this.isHighlighted,
@@ -1745,6 +1672,8 @@ class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
         : widget.isCurrent
             ? _Palette.accent
             : (widget.isWatched ? Colors.white70 : Colors.white);
+    final thumbnail = widget.info?.thumbnail;
+    final hasArt = thumbnail != null && thumbnail.isNotEmpty;
 
     return Focus(
       onFocusChange: (focused) => setState(() => _focused = focused),
@@ -1796,19 +1725,70 @@ class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Center(
-                            child: Text(
-                              '${widget.epNum}',
-                              style: TextStyle(
-                                color: numberColor,
-                                fontSize: _kEpNumber,
-                                fontWeight: (widget.isCurrent ||
-                                        widget.isHighlighted)
-                                    ? FontWeight.w900
-                                    : FontWeight.bold,
+                          if (hasArt)
+                            CachedNetworkImage(
+                              imageUrl: thumbnail,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => const SizedBox.shrink(),
+                            ),
+                          if (hasArt)
+                            // Legible against any still, the way the series
+                            // rail's own gradient is.
+                            const DecoratedBox(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Color(0xBF000000),
+                                  ],
+                                  stops: [0.4, 1.0],
+                                ),
                               ),
                             ),
-                          ),
+                          if (hasArt)
+                            // A corner badge rather than the full-size digit
+                            // once there is a still to show instead of it --
+                            // the number still orients a viewer scanning a
+                            // dozen cards, just without covering the art.
+                            PositionedDirectional(
+                              start: context.rem(AppRem.xs),
+                              top: context.rem(AppRem.xs),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: context.rem(AppRem.xs),
+                                  vertical: context.rem(AppRem.xxs),
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.55),
+                                  borderRadius: BorderRadius.circular(
+                                      context.rem(AppRem.radiusSm)),
+                                ),
+                                child: Text(
+                                  '${widget.epNum}',
+                                  style: TextStyle(
+                                    color: numberColor,
+                                    fontSize: AppType.tiny,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            )
+                          else
+                            Center(
+                              child: Text(
+                                '${widget.epNum}',
+                                style: TextStyle(
+                                  color: numberColor,
+                                  fontSize: _kEpNumber,
+                                  fontWeight: (widget.isCurrent ||
+                                          widget.isHighlighted)
+                                      ? FontWeight.w900
+                                      : FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           Center(
                             child: AnimatedOpacity(
                               opacity: hovered ? 1.0 : 0.0,
@@ -1857,6 +1837,21 @@ class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (widget.info?.title.isNotEmpty ?? false) ...[
+                  SizedBox(height: context.rem(AppRem.xxs)),
+                  Text(
+                    widget.info!.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: widget.isWatched
+                          ? Colors.white38
+                          : Colors.white70,
+                      fontSize: _kEpStreamTitle,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

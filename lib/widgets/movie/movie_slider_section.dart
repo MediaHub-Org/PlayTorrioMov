@@ -69,37 +69,14 @@ class _MovieSliderSectionState extends State<MovieSliderSection>
                   ),
                   
                   // Desktop Scroll Arrows
-                  if (isDesktop) ...[
-                    // Left Arrow
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      left: context.rem(canScrollLeft && _isHoveringSlider ? 0.625 : -3.75),
-                      top: 0,
-                      bottom: 0,
-                      child: Center(
-                        child: SliderArrow(
-                          icon: Icons.arrow_back_ios_new_rounded,
-                          onTap: () => scrollSlider(-1),
-                        ),
-                      ),
+                  if (isDesktop)
+                    RailEdgeArrows(
+                      visible: _isHoveringSlider,
+                      canGoPrevious: canScrollLeft,
+                      canGoNext: canScrollRight,
+                      onPrevious: () => scrollSlider(-1),
+                      onNext: () => scrollSlider(1),
                     ),
-
-                    // Right Arrow
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeOutCubic,
-                      right: context.rem(canScrollRight && _isHoveringSlider ? 0.625 : -3.75),
-                      top: 0,
-                      bottom: 0,
-                      child: Center(
-                        child: SliderArrow(
-                          icon: Icons.arrow_forward_ios_rounded,
-                          onTap: () => scrollSlider(1),
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

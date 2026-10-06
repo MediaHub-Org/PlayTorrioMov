@@ -149,6 +149,18 @@ bool Win32Window::Create(const std::wstring& title,
     return false;
   }
 
+  // Fullscreen (WindowService, lib/services/window/window_service.dart) hides
+  // this window, flips its maximized/fullscreen state, then shows it again --
+  // deliberately, to replace the shrink-then-grow flash of an in-place resize
+  // with one blink. But DWM still played its own open/restore animation over
+  // that swap: a blank or stretched frame or two, right as the window
+  // reappeared at its new size, before Flutter had painted it. Forcibly
+  // disabling this window's DWM transitions stops that animation at the
+  // source, so the hide/show swap is the only transition left to see.
+  BOOL disable_transitions = TRUE;
+  DwmSetWindowAttribute(window, DWMWA_TRANSITIONS_FORCEDISABLED,
+                        &disable_transitions, sizeof(disable_transitions));
+
   UpdateTheme(window);
 
   return OnCreate();

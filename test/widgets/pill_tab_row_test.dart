@@ -80,5 +80,39 @@ void main() {
       expect(tester.getCenter(find.text('Collections')).dx, lessThan(middle));
       expect(tester.getCenter(find.text('Continue')).dx, greaterThan(middle));
     });
+
+    testWidgets('the capsule hugs a short row instead of filling the bar', (
+      tester,
+    ) async {
+      // Two short pills on an 800px-wide bar: a capsule that merely centers
+      // its *content* while filling its own width end to end would still
+      // stretch to 800px. It should instead be barely wider than the pills.
+      tester.view.physicalSize = const Size(800, 600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        wrap(
+          PillTabRow(
+            tabs: const [
+              SubTab(id: 'a', label: 'Collections', icon: Icons.movie_rounded),
+              SubTab(id: 'b', label: 'Continue', icon: Icons.play_arrow_rounded),
+            ],
+            activeId: 'a',
+            onSelected: (_) {},
+          ),
+        ),
+      );
+
+      final capsule = tester
+          .widgetList<Container>(find.descendant(
+            of: find.byType(PillTabRow),
+            matching: find.byType(Container),
+          ))
+          .first;
+      final capsuleWidth = tester
+          .getSize(find.byWidget(capsule))
+          .width;
+      expect(capsuleWidth, lessThan(400));
+    });
   });
 }

@@ -189,15 +189,13 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
                 // hover, and an Android device with a mouse would not get
                 // them. A touch device never fires onEnter, so hover is the
                 // direct answer.
-                _Arrow(
-                  visible: _canLeft && _hovering,
-                  alignLeft: true,
-                  onTap: () => _scrollBy(-1),
-                ),
-                _Arrow(
-                  visible: _canRight && _hovering,
-                  alignLeft: false,
-                  onTap: () => _scrollBy(1),
+                RailEdgeArrows(
+                  visible: _hovering,
+                  canGoPrevious: _canLeft,
+                  canGoNext: _canRight,
+                  onPrevious: () => _scrollBy(-1),
+                  onNext: () => _scrollBy(1),
+                  insetRem: AppRem.sm,
                 ),
               ],
             ),
@@ -205,46 +203,6 @@ class _BrowseRowViewState<T> extends State<BrowseRowView<T>> {
         ),
         SizedBox(height: context.rem(AppRem.md)),
       ],
-    );
-  }
-}
-
-class _Arrow extends StatelessWidget {
-  final bool visible;
-  final bool alignLeft;
-  final VoidCallback onTap;
-
-  const _Arrow({
-    required this.visible,
-    required this.alignLeft,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Parked off the edge by a full arrow and a bit, in rem like the arrow.
-    final offset = context.rem(visible ? AppRem.sm : -AppRem.arrowParked);
-    return AnimatedPositioned(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOutCubic,
-      left: alignLeft ? offset : null,
-      right: alignLeft ? null : offset,
-      top: 0,
-      bottom: 0,
-      child: Center(
-        // Parked off the edge until a pointer hovers the row, but still
-        // in the tree: without this a D-pad could land on the invisible
-        // arrow, a focus stop with nothing to see and nothing worth doing.
-        child: ExcludeFocus(
-          excluding: !visible,
-          child: SliderArrow(
-            icon: alignLeft
-                ? Icons.arrow_back_ios_new_rounded
-                : Icons.arrow_forward_ios_rounded,
-            onTap: onTap,
-          ),
-        ),
-      ),
     );
   }
 }

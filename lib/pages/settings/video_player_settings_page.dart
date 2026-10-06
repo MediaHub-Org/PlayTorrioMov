@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/player/player_settings.dart';
+import '../../services/player/video_quality_preference.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/animated_ambient_background.dart';
 import '../../widgets/player/player_glass.dart';
@@ -84,42 +85,49 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 1: Video Decoders & Hardware Acceleration ──
+                // ── Section 1: Video Quality (data-usage tier) ──
+                _buildSectionHeader(l10n.videoSectionQuality),
+                SizedBox(height: context.rem(AppRem.ms)),
+                _buildVideoQualityCard(palette),
+
+                SizedBox(height: context.rem(AppRem.lg)),
+
+                // ── Section 2: Video Decoders & Hardware Acceleration ──
                 _buildSectionHeader(l10n.videoSectionDecoders),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildDecodersCard(palette),
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 2: Engine Performance & Fast Decode (AnymeX) ──
+                // ── Section 3: Engine Performance & Fast Decode (AnymeX) ──
                 _buildSectionHeader(l10n.videoSectionOptimizations),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildPerformanceOptimizationCard(palette),
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 3: Buffer Cushion & Anti-Desync Engine ──
+                // ── Section 4: Buffer Cushion & Anti-Desync Engine ──
                 _buildSectionHeader(l10n.videoSectionBuffer),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildBufferCushionCard(palette),
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 4: Network Continuity & Auto-Reconnect ──
+                // ── Section 5: Network Continuity & Auto-Reconnect ──
                 _buildSectionHeader(l10n.videoSectionNetwork),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildNetworkReconnectCard(palette),
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 5: A/V Master Clock & Sync Calibration ──
+                // ── Section 6: A/V Master Clock & Sync Calibration ──
                 _buildSectionHeader(l10n.videoSectionClock),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildAudioSyncCard(palette),
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 6: Subtitle Appearance & libass Styling ──
+                // ── Section 7: Subtitle Appearance & libass Styling ──
                 _buildSectionHeader(l10n.videoSectionSubtitles),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildSubtitleAppearanceCard(palette),
@@ -323,6 +331,153 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// The one tier a name ("Good", "720p") answers worse than a cost does: how
+  /// much of a data cap one hour of it spends. The three tiles pick the
+  /// [StreamSource.qualityRank] the Sources list's default sort reaches for
+  /// first on a title with more than one -- a bias, never a filter, so a
+  /// lower tier never hides a 4K release; it is just no longer the first one
+  /// offered. See `VideoQualityPreference`'s own doc comment for why this is
+  /// a standing preference where the per-title quality filter below it is
+  /// not.
+  Widget _buildVideoQualityCard(AppThemePalette palette) {
+    final l10n = context.l10n;
+    String gb(double v) => v.toStringAsFixed(2);
+
+    return ValueListenableBuilder<VideoQualityTier>(
+      valueListenable: VideoQualityPreference.tier,
+      builder: (context, current, _) {
+        return Container(
+          padding: EdgeInsets.all(context.rem(1)),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+            border: Border.all(color: AppColors.inkAlpha(0.08)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.videoQualityIntro,
+                style: TextStyle(
+                  fontSize: AppType.tinyPlus,
+                  color: AppColors.inkAlpha(0.5),
+                  height: 1.35, // ratio: a line height, not a size
+                ),
+              ),
+              SizedBox(height: context.rem(AppRem.ms)),
+              for (final tier in VideoQualityTier.values) ...[
+                _buildQualityTile(
+                  selected: current == tier,
+                  title: switch (tier) {
+                    VideoQualityTier.good => l10n.videoQualityGoodTitle,
+                    VideoQualityTier.better => l10n.videoQualityBetterTitle,
+                    VideoQualityTier.best => l10n.videoQualityBestTitle,
+                  },
+                  resolution: switch (tier) {
+                    VideoQualityTier.good => l10n.videoQualityGoodBody,
+                    VideoQualityTier.better => l10n.videoQualityBetterBody,
+                    VideoQualityTier.best => l10n.videoQualityBestBody,
+                  },
+                  perHour: l10n.videoQualityPerHour(gb(gbPerHourFor(tier))),
+                  palette: palette,
+                  onTap: () => VideoQualityPreference.setTier(tier),
+                ),
+                if (tier != VideoQualityTier.values.last)
+                  SizedBox(height: context.rem(AppRem.xs)),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildQualityTile({
+    required bool selected,
+    required String title,
+    required String resolution,
+    required String perHour,
+    required AppThemePalette palette,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: EdgeInsets.all(context.rem(0.75)),
+          decoration: BoxDecoration(
+            color: selected
+                ? palette.primaryColor.withValues(alpha: 0.12)
+                : AppColors.inkAlpha(0.02),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+            border: Border.all(
+              color: selected
+                  ? palette.primaryColor.withValues(alpha: 0.5)
+                  : AppColors.inkAlpha(0.06),
+              width: selected ? 1.2 : 0.8, // px: a border weight, not a layout size
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_off_rounded,
+                color: selected ? palette.primaryColor : AppColors.inkDisabled,
+                size: context.rem(AppRem.iconSm),
+              ),
+              SizedBox(width: context.rem(AppRem.sm)),
+              Expanded(
+                child: Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: context.rem(AppRem.sm),
+                  runSpacing: context.rem(AppRem.xxs),
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: AppType.small,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    Text(
+                      resolution,
+                      style: TextStyle(
+                        fontSize: AppType.tiny,
+                        color: AppColors.inkAlpha(0.45),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: context.rem(AppRem.sm)),
+              // Capped rather than flexed: it is a short, fixed-shape fact
+              // ("Uses about 1.40 GB per hour"), and at a large text scale it
+              // should wrap to a second line sooner than it should squeeze
+              // the title out of room.
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: context.rem(6.5)),
+                child: Text(
+                  perHour,
+                  textAlign: TextAlign.end,
+                  style: TextStyle(
+                    fontSize: AppType.tiny,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.inkAlpha(0.6),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

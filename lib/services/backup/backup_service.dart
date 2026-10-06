@@ -40,14 +40,9 @@ bool isPrivateOrLoopbackHost(String host) {
 /// on purpose -- the local and cloud transports both ship the same
 /// [_buildEnvelopeJson] envelope, just to a different destination.
 abstract final class BackupService {
-  /// Builds the same versioned JSON envelope both the local file and the
-  /// cloud transport write.
-  ///
-  /// Visible for tests: the destination is now a dialog the user drives,
-  /// which a unit test cannot, but the part worth covering -- that every
-  /// SharedPreferences value type survives a round trip -- lives here and
-  /// is unchanged by that.
-  @visibleForTesting
+  /// Builds the same versioned JSON envelope every transport writes --
+  /// the local file, WebDAV, and (lib/services/backup/dropbox_backup_service.dart)
+  /// Dropbox all ship this unchanged, just to a different destination.
   static Future<String> buildEnvelopeJson() => _buildEnvelopeJson();
 
   static Future<String> _buildEnvelopeJson() async {
@@ -87,7 +82,6 @@ abstract final class BackupService {
   /// Restores every key found in an envelope produced by [buildEnvelopeJson].
   /// Returns how many keys were restored. Existing keys not present in the
   /// backup are left untouched.
-  @visibleForTesting
   static Future<int> applyEnvelopeJson(String raw) => _applyEnvelopeJson(raw);
 
   static Future<int> _applyEnvelopeJson(String raw) async {

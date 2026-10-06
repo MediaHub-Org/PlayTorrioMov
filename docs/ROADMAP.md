@@ -49,6 +49,15 @@ Device checks; none of these can be settled from the code.
 
 ---
 
+## Waiting on a decision
+
+| What | Status |
+|:---|:---|
+| Trakt sync | Fully built (`_TraktSyncCard`, `TraktService`), gated on a `TRAKT_CLIENT_ID`/`TRAKT_CLIENT_SECRET` only a Trakt VIP account can register. Not a code gap -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
+| Dropbox / Google Drive / Mega backup | Today's cloud backup is WebDAV-only, on purpose (no vendor lock-in). Adding any of these three is a separate OAuth integration each, not an extension of WebDAV. Waiting on which provider(s) to build first and whether auto-backup means "on a timer while the app is open" -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
+
+---
+
 ## Reference
 
 ### Upstream sync
