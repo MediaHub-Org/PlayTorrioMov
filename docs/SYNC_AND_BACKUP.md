@@ -103,10 +103,22 @@ fix had to work around — Trakt does not solve that problem, it has it too.
   endpoint (Nextcloud, ownCloud, a self-hosted WebDAV server, or any paid
   host that speaks WebDAV) with a URL, username and password. The app PUTs
   and GETs the same JSON envelope there with plain HTTP Basic Auth.
-- **No scheduler**: both paths are manual, triggered by a button in
-  Settings → Backup. There is no periodic/auto-backup today, to any
-  destination, so that part of the ask is new regardless of which
-  providers it ends up supporting.
+- **Dropbox backup** (`dropbox_backup_service.dart`): PKCE OAuth against a
+  "public client" app (App Key only, no secret), with the code Dropbox
+  shows pasted back in -- the same shape as Trakt's device code. Uploads
+  and downloads the same envelope. Needs a `DROPBOX_APP_KEY` (free, from
+  the Dropbox App Console) this build does not carry yet.
+- **Google Drive backup** (`google_drive_backup_service.dart`): OAuth
+  against a "Desktop" client with a loopback redirect (no redirect URI to
+  pre-register, and no pasted code -- Google retired that flow), narrow
+  `drive.file` scope, same envelope under the same name. Needs a
+  `GOOGLE_DRIVE_CLIENT_ID` (free, from a Google Cloud project) this build
+  does not carry yet.
+- **Auto-backup** (`auto_backup_service.dart`): on by default once a
+  destination is connected, backing up at app open when a day/week/month
+  (your choice) has passed since the last one. There is no background-task
+  runner in this app, so "at app open" is what "automatic" means --
+  Dropbox first, then Google Drive, then WebDAV.
 
 The WebDAV choice was deliberate (see the comment in
 `cloud_backup_settings.dart`): "no vendor lock-in, no request-signing
@@ -122,8 +134,8 @@ separate integrations, each with its own cost:
 
 | Provider | Auth | Real cost of adding it |
 |---|---|---|
-| **Dropbox** | OAuth2, PKCE — no client secret needed for an installed/public app | Lowest lift of the three. Register an app in the Dropbox App Console (free), implement the PKCE flow and the plain REST upload/download calls. A weekend-sized job. |
-| **Google Drive** | OAuth2 via a Google Cloud project | A Google Cloud project and OAuth consent screen are required even for personal use. Using the narrow `drive.file`/`drive.appdata` scope (the app can only see files it created itself, not the user's whole Drive) avoids Google's "sensitive scope" verification review — **this is the scope to use, not the broad one** — but the project/consent-screen setup, and keeping it from breaking when Google re-verifies it periodically, is real ongoing maintenance, not just a one-time build. |
+| **Dropbox** | OAuth2, PKCE — no client secret needed for an installed/public app | Built (`dropbox_backup_service.dart` + the Backup settings card): PKCE flow with the code pasted back in, plain REST upload/download. Still needs a `DROPBOX_APP_KEY` — registering one is free, at dropbox.com/developers/apps. |
+| **Google Drive** | OAuth2 via a Google Cloud project | Built (`google_drive_backup_service.dart` + the Backup settings card): a "Desktop" client, loopback redirect (no URI to pre-register, any port), PKCE, and the narrow `drive.file` scope — the app sees only files it created itself, never the whole Drive. Still needs a `GOOGLE_DRIVE_CLIENT_ID` — free, from a Google Cloud project with an OAuth consent screen. Two Google-side gotchas, both setup rather than code: consent screens left in test mode expire their grants after 7 days, so publish it to Production; and until Google verifies the app, sign-in shows an "unverified app" warning the user taps through. |
 | **Mega** | Proprietary — no REST/OAuth; email+password login, client-side key derivation (RSA/AES) done the way Mega's own SDK does it | No official Dart SDK; the community packages that exist are less mature than Dropbox's or Google's official ones. The largest and least certain lift of the three, and the one most likely to need rework if Mega changes anything server-side. |
 
 None of this is a reason not to do it — it's the reason to pick one (or an
@@ -133,12 +145,14 @@ infrastructure exists today to do it while closed) or something else.
 
 ### Open, waiting on a decision
 
-See the chat where this was asked for the specific question put to the
-user: which provider to build first, whether a maintainer-registered app
-(shipped to everyone, the TMDB/Simkl "it just works" model) or a
-user-registered one (the Trakt "bring your own VIP app" model) is wanted for
-each, and what "auto" should mean given there is no background-task runner
-today.
+One provider left: Mega (proprietary login, client-side key derivation, no
+mature Dart SDK -- the largest and least certain lift, see the table
+above). Dropbox and Google Drive are built and only need their app
+credentials; "auto" is settled as "at app open" (`auto_backup_service.dart`).
+The remaining question is the credential model already put to the user:
+a maintainer-registered app shipped to everyone (the TMDB/Simkl "it just
+works" model) or a user-registered one (the Trakt "bring your own app"
+model) per provider.
 
 ---
 

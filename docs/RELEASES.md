@@ -148,6 +148,8 @@ looks for:
 |:-----------------------------------------|:---------------------------------------------------------------------------|
 | `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` | Trakt sign-in                                                              |
 | `SIMKL_CLIENT_ID`                        | Simkl sign-in (the PIN flow needs no secret)                               |
+| `DROPBOX_APP_KEY`                        | Dropbox backup (PKCE public client: key only, no secret)                   |
+| `GOOGLE_DRIVE_CLIENT_ID`                 | Google Drive backup (Desktop client, loopback flow; secret optional)       |
 | `TMDB_API_KEY`                           | Cast photos and character names, so a fresh install has them with no setup |
 
 The name says *contents*, not a path, because that is the mistake the old

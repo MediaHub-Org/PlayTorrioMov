@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'backup_service.dart';
 import 'cloud_backup_settings.dart';
 import 'dropbox_backup_service.dart';
+import 'google_drive_backup_service.dart';
 
 /// "Backup at app open, if enough time has passed" -- there is no
 /// background-task runner in this app (see docs/SYNC_AND_BACKUP.md), so an
@@ -103,11 +104,14 @@ abstract final class AutoBackupService {
       );
       if (!due) return;
 
-      // Dropbox first when both are connected: one destination, not a race
-      // between two uploads at startup. Nothing connected is not a failure
-      // -- there is simply nowhere to back up to yet.
+      // Dropbox first, Drive second, when several are connected: one
+      // destination, not a race between uploads at startup. Nothing
+      // connected is not a failure -- there is simply nowhere to back up
+      // to yet.
       if (await DropboxBackupService.isAuthenticated()) {
         await DropboxBackupService.upload();
+      } else if (await GoogleDriveBackupService.isAuthenticated()) {
+        await GoogleDriveBackupService.upload();
       } else if (CloudBackupSettings.config.value != null) {
         await BackupService.uploadToCloud(CloudBackupSettings.config.value!);
       } else {

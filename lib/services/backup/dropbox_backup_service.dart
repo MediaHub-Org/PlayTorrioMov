@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../utils/pkce.dart';
 import '../config/env_service.dart';
 import '../storage/secure_value_store.dart';
 import 'backup_service.dart';
@@ -47,19 +46,8 @@ abstract final class DropboxBackupService {
   static bool get isConfigured => EnvService.dropboxAppKey.isNotEmpty;
 
   // ── PKCE ──────────────────────────────────────────────────────────────
-
-  static String _randomVerifier() {
-    // 43-128 chars of the unreserved URL-safe alphabet, per RFC 7636. 64
-    // random bytes, base64url-encoded without padding, comfortably lands in
-    // that range (86 chars).
-    final bytes = List<int>.generate(64, (_) => Random.secure().nextInt(256));
-    return base64Url.encode(bytes).replaceAll('=', '');
-  }
-
-  static String _challengeFor(String verifier) {
-    final digest = sha256.convert(utf8.encode(verifier));
-    return base64Url.encode(digest.bytes).replaceAll('=', '');
-  }
+  // The verifier math lives in `lib/utils/pkce.dart`, shared with the
+  // Google Drive flow -- see its doc comment for why there is one copy.
 
   /// Starts a connection: generates and remembers a PKCE verifier, and
   /// returns the URL to open in a browser. The verifier is stashed in
@@ -67,14 +55,14 @@ abstract final class DropboxBackupService {
   /// code it is paired to, which the user still has to paste back in) so it
   /// survives the app losing focus while the browser is open.
   static Future<String> beginAuthorization() async {
-    final verifier = _randomVerifier();
+    final verifier = Pkce.newVerifier();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_verifierKey, verifier);
 
     final uri = Uri.parse(_authorizeUrl).replace(queryParameters: {
       'client_id': EnvService.dropboxAppKey,
       'response_type': 'code',
-      'code_challenge': _challengeFor(verifier),
+      'code_challenge': Pkce.challengeFor(verifier),
       'code_challenge_method': 'S256',
       'token_access_type': 'offline',
     });

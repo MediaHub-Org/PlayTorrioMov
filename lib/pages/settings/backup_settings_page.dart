@@ -6,6 +6,7 @@ import '../../services/backup/auto_backup_service.dart';
 import '../../services/backup/backup_service.dart';
 import '../../services/backup/cloud_backup_settings.dart';
 import '../../services/backup/dropbox_backup_service.dart';
+import '../../services/backup/google_drive_backup_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
@@ -592,6 +593,8 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
           SizedBox(height: context.rem(AppRem.ms)),
           const _DropboxBackupSection(),
           SizedBox(height: context.rem(AppRem.ms)),
+          const _GoogleDriveBackupSection(),
+          SizedBox(height: context.rem(AppRem.ms)),
           _buildCloudBackupSection(),
           SizedBox(height: context.rem(AppRem.ms)),
           _buildAutoBackupSection(),
@@ -875,6 +878,303 @@ class _DropboxBackupSectionState extends State<_DropboxBackupSection> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: _isBusy ? null : _downloadDropbox,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.ink,
+                      side: BorderSide(color: AppColors.inkAlpha(0.16)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+                      padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
+                    ),
+                    icon: Icon(Icons.cloud_download_rounded, size: context.rem(AppRem.iconSm)),
+                    label: Text(context.l10n.backupDownload),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Mirrors [_DropboxBackupSection] in shape (connect, upload, download) but
+/// owns its own connect/busy state for the same reason: Google's pairing is
+/// a browser round-trip to a loopback server rather than anything pasted or
+/// typed, which neither the WebDAV section's single busy flag nor the
+/// Dropbox section's code field has state for.
+class _GoogleDriveBackupSection extends StatefulWidget {
+  const _GoogleDriveBackupSection();
+
+  @override
+  State<_GoogleDriveBackupSection> createState() =>
+      _GoogleDriveBackupSectionState();
+}
+
+class _GoogleDriveBackupSectionState extends State<_GoogleDriveBackupSection> {
+  bool _isLoading = true;
+  bool _connected = false;
+  String? _accountName;
+  bool _isConnecting = false;
+  bool _cancelledByUser = false;
+  bool _isBusy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
+  }
+
+  Future<void> _checkStatus() async {
+    setState(() => _isLoading = true);
+    final connected = await GoogleDriveBackupService.isAuthenticated();
+    final name = connected
+        ? await GoogleDriveBackupService.getAccountName()
+        : null;
+    if (mounted) {
+      setState(() {
+        _connected = connected;
+        _accountName = name;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _startConnecting() async {
+    setState(() {
+      _isConnecting = true;
+      _cancelledByUser = false;
+    });
+    final url = await GoogleDriveBackupService.beginAuthorization();
+    try {
+      final launched = await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      );
+      if (!launched) {
+        await launchUrl(Uri.parse(url), mode: LaunchMode.platformDefault);
+      }
+    } catch (e) {
+      debugPrint('[GoogleDrive] Browser launch error: $e');
+    }
+    // The browser comes back to the loopback server on its own; this only
+    // finishes when it does, the user cancels, or five minutes pass.
+    try {
+      await GoogleDriveBackupService.waitForAndConnect();
+      await _checkStatus();
+    } catch (e) {
+      // Closing the server to cancel ends its request stream with no
+      // element -- that error IS the cancel working, not a failure, so a
+      // user who tapped Cancel must not get a failure snackbar for it.
+      if (_cancelledByUser) return;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.backupDriveConnectFailed('$e')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isConnecting = false);
+    }
+  }
+
+  Future<void> _cancelConnecting() async {
+    _cancelledByUser = true;
+    await GoogleDriveBackupService.cancelAuthorization();
+    if (mounted) setState(() => _isConnecting = false);
+  }
+
+  Future<void> _disconnect() async {
+    await GoogleDriveBackupService.logout();
+    await _checkStatus();
+  }
+
+  Future<void> _uploadDrive() async {
+    final l10n = context.l10n;
+    setState(() => _isBusy = true);
+    try {
+      await GoogleDriveBackupService.upload();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.backupDriveUploaded),
+            backgroundColor: const Color(0xFF1E8E3E),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.backupDriveUploadFailed('$e')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isBusy = false);
+    }
+  }
+
+  Future<void> _downloadDrive() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.raised,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
+        title: Text(l10n.backupCloudRestoreConfirmTitle, style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.w800)),
+        content: Text(l10n.backupCloudRestoreConfirmBody, style: TextStyle(color: AppColors.inkAlpha(0.65))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.backupCancel, style: TextStyle(color: AppColors.inkAlpha(0.45))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+            ),
+            child: Text(l10n.backupRestore, style: const TextStyle(color: AppColors.onAccent)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _isBusy = true);
+    try {
+      final restored = await GoogleDriveBackupService.download();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupRestored(restored)), backgroundColor: const Color(0xFF1E8E3E), behavior: SnackBarBehavior.floating),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.backupRestoreFailed('$e')), backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isBusy = false);
+    }
+  }
+
+  static const _driveBlue = Color(0xFF1A73E8);
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    final l10n = context.l10n;
+    if (_isLoading) return const SizedBox.shrink();
+
+    return Container(
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+        border: Border.all(
+          color: _connected ? _driveBlue.withValues(alpha: 0.3) : AppColors.inkAlpha(0.08),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: context.rem(2.625),
+                height: context.rem(2.625),
+                decoration: BoxDecoration(
+                  color: _driveBlue.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                ),
+                child: const Icon(Icons.cloud_rounded, color: _driveBlue),
+              ),
+              SizedBox(width: context.rem(0.875)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.backupDriveTitle, style: const TextStyle(fontSize: AppType.bodyLg, fontWeight: FontWeight.w800)),
+                    SizedBox(height: context.rem(AppRem.xs)),
+                    Text(
+                      !GoogleDriveBackupService.isConfigured
+                          ? l10n.backupDriveUnavailable
+                          : _connected
+                              ? l10n.backupDriveConnected(_accountName ?? '')
+                              : l10n.backupDriveDisconnected,
+                      style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.captionPlus, height: 1.35), // ratio: a line height, not a size
+                    ),
+                  ],
+                ),
+              ),
+              if (GoogleDriveBackupService.isConfigured && !_isConnecting)
+                if (_connected)
+                  TextButton(
+                    onPressed: _disconnect,
+                    child: Text(l10n.backupDisconnect, style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: AppType.small)),
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: _startConnecting,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _driveBlue,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+                      padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(0.625)),
+                    ),
+                    child: Text(l10n.backupDriveOpenGoogle, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.small)),
+                  ),
+            ],
+          ),
+          // The browser round-trip is still in flight: approving there lands
+          // back here on its own, and Cancel closes the loopback server so
+          // nothing keeps listening after the user walked away.
+          if (_isConnecting) ...[
+            SizedBox(height: context.rem(AppRem.md)),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.backupDriveWaiting,
+                    style: TextStyle(color: AppColors.inkAlpha(0.6), fontSize: AppType.small),
+                  ),
+                ),
+                SizedBox(width: context.rem(0.625)),
+                TextButton(
+                  onPressed: _cancelConnecting,
+                  child: Text(l10n.backupCancel, style: TextStyle(color: AppColors.inkAlpha(0.6))),
+                ),
+              ],
+            ),
+          ],
+          if (_connected) ...[
+            SizedBox(height: context.rem(AppRem.md)),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isBusy ? null : _uploadDrive,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.ink,
+                      side: BorderSide(color: AppColors.inkAlpha(0.16)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+                      padding: EdgeInsets.symmetric(vertical: context.rem(AppRem.ms)),
+                    ),
+                    icon: Icon(Icons.cloud_upload_rounded, size: context.rem(AppRem.iconSm)),
+                    label: Text(context.l10n.backupUpload),
+                  ),
+                ),
+                SizedBox(width: context.rem(0.625)),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _isBusy ? null : _downloadDrive,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.ink,
                       side: BorderSide(color: AppColors.inkAlpha(0.16)),

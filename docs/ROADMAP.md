@@ -54,7 +54,7 @@ Device checks; none of these can be settled from the code.
 | What | Status |
 |:---|:---|
 | Trakt sync | Fully built (`_TraktSyncCard`, `TraktService`), gated on a `TRAKT_CLIENT_ID`/`TRAKT_CLIENT_SECRET` only a Trakt VIP account can register. Not a code gap -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
-| Dropbox / Google Drive / Mega backup | Today's cloud backup is WebDAV-only, on purpose (no vendor lock-in). Adding any of these three is a separate OAuth integration each, not an extension of WebDAV. Waiting on which provider(s) to build first and whether auto-backup means "on a timer while the app is open" -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
+| Dropbox / Google Drive / Mega backup | Dropbox and Google Drive are built (settings cards, auto-backup prefers them over WebDAV), gated on a `DROPBOX_APP_KEY` / `GOOGLE_DRIVE_CLIENT_ID` this build does not carry yet. Mega is still open (proprietary login, no mature Dart SDK). "Auto" is settled as "at app open". Still waiting on the credential model per provider: maintainer-registered (TMDB/Simkl style) or user-registered (Trakt style) -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
 
 ---
 

@@ -42,7 +42,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   is connected, backing up at app open if it has been a day/week/month
   (your choice) since the last one -- there is no background-task runner in
   this app, so "at app open" is what "automatic" can mean without one.
-  Prefers Dropbox over WebDAV when both are connected.
+  Prefers Dropbox, then Google Drive, then WebDAV when several are
+  connected.
+- **Google Drive backup, in Settings -> Backup**, alongside Dropbox and
+  WebDAV: Connect opens Google in the browser and the approval lands back
+  in the app on its own (no code to paste -- Google retired that flow), then
+  Upload/Download of the same backup file every destination writes, under
+  the same name. Uses the narrow `drive.file` scope, so the app only ever
+  sees files it created itself. Needs a `GOOGLE_DRIVE_CLIENT_ID` this build
+  does not carry yet -- see docs/SYNC_AND_BACKUP.md. Auto-backup prefers
+  Dropbox first, then Drive, then WebDAV. Untested against a live Google
+  project -- say if the consent screen complains.
 
 ### Changed
 
