@@ -54,7 +54,7 @@ abstract final class AppInfo {
   static const String fallbackVersion = '1.9.4';
 
   /// Build-number counterpart to [fallbackVersion].
-  static const String fallbackBuildNumber = '51';
+  static const String fallbackBuildNumber = '52';
 
   /// Renders a version for display: `1.1.3` on a stable build, `1.1.3 (dev)`
   /// on a channel build. Every user-visible version string goes through here
