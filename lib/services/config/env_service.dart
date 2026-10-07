@@ -16,17 +16,25 @@ class EnvService {
     if (_initialized) return;
     _initialized = true;
 
-    // 1. Try reading from root filesystem .env (Desktop / Local dev)
-    try {
-      final file = File('.env');
-      if (await file.exists()) {
-        final lines = await file.readAsLines();
-        _parseLines(lines);
-        return;
+    // 1. Try reading a filesystem .env (Desktop / Local dev). Two candidate
+    // directories, not one: `flutter run` sets the working directory to the
+    // project root, where a developer's own `.env` lives, but a *built*
+    // Release exe launched by double-clicking it in Explorer starts with the
+    // exe's own folder as its working directory instead -- a `.env` sitting
+    // next to the built exe is the only one a double-click will ever find.
+    for (final dir in [Directory.current.path, _executableDir]) {
+      if (dir == null) continue;
+      try {
+        final file = File('$dir/.env');
+        if (await file.exists()) {
+          final lines = await file.readAsLines();
+          _parseLines(lines);
+          return;
+        }
+      } catch (_) {
+        // No .env on disk is the normal case for a release build -- the
+        // bundled asset below is where it usually lives.
       }
-    } catch (_) {
-      // No .env on disk is the normal case for a release build -- the bundled
-      // asset below is where it usually lives.
     }
 
     // 2. Try reading from rootBundle asset if bundled
@@ -46,6 +54,18 @@ class EnvService {
     } catch (_) {
       // No dotenv anywhere. The app runs on whatever the platform environment
       // provides, and Settings asks for a key if it needs one.
+    }
+  }
+
+  /// The built executable's own directory, or null if it can't be read
+  /// (web, or a sandboxed platform where this throws) -- never fatal, just
+  /// one fewer place to look.
+  static String? get _executableDir {
+    try {
+      final exe = File(Platform.resolvedExecutable);
+      return exe.parent.path;
+    } catch (_) {
+      return null;
     }
   }
 
