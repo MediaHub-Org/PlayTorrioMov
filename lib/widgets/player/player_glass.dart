@@ -171,25 +171,26 @@ class PlayerMenuAnchor extends StatelessWidget {
 
   const PlayerMenuAnchor({super.key, required this.child, this.onClose});
 
-  /// Clearance for the transport bar the popover sits above, plus whatever
-  /// the system puts below it (gesture bar, home indicator).
+  /// Clearance for the transport bar's actual controls, plus whatever the
+  /// system puts below it (gesture bar, home indicator).
   ///
   /// Measured against the bar itself rather than guessed: the menu sits just
   /// above the playback line, so the seek bar stays visible and scrubbable
   /// while a menu is open. The figure mirrors the transport bar's own build
-  /// (its top padding, the 2.25 rem seek row, the gap, the buttons row and
-  /// the bottom padding) plus air you can see -- a tight gap read as the
-  /// card touching the bar and the seek row's end time with it -- in rem so
-  /// it grows with the text size exactly as the bar does.
+  /// from the seek row down -- the 2.25 rem seek row, the gap, the buttons
+  /// row and the bottom padding -- plus a sliver of air so the card does not
+  /// touch the seek row's end time. It deliberately leaves out the bar's own
+  /// top padding: that space is the gradient fade's starting point, empty of
+  /// any control, so a popover sitting over it reads as closer to the
+  /// buttons instead of floating with a gap above them.
   static double bottomInset(BuildContext context) {
     final isCompact = MediaQuery.sizeOf(context).width < 680;
     final bar =
-        (isCompact ? AppRem.xl : 3.0) +
         2.25 +
         (isCompact ? AppRem.xs : AppRem.sm) +
         (isCompact ? 2.25 : 2.625) +
         (isCompact ? 0.875 : AppRem.lg);
-    return context.rem(bar + 0.75) + MediaQuery.paddingOf(context).bottom;
+    return context.rem(bar + 0.25) + MediaQuery.paddingOf(context).bottom;
   }
 
   /// Clearance for the title bar above. Being bounded at the top is the

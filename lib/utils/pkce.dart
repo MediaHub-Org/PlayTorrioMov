@@ -3,11 +3,12 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 
-/// PKCE (RFC 7636) for the installed-app OAuth flows -- Dropbox and Google
-/// Drive both prove themselves with a code verifier instead of a client
-/// secret, which no copy of this app could keep safe baked into it anyway.
-/// One copy on purpose: two services had these two functions each, and the
-/// second copy is where a future fix would not land.
+/// PKCE (RFC 7636) for the installed-app OAuth flow -- Dropbox proves itself
+/// with a code verifier instead of a client secret, which no copy of this
+/// app could keep safe baked into it anyway. Kept as its own file rather
+/// than inlined into the one service using it, so a second provider needing
+/// the same two functions later has somewhere to share them from instead of
+/// a second copy.
 abstract final class Pkce {
   Pkce._();
 

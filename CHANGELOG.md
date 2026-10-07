@@ -16,6 +16,28 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   middle of the picture for something every platform could already do.
   Untested against a real touchscreen or a TV remote -- say if the
   remaining ways to seek do not cover a case these did.
+- **Play/pause also lives in the bottom bar now**, right before the volume
+  control, so reaching for the bar to adjust something else doesn't also
+  require waiting for the centered overlay to reappear just to pause.
+- **Holding J/L or an arrow key seeks faster the longer it's held** (10s →
+  30s → 1min → 2min), the same ramp the seek bar's own Left/Right already
+  had -- this is the keyboard's way to reach what the removed ±30s buttons
+  used to give with a single tap.
+- **Popup menus (speed, audio, subtitles, stats, sleep, aspect) sit closer
+  to the transport bar.** The clearance above the bar was counting its
+  cosmetic top gradient as space to avoid, when nothing interactive lives
+  there -- tightened twice this round after the first pass still left a
+  visible gap.
+- Replaced Google Drive backup with Dropbox as the one configured cloud
+  destination (see Removed) -- the app's own Dropbox app key is now set, so
+  Connect actually works instead of showing "not set up yet."
+
+### Removed
+
+- **Google Drive backup.** Built alongside Dropbox, then dropped in favor
+  of carrying one cloud provider instead of two -- see
+  `docs/SYNC_AND_BACKUP.md`'s "Google Drive: built, then removed" for the
+  reasoning. Auto-backup now tries Dropbox, then WebDAV.
 
 ### Added
 
@@ -25,6 +47,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   duration-based seek. J/K/L and the arrow keys already matched YouTube's
   own shortcuts before this; now listed together in Settings → Keyboard
   Shortcuts.
+
+### Fixed (unverified)
+
+- **Attempted another pass at the white flash when toggling fullscreen on
+  Windows.** Bumped the hidden "let the engine catch up before showing"
+  delay from 50ms to 150ms, on the theory that a decoding video needs more
+  slack than an idle window to paint its first frame at the new size. Not
+  confirmed fixed -- say if it's still visible.
 
 ## [1.9.5+53] - 2026-10-08
 

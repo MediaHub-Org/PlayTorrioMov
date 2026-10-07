@@ -40,21 +40,20 @@ abstract final class DropboxBackupService {
 
   /// Fixed: one backup file, overwritten in place, in the app's own folder
   /// (Dropbox scopes a PKCE app to its own `/Apps/<app name>` folder unless
-  /// it asks for full-Drive access, which this never does).
+  /// it asks for full Dropbox access, which this never does).
   static const _backupPath = '/playtorrio-backup.json';
 
-  /// Exposed so a test can confirm this agrees with
-  /// `GoogleDriveBackupService.backupName` on one shared file identity --
-  /// both write the exact same [BackupService] envelope under it, so either
-  /// one can restore a backup the other made.
+  /// Exposed so a test can pin the file name: a local export, a WebDAV
+  /// upload and this all write the same [BackupService] envelope under it,
+  /// and a rename here would silently orphan every backup made before it.
   @visibleForTesting
   static const backupPath = _backupPath;
 
   static bool get isConfigured => EnvService.dropboxAppKey.isNotEmpty;
 
   // ── PKCE ──────────────────────────────────────────────────────────────
-  // The verifier math lives in `lib/utils/pkce.dart`, shared with the
-  // Google Drive flow -- see its doc comment for why there is one copy.
+  // The verifier math lives in `lib/utils/pkce.dart`, its own file rather
+  // than inlined here -- see its doc comment for why.
 
   /// Starts a connection: generates and remembers a PKCE verifier, and
   /// returns the URL to open in a browser. The verifier is stashed in

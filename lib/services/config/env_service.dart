@@ -114,24 +114,6 @@ class EnvService {
     return get('DROPBOX_APP_KEY');
   }
 
-  // Google Drive OAuth client ID (checks compile-time dart-define first,
-  // then runtime .env). A "Desktop" client proves itself with PKCE, the
-  // same as Dropbox above -- and loopback redirect URIs need no
-  // pre-registration, so any free Google Cloud project yields one. The
-  // secret stays optional and is only sent when set: an installed app has
-  // nowhere safe to keep one.
-  static String get googleDriveClientId {
-    const compileVal = String.fromEnvironment('GOOGLE_DRIVE_CLIENT_ID');
-    if (compileVal.isNotEmpty) return compileVal;
-    return get('GOOGLE_DRIVE_CLIENT_ID');
-  }
-
-  static String get googleDriveClientSecret {
-    const compileVal = String.fromEnvironment('GOOGLE_DRIVE_CLIENT_SECRET');
-    if (compileVal.isNotEmpty) return compileVal;
-    return get('GOOGLE_DRIVE_CLIENT_SECRET');
-  }
-
   // TMDB API key (checks compile-time dart-define first, then runtime .env).
   //
   // A release build carries this via the ENV_FILE repository secret, the

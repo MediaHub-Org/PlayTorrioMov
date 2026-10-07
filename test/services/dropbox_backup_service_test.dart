@@ -62,4 +62,11 @@ void main() {
       expect(await DropboxBackupService.isAuthenticated(), isFalse);
     });
   });
+
+  test('backup file name stays stable', () {
+    // A local export, a WebDAV upload and this all write the same envelope
+    // under the same name -- a person browsing Dropbox's web UI should
+    // recognize it as the same backup they'd find anywhere else.
+    expect(DropboxBackupService.backupPath, '/playtorrio-backup.json');
+  });
 }

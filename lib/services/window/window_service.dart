@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show Colors;
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -39,6 +40,13 @@ class WindowService with WindowListener {
       final isFs = await windowManager.isFullScreen();
       isFullscreenNotifier.value = isFs;
       await windowManager.setMinimumSize(minimumWindowSize);
+      // The native window's own backbuffer is white until Flutter paints
+      // its first frame at a new size -- invisible on a normal resize, but
+      // the fullscreen toggle's hide/show (see _enterFullscreen) exists
+      // exactly because a resize paints every intermediate frame, so a
+      // white one still flashes through during the gap. Black matches the
+      // player's own Scaffold, so whatever shows through reads as nothing.
+      await windowManager.setBackgroundColor(Colors.black);
       // Defers the actual close until we call destroy() below, instead of
       // the OS killing the process mid-teardown while LocalStreamProxy's
       // server (and other background services) are still live.
@@ -144,12 +152,13 @@ class WindowService with WindowListener {
 
   /// Lets a couple of frames pass while the window is still hidden, so
   /// `show()` reveals content already painted at the new size instead of
-  /// whatever was there before the resize. Three frames at a reasonable
-  /// refresh rate is a guess, not a measurement against a vsync signal --
-  /// cheap insurance that costs the toggle a few milliseconds nobody will
-  /// perceive as lag, against a flash that was very perceptible.
+  /// whatever was there before the resize. A guess, not a measurement
+  /// against a vsync signal -- bumped from 50ms because a still-visible
+  /// flash reported against real video playback suggests the engine, busy
+  /// decoding, needs more than one refresh's worth of slack to paint the
+  /// first frame at the new size.
   Future<void> _settleBeforeShowing() =>
-      Future.delayed(const Duration(milliseconds: 50));
+      Future.delayed(const Duration(milliseconds: 150));
 
   /// Alias for toggleFullscreen
   Future<void> toggleFullScreen() => toggleFullscreen();

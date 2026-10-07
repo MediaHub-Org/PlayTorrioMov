@@ -10,11 +10,11 @@ import 'player_seek_bar.dart';
 import 'player_volume_control.dart';
 import '../../services/app_units.dart';
 
-/// Bottom transport bar: timeline scrubber, volume, and one button per
-/// control -- stats, speed, audio, subtitles, sleep timer, aspect ratio.
-/// Play/pause and seek live in the centered overlay instead (see
-/// PlayerCenterControls), and episode switching lives in PlayerTopBar's own
-/// "Episodes" badge -- neither is duplicated here.
+/// Bottom transport bar: timeline scrubber, play/pause, volume, and one
+/// button per control -- stats, speed, audio, subtitles, sleep timer, aspect
+/// ratio. Play/pause is also centered in its own overlay (see
+/// PlayerCenterControls) for a remote's D-pad to land on; episode switching
+/// lives in PlayerTopBar's own "Episodes" badge rather than here.
 ///
 /// Six buttons share the row on a narrow phone, and the volume button takes
 /// the other end only on desktop: phones own hardware buttons and TV
@@ -31,11 +31,13 @@ class PlayerTransport extends StatelessWidget {
   final bool isMuted;
   final double playbackRate;
   final bool isSubtitlesActive;
+  final bool isPlaying;
 
   // Actions
   final ValueChanged<Duration> onSeek;
   final ValueChanged<double> onVolumeChanged;
   final VoidCallback onToggleMute;
+  final VoidCallback onPlayPause;
 
   /// Opens the full subtitle panel -- track list, appearance, sync. Its
   /// first pill is Off, so turning subtitles off is still two taps rather
@@ -72,9 +74,11 @@ class PlayerTransport extends StatelessWidget {
     required this.isMuted,
     required this.playbackRate,
     required this.isSubtitlesActive,
+    required this.isPlaying,
     required this.onSeek,
     required this.onVolumeChanged,
     required this.onToggleMute,
+    required this.onPlayPause,
     required this.onOpenSubtitleMenu,
     required this.onOpenSpeedMenu,
     required this.onOpenAudioMenu,
@@ -162,36 +166,58 @@ class PlayerTransport extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Volume, desktop only (see showVolume above): the full
-                // slider on wide screens, a mute button on compact ones.
-                // The placeholder keeps the menus pinned to the row's end
-                // where there is no volume to balance them.
-                if (!showVolume)
-                  const SizedBox.shrink()
-                else if (!isCompact)
-                  PlayerVolumeControl(
-                    volume: volume,
-                    isMuted: isMuted,
-                    onVolumeChanged: onVolumeChanged,
-                    onToggleMute: onToggleMute,
-                  )
-                else
-                  PlayerIconButton(
-                    focusNode: volumeFocusNode,
-                    size: btnSize,
-                    iconSize: btnIconSize,
-                    icon: Icon(
-                      isMuted || volume == 0
-                          ? Icons.volume_off_rounded
-                          : (volume > 1.0
-                                ? Icons.volume_up_rounded
-                                : Icons.volume_down_rounded),
+                // Play/pause, then volume (desktop only -- see showVolume
+                // above): the full slider on wide screens, a mute button on
+                // compact ones. Play/pause used to live only in the centered
+                // overlay; it earns a second, permanent spot here because
+                // that overlay fades out with the rest of the controls, and
+                // a mouse user reaching for the bar to adjust something else
+                // shouldn't have to wait for it to reappear just to pause.
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PlayerIconButton(
+                      size: btnSize,
+                      iconSize: btnIconSize,
+                      icon: Icon(
+                        isPlaying
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded,
+                      ),
+                      tooltip: isPlaying
+                          ? context.l10n.playerPause
+                          : context.l10n.playerPlay,
+                      onPressed: onPlayPause,
                     ),
-                    tooltip: isMuted
-                        ? context.l10n.playerUnmute
-                        : context.l10n.playerMute,
-                    onPressed: onToggleMute,
-                  ),
+                    if (showVolume) ...[
+                      SizedBox(width: gap),
+                      if (!isCompact)
+                        PlayerVolumeControl(
+                          volume: volume,
+                          isMuted: isMuted,
+                          onVolumeChanged: onVolumeChanged,
+                          onToggleMute: onToggleMute,
+                        )
+                      else
+                        PlayerIconButton(
+                          focusNode: volumeFocusNode,
+                          size: btnSize,
+                          iconSize: btnIconSize,
+                          icon: Icon(
+                            isMuted || volume == 0
+                                ? Icons.volume_off_rounded
+                                : (volume > 1.0
+                                      ? Icons.volume_up_rounded
+                                      : Icons.volume_down_rounded),
+                          ),
+                          tooltip: isMuted
+                              ? context.l10n.playerUnmute
+                              : context.l10n.playerMute,
+                          onPressed: onToggleMute,
+                        ),
+                    ],
+                  ],
+                ),
 
                 // Right group: stats, speed, audio, subtitles, sleep timer,
                 // aspect -- one button each, in that order. Each of these is

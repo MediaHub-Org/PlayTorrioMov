@@ -143,11 +143,11 @@ void main() {
       );
 
       final card = tester.getRect(find.byType(SleepTimerMenu));
-      // Just above the playback line: the inset clears the whole transport
-      // bar (its top padding, the seek row, the gap, the buttons and the
-      // bottom padding) plus air you can see, not just the buttons row, so
+      // Just above the playback line: the inset clears the seek row, the
+      // gap, the buttons and the bottom padding (not the bar's own top
+      // padding -- see bottomInset's doc comment) plus a sliver of air, so
       // the timeline stays visible and scrubbable while a menu is open.
-      expect(card.bottom, lessThanOrEqualTo(720 - 166));
+      expect(card.bottom, lessThanOrEqualTo(720 - 110));
       expect(card.bottom, greaterThan(720 - 320));
     });
 

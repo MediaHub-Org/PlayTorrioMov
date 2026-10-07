@@ -2100,6 +2100,17 @@ class _PlayerScreenState extends State<PlayerScreen>
     _startHideControlsTimer();
   }
 
+  /// Mirrors [PlayerSeekBar._stepFor]'s own ramp: the same four steps, so
+  /// holding J/L or an arrow key reaches the ±30s (and beyond) the removed
+  /// center buttons used to give with a single tap, instead of needing a
+  /// dedicated shortcut for it.
+  Duration _seekRepeatStep(int repeats) {
+    if (repeats < 4) return const Duration(seconds: 10);
+    if (repeats < 12) return const Duration(seconds: 30);
+    if (repeats < 24) return const Duration(minutes: 1);
+    return const Duration(minutes: 2);
+  }
+
   void _seekRelative(Duration offset) {
     final cur = _player.state.position;
     final dur = _player.state.duration;
@@ -2163,6 +2174,11 @@ class _PlayerScreenState extends State<PlayerScreen>
   SeekFlash? _seekFlash;
   int _seekFlashSeq = 0;
   Timer? _seekFlashTimer;
+
+  /// How many times J/L or an arrow has auto-repeated while held, reset by
+  /// the next fresh press (see the ramp this drives in [_seekRelative]'s
+  /// caller below, mirroring [PlayerSeekBar._stepFor]).
+  int _seekKeyRepeats = 0;
 
   /// Shows the step that was just taken, on the side it moved the video.
   /// Every fixed-step seek routes through [_seekRelative], so the double-tap
@@ -2487,6 +2503,26 @@ class _PlayerScreenState extends State<PlayerScreen>
               }
             }
 
+            // A held J/L or arrow key seeks faster the longer it stays down,
+            // same ramp as the seek bar's own Left/Right (see
+            // _seekRepeatStep). Handled separately from the KeyDownEvent
+            // switch below so every other shortcut (space, M, the frame
+            // step keys, ...) still only fires once per press.
+            if (event is KeyRepeatEvent) {
+              final isTv = TvModeService.isTv.value;
+              final isBack = event.logicalKey == LogicalKeyboardKey.keyJ ||
+                  (!isTv && event.logicalKey == LogicalKeyboardKey.arrowLeft);
+              final isForward = event.logicalKey == LogicalKeyboardKey.keyL ||
+                  (!isTv && event.logicalKey == LogicalKeyboardKey.arrowRight);
+              if (isBack || isForward) {
+                _seekKeyRepeats++;
+                final step = _seekRepeatStep(_seekKeyRepeats);
+                _seekRelative(isBack ? -step : step);
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            }
+
             if (event is KeyDownEvent) {
               // On a real TV the 4 arrows are the only way to move focus
               // between controls (play/pause, seek, the volume slider, the
@@ -2565,11 +2601,13 @@ class _PlayerScreenState extends State<PlayerScreen>
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyJ ||
                   (!isTv && event.logicalKey == LogicalKeyboardKey.arrowLeft)) {
+                _seekKeyRepeats = 0;
                 _seekRelative(const Duration(seconds: -10));
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyL ||
                   (!isTv &&
                       event.logicalKey == LogicalKeyboardKey.arrowRight)) {
+                _seekKeyRepeats = 0;
                 _seekRelative(const Duration(seconds: 10));
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.comma) {
@@ -3092,9 +3130,11 @@ class _PlayerScreenState extends State<PlayerScreen>
                     playbackRate: _playbackRate,
                     isSubtitlesActive:
                         _isSubtitleEnabled && _currentSubtitleVariant != null,
+                    isPlaying: _isPlaying,
                     onSeek: (pos) => _player.seek(pos),
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
+                    onPlayPause: _togglePlayPause,
                     onOpenSubtitleMenu: () => _toggleMenu('subtitle'),
                     onOpenSpeedMenu: () => _toggleMenu('speed'),
                     onOpenAudioMenu: () => _toggleMenu('audio'),
