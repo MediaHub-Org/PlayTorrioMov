@@ -1,4 +1,6 @@
-# Sanity-checks docs/INFO.excalidraw after gen_info_diagram.ps1 writes it.
+# Sanity-checks a generated .excalidraw diagram (default: docs/INFO.excalidraw,
+# after gen_info_diagram.ps1 writes it; pass -Path for another one, e.g. after
+# gen_backup_sync_diagram.ps1).
 #
 # The diagram is generated, so a mistake in the layout is a mistake in the
 # script -- but the script cannot see the result. This reads the file back
@@ -7,9 +9,10 @@
 # whose endpoints land inside a box they were not aimed at, and text wider
 # than the box it is bound to. All four are silent in the editor; they just
 # look wrong, or the file does not open at all.
+param([string]$Path = 'docs/INFO.excalidraw')
 $ErrorActionPreference = 'Stop'
 
-$doc = Get-Content 'docs/INFO.excalidraw' -Raw | ConvertFrom-Json
+$doc = Get-Content $Path -Raw | ConvertFrom-Json
 $boxes = @($doc.elements | Where-Object { $_.type -eq 'rectangle' })
 $arrows = @($doc.elements | Where-Object { $_.type -eq 'arrow' })
 $texts = @($doc.elements | Where-Object { $_.type -eq 'text' })
@@ -122,5 +125,15 @@ foreach ($text in $texts) {
   }
 }
 
-if ($problems -eq 0) { 'OK: no overlaps, no arrow ends inside a box, no text overflow' }
+# A wrong Set-Content encoding silently replaces every em dash and middle
+# dot with U+FFFD -- this is exactly how that was found the first time, by
+# reading the file back rather than trusting what the script thought it wrote.
+foreach ($text in $texts) {
+  if ($text.text -and $text.text.Contains([char]0xFFFD)) {
+    "ENCODING CORRUPTED  $($text.id): $($text.text)"
+    $problems++
+  }
+}
+
+if ($problems -eq 0) { 'OK: no overlaps, no arrow ends inside a box, no text overflow, no encoding corruption' }
 else { "$problems problem(s)" }
