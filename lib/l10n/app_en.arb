@@ -878,6 +878,8 @@
   "shortcutsPlayPause": "Play / Pause",
   "shortcutsSeekBack": "Seek -10s",
   "shortcutsSeekForward": "Seek +10s",
+  "shortcutsFrameStep": "Step one frame back / forward (pauses)",
+  "@shortcutsFrameStep": {"description": "Shortcut row for , and . -- frame-accurate step, pauses playback like YouTube's own shortcut"},
   "shortcutsVolume": "Volume",
   "shortcutsMute": "Mute",
   "shortcutsSubtitles": "Subtitles",

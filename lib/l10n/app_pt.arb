@@ -707,6 +707,7 @@
   "shortcutsPlayPause": "Reproduzir / Pausar",
   "shortcutsSeekBack": "Retroceder 10 s",
   "shortcutsSeekForward": "Avançar 10 s",
+  "shortcutsFrameStep": "Avança ou retrocede um quadro (pausa)",
   "shortcutsVolume": "Volume",
   "shortcutsMute": "Silenciar",
   "shortcutsSubtitles": "Legendas",

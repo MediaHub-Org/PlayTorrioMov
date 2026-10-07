@@ -2112,6 +2112,22 @@ class _PlayerScreenState extends State<PlayerScreen>
     _startHideControlsTimer();
   }
 
+  /// Steps exactly one video frame, YouTube's `,`/`.`. Routed straight to
+  /// libmpv's own `frame-step`/`frame-back-step` commands -- there is no
+  /// Dart-level wrapper for either, and no sane way to reimplement
+  /// frame-accurate stepping on top of a duration-based seek. mpv pauses
+  /// first on its own if playback was running, which is the only way a
+  /// single frame's difference is visible at all.
+  Future<void> _stepFrame({required bool forward}) async {
+    try {
+      final dynamic platform = _player.platform;
+      await platform?.command([forward ? 'frame-step' : 'frame-back-step']);
+      _startHideControlsTimer();
+    } catch (e) {
+      debugPrint('[PlayerScreen] could not step a frame: $e');
+    }
+  }
+
   /// Which menu, if any, the open one was stepped into from. Every menu
   /// opens straight from the transport bar, so there is never anything
   /// behind one: a stale parent here would show a back arrow leading to a
@@ -2555,6 +2571,16 @@ class _PlayerScreenState extends State<PlayerScreen>
                   (!isTv &&
                       event.logicalKey == LogicalKeyboardKey.arrowRight)) {
                 _seekRelative(const Duration(seconds: 10));
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.comma) {
+                // YouTube's own keys for this, kept as-is rather than
+                // translated: a frame is not "back" or "forward" the way an
+                // arrow is, and most players a keyboard user already knows
+                // (YouTube, VLC) use these exact two.
+                _stepFrame(forward: false);
+                return KeyEventResult.handled;
+              } else if (event.logicalKey == LogicalKeyboardKey.period) {
+                _stepFrame(forward: true);
                 return KeyEventResult.handled;
               } else if (event.logicalKey == LogicalKeyboardKey.keyF ||
                   event.logicalKey == LogicalKeyboardKey.f11) {

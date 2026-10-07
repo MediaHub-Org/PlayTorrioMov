@@ -29,10 +29,10 @@ void main() {
     testWidgets('renders every shortcut row', (tester) async {
       await pumpPage(tester);
 
-      // Twelve rows, one per entry in the page's list. The count is asserted
-      // rather than the individual labels because the labels are the thing
-      // under test below.
-      expect(find.byType(Row), findsNWidgets(12));
+      // One row per entry in the page's list. The count is asserted rather
+      // than the individual labels because the labels are the thing under
+      // test below.
+      expect(find.byType(Row), findsNWidgets(13));
     });
 
     testWidgets('translates the action column but not the key column', (tester) async {

@@ -17,6 +17,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Untested against a real touchscreen or a TV remote -- say if the
   remaining ways to seek do not cover a case these did.
 
+### Added
+
+- **`,` and `.` step one video frame back/forward**, YouTube's own keys for
+  it. Routed straight to libmpv's `frame-step`/`frame-back-step` -- there is
+  no sane way to reimplement frame-accurate stepping on top of a
+  duration-based seek. J/K/L and the arrow keys already matched YouTube's
+  own shortcuts before this; now listed together in Settings → Keyboard
+  Shortcuts.
+
 ## [1.9.5+53] - 2026-10-08
 
 Subtitle panel buttons that react to a tap, Simkl as the one sync service (Trakt's paid-VIP gate made it impractical to keep offering), and confirmed Dropbox/Google Drive backups restore each other.

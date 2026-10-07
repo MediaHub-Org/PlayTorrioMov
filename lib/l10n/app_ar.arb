@@ -707,6 +707,7 @@
   "shortcutsPlayPause": "تشغيل / إيقاف مؤقت",
   "shortcutsSeekBack": "رجوع ١٠ ثوانٍ",
   "shortcutsSeekForward": "تقدّم ١٠ ثوانٍ",
+  "shortcutsFrameStep": "تقدم/تراجع إطار واحد (يوقف التشغيل)",
   "shortcutsVolume": "مستوى الصوت",
   "shortcutsMute": "كتم الصوت",
   "shortcutsSubtitles": "الترجمات",
