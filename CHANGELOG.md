@@ -3,6 +3,18 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Trakt takes pasted API credentials, like Simkl and TMDB already do.**
+  Every published build ships an empty `.env`, and a Trakt user cannot
+  always register their way out of that the way a Simkl user can -- new
+  Trakt apps need VIP. So the Sync card's dead-end note is now a working
+  door: anyone holding a working Client ID + Secret (their own app from
+  before the VIP gate, or the maintainer's) pastes both into the card and
+  connects, no rebuild and no `.env` edit. The build's own keys remain the
+  fallback when present.
+
 ## [1.9.4+51] - 2026-10-07
 
 ### Added

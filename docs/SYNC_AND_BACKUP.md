@@ -73,15 +73,17 @@ fix had to work around — Trakt does not solve that problem, it has it too.
 - **Trakt**: equally fully wired (`_TraktSyncCard`, `TraktService`,
   `TraktCalendarService`, `TraktContinueWatchingService` — the device-code
   OAuth pairing flow, sync-now, logout, calendar and continue-watching
-  enrichment are all implemented and already called from the UI). The
-  **only** thing missing is a working `TRAKT_CLIENT_ID`/`TRAKT_CLIENT_SECRET`
-  in `.env`. Until one exists, `sync_settings_page.dart` shows
-  `unavailableNote` explaining the VIP requirement instead of a dead button.
+  enrichment are all implemented and already called from the UI). Credentials
+  resolve like Simkl's and TMDB's: a user-pasted Client ID + Secret in
+  Settings → Sync (`TraktSettings`) wins, the build's
+  `TRAKT_CLIENT_ID`/`TRAKT_CLIENT_SECRET` is the fallback, so anyone
+  holding working credentials — their own pre-VIP-gate app, or the
+  maintainer's — connects with no rebuild.
   **To turn it on**: whoever holds (or buys) a Trakt VIP subscription
   registers an application at trakt.tv/oauth/applications (redirect URI can
   be anything for the device-code flow this app uses) and hands over the
-  Client ID and Client Secret to go in `.env`. There is no code left to
-  write for this — it is a credentials problem, not a feature gap.
+  Client ID and Client Secret to go in `.env` — or pastes them straight
+  into the app. There is no code left to write for this — it is a credentials problem, not a feature gap.
 - Both cards can be connected at once; the app does not force a choice
   between them. Running both means scrobbling to two services for every
   watch, which is harmless but redundant if you only read history from one.

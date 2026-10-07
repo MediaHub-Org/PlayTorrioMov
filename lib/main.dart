@@ -34,6 +34,7 @@ import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
 import 'services/simkl/simkl_settings.dart';
 import './services/tmdb/tmdb_settings.dart';
+import './services/trakt/trakt_settings.dart';
 import './services/stream/torrent_stream_service.dart';
 import './services/config/env_service.dart';
 import './services/tv_mode_service.dart';
@@ -106,6 +107,7 @@ void main() async {
     ContinueWatchingService.initialize(),
     CustomChannelsService.initialize(),
     FavoriteChannelsService.initialize(),
+    TraktSettings.initialize(),
     IptvController.instance.init(),
     IptvSettings.initialize(),
     HomeRowsSettings.initialize(),

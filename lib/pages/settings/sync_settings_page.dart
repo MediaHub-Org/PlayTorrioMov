@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/l10n.dart';
-import '../../services/trakt/trakt_constants.dart';
 import '../../services/trakt/trakt_service.dart';
+import '../../services/trakt/trakt_settings.dart';
 import '../../services/simkl/simkl_service.dart';
 import '../../services/simkl/simkl_settings.dart';
 import '../../services/my_list/my_list_service.dart';
@@ -549,6 +549,9 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
     if (!mounted) return;
     if (res == null) {
       setState(() => _pairing = false);
+      // The card's own status line carries the reason; the snackbar would
+      // otherwise repeat a generic failure over the top of it.
+      TraktSettings.note(context.l10n.syncTraktFailedCode);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(context.l10n.syncTraktFailedCode)));
@@ -591,8 +594,173 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
     await _checkStatus();
   }
 
+  Future<void> _showCredentialsDialog() async {
+    final l10n = context.l10n;
+    final idController = TextEditingController(
+      text: TraktSettings.clientId.value ?? '',
+    );
+    final secretController = TextEditingController(
+      text: TraktSettings.clientSecret.value ?? '',
+    );
+
+    Future<void> pasteInto(TextEditingController controller) async {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final pasted = data?.text?.trim();
+      if (pasted == null || pasted.isEmpty) return;
+      controller.text = pasted;
+    }
+
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          // Empty is allowed, but only both at once: it clears saved
+          // credentials. Anything else has to look like a credential on
+          // both sides, so a half-pasted pair is caught here and not as a
+          // 401 later.
+          final id = idController.text.trim();
+          final secret = secretController.text.trim();
+          final bothEmpty = id.isEmpty && secret.isEmpty;
+          final bothValid =
+              TraktSettings.looksLikeCredential(id) &&
+              TraktSettings.looksLikeCredential(secret);
+          final isValid = bothEmpty || bothValid;
+          InputDecoration field({
+            required String hint,
+            required TextEditingController controller,
+          }) => InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
+            errorText: isValid ? null : l10n.syncTraktCredentialsInvalid,
+            errorMaxLines: 3,
+            filled: true,
+            fillColor: AppColors.bar,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              borderSide: BorderSide.none,
+            ),
+            suffixIcon: IconButton(
+              tooltip: l10n.syncSimklPaste,
+              icon: Icon(Icons.content_paste_rounded, size: context.rem(AppRem.iconSm)),
+              onPressed: () async {
+                await pasteInto(controller);
+                setDialogState(() {});
+              },
+            ),
+          );
+          return AlertDialog(
+            backgroundColor: AppColors.raised,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+            ),
+            title: Text(
+              l10n.syncTraktCredentialsTitle,
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: AppColors.ink,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.syncTraktCredentialsBody,
+                  style: TextStyle(
+                    color: AppColors.inkAlpha(0.7),
+                    fontSize: AppType.small,
+                    height: 1.4, // ratio: a line height, not a size
+                  ),
+                ),
+                SizedBox(height: context.rem(AppRem.snug)),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: () => _openBrowser(
+                      'https://trakt.tv/oauth/applications',
+                      'Trakt',
+                    ),
+                    icon: Icon(Icons.open_in_new_rounded, size: context.rem(AppRem.iconXs)),
+                    label: Text(l10n.syncTraktOpenAppsPage),
+                  ),
+                ),
+                SizedBox(height: context.rem(AppRem.snug)),
+                TextField(
+                  controller: idController,
+                  autofocus: true,
+                  onChanged: (_) => setDialogState(() {}),
+                  style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+                  decoration: field(
+                    hint: l10n.syncClientIdHint,
+                    controller: idController,
+                  ),
+                ),
+                SizedBox(height: context.rem(AppRem.xs)),
+                TextField(
+                  controller: secretController,
+                  onChanged: (_) => setDialogState(() {}),
+                  style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+                  decoration: field(
+                    hint: l10n.syncTraktClientSecretHint,
+                    controller: secretController,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(
+                  l10n.syncCancel,
+                  style: TextStyle(color: AppColors.inkAlpha(0.6)),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: isValid ? () => Navigator.pop(ctx, true) : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFED1C24),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                  ),
+                ),
+                child: Text(
+                  l10n.syncSave,
+                  style: const TextStyle(
+                    color: AppColors.onAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    if (saved != true || !mounted) return;
+    final id = idController.text.trim();
+    final secret = secretController.text.trim();
+    await TraktSettings.setClientId(id.isEmpty ? null : id);
+    await TraktSettings.setClientSecret(secret.isEmpty ? null : secret);
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    return ValueListenableBuilder<String?>(
+      valueListenable: TraktSettings.clientId,
+      builder: (context, _, __) => ValueListenableBuilder<String?>(
+        valueListenable: TraktSettings.clientSecret,
+        builder: (context, _, __) => ValueListenableBuilder<String?>(
+          valueListenable: TraktSettings.lastStatus,
+          builder: (context, status, __) => _buildCard(status),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCard(String? status) {
     final l10n = context.l10n;
     return _SyncCardChrome(
       icon: Icons.movie_filter_rounded,
@@ -605,15 +773,21 @@ class _TraktSyncCardState extends State<_TraktSyncCard> {
       userCode: _userCode,
       pairingHint: l10n.syncTraktPairingHint,
       verifyUrlLabel: l10n.syncTraktOpenVerify,
-      // Trakt now gates creating a new API app behind a Trakt VIP
-      // subscription for whoever registers it (this app's maintainer, not
-      // each connecting user) -- confirmed via Trakt's own forums, this
-      // isn't a bug on our end. Until that's set up, kTraktClientId stays
-      // empty and Connect would just fail with no explanation, so this
-      // shows why instead of a dead-end button.
-      unavailableNote: kTraktClientId.isEmpty
+      // Every published build ships an empty .env, and unlike Simkl a Trakt
+      // user cannot always register their way out: new API apps need VIP.
+      // An app from before that gate still works, and anyone holding
+      // working credentials can paste them in below -- no rebuild needed.
+      unavailableNote: TraktSettings.needsUserCredentials
           ? l10n.syncTraktUnavailable
           : null,
+      unavailableActionLabel: TraktSettings.clientId.value == null
+          ? l10n.syncTraktAddCredentials
+          : l10n.syncTraktChangeCredentials,
+      onUnavailableAction: _showCredentialsDialog,
+      unavailableSecondaryLabel: l10n.syncTraktOpenAppsPage,
+      onUnavailableSecondary: () =>
+          _openBrowser('https://trakt.tv/oauth/applications', 'Trakt'),
+      statusNote: status,
       onConnect: _startPairing,
       onDisconnect: _logout,
       onCopyCode: () {
