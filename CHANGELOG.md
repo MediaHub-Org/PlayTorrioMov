@@ -3,6 +3,18 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+- **Source cards show the bitrate.** Parsed from the release title where
+  stated, probed off the HLS master manifest for direct streams (cached
+  per URL, four at a time, playlists only -- never a GET just to learn a
+  file is an mp4), or estimated from size and runtime as a last resort.
+  Ported from upstream's Oct 2/5 batch onto this fork's rewritten cards,
+  with the manifest decoded as UTF-8 and concurrent probes for one URL
+  deduplicated. Twins that state nothing still take numbers rather than
+  reading the same word twice.
+
 ## [1.9.6+54] - 2026-10-08
 
 ### Fixed

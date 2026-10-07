@@ -836,7 +836,7 @@
   "syncComplete": "Sincronização com {provider} concluída!",
   "syncTraktPairingHint": "Digite este código de ativação em trakt.tv/activate:",
   "syncTraktOpenVerify": "Abrir trakt.tv/activate",
-  "syncTraktUnavailable": "Entrar no Trakt exige o Client ID e o Client Secret do seu próprio app de API, e esta versão não inclui nenhum. Registrar um app novo exige VIP do Trakt, mas um app anterior continua funcionando: cole as credenciais abaixo.",
+  "syncTraktUnavailable": "Entrar no Trakt exige o Client ID e o Client Secret do seu próprio app de API, e esta versão não inclui nenhum. Registrar um app novo exige VIP do Trakt, mas um app anterior continua funcionando: cole as credenciais abaixo. Contas grátis também têm só um app conectado: com o Stremio ainda conectado, um segundo app exige VIP (ou revogue o Stremio primeiro).",
   "syncTraktAddCredentials": "Adicionar credenciais de API",
   "syncTraktChangeCredentials": "Alterar credenciais de API",
   "syncTraktOpenAppsPage": "Abrir apps de API do Trakt",

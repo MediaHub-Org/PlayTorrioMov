@@ -1076,7 +1076,7 @@
   },
   "syncTraktPairingHint": "Enter this activation code at trakt.tv/activate:",
   "syncTraktOpenVerify": "Open trakt.tv/activate",
-  "syncTraktUnavailable": "Trakt sign-in needs your own API app's Client ID and Secret — this build ships neither. Registering a new app needs Trakt VIP, but an app from before that still works: paste its credentials below.",
+  "syncTraktUnavailable": "Trakt sign-in needs your own API app's Client ID and Secret — this build ships neither. Registering a new app needs Trakt VIP, but an app from before that still works: paste its credentials below. Free accounts also get one connected app: with Stremio still connected, a second app needs VIP (or revoke Stremio first).",
   "syncTraktAddCredentials": "Add API credentials",
   "syncTraktChangeCredentials": "Change API credentials",
   "syncTraktOpenAppsPage": "Open Trakt API apps",

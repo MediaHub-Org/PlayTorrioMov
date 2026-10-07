@@ -88,6 +88,41 @@ fix had to work around — Trakt does not solve that problem, it has it too.
   reopening, for whoever ends up with a working Trakt app (VIP-registered,
   or one that predates the gate).
 
+### Moving a Trakt library to Simkl
+
+Three routes, cheapest working one first. The goal most people actually
+have — watchlist, history, ratings, collection living in Simkl so the
+app's own sync (calendar, Continue Watching, My List) picks them up —
+does not need the Custom Lists API at all; that API is read-only beta
+(see below), and a custom list is curation, not library.
+
+- **Simkl's Trakt ZIP importer** (`simkl.com/apps/import/trakt/`): upload
+  the `.zip` from Trakt → Settings → Data → Export. No Trakt connection,
+  so the one-community-app limit is untouched. Verified present, not
+  verified free: the importer has asked for Simkl VIP before, so if it
+  gates, fall through to the next route rather than paying blind.
+- **The free API route**: `POST /sync/history`, `/sync/add-to-list`
+  (watchlist statuses), `/sync/ratings` and `/sync/collection` all work
+  with any free client ID — only the importer UI and Custom Lists are
+  paywalled. It needs a V2 OAuth2 app (free, same developer page; V1 PIN
+  apps get told to use the device flow) and one device approval at
+  `simkl.com/pin`: `POST /oauth2/device` with
+  `client_id` + `scope=media:read media:write` returns a `user_code`,
+  then `POST /oauth2/token` with the device-code grant polls until the
+  approval lands. History goes per-episode with `watched_at`
+  (`{shows: [{ids, seasons: [{number, episodes:
+  [{number, watched_at}]}]}]}`), the watchlist as `plantowatch`, and
+  everything upserts — re-running is safe. Proven in Oct 2026 against a
+  real export: 59 shows / 7317 episodes + 306 movies of history, 115
+  watchlist items, ratings and collection, with 1 unknown show and 2
+  movies unmatched. Use the access token once and discard it; it reads
+  and writes the whole account.
+- **By hand**: the watchlist's shows, one search each, into the custom
+  `tv` list on simkl.com. Only this reaches a *custom* list — its writes
+  are web-only by Simkl's own design (a POST returns 200 and changes
+  nothing), so no script can do it. Twenty-nine shows is fifteen minutes;
+  the history behind them cannot follow this way.
+
 ---
 
 ## Backup: today, and the vendor question

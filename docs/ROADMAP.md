@@ -60,6 +60,7 @@ Device checks; none of these can be settled from the code.
 | What                                 | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |:-------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Mega backup | Dropbox is built and configured (`DROPBOX_APP_KEY` set; settings card, auto-backup prefers it over WebDAV). Google Drive was built then removed in favor of Dropbox alone -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md)'s "Google Drive: built, then removed". Mega is still open (proprietary login, no mature Dart SDK). "Auto" is settled as "at app open". **Local dev only**: `DROPBOX_APP_KEY` lives in the gitignored root `.env`; public release builds still need it added to the `ENV_FILE`/`DOTENV` repo secret (append, don't overwrite -- it also carries TMDB/Trakt/Simkl) before a tagged build has working Dropbox |
+| Simkl custom-list writes | The Custom Lists API is read-only beta (reads need AUTH V2 + PRO/VIP; adding/removing items is web-only, and a POST returns 200 while changing nothing). Nothing to build against until Simkl ships writes -- the watchlist/history/ratings/collection sync the app actually uses is unaffected. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md)'s "Moving a Trakt library to Simkl" |
 
 ---
 
@@ -68,8 +69,11 @@ Device checks; none of these can be settled from the code.
 ### Upstream sync
 
 PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod` (archived), the
-direct downstream of `ayman708-UX/PlayTorrioV3`. **Reviewed through `39b736f`;
-nothing outstanding** (re-fetched 2026-09-20). Not taken, so not re-reviewed:
+direct downstream of `ayman708-UX/PlayTorrioV3`. **Reviewed through `61098a5`
+(2026-10-08)** -- took the Oct 2/5 bitrate batch (upstream PR #50: title
+parsing on `StreamSource`, the HLS `StreamBitrateResolver`, bitrate badges
+on both source cards, ported onto this fork's rewritten player with UTF-8
+and in-flight fixes of its own). Not taken, so not re-reviewed:
 `39b736f`'s CloudStream extension system (a plugin ecosystem, a feature not a
 fix) and its Kotlin-side coroutine fix; `9616808`, a blurred hero backdrop for
 a problem we do not have; and `29a4127`, `1da1940`, `d2f8074`, in the area this

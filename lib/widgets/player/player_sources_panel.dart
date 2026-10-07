@@ -7,6 +7,7 @@ import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/stream/stream_service.dart';
+import '../../services/stream/stream_bitrate_resolver.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/anime/anime_scraper_service.dart';
 import '../common/source_badges.dart';
@@ -61,6 +62,13 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
   int? _hoveredIndex;
   int? _focusedIndex;
 
+  /// Manifest-resolved bitrates for direct streams (url -> kbps), read
+  /// from HLS masters the same way the watch screen's own cards do.
+  final Map<String, int> _resolvedBitrates = {};
+  final List<StreamSource> _bitrateProbeQueue = [];
+  int _activeBitrateProbes = 0;
+  static const int _maxConcurrentBitrateProbes = 4;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +76,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     if (widget.cachedSources != null && widget.cachedSources!.isNotEmpty) {
       _sources.addAll(widget.cachedSources!);
       _isLoading = false;
+      _queueBitrateProbes(widget.cachedSources!);
     } else {
       _startScraping();
     }
@@ -125,6 +134,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                 (s.name == source.name && s.title == source.title));
             if (!exists) {
               _sources.add(source);
+              _queueBitrateProbes([source]);
             }
           });
         },
@@ -160,6 +170,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
               (s.name == source.name && s.title == source.title));
           if (!exists) {
             _sources.add(source);
+            _queueBitrateProbes([source]);
           }
         });
       },
@@ -179,6 +190,39 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
   void dispose() {
     _streamSub?.cancel();
     super.dispose();
+  }
+
+  /// Reads the top variant's BANDWIDTH off HLS master manifests, four at a
+  /// time. Same rule as the watch screen's own cards
+  /// ([StreamBitrateResolver.shouldProbe]): titles that state a bitrate and
+  /// anything that is not a playlist-looking URL never reach the network.
+  void _queueBitrateProbes(List<StreamSource> sources) {
+    for (final s in sources) {
+      if (!StreamBitrateResolver.shouldProbe(s)) continue;
+      final url = s.url;
+      if (url == null ||
+          url.isEmpty ||
+          _resolvedBitrates.containsKey(url)) {
+        continue;
+      }
+      _bitrateProbeQueue.add(s);
+    }
+    _drainBitrateProbeQueue();
+  }
+
+  void _drainBitrateProbeQueue() {
+    while (_activeBitrateProbes < _maxConcurrentBitrateProbes &&
+        _bitrateProbeQueue.isNotEmpty) {
+      final source = _bitrateProbeQueue.removeAt(0);
+      _activeBitrateProbes++;
+      StreamBitrateResolver.resolveKbps(source).then((kbps) {
+        _activeBitrateProbes--;
+        if (kbps != null && mounted) {
+          setState(() => _resolvedBitrates[source.url!] = kbps);
+        }
+        _drainBitrateProbeQueue();
+      });
+    }
   }
 
   @override
@@ -523,6 +567,12 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
     // has to agree with the P2P/HTTP badge next to it.
     final isTorrent = source.isMagnet;
     final resolution = _extractResolution(title);
+    // Stated in the title, or probed from the HLS manifest in the
+    // background when the source arrived (see [_queueBitrateProbes]).
+    // Torrents show nothing here: this panel has no runtime to estimate
+    // from, and a title-stated bitrate already surfaced above.
+    final bitrateKbps =
+        source.bitrateKbps ?? _resolvedBitrates[source.url];
 
     return Focus(
       onFocusChange: (focused) =>
@@ -626,6 +676,29 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                           // so a source's delivery and seed health read the
                           // same wherever it is listed.
                           ...sourceDeliveryBadges(source),
+
+                          // The probed or stated bitrate, in the panel's own
+                          // pill shape rather than a shared badge: it is a
+                          // measurement, not a category, and it sits beside
+                          // the resolution it qualifies.
+                          if (bitrateKbps != null)
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
+                              decoration: BoxDecoration(
+                                color: PlayerTheme.accent.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
+                                border: Border.all(color: PlayerTheme.accent.withValues(alpha: 0.35)),
+                              ),
+                              child: Text(
+                                StreamSource.formatBitrate(bitrateKbps),
+                                style: TextStyle(
+                                  color: const Color(0xFF9D84FF),
+                                  fontSize: TvType.scale(AppType.nanoPlus),
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ),
 
                           // The site behind the source, resolved through the
                           // registered roster -- never a bare file id or a

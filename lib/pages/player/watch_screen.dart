@@ -25,6 +25,7 @@ import '../../services/tv_mode_service.dart';
 import '../../services/player/video_quality_preference.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
+import '../../services/stream/stream_bitrate_resolver.dart';
 import '../../utils/download/download_launcher.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../widgets/common/horizontal_slider_scroll.dart';
@@ -1729,6 +1730,29 @@ class _SourceCard extends StatefulWidget {
 class _SourceCardState extends State<_SourceCard> {
   bool _hovered = false;
 
+  /// Manifest-resolved bitrate for direct streams that state none in
+  /// their title. Probed once per card; the resolver caches per URL, so a
+  /// list showing the same host twenty times fetches one manifest.
+  int? _resolvedBitrateKbps;
+
+  @override
+  void initState() {
+    super.initState();
+    _probeBitrate();
+  }
+
+  /// Reads the top variant's BANDWIDTH off the HLS master manifest.
+  /// Torrents and debrid links never reach this; their estimate comes from
+  /// size and runtime below.
+  void _probeBitrate() {
+    if (!StreamBitrateResolver.shouldProbe(widget.source)) return;
+    StreamBitrateResolver.resolveKbps(widget.source).then((kbps) {
+      if (kbps != null && mounted) {
+        setState(() => _resolvedBitrateKbps = kbps);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = widget.source;
@@ -1780,6 +1804,20 @@ class _SourceCardState extends State<_SourceCard> {
       );
     }
     if (s.fileSize != null) badges.add(_badge(s.fileSize!, _C.textTertiary));
+
+    // Bitrate: stated in the title, probed from the HLS manifest for
+    // direct streams, or estimated from size and runtime as a last resort.
+    // A number here answers "which 1080p" the way seeders do for
+    // torrents -- two otherwise identical sources sorted by weight.
+    final runtimeMinutes = int.tryParse(widget.detail.runtime ?? '');
+    final bitrateKbps = s.bitrateKbps ??
+        _resolvedBitrateKbps ??
+        s.estimatedBitrateKbps(runtimeMinutes);
+    if (bitrateKbps != null) {
+      badges.add(
+        _badge(StreamSource.formatBitrate(bitrateKbps), _C.textTertiary),
+      );
+    }
 
     // Audio Language / Dub badge
     final audioBadge = s.getAudioBadge(mediaTitle: widget.detail.name);

@@ -836,7 +836,7 @@
   "syncComplete": "اكتملت المزامنة مع {provider}!",
   "syncTraktPairingHint": "أدخل رمز التنشيط هذا على trakt.tv/activate:",
   "syncTraktOpenVerify": "فتح trakt.tv/activate",
-  "syncTraktUnavailable": "يتطلب تسجيل الدخول إلى Trakt معرّف العميل (Client ID) وسر العميل (Client Secret) الخاصين بتطبيق API خاص بك، ولا يتضمن هذا الإصدار أيًا منهما. تسجيل تطبيق جديد يتطلب Trakt VIP، لكن التطبيق المسجل سابقًا ما زال يعمل: الصق بياناته أدناه.",
+  "syncTraktUnavailable": "يتطلب تسجيل الدخول إلى Trakt معرّف العميل (Client ID) وسر العميل (Client Secret) الخاصين بتطبيق API خاص بك، ولا يتضمن هذا الإصدار أيًا منهما. تسجيل تطبيق جديد يتطلب Trakt VIP، لكن التطبيق المسجل سابقًا ما زال يعمل: الصق بياناته أدناه. الحسابات المجانية أيضًا محدودة بتطبيق واحد متصل: مع بقاء Stremio متصلاً، يتطلب التطبيق الثاني VIP (أو احذف Stremio أولاً).",
   "syncTraktAddCredentials": "إضافة بيانات API",
   "syncTraktChangeCredentials": "تغيير بيانات API",
   "syncTraktOpenAppsPage": "فتح تطبيقات Trakt API",

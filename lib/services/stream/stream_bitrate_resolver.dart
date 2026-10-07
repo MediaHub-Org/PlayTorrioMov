@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 import '../../models/stream/stream_model.dart';
@@ -15,6 +17,26 @@ class StreamBitrateResolver {
 
   static final Map<String, int?> _cache = {};
 
+  /// One owner per in-flight URL: a scrape burst hands every card the same
+  /// handful of hosts, and without this each card fetched the same manifest
+  /// on its own. The cache below only helps the *next* call, not the ten
+  /// already running.
+  static final Map<String, Future<int?>> _inflight = {};
+
+  /// Whether [source] is worth an HLS probe: an http(s) playlist-looking
+  /// URL with no bitrate stated in its title. One rule for every card, so
+  /// they do not drift -- and notably *not* every http URL: the resolver
+  /// re-checks the content-type itself, but a GET just to learn a file is
+  /// an mp4 wastes the viewer's data, and fires real network calls from
+  /// widget tests that pump cards with example URLs.
+  static bool shouldProbe(StreamSource source) {
+    if (source.bitrateKbps != null) return false;
+    final url = source.url;
+    if (url == null || !url.toLowerCase().startsWith('http')) return false;
+    final path = Uri.tryParse(url)?.path.toLowerCase() ?? '';
+    return path.endsWith('.m3u8');
+  }
+
   /// Returns the peak variant bitrate in kbps for [source], or null when the
   /// stream is not an HLS master playlist or can't be reached.
   static Future<int?> resolveKbps(StreamSource source) async {
@@ -23,13 +45,21 @@ class StreamBitrateResolver {
       return null;
     }
     if (_cache.containsKey(rawUrl)) return _cache[rawUrl];
+    final running = _inflight[rawUrl];
+    if (running != null) return running;
 
-    final kbps = await _fetchManifestKbps(rawUrl, source.headers);
-    _cache[rawUrl] = kbps;
-    if (_cache.length > _maxCacheEntries) {
-      _cache.remove(_cache.keys.first);
+    final future = _fetchManifestKbps(rawUrl, source.headers);
+    _inflight[rawUrl] = future;
+    try {
+      final kbps = await future;
+      _cache[rawUrl] = kbps;
+      if (_cache.length > _maxCacheEntries) {
+        _cache.remove(_cache.keys.first);
+      }
+      return kbps;
+    } finally {
+      _inflight.remove(rawUrl);
     }
-    return kbps;
   }
 
   static Future<int?> _fetchManifestKbps(
@@ -81,7 +111,11 @@ class StreamBitrateResolver {
       }
       if (buf.isEmpty) return null;
 
-      return parseManifestKbps(String.fromCharCodes(buf));
+      // allowMalformed: a manifest is ASCII by spec, but a mislabeled or
+      // half-read body must not throw away the BANDWIDTH lines that did
+      // arrive intact -- fromCharCodes would mojibake every byte past the
+      // first non-UTF8 one instead.
+      return parseManifestKbps(utf8.decode(buf, allowMalformed: true));
     } catch (_) {
       return null;
     } finally {

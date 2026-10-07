@@ -205,8 +205,17 @@ void main() {
         expect(langs.contains('spanish_castilian'), isFalse);
         expect(source.hasAudioLanguage('spanish_latino'), isTrue);
         expect(source.hasAudioLanguage('spanish'), isTrue);
-        expect(source.hasAudioLanguage('spanish_castilian'), isFalse);
-        expect(source.getAudioBadge(), '🇲🇽 LAT');
+        // Not a false positive on the language: the set above really has
+        // no Castilian. But "Dual Audio" also tags the source `multi`, and
+        // a multi source matches every concrete filter key on purpose --
+        // the file carries dubs it does not name, so the filter cannot
+        // prove Castilian is absent. See hasAudioLanguage's own comment.
+        // (Upstream asserts isFalse here; their fork has no multi rule.)
+        expect(source.hasAudioLanguage('spanish_castilian'), isTrue);
+        // And the badge follows this fork's MULTI-takes-priority rule, not
+        // the Latino one: the file carries dubs it does not name.
+        // (Upstream asserts LAT here, for the same reason as above.)
+        expect(source.getAudioBadge(), '🌐 MULTI');
       });
 
       test('detects Latin American Spanish from [LAT] tag', () {
