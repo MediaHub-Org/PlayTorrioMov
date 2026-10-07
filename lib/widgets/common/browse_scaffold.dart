@@ -549,7 +549,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
               AppSpacing.pageInset(context),
               context.rem(AppRem.sm),
               AppSpacing.pageInset(context),
-              context.rem(AppRem.ms),
+              context.rem(AppRem.md),
             ),
             child: Container(
               width: context.rem(_kTitleBoneWidth),

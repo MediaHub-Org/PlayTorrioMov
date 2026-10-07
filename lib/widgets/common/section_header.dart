@@ -27,12 +27,13 @@ class SectionHeader extends StatelessWidget {
       // Bottom matches the loading skeleton's own title placeholder
       // (BrowseScaffold._buildLoading) so the real header doesn't shift the
       // row down once content replaces the skeleton. Used to be 0, leaving
-      // the title flush against the card row with no breathing room.
+      // the title flush against the card row with no breathing room; ms
+      // (0.75rem) still read as tight once the row itself was in place.
       padding: EdgeInsets.fromLTRB(
         AppSpacing.pageInset(context),
         context.rem(AppRem.sm),
         AppSpacing.pageInset(context),
-        context.rem(AppRem.ms),
+        context.rem(AppRem.md),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

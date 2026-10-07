@@ -17,6 +17,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **More air between a section's title and its card row** (Popular, and
+  every other movies/series/anime row app-wide -- one shared header). The
+  loading skeleton's placeholder is kept in step so content doesn't jump
+  down when it replaces the shimmer.
 - **The centered ±30s seek buttons are gone; only play/pause stays over the
   middle of the video.** Every platform already has a better way to do the
   same jump: double-tap zones and keyboard seek on touch/desktop, and the
