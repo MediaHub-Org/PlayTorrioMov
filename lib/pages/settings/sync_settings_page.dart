@@ -17,11 +17,22 @@ import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
 
-/// Every third-party account or key the app talks to, in one place: Trakt,
-/// Simkl and TMDB. Trakt/Simkl used to be the whole page (two nearly
-/// identical cards -- status, connect/disconnect, one sync action); TMDB
-/// joined from the old "General & Data" catch-all, which had nothing left in
-/// it once it moved out.
+/// Shows the Trakt card at all. Off by a product decision, not a technical
+/// one: Trakt now gates registering a *new* API app behind a paid VIP
+/// subscription (see `TraktSettings`'s own doc comment, and
+/// docs/SYNC_AND_BACKUP.md), which makes it impractical to offer as the
+/// default sync option -- Simkl needs nothing but a free client ID. The
+/// card, `TraktService`, `TraktSettings` and the pasted-credentials path are
+/// all left in place rather than deleted: flipping this back to `true` is
+/// the whole reopening, for whoever ends up with a working Trakt app
+/// (VIP-registered, or one that predates the gate) and wants it back.
+const bool _traktSyncEnabled = false;
+
+/// Every third-party account or key the app talks to, in one place: Trakt
+/// (disabled, see [_traktSyncEnabled]), Simkl and TMDB. Trakt/Simkl used to
+/// be the whole page (two nearly identical cards -- status,
+/// connect/disconnect, one sync action); TMDB joined from the old "General
+/// & Data" catch-all, which had nothing left in it once it moved out.
 class SyncSettingsPage extends StatelessWidget {
   const SyncSettingsPage({super.key});
 
@@ -45,8 +56,10 @@ class SyncSettingsPage extends StatelessWidget {
       ),
       body: SettingsScrollView(
         children: [
-          const _TraktSyncCard(),
-          SizedBox(height: context.rem(AppRem.md)),
+          if (_traktSyncEnabled) ...[
+            const _TraktSyncCard(),
+            SizedBox(height: context.rem(AppRem.md)),
+          ],
           const _SimklSyncCard(),
           SizedBox(height: context.rem(AppRem.md)),
           const _TmdbConnectCard(),

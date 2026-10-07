@@ -39,6 +39,25 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **A track whose only title was "Forced" or "SDH" was named "Forced"** with
   a Forced chip beside it. It now reads "Track N · SRT" with the chip.
 
+### Changed
+
+- **Simkl is the one sync service the app offers; the Trakt card in
+  Settings → Sync is switched off.** Registering a *new* Trakt API app now
+  needs a paid VIP subscription, which makes it impractical to offer next to
+  Simkl's free one. Decided, not removed: `TraktService`, `TraktSettings`
+  and the pasted-credentials path are unchanged, and turning the card back
+  on is one constant (`_traktSyncEnabled` in `sync_settings_page.dart`) for
+  whoever ends up with a working Trakt app.
+
+### Fixed
+
+- **Confirmed Dropbox and Google Drive restore each other's backup.** Both
+  already went through the same `BackupService` envelope and the same file
+  name by construction; a new test
+  (`backup_cross_provider_compatibility_test.dart`) now pins both the shared
+  name and that Drive's multipart upload never alters the envelope's bytes,
+  so a drift here fails a test instead of a restore.
+
 ## [1.9.4+52] - 2026-10-07
 
 ### Added

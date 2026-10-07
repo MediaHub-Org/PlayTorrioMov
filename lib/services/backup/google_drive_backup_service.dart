@@ -49,6 +49,12 @@ abstract final class GoogleDriveBackupService {
   /// Fixed: one backup file, found by name and overwritten in place.
   static const _backupName = 'playtorrio-backup.json';
 
+  /// Exposed so a test can confirm this agrees with
+  /// `DropboxBackupService.backupPath` on one shared file identity -- see
+  /// that constant's own doc comment.
+  @visibleForTesting
+  static const backupName = _backupName;
+
   static bool get isConfigured => EnvService.googleDriveClientId.isNotEmpty;
 
   // The attempt currently holding the loopback server open, if any. Kept in

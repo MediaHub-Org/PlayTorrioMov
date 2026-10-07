@@ -43,6 +43,13 @@ abstract final class DropboxBackupService {
   /// it asks for full-Drive access, which this never does).
   static const _backupPath = '/playtorrio-backup.json';
 
+  /// Exposed so a test can confirm this agrees with
+  /// `GoogleDriveBackupService.backupName` on one shared file identity --
+  /// both write the exact same [BackupService] envelope under it, so either
+  /// one can restore a backup the other made.
+  @visibleForTesting
+  static const backupPath = _backupPath;
+
   static bool get isConfigured => EnvService.dropboxAppKey.isNotEmpty;
 
   // ── PKCE ──────────────────────────────────────────────────────────────

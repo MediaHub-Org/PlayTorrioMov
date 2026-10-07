@@ -64,29 +64,22 @@ fix had to work around — Trakt does not solve that problem, it has it too.
 
 ### Current state of each
 
-- **Simkl**: fully wired (`lib/pages/settings/sync_settings_page.dart`'s
-  `_SimklSyncCard`, backed by `lib/services/simkl/simkl_service.dart`). Works
-  out of the box once a client ID is set (`SIMKL_CLIENT_ID` in `.env`) —
-  registering one is free and takes about a minute at
-  simkl.com/settings/developer. The in-app "unavailable" message already
-  walks a user through this.
-- **Trakt**: equally fully wired (`_TraktSyncCard`, `TraktService`,
-  `TraktCalendarService`, `TraktContinueWatchingService` — the device-code
-  OAuth pairing flow, sync-now, logout, calendar and continue-watching
-  enrichment are all implemented and already called from the UI). Credentials
-  resolve like Simkl's and TMDB's: a user-pasted Client ID + Secret in
-  Settings → Sync (`TraktSettings`) wins, the build's
-  `TRAKT_CLIENT_ID`/`TRAKT_CLIENT_SECRET` is the fallback, so anyone
-  holding working credentials — their own pre-VIP-gate app, or the
-  maintainer's — connects with no rebuild.
-  **To turn it on**: whoever holds (or buys) a Trakt VIP subscription
-  registers an application at trakt.tv/oauth/applications (redirect URI can
-  be anything for the device-code flow this app uses) and hands over the
-  Client ID and Client Secret to go in `.env` — or pastes them straight
-  into the app. There is no code left to write for this — it is a credentials problem, not a feature gap.
-- Both cards can be connected at once; the app does not force a choice
-  between them. Running both means scrobbling to two services for every
-  watch, which is harmless but redundant if you only read history from one.
+- **Simkl**: the one the app offers. Fully wired
+  (`lib/pages/settings/sync_settings_page.dart`'s `_SimklSyncCard`, backed by
+  `lib/services/simkl/simkl_service.dart`), and works out of the box once a
+  client ID is set (`SIMKL_CLIENT_ID` in `.env`) — registering one is free
+  and takes about a minute at simkl.com/settings/developer. The in-app
+  "unavailable" message already walks a user through this.
+- **Trakt**: built the same way (`_TraktSyncCard`, `TraktService`,
+  `TraktCalendarService`, `TraktContinueWatchingService`, and a
+  pasted-credentials path identical to Simkl's/TMDB's — see `TraktSettings`),
+  but **its Settings card is switched off** (`_traktSyncEnabled = false` in
+  `sync_settings_page.dart`) rather than removed. Decided, not left open:
+  registering a *new* Trakt API app now needs a paid VIP subscription, which
+  makes it impractical to offer next to Simkl's free one. Nothing underneath
+  was deleted — flipping that one constant back to `true` is the entire
+  reopening, for whoever ends up with a working Trakt app (VIP-registered,
+  or one that predates the gate).
 
 ---
 
@@ -121,6 +114,15 @@ fix had to work around — Trakt does not solve that problem, it has it too.
   (your choice) has passed since the last one. There is no background-task
   runner in this app, so "at app open" is what "automatic" means --
   Dropbox first, then Google Drive, then WebDAV.
+- **One format, not three**: local export, WebDAV, Dropbox and Google Drive
+  all go through the same `BackupService.buildEnvelopeJson`/
+  `applyEnvelopeJson`, under the same file name (Dropbox's
+  `/playtorrio-backup.json` and Drive's `playtorrio-backup.json` are the
+  same name, just a path-rooted one and a bare one). A backup made on
+  Dropbox restores from Google Drive and vice versa --
+  `test/services/backup_cross_provider_compatibility_test.dart` pins both
+  the shared name and that Drive's multipart wrapping never touches the
+  envelope's bytes on the way through.
 
 The WebDAV choice was deliberate (see the comment in
 `cloud_backup_settings.dart`): "no vendor lock-in, no request-signing

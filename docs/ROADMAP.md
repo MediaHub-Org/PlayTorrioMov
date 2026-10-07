@@ -51,6 +51,7 @@ Device checks; none of these can be settled from the code.
 | Single-select audio filter                               | "English or Spanish" needs multi-select; the checkmark delay was a stale-rows bug, since fixed                                                                                                                                                                                                                                                        |
 | Alphabetical online subtitle order                       | The list leads with the language being heard on purpose                                                                                                                                                                                                                                                                                               |
 | Translating catalog descriptions, AniList genres/formats | Addon and AniList data, sent back to their APIs to filter; would need a display-name map per language. See CONVENTIONS                                                                                                                                                                                                                                |
+| Trakt sync (card in Settings → Sync)                      | Decided off, not deleted (`_traktSyncEnabled = false` in `sync_settings_page.dart`): registering a *new* Trakt API app now needs paid VIP, which makes it impractical next to Simkl's free one. Simkl is the one the app offers. `TraktService`/`TraktSettings` and the pasted-credentials path stay in place -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
 
 ---
 
@@ -58,8 +59,7 @@ Device checks; none of these can be settled from the code.
 
 | What | Status |
 |:---|:---|
-| Trakt sync | Fully built (`_TraktSyncCard`, `TraktService`), and anyone holding working credentials connects today: user-pasted ID + Secret in Settings → Sync wins, the build's `TRAKT_CLIENT_ID`/`TRAKT_CLIENT_SECRET` is the fallback. Still needs a VIP-gated registration for *new* apps, or a pre-gate one -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
-| Dropbox / Google Drive / Mega backup | Dropbox and Google Drive are built (settings cards, auto-backup prefers them over WebDAV), gated on a `DROPBOX_APP_KEY` / `GOOGLE_DRIVE_CLIENT_ID` this build does not carry yet. Mega is still open (proprietary login, no mature Dart SDK). "Auto" is settled as "at app open". Still waiting on the credential model per provider: maintainer-registered (TMDB/Simkl style) or user-registered (Trakt style) -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
+| Dropbox / Google Drive / Mega backup | Dropbox and Google Drive are built (settings cards, auto-backup prefers them over WebDAV, one shared `BackupService` envelope so either restores the other's backup), gated on a `DROPBOX_APP_KEY` / `GOOGLE_DRIVE_CLIENT_ID` this build does not carry yet. Mega is still open (proprietary login, no mature Dart SDK). "Auto" is settled as "at app open". Still waiting on the credential model per provider: maintainer-registered (TMDB/Simkl style) or user-registered (Trakt style) -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
 
 ---
 
