@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../models/subtitle/subtitle_model.dart';
@@ -204,14 +205,19 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             // row of their own under the toggle, which cost a line of height
             // and read as a second set of choices rather than as actions on
             // the list below.
-            PlayerIconButton(
-              size: context.rem(1.75),
-              iconSize: context.rem(0.9375),
-              icon: const Icon(Icons.refresh_rounded),
-              tooltip: context.l10n.subsRefreshOnline,
-              onPressed: widget.onRefresh,
-            ),
-            SizedBox(width: context.rem(AppRem.xxs)),
+            // Refresh searches the online providers; on the Embedded list it
+            // would do something the viewer cannot see, so it is only there
+            // for the list it refreshes.
+            if (_source == _SubtitleSource.online) ...[
+              PlayerIconButton(
+                size: context.rem(1.75),
+                iconSize: context.rem(0.9375),
+                icon: const Icon(Icons.refresh_rounded),
+                tooltip: context.l10n.subsRefreshOnline,
+                onPressed: widget.onRefresh,
+              ),
+              SizedBox(width: context.rem(AppRem.xxs)),
+            ],
             PlayerIconButton(
               size: context.rem(1.75),
               iconSize: context.rem(0.9375),
@@ -662,6 +668,109 @@ class _ShowAllRow extends StatelessWidget {
   }
 }
 
+/// The press, hover and focus cues shared by the panel's pills: the on/off
+/// button, the Embedded / Online tabs and the filter chips.
+///
+/// They were an `InkWell` over an opaque `Container`, so the ink the `InkWell`
+/// draws on the `Material` underneath was hidden by the container's own fill:
+/// hovering or pressing one changed nothing, and a remote's focus was a faint
+/// overlay on a translucent pill. The cues are drawn into the fill instead --
+/// a white lift for hover, a stronger one for a press, the violet wash the
+/// rest of the player uses for focus.
+///
+/// Focus shows only while the viewer is navigating with keys or a D-pad
+/// ([FocusHighlightMode.traditional]). The panel takes focus when it opens,
+/// whichever way it was opened, and a violet wash on a control nobody has
+/// moved to read as that control being switched on.
+class _MenuPill extends StatefulWidget {
+  final VoidCallback onTap;
+  final double radius;
+  final Color fill;
+  final Color border;
+  final BoxConstraints constraints;
+  final EdgeInsetsGeometry? padding;
+  final AlignmentGeometry? alignment;
+
+  /// Takes focus when the panel opens: the control a remote should land on,
+  /// rather than the first action in the header.
+  final bool autofocus;
+  final Widget child;
+
+  const _MenuPill({
+    required this.onTap,
+    required this.radius,
+    required this.fill,
+    required this.border,
+    required this.constraints,
+    this.padding,
+    this.alignment,
+    this.autofocus = false,
+    required this.child,
+  });
+
+  @override
+  State<_MenuPill> createState() => _MenuPillState();
+}
+
+class _MenuPillState extends State<_MenuPill> {
+  bool _hovered = false;
+  bool _pressed = false;
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final showFocus = _focused &&
+        FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+    var fill = widget.fill;
+    if (_pressed) {
+      fill = Color.alphaBlend(Colors.white.withValues(alpha: 0.12), fill);
+    } else if (_hovered) {
+      fill = Color.alphaBlend(Colors.white.withValues(alpha: 0.06), fill);
+    }
+    if (showFocus) {
+      fill = Color.alphaBlend(PlayerTheme.accent.withValues(alpha: 0.30), fill);
+    }
+
+    return Focus(
+      autofocus: widget.autofocus,
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: (node, event) {
+        if (event is! KeyDownEvent) return KeyEventResult.ignored;
+        if (event.logicalKey != LogicalKeyboardKey.select &&
+            event.logicalKey != LogicalKeyboardKey.enter) {
+          return KeyEventResult.ignored;
+        }
+        widget.onTap();
+        return KeyEventResult.handled;
+      },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            constraints: widget.constraints,
+            padding: widget.padding,
+            alignment: widget.alignment,
+            decoration: BoxDecoration(
+              color: fill,
+              borderRadius: BorderRadius.circular(widget.radius),
+              border: Border.all(color: widget.border),
+            ),
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// One of the Embedded / Online tabs.
 class _TabButton extends StatelessWidget {
   final String label;
@@ -678,33 +787,23 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.rem(0.5625)),
-        onTap: onTap,
-        child: Container(
-          constraints: BoxConstraints(minHeight: context.rem(2.125)),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: isSelected
-                ? PlayerTheme.accent.withValues(alpha: 0.18)
-                : PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(context.rem(0.5625)),
-            border: Border.all(
-              color: isSelected
-                  ? PlayerTheme.accent.withValues(alpha: 0.55)
-                  : PlayerTheme.edgeSoft,
-            ),
-          ),
-          child: Text(
-            count > 0 ? '$label  $count' : label,
-            style: TextStyle(
-              color: isSelected ? PlayerTheme.ink : PlayerTheme.inkSubtle,
-              fontSize: AppType.caption,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
+    return _MenuPill(
+      onTap: onTap,
+      radius: context.rem(0.5625),
+      fill: isSelected
+          ? PlayerTheme.accent.withValues(alpha: 0.18)
+          : PlayerTheme.raised,
+      border: isSelected
+          ? PlayerTheme.accent.withValues(alpha: 0.55)
+          : PlayerTheme.edgeSoft,
+      constraints: BoxConstraints(minHeight: context.rem(2.125)),
+      alignment: Alignment.center,
+      child: Text(
+        count > 0 ? '$label  $count' : label,
+        style: TextStyle(
+          color: isSelected ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+          fontSize: AppType.caption,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
         ),
       ),
     );
@@ -725,28 +824,22 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.rem(0.4375)),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.3125)),
-          decoration: BoxDecoration(
-            color: isSelected ? PlayerTheme.raised : Colors.transparent,
-            borderRadius: BorderRadius.circular(context.rem(0.4375)),
-            border: Border.all(
-              color: isSelected ? PlayerTheme.edge : PlayerTheme.edgeSoft,
-            ),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? PlayerTheme.ink : PlayerTheme.inkSubtle,
-              fontSize: AppType.tiny,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
+    return _MenuPill(
+      onTap: onTap,
+      radius: context.rem(0.4375),
+      fill: isSelected ? PlayerTheme.raised : Colors.transparent,
+      border: isSelected ? PlayerTheme.edge : PlayerTheme.edgeSoft,
+      constraints: const BoxConstraints(),
+      padding: EdgeInsets.symmetric(
+        horizontal: context.rem(0.625),
+        vertical: context.rem(0.3125),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+          fontSize: AppType.tiny,
+          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
         ),
       ),
     );
@@ -755,6 +848,10 @@ class _FilterChip extends StatelessWidget {
 
 /// The on/off control. One button whose label and color follow the state,
 /// rather than two chips where one is always inert.
+///
+/// It is where focus lands when the panel opens: the one control a viewer
+/// opening this panel is most likely to want, and a harmless one to press by
+/// accident, where the header's first action (refresh) is a network search.
 class _SubtitleToggleButton extends StatelessWidget {
   final bool isEnabled;
   final VoidCallback onPressed;
@@ -766,54 +863,41 @@ class _SubtitleToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.rem(0.5625)),
-        onTap: onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          constraints: BoxConstraints(minHeight: context.rem(2.375)),
-          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625)),
-          decoration: BoxDecoration(
-            color: isEnabled
-                ? PlayerTheme.accent.withValues(alpha: 0.18)
-                : PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(context.rem(0.5625)),
-            border: Border.all(
-              color: isEnabled
-                  ? PlayerTheme.accent.withValues(alpha: 0.55)
-                  : PlayerTheme.edgeSoft,
+    return _MenuPill(
+      autofocus: true,
+      onTap: onPressed,
+      radius: context.rem(0.5625),
+      fill: isEnabled
+          ? PlayerTheme.accent.withValues(alpha: 0.18)
+          : PlayerTheme.raised,
+      border: isEnabled
+          ? PlayerTheme.accent.withValues(alpha: 0.55)
+          : PlayerTheme.edgeSoft,
+      constraints: BoxConstraints(minHeight: context.rem(2.375)),
+      padding: EdgeInsets.symmetric(horizontal: context.rem(0.625)),
+      child: Row(
+        children: [
+          Icon(
+            isEnabled
+                ? Icons.closed_caption_rounded
+                : Icons.closed_caption_disabled_rounded,
+            size: context.rem(1.0625),
+            color: isEnabled ? PlayerTheme.accent : PlayerTheme.inkDisabled,
+          ),
+          SizedBox(width: context.rem(0.5625)),
+          Expanded(
+            child: Text(
+              isEnabled
+                  ? context.l10n.playerSubtitleTurnOff
+                  : context.l10n.playerSubtitleTurnOn,
+              style: TextStyle(
+                color: isEnabled ? PlayerTheme.ink : PlayerTheme.inkMuted,
+                fontSize: AppType.captionPlus,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-          child: Row(
-            children: [
-              Icon(
-                isEnabled
-                    ? Icons.closed_caption_rounded
-                    : Icons.closed_caption_disabled_rounded,
-                size: context.rem(1.0625),
-                color: isEnabled
-                    ? PlayerTheme.accent
-                    : PlayerTheme.inkDisabled,
-              ),
-              SizedBox(width: context.rem(0.5625)),
-              Expanded(
-                child: Text(
-                  isEnabled
-                      ? context.l10n.playerSubtitleTurnOff
-                      : context.l10n.playerSubtitleTurnOn,
-                  style: TextStyle(
-                    color:
-                        isEnabled ? PlayerTheme.ink : PlayerTheme.inkMuted,
-                    fontSize: AppType.captionPlus,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
