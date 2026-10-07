@@ -890,25 +890,37 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
     setState(() => _userCode = userCode);
     _openBrowser(verifyUrl, 'Simkl');
 
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(Duration(seconds: interval), (t) async {
-      final status = await SimklService.instance.pollPin(userCode);
-      if (status == null) {
-        t.cancel();
-        if (mounted) {
-          setState(() {
-            _pairing = false;
-            _isAuthed = true;
-          });
-          _checkStatus();
-          MyListService.syncAll();
-          ContinueWatchingService.syncCloudSessions();
+    // `slow_down` means the interval itself was the offense: retrying on
+    // the same beat re-arms the lockout, so each one backs the next poll
+    // off by five seconds rather than hammering through to expiry.
+    var waitSeconds = interval;
+    void schedule() {
+      if (!mounted) return;
+      _pollTimer?.cancel();
+      _pollTimer = Timer.periodic(Duration(seconds: waitSeconds), (t) async {
+        final status = await SimklService.instance.pollPin(userCode);
+        if (status == null) {
+          t.cancel();
+          if (mounted) {
+            setState(() {
+              _pairing = false;
+              _isAuthed = true;
+            });
+            _checkStatus();
+            MyListService.syncAll();
+            ContinueWatchingService.syncCloudSessions();
+          }
+        } else if (status == 'expired_token' || status == 'access_denied') {
+          t.cancel();
+          if (mounted) setState(() => _pairing = false);
+        } else if (status == 'slow_down') {
+          waitSeconds += 5;
+          schedule();
         }
-      } else if (status == 'expired_token' || status == 'access_denied') {
-        t.cancel();
-        if (mounted) setState(() => _pairing = false);
-      }
-    });
+      });
+    }
+
+    schedule();
   }
 
   Future<void> _logout() async {

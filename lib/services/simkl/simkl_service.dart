@@ -288,6 +288,18 @@ class SimklService {
   // PIN Flow
   // ============================================================================
 
+  /// The device-code request body -- scope included. Omitting `scope`
+  /// silently mints a `media:read`-only token (Simkl downgrades rather than
+  /// rejects), which then fails every write -- scrobble, watchlist,
+  /// ratings -- while the card shows connected. A standalone function so
+  /// the one string that keeps the token writable has one place to be
+  /// tested without standing up the network.
+  @visibleForTesting
+  static Map<String, String> deviceRequestBody() => {
+    'client_id': kSimklClientId,
+    'scope': 'media:read media:write',
+  };
+
   /// Request a PIN via Simkl's RFC 8628 device authorization grant
   /// (`POST /oauth2/device`) -- the flow every newly-registered Simkl app
   /// gets; see `kSimklDeviceUrl`'s doc comment for how that was confirmed.
@@ -314,7 +326,7 @@ class SimklService {
           .post(
             Uri.parse(kSimklDeviceUrl),
             headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'client_id': kSimklClientId}),
+            body: jsonEncode(deviceRequestBody()),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -334,9 +346,20 @@ class SimklService {
             expiresAt: DateTime.now().add(Duration(seconds: seconds)),
             deviceCode: deviceCode,
           );
+          SimklSettings.note(
+            'Waiting for you to enter the PIN at simkl.com/pin.',
+          );
+          return data;
         }
-        SimklSettings.note('Waiting for you to enter the PIN at simkl.com/pin.');
-        return data;
+        // A 200 without usable codes: proceeding would open the browser
+        // and then fail the first poll with access_denied, stranding the
+        // viewer on a page that can no longer do anything.
+        debugPrint('Simkl: PIN response carried no usable codes');
+        SimklSettings.note(
+          'Simkl answered, but the reply was missing its codes. '
+          'Try Connect again.',
+        );
+        return null;
       }
 
       debugPrint('Simkl: PIN request failed (${response.statusCode})');
@@ -385,6 +408,20 @@ class SimklService {
       if (response.statusCode == 200) {
         final accessToken = data['access_token'] as String?;
         if (accessToken == null || accessToken.isEmpty) return 'error';
+        // A typo in the requested scope downgrades to read-only instead of
+        // failing, so a token that works until its first write has to be
+        // caught here -- storing it would show connected and then fail
+        // every scrobble, watchlist move and rating silently.
+        if (!(data['scope'] as String? ?? '').contains('media:write')) {
+          debugPrint(
+            'Simkl: token grant came back read-only (${data['scope']})',
+          );
+          SimklSettings.note(
+            'Simkl approved read-only access. Reconnect and allow writing '
+            'when it asks.',
+          );
+          return 'error';
+        }
         _pinAuthorizations.remove(userCode);
         Future<void> commit() async {
           await StorageService.setSimklAccessToken(accessToken);

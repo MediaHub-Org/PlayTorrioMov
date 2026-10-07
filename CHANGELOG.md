@@ -25,6 +25,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   previous state on a miss, and selection reads mpv's own reported track
   id instead of a list position that drifts whenever a pseudo-track is
   skipped.
+- **Simkl Connect asks for write scope up front.** The device-code request
+  sent no `scope`, and Simkl answers that with a read-only token instead
+  of an error -- so Connect succeeded and every write after it
+  (scrobbling, watchlist moves, ratings) failed silently while the card
+  showed connected. The request now asks for `media:read media:write`,
+  the token's own scope is checked before it is stored, and a `slow_down`
+  backs the poll off instead of hammering the same interval. Verified the
+  request shape against the live endpoint with a real client ID.
 
 ### Changed
 
