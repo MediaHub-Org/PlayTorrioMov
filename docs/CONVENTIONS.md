@@ -704,12 +704,12 @@ Four tests read `lib/` as text instead of pumping it, because the code that
 stays wrong longest is on pages nothing can construct: the portals modal and
 the channel sheet both fetch over the network.
 
-| Test | Invariant |
-|:--|:--|
-| `no_hardcoded_text_test` | No `Text()` holds an English sentence |
-| `icon_button_tooltip_test` | Every icon-only button carries a tooltip |
-| `rtl_directional_padding_test` | No padding names a physical edge |
-| `american_spelling_test` | One spelling of every word |
+| Test                           | Invariant                                |
+|:-------------------------------|:-----------------------------------------|
+| `no_hardcoded_text_test`       | No `Text()` holds an English sentence    |
+| `icon_button_tooltip_test`     | Every icon-only button carries a tooltip |
+| `rtl_directional_padding_test` | No padding names a physical edge         |
+| `american_spelling_test`       | One spelling of every word               |
 
 Each keeps an allowlist keyed by file, and an entry in one is a decision that
 the case is genuinely not what the test is looking for — a unit, an API token,
