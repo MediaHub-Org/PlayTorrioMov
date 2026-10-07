@@ -31,9 +31,16 @@ class _SimklPinAuthorization {
   final ProfileAsyncAuthorization authorization;
   final DateTime expiresAt;
 
+  /// The device code the token poll authenticates with -- a second value
+  /// alongside the user-facing PIN, not interchangeable with it (RFC 8628
+  /// names them separately on purpose: one is shown to the person, the
+  /// other identifies this specific pending authorization to the server).
+  final String deviceCode;
+
   const _SimklPinAuthorization({
     required this.authorization,
     required this.expiresAt,
+    required this.deviceCode,
   });
 }
 
@@ -281,7 +288,9 @@ class SimklService {
   // PIN Flow
   // ============================================================================
 
-  /// Request a PIN for the device-code-style OAuth flow.
+  /// Request a PIN via Simkl's RFC 8628 device authorization grant
+  /// (`POST /oauth2/device`) -- the flow every newly-registered Simkl app
+  /// gets; see `kSimklDeviceUrl`'s doc comment for how that was confirmed.
   /// Returns the parsed JSON response on success, null on failure.
   Future<Map<String, dynamic>?> requestPin() async {
     // Checked before the request, not after: without an id Simkl answers
@@ -301,20 +310,29 @@ class SimklService {
       final authorization = await ProfileAsyncAuthorization.capture(
         ProfileFeature.trackersAndDiscovery,
       );
-      final uri = Uri.parse(
-        kSimklPinUrl,
-      ).replace(queryParameters: {'client_id': kSimklClientId});
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse(kSimklDeviceUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'client_id': kSimklClientId}),
+          )
+          .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final userCode = data['user_code'] as String?;
-        if (authorization != null && userCode != null && userCode.isNotEmpty) {
+        final deviceCode = data['device_code'] as String?;
+        if (authorization != null &&
+            userCode != null &&
+            userCode.isNotEmpty &&
+            deviceCode != null &&
+            deviceCode.isNotEmpty) {
           _prunePinAuthorizations();
           final seconds = (data['expires_in'] as int? ?? 900).clamp(1, 1800);
           _pinAuthorizations[userCode] = _SimklPinAuthorization(
             authorization: authorization,
             expiresAt: DateTime.now().add(Duration(seconds: seconds)),
+            deviceCode: deviceCode,
           );
         }
         SimklSettings.note('Waiting for you to enter the PIN at simkl.com/pin.');
@@ -331,10 +349,16 @@ class SimklService {
     }
   }
 
-  /// Poll for PIN authorization status.
+  /// Poll for PIN authorization status via `POST /oauth2/token` with the
+  /// device-code grant -- RFC 8628's own poll shape: success is HTTP 200
+  /// with `access_token`, everything else is HTTP 400 with an `error` code
+  /// (`authorization_pending`, `slow_down`, `access_denied`,
+  /// `expired_token`), confirmed against Simkl's real endpoint rather than
+  /// assumed from docs.
+  ///
   /// Returns null on success (token stored), or an error string:
-  /// "authorization_pending", "slow_down", "network_error" (transient — safe
-  /// to retry), or "error" (fatal).
+  /// "authorization_pending", "slow_down", "access_denied", "expired_token",
+  /// "network_error" (transient — safe to retry), or "error" (fatal).
   Future<String?> pollPin(String userCode) async {
     try {
       final attempt = _pinAuthorizations[userCode];
@@ -342,40 +366,54 @@ class SimklService {
         _pinAuthorizations.remove(userCode);
         return 'access_denied';
       }
-      final uri = Uri.parse(
-        simklPinPollUrl(userCode),
-      ).replace(queryParameters: {'client_id': kSimklClientId});
-      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      final response = await http
+          .post(
+            Uri.parse(kSimklTokenUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+              'device_code': attempt.deviceCode,
+              'client_id': kSimklClientId,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      final data = response.body.isEmpty
+          ? const <String, dynamic>{}
+          : jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        final result = data['result'] as String?;
-
-        if (result == 'OK') {
-          final accessToken = data['access_token'] as String?;
-          if (accessToken == null || accessToken.isEmpty) return 'error';
-          _pinAuthorizations.remove(userCode);
-          Future<void> commit() async {
-            await StorageService.setSimklAccessToken(accessToken);
-            await _fetchAndStoreUsername(accessToken);
-            StorageService.movieFinishedRevision.value++;
-          }
-
-          try {
-            await attempt.authorization.run(commit);
-          } on StateError {
-            return 'access_denied';
-          }
-          return null; // Success
+        final accessToken = data['access_token'] as String?;
+        if (accessToken == null || accessToken.isEmpty) return 'error';
+        _pinAuthorizations.remove(userCode);
+        Future<void> commit() async {
+          await StorageService.setSimklAccessToken(accessToken);
+          await _fetchAndStoreUsername(accessToken);
+          StorageService.movieFinishedRevision.value++;
         }
 
-        final message = (data['message'] as String?)?.toLowerCase() ?? '';
-        if (message.contains('slow down')) return 'slow_down';
-        return 'authorization_pending';
+        try {
+          await attempt.authorization.run(commit);
+        } on StateError {
+          return 'access_denied';
+        }
+        return null; // Success
       }
 
-      debugPrint('Simkl: PIN poll failed (${response.statusCode})');
-      return 'error';
+      final errorCode = data['error'] as String?;
+      if (errorCode == 'access_denied' || errorCode == 'expired_token') {
+        _pinAuthorizations.remove(userCode);
+      }
+      switch (errorCode) {
+        case 'authorization_pending':
+        case 'slow_down':
+        case 'access_denied':
+        case 'expired_token':
+          return errorCode;
+        default:
+          debugPrint('Simkl: PIN poll failed (${response.statusCode}) $errorCode');
+          return 'error';
+      }
     } catch (error) {
       // Network timeout, socket exception, etc. — transient, safe to retry
       debugPrint('Simkl: PIN poll network error (${error.runtimeType})');

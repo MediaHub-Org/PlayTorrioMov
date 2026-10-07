@@ -5,6 +5,16 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Simkl Connect now uses the device-authorization flow Simkl actually
+  issues to new apps.** The old `GET /oauth/pin` this replaced answers
+  every current app registration with "this client_id is an OAuth 2.0 app,
+  use POST /oauth2/device instead" -- so Connect could not have worked for
+  any Simkl app registered today, regardless of how correct the client ID
+  was. Verified against Simkl's real API with a live client ID, not
+  assumed from docs.
+
 ### Changed
 
 - **The centered ±30s seek buttons are gone; only play/pause stays over the

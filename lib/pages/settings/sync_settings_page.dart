@@ -878,8 +878,13 @@ class _SimklSyncCardState extends State<_SimklSyncCard> {
     }
 
     final userCode = res['user_code'] as String? ?? '';
-    final verifyUrl =
-        res['verification_url'] as String? ?? 'https://simkl.com/pin';
+    // RFC 8628's own field, pre-filling the code so the browser lands
+    // straight on "Connect" rather than a page asking for it to be typed
+    // back in -- `verification_uri` alone (no code) is the fallback for an
+    // older/differently-shaped response that doesn't carry it.
+    final verifyUrl = (res['verification_uri_complete'] as String?) ??
+        (res['verification_uri'] as String?) ??
+        'https://simkl.com/pin';
     final interval = (res['interval'] as int? ?? 5).clamp(2, 30);
 
     setState(() => _userCode = userCode);

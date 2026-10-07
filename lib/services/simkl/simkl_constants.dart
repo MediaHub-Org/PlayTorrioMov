@@ -29,5 +29,10 @@ const String kSimklTrendingUrl =
 /// CDN calendar file (public, no auth): upcoming episode air dates for all TV shows.
 const String kSimklCalendarTvUrl = 'https://data.simkl.in/calendar/tv.json';
 
-const String kSimklPinUrl = '$kSimklApiBaseUrl/oauth/pin';
-String simklPinPollUrl(String userCode) => '$kSimklPinUrl/$userCode';
+/// RFC 8628 device authorization grant -- the flow every newly-registered
+/// Simkl app now gets. The old `GET /oauth/pin` this replaced answers
+/// `{"error":"unauthorized_client", "message":"This client_id is an OAuth
+/// 2.0 app: use POST /oauth2/device instead"}` for any app Simkl created
+/// today, verified against a real client ID rather than assumed from docs.
+const String kSimklDeviceUrl = '$kSimklApiBaseUrl/oauth2/device';
+const String kSimklTokenUrl = '$kSimklApiBaseUrl/oauth2/token';
