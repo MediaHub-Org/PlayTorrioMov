@@ -3,6 +3,42 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **The subtitle panel's buttons light up under a finger, a mouse and a
+  remote.** The on/off button, the Embedded / Online tabs and the filter
+  chips drew their own fill over the ink that would have shown a press, so
+  hovering or pressing one changed nothing; the icon buttons in the header
+  lit on hover and focus but not on a tap. Each now lifts on hover, lifts
+  more while pressed, and shows the violet wash while a remote or keyboard is
+  on it. Not confirmed on a TV.
+- **Refresh is only there on the Online list.** It searches the online
+  providers, so on the Embedded list it did something nobody could see.
+- **Two embedded tracks of one language say which is which.** A full English
+  track beside a "Signs & Songs" one, the usual anime release, both read
+  "English"; the second now reads "English · Signs & Songs", from the file's
+  own track title. A language with one track, or tracks whose titles say
+  nothing beyond Forced / SDH / a region, are named as before.
+
+### Fixed
+
+- **Refresh showed as switched on, in violet, when the subtitle panel
+  opened.** The panel takes focus when it opens, and with no back button (it
+  now opens straight from the player bar) the first control was Refresh, so
+  it wore the focus ring and one press of OK on a remote started a search.
+  Focus now starts on the on/off button, and the cue is drawn only while
+  someone is navigating with keys or a D-pad, not for a touch or a mouse.
+- **Embedded Chinese tracks titled in Chinese all read "Chinese".** A track
+  titled 简体中文 or 繁體中文 now reads "Chinese (Simplified)" or "Chinese
+  (Traditional)".
+- **A track tagged `mul` read "MUL", and a muxer's private `qaa`-`qtz` tag
+  read as a language.** `mul` is now "Multiple", and the private tags fall
+  back to the track's own title.
+- **A track whose only title was "Forced" or "SDH" was named "Forced"** with
+  a Forced chip beside it. It now reads "Track N · SRT" with the chip.
+
 ## [1.9.4+52] - 2026-10-07
 
 ### Added

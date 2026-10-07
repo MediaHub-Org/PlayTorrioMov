@@ -453,20 +453,28 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
   bool _hovered = false;
   bool _focused = false;
 
+  /// A finger or button is down on it. Hover and focus already lit the
+  /// button, but a tap on a touch screen has neither, so pressing one showed
+  /// nothing until the action itself landed.
+  bool _pressed = false;
+
   @override
   Widget build(BuildContext context) {
+    final lit = _hovered || _focused || _pressed;
     final bg = widget.active
         ? (widget.activeColor ?? Colors.white.withValues(alpha: 0.22))
-        : ((_hovered || _focused)
-            ? (widget.backgroundColor ?? Colors.white.withValues(alpha: 0.12))
-            : (widget.backgroundColor ?? Colors.transparent));
+        : _pressed
+            ? Colors.white.withValues(alpha: 0.22)
+            : (lit
+                ? (widget.backgroundColor ?? Colors.white.withValues(alpha: 0.12))
+                : (widget.backgroundColor ?? Colors.transparent));
 
     final iconContent = Stack(
       alignment: Alignment.center,
       children: [
         IconTheme(
           data: IconThemeData(
-            color: widget.active ? Colors.white : ((_hovered || _focused) ? Colors.white : PlayerTheme.inkMuted),
+            color: widget.active || lit ? Colors.white : PlayerTheme.inkMuted,
             size: widget.iconSize,
           ),
           child: widget.icon,
@@ -529,6 +537,12 @@ class _PlayerIconButtonState extends State<PlayerIconButton> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onPressed,
+            // Only a button that does something answers a press.
+            onTapDown: widget.onPressed == null
+                ? null
+                : (_) => setState(() => _pressed = true),
+            onTapUp: (_) => setState(() => _pressed = false),
+            onTapCancel: () => setState(() => _pressed = false),
             child: buttonBody,
           ),
         ),

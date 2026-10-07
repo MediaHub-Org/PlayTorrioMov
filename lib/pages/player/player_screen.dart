@@ -1051,6 +1051,13 @@ class _PlayerScreenState extends State<PlayerScreen>
       keptSubs.map((t) => t.title).toList(growable: false),
       numberDuplicates: false,
     );
+    // Where a region still leaves two tracks reading alike (a full English
+    // track beside a "Signs & Songs" one), the container's own title says
+    // which is which.
+    final qualifiers = embeddedTrackQualifiers(
+      uniqueNames,
+      keptSubs.map((t) => t.title).toList(growable: false),
+    );
 
     for (var i = 0; i < keptSubs.length; i++) {
       final t = keptSubs[i];
@@ -1090,6 +1097,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           // display name and prefers the language, so sniffing it meant
           // looking for "forced" in the word "Spanish".
           containerTitle: t.title,
+          qualifier: qualifiers[i],
         ),
       );
     }

@@ -258,6 +258,10 @@ const Map<String, String> _iso639ToDisplayName = {
     'ky': 'Kyrgyz',
     'tgk': 'Tajik',
     'tg': 'Tajik',
+    // ISO 639-2's "multiple languages": a track that carries several at once
+    // (a dual-language subtitle). Not one language, but a real name beats
+    // "MUL" in a picker.
+    'mul': 'Multiple',
 };
 
 /// The display name for a subtitle language code, or a sensible rendering of
@@ -364,6 +368,10 @@ String subtitleTrackLanguageName(String? rawLanguage) {
   }
   final mpv = _mpvTagToDisplayName[raw.toLowerCase()];
   if (mpv != null) return mpv;
+  // qaa-qtz is the range ISO 639-2 reserves for local use: a muxer's private
+  // tag, not a language anyone could be expected to read. Left unnamed so the
+  // track falls back to its own title, as `und` does.
+  if (RegExp(r'^q[a-t][a-z]$', caseSensitive: false).hasMatch(raw)) return '';
   return subtitleLanguageName(raw);
 }
 
@@ -472,6 +480,103 @@ bool _isKnownCode(String token) =>
     _iso639ToDisplayName.containsKey(token) ||
     _mpvTagToDisplayName.containsKey(token);
 
+/// Words in a container title that the row already says another way: the
+/// Forced and SDH badges, the format chip, the region in the name, and the
+/// language itself in its own spelling. What is left over -- "Signs & Songs",
+/// "Commentary", "Full" -- is the only thing that can tell two tracks of one
+/// language apart.
+const Set<String> _qualifierNoise = {
+  'forced', 'forzado', 'forzados', 'forzada', 'forzadas',
+  'forçado', 'forçados', 'forçada', 'forçadas',
+  'sdh', 'cc', 'hi', 'hoh', 'hearing', 'impaired', 'deaf', 'closed',
+  'caption', 'captions', 'subtitle', 'subtitles', 'subs', 'sub',
+  'srt', 'ass', 'ssa', 'pgs', 'vobsub', 'dvd', 'dvb', 'vtt', 'webvtt',
+  'subrip', 'text', 'default',
+  'latin', 'america', 'american', 'latino', 'latam', 'castilian',
+  'castellano', 'spain', 'españa', 'brazil', 'brasil', 'brazilian',
+  'portugal', 'united', 'states', 'kingdom', 'australia', 'canada',
+  'mexico', 'argentina', 'taiwan', 'hong', 'kong', 'simplified',
+  'traditional', 'us', 'uk', 'br', 'pt', 'es', 'mx', 'ca', 'au', 'ar',
+  'cn', 'tw', 'hk',
+  // A language written in itself, which the English-name table cannot match.
+  'español', 'espanol', 'français', 'francais', 'deutsch', 'italiano',
+  'português', 'portugues', 'nederlands', 'polski', 'türkçe', 'svenska',
+  'dansk', 'norsk', 'suomi', 'русский', '日本語', '한국어', 'العربية',
+};
+
+/// Every word of every display name in the language table, lower-cased, so
+/// "English" and "Haitian Creole" are recognized as language and not as a
+/// qualifier.
+final Set<String> _languageNameWords = {
+  for (final name in _iso639ToDisplayName.values)
+    ...name.toLowerCase().split(RegExp(r'[^\p{L}]+', unicode: true)),
+}..remove('');
+
+/// What a container title says beyond what the row already shows, or null
+/// when it says nothing more.
+///
+/// Free text, so it is read conservatively: only whole words are dropped, and
+/// a three-letter ISO code goes but a two-letter one does not ("no", "is" and
+/// "to" are words long before they are Norwegian, Icelandic or Tonga).
+String? _titleQualifier(String? title) {
+  var text = title?.trim() ?? '';
+  if (text.isEmpty) return null;
+  text = text.replaceAll(RegExp('简体中文|繁體中文|繁体中文|简体|繁體|繁体|简中|繁中|中文'), ' ');
+  final hasWord = RegExp(r'[\p{L}\p{N}]', unicode: true);
+  final kept = <String>[];
+  for (final token in text.split(RegExp(r'[\s\[\]()\-_|,.:;]+'))) {
+    if (token.isEmpty) continue;
+    final lower = token.toLowerCase();
+    if (_qualifierNoise.contains(lower)) continue;
+    if (_languageNameWords.contains(lower)) continue;
+    if (lower.length == 3 && _isKnownCode(lower)) continue;
+    kept.add(token);
+  }
+  // A joiner left stranded by what was dropped ("English & Spanish").
+  while (kept.isNotEmpty && !hasWord.hasMatch(kept.first)) {
+    kept.removeAt(0);
+  }
+  while (kept.isNotEmpty && !hasWord.hasMatch(kept.last)) {
+    kept.removeLast();
+  }
+  return kept.isEmpty ? null : kept.join(' ');
+}
+
+/// What to append to each embedded track's name so two tracks of one language
+/// do not read the same.
+///
+/// Two English tracks -- a full translation and a "Signs & Songs" one, which
+/// is how most anime releases ship -- both read "English", and with numbering
+/// off for embedded lists (see [uniqueTrackLanguageNames]) the choice between
+/// them was invisible. The container's own title is the only place the
+/// difference is written, so it is used, but only where two labels collide: a
+/// language with one track is just its name, and a title that matches the
+/// label already (every track says "English") adds nothing.
+///
+/// [labels] are the names from [uniqueTrackLanguageNames]; a track with no
+/// label is skipped, since [embeddedFallbackTitle] already used its title.
+List<String?> embeddedTrackQualifiers(
+  List<String> labels,
+  List<String?> titles,
+) {
+  final byLabel = <String, List<int>>{};
+  for (var i = 0; i < labels.length; i++) {
+    if (labels[i].isEmpty) continue;
+    byLabel.putIfAbsent(labels[i], () => []).add(i);
+  }
+  final qualifiers = List<String?>.filled(labels.length, null);
+  for (final group in byLabel.values) {
+    if (group.length < 2) continue;
+    final found = {
+      for (final i in group) i: _titleQualifier(i < titles.length ? titles[i] : null),
+    };
+    // Identical (or all empty): nothing tells them apart, so nothing is added.
+    if (found.values.toSet().length < 2) continue;
+    found.forEach((i, q) => qualifiers[i] = q);
+  }
+  return qualifiers;
+}
+
 /// What an embedded track with no language is called.
 ///
 /// The container title first -- muxers write usable names there -- then the
@@ -484,7 +589,12 @@ String embeddedFallbackTitle({
   String? codec,
   required int index,
 }) {
-  final title = containerTitle?.trim() ?? '';
+  // A title that says only "Forced" or "SDH" names nothing: those two are
+  // already badges on the row, and a row reading "Forced" with a Forced chip
+  // beside it says it twice and tells the viewer nothing else.
+  final title = _titleQualifier(containerTitle) == null
+      ? ''
+      : containerTitle!.trim();
   if (title.isNotEmpty) return title;
   final label = codecShortLabel(codec);
   if (label != null) return 'Track $index · $label';
@@ -598,6 +708,14 @@ String? _regionFromTitle(String? title) {
     'hong kong': 'HK',
     'simplified': 'Simplified',
     'traditional': 'Traditional',
+    // Muxers write the script in its own characters: a track tagged `chi`
+    // and titled "简体中文" is the simplified one, and without these both
+    // scripts read "Chinese" side by side.
+    '简体': 'Simplified',
+    '简中': 'Simplified',
+    '繁體': 'Traditional',
+    '繁体': 'Traditional',
+    '繁中': 'Traditional',
   };
   for (final entry in regions.entries) {
     if (text.contains(entry.key)) return entry.value;

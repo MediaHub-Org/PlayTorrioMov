@@ -97,6 +97,11 @@ class PlayerEmbeddedSubtitle {
   /// opposed to a title that merely says so -- see [isForced].
   final bool isForcedTrack;
 
+  /// What sets this track apart from another of the same language ("Signs &
+  /// Songs"), read off the container title only where two tracks would
+  /// otherwise read the same. See `embeddedTrackQualifiers`.
+  final String? qualifier;
+
   const PlayerEmbeddedSubtitle({
     required this.index,
     required this.title,
@@ -105,6 +110,7 @@ class PlayerEmbeddedSubtitle {
     this.containerTitle,
     this.isDefault = false,
     this.isForcedTrack = false,
+    this.qualifier,
   });
 
   /// Marked forced by the file's flag, or by its title.
@@ -116,8 +122,11 @@ class PlayerEmbeddedSubtitle {
 
   /// What the picker shows for this track: its language, or the container's
   /// own title when the language is unknown.
-  String get displayName =>
-      (language?.isNotEmpty ?? false) ? language! : title;
+  String get displayName {
+    final name = (language?.isNotEmpty ?? false) ? language! : title;
+    final extra = qualifier;
+    return extra == null || extra.isEmpty ? name : '$name · $extra';
+  }
 
   /// The codec mpv reports, lowercased, with the container title as a
   /// fallback. Muxers routinely write the format into the title --
@@ -176,6 +185,7 @@ class PlayerEmbeddedSubtitle {
     containerTitle: containerTitle,
     isDefault: isDefault,
     isForcedTrack: isForcedTrack,
+    qualifier: qualifier,
   );
 }
 

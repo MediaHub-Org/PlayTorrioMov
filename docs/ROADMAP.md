@@ -29,6 +29,11 @@ Device checks; none of these can be settled from the code.
   fallback).
 - **The loading logo** with a torrent, a debrid link and a plain URL, and
   that it clears on the first frame.
+- **The subtitle panel on a TV and a phone.** Opening it should put the
+  violet wash on "Turn subtitles on" with a remote and show nothing lit with a
+  finger; Refresh appears only on the Online tab; a file with a full and a
+  "Signs & Songs" track of one language should list them as two different
+  rows.
 
 ---
 
