@@ -102,6 +102,14 @@ class PlayerEmbeddedSubtitle {
   /// otherwise read the same. See `embeddedTrackQualifiers`.
   final String? qualifier;
 
+  /// The track id as mpv reports it, for selection. Usually the same digits
+  /// as [index], but the index falls back to list position when the id does
+  /// not parse -- and the filtered list this loop builds is shorter than the
+  /// file's own whenever a pseudo-track was skipped, so a position is the
+  /// wrong id to hand mpv. Selection reads this; the menu keeps comparing
+  /// [index].
+  final String? trackId;
+
   const PlayerEmbeddedSubtitle({
     required this.index,
     required this.title,
@@ -111,7 +119,12 @@ class PlayerEmbeddedSubtitle {
     this.isDefault = false,
     this.isForcedTrack = false,
     this.qualifier,
+    this.trackId,
   });
+
+  /// The id mpv selects by: the reported one, or the display index when the
+  /// file gave no parsable id at all.
+  String get selectionId => trackId ?? index.toString();
 
   /// Marked forced by the file's flag, or by its title.
   bool get isForced =>
@@ -125,7 +138,11 @@ class PlayerEmbeddedSubtitle {
   String get displayName {
     final name = (language?.isNotEmpty ?? false) ? language! : title;
     final extra = qualifier;
-    return extra == null || extra.isEmpty ? name : '$name · $extra';
+    if (extra == null || extra.isEmpty) return name;
+    // A bare number joins directly, the way the audio menu numbers
+    // identical rows ("Spanish #1") rather than as a middot aside.
+    if (extra.startsWith('#')) return '$name $extra';
+    return '$name · $extra';
   }
 
   /// The codec mpv reports, lowercased, with the container title as a
@@ -186,6 +203,7 @@ class PlayerEmbeddedSubtitle {
     isDefault: isDefault,
     isForcedTrack: isForcedTrack,
     qualifier: qualifier,
+    trackId: trackId,
   );
 }
 

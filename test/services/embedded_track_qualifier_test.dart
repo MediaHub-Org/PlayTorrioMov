@@ -8,13 +8,21 @@ import 'package:playtorriomov/models/subtitle/subtitle_model.dart';
 import 'package:playtorriomov/services/subtitles/subtitle_languages.dart';
 
 /// The labels the player would draw for tracks with these tags and titles.
-List<String> labelsFor(List<String?> languages, List<String?> titles) {
+List<String> labelsFor(
+  List<String?> languages,
+  List<String?> titles, {
+  List<String?> codecs = const [],
+}) {
   final names = uniqueTrackLanguageNames(
     languages,
     titles,
     numberDuplicates: false,
   );
-  final qualifiers = embeddedTrackQualifiers(names, titles);
+  final qualifiers = embeddedTrackQualifiers(
+    names,
+    titles,
+    codecs: codecs,
+  );
   return [
     for (var i = 0; i < names.length; i++)
       PlayerEmbeddedSubtitle(
@@ -46,23 +54,34 @@ void main() {
       expect(labelsFor(['eng'], ['Signs & Songs']), ['English']);
     });
 
-    test('nothing is added when the titles say nothing more', () {
-      // Forced and SDH are badges, the language is the name, [ES] is the
-      // region: none of it is a qualifier, so both rows stay as they were.
+    test('the format separates twins the titles cannot', () {
+      // Forced and SDH are badges, the language is the name: none of it is
+      // a qualifier -- but a PGS beside an SRT really are different things
+      // to pick, so the format names the rows instead of nothing doing so.
       expect(
-        labelsFor(['eng', 'eng'], ['English', 'English [SDH]']),
-        ['English', 'English'],
+        labelsFor(
+          ['eng', 'eng'],
+          ['English', 'English [SDH]'],
+          codecs: ['hdmv_pgs_subtitle', 'subrip'],
+        ),
+        ['English · PGS', 'English · SRT'],
       );
       expect(
-        labelsFor(['eng', 'eng'], ['English (Forced)', 'English']),
-        ['English', 'English'],
+        labelsFor(
+          ['eng', 'eng'],
+          ['English (Forced)', 'English'],
+          codecs: ['subrip', 'ass'],
+        ),
+        ['English · SRT', 'English · ASS'],
       );
     });
 
-    test('identical titles are not invented a difference', () {
+    test('identical twins with identical formats take numbers', () {
+      // Nothing -- title, format, nothing -- tells these apart, so the
+      // rows take numbers rather than reading the same word twice.
       expect(
         labelsFor(['eng', 'eng'], ['Commentary', 'Commentary']),
-        ['English', 'English'],
+        ['English #1', 'English #2'],
       );
     });
 

@@ -444,6 +444,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             ],
             isSelected: widget.isSubtitleEnabled &&
                 widget.selectedEmbeddedIndex == track.index,
+            showSelectionMarker: false,
             onTap: () => widget.onSelectEmbedded(track),
           ),
         );
@@ -510,6 +511,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             // While the files are open the tick moves down to the file:
             // the group staying ticked beside it read as two selections.
             isSelected: groupTicked && !isExpanded,
+            showSelectionMarker: false,
             trailing: group.variants.length > 1                ? Icon(
                     isExpanded
                         ? Icons.expand_less_rounded
@@ -546,6 +548,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
                 leading: const SizedBox(width: 0),
                 title: _variantLabel(context, variant),
                 isSelected: fileTicked,
+                showSelectionMarker: false,
                 onTap: () => widget.onSelectVariant(variant),
               ),
             );
@@ -582,28 +585,27 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
 
   /// What one file in an expanded language is called.
   ///
-  /// The provider and the release tags, which are the only things that tell
-  /// two files for one language apart. They are hidden until the row is
-  /// opened, because at the top level they are noise -- but once a viewer is
-  /// choosing between files, they are the whole basis for the choice.
-  ///
-  /// The format is left out when the title already ends in it. A provider
-  /// that names its files "Movie.srt" produced rows reading "SubtitleCat ·
-  /// SRT" beside a title that said SRT, which is the same fact twice.
+  /// The release title, which is the only thing that tells two files for
+  /// one language apart -- and nothing else. The provider prefix used to
+  /// ride along on every row ("OpenSubtitles · SRT · …"), which named the
+  /// shop rather than the goods; the format stays only where the title
+  /// names nothing (empty, 'standard', or a bare download id like the
+  /// numeric ones OpenSubtitles sends). SDH and forced markers stay, since
+  /// they change what the file is rather than where it came from.
   String _variantLabel(BuildContext context, SubtitleVariant variant) {
-    final title = variant.title.trim();
+    final title = variant.title.trim().replaceAll(RegExp(r'\s+'), ' ');
     final format = variant.format.toUpperCase();
-    final titleSaysFormat = format.isNotEmpty &&
-        title.toUpperCase().endsWith(format);
+    final bare = title.isEmpty ||
+        title.toLowerCase() == 'standard' ||
+        RegExp(r'^\d+$').hasMatch(title);
+    final name = bare
+        ? (format.isNotEmpty ? format : variant.title)
+        : title;
     final parts = <String>[
-      if (variant.providerName.isNotEmpty) variant.providerName,
-      if (format.isNotEmpty && !titleSaysFormat) format,
+      if (name.isNotEmpty) name,
       if (variant.isHearingImpaired) context.l10n.subsSdhShort,
       if (variant.isForced) context.l10n.subsForced,
     ];
-    if (title.isNotEmpty && title.toLowerCase() != 'standard') {
-      parts.add(title);
-    }
     return parts.isEmpty ? variant.title : parts.join(' · ');
   }
 

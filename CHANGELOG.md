@@ -14,6 +14,17 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   any Simkl app registered today, regardless of how correct the client ID
   was. Verified against Simkl's real API with a live client ID, not
   assumed from docs.
+- **Twin embedded subtitle tracks no longer read identically.** Two
+  "Spanish" rows with matching titles fell through every naming rule and
+  stayed twins. They now fall back to the format (a PGS beside an SRT),
+  and only to numbers when the formats match too -- the audio menu's own
+  shape for indistinguishable rows.
+- **A rejected embedded track no longer stays ticked.** Selection claimed
+  the track before mpv confirmed it, so a file mpv could not take still
+  showed selected with nothing rendering. The menu now rolls back to the
+  previous state on a miss, and selection reads mpv's own reported track
+  id instead of a list position that drifts whenever a pseudo-track is
+  skipped.
 
 ### Changed
 
@@ -52,6 +63,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   of carrying one cloud provider instead of two -- see
   `docs/SYNC_AND_BACKUP.md`'s "Google Drive: built, then removed" for the
   reasoning. Auto-backup now tries Dropbox, then WebDAV.
+
+- **Subtitle panel rows mark selection by highlight only.** Every row
+  carried an unchecked radio circle by default, which read as a choice
+  waiting to be made rather than a list to browse. The fill, edge and bold
+  title already say which row is on; the audio menu keeps its radios.
+- **Online subtitle file rows name the file, not the provider.** Rows read
+  "Provider · SRT · …" -- the shop, not the goods. They now read the
+  release title with its SDH/forced markers, falling back to the format
+  where the title is empty or a bare download id.
 
 ### Added
 

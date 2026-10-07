@@ -93,8 +93,14 @@ void main() {
       );
       await tester.pump();
 
+      // No row may read as selected -- and the panel draws no radios at
+      // all, so the highlight is the only selection mark either way.
+      final rows = tester
+          .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+          .toList();
+      expect(rows.where((r) => r.isSelected), isEmpty);
       expect(find.byIcon(Icons.radio_button_checked_rounded), findsNothing);
-      expect(find.byIcon(Icons.radio_button_unchecked_rounded), findsWidgets);
+      expect(find.byIcon(Icons.radio_button_unchecked_rounded), findsNothing);
     });
 
     testWidgets('the selected file is the only one marked', (tester) async {
@@ -116,13 +122,19 @@ void main() {
       await tester.pump();
 
       // The language row is marked, and so is the file inside it once the
-      // row is opened -- but never both files.
-      expect(find.byIcon(Icons.radio_button_checked_rounded), findsOneWidget);
+      // row is opened -- but never both files. Marked means highlighted:
+      // the panel draws no radios.
+      final rows = tester
+          .widgetList<PlayerMenuRow>(find.byType(PlayerMenuRow))
+          .toList();
+      expect(rows.where((r) => r.isSelected).length, 1);
+      expect(find.byIcon(Icons.radio_button_checked_rounded), findsNothing);
+      expect(find.byIcon(Icons.radio_button_unchecked_rounded), findsNothing);
     });
   });
 
-  group('a file row does not repeat its own format', () {
-    testWidgets('the format is dropped when the title already says it', (
+  group('a file row names the file, not the provider', () {
+    testWidgets('the provider prefix is dropped', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -154,12 +166,13 @@ void main() {
       await tester.tap(find.text('Arabic'));
       await tester.pump();
 
-      // "SubtitleCat · SRT · Movie.srt" says SRT twice.
+      // Just the file name: the shop is not the goods.
+      expect(find.text('Movie.srt'), findsNWidgets(2));
+      expect(find.textContaining('SubtitleCat'), findsNothing);
       expect(find.textContaining('SRT'), findsNothing);
-      expect(find.textContaining('SubtitleCat'), findsWidgets);
     });
 
-    testWidgets('the format is kept when the title does not say it', (
+    testWidgets('a bare download id falls back to the format', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -169,9 +182,9 @@ void main() {
               language: 'Arabic',
               variants: [
                 SubtitleVariant(
-                  providerName: 'SubDL',
+                  providerName: 'OpenSubtitles',
                   language: 'Arabic',
-                  title: 'BluRay',
+                  title: '847201',
                   downloadUrl: 'https://x/1.srt',
                   format: 'srt',
                 ),
@@ -191,7 +204,12 @@ void main() {
       await tester.tap(find.text('Arabic'));
       await tester.pump();
 
-      expect(find.textContaining('SRT'), findsWidgets);
+      // A numeric id names nothing, so the format is what tells the row
+      // apart; a real title needs no such help.
+      expect(find.text('SRT'), findsOneWidget);
+      expect(find.text('WEB-DL'), findsOneWidget);
+      expect(find.textContaining('OpenSubtitles'), findsNothing);
+      expect(find.textContaining('SubDL'), findsNothing);
     });
   });
 
@@ -243,10 +261,11 @@ void main() {
 
       // One tap does both: it picks the best file, the way Netflix and
       // Disney+ do, and opens the rest so a wrong pick is visible without a
-      // second gesture to discover.
+      // second gesture to discover. Both files read "SRT": untitled test
+      // variants fall back to the format.
       expect(picked?.downloadUrl, 'best');
       expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
-      expect(find.textContaining('test'), findsWidgets);
+      expect(find.text('SRT'), findsNWidgets(2));
     });
 
     testWidgets('tapping the open row again collapses it', (tester) async {

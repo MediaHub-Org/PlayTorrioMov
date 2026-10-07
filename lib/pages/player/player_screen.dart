@@ -1053,10 +1053,12 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
     // Where a region still leaves two tracks reading alike (a full English
     // track beside a "Signs & Songs" one), the container's own title says
-    // which is which.
+    // which is which -- and where even the titles match, the format and at
+    // last a number do, so no two rows ever read the same.
     final qualifiers = embeddedTrackQualifiers(
       uniqueNames,
       keptSubs.map((t) => t.title).toList(growable: false),
+      codecs: keptSubs.map((t) => t.codec).toList(growable: false),
     );
 
     for (var i = 0; i < keptSubs.length; i++) {
@@ -1098,6 +1100,7 @@ class _PlayerScreenState extends State<PlayerScreen>
           // looking for "forced" in the word "Spanish".
           containerTitle: t.title,
           qualifier: qualifiers[i],
+          trackId: t.id,
         ),
       );
     }
@@ -1460,6 +1463,11 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   Future<void> _selectEmbeddedSubtitle(PlayerEmbeddedSubtitle embedded) async {
+    // Captured first: a rejected track must leave the menu exactly as it
+    // was, not ticked on a subtitle mpv never took.
+    final prevIndex = _selectedEmbeddedSubtitleIndex;
+    final prevVariant = _currentSubtitleVariant;
+    final wasEnabled = _isSubtitleEnabled;
     setState(() {
       _selectedEmbeddedSubtitleIndex = embedded.index;
       _currentSubtitleVariant = SubtitleVariant(
@@ -1488,6 +1496,15 @@ class _PlayerScreenState extends State<PlayerScreen>
     // set never throws -- it only logs -- so a rejected track id used to
     // fail silently, with the menu showing selected and mpv on `no`.
     final selected = await _selectEmbeddedTrack(embedded);
+    if (!selected && mounted) {
+      // The snackbar below says it failed; the menu must agree with it
+      // rather than holding a tick on the track that did not load.
+      setState(() {
+        _selectedEmbeddedSubtitleIndex = prevIndex;
+        _currentSubtitleVariant = prevVariant;
+        _isSubtitleEnabled = wasEnabled;
+      });
+    }
     if (selected) {
       if (embedded.needsLibass) {
         PlayerSettings.embeddedSubtitleActive.value = true;
@@ -1530,7 +1547,9 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// mpv had never heard of. One retry, for the transient case; a second
   /// miss is logged by the diagnostics call that follows and left alone.
   Future<bool> _selectEmbeddedTrack(PlayerEmbeddedSubtitle embedded) async {
-    final wanted = embedded.index.toString();
+    // The reported id, not the display index: the two agree except where
+    // the id did not parse, and exactly there the index is a guess.
+    final wanted = embedded.selectionId;
     for (var attempt = 0; attempt < 2; attempt++) {
       try {
         await _player.setSubtitleTrack(

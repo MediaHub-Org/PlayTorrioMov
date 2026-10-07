@@ -3,10 +3,13 @@
 // The player's popovers are one family, and two things about them had drifted
 // apart: their widths (280, 320 and 330, so the panel jumped sideways as a
 // viewer moved between them) and how they mark a selection (a leading radio
-// in three menus, a trailing check in the aspect menu).
+// everywhere except the aspect menu's trailing check).
 //
-// Both are the kind of thing that regresses one menu at a time, so they are
-// asserted across every menu rather than per menu.
+// The subtitle menu has since opted out of the radio: every row would carry
+// an unchecked circle by default, which reads as a choice waiting to be made
+// rather than a list to browse, so its highlight (fill, edge, bold title) is
+// the only selection mark. Both shapes are asserted across every menu rather
+// than per menu, because either regresses one menu at a time.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
@@ -153,7 +156,7 @@ void main() {
       expect(find.byIcon(Icons.check_rounded), findsNothing);
     });
 
-    testWidgets('the subtitle menu uses a radio', (tester) async {
+    testWidgets('the subtitle menu marks by highlight, not a radio', (tester) async {
       await tester.pumpWidget(
         wrap(
           PlayerSubtitleMenu(
@@ -182,7 +185,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.radio_button_unchecked_rounded), findsWidgets);
+      // No radios anywhere in this panel -- checked or unchecked -- while
+      // every other menu keeps them. The highlight carries the selection.
+      expect(find.byIcon(Icons.radio_button_checked_rounded), findsNothing);
+      expect(find.byIcon(Icons.radio_button_unchecked_rounded), findsNothing);
       expect(find.byIcon(Icons.check_rounded), findsNothing);
     });
   });

@@ -29,6 +29,12 @@ class PlayerMenuRow extends StatelessWidget {
   /// Drawn after the badges. A chevron, where a row opens something.
   final Widget? trailing;
 
+  /// Whether the leading radio mark is drawn. The subtitle panel hides it:
+  /// every row would carry an unchecked circle by default, which reads as a
+  /// choice waiting to be made rather than a list to browse, and the
+  /// highlight (fill, edge, bold title) already says which row is on.
+  final bool showSelectionMarker;
+
   const PlayerMenuRow({
     super.key,
     required this.leading,
@@ -37,6 +43,7 @@ class PlayerMenuRow extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.trailing,
+    this.showSelectionMarker = true,
   });
 
   @override
@@ -62,18 +69,20 @@ class PlayerMenuRow extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // A radio mark, not a filled row: which one of these is on is
-                  // the question the list answers, and a tick says it without
-                  // leaning on the accent color to carry the meaning alone.
-                  Icon(
-                    isSelected
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_unchecked_rounded,
-                    size: context.rem(0.9375),
-                    color:
-                        isSelected ? PlayerTheme.accent : PlayerTheme.inkDisabled,
-                  ),
-                  SizedBox(width: context.rem(AppRem.sm)),
+                  if (showSelectionMarker) ...[
+                    // A radio mark, not a filled row: which one of these is on is
+                    // the question the list answers, and a tick says it without
+                    // leaning on the accent color to carry the meaning alone.
+                    Icon(
+                      isSelected
+                          ? Icons.radio_button_checked_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      size: context.rem(0.9375),
+                      color:
+                          isSelected ? PlayerTheme.accent : PlayerTheme.inkDisabled,
+                    ),
+                    SizedBox(width: context.rem(AppRem.sm)),
+                  ],
                   leading,
                   SizedBox(width: context.rem(AppRem.sm)),
                   Expanded(

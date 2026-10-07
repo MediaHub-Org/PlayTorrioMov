@@ -546,19 +546,24 @@ String? _titleQualifier(String? title) {
 /// do not read the same.
 ///
 /// Two English tracks -- a full translation and a "Signs & Songs" one, which
-/// is how most anime releases ship -- both read "English", and with numbering
-/// off for embedded lists (see [uniqueTrackLanguageNames]) the choice between
-/// them was invisible. The container's own title is the only place the
-/// difference is written, so it is used, but only where two labels collide: a
-/// language with one track is just its name, and a title that matches the
-/// label already (every track says "English") adds nothing.
+/// is how most anime releases ship -- both read "English", and the choice
+/// between them was invisible. The container's own title is the first place
+/// the difference is looked for.
+///
+/// Where the titles say nothing more (identical, or all noise), the format
+/// is next: a PGS beside an SRT really are different things to pick, and the
+/// row already carries the format as a chip, so the name agrees with it
+/// rather than inventing alongside it. Only when the formats match too do
+/// the twins take numbers -- the honest answer for tracks no metadata tells
+/// apart, the same shape the audio menu uses for identical rows.
 ///
 /// [labels] are the names from [uniqueTrackLanguageNames]; a track with no
 /// label is skipped, since [embeddedFallbackTitle] already used its title.
 List<String?> embeddedTrackQualifiers(
   List<String> labels,
-  List<String?> titles,
-) {
+  List<String?> titles, {
+  List<String?> codecs = const [],
+}) {
   final byLabel = <String, List<int>>{};
   for (var i = 0; i < labels.length; i++) {
     if (labels[i].isEmpty) continue;
@@ -570,9 +575,27 @@ List<String?> embeddedTrackQualifiers(
     final found = {
       for (final i in group) i: _titleQualifier(i < titles.length ? titles[i] : null),
     };
-    // Identical (or all empty): nothing tells them apart, so nothing is added.
-    if (found.values.toSet().length < 2) continue;
-    found.forEach((i, q) => qualifiers[i] = q);
+    if (found.values.toSet().length >= 2) {
+      found.forEach((i, q) => qualifiers[i] = q);
+      continue;
+    }
+    // Identical (or all empty) titles: fall back to the format, then to
+    // numbers. Leaving both rows reading "Spanish" is what the numbering
+    // rule was protecting against in the first place -- just with words
+    // instead of digits where words exist.
+    final formats = {
+      for (final i in group)
+        i: codecShortLabel(i < codecs.length ? codecs[i] : null),
+    };
+    if (formats.values.toSet().length >= 2) {
+      formats.forEach((i, f) => qualifiers[i] = f);
+      continue;
+    }
+    var n = 0;
+    for (final i in group) {
+      n++;
+      qualifiers[i] = '#$n';
+    }
   }
   return qualifiers;
 }

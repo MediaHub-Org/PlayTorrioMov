@@ -139,4 +139,49 @@ void main() {
       expect(track(codec: 'ass').isImageSubtitle, isFalse);
     });
   });
+
+  group('an embedded track is selected by its reported id', () {
+    // The display index falls back to list position when the id does not
+    // parse -- and the filtered list is shorter than the file's own whenever
+    // a pseudo-track was skipped, so a position is the wrong id to hand
+    // mpv. Selection reads the reported id; the menu keeps comparing the
+    // display index.
+    test('selectionId prefers the reported id', () {
+      const t = PlayerEmbeddedSubtitle(
+        index: 3,
+        title: 'Spanish',
+        language: 'Spanish',
+        trackId: '7',
+      );
+      expect(t.selectionId, '7');
+    });
+
+    test('selectionId falls back to the display index', () {
+      expect(track().selectionId, '1');
+    });
+
+    test('withFlags keeps the reported id', () {
+      const t = PlayerEmbeddedSubtitle(
+        index: 3,
+        title: 'Spanish',
+        language: 'Spanish',
+        trackId: '7',
+      );
+      expect(
+        t.withFlags(isDefault: false, isForcedTrack: false).selectionId,
+        '7',
+      );
+    });
+
+    test('a bare number joins the name directly', () {
+      const t = PlayerEmbeddedSubtitle(
+        index: 1,
+        title: 'Spanish',
+        language: 'Spanish',
+        qualifier: '#2',
+      );
+      // The audio menu's shape ("Spanish #2"), not a middot aside.
+      expect(t.displayName, 'Spanish #2');
+    });
+  });
 }
