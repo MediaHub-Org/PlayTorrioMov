@@ -134,20 +134,19 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('the center controls tooltips follow the app language',
+  testWidgets('the center play/pause tooltip follows the app language',
       (tester) async {
     await tester.pumpWidget(inLocale(
       'pt',
-      PlayerCenterControls(
-        isPlaying: true,
-        onPlayPause: () {},
-        onSeekBack30: () {},
-        onSeekForward30: () {},
-      ),
+      PlayerCenterControls(isPlaying: true, onPlayPause: () {}),
     ));
+    expect(find.byTooltip('Pausar'), findsOneWidget);
 
-    expect(find.byTooltip('Voltar 30 segundos'), findsOneWidget);
-    expect(find.byTooltip('Avançar 30 segundos'), findsOneWidget);
+    await tester.pumpWidget(inLocale(
+      'pt',
+      PlayerCenterControls(isPlaying: false, onPlayPause: () {}),
+    ));
+    expect(find.byTooltip('Reproduzir'), findsOneWidget);
   });
 
   testWidgets('the shared error view follows the app language', (tester) async {

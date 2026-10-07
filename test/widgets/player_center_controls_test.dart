@@ -11,71 +11,37 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        wrap(
-          PlayerCenterControls(
-            isPlaying: false,
-            onPlayPause: () {},
-            onSeekBack30: () {},
-            onSeekForward30: () {},
-          ),
-        ),
+        wrap(PlayerCenterControls(isPlaying: false, onPlayPause: () {})),
       );
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
       expect(find.byIcon(Icons.pause_rounded), findsNothing);
 
       await tester.pumpWidget(
-        wrap(
-          PlayerCenterControls(
-            isPlaying: true,
-            onPlayPause: () {},
-            onSeekBack30: () {},
-            onSeekForward30: () {},
-          ),
-        ),
+        wrap(PlayerCenterControls(isPlaying: true, onPlayPause: () {})),
       );
       expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
       expect(find.byIcon(Icons.play_arrow_rounded), findsNothing);
     });
 
-    testWidgets('each button reports through its own callback', (
-      tester,
-    ) async {
-      var playPauseTaps = 0;
-      var back30Taps = 0;
-      var forward30Taps = 0;
-
+    testWidgets('reports a tap through its callback', (tester) async {
+      var taps = 0;
       await tester.pumpWidget(
-        wrap(
-          PlayerCenterControls(
-            isPlaying: false,
-            onPlayPause: () => playPauseTaps++,
-            onSeekBack30: () => back30Taps++,
-            onSeekForward30: () => forward30Taps++,
-          ),
-        ),
+        wrap(PlayerCenterControls(isPlaying: false, onPlayPause: () => taps++)),
       );
 
       await tester.tap(find.byIcon(Icons.play_arrow_rounded));
-      await tester.tap(find.byIcon(Icons.replay_30_rounded));
-      await tester.tap(find.byIcon(Icons.forward_30_rounded));
-
-      expect(playPauseTaps, 1);
-      expect(back30Taps, 1);
-      expect(forward30Taps, 1);
+      expect(taps, 1);
     });
 
-    testWidgets('a live stream gets play/pause alone, still centered', (
-      tester,
-    ) async {
-      // Seeking has no meaning without a duration, so the ±30s buttons take
-      // no callbacks on a live stream. The button that remains has to stay
-      // where it was, or Live TV reads as a different player -- which is
-      // what sharing this widget is for.
+    testWidgets('stays centered -- no seek buttons beside it', (tester) async {
+      // Removed rather than kept behind a flag: every platform already has a
+      // better way to do the same jump (see PlayerCenterControls's own doc
+      // comment). This is the one thing left to protect against it quietly
+      // coming back as a second, near-identical control.
       await tester.pumpWidget(
         wrap(PlayerCenterControls(isPlaying: false, onPlayPause: () {})),
       );
 
-      expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
       expect(find.byIcon(Icons.replay_30_rounded), findsNothing);
       expect(find.byIcon(Icons.forward_30_rounded), findsNothing);
 
@@ -84,46 +50,6 @@ void main() {
         tester.getCenter(find.byIcon(Icons.play_arrow_rounded)).dx,
         moreOrLessEquals(screenCentre, epsilon: 1.0),
       );
-    });
-
-    testWidgets('the seekable layout keeps play/pause between the skips', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          PlayerCenterControls(
-            isPlaying: true,
-            onPlayPause: () {},
-            onSeekBack30: () {},
-            onSeekForward30: () {},
-          ),
-        ),
-      );
-
-      final back = tester.getCenter(find.byIcon(Icons.replay_30_rounded)).dx;
-      final play = tester.getCenter(find.byIcon(Icons.pause_rounded)).dx;
-      final forward =
-          tester.getCenter(find.byIcon(Icons.forward_30_rounded)).dx;
-
-      expect(back, lessThan(play));
-      expect(forward, greaterThan(play));
-    });
-
-    testWidgets('one side alone is honoured rather than dropping both', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        wrap(
-          PlayerCenterControls(
-            isPlaying: true,
-            onPlayPause: () {},
-            onSeekForward30: () {},
-          ),
-        ),
-      );
-
-      expect(find.byIcon(Icons.replay_30_rounded), findsNothing);
-      expect(find.byIcon(Icons.forward_30_rounded), findsOneWidget);
     });
   });
 }

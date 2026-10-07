@@ -240,8 +240,6 @@
   "playerCastStop": "إيقاف البث",
   "playerDiscardChanges": "تجاهل التغييرات",
   "playerDone": "تم",
-  "playerBack30": "رجوع 30 ثانية",
-  "playerForward30": "تقديم 30 ثانية",
   "playerSecondsN": "{seconds} ثانية",
   "playerDismiss": "إخفاء (✕)",
   "playerEpisodeCount": "{count} حلقة",

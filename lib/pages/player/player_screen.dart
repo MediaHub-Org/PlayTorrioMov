@@ -2987,7 +2987,8 @@ class _PlayerScreenState extends State<PlayerScreen>
             child: PlayerSeekFeedback(flash: _seekFlash),
           ),
 
-        // Centered Play/Pause + ±10s (YouTube/Netflix style)
+        // Centered Play/Pause. No seek buttons beside it -- see
+        // PlayerCenterControls's own doc comment for why.
         if (!_isLoading)
           Positioned.fill(
             child: ExcludeFocus(
@@ -3017,10 +3018,6 @@ class _PlayerScreenState extends State<PlayerScreen>
                       playPauseFocusNode: _playPauseFocus,
                       isPlaying: _isPlaying,
                       onPlayPause: _togglePlayPause,
-                      onSeekBack30: () =>
-                          _seekRelative(const Duration(seconds: -30)),
-                      onSeekForward30: () =>
-                          _seekRelative(const Duration(seconds: 30)),
                     ),
                   ),
                 ),

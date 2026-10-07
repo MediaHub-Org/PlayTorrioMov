@@ -8,10 +8,10 @@ import 'package:playtorriomov/widgets/player/player_center_controls.dart';
 import 'package:playtorriomov/widgets/player/player_transport.dart';
 
 /// The player's layout in miniature, wired the way `PlayerScreen` wires it:
-/// the centered play/pause with its seek buttons, the transport bar pinned to
-/// the bottom, and the named stops between them. A remote has only the
-/// arrows, so what these tests hold is that it can reach every control and
-/// that each arrow goes where a person expects (#80).
+/// the centered play/pause, the transport bar pinned to the bottom, and the
+/// named stops between them. A remote has only the arrows, so what these
+/// tests hold is that it can reach every control and that each arrow goes
+/// where a person expects (#80).
 class _Nodes {
   final playPause = FocusNode(debugLabel: 'playPause');
   final seek = FocusNode(debugLabel: 'seek');
@@ -45,8 +45,6 @@ Widget _player(_Nodes n) => MaterialApp(
             child: PlayerCenterControls(
               isPlaying: true,
               onPlayPause: () {},
-              onSeekBack30: () {},
-              onSeekForward30: () {},
               playPauseFocusNode: n.playPause,
             ),
           ),

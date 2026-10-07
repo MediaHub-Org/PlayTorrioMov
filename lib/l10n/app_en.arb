@@ -312,8 +312,6 @@
   "playerCastStop": "Stop casting",
   "playerDiscardChanges": "Discard changes",
   "playerDone": "Done",
-  "playerBack30": "Back 30 seconds",
-  "playerForward30": "Forward 30 seconds",
   "playerSecondsN": "{seconds} seconds",
   "@playerSecondsN": {"description": "Seek feedback bubble, e.g. \"10 seconds\"", "placeholders": {"seconds": {"type": "int"}}},
   "playerDismiss": "Dismiss (✕)",

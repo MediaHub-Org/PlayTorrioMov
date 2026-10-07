@@ -18,7 +18,7 @@ void main() {
       final source = _read(livePlayer);
       for (final widget in const [
         'PlayerIconButton', // buttons
-        'PlayerCenterControls', // play/pause and seek
+        'PlayerCenterControls', // the centered play/pause
         'PlayerVolumeControl', // volume, including the boost range
         'SleepTimerMenu', // the moon button's popover
         'PlayerAspectMenu', // the panel it steps into

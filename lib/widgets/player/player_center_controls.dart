@@ -14,28 +14,27 @@ final _activators = {
   LogicalKeyboardKey.gameButtonA,
 };
 
-/// Centered play/pause with ±30s seek on either side. Lives over the middle
-/// of the video, not in the bottom transport bar, so it stays reachable (and
-/// visible) regardless of how far down the bottom bar's own controls get
-/// trimmed.
+/// Centered play/pause. Lives over the middle of the video, not in the
+/// bottom transport bar, so it stays reachable (and visible) regardless of
+/// how far down the bottom bar's own controls get trimmed -- and it is the
+/// one thing a remote's first arrow press can land on when the controls
+/// reappear, the anchor the rest of the D-pad traversal is built around
+/// (#80).
 ///
-/// ±30s rather than ±10s so that each amount has exactly one affordance:
-/// the double-tap side zones are the small nudge, these buttons are the
-/// bigger jump. They used to be ±10s as well, which on a phone meant the
-/// gesture and the buttons did the same thing while ±30s sat in a third
-/// place, the transport bar -- three seek controls, two of them identical.
-///
-/// The seek callbacks are optional so a live stream can use the same widget:
-/// seeking has no meaning without a duration, and the alternative -- a
-/// second, near-identical play/pause somewhere else -- is how the Live TV
-/// player drifted away from this one in the first place. With them null the
-/// play button stands alone, centered, at the same size and in the same
-/// place.
+/// Used to carry ±30s seek buttons on either side. Removed rather than kept
+/// behind a flag: every platform already has a better way to do the same
+/// jump -- double-tap zones and keyboard seek on touch/desktop, and the
+/// transport bar's own seek bar on a TV remote, which nudges 10s and
+/// accelerates to a full 2 minutes per press the longer Left/Right is held
+/// (see `PlayerSeekBar._stepFor`). The buttons were a second, bigger-only
+/// affordance sitting over the middle of the picture for something every
+/// platform could already do -- the double-tap gesture study that picked
+/// ±30s over ±10s to begin with ("three seek controls, two of them
+/// identical") reached the same conclusion about this one, just a release
+/// later.
 class PlayerCenterControls extends StatelessWidget {
   final bool isPlaying;
   final VoidCallback onPlayPause;
-  final VoidCallback? onSeekBack30;
-  final VoidCallback? onSeekForward30;
 
   /// The play/pause button's focus node, so the screen can hand a remote's
   /// first arrow press to it when the controls come back on screen.
@@ -45,8 +44,6 @@ class PlayerCenterControls extends StatelessWidget {
     super.key,
     required this.isPlaying,
     required this.onPlayPause,
-    this.onSeekBack30,
-    this.onSeekForward30,
     this.playPauseFocusNode,
   });
 
@@ -54,122 +51,15 @@ class PlayerCenterControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isCompact = screenWidth < 680;
-    final sideSize = context.rem(isCompact ? 3.25 : 4);
-    final sideIconSize = context.rem(isCompact ? 1.625 : 2);
     final playSize = context.rem(isCompact ? 4.25 : 5.25);
     final playIconSize = context.rem(isCompact ? 2.125 : 2.625);
-    final gap = context.rem(isCompact ? 1.75 : 2.75);
 
-    final seekBack = onSeekBack30;
-    final seekForward = onSeekForward30;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        if (seekBack != null) ...[
-          _CenterButton(
-            size: sideSize,
-            iconSize: sideIconSize,
-            icon: Icons.replay_30_rounded,
-            tooltip: context.l10n.playerBack30,
-            onTap: seekBack,
-          ),
-          SizedBox(width: gap),
-        ],
-        _PlayPauseButton(
-          isPlaying: isPlaying,
-          size: playSize,
-          iconSize: playIconSize,
-          onTap: onPlayPause,
-          focusNode: playPauseFocusNode,
-        ),
-        if (seekForward != null) ...[
-          SizedBox(width: gap),
-          _CenterButton(
-            size: sideSize,
-            iconSize: sideIconSize,
-            icon: Icons.forward_30_rounded,
-            tooltip: context.l10n.playerForward30,
-            onTap: seekForward,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _CenterButton extends StatefulWidget {
-  final double size;
-  final double iconSize;
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  const _CenterButton({
-    required this.size,
-    required this.iconSize,
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  @override
-  State<_CenterButton> createState() => _CenterButtonState();
-}
-
-class _CenterButtonState extends State<_CenterButton> {
-  bool _hovered = false;
-  bool _focused = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: widget.tooltip,
-      child: Focus(
-        onFocusChange: (focused) => setState(() => _focused = focused),
-        onKeyEvent: (node, event) {
-          if (event is! KeyDownEvent) return KeyEventResult.ignored;
-          if (!_activators.contains(event.logicalKey)) {
-            return KeyEventResult.ignored;
-          }
-          widget.onTap();
-          return KeyEventResult.handled;
-        },
-        child: FocusRing(
-          visible: _focused,
-          borderRadius: widget.size / 2, // ratio: half the button, a circle
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            onEnter: (_) => setState(() => _hovered = true),
-            onExit: (_) => setState(() => _hovered = false),
-            child: GestureDetector(
-              onTap: widget.onTap,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: widget.size,
-                height: widget.size,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                    alpha: (_hovered || _focused) ? 0.20 : 0.12,
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    width: 1, // px: a hairline, not a layout size
-                  ),
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  widget.icon,
-                  color: Colors.white,
-                  size: widget.iconSize,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return _PlayPauseButton(
+      isPlaying: isPlaying,
+      size: playSize,
+      iconSize: playIconSize,
+      onTap: onPlayPause,
+      focusNode: playPauseFocusNode,
     );
   }
 }

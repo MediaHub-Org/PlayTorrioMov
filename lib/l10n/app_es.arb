@@ -240,8 +240,6 @@
   "playerCastStop": "Dejar de transmitir",
   "playerDiscardChanges": "Descartar cambios",
   "playerDone": "Listo",
-  "playerBack30": "Retroceder 30 segundos",
-  "playerForward30": "Avanzar 30 segundos",
   "playerSecondsN": "{seconds} segundos",
   "playerDismiss": "Descartar (✕)",
   "playerEpisodeCount": "{count} episodios",

@@ -3,6 +3,20 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **The centered ±30s seek buttons are gone; only play/pause stays over the
+  middle of the video.** Every platform already has a better way to do the
+  same jump: double-tap zones and keyboard seek on touch/desktop, and the
+  transport bar's own seek bar on a TV remote, which nudges 10s and
+  accelerates up to a full 2 minutes per press the longer Left/Right is
+  held. The buttons were a second, bigger-only affordance sitting over the
+  middle of the picture for something every platform could already do.
+  Untested against a real touchscreen or a TV remote -- say if the
+  remaining ways to seek do not cover a case these did.
+
 ## [1.9.5+53] - 2026-10-08
 
 Subtitle panel buttons that react to a tap, Simkl as the one sync service (Trakt's paid-VIP gate made it impractical to keep offering), and confirmed Dropbox/Google Drive backups restore each other.

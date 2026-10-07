@@ -1225,25 +1225,14 @@ class _IptvPlayerPageState extends State<IptvPlayerPage>
                           ),
 
                           // Centered play/pause -- the same widget, size and
-                          // position as Movies/Series/Anime, minus the ±10s
-                          // buttons, which have no meaning on a live stream.
-                          // It used to be a bare IconButton at the left end of
-                          // the bottom bar, which is the single most visible
-                          // way this player read as a different app.
+                          // position as Movies/Series/Anime. It used to be a
+                          // bare IconButton at the left end of the bottom
+                          // bar, which is the single most visible way this
+                          // player read as a different app.
                           Center(
                             child: PlayerCenterControls(
                               isPlaying: _isPlaying,
                               onPlayPause: _togglePlayPause,
-                              // ±30s, matching Movies/Series/Anime: the
-                              // buttons are the bigger jump, the double-tap
-                              // zones the small nudge. Null on live, where
-                              // seeking has no meaning.
-                              onSeekBack30: isLive
-                                  ? null
-                                  : () => _seekRelative(-30),
-                              onSeekForward30: isLive
-                                  ? null
-                                  : () => _seekRelative(30),
                             ),
                           ),
 
