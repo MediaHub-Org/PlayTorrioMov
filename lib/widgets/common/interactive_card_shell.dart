@@ -63,6 +63,26 @@ class _InteractiveCardShellState extends State<InteractiveCardShell> {
   bool _pressed = false;
   bool _focused = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // The highlight mode flips when the viewer switches input (touch/mouse
+    // to keys/D-pad), which is exactly when focused styling should appear
+    // or disappear -- without this a card focused by FirstFocusScope keeps
+    // its zoom for a mouse viewer who never touched the keyboard.
+    FocusManager.instance.addListener(_onHighlightModeChanged);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeListener(_onHighlightModeChanged);
+    super.dispose();
+  }
+
+  void _onHighlightModeChanged() {
+    if (mounted) setState(() {});
+  }
+
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
@@ -88,7 +108,15 @@ class _InteractiveCardShellState extends State<InteractiveCardShell> {
 
   @override
   Widget build(BuildContext context) {
-    final hovered = _hovered || _focused;
+    // Focus zooms the card only while the viewer is navigating with keys
+    // or a D-pad. A mouse viewer never asked for focus: FirstFocusScope
+    // hands it to the first card on open so a remote has somewhere to be,
+    // and without this gate that looked like the first movie arriving
+    // pre-selected and zoomed. Same gate the player menus use.
+    final focusShown = _focused &&
+        FocusManager.instance.highlightMode ==
+            FocusHighlightMode.traditional;
+    final hovered = _hovered || focusShown;
     return Focus(
       autofocus: widget.autofocus,
       onFocusChange: _onFocusChange,

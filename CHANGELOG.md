@@ -15,6 +15,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   deduplicated. Twins that state nothing still take numbers rather than
   reading the same word twice.
 
+### Fixed
+- **The first movie card no longer opens pre-selected and zoomed on
+  desktop.** Focus hands itself to the first card so a remote has somewhere
+  to be -- but the zoom followed focus unconditionally, so mouse viewers
+  got a "selected" card they never touched. Focus styling now follows the
+  keyboard highlight mode like the player menus already do: keys and D-pad
+  still zoom, mouse and touch do not.
+
 ## [1.9.6+54] - 2026-10-08
 
 ### Fixed
