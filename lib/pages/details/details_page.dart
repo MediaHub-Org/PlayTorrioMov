@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/tv_mode_service.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/over_artwork.dart';
@@ -26,7 +27,6 @@ import '../../services/metadata/metadata_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
-import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/details_section_header.dart';
 import '../../widgets/details/details_metrics.dart';
 import '../../widgets/common/glass_back_button.dart';
@@ -1103,10 +1103,6 @@ class _DetailsPageState extends State<DetailsPage>
                 SizedBox(height: context.rem(DetailsSpace.lg)),
                 _buildSynopsis(_synopsisText(meta)),
               ],
-              if (meta.genres.isNotEmpty) ...[
-                SizedBox(height: context.rem(DetailsSpace.lg)),
-                _buildGenreChips(meta.genres),
-              ],
             ],
           ),
         ),
@@ -1165,10 +1161,6 @@ class _DetailsPageState extends State<DetailsPage>
           SizedBox(height: context.rem(DetailsSpace.lg)),
           _buildSynopsis(_synopsisText(meta)),
         ],
-        if (meta.genres.isNotEmpty) ...[
-          SizedBox(height: context.rem(DetailsSpace.md)),
-          _buildGenreChips(meta.genres),
-        ],
       ],
     );
   }
@@ -1211,16 +1203,6 @@ class _DetailsPageState extends State<DetailsPage>
           ),
         ],
       ),
-    );
-  }
-
-  // Small pill chips for genres, sitting under the synopsis. This replaces
-  // the old boxed "Quick Facts" panel — same information, but styled as a
-  // lightweight row instead of a card that left dead space under the poster.
-  Widget _buildGenreChips(List<String> genres) {
-    return GenreTagRow(
-      genres: genres,
-      onTap: (g) => pushPage(context, DiscoverPage(query: g, isGenre: true)),
     );
   }
 
@@ -1379,6 +1361,10 @@ class _DetailsPageState extends State<DetailsPage>
     );
     return HoverButton(
       scaleAmount: 1.08,
+      // On a TV a remote lands on Play first. Nothing here asked for focus, so
+      // it went to whatever sat first in reading order -- the genre tags, which
+      // are gone now, and still the poster's neighbors on a wide screen.
+      autofocus: TvModeService.isTv.value,
       onTap: () => _handlePlayAction(_playTarget(resumeTarget)),
       child: Builder(builder: (context) {
         final focused = Focus.of(context).hasFocus;

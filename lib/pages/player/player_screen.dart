@@ -53,6 +53,7 @@ import '../../widgets/player/player_volume_control.dart';
 import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
+import '../../widgets/player/player_loading_title.dart';
 import '../../widgets/player/player_stats_menu.dart';
 import '../../services/cast/cast_service.dart';
 import '../../services/tv_type.dart';
@@ -2809,26 +2810,49 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   /// The logo filling with load progress, and what is being waited on.
+  ///
+  /// Under the title being loaded: its logo (or its name), then the episode.
+  /// The detail's name rather than [PlayerScreen.title], which for a movie is
+  /// the release's filename.
   Widget _buildLoadingContent() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ValueListenableBuilder<double>(
-          valueListenable: _loadProgress,
-          builder: (context, progress, _) => PlayerLoadingLogo(progress: progress),
-        ),
-        SizedBox(height: context.rem(AppRem.lg)),
-        Text(
-          _status(context.l10n),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: AppType.bodyLg,
-            letterSpacing: 1.2,
+    final episode = _currentEpisode;
+    final name = widget.detail?.name ?? widget.title;
+    // Scaled down rather than clipped when the title block, the logo and the
+    // status line do not all fit a short screen.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PlayerLoadingTitle(
+            logoUrl: widget.logoUrl ?? widget.detail?.logo,
+            title: name,
+            subtitle: episode == null
+                ? null
+                : PlayerLoadingTitle.episodeLabel(
+                    season: episode.season,
+                    episode: episode.episode,
+                    name: episode.title,
+                  ),
           ),
-        ),
-      ],
+          SizedBox(height: context.rem(AppRem.lg)),
+          ValueListenableBuilder<double>(
+            valueListenable: _loadProgress,
+            builder: (context, progress, _) => PlayerLoadingLogo(progress: progress),
+          ),
+          SizedBox(height: context.rem(AppRem.lg)),
+          Text(
+            _status(context.l10n),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: AppType.bodyLg,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

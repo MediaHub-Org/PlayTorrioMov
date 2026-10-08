@@ -29,11 +29,29 @@ Device checks; none of these can be settled from the code.
   fallback).
 - **The loading logo** with a torrent, a debrid link and a plain URL, and
   that it clears on the first frame.
+- **TV: details, loading screen and speed menu.** Opening a title's details
+  with a remote should land on Play, and Down/Right should reach the library
+  buttons and then the rails with no genre tags in between. The loading screen
+  should show the title's logo (or its name) above the filling logo, and the
+  episode under it. The speed menu should stay open while Left/Right step the
+  speed, close on OK or Back, and have no frame around the slider.
 - **The subtitle panel on a TV and a phone.** Opening it should put the
   violet wash on "Turn subtitles on" with a remote and show nothing lit with a
   finger; Refresh appears only on the Online tab; a file with a full and a
   "Signs & Songs" track of one language should list them as two different
   rows.
+
+---
+
+## Planned
+
+Written plans, not started. Each says what is known, what is a guess, and what
+has to be measured first.
+
+| Plan                                                | Status                                                                                                                       |
+|:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
+| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Five steps, ordered by risk: dedupe the mechanical copies (13 key sets, 3 logo blocks), one press/hover/focus primitive, split the big pages, the player last, then the oversized services. Step 1 is next. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Slow playback on slow links and on a TV. Step 0 (a diagnosis in the stats panel, then one TV session) comes first; steps 1 and 2 (release choice, debrid cached badge) do not depend on it. True stream adaptation is possible for HLS sources only. |
 
 ---
 

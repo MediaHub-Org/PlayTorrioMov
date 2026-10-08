@@ -3,6 +3,43 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **The loading screen says what is loading.** Above the filling logo it now
+  shows the title's own logo, or its name where there is no logo (anime has
+  none), and under it the episode ("S1 · E3 · In Perpetuity"). The player had
+  been handed the logo for a long time and never drew it, so a slow torrent
+  waited on a screen that did not name the movie. A movie shows the detail's
+  name, not the release's filename.
+
+### Changed
+
+- **On a TV, the details page starts on Play.** A remote used to land on the
+  genre tags first, because reading order puts anything higher on the screen
+  ahead of Play and, on a wide layout, the tags sit higher. The tags are gone
+  from the details page (the genres are still in the info line under the
+  title); they opened the Discover page for that genre and added a stop
+  before the video.
+- **The speed menu is a slider and nothing else.** The - and + buttons are
+  removed: Left/Right on a remote and a drag on a screen already step the
+  slider, so they were a third way to do it and one more thing to focus. On a
+  TV a hint line says what the remote does ("Left/Right to adjust · OK to
+  apply").
+- **Sliders in the player no longer wear a frame.** The speed and volume
+  sliders take focus when their menu opens, so the box that marked focus was
+  on screen by default. Focus is now a thicker track and a larger thumb, as
+  on the seek bar. Up and Down are no longer taken by these sliders, so a
+  remote can leave them for the menu's Back button.
+
+### Fixed
+
+- **On a TV the speed menu closed after one press.** Every arrow was reported
+  to the menu as a finished drag, so going from 1x to 1.5x lost the menu at
+  1.25x. It now stays open while Left/Right step the speed and closes on OK
+  or Back. Not confirmed on a TV.
+
 ## [1.9.7+55] - 2026-10-08
 
 ### Added
