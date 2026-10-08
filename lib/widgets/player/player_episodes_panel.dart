@@ -8,16 +8,7 @@ import '../../services/tv_type.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 import '../common/focus_fill.dart';
-
-/// The keys that activate a focused episode card. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
-/// inside a `const` set literal.
-final _episodeCardActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../common/activate_keys.dart';
 
 /// Ultra-responsive, glassmorphic Episodes Side Panel with season tabs,
 /// auto-scroll to current episode, animated card expansion, and high FPS rendering.
@@ -607,7 +598,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
           setState(() => _focusedIndex = focused ? index : null),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        if (!_episodeCardActivators.contains(event.logicalKey)) {
+        if (!kActivateKeys.contains(event.logicalKey)) {
           return KeyEventResult.ignored;
         }
         _handleEpisodeTap(video);

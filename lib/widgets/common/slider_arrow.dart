@@ -4,16 +4,7 @@ import 'package:flutter/services.dart';
 import '../../services/theme/app_colors.dart';
 import 'arrow_affordance.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused [SliderArrow]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import 'activate_keys.dart';
 
 class SliderArrow extends StatefulWidget {
   final IconData icon;
@@ -36,7 +27,7 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

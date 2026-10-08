@@ -9,16 +9,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused [_FeatureToggleChip]. `final`, not
-/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
-/// that inside a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../../widgets/common/activate_keys.dart';
 
 class AddonsSettingsPage extends StatefulWidget {
   const AddonsSettingsPage({super.key});
@@ -627,7 +618,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

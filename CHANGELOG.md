@@ -33,6 +33,50 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   on the seek bar. Up and Down are no longer taken by these sliders, so a
   remote can leave them for the menu's Back button.
 
+### Added (language and playback)
+
+- **Audio, subtitles and description follow the device language, like a
+  streaming app.** None of it hides anything:
+  - The source list opens on releases in your language, then MULTI releases,
+    then the rest (it used to open on whatever answered first).
+  - A file with several audio tracks opens on the one in your language when
+    it has it; the next episode runs the rule again, unless you chose a track
+    by hand. This was opt-in, behind a list you had to build.
+  - When the audio is not in your language and the file carries a subtitle in
+    it, that subtitle comes on by itself. Embedded only, nothing downloaded;
+    forced tracks are skipped. Settings -> Video Player -> Language has a
+    switch.
+  - The synopsis is TMDB's in your language, in every language TMDB has (it
+    was the four the app is translated into). It also asked for English when
+    the interface was left on the device default, whatever the device said.
+- **Sources are ranked for your connection.** After language, a release whose
+  bitrate is known to be above what the connection carries goes behind the
+  ones that fit; then the quality tier, then seeders. The connection's ceiling
+  is learned only from stalls, so a fast link is never capped; it lifts again
+  after two clean minutes. On a TV the default tier is 1080p, not 4K.
+- **Stats panel tells you why it is slow.** Needs / Delivering / Decoder /
+  Dropped frames, and one sentence: the connection cannot carry this source, or
+  the device cannot decode it.
+- **"Playback keeps pausing" with an "Other sources" action**, after three
+  stalls in three minutes.
+
+### Changed (language and playback)
+
+- **Fewer, longer pauses instead of a stutter.** mpv resumed after one second
+  of cushion, ran dry and stopped again. It now waits a quarter of the
+  read-ahead (2 to 10 seconds, by buffer preset). Live channels keep one
+  second.
+- **A short jump back comes from the cache.** The rewind cache was a flat
+  50 MB, under seven seconds of a 4K remux; it is now half the forward cache
+  (50 to 250 MB).
+- **Faster first frame on a slow link.** Stream probing read up to 32 MB and
+  20 seconds of media before starting; it is 16 MB and 6 seconds. An HLS
+  source opens on the highest rendition the connection has been seen to carry,
+  not always the highest. None of the playback figures is measured on a device.
+- Housekeeping: the 17 private copies of the keys that press a control are one
+  set, the logo-or-title block is one widget, and `withOpacity` is
+  `withValues` (28 calls).
+
 ### Fixed
 
 - **TV focus audit: rows and pills that showed nothing under a remote.** An

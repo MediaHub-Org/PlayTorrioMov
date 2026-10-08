@@ -28,16 +28,7 @@ import '../../widgets/common/library_actions_row.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
-
-/// The keys that activate a focused [_HoverScale]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
-/// inside a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../../widgets/common/activate_keys.dart';
 
 // This page's own sizes, in rem (the ones it shares with DetailsPage are in
 // details_metrics.dart), read through `context.rem(_Dim.x)`.
@@ -1587,7 +1578,7 @@ class _HoverScaleState extends State<_HoverScale> {
     final onTap = widget.onTap;
     if (onTap == null) return KeyEventResult.ignored;
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     onTap();
     return KeyEventResult.handled;
   }
@@ -1659,7 +1650,7 @@ class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

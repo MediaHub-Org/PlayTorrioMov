@@ -104,4 +104,18 @@ void main() {
     // And the source cards, which are re-sorted as add-ons answer.
     expect(source, contains('key: _sourceCardKey(filtered, index)'));
   });
+
+  test('the keys that press a control are declared once', () {
+    // Seventeen files each carried their own copy, and they drifted. The one
+    // set lives in widgets/common/activate_keys.dart.
+    final copies = <String>[];
+    for (final file in libFiles()) {
+      if (file.path.endsWith('activate_keys.dart')) continue;
+      final text = file.readAsStringSync();
+      if (RegExp(r'final\s+_\w*[aA]ctivators\s*=').hasMatch(text)) {
+        copies.add(file.path);
+      }
+    }
+    expect(copies, isEmpty, reason: 'use kActivateKeys');
+  });
 }

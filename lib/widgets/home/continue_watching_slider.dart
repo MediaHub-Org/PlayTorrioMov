@@ -19,16 +19,7 @@ import '../common/slider_arrow.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused continue-watching card. `final`, not
-/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
-/// that inside a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../common/activate_keys.dart';
 
 class ContinueWatchingSlider extends StatefulWidget {
   final String?
@@ -387,7 +378,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

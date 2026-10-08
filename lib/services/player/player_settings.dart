@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../scraper/user_agent.dart';
+import './link_speed_memory.dart';
 import '../../l10n/app_localizations.dart';
 
 /// Available decoder preset types tailored for each platform.
@@ -147,6 +148,7 @@ abstract final class PlayerSettings {
   static const _keyAutoResyncOnStall = 'player_auto_resync_on_stall';
   static const _keyLowLatency = 'player_low_latency';
   static const _keyHardwareAudioClock = 'player_hardware_audio_clock';
+  static const _keyAutoSubtitles = 'player_auto_subtitles';
   static const _keyAudioDelayDefault = 'player_audio_delay_default';
   static const _keyAutoNextEnabled = 'player_auto_next_enabled';
   static const _keyEnableSurfaceProducer = 'player_enable_surface_producer';
@@ -194,6 +196,11 @@ abstract final class PlayerSettings {
   static final ValueNotifier<bool> hardwareAudioClock = ValueNotifier<bool>(true);
   static final ValueNotifier<double> audioDelayDefault = ValueNotifier<double>(0.0);
   static final ValueNotifier<bool> autoNextEnabled = ValueNotifier<bool>(true);
+
+  /// Turn on a subtitle in the viewer's language by itself when the audio is
+  /// in another. On by default, like a streaming app's profile language; see
+  /// `SubtitleAutoPick.embeddedForViewer`.
+  static final ValueNotifier<bool> autoSubtitles = ValueNotifier<bool>(true);
   /// Android Direct Surface (SurfaceProducer / SurfaceView) toggle. Default: false (off).
   /// Ported from upstream PlayTorrioV3 b0aecf5.
   static final ValueNotifier<bool> enableSurfaceProducer = ValueNotifier<bool>(false);
@@ -365,6 +372,7 @@ abstract final class PlayerSettings {
     hardwareAudioClock.value = prefs.getBool(_keyHardwareAudioClock) ?? true;
     audioDelayDefault.value = prefs.getDouble(_keyAudioDelayDefault) ?? 0.0;
     autoNextEnabled.value = prefs.getBool(_keyAutoNextEnabled) ?? true;
+    autoSubtitles.value = prefs.getBool(_keyAutoSubtitles) ?? true;
     enableSurfaceProducer.value = prefs.getBool(_keyEnableSurfaceProducer) ?? false;
 
     // Load Subtitle Customization Preferences
@@ -457,9 +465,29 @@ abstract final class PlayerSettings {
   }
 
   /// Returns effective back bytes buffer
+  ///
+  /// What a few seconds of rewind costs to keep. It was a flat 50 MB, which at
+  /// 10 Mb/s is forty seconds and at a 4K remux's 60 Mb/s is under seven: a
+  /// short jump back left the cache and re-requested the data over the
+  /// network, which is the pause people notice when they "go back a bit".
+  /// Half the forward cache, between 50 and 250 MB, so the rewind scales with
+  /// the preset the way the read-ahead does.
   static int getEffectiveMaxBackBytes() {
-    return 52428800; // 50 MB back buffer
+    return (getEffectiveMaxBytes() ~/ 2).clamp(52428800, 262144000);
   }
+
+  /// How many seconds mpv waits to have buffered before it resumes after a
+  /// stall (`cache-pause-wait`).
+  ///
+  /// mpv's own value is one second, and on a link that is slower than the video
+  /// that is the stutter: it plays one second, runs dry, waits one second, and
+  /// repeats, so the picture jerks along instead of pausing once and then
+  /// playing. A streaming app rebuffers to a real cushion, which costs one
+  /// longer wait and removes the rest. A quarter of the read-ahead, so the
+  /// bigger presets wait longer and Minimal stays quick, and never so long
+  /// that a stall feels like a freeze.
+  static int getEffectiveResumeSecs() =>
+      (getEffectiveCacheSecs() / 4).round().clamp(2, 10);
 
   /// Returns effective cache seconds for readahead
   static int getEffectiveCacheSecs() {
@@ -671,6 +699,7 @@ abstract final class PlayerSettings {
         await platform.setProperty('demuxer-max-back-bytes', '${getEffectiveMaxBackBytes()}');
         await platform.setProperty('cache-secs', '${getEffectiveCacheSecs()}');
         await platform.setProperty('demuxer-readahead-secs', '${getEffectiveCacheSecs()}');
+        await platform.setProperty('cache-pause-wait', '${getEffectiveResumeSecs()}');
         await platform.setProperty('network-timeout', '60');
         await platform.setProperty(
           'stream-lavf-o',
@@ -695,15 +724,38 @@ abstract final class PlayerSettings {
       await platform.setProperty('demuxer-max-back-bytes', '${getEffectiveMaxBackBytes()}');
       await platform.setProperty('cache-secs', '${getEffectiveCacheSecs()}');
       await platform.setProperty('demuxer-readahead-secs', '${getEffectiveCacheSecs()}');
+      // A live channel keeps mpv's one second: waiting longer would put the
+      // picture further behind the broadcast every time it stalled.
+      if (!isLive) {
+        await platform.setProperty('cache-pause-wait', '${getEffectiveResumeSecs()}');
+      }
       await platform.setProperty('network-timeout', '30');
 
       // 8. Network Stream Continuity (Live IPTV vs VOD separation)
       await applyStreamContinuity(player, isLive: isLive);
 
       // 9. Native HLS & image-disguised (.jpg/.png) stream probing
-      await platform.setProperty('hls-bitrate', 'max');
-      await platform.setProperty('demuxer-lavf-probesize', '32768000');
-      await platform.setProperty('demuxer-lavf-analyzeduration', '20');
+      //
+      // mpv picks one HLS variant when the stream opens and does not move
+      // between them, so the choice is made here: the highest, unless this
+      // connection has been seen stalling, in which case the highest one it was
+      // seen to carry (mpv takes the best variant at or under the number, and
+      // the lowest if none is). "max" for everyone made a slow link open on the
+      // 4K rendition.
+      final fitKbps = LinkSpeedMemory.sustainableKbps;
+      await platform.setProperty(
+        'hls-bitrate',
+        fitKbps == null ? 'max' : '${fitKbps * 1000}',
+      );
+      // How much of the stream FFmpeg reads before it starts playing, hunting
+      // for the codec parameters of every track. The ceiling was 32 MB and 20
+      // seconds of media: a file with a PGS subtitle track, whose packets are
+      // sparse, can use all of it, and at the start of a slow download that is
+      // the wait before the first frame. 16 MB and 6 seconds still covers a
+      // disguised-extension stream (it needs bytes, not seconds) and a late
+      // audio track, and ends sooner when the link is slow.
+      await platform.setProperty('demuxer-lavf-probesize', '16777216');
+      await platform.setProperty('demuxer-lavf-analyzeduration', '6');
       await platform.setProperty('demuxer-lavf-o', 'strict=experimental');
     } catch (e) {
       debugPrint('[PlayerSettings] applyPreOpenProperties warning: $e');
@@ -1177,6 +1229,13 @@ abstract final class PlayerSettings {
     _notify();
   }
 
+  static Future<void> setAutoSubtitles(bool val) async {
+    autoSubtitles.value = val;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyAutoSubtitles, val);
+    _notify();
+  }
+
   static Future<void> setHardwareAudioClock(bool val) async {
     hardwareAudioClock.value = val;
     final prefs = await SharedPreferences.getInstance();
@@ -1449,6 +1508,7 @@ abstract final class PlayerSettings {
     await prefs.remove(_keyAutoResyncOnStall);
     await prefs.remove(_keyLowLatency);
     await prefs.remove(_keyHardwareAudioClock);
+    await prefs.remove(_keyAutoSubtitles);
     await prefs.remove(_keyAudioDelayDefault);
     await prefs.remove(_keyAutoNextEnabled);
     await prefs.remove(_keyEnableSurfaceProducer);
@@ -1471,6 +1531,7 @@ abstract final class PlayerSettings {
     hardwareAudioClock.value = true;
     audioDelayDefault.value = 0.0;
     autoNextEnabled.value = true;
+    autoSubtitles.value = true;
     enableSurfaceProducer.value = false;
     customDecoders.value = _getDefaultDecodersForPreset(DecoderPreset.hardwareAuto);
 

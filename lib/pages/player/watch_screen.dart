@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
-import '../../widgets/common/reading_direction.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +22,8 @@ import '../../services/app_breakpoints.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/tv_mode_service.dart';
 import '../../services/player/video_quality_preference.dart';
+import '../../services/player/link_speed_memory.dart';
+import '../../services/sources/source_ranking.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../services/stream/stream_bitrate_resolver.dart';
@@ -36,17 +37,9 @@ import '../details/details_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/app_units.dart';
 import '../../widgets/common/focus_fill.dart';
+import '../../widgets/common/title_or_logo.dart';
 import '../../widgets/player/player_glass.dart' show PlayerFocusOnOpen;
-
-/// The keys that activate the "no sources, install addons" button below.
-/// `final`, not `const`: `LogicalKeyboardKey` overrides `==`, and the
-/// analyzer rejects that inside a `const` set literal.
-final _settingsButtonActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../../widgets/common/activate_keys.dart';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -331,10 +324,18 @@ class _WatchScreenState extends State<WatchScreen>
     } else if (_selectedSizeFilter == 'smallest') {
       list.sort((a, b) => (a.sizeBytes ?? double.infinity).compareTo(b.sizeBytes ?? double.infinity));
     } else {
-      // Closest to the data-usage tier set in Settings -> Video Player. See
-      // `qualityDistanceComparator`'s own doc comment for why this is the
-      // same order as before for anyone who has not touched that setting.
-      list.sort(qualityDistanceComparator(VideoQualityPreference.tier.value));
+      // Best first for this viewer: their language, then what their
+      // connection carries, then the data-usage tier set in Settings -> Video
+      // Player (see `qualityDistanceComparator`), then seeders. Nothing is
+      // hidden; see `rankSources`.
+      list = rankSources(
+        list,
+        tier: VideoQualityPreference.tier.value,
+        preferredAudio: SourceFilterSettings.effectiveAudioRank(),
+        mediaTitle: widget.detail.name,
+        maxKbps: LinkSpeedMemory.sustainableKbps,
+        runtimeMinutes: int.tryParse(widget.detail.runtime ?? ''),
+      );
     }
     return list;
   }
@@ -730,40 +731,16 @@ class _WatchScreenState extends State<WatchScreen>
   }
 
   Widget _buildLogoOrTitle(MovieDetail meta, bool isDesktop) {
-    if (meta.logo != null && meta.logo!.isNotEmpty) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: context.rem(isDesktop ? 23.75 : 16.25),
-          maxHeight: context.rem(isDesktop ? 7.5 : 5),
-        ),
-        child: CachedNetworkImage(
-          imageUrl: meta.logo!,
-          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
-          fit: BoxFit.contain,
-          errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
-        ),
-      );
-    }
-    return _buildTextTitle(meta.name, isDesktop);
-  }
-
-  Widget _buildTextTitle(String text, bool isDesktop) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: isDesktop ? AppType.displayMd : AppType.displaySm,
-        fontWeight: FontWeight.w800,
-        height: 1.1, // ratio: a line height, not a size
-        letterSpacing: -0.5,
-        color: _C.textPrimary,
-        shadows: [
-          Shadow(
-            color: Colors.black.withValues(alpha: 0.7),
-            blurRadius: context.rem(1.25),
-            offset: Offset(0, context.rem(AppRem.xs)),
-          ),
-        ],
-      ),
+    return TitleOrLogo(
+      logoUrl: meta.logo,
+      name: meta.name,
+      maxLogoWidth: context.rem(isDesktop ? 23.75 : 16.25),
+      maxLogoHeight: context.rem(isDesktop ? 7.5 : 5),
+      fontSize: isDesktop ? AppType.displayMd : AppType.displaySm,
+      letterSpacing: -0.5, // px: tracking, not a layout size
+      color: _C.textPrimary,
+      shadowBlur: context.rem(1.25),
+      shadowOffsetY: context.rem(AppRem.xs),
     );
   }
 
@@ -2442,7 +2419,7 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 setState(() => _isHovering = focused),
             onKeyEvent: (node, event) {
               if (event is! KeyDownEvent) return KeyEventResult.ignored;
-              if (!_settingsButtonActivators.contains(event.logicalKey)) {
+              if (!kActivateKeys.contains(event.logicalKey)) {
                 return KeyEventResult.ignored;
               }
               pushPage(context, const SettingsPage());

@@ -13,7 +13,7 @@ Measured on `v1.9.7+55` (2026-10-08), not guessed:
 | Dart files / lines under `lib/` (no generated l10n) | 332 / about 102,600                                                                                                                                      |
 | Test files                                          | 197                                                                                                                                                      |
 | Files over 1,000 lines                              | 21. The five largest: `player_screen.dart` 3,685, `watch_screen.dart` 2,755, `details_page.dart` 2,433, `iptv_portal_browser_page.dart` 2,160, `iptv_player_page.dart` 2,080 |
-| The same key-activator set, copied                  | 13 files declare their own `_activators = {...}`                                                                                                         |
+| The same key-activator set, copied                  | 17 files declared their own (now one)                                                                                                         |
 | The same logo-or-title block, copied                | `details_page.dart` and `watch_screen.dart` each build it, with different size constants                                                                 |
 | Press / hover / focus primitives                    | `HoverButton`, `PlayerIconButton`, `FocusRing`, `FocusFill`, `FocusHighlight`, and the subtitle panel's `_MenuPill`: six, each with its own rules        |
 | Deprecated `withOpacity`                            | 28 calls in 3 files, hidden by `deprecated_member_use: ignore` in `analysis_options.yaml`                                                               |
@@ -47,7 +47,16 @@ These keep a refactor from being a rewrite.
 Ordered by value for risk: the cheap, mechanical wins first, the player last
 because it is the largest and the least testable from a desk.
 
-### Step 1 — Mechanical dedupe (low risk, high repetition)
+### Step 1 — Mechanical dedupe (low risk, high repetition) — **done**
+
+Shipped on this branch: 17 private key sets became `kActivateKeys` /
+`kActivateKeysWithSpace` (a test now fails on a new copy), the logo-or-title
+block is `TitleOrLogo` (details, sources and the loading screen), and the 28
+`withOpacity` calls are `withValues`. Not done: `deprecated_member_use: ignore`
+stays, because turning it on shows **37** other deprecations -- 28 `activeColor`
+on switches (the replacement changes how a switch looks, so it needs eyes on a
+device), 6 `cacheExtent`, and one each of `value`, `textScaleFactor` and
+`onReorder`. That is the next mechanical PR.
 
 - **One `activateKeys` set** in `lib/widgets/common/`, replacing the 13 private
   copies. They differ in one place at most (`space` is in `HoverButton`'s and

@@ -1,7 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/app_units.dart';
+import '../common/title_or_logo.dart';
 
 /// What is being loaded, above the filling logo: the title's own logo where
 /// there is one, its name where there is not, and under it the episode.
@@ -47,50 +47,33 @@ class PlayerLoadingTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logo = logoUrl;
     // A phone held sideways has little height to share with the filling logo
     // and the status line below.
     final compact = MediaQuery.sizeOf(context).height < 500;
     final maxHeight = context.rem(compact ? 3.5 : 5.5);
-
-    final name = Text(
-      title,
-      textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: compact ? AppType.titleSm : AppType.displaySm,
-        fontWeight: FontWeight.w800,
-        height: 1.1, // ratio: a line height, not a size
-        shadows: [
-          Shadow(
-            color: Colors.black.withValues(alpha: 0.7),
-            blurRadius: context.rem(AppRem.blurLg),
-          ),
-        ],
-      ),
-    );
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: context.rem(22)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (logo != null && logo.isNotEmpty)
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxHeight),
-              child: CachedNetworkImage(
-                imageUrl: logo,
-                fit: BoxFit.contain,
-                // Nothing while it loads: the name appearing and then being
-                // replaced by the logo would flash on every launch.
-                placeholder: (_, __) => SizedBox(height: maxHeight),
-                errorWidget: (_, __, ___) => name,
-              ),
-            )
-          else
-            name,
+          TitleOrLogo(
+            logoUrl: logoUrl,
+            name: title,
+            maxLogoWidth: context.rem(22),
+            maxLogoHeight: maxHeight,
+            fontSize: compact ? AppType.titleSm : AppType.displaySm,
+            letterSpacing: 0,
+            color: Colors.white,
+            shadowBlur: context.rem(AppRem.blurLg),
+            shadowOffsetY: 0,
+            logoAlignment: Alignment.center,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            // Nothing while it loads: the name appearing and then being
+            // replaced by the logo would flash on every launch.
+            placeholder: SizedBox(height: maxHeight),
+          ),
           if (subtitle != null && subtitle!.isNotEmpty) ...[
             SizedBox(height: context.rem(AppRem.xs)),
             Text(

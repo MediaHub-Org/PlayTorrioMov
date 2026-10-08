@@ -192,7 +192,7 @@ class MovieCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: AppType.small,
-                        color: AppColors.ink.withOpacity(0.52),
+                        color: AppColors.ink.withValues(alpha: 0.52),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -204,7 +204,7 @@ class MovieCard extends StatelessWidget {
                       width: context.rem(AppRem.xs),
                       height: context.rem(AppRem.xs),
                       decoration: BoxDecoration(
-                        color: AppColors.ink.withOpacity(0.26),
+                        color: AppColors.ink.withValues(alpha: 0.26),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -216,7 +216,7 @@ class MovieCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: AppType.small,
-                      color: AppColors.ink.withOpacity(0.42),
+                      color: AppColors.ink.withValues(alpha: 0.42),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -259,13 +259,13 @@ class _PosterFrame extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(hovered ? 0.60 : 0.34),
+            color: Colors.black.withValues(alpha: hovered ? 0.60 : 0.34),
             blurRadius: context.rem(hovered ? AppRem.blurXl : AppRem.blurLg),
             offset: Offset(0, context.rem(hovered ? AppRem.posterHoverOffset : AppRem.posterRestOffset)),
           ),
           if (hovered)
             BoxShadow(
-              color: palette.primaryColor.withOpacity(0.35),
+              color: palette.primaryColor.withValues(alpha: 0.35),
               blurRadius: context.rem(AppRem.posterGlow),
               spreadRadius: 1, // px: a hairline of glow, not a size
               offset: Offset(0, context.rem(AppRem.sm)),
@@ -303,9 +303,9 @@ class _PosterFrame extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Colors.black.withOpacity(0.00),
-                      Colors.black.withOpacity(0.00),
-                      Colors.black.withOpacity(0.20),
+                      Colors.black.withValues(alpha: 0.00),
+                      Colors.black.withValues(alpha: 0.00),
+                      Colors.black.withValues(alpha: 0.20),
                     ],
                   ),
                 ),
@@ -325,7 +325,7 @@ class _PosterFrame extends StatelessWidget {
                       colors: [
                         AppColors.onAccent.withValues(alpha: 0.11),
                         Colors.transparent,
-                        Colors.black.withOpacity(0.40),
+                        Colors.black.withValues(alpha: 0.40),
                       ],
                     ),
                   ),
@@ -412,7 +412,7 @@ class _PosterFrame extends StatelessWidget {
                       color: AppColors.onAccent.withValues(alpha: 0.95),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.40),
+                          color: Colors.black.withValues(alpha: 0.40),
                           blurRadius: context.rem(_kPlayBlur),
                           offset: Offset(0, context.rem(_kPlayOffset)),
                         ),

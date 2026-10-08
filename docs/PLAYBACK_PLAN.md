@@ -13,8 +13,57 @@ can actually sustain, (3) steer people to a path that is not limited by seeds
 (debrid), and (4) switch to a lighter source when one stalls. True stream
 adaptation is possible only for HLS sources, and is the smallest group.
 
-Nothing below is built yet. This is the plan, with what is known, what is a
-guess, and what has to be measured on a TV first.
+## Status
+
+| Step | What | State |
+|:-----|:-----|:------|
+| 0.1 | Diagnosis in the stats panel | **Done.** Needs / Delivering / Decoder / Dropped frames, and a sentence naming the link or the decoder (`playback_diagnosis.dart`). Not tried on a device. |
+| 0.2 | One TV session with the panel open | **Open: needs a TV.** Everything marked "hypothesis" below waits on it. |
+| 1 | Release choice by device and link | **Done.** TV default tier is 1080p; the list ranks by language, then weight, then tier, then seeders (`source_ranking.dart`); the link ceiling is learned only from stalls (`link_speed_memory.dart`). |
+| 2 | Debrid: cached badge, prefer, guidance | **Open.** Needs each provider's current availability API checked first; nothing was built. |
+| 3 | Offer a lighter source after stalls | **Done as an offer.** Three stalls in three minutes show "Playback keeps pausing" with an "Other sources" action (`playback_health.dart`). It does not switch by itself. |
+| 4 | Pipeline tuning | **Started, unmeasured.** Rebuffer cushion (`cache-pause-wait`), rewind cache and faster stream probing are in; each is reasoned, not measured. TV buffer presets and the disk cache wait for Step 0.2. |
+| 5 | HLS step-down | **Partly.** An HLS source opens on the highest rendition the link has been seen to carry instead of always the highest. The mid-stream step-down loop is not built. |
+
+What changed, concretely, and what each is expected to do (none measured):
+
+- **`cache-pause-wait`** was mpv's 1 second. After a stall the player resumed
+  with one second of video, ran dry and stalled again: the stutter on a link
+  slower than the video. It now waits a quarter of the read-ahead (2-10 s by
+  preset), so one longer wait replaces many short ones.
+- **Rewind cache** was a flat 50 MB, under seven seconds of a 4K remux. It is
+  now half the forward cache (50-250 MB), so a short jump back comes from
+  memory.
+- **Stream probing** read up to 32 MB and 20 s of media before the first frame
+  while hunting for every track's codec parameters; sparse tracks (PGS
+  subtitles) can use all of it. It is now 16 MB and 6 s.
+- **Language is now part of the ranking**, so a Spanish device opens on the
+  Spanish release, not on the best-looking English one (see below).
+
+## Language
+
+Streaming apps play in the device's language and have it. For a torrent app
+that depends on what the release contains, so the language is a preference
+that orders, never a filter that hides:
+
+- the source list ranks releases in the device language first, then MULTI,
+  then the rest;
+- a file with several audio tracks opens on the device-language one when it
+  has it (and the next episode runs the rule again, unless the viewer chose a
+  track by hand);
+- when the audio is not in the device language, the file's own subtitle in it
+  comes on by itself (embedded only, nothing downloaded; a Settings switch
+  turns it off);
+- the synopsis follows the device language in every language TMDB has, not
+  only the four the app is translated into. With the interface left on default
+  it used to ask for no language and get English.
+
+Not done: the interface itself exists in English, Spanish, Portuguese and
+Arabic. Another device language shows the English interface. A new language is
+a full translation of about 1,500 strings and a decision about which ones.
+
+Nothing below was changed by that status table: it is the plan as written, with
+what is known, what is a guess, and what has to be measured on a TV first.
 
 ## What the code does today
 

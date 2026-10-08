@@ -2,17 +2,17 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/locale/system_language.dart';
 import '../../services/tv_mode_service.dart';
 import '../../services/theme/app_colors.dart';
-import '../../services/theme/app_theme_service.dart';
 import '../../widgets/common/over_artwork.dart';
+import '../../widgets/common/title_or_logo.dart';
 import '../../l10n/l10n.dart';
 import '../../widgets/common/arrow_affordance.dart';
 import '../../models/details/credit.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../widgets/details/credit_card.dart';
 import '../../widgets/details/similar_card.dart';
-import '../../widgets/common/reading_direction.dart';
 
 import '../../models/movie/cast_member.dart';
 import '../../models/movie/movie.dart';
@@ -37,16 +37,7 @@ import '../../services/app_breakpoints.dart';
 import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
 import '../../widgets/details/details_poster_fit.dart';
-
-/// The keys that activate a focused [_EpisodeCard]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../../widgets/common/activate_keys.dart';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -544,7 +535,7 @@ class _DetailsPageState extends State<DetailsPage>
     // the page makes one TMDB pass per title. TMDB's catalog copy replaces
     // the addon's when it exists -- and translated, where the addon only
     // ever has English. Silent when there is nothing better to show.
-    final localeCode = AppThemeService.locale.value?.languageCode;
+    final localeCode = SystemLanguage.code;
     TmdbService.fetchOverview(
       tmdbId: tmdbId,
       isTvShow: isTvShow,
@@ -626,7 +617,7 @@ class _DetailsPageState extends State<DetailsPage>
     return TmdbService.fetchSimilar(
       tmdbId,
       isTvShow: isTvShow,
-      localeCode: AppThemeService.locale.value?.languageCode,
+      localeCode: SystemLanguage.code,
     );
   }
 
@@ -1057,12 +1048,12 @@ class _DetailsPageState extends State<DetailsPage>
                         // of the usual drop shadow, so it reads as "lit" rather
                         // than just floating on black
                         BoxShadow(
-                          color: _Palette.accent.withOpacity(0.18),
+                          color: _Palette.accent.withValues(alpha: 0.18),
                           blurRadius: context.rem(DetailsDim.glowBlur),
                           spreadRadius: -context.rem(DetailsDim.glowSpread),
                         ),
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.55),
+                          color: Colors.black.withValues(alpha: 0.55),
                           blurRadius: context.rem(DetailsDim.posterShadowBlur),
                           offset: Offset(0, context.rem(DetailsDim.posterShadowLift)),
                         ),
@@ -1123,12 +1114,12 @@ class _DetailsPageState extends State<DetailsPage>
                   borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
                   boxShadow: [
                     BoxShadow(
-                      color: _Palette.accent.withOpacity(0.16),
+                      color: _Palette.accent.withValues(alpha: 0.16),
                       blurRadius: context.rem(DetailsDim.mobileGlowBlur),
                       spreadRadius: -context.rem(AppRem.xs),
                     ),
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       blurRadius: context.rem(AppRem.md),
                       offset: Offset(0, context.rem(AppRem.sm)),
                     ),
@@ -1169,40 +1160,20 @@ class _DetailsPageState extends State<DetailsPage>
   // poster next to it the way it did before (that's what made the poster
   // look like an afterthought in the screenshot).
   Widget _buildLogoOrTitle(MovieDetail meta, {required bool isDesktop}) {
-    if (meta.logo != null && meta.logo!.isNotEmpty) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: context.rem(isDesktop ? DetailsDim.logoWidthDesktop : DetailsDim.logoWidthMobile),
-          maxHeight: context.rem(isDesktop ? DetailsDim.logoHeightDesktop : DetailsDim.logoHeightMobile),
-        ),
-        child: CachedNetworkImage(
-          imageUrl: meta.logo!,
-          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
-          fit: BoxFit.contain,
-          errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
-        ),
-      );
-    }
-    return _buildTextTitle(meta.name, isDesktop);
-  }
-
-  Widget _buildTextTitle(String text, bool isDesktop) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: isDesktop ? _kTitleDesktop : _kTitleMobile,
-        fontWeight: FontWeight.w800,
-        height: 1.1, // ratio: a line height, not a size
-        letterSpacing: -1.0, // px: tracking, not a layout size
-        color: Colors.white,
-        shadows: [
-          Shadow(
-            color: Colors.black.withOpacity(0.7),
-            blurRadius: context.rem(AppRem.blurLg),
-            offset: Offset(0, context.rem(AppRem.snug)),
-          ),
-        ],
+    return TitleOrLogo(
+      logoUrl: meta.logo,
+      name: meta.name,
+      maxLogoWidth: context.rem(
+        isDesktop ? DetailsDim.logoWidthDesktop : DetailsDim.logoWidthMobile,
       ),
+      maxLogoHeight: context.rem(
+        isDesktop ? DetailsDim.logoHeightDesktop : DetailsDim.logoHeightMobile,
+      ),
+      fontSize: isDesktop ? _kTitleDesktop : _kTitleMobile,
+      letterSpacing: -1.0, // px: tracking, not a layout size
+      color: Colors.white,
+      shadowBlur: context.rem(AppRem.blurLg),
+      shadowOffsetY: context.rem(AppRem.snug),
     );
   }
 
@@ -1253,9 +1224,9 @@ class _DetailsPageState extends State<DetailsPage>
             vertical: context.rem(DetailsDim.ratingPadY),
           ),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
+            color: Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(context.rem(DetailsDim.ratingRadius)),
-            border: Border.all(color: Colors.white.withOpacity(0.25)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1386,7 +1357,7 @@ class _DetailsPageState extends State<DetailsPage>
           borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
           boxShadow: [
             BoxShadow(
-              color: _Palette.accent.withOpacity(focused ? 0.75 : 0.35),
+              color: _Palette.accent.withValues(alpha: focused ? 0.75 : 0.35),
               blurRadius: context.rem(focused ? AppRem.lg : AppRem.md),
               offset: Offset(0, context.rem(AppRem.xs)),
             ),
@@ -1670,12 +1641,12 @@ class _DetailsPageState extends State<DetailsPage>
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.ink
-                          : AppColors.ink.withOpacity(0.07),
+                          : AppColors.ink.withValues(alpha: 0.07),
                       borderRadius: BorderRadius.circular(context.rem(DetailsDim.seasonRadius)),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.ink
-                            : AppColors.ink.withOpacity(0.1),
+                            : AppColors.ink.withValues(alpha: 0.1),
                       ),
                     ),
                     child: Text(
@@ -2190,9 +2161,9 @@ class _DetailsPageState extends State<DetailsPage>
                   width: context.rem(DetailsDim.arrowSize),
                   height: context.rem(DetailsDim.arrowSize),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
+                    color: Colors.black.withValues(alpha: 0.6),
                     shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.ink.withOpacity(0.2)),
+                    border: Border.all(color: AppColors.ink.withValues(alpha: 0.2)),
                   ),
                   child: Icon(
                     readingOrderArrow(context, icon),
@@ -2245,7 +2216,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     (widget.onTap ?? () {})();
     return KeyEventResult.handled;
   }
@@ -2278,14 +2249,14 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                 color: widget.isCurrent
                     ? AppColors.accent
                     : hovered
-                        ? AppColors.ink.withOpacity(0.22)
-                        : AppColors.ink.withOpacity(0.04),
+                        ? AppColors.ink.withValues(alpha: 0.22)
+                        : AppColors.ink.withValues(alpha: 0.04),
                 width: widget.isCurrent ? 1.5 : 1.0, // px: a selected weight, not a layout size
               ),
               boxShadow: hovered
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withValues(alpha: 0.4),
                         blurRadius: context.rem(DetailsDim.episodeShadowBlur),
                         offset: Offset(0, context.rem(AppRem.sm)),
                       ),
@@ -2318,7 +2289,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.75),
+                                Colors.black.withValues(alpha: 0.75),
                               ],
                               stops: const [0.5, 1.0],
                             ),
@@ -2335,7 +2306,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.5),
+                                    color: Colors.black.withValues(alpha: 0.5),
                                     blurRadius: context.rem(AppRem.radiusPill),
                                   ),
                                 ],

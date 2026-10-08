@@ -127,7 +127,14 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
 
                 SizedBox(height: context.rem(AppRem.lg)),
 
-                // ── Section 7: Subtitle Appearance & libass Styling ──
+                // ── Section 7: Language (audio and subtitles follow the device) ──
+                _buildSectionHeader(l10n.videoSectionLanguage),
+                SizedBox(height: context.rem(AppRem.ms)),
+                _buildLanguageCard(palette),
+
+                SizedBox(height: context.rem(AppRem.lg)),
+
+                // ── Section 8: Subtitle Appearance & libass Styling ──
                 _buildSectionHeader(l10n.videoSectionSubtitles),
                 SizedBox(height: context.rem(AppRem.ms)),
                 _buildSubtitleAppearanceCard(palette),
@@ -1260,6 +1267,70 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  /// Audio and subtitles in the viewer's own language: the card says what the
+  /// app does by default and offers the one switch that has an opposite.
+  Widget _buildLanguageCard(AppThemePalette palette) {
+    final l10n = context.l10n;
+    return Container(
+      padding: EdgeInsets.all(context.rem(AppRem.md)),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+        border: Border.all(color: AppColors.inkAlpha(0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.videoLanguageIntro,
+            style: TextStyle(
+              fontSize: AppType.caption,
+              color: AppColors.inkAlpha(0.5),
+              height: 1.3, // ratio: a line height, not a size
+            ),
+          ),
+          SizedBox(height: context.rem(AppRem.sm)),
+          Divider(color: AppColors.inkAlpha(0.06), height: 1), // px: a hairline, not a layout size
+          SizedBox(height: context.rem(AppRem.sm)),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            secondary: Container(
+              padding: EdgeInsets.all(context.rem(AppRem.sm)),
+              decoration: BoxDecoration(
+                color: palette.primaryColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              ),
+              child: Icon(
+                Icons.closed_caption_rounded,
+                color: palette.primaryColor,
+                size: context.rem(AppRem.icon),
+              ),
+            ),
+            title: Text(
+              l10n.videoAutoSubtitlesTitle,
+              style: TextStyle(
+                fontSize: AppType.bodyPlus,
+                fontWeight: FontWeight.w700,
+                color: AppColors.ink,
+              ),
+            ),
+            subtitle: Text(
+              l10n.videoAutoSubtitlesBody,
+              style: TextStyle(
+                fontSize: AppType.caption,
+                color: AppColors.inkAlpha(0.5),
+                height: 1.3, // ratio: a line height, not a size
+              ),
+            ),
+            value: PlayerSettings.autoSubtitles.value,
+            activeColor: palette.primaryColor,
+            onChanged: (val) => PlayerSettings.setAutoSubtitles(val),
+          ),
         ],
       ),
     );

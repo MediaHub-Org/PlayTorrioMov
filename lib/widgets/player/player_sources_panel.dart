@@ -15,16 +15,7 @@ import '../../services/tv_type.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 import '../common/focus_fill.dart';
-
-/// The keys that activate a focused source card. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
-/// inside a `const` set literal.
-final _sourceCardActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../common/activate_keys.dart';
 
 /// Glassmorphic Sources Side Panel for selecting episode stream sources,
 /// with targeted scraping, episode caching, and error recovery banners.
@@ -580,7 +571,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
           setState(() => _focusedIndex = focused ? index : null),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        if (!_sourceCardActivators.contains(event.logicalKey)) {
+        if (!kActivateKeys.contains(event.logicalKey)) {
           return KeyEventResult.ignored;
         }
         widget.onPlaySource(source, widget.episode);

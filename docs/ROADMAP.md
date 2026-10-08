@@ -37,6 +37,14 @@ Device checks; none of these can be settled from the code.
   and Catalog sort pills, and the video settings cards. Every row should show a
   wash under the remote, and a mouse should light it lighter. After touching the
   screen with a mouse or a remote app, the focus cue should stay.
+- **Language and playback on a real connection.** On a device set to Spanish
+  (or any of the thirteen languages the detector knows): the source list should
+  open on releases in that language; a file with several audio tracks should
+  open on that track; with foreign audio and an embedded subtitle in your
+  language, that subtitle should come on by itself. Then on the slow
+  connection: does it stop and wait once instead of stuttering, does the stats
+  panel's sentence name the cause, does "Playback keeps pausing" appear after
+  repeated stalls, and does a jump back come out of the cache.
 - **TV: details, loading screen and speed menu.** Opening a title's details
   with a remote should land on Play, and Down/Right should reach the library
   buttons and then the rails with no genre tags in between. The loading screen
@@ -58,8 +66,8 @@ has to be measured first.
 
 | Plan                                                | Status                                                                                                                       |
 |:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
-| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Five steps, ordered by risk: dedupe the mechanical copies (13 key sets, 3 logo blocks), one press/hover/focus primitive, split the big pages, the player last, then the oversized services. Step 1 is next. |
-| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Slow playback on slow links and on a TV. Step 0 (a diagnosis in the stats panel, then one TV session) comes first; steps 1 and 2 (release choice, debrid cached badge) do not depend on it. True stream adaptation is possible for HLS sources only. |
+| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Step 1 (mechanical dedupe) is done; next is the 37 deprecations it uncovered, then one press/hover/focus primitive, the big pages, and the player last. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Done: the diagnosis in the stats panel, release ranking by language/weight/tier/seeders, the link ceiling learned from stalls, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache and faster probing. **Open: Step 0.2 (one TV session) and Step 2 (debrid cached badge, after checking each provider's current API).** True stream adaptation is possible for HLS only. |
 
 ---
 

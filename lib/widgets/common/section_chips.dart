@@ -7,6 +7,7 @@ import '../../utils/hub_controller.dart';
 import 'tv_focus_bridge.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
+import 'activate_keys.dart';
 
 /// The section switcher for tablet and desktop, driven by
 /// [HubController.currentSections]: one chip per section, centered, and
@@ -84,23 +85,12 @@ class _Chip extends StatefulWidget {
   State<_Chip> createState() => _ChipState();
 }
 
-/// The keys that activate a focused chip. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _chipActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-  LogicalKeyboardKey.space,
-};
-
 class _ChipState extends State<_Chip> {
   bool _focused = false;
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_chipActivators.contains(event.logicalKey)) {
+    if (!kActivateKeysWithSpace.contains(event.logicalKey)) {
       return KeyEventResult.ignored;
     }
     widget.onTap();

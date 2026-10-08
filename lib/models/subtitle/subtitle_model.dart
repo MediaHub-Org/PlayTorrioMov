@@ -256,6 +256,41 @@ abstract final class SubtitleAutoPick {
     return tracks.first;
   }
 
+  /// The embedded track to turn on by itself because the viewer cannot be
+  /// expected to follow the audio, or null when none should come on.
+  ///
+  /// A streaming app shows subtitles in the profile language when the film is
+  /// playing in another one, and nothing when it is playing in theirs. The same
+  /// here: if the audio being heard is not [viewerLanguage], the first full
+  /// translation into it comes on. Never when the audio is already theirs, and
+  /// never when the audio's language is unknown -- guessing would put words on
+  /// the screen of someone who understands every one that is said.
+  ///
+  /// Forced tracks are skipped (they translate only the foreign lines of a
+  /// film that is otherwise in the viewer's language) and hearing-impaired
+  /// ones come last, because they describe sounds a viewer who simply does not
+  /// speak the language did not ask for.
+  static PlayerEmbeddedSubtitle? embeddedForViewer(
+    List<PlayerEmbeddedSubtitle> tracks, {
+    required String viewerLanguage,
+    String? audioLanguage,
+  }) {
+    final viewer = languageKey(viewerLanguage);
+    final audio = languageKey(audioLanguage);
+    if (viewer == null || audio == null || viewer == audio) return null;
+
+    final inViewerLanguage = tracks.where(
+      (t) => !t.isForced &&
+          (languageKey(t.language) == viewer || languageKey(t.title) == viewer),
+    );
+    PlayerEmbeddedSubtitle? hearingImpaired;
+    for (final track in inViewerLanguage) {
+      if (!track.isHearingImpaired) return track;
+      hearingImpaired ??= track;
+    }
+    return hearingImpaired;
+  }
+
   /// The embedded tracks in the order a viewer should see them.
   ///
   /// The language being heard comes first, because that is the track a

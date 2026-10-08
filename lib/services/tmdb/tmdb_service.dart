@@ -171,14 +171,42 @@ abstract final class TmdbService {
   /// grow one; anything else stays retryable on the next open.
   static final Map<String, String?> _overviewByKey = <String, String?>{};
 
-  /// The TMDB `language` tag for an app locale code. Regional where the app
-  /// is regional (pt-BR); bare where that is what TMDB covers (ar). Unknown
-  /// codes fall back to English rather than to whatever TMDB guesses.
+  /// The TMDB `language` tag for a language code. Regional where TMDB wants a
+  /// region (pt-BR, zh-CN); bare where it does not (ar). A code with no entry
+  /// falls back to English rather than to whatever TMDB guesses.
+  ///
+  /// This was four languages, the app's own. The synopsis is not the app's
+  /// text, though: TMDB has it in all of these, and a French viewer was reading
+  /// English. The table is the languages TMDB's catalog is complete in.
   @visibleForTesting
   static String languageTagFor(String? localeCode) => switch (localeCode) {
         'es' => 'es-ES',
         'pt' => 'pt-BR',
         'ar' => 'ar',
+        'fr' => 'fr-FR',
+        'de' => 'de-DE',
+        'it' => 'it-IT',
+        'nl' => 'nl-NL',
+        'pl' => 'pl-PL',
+        'ru' => 'ru-RU',
+        'tr' => 'tr-TR',
+        'uk' => 'uk-UA',
+        'cs' => 'cs-CZ',
+        'sv' => 'sv-SE',
+        'da' => 'da-DK',
+        'fi' => 'fi-FI',
+        'nb' || 'no' => 'nb-NO',
+        'hu' => 'hu-HU',
+        'ro' => 'ro-RO',
+        'el' => 'el-GR',
+        'he' => 'he-IL',
+        'hi' => 'hi-IN',
+        'th' => 'th-TH',
+        'vi' => 'vi-VN',
+        'id' => 'id-ID',
+        'ja' => 'ja-JP',
+        'ko' => 'ko-KR',
+        'zh' => 'zh-CN',
         _ => 'en-US',
       };
 

@@ -24,16 +24,7 @@ import '../../widgets/common/setting_choice_chip.dart';
 import '../../widgets/common/clamped_text_scale.dart';
 import '../../services/app_units.dart';
 import '../../widgets/common/focus_fill.dart';
-
-/// The keys that activate a focused portal-browser card. `final`, not
-/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
-/// that inside a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../../widgets/common/activate_keys.dart';
 
 class IptvPortalBrowserPage extends StatefulWidget {
   final VerifiedPortal? portal;
@@ -1435,7 +1426,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }
@@ -1566,7 +1557,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }
@@ -1843,7 +1834,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }
@@ -2050,7 +2041,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

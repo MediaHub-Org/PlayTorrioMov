@@ -10,6 +10,7 @@ import '../collection/collection_picker_sheet.dart';
 import 'like_button.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
+import 'activate_keys.dart';
 
 /// The app's one set of library actions: **Watchlist**, **Watched**, **Like**.
 ///
@@ -159,16 +160,6 @@ class LibraryActionsRow extends StatelessWidget {
   }
 }
 
-/// The keys that activate a focused [_StatusButton]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
-
 /// Icon-only with a hover [Tooltip] for the label: once three buttons share
 /// a details page's action row there is no width left for "Add to
 /// watchlist" as text, and an icon cannot overflow the way that label did.
@@ -197,7 +188,7 @@ class _StatusButtonState extends State<_StatusButton> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }
