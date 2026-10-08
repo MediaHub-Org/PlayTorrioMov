@@ -16,6 +16,7 @@ import '../../services/anime/extractors/anidb_extractor.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_fill.dart';
 
 class AnimeStreamSheet extends StatefulWidget {
   final AnimeMedia anime;
@@ -361,105 +362,108 @@ class _AnimeStreamSheetState extends State<AnimeStreamSheet> {
 
                               return Material(
                                 color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => _playSource(s),
-                                  borderRadius: BorderRadius.circular(context.rem(0.875)),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: context.rem(AppRem.md),
-                                      vertical: context.rem(AppRem.ms),
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.raised,
-                                      borderRadius: BorderRadius.circular(context.rem(0.875)),
-                                      border: Border.all(
-                                        color:
-                                            AppColors.inkAlpha(0.08),
+                                child: FocusFill(
+                                  radius: context.rem(0.875),
+                                  child: InkWell(
+                                    onTap: () => _playSource(s),
+                                    borderRadius: BorderRadius.circular(context.rem(0.875)),
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: context.rem(AppRem.md),
+                                        vertical: context.rem(AppRem.ms),
                                       ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.all(context.rem(AppRem.sm)),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.accent
-                                                .withValues(alpha: 0.2),
-                                            borderRadius:
-                                                BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                                          ),
-                                          child: Icon(
-                                            Icons.play_circle_fill_rounded,
-                                            color: AppColors.accent,
-                                            size: context.rem(AppRem.iconLg),
-                                          ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.raised,
+                                        borderRadius: BorderRadius.circular(context.rem(0.875)),
+                                        border: Border.all(
+                                          color:
+                                              AppColors.inkAlpha(0.08),
                                         ),
-                                        SizedBox(width: context.rem(0.875)),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                s.name ?? context.l10n.playerStreamSourceFallback,
-                                                style: TextStyle(
-                                                  color: AppColors.ink,
-                                                  fontSize: AppType.body,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              SizedBox(height: context.rem(0.1875)),
-                                              Text(
-                                                s.description ?? s.addonName,
-                                                style: TextStyle(
-                                                  color: AppColors.inkSubtle,
-                                                  fontSize: AppType.tiny,
-                                                ),
-                                              ),
-                                              // Same seed badge the movie
-                                              // and series picker shows, so
-                                              // a torrent source reads the
-                                              // same here. A direct link has
-                                              // none, and then the gap above
-                                              // it would be dead space.
-                                              if (sourceDeliveryBadges(s)
-                                                  .isNotEmpty) ...[
-                                                SizedBox(height: context.rem(AppRem.snug)),
-                                                Wrap(
-                                                  spacing: context.rem(AppRem.snug),
-                                                  runSpacing: context.rem(AppRem.xs),
-                                                  children:
-                                                      sourceDeliveryBadges(s),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: context.rem(AppRem.sm),
-                                            vertical: context.rem(AppRem.xs),
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: isDub
-                                                ? Colors.orange
-                                                    .withValues(alpha: 0.2)
-                                                : Colors.blue
-                                                    .withValues(alpha: 0.2),
-                                            borderRadius:
-                                                BorderRadius.circular(context.rem(AppRem.snug)),
-                                          ),
-                                          child: Text(
-                                            isDub ? 'DUB' : 'SUB',
-                                            style: TextStyle(
-                                              color: isDub
-                                                  ? Colors.orangeAccent
-                                                  : Colors.lightBlueAccent,
-                                              fontSize: TvType.scale(AppType.micro),
-                                              fontWeight: FontWeight.w900,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.all(context.rem(AppRem.sm)),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.accent
+                                                  .withValues(alpha: 0.2),
+                                              borderRadius:
+                                                  BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                                            ),
+                                            child: Icon(
+                                              Icons.play_circle_fill_rounded,
+                                              color: AppColors.accent,
+                                              size: context.rem(AppRem.iconLg),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                          SizedBox(width: context.rem(0.875)),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  s.name ?? context.l10n.playerStreamSourceFallback,
+                                                  style: TextStyle(
+                                                    color: AppColors.ink,
+                                                    fontSize: AppType.body,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                SizedBox(height: context.rem(0.1875)),
+                                                Text(
+                                                  s.description ?? s.addonName,
+                                                  style: TextStyle(
+                                                    color: AppColors.inkSubtle,
+                                                    fontSize: AppType.tiny,
+                                                  ),
+                                                ),
+                                                // Same seed badge the movie
+                                                // and series picker shows, so
+                                                // a torrent source reads the
+                                                // same here. A direct link has
+                                                // none, and then the gap above
+                                                // it would be dead space.
+                                                if (sourceDeliveryBadges(s)
+                                                    .isNotEmpty) ...[
+                                                  SizedBox(height: context.rem(AppRem.snug)),
+                                                  Wrap(
+                                                    spacing: context.rem(AppRem.snug),
+                                                    runSpacing: context.rem(AppRem.xs),
+                                                    children:
+                                                        sourceDeliveryBadges(s),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: context.rem(AppRem.sm),
+                                              vertical: context.rem(AppRem.xs),
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: isDub
+                                                  ? Colors.orange
+                                                      .withValues(alpha: 0.2)
+                                                  : Colors.blue
+                                                      .withValues(alpha: 0.2),
+                                              borderRadius:
+                                                  BorderRadius.circular(context.rem(AppRem.snug)),
+                                            ),
+                                            child: Text(
+                                              isDub ? 'DUB' : 'SUB',
+                                              style: TextStyle(
+                                                color: isDub
+                                                    ? Colors.orangeAccent
+                                                    : Colors.lightBlueAccent,
+                                                fontSize: TvType.scale(AppType.micro),
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

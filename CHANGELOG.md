@@ -35,6 +35,28 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **TV focus audit: rows and pills that showed nothing under a remote.** An
+  `InkWell` over an opaque container hides its own focus and hover, so 38 rows,
+  sheet options, cards and buttons (the sources and episodes panels, the cast
+  and subtitle-style sheets, collections, Live TV, the video settings cards, the
+  nav rail) showed no focus; each is now wrapped in `FocusFill`, which also
+  answers a mouse (a light wash) and a press (a stronger one). Seven sort and
+  catalog pills built on `PopupMenuButton` (Discover, Catalog, Library, Live TV
+  sources) get the soft wash `FilterDropdown` already had. A source scan
+  (`test/tv_focus_cues_test.dart`) keeps a bare `InkWell` from coming back.
+  Not confirmed on a TV.
+- **"Sources" filter pills lost focus.** The add-on pill is in the row only
+  once the sources span more than one add-on, which is not known until the
+  search is part-way through; a pill appearing ahead of the focused one rebuilt
+  it as its neighbor and focus fell off the row. The pills now keep their own
+  identity, and so do the source cards, which are re-sorted as add-ons answer.
+- **The filter menus opened with focus still on the pill underneath.** A dialog
+  route hands focus to nothing in it, so the first arrow went to the page behind
+  the menu. A menu now takes focus on open, and a single-choice menu starts on
+  the selected row.
+- **On a TV, focus disappeared after any pointer event.** Flutter stops drawing
+  focus the moment it sees a pointer (a remote app, an air mouse), and a TV has
+  nothing to bring it back. The TV pins focus drawing on.
 - **On a TV the speed menu closed after one press.** Every arrow was reported
   to the menu as a finished drag, so going from 1x to 1.5x lost the menu at
   1.25x. It now stays open while Left/Right step the speed and closes on OK

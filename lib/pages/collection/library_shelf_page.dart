@@ -21,6 +21,7 @@ import '../../widgets/movie/movie_card.dart';
 import '../details/details_page.dart';
 import '../iptv/iptv_channel_sheet.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_highlight.dart';
 
 /// One shelf of the Library, opened from its card.
 ///
@@ -642,58 +643,61 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
       'year_old' => l10n.librarySortYearOldest,
       _ => l10n.librarySortRecent,
     };
-    return PopupMenuButton<String>(
-      initialValue: _sortBy,
-      tooltip: '${l10n.librarySortBy}: $activeLabel',
-      onSelected: (val) => setState(() => _sortBy = val),
-      color: AppColors.raised,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
-        decoration: BoxDecoration(
-          color: AppColors.raised,
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-          border: Border.all(color: AppColors.inkAlpha(0.08)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.sort_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
-            SizedBox(width: context.rem(AppRem.xs)),
-            // Capped like the tab sort pill: the name is a label, and at a
-            // large text scale it names its natural width whatever the row
-            // offers. The tooltip carries the full name.
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: context.rem(7.5)),
-              child: Text(
-                activeLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: AppType.tiny,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.inkMuted,
+    return FocusHighlight(
+      borderRadius: context.rem(AppRem.radiusSm),
+      child: PopupMenuButton<String>(
+        initialValue: _sortBy,
+        tooltip: '${l10n.librarySortBy}: $activeLabel',
+        onSelected: (val) => setState(() => _sortBy = val),
+        color: AppColors.raised,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
+          decoration: BoxDecoration(
+            color: AppColors.raised,
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+            border: Border.all(color: AppColors.inkAlpha(0.08)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.sort_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
+              SizedBox(width: context.rem(AppRem.xs)),
+              // Capped like the tab sort pill: the name is a label, and at a
+              // large text scale it names its natural width whatever the row
+              // offers. The tooltip carries the full name.
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: context.rem(7.5)),
+                child: Text(
+                  activeLabel,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: AppType.tiny,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.inkMuted,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+        itemBuilder: (context) => [
+          PopupMenuItem(value: 'recent', child: Text(l10n.librarySortRecent)),
+          PopupMenuItem(value: 'title_az', child: Text(l10n.librarySortTitle)),
+          PopupMenuItem(
+            value: 'title_za',
+            child: Text(l10n.librarySortTitleDesc),
+          ),
+          PopupMenuItem(
+            value: 'year_new',
+            child: Text(l10n.librarySortYearNewest),
+          ),
+          PopupMenuItem(
+            value: 'year_old',
+            child: Text(l10n.librarySortYearOldest),
+          ),
+        ],
       ),
-      itemBuilder: (context) => [
-        PopupMenuItem(value: 'recent', child: Text(l10n.librarySortRecent)),
-        PopupMenuItem(value: 'title_az', child: Text(l10n.librarySortTitle)),
-        PopupMenuItem(
-          value: 'title_za',
-          child: Text(l10n.librarySortTitleDesc),
-        ),
-        PopupMenuItem(
-          value: 'year_new',
-          child: Text(l10n.librarySortYearNewest),
-        ),
-        PopupMenuItem(
-          value: 'year_old',
-          child: Text(l10n.librarySortYearOldest),
-        ),
-      ],
     );
   }
 

@@ -23,6 +23,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/setting_choice_chip.dart';
 import '../../widgets/common/clamped_text_scale.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_fill.dart';
 
 /// The keys that activate a focused portal-browser card. `final`, not
 /// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
@@ -1050,33 +1051,36 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                     Row(
                       children: [
                         // Mobile Category Chip
-                        InkWell(
-                          onTap: () => _showMobileCategorySheet(context),
-                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.4375)),
-                            decoration: BoxDecoration(
-                              color: AppColors.raised,
-                              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                              border: Border.all(color: AppColors.accent.withValues(alpha: 0.5)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.folder_rounded, color: AppColors.accent, size: context.rem(0.9375)),
-                                SizedBox(width: context.rem(AppRem.snug)),
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.32),
-                                  child: Text(
-                                    _selectedCategoryName(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(color: AppColors.ink, fontSize: AppType.tinyPlus, fontWeight: FontWeight.bold),
+                        FocusFill(
+                          radius: context.rem(AppRem.radiusPill),
+                          child: InkWell(
+                            onTap: () => _showMobileCategorySheet(context),
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(0.4375)),
+                              decoration: BoxDecoration(
+                                color: AppColors.raised,
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                                border: Border.all(color: AppColors.accent.withValues(alpha: 0.5)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.folder_rounded, color: AppColors.accent, size: context.rem(0.9375)),
+                                  SizedBox(width: context.rem(AppRem.snug)),
+                                  ConstrainedBox(
+                                    constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.32),
+                                    child: Text(
+                                      _selectedCategoryName(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(color: AppColors.ink, fontSize: AppType.tinyPlus, fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: context.rem(AppRem.xs)),
-                                Icon(Icons.arrow_drop_down_rounded, color: AppColors.accent, size: context.rem(AppRem.iconSm)),
-                              ],
+                                  SizedBox(width: context.rem(AppRem.xs)),
+                                  Icon(Icons.arrow_drop_down_rounded, color: AppColors.accent, size: context.rem(AppRem.iconSm)),
+                                ],
+                              ),
                             ),
                           ),
                         ),

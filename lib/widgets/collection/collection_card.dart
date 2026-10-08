@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// The three ways a card's square can be filled. Named so the choice can be
 /// asserted without rendering a network image in a test.
@@ -75,40 +76,43 @@ class CollectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-              child: _buildArt(context),
+    return FocusFill(
+      radius: context.rem(AppRem.radiusMd),
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                child: _buildArt(context),
+              ),
             ),
-          ),
-          SizedBox(height: context.rem(AppRem.sm)),
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: AppColors.ink,
-              fontSize: AppType.smallPlus,
-              fontWeight: FontWeight.w700,
+            SizedBox(height: context.rem(AppRem.sm)),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.ink,
+                fontSize: AppType.smallPlus,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          SizedBox(height: context.rem(AppRem.xxs)),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.tinyPlus),
-          ),
-        ],
+            SizedBox(height: context.rem(AppRem.xxs)),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.tinyPlus),
+            ),
+          ],
+        ),
       ),
     );
   }

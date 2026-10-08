@@ -6,6 +6,7 @@ import '../../services/cast/cast_service.dart';
 import '../../utils/navigation/adaptive_sheet.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Device picker for Cast -- shown from the player's Cast button. Only ever
 /// opened when [CastService.isSupported] is true (mobile only); callers must
@@ -274,60 +275,63 @@ class _PlayerCastSheetState extends State<PlayerCastSheet> {
                               children: devices.map((device) {
                                 return Material(
                                   color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(
-                                      context.rem(AppRem.radiusPill),
-                                    ),
-                                    onTap: _isCasting
-                                        ? null
-                                        : () => _castToDevice(device),
-                                    child: Container(
-                                      // A floor, not a fixed height: the device name grows with text scale.
-                                      constraints: BoxConstraints(
-                                        minHeight: context.rem(3),
+                                  child: FocusFill(
+                                    radius: context.rem(AppRem.radiusPill),
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(
+                                        context.rem(AppRem.radiusPill),
                                       ),
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: context.rem(AppRem.sm),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            device.deviceID == connectedId
-                                                ? Icons.cast_connected_rounded
-                                                : Icons.tv_rounded,
-                                            size: context.rem(AppRem.icon),
-                                            color: PlayerTheme.inkMuted,
-                                          ),
-                                          SizedBox(
-                                            width: context.rem(AppRem.ms),
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              device.friendlyName,
-                                              style: const TextStyle(
-                                                color: PlayerTheme.ink,
-                                                fontSize: AppType.body,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          if (_castingDeviceName ==
-                                              device.friendlyName) ...[
-                                            SizedBox(
-                                              width: context.rem(AppRem.sm),
+                                      onTap: _isCasting
+                                          ? null
+                                          : () => _castToDevice(device),
+                                      child: Container(
+                                        // A floor, not a fixed height: the device name grows with text scale.
+                                        constraints: BoxConstraints(
+                                          minHeight: context.rem(3),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: context.rem(AppRem.sm),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              device.deviceID == connectedId
+                                                  ? Icons.cast_connected_rounded
+                                                  : Icons.tv_rounded,
+                                              size: context.rem(AppRem.icon),
+                                              color: PlayerTheme.inkMuted,
                                             ),
                                             SizedBox(
-                                              width: context.rem(1),
-                                              height: context.rem(1),
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: PlayerTheme.accent,
+                                              width: context.rem(AppRem.ms),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                device.friendlyName,
+                                                style: const TextStyle(
+                                                  color: PlayerTheme.ink,
+                                                  fontSize: AppType.body,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
+                                            if (_castingDeviceName ==
+                                                device.friendlyName) ...[
+                                              SizedBox(
+                                                width: context.rem(AppRem.sm),
+                                              ),
+                                              SizedBox(
+                                                width: context.rem(1),
+                                                height: context.rem(1),
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: PlayerTheme.accent,
+                                                ),
+                                              ),
+                                            ],
                                           ],
-                                        ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -359,33 +363,36 @@ class _StopCastingRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-        onTap: onTap,
-        child: Container(
-          constraints: BoxConstraints(minHeight: context.rem(3)),
-          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
-          child: Row(
-            children: [
-              Icon(
-                Icons.cast_connected_rounded,
-                size: context.rem(AppRem.icon),
-                color: PlayerTheme.accent,
-              ),
-              SizedBox(width: context.rem(AppRem.ms)),
-              Expanded(
-                child: Text(
-                  context.l10n.playerCastStop,
-                  style: TextStyle(
-                    color: PlayerTheme.accent,
-                    fontSize: AppType.body,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusPill),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+          onTap: onTap,
+          child: Container(
+            constraints: BoxConstraints(minHeight: context.rem(3)),
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm)),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.cast_connected_rounded,
+                  size: context.rem(AppRem.icon),
+                  color: PlayerTheme.accent,
                 ),
-              ),
-            ],
+                SizedBox(width: context.rem(AppRem.ms)),
+                Expanded(
+                  child: Text(
+                    context.l10n.playerCastStop,
+                    style: TextStyle(
+                      color: PlayerTheme.accent,
+                      fontSize: AppType.body,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

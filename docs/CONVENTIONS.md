@@ -402,6 +402,38 @@ are closed. It is not justified as a way to avoid passing a parameter.
 `PlayerIconButton`, `PlayerToggleChip`, `FocusRing`, `PlayerStepSlider`. A
 player menu composes these; it does not re-implement a card or a button.
 
+### TV focus: how a control shows hover, focus and press
+
+A remote has no cursor, so a control that shows nothing under focus is, to the
+person holding it, a control that is not there. The rules, each learned the
+hard way (#80):
+
+- **An `InkWell` is wrapped in `FocusFill(radius: ..., child: InkWell(...))`.**
+  The `InkWell` paints hover, focus and splash on the `Material` underneath,
+  and an opaque `Container` inside it covers all three. `FocusFill` draws the
+  cue on top: a violet wash that is lighter for hover, stronger for a press and
+  strongest for focus. `test/tv_focus_cues_test.dart` fails on a bare `InkWell`;
+  a site that is right without the wrapper says why with `// focus-ok: <reason>`.
+- **A `PopupMenuButton` with its own `child` is wrapped in `FocusHighlight`**,
+  for the same reason (the pill is a container the Material tint cannot reach).
+  With an icon it is an `IconButton`, which the theme covers.
+- **Keys keep focus on a row that changes shape.** A `Row` or list child is
+  matched by position, so when an item appears or disappears ahead of the one
+  with focus, the focused element is rebuilt as its neighbor and focus is lost.
+  Pills that may come and go, and cards in a list that is re-sorted as results
+  arrive, carry a `ValueKey` that names the item (see the watch screen's filter
+  pills and `_sourceCardKey`).
+- **A menu that opens takes focus.** A dialog route hands focus to nothing in
+  it. Wrap the menu in `PlayerFocusOnOpen`; in a single-choice menu give the
+  selected row `autofocus`, so a remote starts where the choice is.
+- **A control that takes focus when its panel opens shows it only to a keyboard
+  or D-pad.** Draw it when `FocusManager.instance.highlightMode` is
+  `traditional`, or a touch viewer sees an auto-focused control lit as if it
+  were switched on. On a TV the mode is pinned (`TvModeService.applyFocusStrategy`),
+  so a pointer event never turns the cue off.
+- **A slider shows focus on itself** (a thicker track, a larger thumb), not in a
+  frame: it takes focus on open, so a frame would be on screen by default.
+
 ### Localization
 
 Two accessors, and the choice is deliberate:

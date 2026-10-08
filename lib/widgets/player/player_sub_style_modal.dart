@@ -6,6 +6,7 @@ import '../../services/player/player_settings.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// How opaque the subtitle background is, 0 to 1, read from a `#AARRGGBB`
 /// string. A value that does not parse counts as no background.
@@ -265,41 +266,44 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             final isSelected = activePreset == preset;
             return Padding(
               padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
-              child: InkWell(
-                onTap: () => PlayerSettings.setSubStylePreset(preset, player: widget.player),
-                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
-                  decoration: BoxDecoration(
-                    color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
-                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                    border: Border.all(
-                      color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
+              child: FocusFill(
+                radius: context.rem(AppRem.radiusPill),
+                child: InkWell(
+                  onTap: () => PlayerSettings.setSubStylePreset(preset, player: widget.player),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
+                    decoration: BoxDecoration(
+                      color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                      border: Border.all(
+                        color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: context.rem(0.625),
-                        height: context.rem(0.625),
-                        margin: EdgeInsetsDirectional.only(end: context.rem(AppRem.snug)),
-                        decoration: BoxDecoration(
-                          color: _parseColorFromHex(preset.textColor),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white30, width: 0.8), // px: a hairline, not a layout size
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: context.rem(0.625),
+                          height: context.rem(0.625),
+                          margin: EdgeInsetsDirectional.only(end: context.rem(AppRem.snug)),
+                          decoration: BoxDecoration(
+                            color: _parseColorFromHex(preset.textColor),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white30, width: 0.8), // px: a hairline, not a layout size
+                          ),
                         ),
-                      ),
-                      Text(
-                        preset.label(context.l10n),
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                          fontSize: AppType.tinyPlus,
-                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                        Text(
+                          preset.label(context.l10n),
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : PlayerTheme.inkMuted,
+                            fontSize: AppType.tinyPlus,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -483,27 +487,30 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
             activeHex.toLowerCase() == hex.toLowerCase();
         return Tooltip(
           message: _paletteName(context.l10n, item['name'] as String),
-          child: InkWell(
-            onTap: () => onPick(hex),
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-            child: Container(
-              width: context.rem(1.75),
-              height: context.rem(1.75),
-              decoration: BoxDecoration(
-                color: item['color'] as Color,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: selected ? PlayerTheme.accent : Colors.white38,
-                  width: selected ? 2.5 : 0.8, // px: a hairline, not a layout size
+          child: FocusFill(
+            radius: context.rem(AppRem.radiusLg),
+            child: InkWell(
+              onTap: () => onPick(hex),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+              child: Container(
+                width: context.rem(1.75),
+                height: context.rem(1.75),
+                decoration: BoxDecoration(
+                  color: item['color'] as Color,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: selected ? PlayerTheme.accent : Colors.white38,
+                    width: selected ? 2.5 : 0.8, // px: a hairline, not a layout size
+                  ),
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: PlayerTheme.accentGlow,
+                            blurRadius: context.rem(AppRem.snug),
+                          ),
+                        ]
+                      : null,
                 ),
-                boxShadow: selected
-                    ? [
-                        BoxShadow(
-                          color: PlayerTheme.accentGlow,
-                          blurRadius: context.rem(AppRem.snug),
-                        ),
-                      ]
-                    : null,
               ),
             ),
           ),
@@ -614,32 +621,35 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
   Widget _buildAlignButton(String title, String alignVal, IconData icon) {
     final isSelected = PlayerSettings.subAlignX.value == alignVal;
     return Expanded(
-      child: InkWell(
-        onTap: () => PlayerSettings.setSubAlignX(alignVal, player: widget.player),
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: context.rem(0.625)),
-          decoration: BoxDecoration(
-            color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-            border: Border.all(
-              color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: isSelected ? Colors.white : PlayerTheme.inkSubtle, size: context.rem(AppRem.iconSm)),
-              SizedBox(height: context.rem(AppRem.xs)),
-              Text(
-                title,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : PlayerTheme.inkMuted,
-                  fontSize: AppType.tinyPlus,
-                  fontWeight: FontWeight.w600,
-                ),
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusPill),
+        child: InkWell(
+          onTap: () => PlayerSettings.setSubAlignX(alignVal, player: widget.player),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: context.rem(0.625)),
+            decoration: BoxDecoration(
+              color: isSelected ? PlayerTheme.accent : PlayerTheme.raised,
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              border: Border.all(
+                color: isSelected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft,
               ),
-            ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: isSelected ? Colors.white : PlayerTheme.inkSubtle, size: context.rem(AppRem.iconSm)),
+                SizedBox(height: context.rem(AppRem.xs)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : PlayerTheme.inkMuted,
+                    fontSize: AppType.tinyPlus,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -773,17 +783,20 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
     required VoidCallback onTap,
     required Widget child,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.sm)),
-        decoration: BoxDecoration(
-          color: selected ? PlayerTheme.accent : PlayerTheme.raised,
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-          border: Border.all(color: selected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft),
+    return FocusFill(
+      radius: context.rem(AppRem.radiusPill),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(AppRem.sm)),
+          decoration: BoxDecoration(
+            color: selected ? PlayerTheme.accent : PlayerTheme.raised,
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+            border: Border.all(color: selected ? PlayerTheme.accentGlow : PlayerTheme.edgeSoft),
+          ),
+          child: child,
         ),
-        child: child,
       ),
     );
   }
@@ -804,29 +817,32 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
       message: tooltip,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(context.rem(0.5625)),
-          onTap: () => onChanged(!value),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: context.rem(2.5),
-            height: context.rem(2.125),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: value
-                  ? PlayerTheme.accent.withValues(alpha: 0.22)
-                  : PlayerTheme.raised,
-              borderRadius: BorderRadius.circular(context.rem(0.5625)),
-              border: Border.all(
+        child: FocusFill(
+          radius: context.rem(0.5625),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
+            onTap: () => onChanged(!value),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: context.rem(2.5),
+              height: context.rem(2.125),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
                 color: value
-                    ? PlayerTheme.accent.withValues(alpha: 0.6)
-                    : PlayerTheme.edgeSoft,
+                    ? PlayerTheme.accent.withValues(alpha: 0.22)
+                    : PlayerTheme.raised,
+                borderRadius: BorderRadius.circular(context.rem(0.5625)),
+                border: Border.all(
+                  color: value
+                      ? PlayerTheme.accent.withValues(alpha: 0.6)
+                      : PlayerTheme.edgeSoft,
+                ),
               ),
-            ),
-            child: Icon(
-              icon,
-              size: context.rem(1.0625),
-              color: value ? PlayerTheme.accent : PlayerTheme.inkSubtle,
+              child: Icon(
+                icon,
+                size: context.rem(1.0625),
+                color: value ? PlayerTheme.accent : PlayerTheme.inkSubtle,
+              ),
             ),
           ),
         ),

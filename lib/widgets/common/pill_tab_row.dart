@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/app_units.dart';
+import 'focus_fill.dart';
 
 /// One choice inside a [PillTabRow].
 class SubTab {
@@ -96,45 +97,48 @@ class _SubTabButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return InkWell(
-      onTap: onTap,
-      // Material's own focus tint is a few percent of the foreground, which
-      // vanishes on a violet selected tab; a remote needs a stronger one.
-      focusColor: AppColors.inkAlpha(0.22),
-      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.4375)),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppThemeService.currentPalette.value.primaryColor
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              tab.icon,
-              size: context.rem(0.9375),
-              // White on the accent fill; theme ink when there is no fill.
-              color: selected ? AppColors.onAccent : AppColors.inkSubtle,
-            ),
-            SizedBox(width: context.rem(AppRem.snug)),
-            Text(
-              tab.label,
-              // Clamped: LibraryTabs hosts this row in AppBar.bottom, a
-              // PreferredSize fixed at 52 tall. Unclamped, a large
-              // accessibility text size grows this label past that fixed
-              // height and overflows it (#69).
-              textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
-              style: TextStyle(
-                color: selected ? AppColors.onAccent : AppColors.inkAlpha(0.60),
-                fontSize: AppType.captionPlus,
-                fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+    return FocusFill(
+      radius: context.rem(AppRem.radiusSm),
+      child: InkWell(
+        onTap: onTap,
+        // Material's own focus tint is a few percent of the foreground, which
+        // vanishes on a violet selected tab; a remote needs a stronger one.
+        focusColor: AppColors.inkAlpha(0.22),
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(0.4375)),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppThemeService.currentPalette.value.primaryColor
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                tab.icon,
+                size: context.rem(0.9375),
+                // White on the accent fill; theme ink when there is no fill.
+                color: selected ? AppColors.onAccent : AppColors.inkSubtle,
               ),
-            ),
-          ],
+              SizedBox(width: context.rem(AppRem.snug)),
+              Text(
+                tab.label,
+                // Clamped: LibraryTabs hosts this row in AppBar.bottom, a
+                // PreferredSize fixed at 52 tall. Unclamped, a large
+                // accessibility text size grows this label past that fixed
+                // height and overflows it (#69).
+                textScaler: MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
+                style: TextStyle(
+                  color: selected ? AppColors.onAccent : AppColors.inkAlpha(0.60),
+                  fontSize: AppType.captionPlus,
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

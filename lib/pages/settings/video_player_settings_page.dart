@@ -406,76 +406,79 @@ class _VideoPlayerSettingsPageState extends State<VideoPlayerSettingsPage> {
   }) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.all(context.rem(0.75)),
-          decoration: BoxDecoration(
-            color: selected
-                ? palette.primaryColor.withValues(alpha: 0.12)
-                : AppColors.inkAlpha(0.02),
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-            border: Border.all(
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusMd),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: EdgeInsets.all(context.rem(0.75)),
+            decoration: BoxDecoration(
               color: selected
-                  ? palette.primaryColor.withValues(alpha: 0.5)
-                  : AppColors.inkAlpha(0.06),
-              width: selected ? 1.2 : 0.8, // px: a border weight, not a layout size
+                  ? palette.primaryColor.withValues(alpha: 0.12)
+                  : AppColors.inkAlpha(0.02),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              border: Border.all(
+                color: selected
+                    ? palette.primaryColor.withValues(alpha: 0.5)
+                    : AppColors.inkAlpha(0.06),
+                width: selected ? 1.2 : 0.8, // px: a border weight, not a layout size
+              ),
             ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                selected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
-                color: selected ? palette.primaryColor : AppColors.inkDisabled,
-                size: context.rem(AppRem.iconSm),
-              ),
-              SizedBox(width: context.rem(AppRem.sm)),
-              Expanded(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: context.rem(AppRem.sm),
-                  runSpacing: context.rem(AppRem.xxs),
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: AppType.small,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    Text(
-                      resolution,
-                      style: TextStyle(
-                        fontSize: AppType.tiny,
-                        color: AppColors.inkAlpha(0.45),
-                      ),
-                    ),
-                  ],
+            child: Row(
+              children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: selected ? palette.primaryColor : AppColors.inkDisabled,
+                  size: context.rem(AppRem.iconSm),
                 ),
-              ),
-              SizedBox(width: context.rem(AppRem.sm)),
-              // Capped rather than flexed: it is a short, fixed-shape fact
-              // ("Uses about 1.40 GB per hour"), and at a large text scale it
-              // should wrap to a second line sooner than it should squeeze
-              // the title out of room.
-              ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: context.rem(6.5)),
-                child: Text(
-                  perHour,
-                  textAlign: TextAlign.end,
-                  style: TextStyle(
-                    fontSize: AppType.tiny,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.inkAlpha(0.6),
+                SizedBox(width: context.rem(AppRem.sm)),
+                Expanded(
+                  child: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: context.rem(AppRem.sm),
+                    runSpacing: context.rem(AppRem.xxs),
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: AppType.small,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.ink,
+                        ),
+                      ),
+                      Text(
+                        resolution,
+                        style: TextStyle(
+                          fontSize: AppType.tiny,
+                          color: AppColors.inkAlpha(0.45),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(width: context.rem(AppRem.sm)),
+                // Capped rather than flexed: it is a short, fixed-shape fact
+                // ("Uses about 1.40 GB per hour"), and at a large text scale it
+                // should wrap to a second line sooner than it should squeeze
+                // the title out of room.
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: context.rem(6.5)),
+                  child: Text(
+                    perHour,
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: AppType.tiny,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.inkAlpha(0.6),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

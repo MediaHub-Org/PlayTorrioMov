@@ -29,6 +29,14 @@ Device checks; none of these can be settled from the code.
   fallback).
 - **The loading logo** with a torrent, a debrid link and a plain URL, and
   that it clears on the first frame.
+- **TV focus audit.** With a remote, go through: the Sources page (the four
+  filter pills, then OK on each: the menu should open on the selected row and
+  Back should return to the same pill; let the search run and watch that focus
+  stays put when the add-on pill appears), the in-player Sources and Episodes
+  panels, the Cast sheet, Library and Collections, Live TV sources, Discover
+  and Catalog sort pills, and the video settings cards. Every row should show a
+  wash under the remote, and a mouse should light it lighter. After touching the
+  screen with a mouse or a remote app, the focus cue should stay.
 - **TV: details, loading screen and speed menu.** Opening a title's details
   with a remote should land on Play, and Down/Right should reach the library
   buttons and then the rails with no genre tags in between. The loading screen

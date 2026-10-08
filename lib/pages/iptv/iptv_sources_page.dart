@@ -12,6 +12,8 @@ import '../../services/tv_type.dart';
 import '../../widgets/common/pill_tab_row.dart';
 import 'iptv_portal_browser_page.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_fill.dart';
+import '../../widgets/common/focus_highlight.dart';
 
 /// Live TV's sources, as a page rather than a modal.
 ///
@@ -567,75 +569,78 @@ class _ScrapeSourcePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return PopupMenuButton<CatalogSource>(
-      tooltip: context.l10n.iptvChooseSource,
-      initialValue: source,
-      onSelected: onSelected,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(context.rem(0.875)),
-        side: BorderSide(color: AppColors.inkAlpha(0.12)),
-      ),
-      color: AppColors.raised,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.5938)),
-        decoration: BoxDecoration(
-          color: AppColors.inkAlpha(0.08),
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-          border: Border.all(color: AppColors.inkAlpha(0.15)),
+    return FocusHighlight(
+      borderRadius: context.rem(AppRem.radiusPill),
+      child: PopupMenuButton<CatalogSource>(
+        tooltip: context.l10n.iptvChooseSource,
+        initialValue: source,
+        onSelected: onSelected,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(context.rem(0.875)),
+          side: BorderSide(color: AppColors.inkAlpha(0.12)),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              source == CatalogSource.cloudVault
-                  ? Icons.cloud_done_rounded
-                  : Icons.forum_rounded,
-              size: context.rem(0.9375),
-              color: source == CatalogSource.cloudVault
-                  ? const Color(0xFF00E5FF)
-                  : const Color(0xFFFF5722),
-            ),
-            SizedBox(width: context.rem(AppRem.snug)),
-            // Flexible: at a large text scale the source name outgrows the
-            // rail, and a min-size Row sizes its children to their natural
-            // width unless one may give.
-            Flexible(
-              child: Text(
-                source == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: AppColors.ink,
-                  fontSize: AppType.captionPlus,
-                  fontWeight: FontWeight.w700,
+        color: AppColors.raised,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.ms), vertical: context.rem(0.5938)),
+          decoration: BoxDecoration(
+            color: AppColors.inkAlpha(0.08),
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+            border: Border.all(color: AppColors.inkAlpha(0.15)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                source == CatalogSource.cloudVault
+                    ? Icons.cloud_done_rounded
+                    : Icons.forum_rounded,
+                size: context.rem(0.9375),
+                color: source == CatalogSource.cloudVault
+                    ? const Color(0xFF00E5FF)
+                    : const Color(0xFFFF5722),
+              ),
+              SizedBox(width: context.rem(AppRem.snug)),
+              // Flexible: at a large text scale the source name outgrows the
+              // rail, and a min-size Row sizes its children to their natural
+              // width unless one may give.
+              Flexible(
+                child: Text(
+                  source == CatalogSource.cloudVault ? 'Cloud Vault' : 'Reddit',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: AppColors.ink,
+                    fontSize: AppType.captionPlus,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: context.rem(AppRem.xs)),
-            Icon(
-              Icons.arrow_drop_down_rounded,
-              size: context.rem(AppRem.iconSm),
-              color: AppColors.inkMuted,
-            ),
-          ],
+              SizedBox(width: context.rem(AppRem.xs)),
+              Icon(
+                Icons.arrow_drop_down_rounded,
+                size: context.rem(AppRem.iconSm),
+                color: AppColors.inkMuted,
+              ),
+            ],
+          ),
         ),
+        itemBuilder: (ctx) => [
+          PopupMenuItem(
+            value: CatalogSource.cloudVault,
+            child: Text(
+              context.l10n.iptvCloudVaultTitle,
+              style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
+            ),
+          ),
+          PopupMenuItem(
+            value: CatalogSource.reddit,
+            child: Text(
+              context.l10n.iptvRedditTitle,
+              style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
-      itemBuilder: (ctx) => [
-        PopupMenuItem(
-          value: CatalogSource.cloudVault,
-          child: Text(
-            context.l10n.iptvCloudVaultTitle,
-            style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
-          ),
-        ),
-        PopupMenuItem(
-          value: CatalogSource.reddit,
-          child: Text(
-            context.l10n.iptvRedditTitle,
-            style: TextStyle(color: AppColors.ink, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -869,55 +874,58 @@ class _SourceRowShell extends StatelessWidget {
     AppColors.dependOn(context);
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onOpen,
-        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.ms)),
-          decoration: BoxDecoration(
-            color: AppColors.inkAlpha(0.04),
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-            border: Border.all(color: AppColors.inkAlpha(0.08)),
-          ),
-          child: Row(
-            children: [
-              if (leading != null) ...[
-                leading!,
-                SizedBox(width: context.rem(AppRem.ms)),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.ink,
-                        fontWeight: FontWeight.w700,
-                        fontSize: AppType.smallPlus,
+      child: FocusFill(
+        radius: context.rem(AppRem.radiusMd),
+        child: InkWell(
+          onTap: onOpen,
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.ms)),
+            decoration: BoxDecoration(
+              color: AppColors.inkAlpha(0.04),
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              border: Border.all(color: AppColors.inkAlpha(0.08)),
+            ),
+            child: Row(
+              children: [
+                if (leading != null) ...[
+                  leading!,
+                  SizedBox(width: context.rem(AppRem.ms)),
+                ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.ink,
+                          fontWeight: FontWeight.w700,
+                          fontSize: AppType.smallPlus,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: context.rem(0.1875)),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.inkAlpha(0.45),
-                        fontSize: AppType.tiny,
+                      SizedBox(height: context.rem(0.1875)),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: AppColors.inkAlpha(0.45),
+                          fontSize: AppType.tiny,
+                        ),
                       ),
-                    ),
-                    if (badges.isNotEmpty) ...[
-                      SizedBox(height: context.rem(0.3125)),
-                      Wrap(spacing: context.rem(AppRem.snug), runSpacing: context.rem(AppRem.xs), children: badges),
+                      if (badges.isNotEmpty) ...[
+                        SizedBox(height: context.rem(0.3125)),
+                        Wrap(spacing: context.rem(AppRem.snug), runSpacing: context.rem(AppRem.xs), children: badges),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              ...actions,
-            ],
+                ...actions,
+              ],
+            ),
           ),
         ),
       ),

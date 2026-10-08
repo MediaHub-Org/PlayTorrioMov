@@ -17,6 +17,7 @@ import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_highlight.dart';
 
 class DiscoverPage extends StatefulWidget {
   final String? query;
@@ -611,46 +612,49 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 alignment: WrapAlignment.center,
                 children: missing.map((extra) {
                   if (extra.options.isNotEmpty) {
-                    return PopupMenuButton<String>(
-                      tooltip: extra.name,
-                      constraints: BoxConstraints(maxHeight: context.rem(22.5)),
-                      color: AppColors.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                        side: BorderSide(color: AppColors.inkAlpha(0.1)),
-                      ),
-                      onSelected: (val) => _onExtraOptionSelected(extra.name, val),
-                      itemBuilder: (context) => extra.options
-                          .map(
-                            (opt) => PopupMenuItem<String>(
-                              value: opt,
-                              child: Text(opt, style: TextStyle(color: AppColors.ink)),
-                            ),
-                          )
-                          .toList(),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: context.rem(isNarrow ? 0.875 : AppRem.md),
-                          vertical: context.rem(isNarrow ? 0.4375 : AppRem.sm),
+                    return FocusHighlight(
+                      borderRadius: context.rem(1.25),
+                      child: PopupMenuButton<String>(
+                        tooltip: extra.name,
+                        constraints: BoxConstraints(maxHeight: context.rem(22.5)),
+                        color: AppColors.surface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                          side: BorderSide(color: AppColors.inkAlpha(0.1)),
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent,
-                          borderRadius: BorderRadius.circular(context.rem(1.25)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              context.l10n.discoverSelectExtra('${extra.name[0].toUpperCase()}${extra.name.substring(1)}'),
-                              style: TextStyle(
-                                color: AppColors.ink,
-                                fontWeight: FontWeight.bold,
-                                fontSize: isNarrow ? AppType.captionPlus : AppType.body,
+                        onSelected: (val) => _onExtraOptionSelected(extra.name, val),
+                        itemBuilder: (context) => extra.options
+                            .map(
+                              (opt) => PopupMenuItem<String>(
+                                value: opt,
+                                child: Text(opt, style: TextStyle(color: AppColors.ink)),
                               ),
-                            ),
-                            SizedBox(width: context.rem(AppRem.snug)),
-                            Icon(Icons.arrow_drop_down, color: AppColors.ink, size: context.rem(AppRem.icon)),
-                          ],
+                            )
+                            .toList(),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.rem(isNarrow ? 0.875 : AppRem.md),
+                            vertical: context.rem(isNarrow ? 0.4375 : AppRem.sm),
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            borderRadius: BorderRadius.circular(context.rem(1.25)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                context.l10n.discoverSelectExtra('${extra.name[0].toUpperCase()}${extra.name.substring(1)}'),
+                                style: TextStyle(
+                                  color: AppColors.ink,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isNarrow ? AppType.captionPlus : AppType.body,
+                                ),
+                              ),
+                              SizedBox(width: context.rem(AppRem.snug)),
+                              Icon(Icons.arrow_drop_down, color: AppColors.ink, size: context.rem(AppRem.icon)),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -847,53 +851,56 @@ class _DiscoverPageState extends State<DiscoverPage> {
                   children: [
                     // Type selector popup/dropdown
                     if (_availableTypes.isNotEmpty) ...[
-                      PopupMenuButton<String>(
-                        tooltip: context.l10n.discoverContentType,
-                        constraints: BoxConstraints(maxHeight: context.rem(22.5)),
-                        color: AppColors.surface,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                          side: BorderSide(color: AppColors.inkAlpha(0.1)),
-                        ),
-                        onSelected: _onTypeChanged,
-                        itemBuilder: (context) => _availableTypes
-                            .map(
-                              (t) => PopupMenuItem<String>(
-                                value: t,
-                                child: Text(
-                                  '${t[0].toUpperCase()}${t.substring(1)}',
-                                  style: TextStyle(
-                                    color: t == _selectedType ? AppColors.accent : AppColors.ink,
-                                    fontWeight: t == _selectedType ? FontWeight.bold : FontWeight.normal,
+                      FocusHighlight(
+                        borderRadius: context.rem(1.25),
+                        child: PopupMenuButton<String>(
+                          tooltip: context.l10n.discoverContentType,
+                          constraints: BoxConstraints(maxHeight: context.rem(22.5)),
+                          color: AppColors.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                            side: BorderSide(color: AppColors.inkAlpha(0.1)),
+                          ),
+                          onSelected: _onTypeChanged,
+                          itemBuilder: (context) => _availableTypes
+                              .map(
+                                (t) => PopupMenuItem<String>(
+                                  value: t,
+                                  child: Text(
+                                    '${t[0].toUpperCase()}${t.substring(1)}',
+                                    style: TextStyle(
+                                      color: t == _selectedType ? AppColors.accent : AppColors.ink,
+                                      fontWeight: t == _selectedType ? FontWeight.bold : FontWeight.normal,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            )
-                            .toList(),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: context.rem(isNarrow ? 0.625 : 0.875),
-                            vertical: context.rem(AppRem.snug),
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.accent.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(context.rem(1.25)),
-                            border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
-                                style: TextStyle(
-                                  color: AppColors.ink,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: isNarrow ? AppType.caption : AppType.small,
+                              )
+                              .toList(),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: context.rem(isNarrow ? 0.625 : 0.875),
+                              vertical: context.rem(AppRem.snug),
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.accent.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(context.rem(1.25)),
+                              border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${_selectedType[0].toUpperCase()}${_selectedType.substring(1)}',
+                                  style: TextStyle(
+                                    color: AppColors.ink,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: isNarrow ? AppType.caption : AppType.small,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: context.rem(AppRem.xs)),
-                              Icon(Icons.arrow_drop_down, color: AppColors.inkMuted, size: context.rem(AppRem.iconSm)),
-                            ],
+                                SizedBox(width: context.rem(AppRem.xs)),
+                                Icon(Icons.arrow_drop_down, color: AppColors.inkMuted, size: context.rem(AppRem.iconSm)),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -1006,72 +1013,75 @@ class _DiscoverPageState extends State<DiscoverPage> {
                       if (extra.options.isNotEmpty) {
                         return Padding(
                           padding: EdgeInsetsDirectional.only(end: context.rem(AppRem.sm)),
-                          child: PopupMenuButton<String?>(
-                            tooltip: extra.name,
-                            constraints: BoxConstraints(maxHeight: context.rem(22.5)),
-                            color: AppColors.surface,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                              side: BorderSide(color: AppColors.inkAlpha(0.1)),
-                            ),
-                            onSelected: (val) => _onExtraOptionSelected(extra.name, val),
-                            itemBuilder: (context) => [
-                              if (!isReq)
-                                PopupMenuItem<String?>(
-                                  value: null,
-                                  child: Text(context.l10n.catalogAllOf(extra.name), style: TextStyle(color: AppColors.ink)),
-                                ),
-                              ...extra.options.map(
-                                (opt) => PopupMenuItem<String?>(
-                                  value: opt,
-                                  child: Text(
-                                    opt,
-                                    style: TextStyle(
-                                      color: opt == currentVal ? AppColors.accent : AppColors.ink,
-                                      fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
+                          child: FocusHighlight(
+                            borderRadius: context.rem(1.25),
+                            child: PopupMenuButton<String?>(
+                              tooltip: extra.name,
+                              constraints: BoxConstraints(maxHeight: context.rem(22.5)),
+                              color: AppColors.surface,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                                side: BorderSide(color: AppColors.inkAlpha(0.1)),
+                              ),
+                              onSelected: (val) => _onExtraOptionSelected(extra.name, val),
+                              itemBuilder: (context) => [
+                                if (!isReq)
+                                  PopupMenuItem<String?>(
+                                    value: null,
+                                    child: Text(context.l10n.catalogAllOf(extra.name), style: TextStyle(color: AppColors.ink)),
+                                  ),
+                                ...extra.options.map(
+                                  (opt) => PopupMenuItem<String?>(
+                                    value: opt,
+                                    child: Text(
+                                      opt,
+                                      style: TextStyle(
+                                        color: opt == currentVal ? AppColors.accent : AppColors.ink,
+                                        fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: context.rem(isNarrow ? 0.625 : 0.875),
-                                vertical: context.rem(AppRem.snug),
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? AppColors.accent
-                                    : (isReq ? Colors.amber.withValues(alpha: 0.15) : AppColors.inkAlpha(0.08)),
-                                borderRadius: BorderRadius.circular(context.rem(1.25)),
-                                border: Border.all(
+                              ],
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: context.rem(isNarrow ? 0.625 : 0.875),
+                                  vertical: context.rem(AppRem.snug),
+                                ),
+                                decoration: BoxDecoration(
                                   color: isSelected
                                       ? AppColors.accent
-                                      : (isReq ? Colors.amber.withValues(alpha: 0.4) : AppColors.inkAlpha(0.12)),
+                                      : (isReq ? Colors.amber.withValues(alpha: 0.15) : AppColors.inkAlpha(0.08)),
+                                  borderRadius: BorderRadius.circular(context.rem(1.25)),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.accent
+                                        : (isReq ? Colors.amber.withValues(alpha: 0.4) : AppColors.inkAlpha(0.12)),
+                                  ),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${extra.name.toUpperCase()}: ${currentVal ?? (isReq ? context.l10n.discoverRequired : context.l10n.commonAll)}',
-                                    style: TextStyle(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '${extra.name.toUpperCase()}: ${currentVal ?? (isReq ? context.l10n.discoverRequired : context.l10n.commonAll)}',
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? AppColors.ink
+                                            : (isReq ? Colors.amber : AppColors.inkAlpha(0.8)),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: isNarrow ? AppType.tinyPlus : AppType.caption,
+                                      ),
+                                    ),
+                                    SizedBox(width: context.rem(AppRem.xs)),
+                                    Icon(
+                                      Icons.arrow_drop_down,
+                                      size: context.rem(AppRem.iconSm),
                                       color: isSelected
                                           ? AppColors.ink
-                                          : (isReq ? Colors.amber : AppColors.inkAlpha(0.8)),
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: isNarrow ? AppType.tinyPlus : AppType.caption,
+                                          : (isReq ? Colors.amber : AppColors.inkMuted),
                                     ),
-                                  ),
-                                  SizedBox(width: context.rem(AppRem.xs)),
-                                  Icon(
-                                    Icons.arrow_drop_down,
-                                    size: context.rem(AppRem.iconSm),
-                                    color: isSelected
-                                        ? AppColors.ink
-                                        : (isReq ? Colors.amber : AppColors.inkMuted),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
