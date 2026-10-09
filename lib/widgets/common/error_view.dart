@@ -56,7 +56,7 @@ class ErrorView extends StatelessWidget {
               error ?? context.l10n.commonUnknownError,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.ink.withOpacity(0.58),
+                color: AppColors.ink.withValues(alpha: 0.58),
               ),
             ),
             SizedBox(height: context.rem(1.25)),

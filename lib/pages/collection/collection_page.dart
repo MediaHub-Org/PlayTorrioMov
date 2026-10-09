@@ -27,6 +27,8 @@ import 'library_shelf_page.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_fill.dart';
+import '../../widgets/common/focus_highlight.dart';
 
 /// The Profile tab: everything you saved, everything you started, everything
 /// on the device.
@@ -150,63 +152,66 @@ class _CollectionPageState extends State<CollectionPage> {
         children: [
           Expanded(child: _buildTypePills(type, onType)),
           SizedBox(width: context.rem(AppRem.sm)),
-          PopupMenuButton<String>(
-            tooltip: '${l10n.librarySortBy}: ${_sortLabel(sort)}',
-            onSelected: onSort,
-            color: AppColors.raised,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
-              decoration: BoxDecoration(
-                color: AppColors.raised,
-                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-                border: Border.all(color: AppColors.inkAlpha(0.08)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.sort_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
-                  SizedBox(width: context.rem(AppRem.xs)),
-                  // Capped, not flexed: the name is a label, and at a large
-                  // text scale it names its natural width whatever the row
-                  // offers. The tooltip carries the full name.
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: context.rem(7.5)),
-                    child: Text(
-                      _sortLabel(sort),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: AppType.tiny,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.inkMuted,
+          FocusHighlight(
+            borderRadius: context.rem(AppRem.radiusSm),
+            child: PopupMenuButton<String>(
+              tooltip: '${l10n.librarySortBy}: ${_sortLabel(sort)}',
+              onSelected: onSort,
+              color: AppColors.raised,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
+                decoration: BoxDecoration(
+                  color: AppColors.raised,
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+                  border: Border.all(color: AppColors.inkAlpha(0.08)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.sort_rounded, size: context.rem(0.875), color: AppColors.inkMuted),
+                    SizedBox(width: context.rem(AppRem.xs)),
+                    // Capped, not flexed: the name is a label, and at a large
+                    // text scale it names its natural width whatever the row
+                    // offers. The tooltip carries the full name.
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: context.rem(7.5)),
+                      child: Text(
+                        _sortLabel(sort),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: AppType.tiny,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.inkMuted,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'recent',
+                  child: Text(l10n.librarySortRecent),
+                ),
+                PopupMenuItem(
+                  value: 'title_az',
+                  child: Text(l10n.librarySortTitle),
+                ),
+                PopupMenuItem(
+                  value: 'title_za',
+                  child: Text(l10n.librarySortTitleDesc),
+                ),
+                PopupMenuItem(
+                  value: 'year_new',
+                  child: Text(l10n.librarySortYearNewest),
+                ),
+                PopupMenuItem(
+                  value: 'year_old',
+                  child: Text(l10n.librarySortYearOldest),
+                ),
+              ],
             ),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'recent',
-                child: Text(l10n.librarySortRecent),
-              ),
-              PopupMenuItem(
-                value: 'title_az',
-                child: Text(l10n.librarySortTitle),
-              ),
-              PopupMenuItem(
-                value: 'title_za',
-                child: Text(l10n.librarySortTitleDesc),
-              ),
-              PopupMenuItem(
-                value: 'year_new',
-                child: Text(l10n.librarySortYearNewest),
-              ),
-              PopupMenuItem(
-                value: 'year_old',
-                child: Text(l10n.librarySortYearOldest),
-              ),
-            ],
           ),
         ],
       ),
@@ -928,41 +933,44 @@ class _NewCollectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                border: Border.all(color: AppColors.inkAlpha(0.20)),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.add_rounded,
-                  size: context.rem(2),
-                  color: AppColors.inkMuted,
+    return FocusFill(
+      radius: context.rem(AppRem.radiusMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                  border: Border.all(color: AppColors.inkAlpha(0.20)),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.add_rounded,
+                    size: context.rem(2),
+                    color: AppColors.inkMuted,
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(height: context.rem(AppRem.sm)),
-          Text(
-            context.l10n.libraryNewCollection,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: AppColors.inkMuted,
-              fontSize: AppType.smallPlus,
-              fontWeight: FontWeight.w700,
+            SizedBox(height: context.rem(AppRem.sm)),
+            Text(
+              context.l10n.libraryNewCollection,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.inkMuted,
+                fontSize: AppType.smallPlus,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

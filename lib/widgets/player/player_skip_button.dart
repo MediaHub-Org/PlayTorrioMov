@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../models/player/skip_segment_model.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Ultra-sleek, responsive glassmorphism Skip Button with dynamic hover effects
 /// and a left-to-right sweep progress bar that auto-hides when complete.
@@ -170,52 +171,55 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                           // Primary Clickable Skip Body
                           Material(
                             color: Colors.transparent,
-                            child: InkWell(
-                              onTap: widget.onSkip,
-                              hoverColor: accentColor.withValues(alpha: 0.15),
-                              splashColor: accentGlow.withValues(alpha: 0.30),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: context.rem(isCompact ? 0.8125 : 1.125),
-                                  vertical: context.rem(isCompact ? 0.5625 : AppRem.ms),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Animated Action Icon
-                                    AnimatedContainer(
-                                      duration: const Duration(milliseconds: 180),
-                                      transform: Matrix4.translationValues(
-                                        _isHovered ? 2.0 : 0.0,
-                                        0.0,
-                                        0.0,
+                            child: FocusFill(
+                              radius: 0,
+                              child: InkWell(
+                                onTap: widget.onSkip,
+                                hoverColor: accentColor.withValues(alpha: 0.15),
+                                splashColor: accentGlow.withValues(alpha: 0.30),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: context.rem(isCompact ? 0.8125 : 1.125),
+                                    vertical: context.rem(isCompact ? 0.5625 : AppRem.ms),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // Animated Action Icon
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 180),
+                                        transform: Matrix4.translationValues(
+                                          _isHovered ? 2.0 : 0.0,
+                                          0.0,
+                                          0.0,
+                                        ),
+                                        child: Icon(
+                                          widget.segment.icon,
+                                          size: context.rem(isCompact ? AppRem.iconXs : AppRem.icon),
+                                          color: _isHovered ? accentGlow : accentColor,
+                                        ),
                                       ),
-                                      child: Icon(
-                                        widget.segment.icon,
-                                        size: context.rem(isCompact ? AppRem.iconXs : AppRem.icon),
-                                        color: _isHovered ? accentGlow : accentColor,
-                                      ),
-                                    ),
-                                    SizedBox(width: context.rem(isCompact ? 0.4375 : 0.625)),
+                                      SizedBox(width: context.rem(isCompact ? 0.4375 : 0.625)),
 
-                                    // Action Label
-                                    Text(
-                                      widget.segment.label(context.l10n),
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: isCompact ? AppType.captionPlus : AppType.body,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: -0.2,
-                                        shadows: [
-                                          Shadow(
-                                            color: Colors.black.withValues(alpha: 0.8),
-                                            offset: Offset(0, context.rem(0.0625)),
-                                            blurRadius: context.rem(AppRem.xs),
-                                          ),
-                                        ],
+                                      // Action Label
+                                      Text(
+                                        widget.segment.label(context.l10n),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: isCompact ? AppType.captionPlus : AppType.body,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: -0.2,
+                                          shadows: [
+                                            Shadow(
+                                              color: Colors.black.withValues(alpha: 0.8),
+                                              offset: Offset(0, context.rem(0.0625)),
+                                              blurRadius: context.rem(AppRem.xs),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -234,27 +238,30 @@ class _PlayerSkipButtonState extends State<PlayerSkipButton>
                             onExit: (_) => setState(() => _isDismissHovered = false),
                             child: Material(
                               color: Colors.transparent,
-                              child: InkWell(
-                                onTap: widget.onDismiss,
-                                hoverColor: Colors.white.withValues(alpha: 0.15),
-                                splashColor: Colors.white.withValues(alpha: 0.25),
-                                child: Tooltip(
-                                  message: context.l10n.playerDismiss,
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: context.rem(isCompact ? 0.5625 : AppRem.ms),
-                                      vertical: context.rem(isCompact ? 0.5625 : AppRem.ms),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: AnimatedScale(
-                                      scale: _isDismissHovered ? 1.15 : 1.0,
-                                      duration: const Duration(milliseconds: 140),
-                                      child: Icon(
-                                        Icons.close_rounded,
-                                        size: context.rem(isCompact ? 0.9375 : 1.0625),
-                                        color: _isDismissHovered
-                                            ? Colors.white
-                                            : Colors.white.withValues(alpha: 0.60),
+                              child: FocusFill(
+                                radius: 0,
+                                child: InkWell(
+                                  onTap: widget.onDismiss,
+                                  hoverColor: Colors.white.withValues(alpha: 0.15),
+                                  splashColor: Colors.white.withValues(alpha: 0.25),
+                                  child: Tooltip(
+                                    message: context.l10n.playerDismiss,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: context.rem(isCompact ? 0.5625 : AppRem.ms),
+                                        vertical: context.rem(isCompact ? 0.5625 : AppRem.ms),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: AnimatedScale(
+                                        scale: _isDismissHovered ? 1.15 : 1.0,
+                                        duration: const Duration(milliseconds: 140),
+                                        child: Icon(
+                                          Icons.close_rounded,
+                                          size: context.rem(isCompact ? 0.9375 : 1.0625),
+                                          color: _isDismissHovered
+                                              ? Colors.white
+                                              : Colors.white.withValues(alpha: 0.60),
+                                        ),
                                       ),
                                     ),
                                   ),

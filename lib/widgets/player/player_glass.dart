@@ -694,13 +694,25 @@ class _PlayerToggleChipState extends State<PlayerToggleChip> {
 /// A discrete slider that a D-pad can actually drive.
 ///
 /// Material's [Slider] is pointer-only: a remote's left/right keys do
-/// nothing to it, so on a TV the speed and sleep-timer sliders would be
+/// nothing to it, so on a TV the speed and volume sliders would be
 /// visible but unreachable. This wraps one in a [Focus] that moves the
-/// value one step per arrow press and shows the same [FocusRing] the
-/// buttons use, so the control reads as selected from across the room.
+/// value one step per Left/Right press.
+///
+/// **Focus is shown on the slider itself -- a thicker track and a bigger
+/// thumb -- and not by a box around it.** The slider takes focus the moment
+/// its menu opens, so a border drawn for focus was on screen by default, a
+/// frame around a control nobody had moved to yet. It is the same cue the
+/// seek bar uses.
+///
+/// Only Left/Right are taken. Up/Down used to nudge the value too, which made
+/// the slider a trap: a remote could not leave it for the menu's Back button.
 ///
 /// [onChanged] fires on every step (live feedback); [onChangeEnd] fires
-/// once the user stops, which is where the menus commit and close.
+/// when a drag ends, and when OK is pressed on a slider that has one -- the
+/// moment the menus commit and close. Arrow presses do not fire it: a viewer
+/// stepping from 1x to 1.5x is not done after the first press, and the speed
+/// menu used to close under them. A slider with no [onChangeEnd] leaves OK to
+/// its menu (the volume panel mutes with it).
 class PlayerStepSlider extends StatefulWidget {
   final double value;
   final double min;
@@ -735,7 +747,6 @@ class _PlayerStepSliderState extends State<PlayerStepSlider> {
         .clamp(widget.min, widget.max);
     if (next == widget.value) return;
     widget.onChanged(next);
-    widget.onChangeEnd?.call(next);
   }
 
   @override
@@ -748,41 +759,45 @@ class _PlayerStepSliderState extends State<PlayerStepSlider> {
       onFocusChange: (focused) => setState(() => _focused = focused),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        if (event.logicalKey == LogicalKeyboardKey.arrowLeft ||
-            event.logicalKey == LogicalKeyboardKey.arrowDown) {
+        final key = event.logicalKey;
+        if (key == LogicalKeyboardKey.arrowLeft) {
           _nudge(-1);
           return KeyEventResult.handled;
         }
-        if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
-            event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        if (key == LogicalKeyboardKey.arrowRight) {
           _nudge(1);
+          return KeyEventResult.handled;
+        }
+        final onChangeEnd = widget.onChangeEnd;
+        if (onChangeEnd != null &&
+            (key == LogicalKeyboardKey.select ||
+                key == LogicalKeyboardKey.enter)) {
+          onChangeEnd(widget.value);
           return KeyEventResult.handled;
         }
         return KeyEventResult.ignored;
       },
-      child: FocusRing(
-        visible: _focused,
-        borderRadius: context.rem(AppRem.radiusMd),
-        child: SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            activeTrackColor: PlayerTheme.accent,
-            inactiveTrackColor: PlayerTheme.edgeSoft,
-            thumbColor: PlayerTheme.accent,
-            activeTickMarkColor: PlayerTheme.accent,
-            inactiveTickMarkColor: PlayerTheme.inkSubtle,
+      child: SliderTheme(
+        data: SliderTheme.of(context).copyWith(
+          trackHeight: _focused ? 6 : 4,
+          thumbShape: RoundSliderThumbShape(
+            enabledThumbRadius: _focused ? 11 : 8,
           ),
-          child: Slider(
-            value: widget.value.clamp(widget.min, widget.max),
-            min: widget.min,
-            max: widget.max,
-            divisions: widget.divisions,
-            label: widget.label,
-            onChanged: widget.onChanged,
-            onChangeEnd: widget.onChangeEnd,
-          ),
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+          activeTrackColor: PlayerTheme.accent,
+          inactiveTrackColor: PlayerTheme.edgeSoft,
+          thumbColor: PlayerTheme.accent,
+          activeTickMarkColor: PlayerTheme.accent,
+          inactiveTickMarkColor: PlayerTheme.inkSubtle,
+        ),
+        child: Slider(
+          value: widget.value.clamp(widget.min, widget.max),
+          min: widget.min,
+          max: widget.max,
+          divisions: widget.divisions,
+          label: widget.label,
+          onChanged: widget.onChanged,
+          onChangeEnd: widget.onChangeEnd,
         ),
       ),
     );

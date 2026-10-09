@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/l10n.dart';
+import '../../models/stream/stream_model.dart';
 import '../../services/app_units.dart';
+import '../../services/player/playback_diagnosis.dart';
 import '../../services/stream/torrent_stream_service.dart';
 import 'player_glass.dart';
 
@@ -55,6 +59,18 @@ class PlayerStatsMenu extends StatefulWidget {
   /// with no URL worth passing on.
   final VoidCallback? onCopyLink;
 
+  /// Reads one of the player's own properties by name (`cache-speed`,
+  /// `hwdec-current`), or null when it is not available. Null hides the
+  /// diagnosis; the panel works without it.
+  ///
+  /// A callback, not the player: the menu is a plain widget that tests pump
+  /// bare, and a fake of this is one line.
+  final Future<String?> Function(String property)? readProperty;
+
+  /// The source's own bitrate when it states one (or it can be estimated), for
+  /// when the player has not measured the stream yet.
+  final int? sourceBitrateKbps;
+
   const PlayerStatsMenu({
     super.key,
     required this.sourceLabel,
@@ -66,6 +82,8 @@ class PlayerStatsMenu extends StatefulWidget {
     this.initialStats,
     this.buffered,
     this.onCopyLink,
+    this.readProperty,
+    this.sourceBitrateKbps,
   });
 
   @override
@@ -81,9 +99,56 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
   Stream<TorrentStats>? _statsStream;
   TorrentStats? _firstStats;
 
+  /// What the player reports about itself, read once a second while the panel
+  /// is open and stopped with it, like the swarm poll above.
+  Timer? _poll;
+  int? _haveKbps;
+  int? _measuredNeedKbps;
+  String? _decoder;
+  int _dropped = 0;
+  final List<int> _droppedHistory = [];
+
+  /// Frames dropped over the last few seconds, not since the start: a burst
+  /// while seeking is not a problem the viewer has now.
+  int get _droppedRecently =>
+      _droppedHistory.length < 2 ? 0 : _droppedHistory.last - _droppedHistory.first;
+
+  @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _readPlayer() async {
+    final read = widget.readProperty;
+    if (read == null) return;
+    Future<double?> number(String name) async =>
+        double.tryParse(await read(name) ?? '');
+
+    final cacheSpeed = await number('cache-speed');
+    final videoBitrate = await number('video-bitrate');
+    final decoder = await read('hwdec-current');
+    final dropped = (await number('decoder-frame-drop-count') ?? 0) +
+        (await number('frame-drop-count') ?? 0);
+    if (!mounted) return;
+    setState(() {
+      _haveKbps = cacheSpeed == null ? null : (cacheSpeed * 8 / 1000).round();
+      _measuredNeedKbps =
+          videoBitrate == null ? null : (videoBitrate / 1000).round();
+      _decoder = decoder;
+      _dropped = dropped.round();
+      _droppedHistory.add(_dropped);
+      if (_droppedHistory.length > 10) _droppedHistory.removeAt(0);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    if (widget.readProperty != null) {
+      _readPlayer();
+      _poll = Timer.periodic(const Duration(seconds: 1), (_) => _readPlayer());
+    }
     final magnet = widget.torrentMagnet;
     if (magnet != null) {
       _statsStream = TorrentStreamService().statsStream(magnet);
@@ -94,6 +159,65 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
     } else {
       _firstStats = widget.initialStats;
     }
+  }
+
+  /// The player's own figures and, under them, which of the two usual causes of
+  /// a slow playback this looks like.
+  List<Widget> _buildDiagnosis(BuildContext context) {
+    final l10n = context.l10n;
+    final need = _measuredNeedKbps ?? widget.sourceBitrateKbps;
+    final buffered = widget.buffered?.value;
+    final diagnosis = diagnose(
+      needKbps: need,
+      haveKbps: _haveKbps,
+      bufferedSeconds: buffered?.inSeconds.toDouble(),
+      droppedRecently: _droppedRecently,
+    );
+    final decoder = _decoder;
+    final sentence = switch (diagnosis.verdict) {
+      PlaybackVerdict.unknown => null,
+      PlaybackVerdict.healthy => l10n.playerDiagnosisHealthy,
+      PlaybackVerdict.linkTooSlow => l10n.playerDiagnosisLink(
+        StreamSource.formatBitrate(need!),
+        StreamSource.formatBitrate(_haveKbps!),
+      ),
+      PlaybackVerdict.decoderStruggling => l10n.playerDiagnosisDecoder,
+    };
+    final isProblem = diagnosis.verdict == PlaybackVerdict.linkTooSlow ||
+        diagnosis.verdict == PlaybackVerdict.decoderStruggling;
+
+    return [
+      _StatRow(
+        label: l10n.playerStatsNeeds,
+        value: need == null ? null : StreamSource.formatBitrate(need),
+      ),
+      _StatRow(
+        label: l10n.playerStatsDelivering,
+        value: _haveKbps == null ? null : StreamSource.formatBitrate(_haveKbps!),
+      ),
+      _StatRow(
+        label: l10n.playerStatsDecoder,
+        // mpv reports "no" for software decoding; a bare "no" under
+        // "Decoder" reads as a refusal.
+        value: decoder == null || decoder.isEmpty
+            ? null
+            : (decoder == 'no' ? l10n.playerDecoderSoftware : decoder),
+      ),
+      _StatRow(label: l10n.playerStatsDropped, value: '$_dropped'),
+      if (sentence != null)
+        Padding(
+          padding: EdgeInsets.only(top: context.rem(AppRem.xs)),
+          child: Text(
+            sentence,
+            style: TextStyle(
+              color: isProblem ? PlayerTheme.accent : PlayerTheme.inkSubtle,
+              fontSize: AppType.caption,
+              fontWeight: FontWeight.w600,
+              height: 1.3, // ratio: a line height, not a size
+            ),
+          ),
+        ),
+    ];
   }
 
   @override
@@ -156,6 +280,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
                 value: buffered == null ? null : '${buffered.inSeconds} s',
               ),
             ),
+          if (widget.readProperty != null) ..._buildDiagnosis(context),
           if (hash != null && hash.isNotEmpty)
             _StatRow(label: l10n.playerStatsHash, value: hash),
           // The URL copier lives with the data it copies: the top bar kept

@@ -6,6 +6,7 @@ import '../../utils/hub_controller.dart';
 import 'top_bar.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import 'focus_fill.dart';
 
 /// Tier-aware nav chrome wrapping the Media hub's content area.
 ///
@@ -142,29 +143,32 @@ class _SectionTab extends StatelessWidget {
     // Column overflows it (#69). Icon + label still grow together, just
     // capped short of that point.
     final labelScaler = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3);
-    return InkWell(
-      onTap: () => HubController.instance.setCurrentSection(section.id),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(section.icon, color: color, size: context.rem(AppRem.iconMd)),
-          SizedBox(height: context.rem(AppRem.xs)),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xxs)),
-            child: Text(
-              section.localizedLabel(context),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              textScaler: labelScaler,
-              style: TextStyle(
-                color: color,
-                fontSize: TvType.scale(AppType.micro),
-                fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+    return FocusFill(
+      radius: 0,
+      child: InkWell(
+        onTap: () => HubController.instance.setCurrentSection(section.id),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(section.icon, color: color, size: context.rem(AppRem.iconMd)),
+            SizedBox(height: context.rem(AppRem.xs)),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.xxs)),
+              child: Text(
+                section.localizedLabel(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                textScaler: labelScaler,
+                style: TextStyle(
+                  color: color,
+                  fontSize: TvType.scale(AppType.micro),
+                  fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

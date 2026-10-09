@@ -1,15 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-/// The keys that activate a focused [InteractiveCardShell]. `final`, not
-/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
-/// that inside a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import 'activate_keys.dart';
 
 /// The hover/press interaction physics shared by every poster-style card in
 /// the app (Movies, IPTV channels, ...): scale up + lift on hover, scale
@@ -85,7 +76,7 @@ class _InteractiveCardShellState extends State<InteractiveCardShell> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

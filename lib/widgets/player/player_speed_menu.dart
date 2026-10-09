@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
+import '../../services/tv_mode_service.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
 
-/// Playback speed floating popover menu: a readout, and a slider with a -/+
-/// button on either side of it.
+/// Playback speed floating popover menu: a readout and a slider.
 ///
 /// The slider is laid out by *step*, not by value, so normal speed sits in the
 /// middle of the track: three steps slower, three faster. By value the track
@@ -13,7 +13,14 @@ import '../../services/app_units.dart';
 ///
 /// Preset chips sat under it for one release. They repeated what the slider
 /// already offered, and at a phone's width they stacked into a column of
-/// full-width bars, so the menu got taller to say the same thing twice.
+/// full-width bars, so the menu got taller to say the same thing twice. The
+/// -/+ buttons that followed them went the same way: Left/Right on a remote
+/// and a drag on a screen already step the slider, so the buttons were a
+/// third way to do it and a second thing to focus.
+///
+/// On a TV the menu stays open while Left/Right step the speed, and closes on
+/// OK or Back. It used to close after the first press, because the slider
+/// reported every arrow as a finished drag.
 class PlayerSpeedMenu extends StatefulWidget {
   final double currentRate;
   final ValueChanged<double> onRateSelected;
@@ -36,9 +43,9 @@ class PlayerSpeedMenu extends StatefulWidget {
 }
 
 class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
-  /// Every speed the slider and the -/+ buttons step through, with 1x in the
-  /// middle. The steps are not evenly spaced (0.25 up to 1.5, then 2), which
-  /// is fine: the slider works in indices, and 2x is worth more than 1.75x.
+  /// Every speed the slider steps through, with 1x in the middle. The steps
+  /// are not evenly spaced (0.25 up to 1.5, then 2), which is fine: the
+  /// slider works in indices, and 2x is worth more than 1.75x.
   static const List<double> _points = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
 
   /// The index of the step nearest [rate], so a rate that is not on the grid
@@ -52,14 +59,6 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
       }
     }
     return best;
-  }
-
-  /// One step down or up. The menu stays open: the readout shows the result,
-  /// and a viewer nudging from 1x to 1.5x wants two presses, not two
-  /// reopenings.
-  void _step(int direction) {
-    final next = (_index + direction).clamp(0, _points.length - 1);
-    widget.onRateSelected(_points[next]);
   }
 
   @override
@@ -90,36 +89,30 @@ class _PlayerSpeedMenuState extends State<PlayerSpeedMenu> {
             ),
           ),
           SizedBox(height: context.rem(AppRem.xs)),
-          Row(
-            children: [
-              PlayerIconButton(
-                size: context.rem(AppRem.xl),
-                iconSize: context.rem(1.125),
-                icon: const Icon(Icons.remove_rounded),
-                tooltip: context.l10n.playerSlower,
-                onPressed: index > 0 ? () => _step(-1) : null,
-              ),
-              Expanded(
-                child: PlayerStepSlider(
-                  value: index.toDouble(),
-                  min: 0,
-                  max: (_points.length - 1).toDouble(),
-                  divisions: _points.length - 1,
-                  label: '${_points[index].toStringAsFixed(2)}×',
-                  onChanged: (value) =>
-                      widget.onRateSelected(_points[value.round()]),
-                  onChangeEnd: (_) => widget.onClose(),
+          PlayerStepSlider(
+            value: index.toDouble(),
+            min: 0,
+            max: (_points.length - 1).toDouble(),
+            divisions: _points.length - 1,
+            label: '${_points[index].toStringAsFixed(2)}×',
+            onChanged: (value) => widget.onRateSelected(_points[value.round()]),
+            onChangeEnd: (_) => widget.onClose(),
+          ),
+          // Only where there is a remote to be told: a pointer sees the
+          // slider and needs no sentence.
+          if (TvModeService.isTv.value) ...[
+            SizedBox(height: context.rem(AppRem.xs)),
+            Center(
+              child: Text(
+                context.l10n.playerSpeedHint,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: PlayerTheme.inkSubtle,
+                  fontSize: AppType.caption,
                 ),
               ),
-              PlayerIconButton(
-                size: context.rem(AppRem.xl),
-                iconSize: context.rem(1.125),
-                icon: const Icon(Icons.add_rounded),
-                tooltip: context.l10n.playerFaster,
-                onPressed: index < _points.length - 1 ? () => _step(1) : null,
-              ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );

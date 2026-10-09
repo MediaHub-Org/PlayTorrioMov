@@ -1,7 +1,11 @@
 // test/services/source_filter_settings_test.dart
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/stream/stream_model.dart';
+import 'package:playtorriomov/services/locale/system_language.dart';
 import 'package:playtorriomov/services/sources/source_filter_settings.dart';
+import 'package:playtorriomov/services/theme/app_theme_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 StreamSource _source(String title) =>
@@ -14,6 +18,15 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     SourceFilterSettings.audioLanguages.value = const <String>[];
     SourceFilterSettings.qualities.value = const <String>[];
+    // A device language the detector cannot see, so a test about the viewer's
+    // own list is not also a test about the machine it runs on.
+    SystemLanguage.debugDeviceLocale = const Locale('xx');
+    AppThemeService.locale.value = null;
+  });
+
+  tearDown(() {
+    SystemLanguage.debugDeviceLocale = null;
+    AppThemeService.locale.value = null;
   });
 
   group('StreamSource.hasAudioLanguage and MULTI', () {
@@ -120,8 +133,42 @@ void main() {
   });
 
   group('preferredAudioTrackIndex', () {
-    test('an empty ranking never overrides the file default', () {
+    test('no list and a language the detector cannot see leaves the file alone',
+        () {
       expect(preferredAudioTrackIndex(['eng', 'spa']), isNull);
+    });
+
+    test('no list follows the device language, like a streaming app', () {
+      // The file opens on its English track; the phone is set to Spanish and
+      // the file carries a Spanish one.
+      SystemLanguage.debugDeviceLocale = const Locale('es');
+      expect(preferredAudioTrackIndex(['eng', 'spa']), 1);
+    });
+
+    test('the device language is only a default: no match leaves the file', () {
+      SystemLanguage.debugDeviceLocale = const Locale('es');
+      expect(preferredAudioTrackIndex(['eng', 'jpn']), isNull);
+    });
+
+    test("the viewer's own list beats the device language", () {
+      SystemLanguage.debugDeviceLocale = const Locale('es');
+      SourceFilterSettings.audioLanguages.value = const ['japanese'];
+      expect(preferredAudioTrackIndex(['eng', 'spa', 'jpn']), 2);
+    });
+
+    test('the device language is a preference, never a filter', () {
+      SystemLanguage.debugDeviceLocale = const Locale('es');
+      expect(SourceFilterSettings.audioLanguages.value, isEmpty);
+      expect(SourceFilterSettings.effectiveAudioRank(), ['spanish']);
+
+      SourceFilterSettings.audioLanguages.value = const ['german', 'english'];
+      expect(SourceFilterSettings.effectiveAudioRank(), ['german', 'english']);
+    });
+
+    test('an app language chosen in Settings counts as the viewer\'s', () {
+      SystemLanguage.debugDeviceLocale = const Locale('es');
+      AppThemeService.locale.value = const Locale('pt');
+      expect(SourceFilterSettings.effectiveAudioRank(), ['portuguese']);
     });
 
     test('walks the ranking in priority order, not track order', () {

@@ -3,6 +3,7 @@ import '../../l10n/l10n.dart';
 import '../common/hover_button.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Floating glass toolbar for quick live subtitle delay adjustment.
 class SubSyncBar extends StatefulWidget {
@@ -222,20 +223,23 @@ class _StepButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-        onTap: onTap,
-        child: Container(
-          width: context.rem(isWide ? 2.75 : 2.375),
-          constraints: BoxConstraints(minHeight: context.rem(1.75)),
-          alignment: Alignment.center,
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: PlayerTheme.inkMuted,
-              fontSize: AppType.tinyPlus,
-              fontWeight: FontWeight.w700,
-              fontFeatures: [FontFeature.tabularFigures()],
+      child: FocusFill(
+        radius: context.rem(AppRem.snug),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+          onTap: onTap,
+          child: Container(
+            width: context.rem(isWide ? 2.75 : 2.375),
+            constraints: BoxConstraints(minHeight: context.rem(1.75)),
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: PlayerTheme.inkMuted,
+                fontSize: AppType.tinyPlus,
+                fontWeight: FontWeight.w700,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ),

@@ -2,16 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'over_artwork.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused genre tag. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import 'activate_keys.dart';
 
 /// Icon for a genre/category tag, shared by every content-detail page so a
 /// given genre always reads the same way whether it's on a movie, a series,
@@ -129,7 +120,7 @@ class GenreTagRow extends StatelessWidget {
               onKeyEvent: (node, event) {
                 if (onTap == null) return KeyEventResult.ignored;
                 if (event is! KeyDownEvent) return KeyEventResult.ignored;
-                if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+                if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
                 onTap!(g);
                 return KeyEventResult.handled;
               },

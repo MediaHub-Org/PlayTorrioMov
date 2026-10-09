@@ -10,6 +10,7 @@ import 'player_panel.dart';
 import 'player_menu_row.dart';
 import 'player_sub_style_modal.dart' show SubtitleStyleEditor;
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Subtitle on/off and the language list.
 ///
@@ -645,22 +646,25 @@ class _ShowAllRow extends StatelessWidget {
       padding: EdgeInsets.only(top: context.rem(AppRem.xxs), bottom: context.rem(0.1875)),
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(context.rem(0.5625)),
-          onTap: onTap,
-          child: Container(
-            constraints: BoxConstraints(minHeight: context.rem(2.25)),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(context.rem(0.5625)),
-              border: Border.all(color: PlayerTheme.edgeSoft),
-            ),
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: PlayerTheme.inkSubtle,
-                fontSize: AppType.tinyPlus,
-                fontWeight: FontWeight.w600,
+        child: FocusFill(
+          radius: context.rem(0.5625),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(context.rem(0.5625)),
+            onTap: onTap,
+            child: Container(
+              constraints: BoxConstraints(minHeight: context.rem(2.25)),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(context.rem(0.5625)),
+                border: Border.all(color: PlayerTheme.edgeSoft),
+              ),
+              child: Text(
+                label,
+                style: const TextStyle(
+                  color: PlayerTheme.inkSubtle,
+                  fontSize: AppType.tinyPlus,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),

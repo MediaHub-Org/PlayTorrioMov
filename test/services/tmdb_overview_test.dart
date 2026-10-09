@@ -10,6 +10,17 @@ void main() {
       expect(TmdbService.languageTagFor('en'), 'en-US');
     });
 
+    test('the description follows the viewer, not just the app languages', () {
+      // The app is translated into four languages, but the synopsis is
+      // TMDB's, and a French or Japanese viewer was reading English.
+      expect(TmdbService.languageTagFor('fr'), 'fr-FR');
+      expect(TmdbService.languageTagFor('de'), 'de-DE');
+      expect(TmdbService.languageTagFor('ja'), 'ja-JP');
+      expect(TmdbService.languageTagFor('ko'), 'ko-KR');
+      expect(TmdbService.languageTagFor('zh'), 'zh-CN');
+      expect(TmdbService.languageTagFor('no'), 'nb-NO');
+    });
+
     test('unknown codes fall back to English, not to TMDB guessing', () {
       expect(TmdbService.languageTagFor('xx'), 'en-US');
       expect(TmdbService.languageTagFor(null), 'en-US');

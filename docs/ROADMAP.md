@@ -29,11 +29,45 @@ Device checks; none of these can be settled from the code.
   fallback).
 - **The loading logo** with a torrent, a debrid link and a plain URL, and
   that it clears on the first frame.
+- **TV focus audit.** With a remote, go through: the Sources page (the four
+  filter pills, then OK on each: the menu should open on the selected row and
+  Back should return to the same pill; let the search run and watch that focus
+  stays put when the add-on pill appears), the in-player Sources and Episodes
+  panels, the Cast sheet, Library and Collections, Live TV sources, Discover
+  and Catalog sort pills, and the video settings cards. Every row should show a
+  wash under the remote, and a mouse should light it lighter. After touching the
+  screen with a mouse or a remote app, the focus cue should stay.
+- **Language and playback on a real connection.** On a device set to Spanish
+  (or any of the thirteen languages the detector knows): the source list should
+  open on releases in that language; a file with several audio tracks should
+  open on that track; with foreign audio and an embedded subtitle in your
+  language, that subtitle should come on by itself. Then on the slow
+  connection: does it stop and wait once instead of stuttering, does the stats
+  panel's sentence name the cause, does "Playback keeps pausing" appear after
+  repeated stalls, and does a jump back come out of the cache.
+- **TV: details, loading screen and speed menu.** Opening a title's details
+  with a remote should land on Play, and Down/Right should reach the library
+  buttons and then the rails with no genre tags in between. The loading screen
+  should show the title's logo (or its name) above the filling logo, and the
+  episode under it. The speed menu should stay open while Left/Right step the
+  speed, close on OK or Back, and have no frame around the slider.
 - **The subtitle panel on a TV and a phone.** Opening it should put the
   violet wash on "Turn subtitles on" with a remote and show nothing lit with a
   finger; Refresh appears only on the Online tab; a file with a full and a
   "Signs & Songs" track of one language should list them as two different
   rows.
+
+---
+
+## Planned
+
+Written plans, not started. Each says what is known, what is a guess, and what
+has to be measured first.
+
+| Plan                                                | Status                                                                                                                       |
+|:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
+| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Step 1 (mechanical dedupe) is done; next is the 37 deprecations it uncovered, then one press/hover/focus primitive, the big pages, and the player last. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Done: the diagnosis in the stats panel, release ranking by language/weight/tier/seeders, the link ceiling learned from stalls, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache and faster probing. **Open: Step 0.2 (one TV session) and Step 2 (debrid cached badge, after checking each provider's current API).** True stream adaptation is possible for HLS only. |
 
 ---
 

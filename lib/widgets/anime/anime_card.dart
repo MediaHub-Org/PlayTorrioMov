@@ -11,6 +11,7 @@ import '../../services/theme/app_theme_service.dart';
 import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../common/activate_keys.dart';
 
 // This card's own sizes, in rem (the shared poster ones are in AppRem).
 const double _kBadgePadX = 0.4375;
@@ -26,16 +27,6 @@ const double _kLift = 0.375;
 const double _kTitleFont = 15.5;
 const double _kScoreFont = 11;
 const double _kTagFont = 9.5;
-
-/// The keys that activate a focused [AnimeCard]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
 
 class AnimeCard extends StatefulWidget {
   final AnimeMedia anime;
@@ -60,7 +51,7 @@ class _AnimeCardState extends State<AnimeCard> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

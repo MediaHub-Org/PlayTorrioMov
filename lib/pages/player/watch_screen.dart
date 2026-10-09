@@ -5,7 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
-import '../../widgets/common/reading_direction.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/theme/app_colors.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +22,8 @@ import '../../services/app_breakpoints.dart';
 import '../../services/scraper/stream_scraper.dart';
 import '../../services/tv_mode_service.dart';
 import '../../services/player/video_quality_preference.dart';
+import '../../services/player/link_speed_memory.dart';
+import '../../services/sources/source_ranking.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../services/stream/stream_bitrate_resolver.dart';
@@ -35,16 +36,10 @@ import '../settings/settings_page.dart';
 import '../details/details_page.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate the "no sources, install addons" button below.
-/// `final`, not `const`: `LogicalKeyboardKey` overrides `==`, and the
-/// analyzer rejects that inside a `const` set literal.
-final _settingsButtonActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../../widgets/common/focus_fill.dart';
+import '../../widgets/common/title_or_logo.dart';
+import '../../widgets/player/player_glass.dart' show PlayerFocusOnOpen;
+import '../../widgets/common/activate_keys.dart';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -329,10 +324,18 @@ class _WatchScreenState extends State<WatchScreen>
     } else if (_selectedSizeFilter == 'smallest') {
       list.sort((a, b) => (a.sizeBytes ?? double.infinity).compareTo(b.sizeBytes ?? double.infinity));
     } else {
-      // Closest to the data-usage tier set in Settings -> Video Player. See
-      // `qualityDistanceComparator`'s own doc comment for why this is the
-      // same order as before for anyone who has not touched that setting.
-      list.sort(qualityDistanceComparator(VideoQualityPreference.tier.value));
+      // Best first for this viewer: their language, then what their
+      // connection carries, then the data-usage tier set in Settings -> Video
+      // Player (see `qualityDistanceComparator`), then seeders. Nothing is
+      // hidden; see `rankSources`.
+      list = rankSources(
+        list,
+        tier: VideoQualityPreference.tier.value,
+        preferredAudio: SourceFilterSettings.effectiveAudioRank(),
+        mediaTitle: widget.detail.name,
+        maxKbps: LinkSpeedMemory.sustainableKbps,
+        runtimeMinutes: int.tryParse(widget.detail.runtime ?? ''),
+      );
     }
     return list;
   }
@@ -604,6 +607,12 @@ class _WatchScreenState extends State<WatchScreen>
                     return Padding(
                       padding: const EdgeInsets.only(bottom: _S.xs),
                       child: _SourceCard(
+                        // The source's own identity, not its slot: sources
+                        // arrive from several add-ons over seconds and the list
+                        // is re-sorted as they do, so a card by position was
+                        // handed to a different source each time and the one a
+                        // remote was on slid out from under focus.
+                        key: _sourceCardKey(filtered, index),
                         source: filtered[index],
                         backdropUrl:
                             widget.detail.background ?? widget.detail.poster,
@@ -722,40 +731,16 @@ class _WatchScreenState extends State<WatchScreen>
   }
 
   Widget _buildLogoOrTitle(MovieDetail meta, bool isDesktop) {
-    if (meta.logo != null && meta.logo!.isNotEmpty) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: context.rem(isDesktop ? 23.75 : 16.25),
-          maxHeight: context.rem(isDesktop ? 7.5 : 5),
-        ),
-        child: CachedNetworkImage(
-          imageUrl: meta.logo!,
-          alignment: mirroredIfRtl(context, Alignment.bottomLeft),
-          fit: BoxFit.contain,
-          errorWidget: (_, __, ___) => _buildTextTitle(meta.name, isDesktop),
-        ),
-      );
-    }
-    return _buildTextTitle(meta.name, isDesktop);
-  }
-
-  Widget _buildTextTitle(String text, bool isDesktop) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: isDesktop ? AppType.displayMd : AppType.displaySm,
-        fontWeight: FontWeight.w800,
-        height: 1.1, // ratio: a line height, not a size
-        letterSpacing: -0.5,
-        color: _C.textPrimary,
-        shadows: [
-          Shadow(
-            color: Colors.black.withValues(alpha: 0.7),
-            blurRadius: context.rem(1.25),
-            offset: Offset(0, context.rem(AppRem.xs)),
-          ),
-        ],
-      ),
+    return TitleOrLogo(
+      logoUrl: meta.logo,
+      name: meta.name,
+      maxLogoWidth: context.rem(isDesktop ? 23.75 : 16.25),
+      maxLogoHeight: context.rem(isDesktop ? 7.5 : 5),
+      fontSize: isDesktop ? AppType.displayMd : AppType.displaySm,
+      letterSpacing: -0.5, // px: tracking, not a layout size
+      color: _C.textPrimary,
+      shadowBlur: context.rem(1.25),
+      shadowOffsetY: context.rem(AppRem.xs),
     );
   }
 
@@ -1168,12 +1153,20 @@ class _WatchScreenState extends State<WatchScreen>
   /// The pill that opens one filter's glass menu, shared by every filter
   /// (size, source, quality, audio) so the four read as one control in a row
   /// rather than four lookalikes.
+  ///
+  /// [pillKey] is what keeps a pill itself when the row changes shape. The
+  /// add-on pill only exists once the sources span more than one add-on, which
+  /// is not known until the search is part-way through; without a key every
+  /// pill after the one that appeared moved up a slot, so the pill a remote was
+  /// on was torn down and rebuilt as its neighbor and focus fell off the row.
   Widget _buildFilterDropdownButton({
+    required Key pillKey,
     required void Function(BuildContext buttonContext) onTap,
     required String currentText,
     IconData? icon,
   }) {
     return Builder(
+      key: pillKey,
       builder: (buttonContext) {
         return HoverButton(
           scaleAmount: 1.03,
@@ -1232,38 +1225,47 @@ class _WatchScreenState extends State<WatchScreen>
 
   /// One selectable row inside a filter's glass menu. [selected] highlights
   /// it; [onTap] is expected to already pop the menu.
+  ///
+  /// [autofocus] is for a single-choice menu, where the row that is selected
+  /// is where a remote should start: opening the menu on "5 GB - 15 GB" and
+  /// landing on "All Sizes" at the top reads as the choice having been lost.
   Widget _buildFilterMenuItem({
     required String title,
     required bool selected,
     required VoidCallback onTap,
+    bool autofocus = false,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: context.rem(0.625), horizontal: context.rem(0.875)),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-          color: selected
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: selected ? Colors.white : Colors.white70,
-                  fontSize: AppType.body,
-                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+    return FocusFill(
+      radius: context.rem(AppRem.radiusLg),
+      child: InkWell(
+        autofocus: autofocus,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: context.rem(0.625), horizontal: context.rem(0.875)),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+            color: selected
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.transparent,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: selected ? Colors.white : Colors.white70,
+                    fontSize: AppType.body,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-            if (selected)
-              Icon(Icons.check_circle, color: Colors.white, size: context.rem(AppRem.iconSm)),
-          ],
+              if (selected)
+                Icon(Icons.check_circle, color: Colors.white, size: context.rem(AppRem.iconSm)),
+            ],
+          ),
         ),
       ),
     );
@@ -1354,6 +1356,12 @@ class _WatchScreenState extends State<WatchScreen>
                           borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
                           border: Border.all(color: const Color(0x26FFFFFF)),
                         ),
+                        // A scope that takes focus when the menu opens. A
+                        // dialog route does not hand focus to anything in it,
+                        // so on a remote the menu opened with focus still on the
+                        // pill underneath, and the first arrow went to
+                        // whatever sat nearest it on the page behind.
+                        child: PlayerFocusOnOpen(
                         child: SingleChildScrollView(
                           physics: const BouncingScrollPhysics(),
                           child: Column(
@@ -1380,6 +1388,7 @@ class _WatchScreenState extends State<WatchScreen>
                                   ],
                           ),
                         ),
+                        ),
                       ),
                     ),
                   ),
@@ -1405,10 +1414,29 @@ class _WatchScreenState extends State<WatchScreen>
 
   Widget _buildSizeFilterDropdown() {
     return _buildFilterDropdownButton(
+      pillKey: const ValueKey('filter-pill-size'),
       onTap: (buttonContext) => _showSizeGlassDropdown(buttonContext),
       currentText: _getSizeFilterLabel(_selectedSizeFilter),
       icon: Icons.data_usage_rounded,
     );
+  }
+
+  /// A key for the card at [index] that follows the source, not the slot.
+  ///
+  /// Two entries can describe the same release (the same hash from two
+  /// add-ons), so the key counts earlier twins and stays unique in the list.
+  static Key _sourceCardKey(List<StreamSource> list, int index) {
+    final source = list[index];
+    final identity =
+        '${source.addonName}|${source.infoHash ?? source.url ?? source.externalUrl ?? source.title}|${source.fileIdx}';
+    var twins = 0;
+    for (var i = 0; i < index; i++) {
+      final other = list[i];
+      final otherIdentity =
+          '${other.addonName}|${other.infoHash ?? other.url ?? other.externalUrl ?? other.title}|${other.fileIdx}';
+      if (otherIdentity == identity) twins++;
+    }
+    return ValueKey('source:$identity#$twins');
   }
 
   /// The four filter pills, in the one scrollable frame both layouts use.
@@ -1456,6 +1484,7 @@ class _WatchScreenState extends State<WatchScreen>
     return _buildFilterMenuItem(
       title: title,
       selected: _selectedSizeFilter == value,
+      autofocus: _selectedSizeFilter == value,
       onTap: () {
         setState(() {
           _selectedSizeFilter = value;
@@ -1470,6 +1499,7 @@ class _WatchScreenState extends State<WatchScreen>
     if (addons.isEmpty) return const SizedBox.shrink();
 
     return _buildFilterDropdownButton(
+      pillKey: const ValueKey('filter-pill-addon'),
       onTap: (buttonContext) => _showAddonGlassDropdown(buttonContext, addons),
       currentText: _selectedAddonFilter ?? 'All Sources',
     );
@@ -1490,6 +1520,7 @@ class _WatchScreenState extends State<WatchScreen>
     return _buildFilterMenuItem(
       title: title,
       selected: _selectedAddonFilter == value,
+      autofocus: _selectedAddonFilter == value,
       onTap: () {
         setState(() {
           _selectedAddonFilter = value;
@@ -1501,6 +1532,7 @@ class _WatchScreenState extends State<WatchScreen>
 
   Widget _buildQualityFilterDropdown() {
     return _buildFilterDropdownButton(
+      pillKey: const ValueKey('filter-pill-quality'),
       onTap: (buttonContext) => _showQualityGlassDropdown(buttonContext),
       currentText: _multiFilterLabel(
         context.l10n,
@@ -1533,6 +1565,7 @@ class _WatchScreenState extends State<WatchScreen>
 
   Widget _buildAudioFilterDropdown() {
     return _buildFilterDropdownButton(
+      pillKey: const ValueKey('filter-pill-audio'),
       onTap: (buttonContext) => _showAudioGlassDropdown(buttonContext),
       currentText: _multiFilterLabel(
         context.l10n,
@@ -1714,6 +1747,7 @@ class _SourceCard extends StatefulWidget {
   final Duration? initialPosition;
 
   const _SourceCard({
+    super.key,
     required this.source,
     this.backdropUrl,
     this.logoUrl,
@@ -1858,198 +1892,204 @@ class _SourceCardState extends State<_SourceCard> {
         borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
         child: Material(
           color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-            onTap: () {
-              HapticFeedback.lightImpact();
+          child: FocusFill(
+            radius: context.rem(AppRem.radiusMd),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+              onTap: () {
+                HapticFeedback.lightImpact();
 
-              if (s.externalUrl != null && s.externalUrl!.isNotEmpty) {
-                if (s.externalUrl!.startsWith('stremio://')) {
-                  // Example: stremio:///detail/movie/tt28479262
-                  final uriStr = s.externalUrl!.replaceFirst(
-                    'stremio:///',
-                    'stremio://',
-                  );
-                  final uri = Uri.parse(uriStr);
-                  final segments = uri.pathSegments;
-                  if (uri.host == 'detail' && segments.length >= 2) {
-                    final type = segments[0];
-                    final id = segments[1];
-                    final movie = Movie(
-                      id: id,
-                      type: type,
-                      name: s.name ?? 'Unknown',
-                      addonBaseUrl: 'https://v3-cinemeta.strem.io',
+                if (s.externalUrl != null && s.externalUrl!.isNotEmpty) {
+                  if (s.externalUrl!.startsWith('stremio://')) {
+                    // Example: stremio:///detail/movie/tt28479262
+                    final uriStr = s.externalUrl!.replaceFirst(
+                      'stremio:///',
+                      'stremio://',
                     );
-                    pushPage(context, DetailsPage(movie: movie));
+                    final uri = Uri.parse(uriStr);
+                    final segments = uri.pathSegments;
+                    if (uri.host == 'detail' && segments.length >= 2) {
+                      final type = segments[0];
+                      final id = segments[1];
+                      final movie = Movie(
+                        id: id,
+                        type: type,
+                        name: s.name ?? 'Unknown',
+                        addonBaseUrl: 'https://v3-cinemeta.strem.io',
+                      );
+                      pushPage(context, DetailsPage(movie: movie));
+                      return;
+                    }
+                    return;
+                  } else {
+                    // Fallback for http URLs or other schemes
+                    launchUrl(
+                      Uri.parse(s.externalUrl!),
+                      mode: LaunchMode.externalApplication,
+                    );
                     return;
                   }
-                  return;
-                } else {
-                  // Fallback for http URLs or other schemes
-                  launchUrl(
-                    Uri.parse(s.externalUrl!),
-                    mode: LaunchMode.externalApplication,
-                  );
-                  return;
                 }
-              }
 
-              final isColl = widget.detail.isCollection;
-              final effectiveTitle = (isColl && widget.episode != null && widget.episode!.title.isNotEmpty)
-                  ? widget.episode!.title
-                  : s.displayTitle;
+                final isColl = widget.detail.isCollection;
+                final effectiveTitle = (isColl && widget.episode != null && widget.episode!.title.isNotEmpty)
+                    ? widget.episode!.title
+                    : s.displayTitle;
 
-              pushFullscreenPage(
-                PlayerScreen(
-                  source: s,
-                  title: effectiveTitle,
-                  backdropUrl: widget.backdropUrl,
-                  logoUrl: widget.logoUrl,
-                  detail: widget.detail,
-                  episode: widget.episode,
-                  onNextEpisode: widget.onNextEpisode,
-                  initialPosition: widget.initialPosition,
-                ),
-              );
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.all(context.rem(0.875)),
-              decoration: BoxDecoration(
-                color: _hovered
-                    ? _C.surfaceLight.withValues(alpha: 0.9)
-                    : _C.surface.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                border: Border.all(
-                  color: _hovered
-                      ? _C.accent.withValues(alpha: 0.3)
-                      : Colors.white.withValues(alpha: 0.06),
-                ),
-                boxShadow: _hovered
-                    ? [
-                        BoxShadow(
-                          color: _C.accent.withValues(alpha: 0.08),
-                          blurRadius: context.rem(AppRem.md),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Row(
-                children: [
-                  // Addon icon
-                  Container(
-                    width: context.rem(2.5),
-                    height: context.rem(2.5),
-                    decoration: BoxDecoration(
-                      color: _C.accent.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                    ),
-                    child: Icon(
-                      Icons.extension_rounded,
-                      color: _C.accent,
-                      size: context.rem(AppRem.icon),
-                    ),
+                pushFullscreenPage(
+                  PlayerScreen(
+                    source: s,
+                    title: effectiveTitle,
+                    backdropUrl: widget.backdropUrl,
+                    logoUrl: widget.logoUrl,
+                    detail: widget.detail,
+                    episode: widget.episode,
+                    onNextEpisode: widget.onNextEpisode,
+                    initialPosition: widget.initialPosition,
                   ),
-                  const SizedBox(width: _S.sm),
-                  // Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // The release's own file name, as the title: the
-                        // codec, the group and the cut are read off it
-                        // directly, which is why the tags below can be few.
-                        // Its description stays out -- it repeated the same
-                        // string a second time. Two lines, so a long release
-                        // name is mostly there without taking the row over.
-                        Text(
-                          s.releaseName,
-                          style: const TextStyle(
-                            color: _C.textPrimary,
-                            fontSize: AppType.small,
-                            fontWeight: FontWeight.w600,
+                );
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: EdgeInsets.all(context.rem(0.875)),
+                decoration: BoxDecoration(
+                  color: _hovered
+                      ? _C.surfaceLight.withValues(alpha: 0.9)
+                      : _C.surface.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                  border: Border.all(
+                    color: _hovered
+                        ? _C.accent.withValues(alpha: 0.3)
+                        : Colors.white.withValues(alpha: 0.06),
+                  ),
+                  boxShadow: _hovered
+                      ? [
+                          BoxShadow(
+                            color: _C.accent.withValues(alpha: 0.08),
+                            blurRadius: context.rem(AppRem.md),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        // The site behind the source, from the registered
-                        // roster, not the delivery label most scrapers stamp.
-                        // Not repeated when the title already is that name.
-                        if (provider.toLowerCase() !=
-                            s.releaseName.toLowerCase()) ...[
-                          SizedBox(height: context.rem(AppRem.xxs)),
+                        ]
+                      : [],
+                ),
+                child: Row(
+                  children: [
+                    // Addon icon
+                    Container(
+                      width: context.rem(2.5),
+                      height: context.rem(2.5),
+                      decoration: BoxDecoration(
+                        color: _C.accent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                      ),
+                      child: Icon(
+                        Icons.extension_rounded,
+                        color: _C.accent,
+                        size: context.rem(AppRem.icon),
+                      ),
+                    ),
+                    const SizedBox(width: _S.sm),
+                    // Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // The release's own file name, as the title: the
+                          // codec, the group and the cut are read off it
+                          // directly, which is why the tags below can be few.
+                          // Its description stays out -- it repeated the same
+                          // string a second time. Two lines, so a long release
+                          // name is mostly there without taking the row over.
                           Text(
-                            provider,
+                            s.releaseName,
                             style: const TextStyle(
-                              color: _C.textTertiary,
-                              fontSize: AppType.tiny,
+                              color: _C.textPrimary,
+                              fontSize: AppType.small,
+                              fontWeight: FontWeight.w600,
                             ),
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ],
-                        if (badges.isNotEmpty) ...[
-                          SizedBox(height: context.rem(AppRem.sm)),
-                          Wrap(spacing: context.rem(AppRem.xs), runSpacing: context.rem(AppRem.xs), children: badges),
-                        ],
-                      ],
-                    ),
-                  ),
-                  if (!isTv) ...[
-                    const SizedBox(width: _S.xs),
-                    // Copy the magnet link, for a torrent source.
-                    if (s.isMagnet && s.magnetUrl != null) ...[
-                      _CopyMagnetButton(magnetUrl: s.magnetUrl!),
-                      SizedBox(width: context.rem(AppRem.sm)),
-                    ],
-                    // Download this source directly, without opening the player.
-                    ClipOval(
-                      child: Material(
-                        color: _hovered
-                            ? Colors.white.withValues(alpha: 0.1)
-                            : Colors.white.withValues(alpha: 0.06),
-                        child: Tooltip(
-                          message: context.l10n.playerDownload,
-                          child: InkWell(
-                            onTap: () => startSourceDownload(
-                              context,
-                              detail: widget.detail,
-                              episode: widget.episode,
-                              source: s,
-                            ),
-                            child: SizedBox(
-                              width: context.rem(2.25),
-                              height: context.rem(2.25),
-                              child: Icon(
-                                Icons.download_rounded,
+                          // The site behind the source, from the registered
+                          // roster, not the delivery label most scrapers stamp.
+                          // Not repeated when the title already is that name.
+                          if (provider.toLowerCase() !=
+                              s.releaseName.toLowerCase()) ...[
+                            SizedBox(height: context.rem(AppRem.xxs)),
+                            Text(
+                              provider,
+                              style: const TextStyle(
                                 color: _C.textTertiary,
-                                size: context.rem(AppRem.iconSm),
+                                fontSize: AppType.tiny,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                          if (badges.isNotEmpty) ...[
+                            SizedBox(height: context.rem(AppRem.sm)),
+                            Wrap(spacing: context.rem(AppRem.xs), runSpacing: context.rem(AppRem.xs), children: badges),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (!isTv) ...[
+                      const SizedBox(width: _S.xs),
+                      // Copy the magnet link, for a torrent source.
+                      if (s.isMagnet && s.magnetUrl != null) ...[
+                        _CopyMagnetButton(magnetUrl: s.magnetUrl!),
+                        SizedBox(width: context.rem(AppRem.sm)),
+                      ],
+                      // Download this source directly, without opening the player.
+                      ClipOval(
+                        child: Material(
+                          color: _hovered
+                              ? Colors.white.withValues(alpha: 0.1)
+                              : Colors.white.withValues(alpha: 0.06),
+                          child: Tooltip(
+                            message: context.l10n.playerDownload,
+                            child: FocusFill(
+                              radius: 0,
+                              child: InkWell(
+                                onTap: () => startSourceDownload(
+                                  context,
+                                  detail: widget.detail,
+                                  episode: widget.episode,
+                                  source: s,
+                                ),
+                                child: SizedBox(
+                                  width: context.rem(2.25),
+                                  height: context.rem(2.25),
+                                  child: Icon(
+                                    Icons.download_rounded,
+                                    color: _C.textTertiary,
+                                    size: context.rem(AppRem.iconSm),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: _S.xs),
-                    // Play chevron
-                    Container(
-                      width: context.rem(2.25),
-                      height: context.rem(2.25),
-                      decoration: BoxDecoration(
-                        color: _hovered
-                            ? _C.accent.withValues(alpha: 0.2)
-                            : Colors.white.withValues(alpha: 0.06),
-                        shape: BoxShape.circle,
+                      const SizedBox(width: _S.xs),
+                      // Play chevron
+                      Container(
+                        width: context.rem(2.25),
+                        height: context.rem(2.25),
+                        decoration: BoxDecoration(
+                          color: _hovered
+                              ? _C.accent.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.06),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.play_arrow_rounded,
+                          color: _hovered ? _C.accent : _C.textTertiary,
+                          size: context.rem(AppRem.icon),
+                        ),
                       ),
-                      child: Icon(
-                        Icons.play_arrow_rounded,
-                        color: _hovered ? _C.accent : _C.textTertiary,
-                        size: context.rem(AppRem.icon),
-                      ),
-                    ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -2133,38 +2173,41 @@ class _CopyMagnetButtonState extends State<_CopyMagnetButton> {
         message: _copied ? 'Copied!' : 'Copy Magnet Link',
         child: Material(
           color: Colors.transparent,
-          child: InkWell(
-            onTap: _copy,
-            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              width: context.rem(2.25),
-              height: context.rem(2.25),
-              decoration: BoxDecoration(
-                color: _copied
-                    ? const Color(0xFF10B981).withValues(alpha: 0.2)
-                    : (_hovered
-                        ? const Color(0xFF00E5FF).withValues(alpha: 0.18)
-                        : Colors.white.withValues(alpha: 0.06)),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _copied
-                      ? const Color(0xFF10B981).withValues(alpha: 0.5)
-                      : (_hovered
-                          ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
-                          : Colors.white.withValues(alpha: 0.08)),
-                  width: 1, // px: a hairline, not a layout size
-                ),
-              ),
-              child: AnimatedSwitcher(
+          child: FocusFill(
+            radius: context.rem(AppRem.radiusXl),
+            child: InkWell(
+              onTap: _copy,
+              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusXl)),
+              child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  _copied ? Icons.check_rounded : Icons.link_rounded,
-                  key: ValueKey(_copied),
+                width: context.rem(2.25),
+                height: context.rem(2.25),
+                decoration: BoxDecoration(
                   color: _copied
-                      ? const Color(0xFF10B981)
-                      : (_hovered ? const Color(0xFF00E5FF) : _C.textSecondary),
-                  size: context.rem(AppRem.iconSm),
+                      ? const Color(0xFF10B981).withValues(alpha: 0.2)
+                      : (_hovered
+                          ? const Color(0xFF00E5FF).withValues(alpha: 0.18)
+                          : Colors.white.withValues(alpha: 0.06)),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _copied
+                        ? const Color(0xFF10B981).withValues(alpha: 0.5)
+                        : (_hovered
+                            ? const Color(0xFF00E5FF).withValues(alpha: 0.4)
+                            : Colors.white.withValues(alpha: 0.08)),
+                    width: 1, // px: a hairline, not a layout size
+                  ),
+                ),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  child: Icon(
+                    _copied ? Icons.check_rounded : Icons.link_rounded,
+                    key: ValueKey(_copied),
+                    color: _copied
+                        ? const Color(0xFF10B981)
+                        : (_hovered ? const Color(0xFF00E5FF) : _C.textSecondary),
+                    size: context.rem(AppRem.iconSm),
+                  ),
                 ),
               ),
             ),
@@ -2376,7 +2419,7 @@ class _EmptySourcesStateWidgetState extends State<_EmptySourcesStateWidget>
                 setState(() => _isHovering = focused),
             onKeyEvent: (node, event) {
               if (event is! KeyDownEvent) return KeyEventResult.ignored;
-              if (!_settingsButtonActivators.contains(event.logicalKey)) {
+              if (!kActivateKeys.contains(event.logicalKey)) {
                 return KeyEventResult.ignored;
               }
               pushPage(context, const SettingsPage());

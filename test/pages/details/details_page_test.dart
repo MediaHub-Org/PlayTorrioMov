@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/continue_watching/continue_watching_item.dart';
 import 'package:playtorriomov/models/movie/video.dart';
@@ -132,6 +134,24 @@ void main() {
       expect(DetailsPage.resumeEpisode(videos, '9:9'), isNull);
       expect(DetailsPage.resumeEpisode(videos, null), isNull);
       expect(DetailsPage.resumeEpisode(const [], '1:1'), isNull);
+    });
+  });
+
+  group('the page on a TV', () {
+    // The page cannot be pumped here (it fetches), so what a remote lands on
+    // is pinned at the source. A remote went to the genre tags before Play:
+    // reading order puts anything higher on the screen first, and on a wide
+    // layout the tags sit higher than Play does.
+    final source = File('lib/pages/details/details_page.dart').readAsStringSync();
+
+    test('has no genre tags to land on before Play', () {
+      expect(source, isNot(contains('GenreTagRow')));
+      // The genres are still on the page, as the metadata line.
+      expect(source, contains("meta.genres.take(3).join(' · ')"));
+    });
+
+    test('Play asks for focus on a TV', () {
+      expect(source, contains('autofocus: TvModeService.isTv.value'));
     });
   });
 }

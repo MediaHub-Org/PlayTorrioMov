@@ -14,16 +14,8 @@ import '../common/source_badges.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused source card. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
-/// inside a `const` set literal.
-final _sourceCardActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../common/focus_fill.dart';
+import '../common/activate_keys.dart';
 
 /// Glassmorphic Sources Side Panel for selecting episode stream sources,
 /// with targeted scraping, episode caching, and error recovery banners.
@@ -579,7 +571,7 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
           setState(() => _focusedIndex = focused ? index : null),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        if (!_sourceCardActivators.contains(event.logicalKey)) {
+        if (!kActivateKeys.contains(event.logicalKey)) {
           return KeyEventResult.ignored;
         }
         widget.onPlaySource(source, widget.episode);
@@ -737,46 +729,49 @@ class _PlayerSourcesPanelState extends State<PlayerSourcesPanel> {
                 if (source.isMagnet && source.magnetUrl != null) ...[
                   Material(
                     color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
-                      onTap: () {
-                        Clipboard.setData(ClipboardData(text: source.magnetUrl!));
-                        HapticFeedback.lightImpact();
-                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.check_circle_rounded, color: const Color(0xFF10B981), size: context.rem(AppRem.iconSm)),
-                                SizedBox(width: context.rem(AppRem.sm)),
-                                Text(
-                                  context.l10n.playerMagnetCopied,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: AppType.small,
-                                    fontWeight: FontWeight.w600,
+                    child: FocusFill(
+                      radius: context.rem(AppRem.radiusLg),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: source.magnetUrl!));
+                          HapticFeedback.lightImpact();
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.check_circle_rounded, color: const Color(0xFF10B981), size: context.rem(AppRem.iconSm)),
+                                  SizedBox(width: context.rem(AppRem.sm)),
+                                  Text(
+                                    context.l10n.playerMagnetCopied,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: AppType.small,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                              backgroundColor: const Color(0xFF1A1D26),
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+                              duration: const Duration(seconds: 2),
                             ),
-                            backgroundColor: const Color(0xFF1A1D26),
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
-                            duration: const Duration(seconds: 2),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(context.rem(0.4375)),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.08),
+                            shape: BoxShape.circle,
                           ),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(context.rem(0.4375)),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.link_rounded,
-                          color: Colors.white70,
-                          size: context.rem(AppRem.iconXs),
+                          child: Icon(
+                            Icons.link_rounded,
+                            color: Colors.white70,
+                            size: context.rem(AppRem.iconXs),
+                          ),
                         ),
                       ),
                     ),

@@ -7,16 +7,8 @@ import '../../models/movie/video.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused episode card. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that
-/// inside a `const` set literal.
-final _episodeCardActivators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../common/focus_fill.dart';
+import '../common/activate_keys.dart';
 
 /// Ultra-responsive, glassmorphic Episodes Side Panel with season tabs,
 /// auto-scroll to current episode, animated card expansion, and high FPS rendering.
@@ -487,40 +479,43 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
 
                 return Material(
                   color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _selectSeason(season),
-                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? PlayerTheme.accent.withValues(alpha: 0.28)
-                            : Colors.white.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                        border: Border.all(
+                  child: FocusFill(
+                    radius: context.rem(AppRem.radiusPill),
+                    child: InkWell(
+                      onTap: () => _selectSeason(season),
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
+                        decoration: BoxDecoration(
                           color: isActive
-                              ? PlayerTheme.accent.withValues(alpha: 0.80)
-                              : Colors.white.withValues(alpha: 0.10),
-                          width: 1.2, // px: a hairline, not a layout size
+                              ? PlayerTheme.accent.withValues(alpha: 0.28)
+                              : Colors.white.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                          border: Border.all(
+                            color: isActive
+                                ? PlayerTheme.accent.withValues(alpha: 0.80)
+                                : Colors.white.withValues(alpha: 0.10),
+                            width: 1.2, // px: a hairline, not a layout size
+                          ),
+                          boxShadow: isActive
+                              ? [
+                                  BoxShadow(
+                                    color: PlayerTheme.accent.withValues(alpha: 0.35),
+                                    blurRadius: context.rem(0.625),
+                                    offset: Offset(0, context.rem(AppRem.xxs)),
+                                  ),
+                                ]
+                              : null,
                         ),
-                        boxShadow: isActive
-                            ? [
-                                BoxShadow(
-                                  color: PlayerTheme.accent.withValues(alpha: 0.35),
-                                  blurRadius: context.rem(0.625),
-                                  offset: Offset(0, context.rem(AppRem.xxs)),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        tabLabel,
-                        style: TextStyle(
-                          color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.70),
-                          fontSize: AppType.captionPlus,
-                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        alignment: Alignment.center,
+                        child: Text(
+                          tabLabel,
+                          style: TextStyle(
+                            color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.70),
+                            fontSize: AppType.captionPlus,
+                            fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -554,25 +549,28 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
       message: tooltip,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-          child: Container(
-            width: context.rem(1.75),
-            height: context.rem(1.75),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.14),
-                width: 1, // px: a hairline, not a layout size
+        child: FocusFill(
+          radius: context.rem(AppRem.radiusSm),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+            child: Container(
+              width: context.rem(1.75),
+              height: context.rem(1.75),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusSm)),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  width: 1, // px: a hairline, not a layout size
+                ),
               ),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              icon,
-              size: context.rem(AppRem.icon),
-              color: Colors.white.withValues(alpha: 0.85),
+              alignment: Alignment.center,
+              child: Icon(
+                icon,
+                size: context.rem(AppRem.icon),
+                color: Colors.white.withValues(alpha: 0.85),
+              ),
             ),
           ),
         ),
@@ -600,7 +598,7 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
           setState(() => _focusedIndex = focused ? index : null),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        if (!_episodeCardActivators.contains(event.logicalKey)) {
+        if (!kActivateKeys.contains(event.logicalKey)) {
           return KeyEventResult.ignored;
         }
         _handleEpisodeTap(video);
@@ -854,39 +852,42 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
                   // "SELECT SOURCE / PLAY" Action Button
                   Material(
                     color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => widget.onEpisodeSelected(video),
-                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                      child: Container(
-                        constraints: BoxConstraints(minHeight: context.rem(2.375)),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.accent, const Color(0xFF9D84FF)],
-                          ),
-                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.accent.withValues(alpha: 0.45),
-                              blurRadius: context.rem(0.625),
-                              offset: Offset(0, context.rem(AppRem.xxs)),
+                    child: FocusFill(
+                      radius: context.rem(AppRem.radiusPill),
+                      child: InkWell(
+                        onTap: () => widget.onEpisodeSelected(video),
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                        child: Container(
+                          constraints: BoxConstraints(minHeight: context.rem(2.375)),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [AppColors.accent, const Color(0xFF9D84FF)],
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: context.rem(AppRem.iconSm)),
-                            SizedBox(width: context.rem(AppRem.sm)),
-                            Text(
-                              context.l10n.playerSelectSources,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: AppType.small,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.1,
+                            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.accent.withValues(alpha: 0.45),
+                                blurRadius: context.rem(0.625),
+                                offset: Offset(0, context.rem(AppRem.xxs)),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.play_circle_filled_rounded, color: Colors.white, size: context.rem(AppRem.iconSm)),
+                              SizedBox(width: context.rem(AppRem.sm)),
+                              Text(
+                                context.l10n.playerSelectSources,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: AppType.small,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.1,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -923,24 +924,27 @@ class _PlayerEpisodesPanelState extends State<PlayerEpisodesPanel> {
       message: tooltip,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
-          child: Container(
-            padding: EdgeInsets.all(context.rem(AppRem.snug)),
-            decoration: BoxDecoration(
-              color: const Color(0xD9080C14),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black54,
-                  blurRadius: context.rem(AppRem.sm),
-                  offset: Offset(0, context.rem(AppRem.xxs)),
-                ),
-              ],
+        child: FocusFill(
+          radius: 999, // px: fully round, not a layout size
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
+            child: Container(
+              padding: EdgeInsets.all(context.rem(AppRem.snug)),
+              decoration: BoxDecoration(
+                color: const Color(0xD9080C14),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: context.rem(AppRem.sm),
+                    offset: Offset(0, context.rem(AppRem.xxs)),
+                  ),
+                ],
+              ),
+              child: Icon(icon, color: Colors.white, size: context.rem(AppRem.icon)),
             ),
-            child: Icon(icon, color: Colors.white, size: context.rem(AppRem.icon)),
           ),
         ),
       ),

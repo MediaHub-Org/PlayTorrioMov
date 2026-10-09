@@ -16,6 +16,7 @@ import '../../widgets/movie/movie_card.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_highlight.dart';
 
 class CatalogPage extends StatefulWidget {
   final MovieSection section;
@@ -476,63 +477,66 @@ class _CatalogPageState extends State<CatalogPage> {
           final extra = selectableExtras[index];
           final currentVal = _selectedExtras[extra.name];
           final label = currentVal ?? (extra.isRequired ? context.l10n.discoverSelectExtra(extra.name) : context.l10n.catalogAllOf(extra.name));
-          return PopupMenuButton<String?>(
-            tooltip: extra.name,
-            color: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-              side: BorderSide(color: AppColors.inkAlpha(0.1)),
-            ),
-            onSelected: (val) => _onExtraSelected(extra.name, val),
-            itemBuilder: (context) => [
-              if (!extra.isRequired)
-                PopupMenuItem<String?>(
-                  value: null,
-                  child: Text(
-                    context.l10n.commonAll,
-                    style: TextStyle(color: AppColors.ink),
+          return FocusHighlight(
+            borderRadius: context.rem(1.25),
+            child: PopupMenuButton<String?>(
+              tooltip: extra.name,
+              color: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                side: BorderSide(color: AppColors.inkAlpha(0.1)),
+              ),
+              onSelected: (val) => _onExtraSelected(extra.name, val),
+              itemBuilder: (context) => [
+                if (!extra.isRequired)
+                  PopupMenuItem<String?>(
+                    value: null,
+                    child: Text(
+                      context.l10n.commonAll,
+                      style: TextStyle(color: AppColors.ink),
+                    ),
                   ),
-                ),
-              ...extra.options.map(
-                (opt) => PopupMenuItem<String?>(
-                  value: opt,
-                  child: Text(
-                    opt,
-                    style: TextStyle(
-                      color: opt == currentVal ? AppColors.accent : AppColors.ink,
-                      fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
+                ...extra.options.map(
+                  (opt) => PopupMenuItem<String?>(
+                    value: opt,
+                    child: Text(
+                      opt,
+                      style: TextStyle(
+                        color: opt == currentVal ? AppColors.accent : AppColors.ink,
+                        fontWeight: opt == currentVal ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
-              decoration: BoxDecoration(
-                color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.08),
-                borderRadius: BorderRadius.circular(context.rem(1.25)),
-                border: Border.all(
-                  color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.12),
+              ],
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: context.rem(0.875), vertical: context.rem(AppRem.snug)),
+                decoration: BoxDecoration(
+                  color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.08),
+                  borderRadius: BorderRadius.circular(context.rem(1.25)),
+                  border: Border.all(
+                    color: currentVal != null ? AppColors.accent : AppColors.inkAlpha(0.12),
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${extra.name.toUpperCase()}: $label',
-                    style: TextStyle(
-                      color: currentVal != null ? AppColors.ink : AppColors.inkAlpha(0.8),
-                      fontWeight: FontWeight.w600,
-                      fontSize: AppType.small,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${extra.name.toUpperCase()}: $label',
+                      style: TextStyle(
+                        color: currentVal != null ? AppColors.ink : AppColors.inkAlpha(0.8),
+                        fontWeight: FontWeight.w600,
+                        fontSize: AppType.small,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: context.rem(AppRem.xs)),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    size: context.rem(AppRem.iconSm),
-                    color: currentVal != null ? AppColors.ink : AppColors.inkMuted,
-                  ),
-                ],
+                    SizedBox(width: context.rem(AppRem.xs)),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: context.rem(AppRem.iconSm),
+                      color: currentVal != null ? AppColors.ink : AppColors.inkMuted,
+                    ),
+                  ],
+                ),
               ),
             ),
           );

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
 /// Whether the app is running on an actual Android TV device, not a phone or
@@ -25,11 +26,28 @@ abstract final class TvModeService {
     if (kIsWeb || !Platform.isAndroid) return;
     try {
       isTv.value = await _channel.invokeMethod<bool>('isTv') ?? false;
+      applyFocusStrategy(isTv.value);
     } catch (e) {
       // Optional signal, not a startup requirement -- phases 2/3 read it to
       // decide whether to apply TV-specific treatment, and simply don't if
       // it stays false.
       debugPrint('[TvModeService] initialize error: $e');
     }
+  }
+
+  /// On a TV, focus is always drawn.
+  ///
+  /// Flutter shows focus only while it believes the viewer is using keys
+  /// ([FocusHighlightMode.traditional]); it starts a phone in touch mode and
+  /// drops back to it on any pointer event. A TV has no touch, but a remote
+  /// app, an air mouse or a USB mouse sends pointer events, and after one the
+  /// Material controls drew no focus at all -- the cursor was somewhere, and
+  /// to a viewer on the couch the app had lost its place. Pinning the mode
+  /// keeps the cue on, whatever last touched the screen.
+  @visibleForTesting
+  static void applyFocusStrategy(bool isTv) {
+    FocusManager.instance.highlightStrategy = isTv
+        ? FocusHighlightStrategy.alwaysTraditional
+        : FocusHighlightStrategy.automatic;
   }
 }

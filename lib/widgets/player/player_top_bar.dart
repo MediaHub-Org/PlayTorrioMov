@@ -4,6 +4,7 @@ import '../../services/tv_type.dart';
 import '../../services/window/window_service.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Top header bar for the video player.
 class PlayerTopBar extends StatelessWidget {
@@ -162,54 +163,57 @@ class PlayerTopBar extends StatelessWidget {
                   message: context.l10n.detailsEpisodes,
                   child: Material(
                   color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onToggleEpisodes,
-                    borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      padding: EdgeInsets.symmetric(horizontal: context.rem(isCompact ? 0.625 : AppRem.ms), vertical: context.rem(AppRem.sm)),
-                      decoration: BoxDecoration(
-                        color: isEpisodesActive
-                            ? PlayerTheme.accent.withValues(alpha: 0.30)
-                            : const Color(0x33080C12),
-                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
-                        border: Border.all(
+                  child: FocusFill(
+                    radius: context.rem(AppRem.radiusMd),
+                    child: InkWell(
+                      onTap: onToggleEpisodes,
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: EdgeInsets.symmetric(horizontal: context.rem(isCompact ? 0.625 : AppRem.ms), vertical: context.rem(AppRem.sm)),
+                        decoration: BoxDecoration(
                           color: isEpisodesActive
-                              ? PlayerTheme.accent.withValues(alpha: 0.85)
-                              : Colors.white.withValues(alpha: 0.15),
-                          width: 1.2, // px: a hairline, not a layout size
-                        ),
-                        boxShadow: isEpisodesActive
-                            ? [
-                                BoxShadow(
-                                  color: PlayerTheme.accent.withValues(alpha: 0.35),
-                                  blurRadius: context.rem(0.625),
-                                  offset: Offset(0, context.rem(AppRem.xxs)),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.video_library_rounded,
-                            size: context.rem(AppRem.iconSm),
-                            color: isEpisodesActive ? const Color(0xFF9D84FF) : Colors.white,
+                              ? PlayerTheme.accent.withValues(alpha: 0.30)
+                              : const Color(0x33080C12),
+                          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                          border: Border.all(
+                            color: isEpisodesActive
+                                ? PlayerTheme.accent.withValues(alpha: 0.85)
+                                : Colors.white.withValues(alpha: 0.15),
+                            width: 1.2, // px: a hairline, not a layout size
                           ),
-                          if (!isCompact) ...[
-                            SizedBox(width: context.rem(0.4375)),
-                            Text(
-                              context.l10n.detailsEpisodes,
-                              style: TextStyle(
-                                color: isEpisodesActive ? Colors.white : Colors.white.withValues(alpha: 0.9),
-                                fontSize: AppType.captionPlus,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.1,
-                              ),
+                          boxShadow: isEpisodesActive
+                              ? [
+                                  BoxShadow(
+                                    color: PlayerTheme.accent.withValues(alpha: 0.35),
+                                    blurRadius: context.rem(0.625),
+                                    offset: Offset(0, context.rem(AppRem.xxs)),
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.video_library_rounded,
+                              size: context.rem(AppRem.iconSm),
+                              color: isEpisodesActive ? const Color(0xFF9D84FF) : Colors.white,
                             ),
+                            if (!isCompact) ...[
+                              SizedBox(width: context.rem(0.4375)),
+                              Text(
+                                context.l10n.detailsEpisodes,
+                                style: TextStyle(
+                                  color: isEpisodesActive ? Colors.white : Colors.white.withValues(alpha: 0.9),
+                                  fontSize: AppType.captionPlus,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -306,10 +310,13 @@ class _QualityChip extends StatelessWidget {
       message: context.l10n.playerSources,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-          onTap: tap,
-          child: chip,
+        child: FocusFill(
+          radius: context.rem(AppRem.snug),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+            onTap: tap,
+            child: chip,
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/stream/stream_model.dart';
+import '../tv_mode_service.dart';
 
 /// A data-usage tier, the way a streaming app's own settings usually frame
 /// it rather than as a bare resolution: what it costs per hour matters more
@@ -71,16 +72,28 @@ abstract final class VideoQualityPreference {
   static const _key = 'video_quality_preference_tier';
 
   /// Defaults to [VideoQualityTier.best] -- the sort this replaces always
-  /// put the highest quality first, so an installed app that has not
-  /// touched this setting keeps behaving exactly as it did before.
+  /// put the highest quality first, so an installed phone or desktop that has
+  /// not touched this setting keeps behaving exactly as it did before.
+  ///
+  /// **On a TV the default is [VideoQualityTier.better] (1080p).** A TV box
+  /// has a weak radio and a modest decoder, and a 4K remux at 60-80 Mb/s is
+  /// the release most likely to stall on one while looking best in the list.
+  /// Only a default: someone who picked a tier keeps it, and nothing is
+  /// hidden either way.
   static final ValueNotifier<VideoQualityTier> tier =
       ValueNotifier<VideoQualityTier>(VideoQualityTier.best);
+
+  /// Whether the tier was chosen, here or in a previous session. Until it is,
+  /// the device decides.
+  static bool _chosen = false;
+  static bool _watchingDevice = false;
 
   static Future<void> initialize() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final saved = prefs.getString(_key);
       if (saved != null) {
+        _chosen = true;
         tier.value = VideoQualityTier.values.firstWhere(
           (t) => t.name == saved,
           orElse: () => VideoQualityTier.best,
@@ -89,9 +102,27 @@ abstract final class VideoQualityPreference {
     } catch (e) {
       debugPrint('[VideoQualityPreference] Error initializing: $e');
     }
+    _followDevice();
+  }
+
+  /// Applies the device default now and again if TV detection answers later:
+  /// it is a platform-channel call that races this one at startup.
+  static void _followDevice() {
+    void apply() {
+      if (_chosen) return;
+      tier.value = TvModeService.isTv.value
+          ? VideoQualityTier.better
+          : VideoQualityTier.best;
+    }
+
+    apply();
+    if (_watchingDevice) return;
+    _watchingDevice = true;
+    TvModeService.isTv.addListener(apply);
   }
 
   static Future<void> setTier(VideoQualityTier value) async {
+    _chosen = true;
     tier.value = value;
     try {
       final prefs = await SharedPreferences.getInstance();

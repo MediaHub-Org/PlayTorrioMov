@@ -24,6 +24,9 @@ import '../../services/debrid/debrid_service.dart';
 import '../../services/trakt/trakt_service.dart';
 import '../../services/simkl/simkl_service.dart';
 import '../../services/player/player_settings.dart';
+import '../../services/locale/system_language.dart';
+import '../../services/player/playback_health.dart';
+import '../../services/player/link_speed_memory.dart';
 import '../../services/sources/source_filter_settings.dart';
 
 import '../../widgets/player/player_glass.dart';
@@ -53,6 +56,7 @@ import '../../widgets/player/player_volume_control.dart';
 import '../../widgets/player/sub_sync_bar.dart';
 import '../../widgets/player/text_sync_overlay.dart';
 import '../../widgets/player/player_cast_sheet.dart';
+import '../../widgets/player/player_loading_title.dart';
 import '../../widgets/player/player_stats_menu.dart';
 import '../../services/cast/cast_service.dart';
 import '../../services/tv_type.dart';
@@ -139,6 +143,16 @@ class _PlayerScreenState extends State<PlayerScreen>
   StreamSubscription<TorrentStats>? _preloadSub;
   Timer? _firstFrameTimeout;
 
+  /// Notices, once a second after the first frame, how the connection is
+  /// holding up: what it delivers while the player is starved, whether a long
+  /// stretch went fine, and whether the picture keeps stopping.
+  Timer? _healthTimer;
+  late final PlaybackHealth _health = PlaybackHealth(
+    onSlowLink: (kbps) => LinkSpeedMemory.recordStall(kbps),
+    onSmooth: () => LinkSpeedMemory.recordSmooth(),
+    onRepeatedStalls: _offerAnotherSource,
+  );
+
   // Active Menu / Popover
   // 'settings' is the gear; 'audio', 'speed', 'aspect' and 'sleep' are the
   // popovers its rows open. 'subtitle' and 'stats' keep their own transport
@@ -175,6 +189,15 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// be undone by a later track update, so the ranking only fires on the
   /// first non-empty track list.
   bool _audioPreferenceApplied = false;
+
+  /// The viewer picked an audio track themselves, so a new episode does not
+  /// reapply the language preference over their choice.
+  bool _audioChosenManually = false;
+
+  /// The automatic subtitle has had its one chance on this file, whether it
+  /// turned something on or found nothing to. The viewer's own choices after
+  /// that are theirs.
+  bool _autoSubtitleHandled = false;
 
   bool _showAudioHud = false;
   String _audioHudText = '';
@@ -267,6 +290,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     // clicks. Observing the lifecycle re-arms them on resume.
     WidgetsBinding.instance.addObserver(this);
     HardwareKeyboard.instance.addHandler(_keepControlsUpOnKey);
+    _healthTimer = Timer.periodic(const Duration(seconds: 1), (_) => _tickHealth());
     _wasFullscreenBeforeEntering = WindowService.instance.isFullscreen;
     // The sleep timer pauses playback when its countdown ends. The service
     // outlives this screen -- it is a singleton the transport bar's button
@@ -378,6 +402,65 @@ class _PlayerScreenState extends State<PlayerScreen>
     if (state == AppLifecycleState.resumed && mounted) {
       _focusNode.requestFocus();
     }
+  }
+
+  /// One of libmpv's properties by name, or null when this build does not have
+  /// it (not every property exists on every platform or before enough of the
+  /// stream has been read).
+  Future<String?> _readPlayerProperty(String name) async {
+    try {
+      final dynamic platform = _player.platform;
+      return await platform.getProperty(name) as String?;
+    } catch (_) {
+      // A property mpv does not know throws; that is "not available", and
+      // the diagnosis shows a dash for it.
+      return null;
+    }
+  }
+
+  /// One second of [PlaybackHealth]. Nothing counts before the first frame:
+  /// a slow start is a swarm warming up or a debrid link resolving, and the
+  /// rate then says nothing about the connection.
+  Future<void> _tickHealth() async {
+    if (!mounted || _isLoading || _awaitingFirstFrame) return;
+    final buffering = _player.state.buffering;
+    int? kbps;
+    if (buffering) {
+      // mpv's own reading of how fast the cache is filling, in bytes a second.
+      // Only asked while starved: that is the one moment the figure is the
+      // connection's limit and not just how much the player chose to fetch.
+      try {
+        final dynamic platform = _player.platform;
+        final raw = await platform.getProperty('cache-speed') as String?;
+        final bytes = double.tryParse(raw ?? '');
+        if (bytes != null) kbps = (bytes * 8 / 1000).round();
+      } catch (e) {
+        debugPrint('[PlayerScreen] cache-speed unavailable: $e');
+      }
+    }
+    if (!mounted) return;
+    _health.tick(isBuffering: buffering, observedKbps: kbps, now: DateTime.now());
+  }
+
+  /// Playback keeps stopping: say so, and point at the list of other sources,
+  /// where the lighter ones are. Offered, not done: a switch costs a reload
+  /// and the viewer may prefer to wait the minute out.
+  void _offerAnotherSource() {
+    if (!mounted) return;
+    final l10n = context.l10n;
+    final hasPanel = _currentEpisode != null;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.playerKeepsStopping),
+        duration: const Duration(seconds: 8),
+        action: hasPanel
+            ? SnackBarAction(
+                label: l10n.playerOtherSources,
+                onPressed: _openSourcesFromSettings,
+              )
+            : null,
+      ),
+    );
   }
 
   /// Starts waiting for the first decoded frame. Called inside the setState
@@ -1177,19 +1260,49 @@ class _PlayerScreenState extends State<PlayerScreen>
         if (await read('track-list/$i/default') == 'yes') defaults.add(id);
         if (await read('track-list/$i/forced') == 'yes') forced.add(id);
       }
-      if (!mounted || (defaults.isEmpty && forced.isEmpty)) return;
-      setState(() {
-        _embeddedSubtitles = [
-          for (final track in _embeddedSubtitles)
-            track.withFlags(
-              isDefault: defaults.contains(track.index),
-              isForcedTrack: forced.contains(track.index),
-            ),
-        ];
-      });
+      if (!mounted) return;
+      if (defaults.isNotEmpty || forced.isNotEmpty) {
+        setState(() {
+          _embeddedSubtitles = [
+            for (final track in _embeddedSubtitles)
+              track.withFlags(
+                isDefault: defaults.contains(track.index),
+                isForcedTrack: forced.contains(track.index),
+              ),
+          ];
+        });
+      }
     } catch (e) {
       debugPrint('[PlayerScreen] could not read subtitle track flags: $e');
     }
+    // After the flags, whether or not they could be read: the automatic pick
+    // skips forced tracks, and it is the last thing the track list feeds.
+    _maybeAutoSubtitle();
+  }
+
+  /// Turns on a subtitle in the viewer's language when the audio is in
+  /// another, once per file.
+  ///
+  /// Embedded tracks only. A search that turns up two hundred online
+  /// languages is a list to choose from; fetching one costs bandwidth and
+  /// puts a subtitle on screen nobody asked for. The file's own track is
+  /// already on disk (see [_fetchInitialSubtitles]).
+  void _maybeAutoSubtitle() {
+    if (!mounted || _autoSubtitleHandled) return;
+    if (!PlayerSettings.autoSubtitles.value) return;
+    // Wait for the tracks: this is called as the list arrives, and an empty
+    // one is not "nothing to choose from" yet.
+    if (_audioTracks.isEmpty || _embeddedSubtitles.isEmpty) return;
+    _autoSubtitleHandled = true;
+    // Their own choice, made before this ran, stands.
+    if (_isSubtitleEnabled) return;
+
+    final track = SubtitleAutoPick.embeddedForViewer(
+      _embeddedSubtitles,
+      viewerLanguage: SystemLanguage.code,
+      audioLanguage: _selectedAudioLanguage,
+    );
+    if (track != null) _selectEmbeddedSubtitle(track);
   }
 
   static String cleanMediaTitle(String raw) {
@@ -2294,6 +2407,11 @@ class _PlayerScreenState extends State<PlayerScreen>
       _currentCues = [];
       _currentSubtitleVariant = prevVariant;
       _isSubtitleEnabled = wasSubEnabled;
+      // A new file has its own tracks. The language preference runs again
+      // for it unless the viewer chose an audio track by hand; the automatic
+      // subtitle runs again unless they already have one on.
+      _audioPreferenceApplied = _audioChosenManually;
+      _autoSubtitleHandled = false;
     });
 
     // Cleanup previous torrent engine if was P2P
@@ -2408,6 +2526,7 @@ class _PlayerScreenState extends State<PlayerScreen>
     for (final s in _subscriptions) {
       s.cancel();
     }
+    _healthTimer?.cancel();
     _progressSaveTimer?.cancel();
     _volumeHudTimer?.cancel();
     _audioHudTimer?.cancel();
@@ -2809,26 +2928,49 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   /// The logo filling with load progress, and what is being waited on.
+  ///
+  /// Under the title being loaded: its logo (or its name), then the episode.
+  /// The detail's name rather than [PlayerScreen.title], which for a movie is
+  /// the release's filename.
   Widget _buildLoadingContent() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ValueListenableBuilder<double>(
-          valueListenable: _loadProgress,
-          builder: (context, progress, _) => PlayerLoadingLogo(progress: progress),
-        ),
-        SizedBox(height: context.rem(AppRem.lg)),
-        Text(
-          _status(context.l10n),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: AppType.bodyLg,
-            letterSpacing: 1.2,
+    final episode = _currentEpisode;
+    final name = widget.detail?.name ?? widget.title;
+    // Scaled down rather than clipped when the title block, the logo and the
+    // status line do not all fit a short screen.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PlayerLoadingTitle(
+            logoUrl: widget.logoUrl ?? widget.detail?.logo,
+            title: name,
+            subtitle: episode == null
+                ? null
+                : PlayerLoadingTitle.episodeLabel(
+                    season: episode.season,
+                    episode: episode.episode,
+                    name: episode.title,
+                  ),
           ),
-        ),
-      ],
+          SizedBox(height: context.rem(AppRem.lg)),
+          ValueListenableBuilder<double>(
+            valueListenable: _loadProgress,
+            builder: (context, progress, _) => PlayerLoadingLogo(progress: progress),
+          ),
+          SizedBox(height: context.rem(AppRem.lg)),
+          Text(
+            _status(context.l10n),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: AppType.bodyLg,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -3229,6 +3371,7 @@ class _PlayerScreenState extends State<PlayerScreen>
               audioTracks: _audioTracks,
               selectedIndex: _selectedAudioTrackIndex,
               onTrackSelected: (idx) {
+                _audioChosenManually = true;
                 setState(() => _selectedAudioTrackIndex = idx);
                 try {
                   final matching = _player.state.tracks.audio.firstWhere(
@@ -3291,6 +3434,10 @@ class _PlayerScreenState extends State<PlayerScreen>
               onCopyLink: _resolvedStreamUrl == null
                   ? null
                   : _handleCopyStreamUrl,
+              readProperty: _readPlayerProperty,
+              sourceBitrateKbps: widget.source.estimatedBitrateKbps(
+                int.tryParse(widget.detail?.runtime ?? ''),
+              ),
             ),
           ),
 

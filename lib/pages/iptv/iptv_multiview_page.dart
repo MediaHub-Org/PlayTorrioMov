@@ -10,6 +10,7 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/hover_button.dart';
 import '../../services/app_units.dart';
+import '../../widgets/common/focus_fill.dart';
 
 /// Watch up to 4 live channels at once in a grid.
 ///
@@ -171,40 +172,43 @@ class _ChannelPickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final primary = channel.gradient.isNotEmpty ? channel.gradient.first : AppColors.accent;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(context.rem(0.875)),
-      child: Container(
-        decoration: BoxDecoration(
-          color: selected ? primary.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(context.rem(0.875)),
-          border: Border.all(
-            color: selected ? primary : Colors.white.withValues(alpha: 0.1),
-            width: selected ? 2 : 1, // px: a hairline, not a layout size
+    return FocusFill(
+      radius: context.rem(0.875),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(context.rem(0.875)),
+        child: Container(
+          decoration: BoxDecoration(
+            color: selected ? primary.withValues(alpha: 0.18) : Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(context.rem(0.875)),
+            border: Border.all(
+              color: selected ? primary : Colors.white.withValues(alpha: 0.1),
+              width: selected ? 2 : 1, // px: a hairline, not a layout size
+            ),
           ),
-        ),
-        padding: EdgeInsets.all(context.rem(AppRem.ms)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              selected ? Icons.check_circle_rounded : Icons.live_tv_rounded,
-              color: selected ? primary : Colors.white38,
-              size: context.rem(AppRem.iconMd),
-            ),
-            SizedBox(height: context.rem(AppRem.sm)),
-            Text(
-              channel.name,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: selected ? Colors.white : Colors.white70,
-                fontSize: AppType.small,
-                fontWeight: FontWeight.w700,
+          padding: EdgeInsets.all(context.rem(AppRem.ms)),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                selected ? Icons.check_circle_rounded : Icons.live_tv_rounded,
+                color: selected ? primary : Colors.white38,
+                size: context.rem(AppRem.iconMd),
               ),
-            ),
-          ],
+              SizedBox(height: context.rem(AppRem.sm)),
+              Text(
+                channel.name,
+                maxLines: 2,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: selected ? Colors.white : Colors.white70,
+                  fontSize: AppType.small,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

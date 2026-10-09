@@ -3,17 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../services/theme/app_colors.dart';
 import 'focus_ring.dart';
-
-/// The keys that activate a focused [HoverButton]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-  LogicalKeyboardKey.space,
-};
+import 'activate_keys.dart';
 
 /// A tappable thing that leans in slightly under a pointer -- and, since
 /// #78, under a D-pad or keyboard focus too.
@@ -94,7 +84,7 @@ class _HoverButtonState extends State<HoverButton> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) {
+    if (!kActivateKeysWithSpace.contains(event.logicalKey)) {
       return KeyEventResult.ignored;
     }
     widget.onTap();

@@ -3,16 +3,7 @@ import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import 'player_glass.dart' show FocusRing;
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused control in this file. `final`, not
-/// `const`: `LogicalKeyboardKey` overrides `==`, and the analyzer rejects
-/// that inside a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import '../common/activate_keys.dart';
 
 /// Centered play/pause. Lives over the middle of the video, not in the
 /// bottom transport bar, so it stays reachable (and visible) regardless of
@@ -94,7 +85,7 @@ class _PlayPauseButtonState extends State<_PlayPauseButton> {
       onFocusChange: (focused) => setState(() => _focused = focused),
       onKeyEvent: (node, event) {
         if (event is! KeyDownEvent) return KeyEventResult.ignored;
-        if (!_activators.contains(event.logicalKey)) {
+        if (!kActivateKeys.contains(event.logicalKey)) {
           return KeyEventResult.ignored;
         }
         widget.onTap();

@@ -273,4 +273,106 @@ void main() {
       expect(namesOf(tracks), ['Spanish', 'Arabic']);
     });
   });
+
+  group('SubtitleAutoPick.embeddedForViewer', () {
+    // The profile-language rule of a streaming app: subtitles come on by
+    // themselves when the film is not in your language, and stay off when it
+    // is.
+    PlayerEmbeddedSubtitle forced(int index, String language) =>
+        PlayerEmbeddedSubtitle(
+          index: index,
+          title: language,
+          language: language,
+          isForcedTrack: true,
+        );
+
+    test('audio in another language brings on the viewer\'s subtitle', () {
+      final picked = SubtitleAutoPick.embeddedForViewer(
+        [track(0, language: 'eng'), track(1, language: 'spa')],
+        viewerLanguage: 'es',
+        audioLanguage: 'English',
+      );
+      expect(picked?.index, 1);
+    });
+
+    test('audio already in the viewer\'s language needs none', () {
+      expect(
+        SubtitleAutoPick.embeddedForViewer(
+          [track(0, language: 'eng'), track(1, language: 'spa')],
+          viewerLanguage: 'es',
+          audioLanguage: 'spa',
+        ),
+        isNull,
+      );
+    });
+
+    test('an audio track of unknown language is not guessed at', () {
+      expect(
+        SubtitleAutoPick.embeddedForViewer(
+          [track(1, language: 'spa')],
+          viewerLanguage: 'es',
+          audioLanguage: null,
+        ),
+        isNull,
+      );
+    });
+
+    test('no track in the viewer\'s language means none comes on', () {
+      expect(
+        SubtitleAutoPick.embeddedForViewer(
+          [track(0, language: 'eng'), track(1, language: 'fre')],
+          viewerLanguage: 'es',
+          audioLanguage: 'jpn',
+        ),
+        isNull,
+      );
+    });
+
+    test('a forced track is not a translation of the film', () {
+      expect(
+        SubtitleAutoPick.embeddedForViewer(
+          [forced(1, 'spa')],
+          viewerLanguage: 'es',
+          audioLanguage: 'eng',
+        ),
+        isNull,
+        reason: 'it translates only the foreign lines of a film in your language',
+      );
+    });
+
+    test('the full translation beats a forced one beside it', () {
+      final picked = SubtitleAutoPick.embeddedForViewer(
+        [forced(1, 'spa'), track(2, language: 'spa')],
+        viewerLanguage: 'es',
+        audioLanguage: 'eng',
+      );
+      expect(picked?.index, 2);
+    });
+
+    test('hearing-impaired is the last resort, not the first pick', () {
+      const sdh = PlayerEmbeddedSubtitle(
+        index: 1,
+        title: 'Spanish',
+        language: 'spa',
+        containerTitle: 'Spanish [SDH]',
+      );
+      expect(
+        SubtitleAutoPick.embeddedForViewer(
+          [sdh, track(2, language: 'spa')],
+          viewerLanguage: 'es',
+          audioLanguage: 'eng',
+        )?.index,
+        2,
+      );
+      expect(
+        SubtitleAutoPick.embeddedForViewer(
+          [sdh],
+          viewerLanguage: 'es',
+          audioLanguage: 'eng',
+        )?.index,
+        1,
+        reason: 'better than nothing when it is all there is',
+      );
+    });
+  });
 }

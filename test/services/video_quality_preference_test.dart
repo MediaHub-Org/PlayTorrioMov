@@ -1,5 +1,7 @@
 // test/services/video_quality_preference_test.dart
 import 'package:flutter_test/flutter_test.dart';
+import 'package:playtorriomov/services/tv_mode_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:playtorriomov/models/stream/stream_model.dart';
 import 'package:playtorriomov/services/player/video_quality_preference.dart';
 
@@ -49,6 +51,33 @@ void main() {
     test('increases with the tier', () {
       final values = VideoQualityTier.values.map(gbPerHourFor).toList();
       expect(values, [values[0], values[1], values[2]]..sort());
+    });
+  });
+
+  group('VideoQualityPreference on a TV', () {
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      SharedPreferences.setMockInitialValues({});
+      TvModeService.isTv.value = false;
+    });
+    tearDown(() => TvModeService.isTv.value = false);
+
+    test('a TV that never chose opens on 1080p, a phone on the best', () async {
+      await VideoQualityPreference.initialize();
+      expect(VideoQualityPreference.tier.value, VideoQualityTier.best);
+
+      TvModeService.isTv.value = true;
+      expect(VideoQualityPreference.tier.value, VideoQualityTier.better,
+          reason: 'detection answers after startup; the default follows it');
+    });
+
+    test('a tier somebody chose is never overridden by the device', () async {
+      await VideoQualityPreference.initialize();
+      await VideoQualityPreference.setTier(VideoQualityTier.best);
+
+      TvModeService.isTv.value = true;
+
+      expect(VideoQualityPreference.tier.value, VideoQualityTier.best);
     });
   });
 }

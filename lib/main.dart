@@ -42,6 +42,7 @@ import './services/window/window_service.dart';
 import './services/p2p/p2p_settings_service.dart';
 import './services/sources/source_filter_settings.dart';
 import './services/player/video_quality_preference.dart';
+import './services/player/link_speed_memory.dart';
 import './services/scraper/builtin_providers_service.dart';
 import './widgets/updater/update_dialog.dart';
 import './pages/hub/hub_page.dart';
@@ -121,6 +122,7 @@ void main() async {
     // builds, which reads them synchronously to seed its dropdowns.
     SourceFilterSettings.initialize(),
     VideoQualityPreference.initialize(),
+    LinkSpeedMemory.initialize(),
     // Loads which built-in scrapers the user switched off. Must land before
     // the first scrapeAll, which reads the result synchronously.
     BuiltinProvidersService.initialize(),

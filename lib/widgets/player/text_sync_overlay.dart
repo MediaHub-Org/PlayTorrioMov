@@ -9,6 +9,7 @@ import '../../services/subtitles/subtitle_sync_helper.dart';
 import '../../services/tv_type.dart';
 import 'player_glass.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Full-screen right-side floating drawer for dialogue speech following & subtitle sync.
 class TextSyncOverlay extends StatefulWidget {
@@ -503,30 +504,36 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           if (_searchQuery.length >= 3) ...[
                             Tooltip(
                               message: context.l10n.commonPrevious,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
-                                onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
-                                child: Padding(
-                                  padding: EdgeInsets.all(context.rem(AppRem.xxs)),
-                                  child: Icon(
-                                    Icons.keyboard_arrow_up_rounded,
-                                    size: context.rem(AppRem.iconXs),
-                                    color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                              child: FocusFill(
+                                radius: context.rem(AppRem.xs),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
+                                  onTap: _matchedIndices.isNotEmpty ? _goToPrevMatch : null,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(context.rem(AppRem.xxs)),
+                                    child: Icon(
+                                      Icons.keyboard_arrow_up_rounded,
+                                      size: context.rem(AppRem.iconXs),
+                                      color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             Tooltip(
                               message: context.l10n.commonNext,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
-                                onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
-                                child: Padding(
-                                  padding: EdgeInsets.all(context.rem(AppRem.xxs)),
-                                  child: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    size: context.rem(AppRem.iconXs),
-                                    color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                              child: FocusFill(
+                                radius: context.rem(AppRem.xs),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
+                                  onTap: _matchedIndices.isNotEmpty ? _goToNextMatch : null,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(context.rem(AppRem.xxs)),
+                                    child: Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      size: context.rem(AppRem.iconXs),
+                                      color: _matchedIndices.isNotEmpty ? PlayerTheme.ink : PlayerTheme.inkSubtle,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -534,12 +541,15 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                           ],
                           Tooltip(
                             message: context.l10n.commonClearSearch,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
-                              onTap: () => _searchController.clear(),
-                              child: Padding(
-                                padding: EdgeInsets.all(context.rem(AppRem.xxs)),
-                                child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: context.rem(0.875)),
+                            child: FocusFill(
+                              radius: context.rem(AppRem.xs),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
+                                onTap: () => _searchController.clear(),
+                                child: Padding(
+                                  padding: EdgeInsets.all(context.rem(AppRem.xxs)),
+                                  child: Icon(Icons.close_rounded, color: PlayerTheme.inkSubtle, size: context.rem(0.875)),
+                                ),
                               ),
                             ),
                           ),
@@ -616,117 +626,120 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                                               : inRange
                                                   ? PlayerTheme.accent.withValues(alpha: 0.1)
                                                   : Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (_sectionMode) {
-                                        setState(() {
-                                          if (_rangeStart == null || _rangeEnd != null) {
-                                            _rangeStart = index;
-                                            _rangeEnd = null;
-                                          } else {
-                                            _rangeEnd = index;
-                                          }
-                                        });
-                                      } else {
-                                        setState(() {
-                                          _selectedCueIndex = isSelected ? null : index;
-                                        });
-                                      }
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: context.rem(0.875),
-                                        vertical: context.rem(isLandscapeMobile ? AppRem.snug : AppRem.sm),
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Colors.white.withValues(alpha: 0.04),
-                                          ),
-                                          left: isCurrentFocusedMatch
-                                              ? const BorderSide(
-                                                  color: Color(0xFFFFC107),
-                                                  width: 3, // px: a hairline, not a layout size
-                                                )
-                                              : isActive
-                                                  ? BorderSide(
-                                                      color: PlayerTheme.accent,
-                                                      width: 3, // px: a hairline, not a layout size
-                                                    )
-                                                  : BorderSide.none,
+                                  child: FocusFill(
+                                    radius: 999, // px: fully round, not a layout size
+                                    child: InkWell(
+                                      onTap: () {
+                                        if (_sectionMode) {
+                                          setState(() {
+                                            if (_rangeStart == null || _rangeEnd != null) {
+                                              _rangeStart = index;
+                                              _rangeEnd = null;
+                                            } else {
+                                              _rangeEnd = index;
+                                            }
+                                          });
+                                        } else {
+                                          setState(() {
+                                            _selectedCueIndex = isSelected ? null : index;
+                                          });
+                                        }
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: context.rem(0.875),
+                                          vertical: context.rem(isLandscapeMobile ? AppRem.snug : AppRem.sm),
                                         ),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          // Time label
-                                          SizedBox(
-                                            width: context.rem(2.75),
-                                            child: Text(
-                                              SubtitleParser.formatDisplayTime(cue.start),
-                                              style: TextStyle(
-                                                color: isActive ? PlayerTheme.accent : PlayerTheme.inkSubtle,
-                                                fontSize: isLandscapeMobile ? AppType.microPlus : AppType.tiny,
-                                                fontWeight: isActive ? FontWeight.w700 : FontWeight.normal,
-                                                fontFeatures: const [FontFeature.tabularFigures()],
-                                              ),
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: Colors.white.withValues(alpha: 0.04),
                                             ),
+                                            left: isCurrentFocusedMatch
+                                                ? const BorderSide(
+                                                    color: Color(0xFFFFC107),
+                                                    width: 3, // px: a hairline, not a layout size
+                                                  )
+                                                : isActive
+                                                    ? BorderSide(
+                                                        color: PlayerTheme.accent,
+                                                        width: 3, // px: a hairline, not a layout size
+                                                      )
+                                                    : BorderSide.none,
                                           ),
-                                          SizedBox(width: context.rem(AppRem.snug)),
-
-                                          // Dialogue text
-                                          Expanded(
-                                            child: _buildHighlightedText(
-                                              cue.text,
-                                              _searchQuery,
-                                              isActive,
-                                              fontSize: isLandscapeMobile ? AppType.caption : AppType.captionPlus,
-                                            ),
-                                          ),
-
-                                          SizedBox(width: context.rem(AppRem.snug)),
-
-                                          // Right badge
-                                          if (pointNum != null)
-                                            Container(
-                                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
-                                              decoration: BoxDecoration(
-                                                color: PlayerTheme.accent,
-                                                borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
-                                              ),
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            // Time label
+                                            SizedBox(
+                                              width: context.rem(2.75),
                                               child: Text(
-                                                'P$pointNum',
+                                                SubtitleParser.formatDisplayTime(cue.start),
                                                 style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: TvType.scale(AppType.nano),
-                                                  fontWeight: FontWeight.bold,
+                                                  color: isActive ? PlayerTheme.accent : PlayerTheme.inkSubtle,
+                                                  fontSize: isLandscapeMobile ? AppType.microPlus : AppType.tiny,
+                                                  fontWeight: isActive ? FontWeight.w700 : FontWeight.normal,
+                                                  fontFeatures: const [FontFeature.tabularFigures()],
                                                 ),
                                               ),
-                                            )
-                                          else if (isActive)
-                                            Container(
-                                              padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
-                                              decoration: BoxDecoration(
-                                                color: PlayerTheme.accent,
-                                                borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
-                                              ),
-                                              child: Text(
-                                                context.l10n.syncNowBadge,
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: TvType.scale(AppType.pico),
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: 0.5,
-                                                ),
-                                              ),
-                                            )
-                                          else if (inSegment)
-                                            Icon(
-                                              Icons.check_rounded,
-                                              color: PlayerTheme.accent,
-                                              size: context.rem(0.9375),
                                             ),
-                                        ],
+                                            SizedBox(width: context.rem(AppRem.snug)),
+
+                                            // Dialogue text
+                                            Expanded(
+                                              child: _buildHighlightedText(
+                                                cue.text,
+                                                _searchQuery,
+                                                isActive,
+                                                fontSize: isLandscapeMobile ? AppType.caption : AppType.captionPlus,
+                                              ),
+                                            ),
+
+                                            SizedBox(width: context.rem(AppRem.snug)),
+
+                                            // Right badge
+                                            if (pointNum != null)
+                                              Container(
+                                                padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
+                                                decoration: BoxDecoration(
+                                                  color: PlayerTheme.accent,
+                                                  borderRadius: BorderRadius.circular(999), // px: a hairline, not a layout size
+                                                ),
+                                                child: Text(
+                                                  'P$pointNum',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: TvType.scale(AppType.nano),
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              )
+                                            else if (isActive)
+                                              Container(
+                                                padding: EdgeInsets.symmetric(horizontal: context.rem(0.3125), vertical: context.rem(0.0938)),
+                                                decoration: BoxDecoration(
+                                                  color: PlayerTheme.accent,
+                                                  borderRadius: BorderRadius.circular(context.rem(AppRem.xs)),
+                                                ),
+                                                child: Text(
+                                                  context.l10n.syncNowBadge,
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: TvType.scale(AppType.pico),
+                                                    fontWeight: FontWeight.w800,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                ),
+                                              )
+                                            else if (inSegment)
+                                              Icon(
+                                                Icons.check_rounded,
+                                                color: PlayerTheme.accent,
+                                                size: context.rem(0.9375),
+                                              ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1032,18 +1045,21 @@ class _NudgeButton extends StatelessWidget {
     return Material(
       color: Colors.white.withValues(alpha: 0.06),
       borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xs)),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: PlayerTheme.inkMuted,
-              fontSize: AppType.tiny,
-              fontWeight: FontWeight.w600,
-              fontFeatures: [FontFeature.tabularFigures()],
+      child: FocusFill(
+        radius: context.rem(AppRem.snug),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(context.rem(AppRem.snug)),
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.sm), vertical: context.rem(AppRem.xs)),
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: PlayerTheme.inkMuted,
+                fontSize: AppType.tiny,
+                fontWeight: FontWeight.w600,
+                fontFeatures: [FontFeature.tabularFigures()],
+              ),
             ),
           ),
         ),

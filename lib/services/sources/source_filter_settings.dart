@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/subtitle/subtitle_model.dart';
+import '../locale/system_language.dart';
 
 /// The audio-language filter options, in the order they are offered.
 ///
@@ -76,6 +77,11 @@ String? preferredAudioKeyForTrackLanguage(String? rawLanguage) {
   return _preferredIsoToKey[iso];
 }
 
+/// The audio-language key for the viewer's own language (device language, or
+/// the app language when one was chosen), or null when it is not one the
+/// source detector can see -- a rare language, where nothing can be preferred.
+String? get systemAudioKey => _preferredIsoToKey[SystemLanguage.code];
+
 /// The label for one audio-language [key], in the app's language.
 ///
 /// A key with no row falls back to the raw key rather than throwing: the
@@ -141,6 +147,23 @@ abstract final class SourceFilterSettings {
   /// list's own sort already covers "best first".
   static final ValueNotifier<List<String>> qualities =
       ValueNotifier<List<String>>(<String>[]);
+
+  /// The languages to *prefer*, best first: the viewer's own list when they
+  /// made one, otherwise their device language.
+  ///
+  /// This is a preference, never a filter. [audioLanguages] is what hides
+  /// sources, and it stays empty ("show everything") until someone picks a
+  /// language; hiding every release without a dub in the device language would
+  /// leave a rare-language viewer with an empty list. A streaming app plays in
+  /// the device language when it has it and falls back to the original when it
+  /// does not, and so does this: the source list ranks matching releases
+  /// first, and a file with several audio tracks opens on the matching one.
+  static List<String> effectiveAudioRank() {
+    final chosen = audioLanguages.value;
+    if (chosen.isNotEmpty) return chosen;
+    final system = systemAudioKey;
+    return system == null ? const <String>[] : <String>[system];
+  }
 
   /// Loads the saved filters. A stored key this build no longer knows is
   /// ignored rather than applied, so an unknown value can't leave the list
@@ -306,11 +329,16 @@ abstract final class SourceFilterSettings {
 /// the highest-priority language wins, so `[Spanish, English]` on a file with
 /// English then Spanish picks Spanish, not the first track matching anything.
 ///
-/// Returns null when the ranking is empty -- the setting is opt-in, and an
-/// empty list means "never override the file" -- or when no track carries a
-/// ranked language, in which case the muxer's default is the honest answer.
+/// The ranking is the viewer's list, or their device language when they made
+/// none (see [SourceFilterSettings.effectiveAudioRank]). It used to be opt-in,
+/// so a file whose default track was the original opened in the original even
+/// on a phone set to a language the file also carried.
+///
+/// Returns null when there is no ranking -- a device language the detector
+/// cannot see -- or when no track carries a ranked language, in which case
+/// the muxer's default is the honest answer.
 int? preferredAudioTrackIndex(List<String?> trackLanguages) {
-  final rank = SourceFilterSettings.audioLanguages.value;
+  final rank = SourceFilterSettings.effectiveAudioRank();
   if (rank.isEmpty) return null;
   for (final wanted in rank) {
     for (var i = 0; i < trackLanguages.length; i++) {

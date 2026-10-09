@@ -8,6 +8,7 @@ import '../../services/collections/media_collections_service.dart';
 import '../../services/theme/app_colors.dart';
 import '../../utils/navigation/adaptive_sheet.dart';
 import '../../services/app_units.dart';
+import '../common/focus_fill.dart';
 
 /// Picks which collections a title belongs to.
 ///
@@ -152,26 +153,29 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
     if (!_creating) {
       return Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            setState(() => _creating = true);
-            _nameFocus.requestFocus();
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
-            child: Row(
-              children: [
-                Icon(Icons.add_rounded, color: AppColors.accent, size: context.rem(AppRem.icon)),
-                SizedBox(width: context.rem(AppRem.ms)),
-                Text(
-                  context.l10n.libraryNewCollection,
-                  style: TextStyle(
-                    color: AppColors.accent,
-                    fontSize: AppType.body,
-                    fontWeight: FontWeight.w600,
+        child: FocusFill(
+          radius: 0,
+          child: InkWell(
+            onTap: () {
+              setState(() => _creating = true);
+              _nameFocus.requestFocus();
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
+              child: Row(
+                children: [
+                  Icon(Icons.add_rounded, color: AppColors.accent, size: context.rem(AppRem.icon)),
+                  SizedBox(width: context.rem(AppRem.ms)),
+                  Text(
+                    context.l10n.libraryNewCollection,
+                    style: TextStyle(
+                      color: AppColors.accent,
+                      fontSize: AppType.body,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -220,40 +224,43 @@ class _CollectionPickerSheetState extends State<CollectionPickerSheet> {
     final inIt = collection.contains(widget.item);
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          if (inIt) {
-            MediaCollectionsService.removeItem(collection.id, widget.item);
-          } else {
-            MediaCollectionsService.addItem(collection.id, widget.item);
-          }
-        },
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
-          child: Row(
-            children: [
-              Icon(
-                inIt
-                    ? Icons.check_box_rounded
-                    : Icons.check_box_outline_blank_rounded,
-                color: inIt ? AppColors.accent : AppColors.inkMuted,
-                size: context.rem(AppRem.iconMd),
-              ),
-              SizedBox(width: context.rem(AppRem.ms)),
-              Expanded(
-                child: Text(
-                  collection.name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+      child: FocusFill(
+        radius: 0,
+        child: InkWell(
+          onTap: () {
+            if (inIt) {
+              MediaCollectionsService.removeItem(collection.id, widget.item);
+            } else {
+              MediaCollectionsService.addItem(collection.id, widget.item);
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.rem(AppRem.md), vertical: context.rem(AppRem.ms)),
+            child: Row(
+              children: [
+                Icon(
+                  inIt
+                      ? Icons.check_box_rounded
+                      : Icons.check_box_outline_blank_rounded,
+                  color: inIt ? AppColors.accent : AppColors.inkMuted,
+                  size: context.rem(AppRem.iconMd),
                 ),
-              ),
-              SizedBox(width: context.rem(AppRem.sm)),
-              Text(
-                collection.count == 1 ? '1 title' : '${collection.count} titles',
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.caption),
-              ),
-            ],
+                SizedBox(width: context.rem(AppRem.ms)),
+                Expanded(
+                  child: Text(
+                    collection.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+                  ),
+                ),
+                SizedBox(width: context.rem(AppRem.sm)),
+                Text(
+                  collection.count == 1 ? '1 title' : '${collection.count} titles',
+                  style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.caption),
+                ),
+              ],
+            ),
           ),
         ),
       ),

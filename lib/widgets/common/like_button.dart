@@ -3,16 +3,7 @@ import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
-
-/// The keys that activate a focused [LikeButton]. `final`, not `const`:
-/// `LogicalKeyboardKey` overrides `==`, and the analyzer rejects that inside
-/// a `const` set literal.
-final _activators = {
-  LogicalKeyboardKey.enter,
-  LogicalKeyboardKey.numpadEnter,
-  LogicalKeyboardKey.select,
-  LogicalKeyboardKey.gameButtonA,
-};
+import 'activate_keys.dart';
 
 /// Red used for every "liked" state in the app.
 const Color kLikedColor = Color(0xFFE50914);
@@ -83,7 +74,7 @@ class _LikeButtonState extends State<LikeButton> {
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (!_activators.contains(event.logicalKey)) return KeyEventResult.ignored;
+    if (!kActivateKeys.contains(event.logicalKey)) return KeyEventResult.ignored;
     widget.onTap();
     return KeyEventResult.handled;
   }

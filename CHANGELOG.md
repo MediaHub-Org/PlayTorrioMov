@@ -3,6 +3,109 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Added
+
+- **The loading screen says what is loading.** Above the filling logo it now
+  shows the title's own logo, or its name where there is no logo (anime has
+  none), and under it the episode ("S1 · E3 · In Perpetuity"). The player had
+  been handed the logo for a long time and never drew it, so a slow torrent
+  waited on a screen that did not name the movie. A movie shows the detail's
+  name, not the release's filename.
+
+### Changed
+
+- **On a TV, the details page starts on Play.** A remote used to land on the
+  genre tags first, because reading order puts anything higher on the screen
+  ahead of Play and, on a wide layout, the tags sit higher. The tags are gone
+  from the details page (the genres are still in the info line under the
+  title); they opened the Discover page for that genre and added a stop
+  before the video.
+- **The speed menu is a slider and nothing else.** The - and + buttons are
+  removed: Left/Right on a remote and a drag on a screen already step the
+  slider, so they were a third way to do it and one more thing to focus. On a
+  TV a hint line says what the remote does ("Left/Right to adjust · OK to
+  apply").
+- **Sliders in the player no longer wear a frame.** The speed and volume
+  sliders take focus when their menu opens, so the box that marked focus was
+  on screen by default. Focus is now a thicker track and a larger thumb, as
+  on the seek bar. Up and Down are no longer taken by these sliders, so a
+  remote can leave them for the menu's Back button.
+
+### Added (language and playback)
+
+- **Audio, subtitles and description follow the device language, like a
+  streaming app.** None of it hides anything:
+  - The source list opens on releases in your language, then MULTI releases,
+    then the rest (it used to open on whatever answered first).
+  - A file with several audio tracks opens on the one in your language when
+    it has it; the next episode runs the rule again, unless you chose a track
+    by hand. This was opt-in, behind a list you had to build.
+  - When the audio is not in your language and the file carries a subtitle in
+    it, that subtitle comes on by itself. Embedded only, nothing downloaded;
+    forced tracks are skipped. Settings -> Video Player -> Language has a
+    switch.
+  - The synopsis is TMDB's in your language, in every language TMDB has (it
+    was the four the app is translated into). It also asked for English when
+    the interface was left on the device default, whatever the device said.
+- **Sources are ranked for your connection.** After language, a release whose
+  bitrate is known to be above what the connection carries goes behind the
+  ones that fit; then the quality tier, then seeders. The connection's ceiling
+  is learned only from stalls, so a fast link is never capped; it lifts again
+  after two clean minutes. On a TV the default tier is 1080p, not 4K.
+- **Stats panel tells you why it is slow.** Needs / Delivering / Decoder /
+  Dropped frames, and one sentence: the connection cannot carry this source, or
+  the device cannot decode it.
+- **"Playback keeps pausing" with an "Other sources" action**, after three
+  stalls in three minutes.
+
+### Changed (language and playback)
+
+- **Fewer, longer pauses instead of a stutter.** mpv resumed after one second
+  of cushion, ran dry and stopped again. It now waits a quarter of the
+  read-ahead (2 to 10 seconds, by buffer preset). Live channels keep one
+  second.
+- **A short jump back comes from the cache.** The rewind cache was a flat
+  50 MB, under seven seconds of a 4K remux; it is now half the forward cache
+  (50 to 250 MB).
+- **Faster first frame on a slow link.** Stream probing read up to 32 MB and
+  20 seconds of media before starting; it is 16 MB and 6 seconds. An HLS
+  source opens on the highest rendition the connection has been seen to carry,
+  not always the highest. None of the playback figures is measured on a device.
+- Housekeeping: the 17 private copies of the keys that press a control are one
+  set, the logo-or-title block is one widget, and `withOpacity` is
+  `withValues` (28 calls).
+
+### Fixed
+
+- **TV focus audit: rows and pills that showed nothing under a remote.** An
+  `InkWell` over an opaque container hides its own focus and hover, so 38 rows,
+  sheet options, cards and buttons (the sources and episodes panels, the cast
+  and subtitle-style sheets, collections, Live TV, the video settings cards, the
+  nav rail) showed no focus; each is now wrapped in `FocusFill`, which also
+  answers a mouse (a light wash) and a press (a stronger one). Seven sort and
+  catalog pills built on `PopupMenuButton` (Discover, Catalog, Library, Live TV
+  sources) get the soft wash `FilterDropdown` already had. A source scan
+  (`test/tv_focus_cues_test.dart`) keeps a bare `InkWell` from coming back.
+  Not confirmed on a TV.
+- **"Sources" filter pills lost focus.** The add-on pill is in the row only
+  once the sources span more than one add-on, which is not known until the
+  search is part-way through; a pill appearing ahead of the focused one rebuilt
+  it as its neighbor and focus fell off the row. The pills now keep their own
+  identity, and so do the source cards, which are re-sorted as add-ons answer.
+- **The filter menus opened with focus still on the pill underneath.** A dialog
+  route hands focus to nothing in it, so the first arrow went to the page behind
+  the menu. A menu now takes focus on open, and a single-choice menu starts on
+  the selected row.
+- **On a TV, focus disappeared after any pointer event.** Flutter stops drawing
+  focus the moment it sees a pointer (a remote app, an air mouse), and a TV has
+  nothing to bring it back. The TV pins focus drawing on.
+- **On a TV the speed menu closed after one press.** Every arrow was reported
+  to the menu as a finished drag, so going from 1x to 1.5x lost the menu at
+  1.25x. It now stays open while Left/Right step the speed and closes on OK
+  or Back. Not confirmed on a TV.
+
 ## [1.9.7+55] - 2026-10-08
 
 ### Added
