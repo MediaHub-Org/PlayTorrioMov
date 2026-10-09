@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/l10n.dart';
 import '../../models/stream/stream_model.dart';
+import '../../services/debrid/debrid_cache_service.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
 
@@ -74,14 +76,36 @@ class SourceBadge extends StatelessWidget {
 /// feedback was that the rows carry too many tags, that was a pill per row
 /// spent on nothing. The Watch Sources rows dropped them first; the
 /// in-player panel and the anime episode sheet now match.
+///
+/// A torrent the viewer's debrid service already has also says so: it starts
+/// in a second or two whatever its seed count, which makes it the one fact
+/// that outranks the seed pill.
 List<Widget> sourceDeliveryBadges(StreamSource source) {
   final seeders = source.isMagnet ? source.seeders : null;
-  if (seeders == null) return const [];
+  final cached =
+      source.isMagnet &&
+      DebridCacheService.instance.isCached(source.infoHash) == true;
   return [
-    SourceBadge(
-      '$seeders',
-      seedHealthColor(seeders),
-      icon: Icons.arrow_upward_rounded,
-    ),
+    if (cached) const CachedSourceBadge(),
+    if (seeders != null)
+      SourceBadge(
+        '$seeders',
+        seedHealthColor(seeders),
+        icon: Icons.arrow_upward_rounded,
+      ),
   ];
+}
+
+/// "Cached": the viewer's debrid service has this torrent already.
+class CachedSourceBadge extends StatelessWidget {
+  const CachedSourceBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SourceBadge(
+      context.l10n.sourceCachedBadge,
+      _kHealthy,
+      icon: Icons.bolt_rounded,
+    );
+  }
 }

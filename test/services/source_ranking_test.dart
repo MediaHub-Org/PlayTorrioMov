@@ -146,4 +146,58 @@ void main() {
       expect(titles(ranked).first, 'Movie 720p');
     });
   });
+
+  group('already on the debrid service', () {
+    const hashA = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+    const hashB = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+
+    StreamSource torrent(String title, String hash) =>
+        StreamSource(title: title, addonName: 'test', infoHash: hash);
+
+    test('a cached release leads among equals in language', () {
+      final cached = torrent('Movie 1080p Spanish', hashB);
+      final fetched = torrent('Movie 1080p Spanish 4K', hashA);
+      final ranked = rankSources(
+        [fetched, cached],
+        tier: VideoQualityTier.best,
+        cachedHashes: {hashB},
+      );
+      expect(ranked.first, cached,
+          reason: 'it starts in a second; the other must be fetched first');
+    });
+
+    test('language still comes before it', () {
+      final cachedEnglish = torrent('Movie 1080p English', hashA);
+      final fetchedSpanish = torrent('Movie 1080p Spanish', hashB);
+      final ranked = rankSources(
+        [cachedEnglish, fetchedSpanish],
+        tier: VideoQualityTier.best,
+        preferredAudio: const ['spanish'],
+        cachedHashes: {hashA},
+      );
+      expect(ranked.first, fetchedSpanish);
+    });
+
+    test('no debrid, or nothing cached, leaves the order alone', () {
+      final one = torrent('Movie 2160p', hashA);
+      final two = torrent('Movie 1080p', hashB);
+      for (final cached in [null, <String>{}]) {
+        expect(
+          rankSources([two, one], tier: VideoQualityTier.best, cachedHashes: cached),
+          [one, two],
+        );
+      }
+    });
+
+    test('a hash is matched whatever its case', () {
+      final shouty = torrent('Movie 720p', hashA.toUpperCase());
+      final other = torrent('Movie 1080p', hashB);
+      final ranked = rankSources(
+        [other, shouty],
+        tier: VideoQualityTier.best,
+        cachedHashes: {hashA},
+      );
+      expect(ranked.first, shouty);
+    });
+  });
 }

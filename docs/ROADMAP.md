@@ -37,6 +37,19 @@ Device checks; none of these can be settled from the code.
   and Catalog sort pills, and the video settings cards. Every row should show a
   wash under the remote, and a mouse should light it lighter. After touching the
   screen with a mouse or a remote app, the focus cue should stay.
+- **Debrid with a real account.** Set up TorBox (or Premiumize, AllDebrid or
+  Debrid-Link), switch "use debrid for streams" on and open a popular title:
+  releases the service has should wear a green "Cached" badge and lead their
+  language group, and one of them should start in a second or two. If no badge
+  ever appears with a service that should have one, run it once with a
+  debug build and read the `[DebridCache]` lines: they say whether the lookup
+  was refused or came back in a shape this does not recognize. Real-Debrid has
+  no lookup and shows none, by design. The card on the sources page should
+  show for someone without debrid, go away on "Not now" for good, and not
+  show once debrid is on.
+- **Skipping around.** Hold the right arrow on a network stream: the bar
+  should move at once and the picture should jump every so often, not freeze
+  until the key is released. Try it on a torrent and on a debrid link.
 - **Language and playback on a real connection.** On a device set to Spanish
   (or any of the thirteen languages the detector knows): the source list should
   open on releases in that language; a file with several audio tracks should
@@ -67,7 +80,7 @@ has to be measured first.
 | Plan                                                | Status                                                                                                                       |
 |:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
 | [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Step 1 (mechanical dedupe) is done; next is the 37 deprecations it uncovered, then one press/hover/focus primitive, the big pages, and the player last. |
-| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Done: the diagnosis in the stats panel, release ranking by language/weight/tier/seeders, the link ceiling learned from stalls, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache and faster probing. **Open: Step 0.2 (one TV session) and Step 2 (debrid cached badge, after checking each provider's current API).** True stream adaptation is possible for HLS only. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Done: diagnosis in the stats panel (with "Copy diagnostics"), release ranking by language / already-on-debrid / weight / tier / seeders, the link ceiling learned from stalls, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, and burst seeks as one seek. Debrid has a Cached badge, cached-first ranking and a one-time explanation, **unverified against a live account**. **Open: Step 0.2 (one TV session).** True stream adaptation is possible for HLS only; a server of our own is not planned. |
 
 ---
 

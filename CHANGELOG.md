@@ -106,6 +106,36 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   1.25x. It now stays open while Left/Right step the speed and closes on OK
   or Back. Not confirmed on a TV.
 
+## [Unreleased]
+
+### Added
+
+- **Debrid shows what it already has.** A torrent the viewer's debrid service
+  has cached wears a green "Cached" badge in every source list and leads its
+  language group when debrid is on for streams, because it starts in a second
+  or two as a plain file and no longer depends on its seeders. TorBox,
+  Premiumize, AllDebrid and Debrid-Link are asked in one request per forty
+  sources; Real-Debrid has no lookup (it switched it off in November 2024 and, as
+  far as is known, has not restored it) and its settings say so. **Not tried with a real account:** a lookup that fails
+  or answers in a shape the app does not recognize marks nothing, is logged as
+  `[DebridCache]`, and is left alone for ten minutes.
+- **One explanation of debrid, once.** The sources page shows a card when
+  torrents are listed and debrid is not on: torrents depend on seeders, a
+  debrid service avoids that, it is optional and paid. "Set up debrid" opens
+  the settings; "Not now" is remembered and the card never returns.
+- **Copy diagnostics** in the stats panel copies its figures (source, type,
+  host, needs, delivering, decoder, dropped frames, buffered, verdict) as text,
+  so "slow on my TV" can be sent as numbers.
+
+### Changed
+
+- **Skipping around is gentler on a network stream.** Holding an arrow or
+  tapping J/L repeatedly used to ask the player to jump up to thirty times a
+  second, each jump discarding the cache and requesting a different range.
+  The bar moves at once, and the player is asked once the presses pause (at
+  most every 0.9 s during a hold). A file on disk still seeks on every press.
+  A jump into an unbuffered part of a torrent still waits for the swarm.
+
 ## [1.9.7+55] - 2026-10-08
 
 ### Added

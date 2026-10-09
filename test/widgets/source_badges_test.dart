@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/models/stream/stream_model.dart';
+import 'package:playtorriomov/services/debrid/debrid_cache_service.dart';
+import 'package:playtorriomov/l10n/app_localizations.dart';
 import 'package:playtorriomov/widgets/common/source_badges.dart';
 
 StreamSource http({String? title}) => StreamSource(
@@ -125,6 +127,44 @@ void main() {
       await tester.pumpWidget(wrap(sourceDeliveryBadges(source)));
 
       expect(find.text('12'), findsOneWidget);
+    });
+  });
+
+  group('a torrent the debrid service already has', () {
+    const hash = 'dddddddddddddddddddddddddddddddddddddddd';
+    Widget app(List<Widget> badges) => MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Scaffold(body: Row(children: badges)),
+    );
+
+    tearDown(() => DebridCacheService.instance.clear());
+
+    testWidgets('says so, beside its seed count', (tester) async {
+      DebridCacheService.instance.debugMarkCached([hash]);
+
+      await tester.pumpWidget(app(sourceDeliveryBadges(
+        torrent(title: 'Movie 1080p 👤 12 seeders', infoHash: hash),
+      )));
+
+      expect(find.text('Cached'), findsOneWidget);
+      expect(find.text('12'), findsOneWidget);
+    });
+
+    testWidgets('says nothing about one it does not know', (tester) async {
+      await tester.pumpWidget(app(sourceDeliveryBadges(
+        torrent(title: 'Movie 1080p 👤 12 seeders', infoHash: hash),
+      )));
+
+      expect(find.text('Cached'), findsNothing);
+    });
+
+    testWidgets('a direct link is never marked', (tester) async {
+      DebridCacheService.instance.debugMarkCached([hash]);
+
+      await tester.pumpWidget(app(sourceDeliveryBadges(http())));
+
+      expect(find.text('Cached'), findsNothing);
     });
   });
 }

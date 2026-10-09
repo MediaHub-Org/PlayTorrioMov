@@ -13,14 +13,20 @@ import '../player/video_quality_preference.dart';
 ///    names a preferred language comes before one tagged MULTI -- which
 ///    plausibly carries it, but does not say -- and that before the rest. It
 ///    orders; it never hides.
-/// 2. **Weight.** A release whose bitrate is known to be above [maxKbps] goes
+/// 2. **Already on the debrid service.** [cachedHashes] is the set the viewer's
+///    provider listed as cached (null when debrid is not in use). A cached
+///    release starts in a second or two and does not depend on its swarm, so
+///    among releases the viewer would accept in their language it leads. It sits
+///    *after* language on purpose: a Spanish release that has to be fetched
+///    first is still the Spanish release.
+/// 3. **Weight.** A release whose bitrate is known to be above [maxKbps] goes
 ///    behind the ones that fit. Unknown bitrates are not penalized: the title
 ///    often just does not say.
-/// 3. **Quality tier**, closest to the viewer's setting, higher quality
+/// 4. **Quality tier**, closest to the viewer's setting, higher quality
 ///    winning a tie (see [qualityDistanceComparator]).
-/// 4. **Seeders**, more first. Torrents with a hundred seeds start sooner and
+/// 5. **Seeders**, more first. Torrents with a hundred seeds start sooner and
 ///    stall less than the same release with three.
-/// 5. Arrival order, so equal sources do not shuffle between rebuilds.
+/// 6. Arrival order, so equal sources do not shuffle between rebuilds.
 List<StreamSource> rankSources(
   List<StreamSource> sources, {
   required VideoQualityTier tier,
@@ -28,6 +34,7 @@ List<StreamSource> rankSources(
   String? mediaTitle,
   int? maxKbps,
   int? runtimeMinutes,
+  Set<String>? cachedHashes,
 }) {
   final tierOrder = qualityDistanceComparator(tier);
 
@@ -42,6 +49,12 @@ List<StreamSource> rankSources(
         : preferredAudio.length + 1;
   }
 
+  int cachedScore(StreamSource s) {
+    if (cachedHashes == null || cachedHashes.isEmpty) return 0;
+    final hash = s.infoHash?.toLowerCase();
+    return hash != null && cachedHashes.contains(hash) ? 0 : 1;
+  }
+
   int weightScore(StreamSource s) {
     if (maxKbps == null) return 0;
     final kbps = s.estimatedBitrateKbps(runtimeMinutes);
@@ -52,11 +65,18 @@ List<StreamSource> rankSources(
   // every comparison would do it n log n times.
   final entries = <_Ranked>[
     for (var i = 0; i < sources.length; i++)
-      _Ranked(sources[i], i, audioScore(sources[i]), weightScore(sources[i])),
+      _Ranked(
+        sources[i],
+        i,
+        audioScore(sources[i]),
+        cachedScore(sources[i]),
+        weightScore(sources[i]),
+      ),
   ];
 
   entries.sort((a, b) {
     if (a.audio != b.audio) return a.audio.compareTo(b.audio);
+    if (a.cached != b.cached) return a.cached.compareTo(b.cached);
     if (a.weight != b.weight) return a.weight.compareTo(b.weight);
     final byTier = tierOrder(a.source, b.source);
     if (byTier != 0) return byTier;
@@ -74,7 +94,8 @@ class _Ranked {
   final StreamSource source;
   final int index;
   final int audio;
+  final int cached;
   final int weight;
 
-  const _Ranked(this.source, this.index, this.audio, this.weight);
+  const _Ranked(this.source, this.index, this.audio, this.cached, this.weight);
 }

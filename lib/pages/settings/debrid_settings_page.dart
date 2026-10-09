@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
+import '../../services/debrid/debrid_cache_service.dart';
 import '../../services/debrid/debrid_service.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
@@ -481,6 +482,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                     if (val != null) {
                       setState(() => _selectedService = val);
                       await _debrid.saveSelectedService(val);
+                      // What one service has cached says nothing of another.
+                      DebridCacheService.instance.clear();
                       if (val != 'None') {
                         final hasKey = await _debrid.hasKeyForService(val);
                         if (!hasKey) {
@@ -498,6 +501,19 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                     }
                   },
                 ),
+                // Said where the choice is made, so nobody picks it expecting
+                // the Cached badge and wonders why there is none.
+                if (_selectedService == 'Real-Debrid') ...[
+                  SizedBox(height: context.rem(AppRem.sm)),
+                  Text(
+                    l10n.debridNoCacheLookupNote,
+                    style: TextStyle(
+                      color: AppColors.inkSubtle,
+                      fontSize: AppType.caption,
+                      height: 1.35, // ratio: a line height, not a size
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

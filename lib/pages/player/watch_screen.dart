@@ -24,6 +24,10 @@ import '../../services/tv_mode_service.dart';
 import '../../services/player/video_quality_preference.dart';
 import '../../services/player/link_speed_memory.dart';
 import '../../services/sources/source_ranking.dart';
+import '../../services/debrid/debrid_cache_service.dart';
+import '../../services/debrid/debrid_service.dart';
+import '../../widgets/sources/debrid_hint_card.dart';
+import '../settings/debrid_settings_page.dart';
 import '../../services/sources/source_filter_settings.dart';
 import '../../services/stream/stream_service.dart';
 import '../../services/stream/stream_bitrate_resolver.dart';
@@ -130,6 +134,8 @@ class _WatchScreenState extends State<WatchScreen>
     SourceFilterSettings.audioLanguages.addListener(_onSourceFilterChanged);
     SourceFilterSettings.qualities.addListener(_onSourceFilterChanged);
     VideoQualityPreference.tier.addListener(_onSourceFilterChanged);
+    DebridCacheService.instance.changes.addListener(_onSourceFilterChanged);
+    _loadDebridState();
     _loadStreams();
   }
 
@@ -138,11 +144,32 @@ class _WatchScreenState extends State<WatchScreen>
     SourceFilterSettings.audioLanguages.removeListener(_onSourceFilterChanged);
     SourceFilterSettings.qualities.removeListener(_onSourceFilterChanged);
     VideoQualityPreference.tier.removeListener(_onSourceFilterChanged);
+    DebridCacheService.instance.changes.removeListener(_onSourceFilterChanged);
     _sourceBatchTimer?.cancel();
     _animController.dispose();
     _sourcesScrollController.dispose();
     _mainScrollController.dispose();
     super.dispose();
+  }
+
+  /// Whether the viewer streams torrents through debrid. Cached-first ranking
+  /// follows it: a release the service already has only starts sooner if the
+  /// player is going to ask the service for it.
+  bool _debridActive = false;
+
+  Future<void> _loadDebridState() async {
+    final active = await DebridService().isDebridActiveForStreams();
+    if (mounted && active != _debridActive) {
+      setState(() => _debridActive = active);
+    }
+  }
+
+  Future<void> _openDebridSettings() async {
+    await pushPage(context, const DebridSettingsPage());
+    // Back from settings the answer may have changed, and so may the list.
+    DebridCacheService.instance.clear();
+    await _loadDebridState();
+    DebridCacheService.instance.prefetch(_sources.map((s) => s.infoHash));
   }
 
   Future<void> _loadStreams() async {
@@ -207,6 +234,9 @@ class _WatchScreenState extends State<WatchScreen>
       _sources.addAll(batch);
       _isLoadingSources = false;
     });
+    // Ask the viewer's debrid service which of these it already has. Not
+    // awaited: the list shows now and re-ranks when the answer arrives.
+    DebridCacheService.instance.prefetch(batch.map((s) => s.infoHash));
   }
 
   /// Called by the player's auto-next dialog. Pops the player and re-opens the
@@ -335,6 +365,9 @@ class _WatchScreenState extends State<WatchScreen>
         mediaTitle: widget.detail.name,
         maxKbps: LinkSpeedMemory.sustainableKbps,
         runtimeMinutes: int.tryParse(widget.detail.runtime ?? ''),
+        cachedHashes: _debridActive
+            ? DebridCacheService.instance.cachedHashes
+            : null,
       );
     }
     return list;
@@ -566,6 +599,10 @@ class _WatchScreenState extends State<WatchScreen>
                     if (_sources.isNotEmpty) ...[
                       SizedBox(height: context.rem(0.625)),
                       _buildFilterPillRail(),
+                    ],
+                    if (_sources.any((s) => s.isMagnet)) ...[
+                      SizedBox(height: context.rem(AppRem.sm)),
+                      DebridHintCard(onSetUp: _openDebridSettings),
                     ],
                     const SizedBox(height: _S.md),
                   ],
@@ -1086,6 +1123,10 @@ class _WatchScreenState extends State<WatchScreen>
         if (_sources.isNotEmpty) ...[
           SizedBox(height: context.rem(0.625)),
           _buildFilterPillRail(),
+        ],
+        if (_sources.any((s) => s.isMagnet)) ...[
+          SizedBox(height: context.rem(AppRem.sm)),
+          DebridHintCard(onSetUp: _openDebridSettings),
         ],
         const SizedBox(height: _S.sm),
 
@@ -1827,6 +1868,11 @@ class _SourceCardState extends State<_SourceCard> {
     // count (its health, the signal that separates two otherwise identical
     // 1080p sources), the size and the audio language.
     final seeders = s.isMagnet ? s.seeders : null;
+    // On the viewer's debrid service already: it starts in a second or two and
+    // its seeders no longer matter.
+    if (s.isMagnet && DebridCacheService.instance.isCached(s.infoHash) == true) {
+      badges.add(_badge(context.l10n.sourceCachedBadge, const Color(0xFF51CF66)));
+    }
     if (s.isHDR) badges.add(_badge('HDR', const Color(0xFFFFD43B)));
     if (seeders != null) {
       badges.add(
