@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
 import '../../models/stream/stream_model.dart';
@@ -140,6 +141,42 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
       _droppedHistory.add(_dropped);
       if (_droppedHistory.length > 10) _droppedHistory.removeAt(0);
     });
+  }
+
+  /// The panel's figures as plain text, for pasting into a bug report or a
+  /// message. "Slow on my TV" is something nobody can act on; these lines are.
+  String _report(BuildContext context) {
+    final l10n = context.l10n;
+    final need = _measuredNeedKbps ?? widget.sourceBitrateKbps;
+    String bitrate(int? kbps) =>
+        kbps == null ? '-' : StreamSource.formatBitrate(kbps);
+    final buffered = widget.buffered?.value;
+    final diagnosis = diagnose(
+      needKbps: need,
+      haveKbps: _haveKbps,
+      bufferedSeconds: buffered?.inSeconds.toDouble(),
+      droppedRecently: _droppedRecently,
+    );
+    return [
+      '${l10n.playerStatsSource}: ${widget.sourceLabel}',
+      '${l10n.playerStatsType}: ${widget.streamKind}',
+      if (widget.host != null) '${l10n.playerStatsHost}: ${widget.host}',
+      '${l10n.playerStatsNeeds}: ${bitrate(need)}',
+      '${l10n.playerStatsDelivering}: ${bitrate(_haveKbps)}',
+      '${l10n.playerStatsDecoder}: ${_decoder ?? '-'}',
+      '${l10n.playerStatsDropped}: $_dropped',
+      '${l10n.playerStatsBuffered}: ${buffered == null ? '-' : '${buffered.inSeconds} s'}',
+      'Verdict: ${diagnosis.verdict.name}',
+    ].join('\n');
+  }
+
+  Future<void> _copyReport(BuildContext context) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final copied = context.l10n.playerStatsReportCopied;
+    await Clipboard.setData(ClipboardData(text: _report(context)));
+    messenger?.showSnackBar(
+      SnackBar(content: Text(copied), duration: const Duration(seconds: 2)),
+    );
   }
 
   @override
@@ -283,6 +320,20 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
           if (widget.readProperty != null) ..._buildDiagnosis(context),
           if (hash != null && hash.isNotEmpty)
             _StatRow(label: l10n.playerStatsHash, value: hash),
+          if (widget.readProperty != null)
+            TextButton.icon(
+              onPressed: () => _copyReport(context),
+              icon: Icon(
+                Icons.copy_all_rounded,
+                size: context.rem(AppRem.iconSm),
+              ),
+              label: Text(l10n.playerStatsCopyReport),
+              style: TextButton.styleFrom(
+                foregroundColor: PlayerTheme.inkSubtle,
+                minimumSize: Size(0, context.rem(2.25)),
+                textStyle: const TextStyle(fontSize: AppType.caption),
+              ),
+            ),
           // The URL copier lives with the data it copies: the top bar kept
           // it beside download, where it squeezed the title for a clipboard
           // action used once per stream at most.

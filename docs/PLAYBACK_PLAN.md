@@ -18,12 +18,13 @@ adaptation is possible only for HLS sources, and is the smallest group.
 | Step | What | State |
 |:-----|:-----|:------|
 | 0.1 | Diagnosis in the stats panel | **Done.** Needs / Delivering / Decoder / Dropped frames, and a sentence naming the link or the decoder (`playback_diagnosis.dart`). Not tried on a device. |
-| 0.2 | One TV session with the panel open | **Open: needs a TV.** Everything marked "hypothesis" below waits on it. |
-| 1 | Release choice by device and link | **Done.** TV default tier is 1080p; the list ranks by language, then weight, then tier, then seeders (`source_ranking.dart`); the link ceiling is learned only from stalls (`link_speed_memory.dart`). |
-| 2 | Debrid: cached badge, prefer, guidance | **Open.** Needs each provider's current availability API checked first; nothing was built. |
+| 0.2 | One TV session with the panel open | **Open: needs a TV.** The panel now has a "Copy diagnostics" action, so the figures can be pasted as text. Everything marked "hypothesis" below waits on it. |
+| 1 | Release choice by device and link | **Done.** TV default tier is 1080p; the list ranks by language, then already-on-debrid, then weight, then tier, then seeders (`source_ranking.dart`); the link ceiling is learned only from stalls (`link_speed_memory.dart`). |
+| 2 | Debrid: cached badge, prefer, guidance | **Done, unverified against live accounts.** A "Cached" badge and cached-first ranking (`debrid_cache_service.dart`), a one-time card on the sources page explaining debrid, and a note in debrid settings when Real-Debrid is chosen. TorBox, Premiumize, AllDebrid and Debrid-Link are implemented against their documented lookups; Real-Debrid has none (it switched `instantAvailability` off in November 2024). The provider docs could not be fetched from the build environment, so the request and response shapes are from memory of those docs, read tolerantly: a surprise is "no badge", never a wrong one. **Needs one real account to confirm.** |
 | 3 | Offer a lighter source after stalls | **Done as an offer.** Three stalls in three minutes show "Playback keeps pausing" with an "Other sources" action (`playback_health.dart`). It does not switch by itself. |
 | 4 | Pipeline tuning | **Started, unmeasured.** Rebuffer cushion (`cache-pause-wait`), rewind cache and faster stream probing are in; each is reasoned, not measured. TV buffer presets and the disk cache wait for Step 0.2. |
 | 5 | HLS step-down | **Partly.** An HLS source opens on the highest rendition the link has been seen to carry instead of always the highest. The mid-stream step-down loop is not built. |
+| Seeking | Skipping around | **Done for bursts.** Held or repeated fixed-step seeks (arrows, J/L, double tap) are one seek when the presses pause, instead of thirty a second each throwing away the cache (`seek_coalescer.dart`). A jump to an unbuffered part of a *torrent* still waits for those pieces to exist in the swarm; no player setting changes that. |
 
 What changed, concretely, and what each is expected to do (none measured):
 

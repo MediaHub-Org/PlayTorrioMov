@@ -26,6 +26,7 @@ import '../../services/simkl/simkl_service.dart';
 import '../../services/player/player_settings.dart';
 import '../../services/locale/system_language.dart';
 import '../../services/player/playback_health.dart';
+import '../../services/player/seek_coalescer.dart';
 import '../../services/player/link_speed_memory.dart';
 import '../../services/sources/source_filter_settings.dart';
 
@@ -147,6 +148,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// holding up: what it delivers while the player is starved, whether a long
   /// stretch went fine, and whether the picture keeps stopping.
   Timer? _healthTimer;
+
+  /// Fixed-step seeks (the arrows, J/L, a double tap) gather here and reach
+  /// the player once the presses pause; see [SeekCoalescer].
+  late final SeekCoalescer _seeks = SeekCoalescer(
+    onSeek: (target) => _player.seek(target),
+  );
   late final PlaybackHealth _health = PlaybackHealth(
     onSlowLink: (kbps) => LinkSpeedMemory.recordStall(kbps),
     onSmooth: () => LinkSpeedMemory.recordSmooth(),
@@ -323,6 +330,10 @@ class _PlayerScreenState extends State<PlayerScreen>
         if (_awaitingFirstFrame && pos > Duration.zero && mounted) {
           setState(_endFirstFrameWait);
         }
+        // The bar already shows where the presses are heading; the player's
+        // own position is the old one until the seek is made, and writing it
+        // back would snap the bar to where the picture still is.
+        if (_seeks.isPending) return;
         _position = pos;
         _positionNotifier.value = pos;
         _onPlaybackTick(pos);
@@ -526,7 +537,10 @@ class _PlayerScreenState extends State<PlayerScreen>
       },
       onPlay: () => _player.play(),
       onPause: () => _player.pause(),
-      onSeek: (position) => _player.seek(position),
+      onSeek: (position) {
+        _seeks.cancel();
+        _player.seek(position);
+      },
       // See PlaybackCoordinator.activate's onShutdownDispose doc -- this
       // screen's own dispose() (which does the real, safe cleanup for the
       // ordinary close-this-screen path) never runs on a native window
@@ -2244,13 +2258,19 @@ class _PlayerScreenState extends State<PlayerScreen>
   }
 
   void _seekRelative(Duration offset) {
-    final cur = _player.state.position;
-    final dur = _player.state.duration;
-    final target = cur + offset;
-    final clamped = target < Duration.zero
+    // A file on disk seeks for free; a network stream throws its cache away
+    // on every seek, so a held arrow's thirty jumps a second become one.
+    _seeks.delay = _statsKind == 'File'
         ? Duration.zero
-        : (dur > Duration.zero && target > dur ? dur : target);
-    _player.seek(clamped);
+        : const Duration(milliseconds: 250);
+    final target = _seeks.nudge(
+      from: _player.state.position,
+      offset: offset,
+      duration: _player.state.duration,
+    );
+    // Show it now; the player catches up when the presses pause.
+    _position = target;
+    _positionNotifier.value = target;
     _flashSeek(offset.inSeconds);
     _startHideControlsTimer();
   }
@@ -2527,6 +2547,7 @@ class _PlayerScreenState extends State<PlayerScreen>
       s.cancel();
     }
     _healthTimer?.cancel();
+    _seeks.dispose();
     _progressSaveTimer?.cancel();
     _volumeHudTimer?.cancel();
     _audioHudTimer?.cancel();
@@ -3292,7 +3313,10 @@ class _PlayerScreenState extends State<PlayerScreen>
                     isSubtitlesActive:
                         _isSubtitleEnabled && _currentSubtitleVariant != null,
                     isPlaying: _isPlaying,
-                    onSeek: (pos) => _player.seek(pos),
+                    onSeek: (pos) {
+                      _seeks.cancel();
+                      _player.seek(pos);
+                    },
                     onVolumeChanged: (vol) => _applyVolume(vol),
                     onToggleMute: () => _toggleMute(),
                     onPlayPause: _togglePlayPause,

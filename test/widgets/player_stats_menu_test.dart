@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/stream/torrent_stream_service.dart';
 import 'package:playtorriomov/widgets/player/player_stats_menu.dart';
@@ -208,6 +209,55 @@ void main() {
 
       expect(find.text('Needs'), findsNothing);
       expect(find.text('Dropped frames'), findsNothing);
+    });
+
+    testWidgets('copies the figures as text for a bug report', (tester) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() => tester.binding.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null));
+
+      await pumpWith(
+        tester,
+        buffered: const Duration(seconds: 1),
+        properties: {
+          'cache-speed': '1125000',
+          'video-bitrate': '18000000',
+          'hwdec-current': 'no',
+          'frame-drop-count': '0',
+          'decoder-frame-drop-count': '12',
+        },
+      );
+
+      await tester.tap(find.text('Copy diagnostics'));
+      await tester.pump();
+
+      expect(copied, contains('Needs: 18.0 Mb/s'));
+      expect(copied, contains('Delivering: 9.0 Mb/s'));
+      expect(copied, contains('Decoder: no'));
+      expect(copied, contains('Dropped frames: 12'));
+      expect(copied, contains('Verdict: linkTooSlow'));
+      expect(find.text('Diagnostics copied'), findsOneWidget);
+    });
+
+    testWidgets('has nothing to copy without a way to read the player', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(const PlayerStatsMenu(
+        sourceLabel: 'x',
+        streamKind: 'HTTPS',
+      )));
+      await tester.pump();
+
+      expect(find.text('Copy diagnostics'), findsNothing);
     });
   });
 }
