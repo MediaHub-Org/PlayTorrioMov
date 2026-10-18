@@ -150,6 +150,7 @@ looks for:
 | `SIMKL_CLIENT_ID`                        | Simkl sign-in (the PIN flow needs no secret)                               |
 | `DROPBOX_APP_KEY`                        | Dropbox backup (PKCE public client: key only, no secret)                   |
 | `TMDB_API_KEY`                           | Cast photos and character names, so a fresh install has them with no setup |
+| `WYZIE_API_KEY`                          | Online subtitles from Wyzie, with a key of your own (the shared fallback in the source runs out daily) |
 
 The name says *contents*, not a path, because that is the mistake the old
 name invited: `ENV_FILE` reads like somewhere to put a filename. Every line

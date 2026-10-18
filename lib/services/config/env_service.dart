@@ -134,6 +134,16 @@ class EnvService {
     return get('DROPBOX_APP_KEY');
   }
 
+  // Wyzie subtitle API key (checks compile-time dart-define first, then
+  // runtime .env). The source carries a shared key as a fallback, but its
+  // daily quota is shared by every install; a builder's own key keeps online
+  // subtitles working when that quota runs out.
+  static String get wyzieApiKey {
+    const compileVal = String.fromEnvironment('WYZIE_API_KEY');
+    if (compileVal.isNotEmpty) return compileVal;
+    return get('WYZIE_API_KEY');
+  }
+
   // TMDB API key (checks compile-time dart-define first, then runtime .env).
   //
   // A release build carries this via the ENV_FILE repository secret, the

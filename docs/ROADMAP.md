@@ -29,6 +29,15 @@ Device checks; none of these can be settled from the code.
   fallback).
 - **The loading logo** with a torrent, a debrid link and a plain URL, and
   that it clears on the first frame.
+- **Dropbox and Simkl Connect, end to end.** Both credentials are in the
+  published build (checked in v1.9.7's `data/app.so`). Still needs one real
+  approval in the browser for each: Dropbox's pasted code, Simkl's PIN.
+- **Fullscreen white flash on Windows.** The hidden-window delay went from 50 ms
+  to 150 ms; not confirmed on a real decode-under-load case. If it still
+  flashes, say whether it happens going in, coming out, or both.
+- **Anime episode names.** Some episodes still show "EP N" with no title. The
+  fix needs the show and episode number, to check it against AniList's live
+  `streamingEpisodes` data.
 - **TV focus audit.** With a remote, go through: the Sources page (the four
   filter pills, then OK on each: the menu should open on the selected row and
   Back should return to the same pill; let the search run and watch that focus
@@ -106,7 +115,8 @@ has to be measured first.
 
 | What                                 | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 |:-------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Mega backup | Dropbox is built and configured (`DROPBOX_APP_KEY` set; settings card, auto-backup prefers it over WebDAV). Google Drive was built then removed in favor of Dropbox alone -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md)'s "Google Drive: built, then removed". Mega is still open (proprietary login, no mature Dart SDK). "Auto" is settled as "at app open". **Local dev only**: `DROPBOX_APP_KEY` lives in the gitignored root `.env`; public release builds still need it added to the `ENV_FILE`/`DOTENV` repo secret (append, don't overwrite -- it also carries TMDB/Trakt/Simkl) before a tagged build has working Dropbox |
+| Mega backup | Dropbox is built and configured (`DROPBOX_APP_KEY` set; settings card, auto-backup prefers it over WebDAV). Google Drive was built then removed in favor of Dropbox alone -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md)'s "Google Drive: built, then removed". Mega is still open (proprietary login, no mature Dart SDK). "Auto" is settled as "at app open". `DROPBOX_APP_KEY` is in the `DOTENV_CONTENTS` secret, confirmed in the v1.9.7 build |
+| Wyzie online subtitles | The source carries one shared Wyzie key, and every install draws on its 1000 requests a day. It ran out on 2026-10-18, so online subtitles came back empty for everyone until midnight UTC. The code now reads `WYZIE_API_KEY` from `.env` or `DOTENV_CONTENTS` and falls back to the shared key. **Waiting on a key of your own** from store.wyzie.io, added to `DOTENV_CONTENTS`. The shared key is still committed in `wyzie_provider.dart`, so it is public |
 | Simkl custom-list writes | The Custom Lists API is read-only beta (reads need AUTH V2 + PRO/VIP; adding/removing items is web-only, and a POST returns 200 while changing nothing). Nothing to build against until Simkl ships writes -- the watchlist/history/ratings/collection sync the app actually uses is unaffected. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md)'s "Moving a Trakt library to Simkl" |
 
 ---

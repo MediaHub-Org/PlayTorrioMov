@@ -142,6 +142,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   that would otherwise read the same are numbered (`#1`, `#2`). Wyzie's
   `[CC]` tag no longer repeats the CC / SDH badge beside it. Untested
   against live Wyzie data today: its shared key hit the daily limit.
+- **Online subtitles can run on a Wyzie key of your own.** `WYZIE_API_KEY`
+  in `.env` or the `DOTENV_CONTENTS` secret takes precedence over the shared
+  key that ships in the source, which every install draws on daily.
 
 ## [1.9.7+55] - 2026-10-08
 

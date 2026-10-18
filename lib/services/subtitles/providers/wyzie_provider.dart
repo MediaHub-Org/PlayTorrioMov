@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../../../models/subtitle/subtitle_model.dart';
+import '../../config/env_service.dart';
 import '../subtitle_extractor.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_languages.dart';
@@ -12,8 +13,14 @@ class WyzieProvider extends SubtitleProvider {
   String get name => 'Wyzie';
 
   static const String _endpoint = 'https://sub.wyzie.io/search';
-  static const String _apiKey = 'wyzie-2q1gc0ypd8mkisqcw0ijt1b9zjytj7ex';
-  static const Map<String, String> _headers = {
+  static const String _bundledApiKey = 'wyzie-2q1gc0ypd8mkisqcw0ijt1b9zjytj7ex';
+
+  static String get _apiKey {
+    final own = EnvService.wyzieApiKey;
+    return own.isNotEmpty ? own : _bundledApiKey;
+  }
+
+  static Map<String, String> get _headers => {
     'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'application/json',
