@@ -135,6 +135,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   The bar moves at once, and the player is asked once the presses pause (at
   most every 0.9 s during a hold). A file on disk still seeks on every press.
   A jump into an unbuffered part of a torrent still waits for the swarm.
+- **Online subtitle files read as words, not as a filename.** Opening a
+  language lists its files by release name with the dots tidied out
+  (`Dune Part Two`), then the quality and source (`1080p · WEB-DL`). A
+  file with no release name shows `Standard` and its format, and two files
+  that would otherwise read the same are numbered (`#1`, `#2`). Wyzie's
+  `[CC]` tag no longer repeats the CC / SDH badge beside it. Untested
+  against live Wyzie data today: its shared key hit the daily limit.
 
 ## [1.9.7+55] - 2026-10-08
 

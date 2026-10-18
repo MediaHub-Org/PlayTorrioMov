@@ -166,8 +166,10 @@ void main() {
       await tester.tap(find.text('Arabic'));
       await tester.pump();
 
-      // Just the file name: the shop is not the goods.
-      expect(find.text('Movie.srt'), findsNWidgets(2));
+      // The name without its extension and dots, numbered because both files
+      // would otherwise read the same. The shop is not the goods.
+      expect(find.text('Movie #1'), findsOneWidget);
+      expect(find.text('Movie #2'), findsOneWidget);
       expect(find.textContaining('SubtitleCat'), findsNothing);
       expect(find.textContaining('SRT'), findsNothing);
     });
@@ -204,12 +206,54 @@ void main() {
       await tester.tap(find.text('Arabic'));
       await tester.pump();
 
-      // A numeric id names nothing, so the format is what tells the row
-      // apart; a real title needs no such help.
-      expect(find.text('SRT'), findsOneWidget);
-      expect(find.text('WEB-DL'), findsOneWidget);
+      // A numeric id names nothing, so the row reads "Standard" with its
+      // format; the WEB-DL tag is what sets the second row apart.
+      expect(find.text('Standard · SRT'), findsOneWidget);
+      expect(find.text('Standard · SRT · WEB-DL'), findsOneWidget);
       expect(find.textContaining('OpenSubtitles'), findsNothing);
       expect(find.textContaining('SubDL'), findsNothing);
+    });
+  });
+
+  group('a release name reads as words', () {
+    testWidgets('dots become spaces, quality leads, and CC is one marker', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        menu(
+          groups: [
+            SubtitleLanguageGroup(
+              language: 'Arabic',
+              // The first file decides whether the language shows under the
+              // default Subtitles chip, so the CC one goes second.
+              variants: [
+                SubtitleVariant(
+                  providerName: 'Wyzie',
+                  language: 'Arabic',
+                  title: 'Dune.Part.Two.2024.720p.HDTV',
+                  downloadUrl: 'https://x/2.srt',
+                  format: 'srt',
+                ),
+                SubtitleVariant(
+                  providerName: 'Wyzie',
+                  language: 'Arabic',
+                  title: 'Dune.Part.Two.2024.1080p.WEB-DL [CC]',
+                  downloadUrl: 'https://x/1.srt',
+                  format: 'srt',
+                  isHearingImpaired: true,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Arabic'));
+      await tester.pump();
+
+      expect(find.text('Dune Part Two · 1080p · WEB-DL · CC / SDH'), findsOneWidget);
+      expect(find.text('Dune Part Two · 720p · HDTV'), findsOneWidget);
+      expect(find.textContaining('[CC]'), findsNothing);
     });
   });
 
@@ -261,11 +305,12 @@ void main() {
 
       // One tap does both: it picks the best file, the way Netflix and
       // Disney+ do, and opens the rest so a wrong pick is visible without a
-      // second gesture to discover. Both files read "SRT": untitled test
-      // variants fall back to the format.
+      // second gesture to discover. Untitled files read "Standard", so they
+      // are numbered to be told apart, with their format beside them.
       expect(picked?.downloadUrl, 'best');
       expect(find.byIcon(Icons.expand_less_rounded), findsOneWidget);
-      expect(find.text('SRT'), findsNWidgets(2));
+      expect(find.text('Standard #1 · SRT'), findsOneWidget);
+      expect(find.text('Standard #2 · SRT'), findsOneWidget);
     });
 
     testWidgets('tapping the open row again collapses it', (tester) async {

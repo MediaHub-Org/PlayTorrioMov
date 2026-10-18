@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../l10n/l10n.dart';
+import '../../models/subtitle/subtitle_display.dart';
 import '../../models/subtitle/subtitle_model.dart';
 import '../../services/subtitles/subtitle_languages.dart';
 import 'language_flag.dart';
@@ -15,10 +16,9 @@ import '../common/focus_fill.dart';
 /// Subtitle on/off and the language list.
 ///
 /// Rows are languages, not files. Four OpenSubtitles files for Arabic are one
-/// row with a count; picking it takes the best of them. The files themselves
-/// -- their provider, format, quality and release tags -- are not shown,
-/// because none of it changes which language a viewer wants, and a list of
-/// them buried the languages it was supposed to be listing.
+/// row with a count; picking it takes the best of them. Opening a language
+/// lists its files by release name and quality, since that is the only thing
+/// that tells one file from another -- the provider stays off the row.
 ///
 /// The appearance editor still opens in place rather than over the video:
 /// a pop-up hid the subtitles it exists to style.
@@ -538,7 +538,12 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
         );
 
         if (isExpanded) {
-          for (final variant in group.variants) {
+          final names = numberedRowTitles(
+            group.variants,
+            fallback: context.l10n.subsStandardTitle,
+          );
+          for (var i = 0; i < group.variants.length; i++) {
+            final variant = group.variants[i];
             // First match only: duplicate links that survived dedupe share
             // the playing file's URL, and each would tick on its own.
             final fileTicked =
@@ -547,7 +552,7 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
             rows.add(
               PlayerMenuRow(
                 leading: const SizedBox(width: 0),
-                title: _variantLabel(context, variant),
+                title: _variantLabel(context, variant, names[i]),
                 isSelected: fileTicked,
                 showSelectionMarker: false,
                 onTap: () => widget.onSelectVariant(variant),
@@ -584,30 +589,29 @@ class _PlayerSubtitleMenuState extends State<PlayerSubtitleMenu> {
     return rows;
   }
 
-  /// What one file in an expanded language is called.
-  ///
-  /// The release title, which is the only thing that tells two files for
-  /// one language apart -- and nothing else. The provider prefix used to
-  /// ride along on every row ("OpenSubtitles · SRT · …"), which named the
-  /// shop rather than the goods; the format stays only where the title
-  /// names nothing (empty, 'standard', or a bare download id like the
-  /// numeric ones OpenSubtitles sends). SDH and forced markers stay, since
-  /// they change what the file is rather than where it came from.
-  String _variantLabel(BuildContext context, SubtitleVariant variant) {
-    final title = variant.title.trim().replaceAll(RegExp(r'\s+'), ' ');
-    final format = variant.format.toUpperCase();
-    final bare = title.isEmpty ||
-        title.toLowerCase() == 'standard' ||
-        RegExp(r'^\d+$').hasMatch(title);
-    final name = bare
-        ? (format.isNotEmpty ? format : variant.title)
-        : title;
-    final parts = <String>[
-      if (name.isNotEmpty) name,
-      if (variant.isHearingImpaired) context.l10n.subsSdhShort,
-      if (variant.isForced) context.l10n.subsForced,
-    ];
-    return parts.isEmpty ? variant.title : parts.join(' · ');
+  /// What one file in an expanded language is called: its release name
+  /// with the dots and quality tags tidied out of it ("Dune Part Two · 1080p
+  /// · WEB-DL"), then the markers that change what the file is. [name] is the
+  /// cleaned name from [numberedRowTitles], which numbers files that would
+  /// otherwise read the same. The provider stays off the row: it names the
+  /// shop rather than the goods.
+  String _variantLabel(
+    BuildContext context,
+    SubtitleVariant variant,
+    String name,
+  ) {
+    final display = describeSubtitle(variant);
+    final l10n = context.l10n;
+    return [
+      name,
+      // With no release name the format is the only thing left to tell a
+      // file by.
+      if (display.title.isEmpty) variant.format.toUpperCase(),
+      ...display.tags,
+      if (display.isTranslated) l10n.subsAutoTranslated,
+      if (variant.isHearingImpaired) l10n.subsSdhShort,
+      if (variant.isForced) l10n.subsForced,
+    ].where((part) => part.isNotEmpty).join(' · ');
   }
 
   /// Whether a track survives the active chip. Each chip names one kind --
