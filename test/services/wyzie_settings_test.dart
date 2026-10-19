@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:playtorriomov/services/subtitles/providers/wyzie_provider.dart';
 import 'package:playtorriomov/services/subtitles/wyzie_settings.dart';
 
 void main() {
@@ -30,5 +31,17 @@ void main() {
     WyzieSettings.apiKey.value = null;
     await WyzieSettings.initialize();
     expect(WyzieSettings.apiKey.value, 'wyzie-abc');
+  });
+
+  group('WyzieProvider key', () {
+    test('with no key of any kind it sends nothing and finds nothing', () async {
+      expect(WyzieProvider.activeApiKey, isNull);
+      expect(await WyzieProvider().search('Dune'), isEmpty);
+    });
+
+    test('a key the user pasted is the one a search would use', () async {
+      await WyzieSettings.setApiKey('wyzie-mine');
+      expect(WyzieProvider.activeApiKey, 'wyzie-mine');
+    });
   });
 }

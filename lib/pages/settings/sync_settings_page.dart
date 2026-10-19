@@ -12,6 +12,7 @@ import '../../services/my_list/my_list_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
+import '../../services/config/env_service.dart';
 import '../../services/subtitles/wyzie_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
@@ -1415,6 +1416,11 @@ class _WyzieConnectCard extends StatelessWidget {
     return ValueListenableBuilder<String?>(
       valueListenable: WyzieSettings.apiKey,
       builder: (context, ownKey, _) {
+        final status = switch ((ownKey != null, EnvService.wyzieApiKey.isNotEmpty)) {
+          (true, _) => l10n.syncWyzieOwnKey,
+          (false, true) => l10n.syncWyzieBuildKey,
+          _ => l10n.syncWyzieNoKey,
+        };
         return Container(
           padding: EdgeInsets.all(context.rem(AppRem.md)),
           decoration: BoxDecoration(
@@ -1448,7 +1454,7 @@ class _WyzieConnectCard extends StatelessWidget {
                     ),
                     SizedBox(height: context.rem(AppRem.xs)),
                     Text(
-                      ownKey != null ? l10n.syncWyzieOwnKey : l10n.syncWyzieSharedKey,
+                      status,
                       style: TextStyle(
                         color: AppColors.inkSubtle,
                         fontSize: AppType.captionPlus,

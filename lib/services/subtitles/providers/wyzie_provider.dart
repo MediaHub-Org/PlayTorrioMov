@@ -14,21 +14,25 @@ class WyzieProvider extends SubtitleProvider {
   String get name => 'Wyzie';
 
   static const String _endpoint = 'https://sub.wyzie.io/search';
-  static const String _bundledApiKey = 'wyzie-2q1gc0ypd8mkisqcw0ijt1b9zjytj7ex';
 
-  static String get _apiKey {
+  /// The user's own key first, then one the build carries. Null when neither
+  /// exists: Wyzie's keys are per person, so no key is shipped in the source.
+  static String? get _apiKey {
     final pasted = WyzieSettings.apiKey.value;
     if (pasted != null) return pasted;
     final built = EnvService.wyzieApiKey;
-    return built.isNotEmpty ? built : _bundledApiKey;
+    return built.isNotEmpty ? built : null;
   }
 
-  static Map<String, String> get _headers => {
+  @visibleForTesting
+  static String? get activeApiKey => _apiKey;
+
+  static Map<String, String> _headersFor(String key) => {
     'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'application/json',
-    'x-api-key': _apiKey,
-    'Authorization': 'Bearer $_apiKey',
+    'x-api-key': key,
+    'Authorization': 'Bearer $key',
   };
 
 
@@ -41,11 +45,13 @@ class WyzieProvider extends SubtitleProvider {
     int? year,
   }) async {
     final List<SubtitleVariant> results = [];
+    final key = _apiKey;
+    if (key == null) return results;
 
     try {
       final queryParams = <String, String>{
         'source': 'all',
-        'key': _apiKey,
+        'key': key,
       };
 
       if (imdbId != null && imdbId.isNotEmpty) {
@@ -58,7 +64,7 @@ class WyzieProvider extends SubtitleProvider {
       if (episode != null) queryParams['episode'] = episode.toString();
 
       final uri = Uri.parse(_endpoint).replace(queryParameters: queryParams);
-      final res = await http.get(uri, headers: _headers).timeout(const Duration(seconds: 6));
+      final res = await http.get(uri, headers: _headersFor(key)).timeout(const Duration(seconds: 6));
 
       if (res.statusCode != 200) return [];
 
@@ -144,7 +150,7 @@ class WyzieProvider extends SubtitleProvider {
     // archives and normalises the encoding.
     return SubtitleExtractor.downloadAndExtract(
       variant.downloadUrl,
-      headers: _headers,
+      headers: _headersFor(_apiKey ?? ''),
       providerName: name,
     );
   }

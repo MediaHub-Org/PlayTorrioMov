@@ -24,7 +24,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   host, needs, delivering, decoder, dropped frames, buffered, verdict) as text,
   so "slow on my TV" can be sent as numbers.
 
-- **Online subtitles can run on a Wyzie key of your own.** Settings → Connect has a Wyzie card: paste a free key from store.wyzie.io and it takes precedence over the key the build ships with (`WYZIE_API_KEY` in `.env` or `DOTENV_CONTENTS`), which in turn beats the shared key in the source that every install draws on each day and which has been running out.
+- **Online subtitles need a Wyzie key of your own.** Settings → Connect has a Wyzie card: paste a free key from store.wyzie.io, which gives 1000 requests a day to its owner. The shared key that shipped in the source is gone: every install drew on its one daily quota, and it ran out. Until a key is pasted, online subtitles stay empty.
 - **The loading screen says what is loading.** Above the filling logo it now
   shows the title's own logo, or its name where there is no logo (anime has
   none), and under it the episode ("S1 · E3 · In Perpetuity"). The player had

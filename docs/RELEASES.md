@@ -168,7 +168,7 @@ looks for:
 | `SIMKL_CLIENT_ID`                        | Simkl sign-in (the PIN flow needs no secret)                               |
 | `DROPBOX_APP_KEY`                        | Dropbox backup (PKCE public client: key only, no secret)                   |
 | `TMDB_API_KEY`                           | Cast photos and character names, so a fresh install has them with no setup |
-| `WYZIE_API_KEY`                          | Online subtitles from Wyzie. Users can also paste their own key in Settings → Connect, which wins over this one |
+| `WYZIE_API_KEY`                          | Optional build-wide Wyzie key. Users normally paste their own in Settings → Connect, which wins over this one. With neither, online subtitles are off |
 
 The name says *contents*, not a path, because that is the mistake the old
 name invited: `ENV_FILE` reads like somewhere to put a filename. Every line
