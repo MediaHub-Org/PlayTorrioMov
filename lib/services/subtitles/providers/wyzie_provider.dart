@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../models/subtitle/subtitle_model.dart';
 import '../../config/env_service.dart';
+import '../wyzie_settings.dart';
 import '../subtitle_extractor.dart';
 import '../subtitle_provider.dart';
 import '../subtitle_languages.dart';
@@ -16,8 +17,10 @@ class WyzieProvider extends SubtitleProvider {
   static const String _bundledApiKey = 'wyzie-2q1gc0ypd8mkisqcw0ijt1b9zjytj7ex';
 
   static String get _apiKey {
-    final own = EnvService.wyzieApiKey;
-    return own.isNotEmpty ? own : _bundledApiKey;
+    final pasted = WyzieSettings.apiKey.value;
+    if (pasted != null) return pasted;
+    final built = EnvService.wyzieApiKey;
+    return built.isNotEmpty ? built : _bundledApiKey;
   }
 
   static Map<String, String> get _headers => {

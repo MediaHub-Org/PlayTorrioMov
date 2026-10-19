@@ -7,6 +7,24 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Debrid shows what it already has.** A torrent the viewer's debrid service
+  has cached wears a green "Cached" badge in every source list and leads its
+  language group when debrid is on for streams, because it starts in a second
+  or two as a plain file and no longer depends on its seeders. TorBox,
+  Premiumize, AllDebrid and Debrid-Link are asked in one request per forty
+  sources; Real-Debrid has no lookup (it switched it off in November 2024 and, as
+  far as is known, has not restored it) and its settings say so. **Not tried with a real account:** a lookup that fails
+  or answers in a shape the app does not recognize marks nothing, is logged as
+  `[DebridCache]`, and is left alone for ten minutes.
+- **One explanation of debrid, once.** The sources page shows a card when
+  torrents are listed and debrid is not on: torrents depend on seeders, a
+  debrid service avoids that, it is optional and paid. "Set up debrid" opens
+  the settings; "Not now" is remembered and the card never returns.
+- **Copy diagnostics** in the stats panel copies its figures (source, type,
+  host, needs, delivering, decoder, dropped frames, buffered, verdict) as text,
+  so "slow on my TV" can be sent as numbers.
+
+- **Online subtitles can run on a Wyzie key of your own.** Settings → Connect has a Wyzie card: paste a free key from store.wyzie.io and it takes precedence over the key the build ships with (`WYZIE_API_KEY` in `.env` or `DOTENV_CONTENTS`), which in turn beats the shared key in the source that every install draws on each day and which has been running out.
 - **The loading screen says what is loading.** Above the filling logo it now
   shows the title's own logo, or its name where there is no logo (anime has
   none), and under it the episode ("S1 · E3 · In Perpetuity"). The player had
@@ -16,6 +34,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- **Skipping around is gentler on a network stream.** Holding an arrow or
+  tapping J/L repeatedly used to ask the player to jump up to thirty times a
+  second, each jump discarding the cache and requesting a different range.
+  The bar moves at once, and the player is asked once the presses pause (at
+  most every 0.9 s during a hold). A file on disk still seeks on every press.
+  A jump into an unbuffered part of a torrent still waits for the swarm.
+- **Online subtitle files read as words, not as a filename.** Opening a
+  language lists its files by release name with the dots tidied out
+  (`Dune Part Two`), then the quality and source (`1080p · WEB-DL`). A
+  file with no release name shows `Standard` and its format, and two files
+  that would otherwise read the same are numbered (`#1`, `#2`). Wyzie's
+  `[CC]` tag no longer repeats the CC / SDH badge beside it. Untested
+  against live Wyzie data today: its shared key hit the daily limit.
+- **Switches tint the thumb, as they always did on Windows, Android and
+  Linux.** Flutter's old `activeColor` property is replaced everywhere. On
+  iOS and macOS the accent now sits on the thumb rather than the track; that
+  is being checked on a device before it is called right.
 - **On a TV, the details page starts on Play.** A remote used to land on the
   genre tags first, because reading order puts anything higher on the screen
   ahead of Play and, on a wide layout, the tags sit higher. The tags are gone
@@ -105,50 +140,6 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   to the menu as a finished drag, so going from 1x to 1.5x lost the menu at
   1.25x. It now stays open while Left/Right step the speed and closes on OK
   or Back. Not confirmed on a TV.
-
-## [Unreleased]
-
-### Added
-
-- **Debrid shows what it already has.** A torrent the viewer's debrid service
-  has cached wears a green "Cached" badge in every source list and leads its
-  language group when debrid is on for streams, because it starts in a second
-  or two as a plain file and no longer depends on its seeders. TorBox,
-  Premiumize, AllDebrid and Debrid-Link are asked in one request per forty
-  sources; Real-Debrid has no lookup (it switched it off in November 2024 and, as
-  far as is known, has not restored it) and its settings say so. **Not tried with a real account:** a lookup that fails
-  or answers in a shape the app does not recognize marks nothing, is logged as
-  `[DebridCache]`, and is left alone for ten minutes.
-- **One explanation of debrid, once.** The sources page shows a card when
-  torrents are listed and debrid is not on: torrents depend on seeders, a
-  debrid service avoids that, it is optional and paid. "Set up debrid" opens
-  the settings; "Not now" is remembered and the card never returns.
-- **Copy diagnostics** in the stats panel copies its figures (source, type,
-  host, needs, delivering, decoder, dropped frames, buffered, verdict) as text,
-  so "slow on my TV" can be sent as numbers.
-
-### Changed
-
-- **Skipping around is gentler on a network stream.** Holding an arrow or
-  tapping J/L repeatedly used to ask the player to jump up to thirty times a
-  second, each jump discarding the cache and requesting a different range.
-  The bar moves at once, and the player is asked once the presses pause (at
-  most every 0.9 s during a hold). A file on disk still seeks on every press.
-  A jump into an unbuffered part of a torrent still waits for the swarm.
-- **Online subtitle files read as words, not as a filename.** Opening a
-  language lists its files by release name with the dots tidied out
-  (`Dune Part Two`), then the quality and source (`1080p · WEB-DL`). A
-  file with no release name shows `Standard` and its format, and two files
-  that would otherwise read the same are numbered (`#1`, `#2`). Wyzie's
-  `[CC]` tag no longer repeats the CC / SDH badge beside it. Untested
-  against live Wyzie data today: its shared key hit the daily limit.
-- **Switches tint the thumb, as they always did on Windows, Android and
-  Linux.** Flutter's old `activeColor` property is replaced everywhere. On
-  iOS and macOS the accent now sits on the thumb rather than the track; that
-  is being checked on a device before it is called right.
-- **Online subtitles can run on a Wyzie key of your own.** `WYZIE_API_KEY`
-  in `.env` or the `DOTENV_CONTENTS` secret takes precedence over the shared
-  key that ships in the source, which every install draws on daily.
 
 ## [1.9.7+55] - 2026-10-08
 

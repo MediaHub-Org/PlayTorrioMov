@@ -12,6 +12,7 @@ import '../../services/my_list/my_list_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/tmdb/tmdb_service.dart';
 import '../../services/tmdb/tmdb_settings.dart';
+import '../../services/subtitles/wyzie_settings.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
@@ -63,6 +64,8 @@ class SyncSettingsPage extends StatelessWidget {
           const _SimklSyncCard(),
           SizedBox(height: context.rem(AppRem.md)),
           const _TmdbConnectCard(),
+          SizedBox(height: context.rem(AppRem.md)),
+          const _WyzieConnectCard(),
         ],
       ),
     );
@@ -1325,6 +1328,162 @@ class _TmdbConnectCard extends StatelessWidget {
                   );
                 },
               ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+/// A key of the user's own for Wyzie's online subtitles. Shared keys run out
+/// for every install at once, so this is the reliable option; a free key takes
+/// a minute at store.wyzie.io.
+class _WyzieConnectCard extends StatelessWidget {
+  const _WyzieConnectCard();
+
+  Future<void> _showKeyDialog(BuildContext context) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController();
+
+    final key = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.raised,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
+        title: Text(
+          l10n.syncWyzieCardTitle,
+          style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.syncWyzieBody,
+              style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: AppType.small),
+            ),
+            SizedBox(height: context.rem(0.875)),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+              decoration: InputDecoration(
+                hintText: l10n.syncWyzieKeyHint,
+                hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
+                filled: true,
+                fillColor: AppColors.bar,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.syncCancel, style: TextStyle(color: AppColors.inkAlpha(0.6))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF01B4E4),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+              ),
+            ),
+            child: Text(
+              l10n.syncSave,
+              style: const TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (key != null && key.isNotEmpty) {
+      await WyzieSettings.setApiKey(key);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    final l10n = context.l10n;
+    return ValueListenableBuilder<String?>(
+      valueListenable: WyzieSettings.apiKey,
+      builder: (context, ownKey, _) {
+        return Container(
+          padding: EdgeInsets.all(context.rem(AppRem.md)),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg)),
+            border: Border.all(
+              color: ownKey != null
+                  ? const Color(0xFF01B4E4).withValues(alpha: 0.3)
+                  : AppColors.inkAlpha(0.08),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: context.rem(2.625),
+                height: context.rem(2.625),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF01B4E4).withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(context.rem(AppRem.radiusMd)),
+                ),
+                child: const Icon(Icons.subtitles_rounded, color: Color(0xFF01B4E4)),
+              ),
+              SizedBox(width: context.rem(0.875)),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.syncWyzieCardTitle,
+                      style: const TextStyle(fontSize: AppType.bodyLg, fontWeight: FontWeight.w800),
+                    ),
+                    SizedBox(height: context.rem(AppRem.xs)),
+                    Text(
+                      ownKey != null ? l10n.syncWyzieOwnKey : l10n.syncWyzieSharedKey,
+                      style: TextStyle(
+                        color: AppColors.inkSubtle,
+                        fontSize: AppType.captionPlus,
+                        height: 1.35, // ratio: a line height, not a size
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (ownKey != null)
+                TextButton(
+                  onPressed: () => WyzieSettings.setApiKey(null),
+                  child: Text(
+                    l10n.syncDisconnect,
+                    style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: AppType.small),
+                  ),
+                )
+              else
+                ElevatedButton(
+                  onPressed: () => _showKeyDialog(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF01B4E4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                    ),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: context.rem(AppRem.md),
+                      vertical: context.rem(0.625),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.syncConnect,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: AppType.small),
+                  ),
+                ),
             ],
           ),
         );

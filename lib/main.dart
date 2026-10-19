@@ -30,6 +30,7 @@ import './services/iptv/iptv_settings.dart';
 import './services/browse/home_rows_settings.dart';
 import './services/media_session/media_session_service.dart';
 import './services/collections/media_collections_service.dart';
+import './services/subtitles/wyzie_settings.dart';
 import './services/my_list/my_list_service.dart';
 import './services/player/player_settings.dart';
 import 'services/simkl/simkl_settings.dart';
@@ -104,6 +105,7 @@ void main() async {
     AppThemeService.initialize(),
     CastService.initialize(),
     CloudBackupSettings.initialize(),
+    WyzieSettings.initialize(),
     AutoBackupSettings.initialize(),
     ContinueWatchingService.initialize(),
     CustomChannelsService.initialize(),
