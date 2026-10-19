@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-19**, on `v1.9.7+55` (main at `36fa007`).
+Last reconciled: **2026-10-19**, on `v1.9.7+55` (main at `a494429`).
 
 ---
 
@@ -73,14 +73,6 @@ None of these can be settled from the code.
   subtitles on" with a remote, and lights nothing with a finger. Refresh appears
   only on the Online tab. A full and a "Signs & Songs" track of one language list
   as two rows.
-
-## Pending: CI to confirm
-
-- **TorrServer on macOS and iOS.** Linux, Windows, macOS and iOS stage their
-  binary from the `torrserver-MatriX.147` release (see RELEASES.md). Linux passes
-  PR Checks, and Windows was built and run locally: the binary answers `/echo`
-  with `MatriX.147`. A build of every job without a `release_tag` (artifacts only,
-  nothing published) is checking macOS and iOS. Close this when it passes.
 
 ## Waiting on you
 
