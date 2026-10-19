@@ -90,14 +90,15 @@ class MediaSkipSegment {
 
 /// Container for all skip segments retrieved from IntroDB.
 class MediaSkipData {
-  final int? tmdbId;
+  /// v4 keys every response by TVDB and no longer sends `tmdb_id`.
+  final int? tvdbId;
   final String? type;
   final int? season;
   final int? episode;
   final List<MediaSkipSegment> segments;
 
   const MediaSkipData({
-    this.tmdbId,
+    this.tvdbId,
     this.type,
     this.season,
     this.episode,
@@ -129,7 +130,7 @@ class MediaSkipData {
     list.sort((a, b) => (a.startMs ?? 0).compareTo(b.startMs ?? 0));
 
     return MediaSkipData(
-      tmdbId: (json['tmdb_id'] as num?)?.toInt(),
+      tvdbId: (json['tvdb_id'] as num?)?.toInt(),
       type: json['type']?.toString(),
       season: (json['season'] as num?)?.toInt(),
       episode: (json['episode'] as num?)?.toInt(),
