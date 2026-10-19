@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-08**, on `v1.9.7+55`.
+Last reconciled: **2026-10-19**, on `v1.9.7+55` (main at `04817c6`).
 
 ---
 
@@ -18,11 +18,11 @@ Last reconciled: **2026-10-08**, on `v1.9.7+55`.
 
 Device checks; none of these can be settled from the code.
 
-- **TorrServer on CI.** The Linux, Windows, macOS and iOS builds now stage their
-  binary from our `torrserver-MatriX.147` release (see RELEASES.md). Windows is
-  verified locally: the official exe built into the app and answers
-  `/echo` with `MatriX.147`. The next PR Checks run covers the Linux job; the
-  macOS and iOS jobs only run on the next release build.
+- **TorrServer on macOS and iOS.** The Linux, Windows, macOS and iOS builds stage
+  their binary from our `torrserver-MatriX.147` release (see RELEASES.md). Linux
+  passes PR Checks on `04817c6` and Windows was built and run locally, answering
+  `/echo` with `MatriX.147`. The macOS and iOS jobs have not run yet: they only
+  run on the next release build, so check their logs there.
 - **Switch tint on iOS and macOS.** The switches moved from `activeColor` to
   `activeThumbColor`, which is what that property did on Windows, Android and
   Linux already. On Apple, the old property tinted the track, so the accent
@@ -103,7 +103,7 @@ has to be measured first.
 
 | Plan                                                | Status                                                                                                                       |
 |:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
-| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Step 1 (mechanical dedupe) is done; next is the 37 deprecations it uncovered, then one press/hover/focus primitive, the big pages, and the player last. |
+| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Step 1 (mechanical dedupe, and the 37 deprecations it uncovered) is done, and the ignore that hid them is gone. Next is Step 2, one press/hover/focus primitive, which needs the TV checks above first; then the big pages, and the player last. |
 | [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Done: diagnosis in the stats panel (with "Copy diagnostics"), release ranking by language / already-on-debrid / weight / tier / seeders, the link ceiling learned from stalls, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, and burst seeks as one seek. Debrid has a Cached badge, cached-first ranking and a one-time explanation, **unverified against a live account**. **Open: Step 0.2 (one TV session).** True stream adaptation is possible for HLS only; a server of our own is not planned. |
 
 ---
@@ -141,7 +141,10 @@ has to be measured first.
 ### Upstream sync
 
 PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod` (archived), the
-direct downstream of `ayman708-UX/PlayTorrioV3`. **Reviewed through `61098a5`
+direct downstream of `ayman708-UX/PlayTorrioV3`. **That upstream returns 404 as of
+2026-10-19**, the same account whose TorrServer plugin repo is gone, so there is
+nothing left to sync from. The last reviewed state stays `61098a5`; if the repo
+comes back, re-check it from there. **Reviewed through `61098a5`
 (2026-10-08)** -- took the Oct 2/5 bitrate batch (upstream PR #50: title
 parsing on `StreamSource`, the HLS `StreamBitrateResolver`, bitrate badges
 on both source cards, ported onto this fork's rewritten player with UTF-8
