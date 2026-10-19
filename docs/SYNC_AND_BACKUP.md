@@ -194,16 +194,19 @@ Dropbox's simpler pasted-code flow does not have. If Drive support is
 wanted again, `git log -p --follow -- lib/services/backup/google_drive_backup_service.dart`
 has the original implementation to restore from rather than rebuild.
 
-### Open, waiting on a decision
+### Decided: no Mega, and maintainer-registered credentials
 
-One provider left: Mega (proprietary login, client-side key derivation, no
-mature Dart SDK -- the largest and least certain lift, see the table
-above). Dropbox is built and configured; "auto" is settled as "at app open"
-(`auto_backup_service.dart`). The remaining question, if Mega is ever
-added, is the credential model already put to the user for Dropbox: a
-maintainer-registered app shipped to everyone (the TMDB/Simkl "it just
-works" model) or a user-registered one (the Trakt "bring your own app"
-model).
+**Mega is not built.** It has no official Dart SDK, so its login and client-side
+crypto would be a reimplementation, and it needs the user's Mega password stored
+in the app. Cloud backup already works without a password: Dropbox (OAuth, nothing
+stored) and WebDAV (the user's own server). Revisit if Mega ships an official Dart
+SDK, or if storing the password is accepted explicitly.
+
+**The credential model is maintainer-registered.** App credentials are registered
+once by the maintainer and shipped in the build through `DOTENV_CONTENTS`: Dropbox,
+Wyzie, TMDB and Simkl. A user's own key is accepted only where Settings already takes
+one (Simkl's client ID, TMDB's key), so there is no new per-user setup flow. Shipping
+Dropbox's app key is safe because it is a PKCE public client with no secret.
 
 ---
 
