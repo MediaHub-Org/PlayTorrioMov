@@ -10,89 +10,93 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-19**, on `v1.9.7+55` (main at `04817c6`).
+Last reconciled: **2026-10-19**, on `v1.9.7+55` (main at `36fa007`).
 
 ---
 
-## Pending
+## Pending: needs a device
 
-Device checks; none of these can be settled from the code.
+None of these can be settled from the code.
 
-- **TorrServer on macOS and iOS.** The Linux, Windows, macOS and iOS builds stage
-  their binary from our `torrserver-MatriX.147` release (see RELEASES.md). Linux
-  passes PR Checks on `04817c6` and Windows was built and run locally, answering
-  `/echo` with `MatriX.147`. The macOS and iOS jobs have not run yet: they only
-  run on the next release build, so check their logs there.
-- **Switch tint on iOS and macOS.** The switches moved from `activeColor` to
-  `activeThumbColor`, which is what that property did on Windows, Android and
-  Linux already. On Apple, the old property tinted the track, so the accent
-  now sits on the thumb there. Check one switch on an iPhone or a Mac, and if
-  the track tint is missed, add `activeTrackColor` on those platforms.
-- **Text size with the system scale.** The text-size setting now multiplies the
-  system scale rather than a single collapsed factor. At 125% and 150% Windows
-  scaling, and at a large text size on iOS, nothing should overflow or shrink.
-- **Library reorder.** Drag a row to the bottom and to the top of a collection;
-  it should land exactly where it is dropped.
-- **Cast.** Casting from the middle of a movie should start there and pause
-  the phone; "Stop casting" should end the session. A scraper source that
-  needs Referer/User-Agent still has no sender-side way to send them (#79),
-  and whether a phone can cast its own torrent is one `curl` away (see
-  `CastService.canCastUrl`).
-- **Android notification.** Play/Pause should follow the player, and Android
-  13+ should now ask for notification permission on launch.
+- **Switch tint on iOS and macOS.** Switches moved from `activeColor` to
+  `activeThumbColor`. On Apple the old property tinted the track, so the accent
+  now sits on the thumb. Check one switch on an iPhone or a Mac; if the track
+  tint is missing, add `activeTrackColor` on those platforms.
+- **Text size with the system scale.** At 125% and 150% Windows scaling, and at
+  a large text size on iOS, nothing should overflow or shrink.
+- **Library reorder, the drag.** The index logic has a widget test. Drag a row to
+  the bottom and to the top of a collection, and check it lands where dropped.
+- **Cast.** Casting from the middle of a movie starts there and pauses the phone;
+  "Stop casting" ends the session. A scraper source that needs Referer or
+  User-Agent still has no sender-side way to send them (#79). Whether a phone can
+  cast its own torrent is one `curl` away (`CastService.canCastUrl`).
+- **Android notification.** Play/Pause follows the player, and Android 13+ asks
+  for notification permission on launch.
 - **Similar Content** on a movie and a series (TMDB first, BestSimilar as the
   fallback).
-- **The loading logo** with a torrent, a debrid link and a plain URL, and
-  that it clears on the first frame.
-- **Dropbox and Simkl Connect, end to end.** Both credentials are in the
-  published build (checked in v1.9.7's `data/app.so`). Still needs one real
-  approval in the browser for each: Dropbox's pasted code, Simkl's PIN.
+- **The loading logo** with a torrent, a debrid link and a plain URL, and it
+  clears on the first frame.
 - **Fullscreen white flash on Windows.** The hidden-window delay went from 50 ms
-  to 150 ms; not confirmed on a real decode-under-load case. If it still
+  to 150 ms, and that is not confirmed under real decode load. If it still
   flashes, say whether it happens going in, coming out, or both.
-- **Anime episode names.** Some episodes still show "EP N" with no title. The
-  fix needs the show and episode number, to check it against AniList's live
-  `streamingEpisodes` data.
-- **TV focus audit.** With a remote, go through: the Sources page (the four
-  filter pills, then OK on each: the menu should open on the selected row and
-  Back should return to the same pill; let the search run and watch that focus
-  stays put when the add-on pill appears), the in-player Sources and Episodes
-  panels, the Cast sheet, Library and Collections, Live TV sources, Discover
-  and Catalog sort pills, and the video settings cards. Every row should show a
-  wash under the remote, and a mouse should light it lighter. After touching the
-  screen with a mouse or a remote app, the focus cue should stay.
-- **Debrid with a real account.** Set up TorBox (or Premiumize, AllDebrid or
-  Debrid-Link), switch "use debrid for streams" on and open a popular title:
-  releases the service has should wear a green "Cached" badge and lead their
-  language group, and one of them should start in a second or two. If no badge
-  ever appears with a service that should have one, run it once with a
-  debug build and read the `[DebridCache]` lines: they say whether the lookup
-  was refused or came back in a shape this does not recognize. Real-Debrid has
-  no lookup and shows none, by design. The card on the sources page should
-  show for someone without debrid, go away on "Not now" for good, and not
-  show once debrid is on.
-- **Skipping around.** Hold the right arrow on a network stream: the bar
-  should move at once and the picture should jump every so often, not freeze
-  until the key is released. Try it on a torrent and on a debrid link.
-- **Language and playback on a real connection.** On a device set to Spanish
-  (or any of the thirteen languages the detector knows): the source list should
-  open on releases in that language; a file with several audio tracks should
-  open on that track; with foreign audio and an embedded subtitle in your
-  language, that subtitle should come on by itself. Then on the slow
-  connection: does it stop and wait once instead of stuttering, does the stats
-  panel's sentence name the cause, does "Playback keeps pausing" appear after
-  repeated stalls, and does a jump back come out of the cache.
-- **TV: details, loading screen and speed menu.** Opening a title's details
-  with a remote should land on Play, and Down/Right should reach the library
-  buttons and then the rails with no genre tags in between. The loading screen
-  should show the title's logo (or its name) above the filling logo, and the
-  episode under it. The speed menu should stay open while Left/Right step the
-  speed, close on OK or Back, and have no frame around the slider.
-- **The subtitle panel on a TV and a phone.** Opening it should put the
-  violet wash on "Turn subtitles on" with a remote and show nothing lit with a
-  finger; Refresh appears only on the Online tab; a file with a full and a
-  "Signs & Songs" track of one language should list them as two different
-  rows.
+- **TV focus audit.** With a remote: the Sources page (the four filter pills; OK
+  opens each menu on the selected row; Back returns to the same pill; focus stays
+  put when the add-on pill appears), the in-player Sources and Episodes panels,
+  the Cast sheet, Library and Collections, Live TV sources, the Discover and
+  Catalog sort pills, and the video settings cards. Every row shows a wash under
+  the remote; a mouse lights it lighter; after a mouse or remote-app touch, the
+  focus cue stays.
+- **Debrid with a real account.** TorBox (or Premiumize, AllDebrid, Debrid-Link),
+  "use debrid for streams" on, and a popular title: cached releases wear a green
+  "Cached" badge and lead their language group, and one starts in a second or
+  two. If no badge appears where one should, run a debug build and read the
+  `[DebridCache]` lines. Real-Debrid has no lookup and shows none, by design. The
+  sources-page card shows without debrid, goes away on "Not now" for good, and
+  hides once debrid is on.
+- **Skipping around.** Hold the right arrow on a network stream: the bar moves at
+  once and the picture jumps every so often, rather than freezing until the key
+  is released. Try a torrent and a debrid link.
+- **Language and playback on a real connection.** On a device set to Spanish (or
+  any of the thirteen languages the detector knows): the source list opens on
+  that language, a multi-track file opens on that track, and with foreign audio
+  and an embedded subtitle in your language, the subtitle comes on by itself. On
+  a slow connection: it stops and waits once instead of stuttering, the stats
+  panel names the cause, "Playback keeps pausing" appears after repeated stalls,
+  and a jump back comes out of the cache.
+- **TV: details, loading screen, speed menu.** Opening a title's details lands on
+  Play, and Down/Right reach the library buttons and then the rails with no genre
+  tags between. The loading screen shows the title's logo (or name) above the
+  filling logo, and the episode under it. The speed menu stays open while
+  Left/Right step the speed, closes on OK or Back, and has no frame around the
+  slider.
+- **Subtitle panel on TV and phone.** Opening it puts the violet wash on "Turn
+  subtitles on" with a remote, and lights nothing with a finger. Refresh appears
+  only on the Online tab. A full and a "Signs & Songs" track of one language list
+  as two rows.
+
+## Pending: CI to confirm
+
+- **TorrServer on macOS and iOS.** Linux, Windows, macOS and iOS stage their
+  binary from the `torrserver-MatriX.147` release (see RELEASES.md). Linux passes
+  PR Checks, and Windows was built and run locally: the binary answers `/echo`
+  with `MatriX.147`. A build of every job without a `release_tag` (artifacts only,
+  nothing published) is checking macOS and iOS. Close this when it passes.
+
+## Waiting on you
+
+- **Dropbox and Simkl Connect.** Both credentials are in the published build
+  (v1.9.7's `data/app.so`). Simkl's device request returns a PIN for the app ID,
+  and Dropbox's authorize page loads for the app key. Each still needs one real
+  approval in the browser: Dropbox's pasted code, and Simkl's PIN.
+- **Anime episode names.** Some episodes show "EP N" with no title. To check it
+  against AniList's live `streamingEpisodes` data, I need the show and the
+  episode number.
+- **Wyzie online subtitles.** No shared key ships in the source any more. Each
+  person pastes a free key in Settings → Connect (1000 requests a day per key);
+  until then, online subtitles stay empty. To confirm which sources a free key
+  returns, I need a key: the free plan may cover fewer than Pro. The old shared
+  key stays in git history and is public; revoke it on Wyzie's side if the
+  dashboard allows.
 
 ---
 
@@ -101,39 +105,31 @@ Device checks; none of these can be settled from the code.
 Written plans, not started. Each says what is known, what is a guess, and what
 has to be measured first.
 
-| Plan                                                | Status                                                                                                                       |
-|:----------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------|
-| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md)         | Step 1 (mechanical dedupe, and the 37 deprecations it uncovered) is done, and the ignore that hid them is gone. Next is Step 2, one press/hover/focus primitive, which needs the TV checks above first; then the big pages, and the player last. |
-| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md)                | Done: diagnosis in the stats panel (with "Copy diagnostics"), release ranking by language / already-on-debrid / weight / tier / seeders, the link ceiling learned from stalls, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, and burst seeks as one seek. Debrid has a Cached badge, cached-first ranking and a one-time explanation, **unverified against a live account**. **Open: Step 0.2 (one TV session).** True stream adaptation is possible for HLS only; a server of our own is not planned. |
+| Plan | Status |
+|:-----|:-------|
+| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md) | Step 1 is done, including the 37 deprecations and the ignore that hid them. Next is Step 2, one press/hover/focus primitive, which waits on the TV checks above; then the big pages, and the player last. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md) | Done: the stats-panel diagnosis with "Copy diagnostics", release ranking, a learned link ceiling, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, burst seeks as one seek, and the debrid Cached badge with cached-first ranking (**not verified against a live account**). Open: Step 0.2, one TV session. Stream adaptation is HLS-only; a server of our own is not planned. |
 
 ---
 
 ## Not doing, so it stays decided
 
-| What                                                     | Why not                                                                                                                                                                                                                                                                                                                                                       |
-|:---------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Xtream/portal movies and series as parent sources (#77)  | **Not viable right now.** Needs a pipeline, not a tab: match entries to catalog titles (ids where the feed has them, guarded title-plus-year where not), play through the existing details/player so history sees one title, and decide where unmatchable entries live. A wrong match in Films is worse than an honest gap. Portals stay Live TV only         |
-| Size/sort filter under Sources & Filters                 | Browsing choices for *this* title, not a standing preference; they stay on the sources screen                                                                                                                                                                                                                                                                 |
-| Keyboard shortcut for the subtitle panel                 | `A`, `S`, `R`, `C` are taken. Revisit if a key frees up                                                                                                                                                                                                                                                                                                       |
-| Merge `megasource` / `nova`                              | Shared skeleton, but Nova munges titles MegaSource does not; unifying them needs a hook with nothing in common between its two sides                                                                                                                                                                                                                          |
-| Offline tests for page scraping                          | Input is one host's markup on one day, so a fixture pins that day. Ciphers and response formats are covered                                                                                                                                                                                                                                                   |
-| Cast from Windows                                        | Google ships no Cast sender SDK for Windows; it would be DLNA/UPnP, a feature not a fix                                                                                                                                                                                                                                                                       |
-| Sponsor/monetization, aspect-cycle HUD (upstream)        | Out of scope; the player settings already have an aspect control                                                                                                                                                                                                                                                                                              |
-| Single-select audio filter                               | "English or Spanish" needs multi-select; the checkmark delay was a stale-rows bug, since fixed                                                                                                                                                                                                                                                                |
-| Alphabetical online subtitle order                       | The list leads with the language being heard on purpose                                                                                                                                                                                                                                                                                                       |
-| Translating catalog descriptions, AniList genres/formats | Addon and AniList data, sent back to their APIs to filter; would need a display-name map per language. See CONVENTIONS                                                                                                                                                                                                                                        |
-| Trakt sync (card in Settings → Sync)                     | Decided off, not deleted (`_traktSyncEnabled = false` in `sync_settings_page.dart`): registering a *new* Trakt API app now needs paid VIP, which makes it impractical next to Simkl's free one. Simkl is the one the app offers. `TraktService`/`TraktSettings` and the pasted-credentials path stay in place -- see [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
-| Mega backup | **Decided against, for now.** Mega has no official Dart SDK, so its login and client-side crypto would be a reimplementation, and it needs the user's Mega email and password stored in the app. Cloud backup already works without a password: Dropbox (OAuth, nothing stored) and WebDAV (the user's own server). Revisit if Mega ships an official Dart SDK, or if storing the password is accepted explicitly. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md) |
-| Remove the centered play/pause button | **Decided: keep it.** It is where a TV remote's first arrow lands when controls reappear (#80), and the single tap and double tap are already taken (show controls; fullscreen and the ±10s zones). If the look is the complaint, a lighter visual version is the option, not removal |
-| Simkl custom-list writes | **Blocked upstream, not a decision.** Simkl's Custom Lists API is read-only beta (reads need AUTH V2 and PRO/VIP), and a POST returns 200 while changing nothing. Revisit when Simkl ships writes. The watchlist, history and ratings sync is unaffected |
-
----
-
-## Waiting on you
-
-| What                                 | Status                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-|:-------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Wyzie online subtitles | **Decided (2026-10-19):** no shared key in the source any more. Each person pastes their own free key in Settings → Connect; a free key gives 1000 requests a day to its owner. Until a key is pasted, online subtitles stay empty. A build may still carry `WYZIE_API_KEY` in `DOTENV_CONTENTS`, but that is one quota for every install, so it is not recommended. The old shared key stays in git history and is public: revoke it on Wyzie's side if the dashboard allows. **Waiting on you:** a free key, to confirm which sources it returns, since the free plan may cover fewer than Pro |
+| What | Why not |
+|:-----|:--------|
+| Xtream/portal movies and series as parent sources (#77) | **Not viable right now.** It needs a pipeline, not a tab: match entries to catalog titles (by id where the feed has one, guarded title-plus-year where not), play through the existing details and player so history sees one title, and decide where unmatchable entries live. A wrong match in Films is worse than an honest gap. Portals stay Live TV only. |
+| Size/sort filter under Sources & Filters | Browsing choices for *this* title, not a standing preference; they stay on the sources screen. |
+| Keyboard shortcut for the subtitle panel | `A`, `S`, `R`, `C` are taken. Revisit if a key frees up. |
+| Merge `megasource` / `nova` | Shared skeleton, but Nova munges titles MegaSource does not. Unifying them needs a hook with nothing in common between its two sides. |
+| Offline tests for page scraping | The input is one host's markup on one day, so a fixture pins that day. Ciphers and response formats are covered. |
+| Cast from Windows | Google ships no Cast sender SDK for Windows. It would be DLNA/UPnP, a feature, not a fix. |
+| Sponsor/monetization, aspect-cycle HUD (upstream) | Out of scope; the player settings already have an aspect control. |
+| Single-select audio filter | "English or Spanish" needs multi-select. The checkmark delay was a stale-rows bug, since fixed. |
+| Alphabetical online subtitle order | The list leads with the language being heard, on purpose. |
+| Translating catalog descriptions, AniList genres/formats | Addon and AniList data, sent back to their APIs to filter. It would need a display-name map per language. See CONVENTIONS. |
+| Trakt sync (card in Settings → Sync) | Decided off, not deleted (`_traktSyncEnabled = false` in `sync_settings_page.dart`). Registering a *new* Trakt API app now needs paid VIP, which makes it impractical next to Simkl's free one. `TraktService`, `TraktSettings` and the pasted-credentials path stay in place. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md). |
+| Mega backup | **Decided against.** Mega has no official Dart SDK, so its login and client-side crypto would be a reimplementation, and it needs the user's Mega email and password stored in the app. Cloud backup already works without a password: Dropbox (OAuth, nothing stored) and WebDAV (the user's own server). Revisit if Mega ships an official Dart SDK, or if storing the password is accepted explicitly. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md). |
+| Remove the centered play/pause button | **Decided: keep it.** It is where a TV remote's first arrow lands when the controls reappear (#80), and the single tap and double tap are already taken (show controls; fullscreen and the ±10s zones). If the look is the complaint, a lighter visual version is the option, not removal. |
+| Simkl custom-list writes | **Blocked upstream.** Simkl's Custom Lists API is read-only beta (reads need AUTH V2 and PRO/VIP), and a POST returns 200 while changing nothing. Revisit when Simkl ships writes. The watchlist, history and ratings sync is unaffected. |
 
 ---
 
@@ -141,17 +137,11 @@ has to be measured first.
 
 ### Upstream sync
 
-PlayTorrioMov began as a fork of `MediaHub-Org/PlayTorrioMod` (archived), the
-direct downstream of `ayman708-UX/PlayTorrioV3`. **That upstream returns 404 as of
-2026-10-19**, the same account whose TorrServer plugin repo is gone, so there is
-nothing left to sync from. The last reviewed state stays `61098a5`; if the repo
-comes back, re-check it from there. **Reviewed through `61098a5`
-(2026-10-08)** -- took the Oct 2/5 bitrate batch (upstream PR #50: title
-parsing on `StreamSource`, the HLS `StreamBitrateResolver`, bitrate badges
-on both source cards, ported onto this fork's rewritten player with UTF-8
-and in-flight fixes of its own). Not taken, so not re-reviewed:
-`39b736f`'s CloudStream extension system (a plugin ecosystem, a feature not a
-fix) and its Kotlin-side coroutine fix; `9616808`, a blurred hero backdrop for
-a problem we do not have; and `29a4127`, `1da1940`, `d2f8074`, in the area this
-fork has diverged furthest (#45, #46, the portal browser), read as ideas and
-hand-fixed instead (#40).
+The fork's upstream, `ayman708-UX/PlayTorrioV3`, returns 404 as of 2026-10-19,
+so there is nothing to sync from. The last reviewed state is `61098a5`
+(2026-10-08). The Oct 2/5 bitrate batch (upstream PR #50) was taken and ported,
+with UTF-8 and in-flight fixes of its own. Not taken: `39b736f`'s CloudStream
+extension system (a feature, not a fix) and its Kotlin coroutine fix; `9616808`,
+a blurred hero backdrop for a problem we do not have; and `29a4127`, `1da1940`,
+`d2f8074`, read as ideas and hand-fixed instead (#40). Re-check if the repo
+comes back.
