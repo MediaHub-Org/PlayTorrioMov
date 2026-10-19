@@ -3,13 +3,15 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.9.9+57] - 2026-10-19
+
+Dev prerelease: the change below is verified against the live API, not yet on a device.
 
 ### Changed
 
 - **Skip timestamps come from TheIntroDB v4.** The v3 endpoint is deprecated and
   will be shut down, so the app now asks v4, which keys results by TVDB. Nothing
-  changes on screen. Not in v1.9.8, which was built before this change.
+  changes on screen.
 
 ## [1.9.8+56] - 2026-10-19
 
