@@ -24,6 +24,10 @@ MyListItem item(String title, String id) => MyListItem(
   addedAt: DateTime(2026),
 );
 
+List<String?> orderOf(String id) => [
+  for (final i in MediaCollectionsService.byId(id)!.items) i.imdbId,
+];
+
 Future<void> pumpCollection(WidgetTester tester, String id) async {
   await tester.pumpWidget(
     MaterialApp(home: LibraryShelfPage.collection(id)),
@@ -115,6 +119,26 @@ void main() {
       expect(find.byType(ReorderableListView), findsOneWidget);
       expect(find.byIcon(Icons.drag_handle_rounded), findsNWidgets(2));
       expect(find.byTooltip('Done'), findsOneWidget);
+    });
+
+    testWidgets('a row dropped at an index lands at that index', (tester) async {
+      // The drag gesture is not simulated here. This calls the callback with
+      // the indices a drop reports, which is what the service is given.
+      final c = MediaCollectionsService.create('Weekend')!;
+      for (final id in ['tt1', 'tt2', 'tt3']) {
+        MediaCollectionsService.addItem(c.id, item(id, id));
+      }
+      await pumpCollection(tester, c.id);
+      await tester.tap(find.byTooltip('Reorder'));
+      await tester.pumpAndSettle();
+
+      tester.widget<ReorderableListView>(find.byType(ReorderableListView)).onReorderItem!(0, 2);
+      await tester.pumpAndSettle();
+      expect(orderOf(c.id), ['tt2', 'tt3', 'tt1']);
+
+      tester.widget<ReorderableListView>(find.byType(ReorderableListView)).onReorderItem!(2, 0);
+      await tester.pumpAndSettle();
+      expect(orderOf(c.id), ['tt1', 'tt2', 'tt3']);
     });
 
     testWidgets('keeps the user order rather than sorting it', (tester) async {
