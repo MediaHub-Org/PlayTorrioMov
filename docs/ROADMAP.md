@@ -18,6 +18,16 @@ Last reconciled: **2026-10-08**, on `v1.9.7+55`.
 
 Device checks; none of these can be settled from the code.
 
+- **Switch tint on iOS and macOS.** The switches moved from `activeColor` to
+  `activeThumbColor`, which is what that property did on Windows, Android and
+  Linux already. On Apple, the old property tinted the track, so the accent
+  now sits on the thumb there. Check one switch on an iPhone or a Mac, and if
+  the track tint is missed, add `activeTrackColor` on those platforms.
+- **Text size with the system scale.** The text-size setting now multiplies the
+  system scale rather than a single collapsed factor. At 125% and 150% Windows
+  scaling, and at a large text size on iOS, nothing should overflow or shrink.
+- **Library reorder.** Drag a row to the bottom and to the top of a collection;
+  it should land exactly where it is dropped.
 - **Cast.** Casting from the middle of a movie should start there and pause
   the phone; "Stop casting" should end the session. A scraper source that
   needs Referer/User-Agent still has no sender-side way to send them (#79),

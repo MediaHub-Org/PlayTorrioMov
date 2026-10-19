@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 
@@ -297,7 +298,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text(context.l10n.liveTvShowLogos, style: TextStyle(color: AppColors.ink, fontSize: AppType.smallPlus)),
                         value: showLogos,
-                        activeColor: palette.primaryColor,
+                        activeThumbColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowStreamLogos(val),
                       );
                     },
@@ -310,7 +311,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text(context.l10n.liveTvShowEpg, style: TextStyle(color: AppColors.ink, fontSize: AppType.smallPlus)),
                         value: showEpg,
-                        activeColor: palette.primaryColor,
+                        activeThumbColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowEpgSnippet(val),
                       );
                     },
@@ -323,7 +324,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                         contentPadding: EdgeInsets.zero,
                         title: Text(context.l10n.liveTvShowCounts, style: TextStyle(color: AppColors.ink, fontSize: AppType.smallPlus)),
                         value: showCount,
-                        activeColor: palette.primaryColor,
+                        activeThumbColor: palette.primaryColor,
                         onChanged: (val) => IptvSettings.setShowCategoryCount(val),
                       );
                     },
@@ -1193,7 +1194,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
                                           child: ListView.builder(
                                                   controller: _categoryScrollController,
                                                   itemExtent: 46.0,
-                                                  cacheExtent: 300.0,
+                                                  scrollCacheExtent: const ScrollCacheExtent.pixels(300.0),
                                                   addAutomaticKeepAlives: false,
                                                   addRepaintBoundaries: true,
                                                   padding: EdgeInsets.symmetric(horizontal: context.rem(0.625), vertical: context.rem(AppRem.snug)),
@@ -1301,7 +1302,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
           ready: true,
           child: GridView.builder(
           controller: _contentScrollController,
-          cacheExtent: 400.0,
+          scrollCacheExtent: const ScrollCacheExtent.pixels(400.0),
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: true,
           padding: EdgeInsets.fromLTRB(context.rem(isDesktop ? 1.25 : 0.625), context.rem(AppRem.ms), context.rem(isDesktop ? 1.25 : 0.625), context.rem(1.875)),
@@ -1337,7 +1338,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
           child: ListView.builder(
           controller: _contentScrollController,
           itemExtent: 52.0,
-          cacheExtent: 400.0,
+          scrollCacheExtent: const ScrollCacheExtent.pixels(400.0),
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: true,
           padding: EdgeInsets.fromLTRB(context.rem(isDesktop ? 1.25 : 0.625), context.rem(AppRem.ms), context.rem(isDesktop ? 1.25 : 0.625), context.rem(1.875)),
@@ -1371,7 +1372,7 @@ class _IptvPortalBrowserPageState extends State<IptvPortalBrowserPage> {
           child: ListView.builder(
           controller: _contentScrollController,
           itemExtent: 78.0,
-          cacheExtent: 400.0,
+          scrollCacheExtent: const ScrollCacheExtent.pixels(400.0),
           addAutomaticKeepAlives: false,
           addRepaintBoundaries: true,
           padding: EdgeInsets.fromLTRB(context.rem(isDesktop ? 1.25 : 0.625), context.rem(AppRem.ms), context.rem(isDesktop ? 1.25 : 0.625), context.rem(1.875)),

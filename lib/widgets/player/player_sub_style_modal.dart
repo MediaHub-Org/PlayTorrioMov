@@ -718,7 +718,7 @@ class _SubtitleStyleEditorState extends State<SubtitleStyleEditor> {
           ),
           Switch.adaptive(
             value: value,
-            activeColor: PlayerTheme.accent,
+            activeThumbColor: PlayerTheme.accent,
             onChanged: onChanged,
           ),
         ],

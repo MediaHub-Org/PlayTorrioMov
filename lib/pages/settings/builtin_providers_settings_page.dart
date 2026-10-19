@@ -208,7 +208,7 @@ class _BuiltinProvidersSettingsPageState
                   SizedBox(width: context.rem(AppRem.snug)),
                   Switch.adaptive(
                     value: isP2p,
-                    activeColor: const Color(0xFFF59E0B),
+                    activeThumbColor: const Color(0xFFF59E0B),
                     onChanged: (val) => P2pSettingsService.setP2pEnabled(val),
                   ),
                 ],
@@ -356,7 +356,7 @@ class _BuiltinProvidersSettingsPageState
                     SizedBox(width: context.rem(AppRem.sm)),
                     Switch.adaptive(
                       value: enabled,
-                      activeColor: const Color(0xFF10B981),
+                      activeThumbColor: const Color(0xFF10B981),
                       activeTrackColor: const Color(
                         0xFF10B981,
                       ).withValues(alpha: 0.35),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
@@ -376,7 +377,7 @@ class _BrowseScaffoldState<T> extends State<BrowseScaffold<T>>
       // HoverButton/InteractiveCardShell scrolling a newly focused card
       // into view, the viewport keeps advancing as focus does, so each
       // press builds enough of the next row for the press after it.
-      cacheExtent: 2000,
+      scrollCacheExtent: const ScrollCacheExtent.pixels(2000),
       slivers: [
         if (widget.isLoading)
           SliverToBoxAdapter(

@@ -445,7 +445,7 @@ class _AddonCard extends StatelessWidget {
               Switch.adaptive(
                 value: addon.enabled,
                 onChanged: onToggle,
-                activeColor: AppColors.accent,
+                activeThumbColor: AppColors.accent,
               ),
             ],
           ),

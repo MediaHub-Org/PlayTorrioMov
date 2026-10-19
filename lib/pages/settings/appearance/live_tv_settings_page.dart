@@ -180,7 +180,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: enabled,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) {
                       IptvSettings.setEnableSpotlight(val);
                       setState(() {});
@@ -222,7 +222,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                         ),
                         Switch.adaptive(
                           value: autoRotate,
-                          activeColor: palette.primaryColor,
+                          activeThumbColor: palette.primaryColor,
                           onChanged: (val) => IptvSettings.setHeroAutoRotate(val),
                         ),
                       ],
@@ -429,7 +429,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showHd,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowHdBadge(val),
                   ),
                 ],
@@ -469,7 +469,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showTag,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowCategoryTag(val),
                   ),
                 ],
@@ -670,7 +670,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showExpiry,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowPortalExpiry(val),
                   ),
                 ],
@@ -709,7 +709,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showConn,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowPortalConnections(val),
                   ),
                 ],
@@ -929,7 +929,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showLogos,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowStreamLogos(val),
                   ),
                 ],
@@ -968,7 +968,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showEpg,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowEpgSnippet(val),
                   ),
                 ],
@@ -1007,7 +1007,7 @@ class _LiveTvSettingsPageState extends State<LiveTvSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: showCount,
-                    activeColor: palette.primaryColor,
+                    activeThumbColor: palette.primaryColor,
                     onChanged: (val) => IptvSettings.setShowCategoryCount(val),
                   ),
                 ],

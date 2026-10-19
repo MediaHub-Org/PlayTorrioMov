@@ -261,8 +261,9 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
                       // equivalent linear factor so the two can multiply.
                       builder: (context, child) => MediaQuery(
                         data: MediaQuery.of(context).copyWith(
-                          textScaler: TextScaler.linear(
-                            MediaQuery.textScalerOf(context).textScaleFactor * textScale,
+                          textScaler: _ScaledTextScaler(
+                            MediaQuery.textScalerOf(context),
+                            textScale,
                           ),
                         ),
                         child: child!,
@@ -281,3 +282,18 @@ class _PlayTorrioAppState extends State<PlayTorrioApp>
   }
 }
 
+/// The system's own text scaler with the app's text size multiplied on top.
+/// Composes rather than collapsing to one linear factor, so a non-linear
+/// system scale (iOS's accessibility sizes) keeps its curve.
+class _ScaledTextScaler extends TextScaler {
+  const _ScaledTextScaler(this.system, this.factor);
+
+  final TextScaler system;
+  final double factor;
+
+  @override
+  double scale(double fontSize) => system.scale(fontSize) * factor;
+
+  @override
+  double get textScaleFactor => scale(1);
+}

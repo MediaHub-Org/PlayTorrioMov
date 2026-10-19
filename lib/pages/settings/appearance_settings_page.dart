@@ -520,7 +520,7 @@ class _LanguageSelector extends StatelessWidget {
                     builder: (context, native, _) => SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       value: native,
-                      activeColor: palette.primaryColor,
+                      activeThumbColor: palette.primaryColor,
                       onChanged: AppThemeService.setPreferNativeTitles,
                       title: Text(
                         l10n.appearanceNativeTitlesTitle,

@@ -52,11 +52,15 @@ because it is the largest and the least testable from a desk.
 Shipped on this branch: 17 private key sets became `kActivateKeys` /
 `kActivateKeysWithSpace` (a test now fails on a new copy), the logo-or-title
 block is `TitleOrLogo` (details, sources and the loading screen), and the 28
-`withOpacity` calls are `withValues`. Not done: `deprecated_member_use: ignore`
-stays, because turning it on shows **37** other deprecations -- 28 `activeColor`
-on switches (the replacement changes how a switch looks, so it needs eyes on a
-device), 6 `cacheExtent`, and one each of `value`, `textScaleFactor` and
-`onReorder`. That is the next mechanical PR.
+`withOpacity` calls are `withValues`. The **37** deprecations that the ignore
+was hiding are now replaced too -- 6 `cacheExtent` to `scrollCacheExtent`,
+`value` to `initialValue` (keyed, so an outside change still rebuilds the
+dropdown), `onReorder` to `onReorderItem` (which already gives the index
+after removal, so `reorderTarget` is gone), `textScaleFactor` to a
+`TextScaler` that composes with the system's own, and 28 `activeColor` on
+switches to `activeThumbColor`. The ignore line is removed. The switch change
+matches the old property on Windows, Android and Linux; on iOS and macOS the
+old one tinted the track, so those two need a look on a device (ROADMAP).
 
 - **One `activateKeys` set** in `lib/widgets/common/`, replacing the 13 private
   copies. They differ in one place at most (`space` is in `HoverButton`'s and

@@ -503,7 +503,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
                   ),
                   Switch.adaptive(
                     value: enabled,
-                    activeColor: AppColors.accent,
+                    activeThumbColor: AppColors.accent,
                     onChanged: AutoBackupSettings.setEnabled,
                   ),
                 ],

@@ -37,24 +37,6 @@ void main() {
     MediaCollectionsService.resetForTest();
   });
 
-  group('reorderTarget', () {
-    test('a downward move loses the row it left behind', () {
-      // ReorderableListView numbers the destination against the list before
-      // the dragged row is removed; the service removes first, then inserts.
-      expect(LibraryShelfPage.reorderTarget(0, 3), 2);
-      expect(LibraryShelfPage.reorderTarget(1, 2), 1);
-    });
-
-    test('an upward move is already right', () {
-      expect(LibraryShelfPage.reorderTarget(3, 0), 0);
-      expect(LibraryShelfPage.reorderTarget(2, 1), 1);
-    });
-
-    test('dropping a row back where it started is a no-op index', () {
-      expect(LibraryShelfPage.reorderTarget(2, 2), 2);
-    });
-  });
-
   group('a collection shelf', () {
     testWidgets('is titled with the collection name', (tester) async {
       final c = MediaCollectionsService.create('Weekend')!;

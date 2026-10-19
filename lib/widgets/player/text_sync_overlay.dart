@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import '../../l10n/l10n.dart';
 import 'package:media_kit/media_kit.dart';
 
@@ -577,7 +578,7 @@ class _TextSyncOverlayState extends State<TextSyncOverlay> {
                         ListView.builder(
                           controller: _scrollController,
                           itemCount: cues.length,
-                          cacheExtent: 300, // Pre-cache only adjacent visible rows
+                          scrollCacheExtent: const ScrollCacheExtent.pixels(300), // Pre-cache only adjacent visible rows
                           padding: EdgeInsets.only(
                             top: context.rem(AppRem.xs),
                             bottom: context.rem(isLandscapeMobile ? AppRem.lg : 2.5),

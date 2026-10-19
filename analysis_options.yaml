@@ -18,7 +18,6 @@ analyzer:
     - macos/**
     - linux/**
   errors:
-    deprecated_member_use: ignore
     # Promoted from its default info severity, because CI analyses with
     # --no-fatal-infos and an info would not have stopped anything. It was
     # suppressed entirely while 71 bare print() calls sat in lib/, several

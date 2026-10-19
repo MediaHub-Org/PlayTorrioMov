@@ -56,17 +56,6 @@ class LibraryShelfPage extends StatefulWidget {
 
   bool get isCollection => collectionId != null;
 
-  /// Translates [ReorderableListView]'s destination index into the one
-  /// [MediaCollectionsService.reorder] wants.
-  ///
-  /// The widget reports `newIndex` as an insertion point in the list *before*
-  /// the dragged row is taken out, so every downward move arrives one too
-  /// high; the service removes first and then inserts. Off by one here would
-  /// silently mis-place every drag towards the end of the list, which is the
-  /// half of the drags nobody checks.
-  @visibleForTesting
-  static int reorderTarget(int from, int to) => to > from ? to - 1 : to;
-
   @override
   State<LibraryShelfPage> createState() => _LibraryShelfPageState();
 }
@@ -509,14 +498,10 @@ class _LibraryShelfPageState extends State<LibraryShelfPage> {
         child: ReorderableListView.builder(
       padding: EdgeInsets.fromLTRB(context.rem(AppRem.md), context.rem(AppRem.sm), context.rem(AppRem.md), context.rem(6.25)),
       itemCount: collection.items.length,
-      onReorder: (from, to) {
-        // ReorderableListView reports the destination as an insertion index
-        // in the *pre-removal* list, so a downward move is one too high.
-        MediaCollectionsService.reorder(
-          collection.id,
-          from,
-          LibraryShelfPage.reorderTarget(from, to),
-        );
+      onReorderItem: (from, to) {
+        // Already corrected for the row taken out, so it is the index the
+        // service inserts at.
+        MediaCollectionsService.reorder(collection.id, from, to);
       },
       itemBuilder: (context, index) {
         final item = collection.items[index];

@@ -356,7 +356,7 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                     SizedBox(width: context.rem(AppRem.ms)),
                     Switch.adaptive(
                       value: _useDebrid,
-                      activeColor: const Color(0xFF00E5FF),
+                      activeThumbColor: const Color(0xFF00E5FF),
                       onChanged: (val) async {
                         setState(() => _useDebrid = val);
                         await _debrid.saveUseDebridForStreams(val);
@@ -442,7 +442,8 @@ class _DebridSettingsPageState extends State<DebridSettingsPage> {
                 ),
                 SizedBox(height: context.rem(AppRem.ms)),
                 DropdownButtonFormField<String>(
-                  value: services.contains(_selectedService) ? _selectedService : 'None',
+                  key: ValueKey(services.contains(_selectedService) ? _selectedService : 'None'),
+                  initialValue: services.contains(_selectedService) ? _selectedService : 'None',
                   dropdownColor: AppColors.raised,
                   decoration: InputDecoration(
                     filled: true,
