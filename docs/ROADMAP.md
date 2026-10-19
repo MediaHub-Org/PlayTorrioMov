@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-19**, on `v1.9.7+55` (main at `a494429`).
+Last reconciled: **2026-10-19**, on `v1.9.8+56`, a dev prerelease (main at the release commit).
 
 ---
 
