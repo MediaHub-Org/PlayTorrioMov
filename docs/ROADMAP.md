@@ -10,9 +10,17 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-19**, on `v1.9.8+56`, a dev prerelease (main at the release commit).
+Last reconciled: **2026-10-19**, on `v1.9.8+56`, a dev prerelease (main at `9017387`).
 
 ---
+
+## Pending: next release
+
+- **Ship TheIntroDB v4.** PR #89 is merged into `main`, but v1.9.8 was built
+  before it. v3 is deprecated and will be shut down, so the next release should
+  come soon. Anime episode numbering was not checked against TVDB's default
+  order; if skips land on the wrong anime episode, check whether `mapping` is
+  needed (see the PR).
 
 ## Pending: needs a device
 
