@@ -147,6 +147,10 @@ jobs:
           contents: ${{ secrets.DOTENV_CONTENTS }}
           legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
           warn-when-empty: 'true'
+      - name: Stage TorrServer binaries
+        uses: ./.github/actions/torrserver-binaries
+        with:
+          platforms: windows
       - name: Install dependencies
         run: flutter pub get
 
@@ -534,6 +538,10 @@ jobs:
             flutter create --platforms=linux .
           fi
 
+      - name: Stage TorrServer binaries
+        uses: ./.github/actions/torrserver-binaries
+        with:
+          platforms: linux
       - name: Install dependencies
         run: flutter pub get
 
@@ -711,6 +719,10 @@ jobs:
             flutter create --platforms=macos .
           fi
 
+      - name: Stage TorrServer binaries
+        uses: ./.github/actions/torrserver-binaries
+        with:
+          platforms: darwin
       - name: Install dependencies
         run: flutter pub get
 
@@ -842,6 +854,10 @@ jobs:
           contents: ${{ secrets.DOTENV_CONTENTS }}
           legacy-contents: ${{ secrets.ENV_FILE || secrets.DOTENV }}
           warn-when-empty: 'true'
+      - name: Stage TorrServer binaries
+        uses: ./.github/actions/torrserver-binaries
+        with:
+          platforms: ios
       - name: Install dependencies
         run: flutter pub get
 

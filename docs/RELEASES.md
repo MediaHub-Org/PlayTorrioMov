@@ -118,6 +118,24 @@ build environment under a release with no commit to point at. The workflows
 name `ubuntu-24.04` explicitly instead. `windows-latest` and `macos-latest`
 are still floating; pin them the same way if either announces a migration.
 
+### TorrServer binaries come from our own release
+
+The torrserver_flutter plugin needs a TorrServer binary for the Linux, Windows,
+macOS and iOS builds. Its own download points at `ayman708-UX/torrserver_flutter`,
+which no longer exists, so those builds could not fetch it. CI now stages the
+binaries from the `torrserver-MatriX.147` release in this repo
+(`.github/actions/torrserver-binaries`), checks each against a SHA-256 pinned in
+that action, and points `TORRSERVER_FLUTTER_LOCAL_BINARIES` at them. The files
+are the official YouROK/TorrServer assets, unchanged, renamed to the names the
+plugin looks for. Source for that tag: `MatriX.147` upstream, also forked at
+`MediaHub-Org/TorrServer`.
+
+To move to a newer TorrServer: take its release assets from YouROK, check their
+digests, publish them as a new `torrserver-<tag>` release here, then update the
+tag and digests in the action. Keep the plugin at 0.0.6 until it stops pointing
+at the dead repo: 0.0.7 still does, and the Android step in the plugin's Gradle
+file would reach for it too after a version change.
+
 ## What the release build does not check
 
 **`build.yml` has no analyze or test step.** Only `pr-checks.yml` runs them,

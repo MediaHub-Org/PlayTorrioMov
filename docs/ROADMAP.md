@@ -18,6 +18,11 @@ Last reconciled: **2026-10-08**, on `v1.9.7+55`.
 
 Device checks; none of these can be settled from the code.
 
+- **TorrServer on CI.** The Linux, Windows, macOS and iOS builds now stage their
+  binary from our `torrserver-MatriX.147` release (see RELEASES.md). Windows is
+  verified locally: the official exe built into the app and answers
+  `/echo` with `MatriX.147`. The next PR Checks run covers the Linux job; the
+  macOS and iOS jobs only run on the next release build.
 - **Switch tint on iOS and macOS.** The switches moved from `activeColor` to
   `activeThumbColor`, which is what that property did on Windows, Android and
   Linux already. On Apple, the old property tinted the track, so the accent

@@ -151,6 +151,10 @@ jobs:
         run: |
           if [ ! -d linux ]; then flutter create --platforms=linux .; fi
 
+      - name: Stage TorrServer binaries
+        uses: ./.github/actions/torrserver-binaries
+        with:
+          platforms: linux
       - name: Install dependencies
         run: flutter pub get
 
