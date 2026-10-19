@@ -9,7 +9,8 @@ class SkipSegmentsService {
   static final SkipSegmentsService instance = SkipSegmentsService._internal();
   SkipSegmentsService._internal();
 
-  static const String _baseUrl = 'https://api.theintrodb.org/v3/media';
+  @visibleForTesting
+  static const String baseUrl = 'https://api.theintrodb.org/v4/media';
   final Map<String, MediaSkipData> _cache = {};
 
   /// Fetches skip timestamps for a media item.
@@ -66,7 +67,7 @@ class SkipSegmentsService {
       params['duration_ms'] = durationMs.toString();
     }
 
-    final uri = Uri.parse(_baseUrl).replace(queryParameters: params);
+    final uri = Uri.parse(baseUrl).replace(queryParameters: params);
     debugPrint('[SkipSegmentsService] Querying IntroDB: $uri');
 
     try {

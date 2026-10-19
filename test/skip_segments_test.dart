@@ -2,12 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations_en.dart';
 import 'package:playtorriomov/l10n/app_localizations_es.dart';
 import 'package:playtorriomov/models/player/skip_segment_model.dart';
+import 'package:playtorriomov/services/player/skip_segments_service.dart';
 
 void main() {
   group('MediaSkipSegment & MediaSkipData Tests', () {
     test('Parses intro, recap, credits, preview correctly from JSON', () {
       final json = {
-        'tmdb_id': 1396,
+        'tvdb_id': 71663,
         'type': 'tv',
         'season': 1,
         'episode': 1,
@@ -27,7 +28,7 @@ void main() {
       };
 
       final data = MediaSkipData.fromJson(json);
-      expect(data.tmdbId, 1396);
+      expect(data.tvdbId, 71663);
       expect(data.type, 'tv');
       expect(data.season, 1);
       expect(data.episode, 1);
@@ -103,5 +104,11 @@ void main() {
     const odd = MediaSkipSegment(type: 'mixed', startMs: 0, endMs: 1000);
     expect(odd.label(AppLocalizationsEn()), 'Skip Mixed');
     expect(odd.label(AppLocalizationsEs()), 'Saltar Mixed');
+  });
+
+  group('SkipSegmentsService endpoint', () {
+    test('asks the v4 media endpoint, not the frozen v3 one', () {
+      expect(SkipSegmentsService.baseUrl, 'https://api.theintrodb.org/v4/media');
+    });
   });
 }
