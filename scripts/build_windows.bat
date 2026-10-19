@@ -25,11 +25,41 @@ if "%~1"=="" (
 set CHANNEL=dev
 set DEST=%TEMP%\PlayTorrioMov-dev-%STAMP%
 
+REM The torrserver_flutter plugin downloads its TorrServer binary from a repo that
+REM no longer exists, so a clean build fails at install. Stage the pinned official
+REM build from our own release instead, the same way CI does, and point the plugin
+REM at it. A checksum mismatch deletes the file and stops the build.
+set TS_DIR=%TEMP%\torrserver-stage
+set TS_BIN=%TS_DIR%\torrserver-windows-amd64.exe
+set TS_SHA=2a67f19266f111f00828857e7e37c233a509c0def4f6254fd564a1761f35b47d
+set TS_URL=https://github.com/MediaHub-Org/PlayTorrioMov/releases/download/torrserver-MatriX.147/torrserver-windows-amd64.exe
+if not exist "%TS_DIR%" mkdir "%TS_DIR%"
+if not exist "%TS_BIN%" (
+  echo Fetching the pinned TorrServer binary ...
+  curl.exe -fsSL -o "%TS_BIN%" "%TS_URL%"
+  if errorlevel 1 (
+    echo TorrServer download failed.
+    exit /b 1
+  )
+)
+set TS_GOT=
+for /f "skip=1 delims=" %%h in ('certutil -hashfile "%TS_BIN%" SHA256') do if not defined TS_GOT set TS_GOT=%%h
+if /i not "%TS_GOT%"=="%TS_SHA%" (
+  echo TorrServer checksum mismatch; removing the file.
+  del "%TS_BIN%"
+  exit /b 1
+)
+set TORRSERVER_FLUTTER_LOCAL_BINARIES=%TS_DIR%
+
 echo Building Windows dev build (flutter build windows --release --dart-define=APP_CHANNEL=%CHANNEL%)...
 REM `call`, not a bare `flutter`: flutter is a .bat, and running a batch file
 REM without `call` hands this script's control to it for good -- everything
 REM after the build, the staging included, never ran.
-call flutter build windows --release --dart-define=APP_CHANNEL=%CHANNEL%
+REM The keys in .env (Dropbox, Simkl, ...) are compiled in, as CI does, so a
+REM local test build can exercise the sign-in flows.
+set ENV_DEFINE=
+if exist .env set ENV_DEFINE=--dart-define-from-file=.env
+call flutter build windows --release %ENV_DEFINE% --dart-define=APP_CHANNEL=%CHANNEL%
 if %ERRORLEVEL% NEQ 0 (
   echo Build failed with exit code %ERRORLEVEL%.
   exit /b %ERRORLEVEL%

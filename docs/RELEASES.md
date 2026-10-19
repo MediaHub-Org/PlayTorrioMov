@@ -89,7 +89,12 @@ scripts\run_windows.bat          REM runs the newest of those, logs to playtorri
 
 The build carries `--dart-define=APP_CHANNEL=dev`, the same marker a `dev_build`
 dispatch carries, so Settings → About says "Testing build" and a local build
-can never be mistaken for a release. Delete the folder when done; nothing
+can never be mistaken for a release.
+
+The script also fetches the pinned TorrServer binary from the `torrserver-MatriX.147`
+release and checks its SHA-256, because the plugin's own download no longer exists.
+Without that a clean local build fails at install. Keys in `.env` are compiled in, as
+they are in CI, so sign-in flows can be tried locally. Delete the folder when done; nothing
 depends on it.
 
 `build\releases\*.zip` is gone with the old script. To hand a Windows build to
