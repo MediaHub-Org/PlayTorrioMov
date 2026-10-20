@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-19**, on `v1.9.9+57`, a dev prerelease (main at `4399273`).
+Last reconciled: **2026-10-20**, on `v1.9.9+57`, a dev prerelease (main at `90e644a`).
 
 ---
 
@@ -73,6 +73,10 @@ None of these can be settled from the code.
   subtitles on" with a remote, and lights nothing with a finger. Refresh appears
   only on the Online tab. A full and a "Signs & Songs" track of one language list
   as two rows.
+- **Wyzie online subtitles with a key.** Paste a free key in Settings → Connect,
+  then search a title on a device. Sources should list; if they do not, the key
+  or the quota is the first suspect (a 429 means the day's 1000 are used). The
+  free plan may return fewer sources than Pro, so note which ones come back.
 
 ## Waiting on you
 
@@ -83,12 +87,9 @@ None of these can be settled from the code.
 - **Anime episode names.** Some episodes show "EP N" with no title. To check it
   against AniList's live `streamingEpisodes` data, I need the show and the
   episode number.
-- **Wyzie online subtitles.** No shared key ships in the source any more. Each
-  person pastes a free key in Settings → Connect (1000 requests a day per key);
-  until then, online subtitles stay empty. To confirm which sources a free key
-  returns, I need a key: the free plan may cover fewer than Pro. The old shared
-  key stays in git history and is public; revoke it on Wyzie's side if the
-  dashboard allows.
+- **Revoke the old Wyzie key.** The shared key the app used to ship stays in git
+  history, and anyone can read it there. Revoke it on Wyzie's dashboard if it
+  allows. The app no longer uses it, so revoking it does not break anything.
 
 ---
 
