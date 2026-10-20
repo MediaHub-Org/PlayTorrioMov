@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:playtorriomov/l10n/app_localizations_en.dart';
 import 'package:playtorriomov/l10n/app_localizations_es.dart';
 import 'package:playtorriomov/models/player/skip_segment_model.dart';
@@ -109,6 +113,100 @@ void main() {
   group('SkipSegmentsService endpoint', () {
     test('asks the v4 media endpoint, not the frozen v3 one', () {
       expect(SkipSegmentsService.baseUrl, 'https://api.theintrodb.org/v4/media');
+    });
+  });
+
+  group('SkipSegmentsService fetch', () {
+    // The service is a singleton with a per-title cache, so each test takes
+    // its own TMDB id; a shared one would be answered from an earlier test.
+    final service = SkipSegmentsService.instance;
+
+    test('asks the v4 endpoint for the TMDB id, season, episode and duration', () async {
+      Uri? asked;
+      final data = await http.runWithClient(
+        () => service.fetchSkipSegments(
+          tmdbId: '9101',
+          type: 'series',
+          season: 1,
+          episode: 2,
+          durationMs: 1400000,
+        ),
+        () => MockClient((req) async {
+          asked = req.url;
+          return http.Response(
+            json.encode({
+              'tvdb_id': 71663,
+              'intro': [
+                {'start_ms': 0, 'end_ms': 23000}
+              ],
+            }),
+            200,
+          );
+        }),
+      );
+
+      expect(asked!.host, 'api.theintrodb.org');
+      expect(asked!.path, '/v4/media');
+      expect(asked!.queryParameters, {
+        'tmdb_id': '9101',
+        'season': '1',
+        'episode': '2',
+        'duration_ms': '1400000',
+      });
+      expect(data!.tvdbId, 71663);
+      expect(data.segments.single.type, 'intro');
+    });
+
+    test('a movie sends no season or episode', () async {
+      Uri? asked;
+      await http.runWithClient(
+        () => service.fetchSkipSegments(tmdbId: '9102', type: 'movie'),
+        () => MockClient((req) async {
+          asked = req.url;
+          return http.Response('{}', 200);
+        }),
+      );
+
+      expect(asked!.queryParameters, {'tmdb_id': '9102'});
+    });
+
+    test('a title already answered is not asked again', () async {
+      var calls = 0;
+      MockClient counting() => MockClient((_) async {
+            calls++;
+            return http.Response(json.encode({'tvdb_id': 1}), 200);
+          });
+
+      await http.runWithClient(
+          () => service.fetchSkipSegments(tmdbId: '9103', type: 'movie'), counting);
+      await http.runWithClient(
+          () => service.fetchSkipSegments(tmdbId: '9103', type: 'movie'), counting);
+
+      expect(calls, 1);
+    });
+
+    test('a 404 or a server error means no skip data, not a thrown error', () async {
+      for (final status in [404, 500]) {
+        final data = await http.runWithClient(
+          () => service.fetchSkipSegments(tmdbId: '910$status', type: 'movie'),
+          () => MockClient((_) async => http.Response('', status)),
+        );
+        expect(data, isNull, reason: 'status $status');
+      }
+    });
+
+    test('with no TMDB or IMDb id it does not ask at all', () async {
+      var calls = 0;
+      final data = await http.runWithClient(
+        () => service.fetchSkipSegments(type: 'movie'),
+        () => MockClient((_) async {
+          calls++;
+          return http.Response('{}', 200);
+        }),
+      );
+
+      expect(data, isNull);
+      expect(calls, 0);
     });
   });
 }
