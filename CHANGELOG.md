@@ -3,9 +3,9 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.9.9+57] - 2026-10-19
+## [1.9.9+57] - 2026-10-21
 
-Dev prerelease: the change below is verified against the live API, not yet on a device.
+Stable release. The change below is verified against the live API and was checked locally (analysis, the test suite, a Windows build). It has not run on a device yet; the device checks in [ROADMAP.md](docs/ROADMAP.md) are still open.
 
 ### Changed
 
