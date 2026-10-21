@@ -387,7 +387,7 @@
   "searchPromptOrPaste": "ابحث في {scope}، أو الصق رابط ماغنت أو بث",
   "animeAllGenres": "كل الأنواع",
   "animeLoadFailed": "تعذر تحميل كتالوج الأنمي.",
-  "animeAniListUnavailable": "AniList، مصدر فهرس الأنمي، لا تستجيب الآن. تعود عادةً من تلقاء نفسها؛ حاول مرة أخرى بعد قليل.",
+  "animeCatalogUnavailable": "لا تستجيب AniList ولا Kitsu الآن، لذلك فهرس الأنمي فارغ. حاول مرة أخرى بعد قليل.",
   "animeTrendingTitle": "أنمي رائج",
   "animeTrendingSub": "أكثر المسلسلات شعبية ورواجًا",
   "animeSeasonTitle": "الأكثر شعبية هذا الموسم ({season})",

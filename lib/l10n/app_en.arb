@@ -503,7 +503,7 @@
   "@searchPromptOrPaste": {"placeholders": {"scope": {"type": "String"}}},
   "animeAllGenres": "All Genres",
   "animeLoadFailed": "Failed to load the Anime catalog.",
-  "animeAniListUnavailable": "AniList, the source of the anime catalog, is not answering right now. It usually comes back on its own; try again in a while.",
+  "animeCatalogUnavailable": "Neither AniList nor Kitsu is answering right now, so the anime catalog is empty. Try again in a while.",
   "animeTrendingTitle": "Trending Anime",
   "animeTrendingSub": "Top popular and trending series",
   "animeSeasonTitle": "Popular This Season ({season})",

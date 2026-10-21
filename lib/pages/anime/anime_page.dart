@@ -106,7 +106,7 @@ class _AnimePageState extends State<AnimePage> {
       _fantasyAnime = results[6];
       _sciFiAnime = results[7];
       _error = allEmpty
-          ? context.l10n.animeAniListUnavailable
+          ? context.l10n.animeCatalogUnavailable
           : null;
       _loading = false;
     });

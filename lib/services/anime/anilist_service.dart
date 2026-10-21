@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../models/anime/anime_media.dart';
+import 'kitsu_service.dart';
 
 class AnilistService {
   static final AnilistService instance = AnilistService._internal();
@@ -143,7 +144,9 @@ class AnilistService {
     ''';
 
     final data = await _postGraphQL(query, {'page': page, 'perPage': perPage});
-    return _parseMediaList(data);
+    final list = _parseMediaList(data);
+    if (list.isNotEmpty) return list;
+    return KitsuService.instance.trending(perPage: perPage);
   }
 
   /// Popular This Season
@@ -167,7 +170,9 @@ class AnilistService {
       'season': currentSeason(),
       'seasonYear': DateTime.now().year,
     });
-    return _parseMediaList(data);
+    final list = _parseMediaList(data);
+    if (list.isNotEmpty) return list;
+    return KitsuService.instance.popularThisSeason(perPage: perPage);
   }
 
   /// Upcoming Next Season
@@ -191,7 +196,9 @@ class AnilistService {
       'season': nextSeason(),
       'seasonYear': nextSeasonYear(),
     });
-    return _parseMediaList(data);
+    final list = _parseMediaList(data);
+    if (list.isNotEmpty) return list;
+    return KitsuService.instance.upcoming(perPage: perPage);
   }
 
   /// All-Time Top Rated
@@ -210,7 +217,9 @@ class AnilistService {
     ''';
 
     final data = await _postGraphQL(query, {'page': page, 'perPage': perPage});
-    return _parseMediaList(data);
+    final list = _parseMediaList(data);
+    if (list.isNotEmpty) return list;
+    return KitsuService.instance.topRated(perPage: perPage);
   }
 
   /// Filter By Genre
@@ -234,7 +243,9 @@ class AnilistService {
       'perPage': perPage,
       'genre': genre,
     });
-    return _parseMediaList(data);
+    final list = _parseMediaList(data);
+    if (list.isNotEmpty) return list;
+    return KitsuService.instance.byGenre(genre, perPage: perPage);
   }
 
   /// Search Anime
@@ -279,7 +290,13 @@ class AnilistService {
     };
 
     final data = await _postGraphQL(query, variables);
-    return _parseMediaList(data);
+    final list = _parseMediaList(data);
+    if (list.isNotEmpty || !hasSearch) return list;
+    final fallback = await KitsuService.instance.search(search, perPage: perPage);
+    if (genre == null || genre.isEmpty || genre == 'All') return fallback;
+    return fallback
+        .where((a) => a.genres.any((g) => g.toLowerCase() == genre.toLowerCase()))
+        .toList();
   }
 
   /// Browse Anime with Filter Parameters
@@ -375,6 +392,9 @@ class AnilistService {
 
   /// Full Anime Details (Including Voice Actors/Characters, Relations, Recommendations)
   Future<AnimeMedia?> fetchAnimeDetails(int anilistId) async {
+    if (KitsuService.isKitsuId(anilistId)) {
+      return KitsuService.instance.details(KitsuService.kitsuIdOf(anilistId));
+    }
     const query = '''
       query (\$id: Int) {
         Media(id: \$id, type: ANIME) {

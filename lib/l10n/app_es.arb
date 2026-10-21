@@ -387,7 +387,7 @@
   "searchPromptOrPaste": "Buscar {scope}, o pega un enlace magnet o de transmisión",
   "animeAllGenres": "Todos los géneros",
   "animeLoadFailed": "No se pudo cargar el catálogo de anime.",
-  "animeAniListUnavailable": "AniList, la fuente del catálogo de anime, no responde ahora. Suele volver sola; prueba de nuevo en un rato.",
+  "animeCatalogUnavailable": "Ni AniList ni Kitsu responden ahora, así que el catálogo de anime está vacío. Prueba de nuevo en un rato.",
   "animeTrendingTitle": "Anime en tendencia",
   "animeTrendingSub": "Las series más populares y en tendencia",
   "animeSeasonTitle": "Popular esta temporada ({season})",

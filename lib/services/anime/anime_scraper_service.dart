@@ -5,6 +5,7 @@ import '../../models/anime/anime_media.dart';
 import '../../models/movie/movie_detail.dart';
 import '../../models/movie/video.dart';
 import '../../models/stream/stream_model.dart';
+import 'kitsu_service.dart';
 import 'extractors/anidb_extractor.dart';
 import 'extractors/megaplay_extractor.dart';
 import 'extractors/recloud_extractor.dart';
@@ -57,7 +58,32 @@ class AnimeScraperService {
   }
 
   /// Scrape all stream sources for an Anime and Episode across all native extractors concurrently.
+  /// The streams for one episode. A Kitsu-sourced title is resolved to its
+  /// AniList id first, because the stream sites are keyed by that id.
   Stream<StreamSource> scrapeStreamsStream({
+    required AnimeMedia anime,
+    required int episodeNumber,
+    String? categoryFilter, // 'sub', 'dub', or null for both
+  }) async* {
+    final resolved = await _withAnilistId(anime);
+    yield* _scrapeStreams(
+      anime: resolved,
+      episodeNumber: episodeNumber,
+      categoryFilter: categoryFilter,
+    );
+  }
+
+  /// The AniList id of a Kitsu-sourced title, by Kitsu's own mapping. When there
+  /// is none the title keeps its Kitsu id, and only its title-based sources run.
+  Future<AnimeMedia> _withAnilistId(AnimeMedia anime) async {
+    if (!KitsuService.isKitsuId(anime.id)) return anime;
+    final anilistId = await KitsuService.instance
+        .anilistIdFor(KitsuService.kitsuIdOf(anime.id));
+    if (anilistId == null) return anime;
+    return AnimeMedia.fromJson({...anime.toJson(), 'id': anilistId});
+  }
+
+  Stream<StreamSource> _scrapeStreams({
     required AnimeMedia anime,
     required int episodeNumber,
     String? categoryFilter, // 'sub', 'dub', or null for both
@@ -524,7 +550,29 @@ class AnimeScraperService {
 
   /// Scrapes anime streams when only basic metadata (title, anilistId, episodeNumber) is available,
   /// e.g. from in-player sources panel or continuing playback.
+  /// The streams from a title and its episode number. A Kitsu-issued id (negative)
+  /// is resolved to the AniList id of the same show first.
   Stream<StreamSource> scrapeStreamsByDetails({
+    required String title,
+    int? anilistId,
+    required int episodeNumber,
+    String? categoryFilter,
+  }) async* {
+    final resolved = await _resolvedAnilistId(anilistId);
+    yield* _scrapeByDetails(
+      title: title,
+      anilistId: resolved,
+      episodeNumber: episodeNumber,
+      categoryFilter: categoryFilter,
+    );
+  }
+
+  Future<int?> _resolvedAnilistId(int? id) async {
+    if (id == null || id > 0) return id;
+    return KitsuService.instance.anilistIdFor(KitsuService.kitsuIdOf(id));
+  }
+
+  Stream<StreamSource> _scrapeByDetails({
     required String title,
     int? anilistId,
     required int episodeNumber,

@@ -20,11 +20,11 @@ Last reconciled: **2026-10-21**, on `v1.9.10+58`, the stable release (main at `2
   Simkl client ID in Settings; nothing is shipped for everyone to share. Each
   still needs one real approval in the browser: Dropbox's pasted code, and
   Simkl's PIN.
-- **Anime catalog.** AniList has switched its API off for now: every request
-  answers 403, "temporarily disabled due to severe stability issues". Browse,
-  search, details and episode titles all come from AniList, so the anime tab is
-  empty until it returns; the page now says so. Kitsu answers and could serve as
-  a fallback. That would be a decision to take, not a fix.
+- **Anime while AniList is down.** AniList answers 403 for now, so the anime tab
+  falls back to Kitsu: lists, search, details, episode titles, and stream sources
+  through Kitsu's AniList mapping. Check it on a device. Kitsu's titles and
+  genres differ from AniList's, and a show Kitsu does not map gets only its
+  title-based sources.
 - **Anime episode names.** AniList gives a title per episode only for shows it
   links to a legal streaming service (commonly Crunchyroll), which is most of
   the catalog; the rest show "EP N". No key is involved. A show AniList does list

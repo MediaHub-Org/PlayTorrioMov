@@ -14,8 +14,10 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **The player's info popover follows the app's theme.** It used to keep the
   player's fixed dark look whatever theme was chosen.
-- **The anime tab says when AniList is down.** It used to say the connection
-  had failed, which was not the cause.
+- **Anime works while AniList is down.** AniList has its API switched off for
+  now, which left the anime tab empty. The catalog now falls back to Kitsu:
+  lists, search, details and episode titles, with streams found through the
+  AniList id Kitsu maps each show to.
 
 ## [1.9.10+58] - 2026-10-21
 
