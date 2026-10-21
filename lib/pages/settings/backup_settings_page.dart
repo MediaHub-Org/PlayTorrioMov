@@ -727,6 +727,8 @@ class _DropboxBackupSectionState extends State<_DropboxBackupSection> {
   bool _isConnecting = false;
   bool _isBusy = false;
   final _codeController = TextEditingController();
+  final _appKeyController = TextEditingController();
+  bool _editingAppKey = false;
 
   @override
   void initState() {
@@ -737,6 +739,7 @@ class _DropboxBackupSectionState extends State<_DropboxBackupSection> {
   @override
   void dispose() {
     _codeController.dispose();
+    _appKeyController.dispose();
     super.dispose();
   }
 
@@ -781,6 +784,12 @@ class _DropboxBackupSectionState extends State<_DropboxBackupSection> {
     } finally {
       if (mounted) setState(() => _isBusy = false);
     }
+  }
+
+  Future<void> _saveAppKey() async {
+    await DropboxBackupService.setAppKey(_appKeyController.text);
+    _appKeyController.clear();
+    if (mounted) setState(() => _editingAppKey = false);
   }
 
   Future<void> _disconnect() async {
@@ -923,6 +932,50 @@ class _DropboxBackupSectionState extends State<_DropboxBackupSection> {
                   ),
             ],
           ),
+          // The app key belongs to the user's own Dropbox app, so it is entered
+          // here rather than shipped in the build.
+          if (!DropboxBackupService.isConfigured || _editingAppKey) ...[
+            SizedBox(height: context.rem(AppRem.md)),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _appKeyController,
+                    style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+                    decoration: InputDecoration(
+                      hintText: l10n.backupDropboxAppKeyHint,
+                      hintStyle: TextStyle(color: AppColors.inkAlpha(0.3)),
+                      filled: true,
+                      fillColor: AppColors.bar,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: context.rem(AppRem.sm)),
+                ElevatedButton(
+                  onPressed: _saveAppKey,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _dropboxBlue,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+                  ),
+                  child: Text(l10n.backupSave, style: const TextStyle(fontWeight: FontWeight.w700)),
+                ),
+              ],
+            ),
+          ] else if (!_connected && !_isConnecting)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                onPressed: () => setState(() => _editingAppKey = true),
+                child: Text(
+                  l10n.backupDropboxChangeKey,
+                  style: TextStyle(color: AppColors.inkAlpha(0.5), fontSize: AppType.small),
+                ),
+              ),
+            ),
           // The code Dropbox showed in the browser, pasted back here -- no
           // redirect URI/deep link for Dropbox to hand the code to instead.
           if (_isConnecting) ...[

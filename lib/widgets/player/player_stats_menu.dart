@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../../l10n/l10n.dart';
 import '../../models/stream/stream_model.dart';
 import '../../services/app_units.dart';
+import '../../services/theme/app_colors.dart';
 import '../../services/player/playback_diagnosis.dart';
 import '../../services/stream/torrent_stream_service.dart';
 import 'player_glass.dart';
@@ -247,7 +248,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
           child: Text(
             sentence,
             style: TextStyle(
-              color: isProblem ? PlayerTheme.accent : PlayerTheme.inkSubtle,
+              color: isProblem ? AppColors.accent : AppColors.inkSubtle,
               fontSize: AppType.caption,
               fontWeight: FontWeight.w600,
               height: 1.3, // ratio: a line height, not a size
@@ -259,6 +260,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     final l10n = context.l10n;
     final showSwarm =
         widget.torrentMagnet != null || widget.initialStats != null;
@@ -268,11 +270,13 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
     return PlayerGlassCard(
       width: PlayerTheme.menuWidthFor(context),
       padding: EdgeInsets.all(context.rem(0.625)),
+      backgroundColor: AppColors.surface,
+      border: Border.all(color: AppColors.inkAlpha(0.1)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          PlayerMenuHeader(title: l10n.playerStats.toUpperCase()),
+          _StatsHeader(title: l10n.playerStats.toUpperCase()),
           SizedBox(height: context.rem(AppRem.snug)),
           _StatRow(label: l10n.playerStatsSource, value: widget.sourceLabel),
           _StatRow(
@@ -330,7 +334,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
               ),
               label: Text(l10n.playerStatsCopyReport),
               style: TextButton.styleFrom(
-                foregroundColor: PlayerTheme.inkSubtle,
+                foregroundColor: AppColors.inkSubtle,
                 minimumSize: Size(0, context.rem(2.25)),
                 textStyle: const TextStyle(fontSize: AppType.caption),
               ),
@@ -340,7 +344,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
           // action used once per stream at most.
           if (widget.onCopyLink != null) ...[
             SizedBox(height: context.rem(AppRem.xs)),
-            const Divider(color: PlayerTheme.edgeSoft, height: 1), // px: a hairline, not a layout size
+            Divider(color: AppColors.inkAlpha(0.07), height: 1), // px: a hairline, not a layout size
             TextButton.icon(
               onPressed: widget.onCopyLink,
               icon: Icon(
@@ -349,7 +353,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
               ),
               label: Text(l10n.playerCopyStreamUrl),
               style: TextButton.styleFrom(
-                foregroundColor: PlayerTheme.inkSubtle,
+                foregroundColor: AppColors.inkSubtle,
                 minimumSize: Size(0, context.rem(2.25)),
                 textStyle: const TextStyle(fontSize: AppType.caption),
               ),
@@ -372,6 +376,7 @@ class _StatRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    AppColors.dependOn(context);
     return Padding(
       padding: EdgeInsets.symmetric(vertical: context.rem(0.3125)),
       child: Row(
@@ -381,8 +386,8 @@ class _StatRow extends StatelessWidget {
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: PlayerTheme.inkSubtle,
+              style: TextStyle(
+                color: AppColors.inkSubtle,
                 fontSize: AppType.caption,
                 fontWeight: FontWeight.w500,
               ),
@@ -395,15 +400,44 @@ class _StatRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
-              style: const TextStyle(
-                color: PlayerTheme.ink,
+              style: TextStyle(
+                color: AppColors.ink,
                 fontSize: AppType.captionPlus,
                 fontWeight: FontWeight.w600,
-                fontFeatures: [FontFeature.tabularFigures()],
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The stats popover's own title row. The shared player header draws its
+/// title in the player's fixed white, which is unreadable on the app's light
+/// surface, so this one takes its ink from the app's theme.
+class _StatsHeader extends StatelessWidget {
+  final String title;
+
+  const _StatsHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    AppColors.dependOn(context);
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.rem(AppRem.xs),
+        vertical: context.rem(AppRem.xs),
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: AppColors.inkSubtle,
+          fontSize: AppType.caption,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1.2, // px: tracking, not a layout size
+        ),
       ),
     );
   }

@@ -106,7 +106,7 @@ class _AnimePageState extends State<AnimePage> {
       _fantasyAnime = results[6];
       _sciFiAnime = results[7];
       _error = allEmpty
-          ? 'Failed to load Anime catalog. Check your internet connection.'
+          ? context.l10n.animeAniListUnavailable
           : null;
       _loading = false;
     });

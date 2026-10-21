@@ -49,7 +49,36 @@ abstract final class DropboxBackupService {
   @visibleForTesting
   static const backupPath = _backupPath;
 
-  static bool get isConfigured => EnvService.dropboxAppKey.isNotEmpty;
+  static const _appKeyKey = 'dropbox_app_key';
+
+  /// The app key the user registered and pasted in Backup settings. Dropbox
+  /// keys belong to a developer's app, so each person registers their own.
+  static final ValueNotifier<String?> appKey = ValueNotifier<String?>(null);
+
+  /// The key requests use: the user's, else the build's (a developer's own
+  /// `.env`), else none.
+  static String? get effectiveAppKey =>
+      appKey.value ?? (EnvService.dropboxAppKey.isEmpty ? null : EnvService.dropboxAppKey);
+
+  static bool get isConfigured => effectiveAppKey != null;
+
+  static Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_appKeyKey);
+    appKey.value = (stored != null && stored.isNotEmpty) ? stored : null;
+  }
+
+  static Future<void> setAppKey(String? value) async {
+    final trimmed = value?.trim();
+    final normalized = (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+    appKey.value = normalized;
+    final prefs = await SharedPreferences.getInstance();
+    if (normalized == null) {
+      await prefs.remove(_appKeyKey);
+    } else {
+      await prefs.setString(_appKeyKey, normalized);
+    }
+  }
 
   // ── PKCE ──────────────────────────────────────────────────────────────
   // The verifier math lives in `lib/utils/pkce.dart`, its own file rather
@@ -66,7 +95,7 @@ abstract final class DropboxBackupService {
     await prefs.setString(_verifierKey, verifier);
 
     final uri = Uri.parse(_authorizeUrl).replace(queryParameters: {
-      'client_id': EnvService.dropboxAppKey,
+      'client_id': effectiveAppKey ?? '',
       'response_type': 'code',
       'code_challenge': Pkce.challengeFor(verifier),
       'code_challenge_method': 'S256',
@@ -99,7 +128,7 @@ abstract final class DropboxBackupService {
       body: {
         'code': trimmed,
         'grant_type': 'authorization_code',
-        'client_id': EnvService.dropboxAppKey,
+        'client_id': effectiveAppKey ?? '',
         'code_verifier': verifier,
       },
     ).timeout(const Duration(seconds: 20));
@@ -167,7 +196,7 @@ abstract final class DropboxBackupService {
         body: {
           'grant_type': 'refresh_token',
           'refresh_token': refreshToken,
-          'client_id': EnvService.dropboxAppKey,
+          'client_id': effectiveAppKey ?? '',
         },
       ).timeout(const Duration(seconds: 15));
 
