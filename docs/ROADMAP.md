@@ -10,70 +10,9 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-21**, on `v1.9.9+57`, the stable release (main at `658747e`).
+Last reconciled: **2026-10-21**, on `v1.9.9+57`, the stable release (main at `1800667`).
 
 ---
-
-## Pending: needs a device
-
-None of these can be settled from the code.
-
-- **Switch tint on iOS and macOS.** Switches moved from `activeColor` to
-  `activeThumbColor`. On Apple the old property tinted the track, so the accent
-  now sits on the thumb. Check one switch on an iPhone or a Mac; if the track
-  tint is missing, add `activeTrackColor` on those platforms.
-- **Text size with the system scale.** At 125% and 150% Windows scaling, and at
-  a large text size on iOS, nothing should overflow or shrink.
-- **Library reorder, the drag.** The index logic has a widget test. Drag a row to
-  the bottom and to the top of a collection, and check it lands where dropped.
-- **Cast.** Casting from the middle of a movie starts there and pauses the phone;
-  "Stop casting" ends the session. A scraper source that needs Referer or
-  User-Agent still has no sender-side way to send them (#79). Whether a phone can
-  cast its own torrent is one `curl` away (`CastService.canCastUrl`).
-- **Android notification.** Play/Pause follows the player, and Android 13+ asks
-  for notification permission on launch.
-- **Similar Content** on a movie and a series (TMDB first, BestSimilar as the
-  fallback).
-- **The loading screen** with a torrent, a debrid link and a plain URL: the
-  title's logo (or name) and a spinner, and the screen clears on the first frame.
-- **TV focus audit.** With a remote: the Sources page (the four filter pills; OK
-  opens each menu on the selected row; Back returns to the same pill; focus stays
-  put when the add-on pill appears), the in-player Sources and Episodes panels,
-  the Cast sheet, Library and Collections, Live TV sources, the Discover sort
-  pills, the search filter menus, and the video settings cards. Every row shows a wash under
-  the remote; a mouse lights it lighter; after a mouse or remote-app touch, the
-  focus cue stays.
-- **Debrid with a real account.** TorBox (or Premiumize, AllDebrid, Debrid-Link),
-  "use debrid for streams" on, and a popular title: cached releases wear a green
-  "Cached" badge and lead their language group, and one starts in a second or
-  two. If no badge appears where one should, run a debug build and read the
-  `[DebridCache]` lines. Real-Debrid has no lookup and shows none, by design. The
-  sources-page card shows without debrid, goes away on "Not now" for good, and
-  hides once debrid is on.
-- **Skipping around.** Hold the right arrow on a network stream: the bar moves at
-  once and the picture jumps every so often, rather than freezing until the key
-  is released. Try a torrent and a debrid link.
-- **Language and playback on a real connection.** On a device set to Spanish (or
-  any of the thirteen languages the detector knows): the source list opens on
-  that language, a multi-track file opens on that track, and with foreign audio
-  and an embedded subtitle in your language, the subtitle comes on by itself. On
-  a slow connection: it stops and waits once instead of stuttering, the stats
-  panel names the cause, "Playback keeps pausing" appears after repeated stalls,
-  and a jump back comes out of the cache.
-- **TV: details, loading screen, speed menu.** Opening a title's details lands on
-  Play, and Down/Right reach the library buttons and then the rails with no genre
-  tags between. The loading screen shows the title's logo (or name) above a
-  spinner, and the episode under it. The speed menu stays open while
-  Left/Right step the speed, closes on OK or Back, and has no frame around the
-  slider.
-- **Subtitle panel on TV and phone.** Opening it puts the violet wash on "Turn
-  subtitles on" with a remote, and lights nothing with a finger. Refresh appears
-  only on the Online tab. A full and a "Signs & Songs" track of one language list
-  as two rows.
-- **Wyzie online subtitles with a key.** Paste a free key in Settings → Connect,
-  then search a title on a device. Sources should list; if they do not, the key
-  or the quota is the first suspect (a 429 means the day's 1000 are used). The
-  free plan may return fewer sources than Pro, so note which ones come back.
 
 ## Waiting on you
 
@@ -81,9 +20,10 @@ None of these can be settled from the code.
   (v1.9.7's `data/app.so`). Simkl's device request returns a PIN for the app ID,
   and Dropbox's authorize page loads for the app key. Each still needs one real
   approval in the browser: Dropbox's pasted code, and Simkl's PIN.
-- **Anime episode names.** Some episodes show "EP N" with no title. To check it
-  against AniList's live `streamingEpisodes` data, I need the show and the
-  episode number.
+- **Anime episode names.** AniList gives a title per episode only for shows it
+  links to a legal streaming service (commonly Crunchyroll), which is most of
+  the catalog; the rest show "EP N". No key is involved. A show AniList does list
+  with episode titles that shows "EP N" here is a bug: send the show and episode.
 - **Revoke the old Wyzie key.** The shared key the app used to ship stays in git
   history, and anyone can read it there. Revoke it on Wyzie's dashboard if it
   allows. The app no longer uses it, so revoking it does not break anything.

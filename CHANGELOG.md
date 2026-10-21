@@ -5,6 +5,13 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Backups are encrypted with a passphrase.** Set it in Backup settings before
+  your first backup. Every backup -- local file, WebDAV or Dropbox -- is sealed
+  with it, and none can be opened without it. Lose the passphrase and the
+  backups are lost too. Backups made before this still restore.
+
 ### Changed
 
 - **Movies, Series and Anime no longer have filter menus above the rows.**
@@ -12,6 +19,7 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **A filter menu is as wide as the pill that opens it.**
 - **A similar title is no longer cut off when it grows under the pointer.** The
   rail had no room for the enlargement, so its top and bottom were clipped.
 - **Stream stats has space above "Copy diagnostics".**

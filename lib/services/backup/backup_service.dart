@@ -8,6 +8,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_info.dart';
+import 'backup_crypto.dart';
 import 'cloud_backup_settings.dart';
 
 /// True if [host] is `localhost`, a loopback/private-range IPv4 literal, or
@@ -45,11 +46,28 @@ abstract final class BackupService {
   /// Dropbox all ship this unchanged, just to a different destination.
   static Future<String> buildEnvelopeJson() => _buildEnvelopeJson();
 
+  /// What leaves the device: the envelope sealed with the backup passphrase.
+  /// No passphrase, no backup -- nothing goes out in plain text.
+  static Future<String> buildOutgoingEnvelope() async {
+    final passphrase = await BackupPassphrase.read();
+    if (passphrase == null) {
+      throw const BackupCryptoException(
+        'Set a backup passphrase in Backup settings first.',
+      );
+    }
+    return BackupCrypto.seal(await _buildEnvelopeJson(), passphrase);
+  }
+
   static Future<String> _buildEnvelopeJson() async {
     final prefs = await SharedPreferences.getInstance();
     // Sorted, so two exports diff cleanly instead of shuffling with the
-    // store's own key order.
-    final keys = prefs.getKeys().toList()..sort();
+    // store's own key order. The passphrase is left out: it seals this
+    // envelope, so it must never sit inside it.
+    final keys = prefs
+        .getKeys()
+        .where((key) => key != BackupPassphrase.key)
+        .toList()
+      ..sort();
     final data = <String, dynamic>{
       for (final key in keys) key: prefs.get(key),
     };
@@ -85,7 +103,8 @@ abstract final class BackupService {
   static Future<int> applyEnvelopeJson(String raw) => _applyEnvelopeJson(raw);
 
   static Future<int> _applyEnvelopeJson(String raw) async {
-    final envelope = jsonDecode(raw);
+    final plain = await BackupCrypto.open(raw, await BackupPassphrase.read());
+    final envelope = jsonDecode(plain);
     if (envelope is! Map || envelope['data'] is! Map) {
       throw const FormatException('Not a valid PlayTorrio backup file.');
     }
@@ -135,7 +154,7 @@ abstract final class BackupService {
   /// reported a path the user could not reach and could not act on. A
   /// backup nobody can get at is not a backup.
   static Future<String?> exportToPickedFile() async {
-    final json = await _buildEnvelopeJson();
+    final json = await buildOutgoingEnvelope();
     final bytes = Uint8List.fromList(utf8.encode(json));
 
     final destination = await FilePicker.platform.saveFile(
@@ -205,10 +224,10 @@ abstract final class BackupService {
   /// `SecureValueStore` (flutter_secure_storage), not SharedPreferences, so
   /// they are *not* in the envelope -- an earlier version of this comment
   /// said they were, and that is no longer the threat being defended
-  /// against. What the envelope does carry is every other preference,
-  /// including the TMDB and Simkl keys the user pasted in, plus the Basic
-  /// Auth header on the request itself. That is still worth not sending in
-  /// cleartext.
+  /// against. The envelope itself is sealed with the backup passphrase
+  /// (`backup_crypto.dart`), so the body is unreadable on the wire. The Basic
+  /// Auth header is not sealed: it carries the WebDAV password, so the URL
+  /// still has to be https or a local address.
   ///
   /// Loopback/private-LAN/.local addresses are exempt since that traffic
   /// never leaves the local network either way -- the common case for a
@@ -233,7 +252,7 @@ abstract final class BackupService {
     final response = await http.put(
       uri,
       headers: {..._webDavAuthHeader(config), 'Content-Type': 'application/json'},
-      body: await _buildEnvelopeJson(),
+      body: await buildOutgoingEnvelope(),
     ).timeout(const Duration(seconds: 30));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('WebDAV upload failed (HTTP ${response.statusCode}).');

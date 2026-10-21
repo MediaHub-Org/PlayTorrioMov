@@ -235,7 +235,7 @@ abstract final class DropboxBackupService {
     if (token == null) {
       throw Exception('Not connected to Dropbox.');
     }
-    final json = await BackupService.buildEnvelopeJson();
+    final json = await BackupService.buildOutgoingEnvelope();
     final response = await http.post(
       Uri.parse(_uploadUrl),
       headers: {

@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/l10n.dart';
 import '../../services/backup/auto_backup_service.dart';
+import '../../services/backup/backup_crypto.dart';
 import '../../services/backup/backup_service.dart';
 import '../../services/backup/cloud_backup_settings.dart';
 import '../../services/backup/dropbox_backup_service.dart';
@@ -20,10 +21,27 @@ class BackupSettingsPage extends StatefulWidget {
   State<BackupSettingsPage> createState() => _BackupSettingsPageState();
 }
 
+/// Backups cannot be made without the passphrase that seals them. Says so
+/// before trying, rather than failing with the error underneath.
+Future<bool> _hasBackupPassphrase(BuildContext context) async {
+  if (await BackupPassphrase.read() != null) return true;
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.backupPassphraseRequired),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+  return false;
+}
+
 class _BackupSettingsPageState extends State<BackupSettingsPage> {
   bool _isBackingUp = false;
+  Future<String?> _passphrase = BackupPassphrase.read();
 
   Future<void> _exportData(BuildContext context) async {
+    if (!await _hasBackupPassphrase(context)) return;
     setState(() => _isBackingUp = true);
     try {
       final path = await BackupService.exportToPickedFile();
@@ -198,6 +216,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
   Future<void> _uploadCloud(BuildContext context) async {
     final config = CloudBackupSettings.config.value;
     if (config == null) return;
+    if (!await _hasBackupPassphrase(context)) return;
     setState(() => _isBackingUp = true);
     try {
       await BackupService.uploadToCloud(config);
@@ -274,6 +293,93 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
     }
   }
 
+  /// Whether a passphrase is set, and the one button that sets or changes it.
+  Widget _buildPassphraseRow(BuildContext context) {
+    final l10n = context.l10n;
+    return FutureBuilder<String?>(
+      future: _passphrase,
+      builder: (_, snapshot) {
+        final isSet = snapshot.data != null;
+        // The button sits under the status, in the text's own column, so it
+        // gets the card's width and its label wraps instead of running off a
+        // phone at 3x text.
+        return Row(
+          children: [
+            Icon(
+              isSet ? Icons.lock_rounded : Icons.lock_open_rounded,
+              size: context.rem(AppRem.iconSm),
+              color: isSet ? AppColors.accent : AppColors.inkSubtle,
+            ),
+            SizedBox(width: context.rem(AppRem.sm)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isSet ? l10n.backupPassphraseSet : l10n.backupPassphraseNotSet,
+                    style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.captionPlus),
+                  ),
+                  TextButton(
+                    onPressed: () => _setPassphrase(context),
+                    child: Text(isSet ? l10n.backupPassphraseChange : l10n.backupPassphraseSetAction),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _setPassphrase(BuildContext context) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController();
+    final entered = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.raised,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusLg))),
+        title: Text(l10n.backupPassphraseTitle, style: TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.backupPassphraseBody,
+              style: TextStyle(color: AppColors.inkAlpha(0.7), fontSize: AppType.small),
+            ),
+            SizedBox(height: context.rem(0.875)),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              obscureText: true,
+              style: TextStyle(color: AppColors.ink, fontSize: AppType.body),
+              decoration: _cloudFieldDecoration(l10n.backupPassphraseField),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.backupCancel, style: TextStyle(color: AppColors.inkAlpha(0.6))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF01B4E4),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill))),
+            ),
+            child: Text(l10n.backupSave, style: const TextStyle(color: AppColors.onAccent, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (entered == null || entered.isEmpty) return;
+    await BackupPassphrase.save(entered);
+    if (mounted) setState(() => _passphrase = BackupPassphrase.read());
+  }
+
   Widget _buildBackupSection() {
     final l10n = context.l10n;
     return Container(
@@ -316,6 +422,7 @@ class _BackupSettingsPageState extends State<BackupSettingsPage> {
               ),
             ],
           ),
+          _buildPassphraseRow(context),
           SizedBox(height: context.rem(AppRem.md)),
           Row(
             children: [
@@ -683,6 +790,7 @@ class _DropboxBackupSectionState extends State<_DropboxBackupSection> {
 
   Future<void> _uploadDropbox() async {
     final l10n = context.l10n;
+    if (!await _hasBackupPassphrase(context)) return;
     setState(() => _isBusy = true);
     try {
       await DropboxBackupService.upload();

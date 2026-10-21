@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'backup_crypto.dart';
 import 'backup_service.dart';
 import 'cloud_backup_settings.dart';
 import 'dropbox_backup_service.dart';
@@ -102,6 +103,9 @@ abstract final class AutoBackupService {
         now: DateTime.now(),
       );
       if (!due) return;
+      // Nothing to seal the backup with until a passphrase is set. Waiting for
+      // one is the quiet state, not a failure to log on every launch.
+      if (await BackupPassphrase.read() == null) return;
 
       // Dropbox first, WebDAV otherwise, when both are connected: one
       // destination, not a race between uploads at startup. Nothing

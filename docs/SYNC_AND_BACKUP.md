@@ -150,9 +150,19 @@ does not need the Custom Lists API at all; that API is read-only beta
   (your choice) has passed since the last one. There is no background-task
   runner in this app, so "at app open" is what "automatic" means --
   Dropbox first, then WebDAV.
+- **Encrypted before it leaves the device**: every backup -- local file,
+  WebDAV, Dropbox -- is sealed with a passphrase the user sets in Backup
+  settings. The key comes from PBKDF2-HMAC-SHA256 (200,000 rounds, a random
+  salt per backup) and seals the JSON with AES-256-GCM, so a copy in the
+  user's Dropbox or WebDAV is unreadable without the passphrase, and a wrong
+  one is refused rather than restored as garbage. The passphrase lives in
+  `SecureValueStore` and is left out of the envelope itself. With no
+  passphrase set, no backup is made. A backup from before this change, in
+  plain JSON, still restores. Lose the passphrase and the backups cannot be
+  opened: there is no recovery, by design.
 - **One format, not two**: local export, WebDAV and Dropbox all go through
-  the same `BackupService.buildEnvelopeJson`/`applyEnvelopeJson`, under the
-  same file name --
+  `BackupService.buildOutgoingEnvelope` (sealed) and `applyEnvelopeJson`
+  (opens either form), under the same file name --
   `test/services/dropbox_backup_service_test.dart` pins
   `/playtorrio-backup.json` so a future refactor can't rename it out from
   under an existing backup.

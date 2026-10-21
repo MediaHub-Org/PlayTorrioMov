@@ -49,6 +49,10 @@ class FilterDropdown<T> extends StatelessWidget {
   /// rows. In rem so it grows with text scale like the rows do.
   static const double _maxMenuHeightRem = 22;
 
+  /// The narrowest menu worth opening: Flutter's own minimum (112 px), so
+  /// an icon-only pill still gets a menu its labels fit in.
+  static const double _minMenuWidthRem = 7;
+
   /// Opens the menu under the pill. Null (a tap outside) is a dismissal and
   /// reports nothing -- matching PopupMenuButton, whose onSelected never
   /// fires for one -- so a dismissed menu cannot reset a filter.
@@ -82,9 +86,15 @@ class FilterDropdown<T> extends StatelessWidget {
           color: headerPillTint(buttonContext).withValues(alpha: 0.10),
         ),
       ),
-      constraints: BoxConstraints(
-        maxHeight: buttonContext.rem(_maxMenuHeightRem),
-      ),
+      // The menu is exactly as wide as the pill it opens from. Flutter sizes a
+      // menu in steps of 56 px, so an unforced menu never matched its pill. A
+      // pill narrower than a readable menu (icon-only on a phone) gets the
+      // minimum instead.
+      constraints: BoxConstraints.tightFor(
+        width: button.size.width < buttonContext.rem(_minMenuWidthRem)
+            ? buttonContext.rem(_minMenuWidthRem)
+            : button.size.width,
+      ).copyWith(maxHeight: buttonContext.rem(_maxMenuHeightRem)),
     );
     if (result != null) onSelected(result);
   }
