@@ -202,6 +202,9 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       _highlightedEpisode = null;
       _aniDbEpisodes = null;
     });
+    // The rail keeps the offset of the season it was scrolled in; a new season
+    // starts from its first episode.
+    if (_epScrollController.hasClients) _epScrollController.jumpTo(0);
     _resolveAniDbEpisodes();
   }
 
