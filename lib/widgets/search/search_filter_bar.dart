@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
 import '../../services/theme/app_colors.dart';
+import '../../utils/search_result_filters.dart' show SearchSort;
 import '../../utils/search_scope.dart';
 import '../common/filter_dropdown.dart';
 import '../common/hover_button.dart';
@@ -25,8 +26,8 @@ IconData searchFilterIcon(SearchFilter filter) => switch (filter) {
 };
 
 /// The search page's filters: what to search (All, Films, Series, Anime), and
-/// two narrowing menus every one of those can answer -- a decade and a
-/// minimum rating. The same three on every tab, so switching the type never
+/// three menus every one of those can answer -- a decade, a minimum rating and
+/// an alphabetical order. The same on every tab, so switching the type never
 /// changes what you can ask.
 ///
 /// The row keeps to one line. It measures the words first and takes the
@@ -42,6 +43,8 @@ class SearchFilterBar extends StatelessWidget {
   final ValueChanged<int?> onDecadeChanged;
   final int? minRating;
   final ValueChanged<int?> onMinRatingChanged;
+  final SearchSort sort;
+  final ValueChanged<SearchSort> onSortChanged;
 
   const SearchFilterBar({
     super.key,
@@ -51,6 +54,8 @@ class SearchFilterBar extends StatelessWidget {
     required this.onDecadeChanged,
     required this.minRating,
     required this.onMinRatingChanged,
+    required this.sort,
+    required this.onSortChanged,
   });
 
   double _textWidth(BuildContext context, String text, TextStyle style) {
@@ -100,6 +105,12 @@ class SearchFilterBar extends StatelessWidget {
     final ratingLabel = minRating == null
         ? l10n.searchAnyRating
         : '★ $minRating+';
+    // A–Z and Z–A are the same in every language, so they are not translated.
+    final sortLabel = switch (sort) {
+      SearchSort.relevance => l10n.searchSortDefault,
+      SearchSort.az => 'A–Z',
+      SearchSort.za => 'Z–A',
+    };
     final chipLabels = [for (final f in SearchFilter.values) f.label(l10n)];
     final inset = AppSpacing.pageInset(context);
 
@@ -126,6 +137,10 @@ class SearchFilterBar extends StatelessWidget {
                 l10n.searchAnyRating,
                 for (final r in kSearchMinRatings) '\u2605 $r+',
               ]),
+            ) +
+            _menuWidth(
+              context,
+              _longest([l10n.searchSortDefault, 'A\u2013Z', 'Z\u2013A']),
             );
         final iconMenus = (context.rem(AppRem.target) + context.rem(AppRem.snug)) * 2;
         final showChipLabels = chips + iconMenus <= room;
@@ -191,6 +206,28 @@ class SearchFilterBar extends StatelessWidget {
                     ],
                     onSelected: (v) =>
                         onMinRatingChanged(v == null || v <= 0 ? null : v),
+                  ),
+                  gap,
+                  FilterDropdown<SearchSort>(
+                    label: sortLabel,
+                    icon: Icons.sort_rounded,
+                    showLabel: showMenuLabels,
+                    selectedValue: sort,
+                    items: [
+                      PopupMenuItem(
+                        value: SearchSort.relevance,
+                        child: Text(l10n.searchSortDefault),
+                      ),
+                      const PopupMenuItem(
+                        value: SearchSort.az,
+                        child: Text('A–Z'),
+                      ),
+                      const PopupMenuItem(
+                        value: SearchSort.za,
+                        child: Text('Z–A'),
+                      ),
+                    ],
+                    onSelected: (v) => onSortChanged(v ?? SearchSort.relevance),
                   ),
                 ],
               ),

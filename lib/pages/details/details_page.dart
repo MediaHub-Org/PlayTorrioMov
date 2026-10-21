@@ -2011,6 +2011,12 @@ class _DetailsPageState extends State<DetailsPage>
       max: context.rem(AppRem.cardMax),
     );
     final cardHeight = SimilarCard.heightFor(cardWidth, AppUnits.scaleOf(context));
+    // The rail clips to its own box, and a card grows on hover, so the top and
+    // bottom of the card under the pointer were cut off. The room goes around
+    // the rail rather than inside the card: HoverButton scales 5% about the
+    // center, so each edge grows by 2.5% of the height.
+    final hoverRoom = cardHeight * 0.03; // ratio: 2.5% of the height, with a margin
+    final railHeight = cardHeight + hoverRoom + hoverRoom;
     final fadeWidth = context.rem(isDesktop ? DetailsDim.fadeDesktop : DetailsDim.fadeMobile);
 
     return MouseRegion(
@@ -2021,7 +2027,7 @@ class _DetailsPageState extends State<DetailsPage>
         children: [
           DetailsSectionHeader(context.l10n.detailsSimilarContent),
           SizedBox(
-            height: cardHeight,
+            height: railHeight,
             child: Stack(
               clipBehavior: Clip.hardEdge,
               children: [
@@ -2060,6 +2066,7 @@ class _DetailsPageState extends State<DetailsPage>
                     clipBehavior: Clip.hardEdge,
                     controller: _similarScrollController,
                     scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(vertical: hoverRoom),
                     physics: const BouncingScrollPhysics(),
                     itemCount: _similarItems.length,
                     separatorBuilder: (_, __) =>
@@ -2079,7 +2086,7 @@ class _DetailsPageState extends State<DetailsPage>
                     PositionedDirectional(
                       start: 0,
                       top: 0,
-                      bottom: context.rem(DetailsDim.similarArrowBottom),
+                      bottom: context.rem(DetailsDim.similarArrowBottom) + hoverRoom,
                       child: Container(
                         width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                         decoration: BoxDecoration(
@@ -2106,7 +2113,7 @@ class _DetailsPageState extends State<DetailsPage>
                     PositionedDirectional(
                       end: 0,
                       top: 0,
-                      bottom: context.rem(DetailsDim.similarArrowBottom),
+                      bottom: context.rem(DetailsDim.similarArrowBottom) + hoverRoom,
                       child: Container(
                         width: fadeWidth + context.rem(DetailsDim.fadeOverlap),
                         decoration: BoxDecoration(

@@ -320,6 +320,7 @@ class _PlayerStatsMenuState extends State<PlayerStatsMenu> {
           if (widget.readProperty != null) ..._buildDiagnosis(context),
           if (hash != null && hash.isNotEmpty)
             _StatRow(label: l10n.playerStatsHash, value: hash),
+          if (widget.readProperty != null) SizedBox(height: context.rem(AppRem.md)),
           if (widget.readProperty != null)
             TextButton.icon(
               onPressed: () => _copyReport(context),

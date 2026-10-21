@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/l10n/app_localizations.dart';
+import 'package:playtorriomov/utils/search_result_filters.dart' show SearchSort;
 import 'package:playtorriomov/utils/search_scope.dart';
 import 'package:playtorriomov/widgets/common/hover_button.dart';
 import 'package:playtorriomov/widgets/search/search_filter_bar.dart';
@@ -32,6 +33,8 @@ Future<void> pumpBar(
             onDecadeChanged: (_) {},
             minRating: null,
             onMinRatingChanged: (_) {},
+            sort: SearchSort.relevance,
+            onSortChanged: (_) {},
           ),
         ),
       ),
@@ -59,6 +62,7 @@ void main() {
     await pumpBar(tester, width: 1280);
     expect(find.text('Series'), findsOneWidget);
     expect(find.text('All decades'), findsOneWidget);
+    expect(find.text('Default'), findsOneWidget);
     expect(find.byIcon(Icons.tv_rounded), findsNothing);
   });
 
@@ -82,11 +86,12 @@ void main() {
     }
   });
 
-  testWidgets('the same three controls on every type', (tester) async {
+  testWidgets('the same controls on every type', (tester) async {
     for (final type in SearchFilter.values) {
       await pumpBar(tester, width: 1280, type: type);
       expect(find.byIcon(Icons.calendar_today_rounded), findsOneWidget);
       expect(find.byIcon(Icons.star_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.sort_rounded), findsOneWidget);
     }
   });
 }

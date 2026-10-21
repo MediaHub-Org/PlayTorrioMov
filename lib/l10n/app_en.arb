@@ -382,6 +382,7 @@
   "catalogAllGenres": "All genres",
   "catalogAllDecades": "All decades",
   "searchAnyRating": "Any rating",
+  "searchSortDefault": "Default",
   "catalogNewest": "Newest",
   "catalogOldest": "Oldest",
   "catalogNoTitlesForGenre": "No titles found for {genre}.",

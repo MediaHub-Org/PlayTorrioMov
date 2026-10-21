@@ -54,11 +54,12 @@ class _SearchPageState extends State<SearchPage> {
     SearchScope.contentType,
   );
 
-  /// The two narrowing filters, the same on every type (see
+  /// The narrowing filters and the order, the same on every type (see
   /// [SearchFilterBar]). Applied to the results that came back, so changing
   /// one is instant and costs no request.
   int? _decade;
   int? _minRating;
+  SearchSort _sort = SearchSort.relevance;
 
   bool _isMagnetMode = false;
   String _magnetQuery = '';
@@ -229,11 +230,13 @@ class _SearchPageState extends State<SearchPage> {
       _animeResults,
       decade: _decade,
       minRating: _minRating?.toDouble(),
+      sort: _sort,
     );
     final sections = filterSections(
       _results,
       decade: _decade,
       minRating: _minRating?.toDouble(),
+      sort: _sort,
     );
     final animeSection = anime.isEmpty
         ? null
@@ -367,6 +370,8 @@ class _SearchPageState extends State<SearchPage> {
               onDecadeChanged: (v) => setState(() => _decade = v),
               minRating: _minRating,
               onMinRatingChanged: (v) => setState(() => _minRating = v),
+              sort: _sort,
+              onSortChanged: (v) => setState(() => _sort = v),
             ),
           Expanded(
             child: _buildResults(),

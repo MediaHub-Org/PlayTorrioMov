@@ -289,6 +289,7 @@
   "catalogAllGenres": "Todos los géneros",
   "catalogAllDecades": "Todas las décadas",
   "searchAnyRating": "Cualquier nota",
+  "searchSortDefault": "Predeterminado",
   "catalogNewest": "Más recientes",
   "catalogOldest": "Más antiguos",
   "catalogNoTitlesForGenre": "No se encontraron títulos de {genre}.",

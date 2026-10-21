@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-21**, on `v1.9.9+57`, the stable release (main at `b946392`).
+Last reconciled: **2026-10-21**, on `v1.9.9+57`, the stable release (main at `658747e`).
 
 ---
 
@@ -36,9 +36,6 @@ None of these can be settled from the code.
   fallback).
 - **The loading logo** with a torrent, a debrid link and a plain URL, and it
   clears on the first frame.
-- **Fullscreen white flash on Windows.** The hidden-window delay went from 50 ms
-  to 150 ms, and that is not confirmed under real decode load. If it still
-  flashes, say whether it happens going in, coming out, or both.
 - **TV focus audit.** With a remote: the Sources page (the four filter pills; OK
   opens each menu on the selected row; Back returns to the same pill; focus stays
   put when the add-on pill appears), the in-player Sources and Episodes panels,

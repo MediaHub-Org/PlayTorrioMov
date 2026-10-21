@@ -3,6 +3,19 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **Movies and Series no longer have decade and year-sort menus above the
+  rows.** Decade, rating and the new A–Z and Z–A order are in search.
+
+### Fixed
+
+- **A similar title is no longer cut off when it grows under the pointer.** The
+  rail had no room for the enlargement, so its top and bottom were clipped.
+- **Stream stats has space above "Copy diagnostics".**
+
 ## [1.9.9+57] - 2026-10-21
 
 Stable release. The change below is verified against the live API and was checked locally (analysis, the test suite, a Windows build). It has not run on a device yet; the device checks in [ROADMAP.md](docs/ROADMAP.md) are still open.

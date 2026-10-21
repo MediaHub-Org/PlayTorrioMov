@@ -64,6 +64,20 @@ void main() {
     test('a section left empty is dropped, not shown empty', () {
       expect(filterSections(sections, decade: 1980), isEmpty);
     });
+
+    test('A-Z and Z-A order the titles within each section', () {
+      final az = filterSections(sections, sort: SearchSort.az);
+      expect(az.single.movies.map((m) => m.name), ['Mid', 'New', 'Old', 'Unknown']);
+      final za = filterSections(sections, sort: SearchSort.za);
+      expect(za.single.movies.map((m) => m.name), ['Unknown', 'Old', 'New', 'Mid']);
+    });
+
+    test('relevance keeps the addon order, and sorting does not drop titles', () {
+      final relevance = filterSections(sections, sort: SearchSort.relevance);
+      expect(identical(relevance, sections), isTrue);
+      final sorted = filterSections(sections, decade: 2020, sort: SearchSort.za);
+      expect(sorted.single.movies.map((m) => m.name), ['New']);
+    });
   });
 
   group('filterAnime', () {
@@ -81,6 +95,11 @@ void main() {
     test('rating is the AniList score out of ten; unscored is left out', () {
       expect(filterAnime(anime, minRating: 8).map((a) => a.id), [1, 4]);
       expect(filterAnime(anime, minRating: 6).map((a) => a.id), [1, 2, 4]);
+    });
+
+    test('A-Z and Z-A order the shows by title', () {
+      expect(filterAnime(anime, sort: SearchSort.az).map((a) => a.id), [1, 2, 3, 4]);
+      expect(filterAnime(anime, sort: SearchSort.za).map((a) => a.id), [4, 3, 2, 1]);
     });
   });
 }

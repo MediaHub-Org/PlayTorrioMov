@@ -289,6 +289,7 @@
   "catalogAllGenres": "كل الأنواع",
   "catalogAllDecades": "كل العقود",
   "searchAnyRating": "أي تقييم",
+  "searchSortDefault": "الافتراضي",
   "catalogNewest": "الأحدث",
   "catalogOldest": "الأقدم",
   "catalogNoTitlesForGenre": "لم يتم العثور على عناوين لـ {genre}.",

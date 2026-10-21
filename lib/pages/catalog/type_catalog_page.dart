@@ -54,8 +54,6 @@ List<BrowseRow<Movie>> distinctBrowseRows(List<BrowseRow<Movie>> rows) {
   return distinct;
 }
 
-enum _CatalogSort { yearNewest, yearOldest }
-
 /// A simple catalog page that shows all content of a given type
 /// (e.g. "movie" or "series") aggregated from the installed addons.
 ///
@@ -82,8 +80,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   List<Movie> _items = [];
   bool _loading = true;
   String? _error;
-  _CatalogSort _sort = _CatalogSort.yearNewest;
-  int? _decadeFilter;
 
   List<String> _availableGenres = [];
   String? _genreFilter;
@@ -104,40 +100,11 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   /// that slide stays at today's minimal title+year overlay.
   Map<String, MovieDetail> _heroDetails = {};
 
-  static int? _decadeOf(Movie m) {
-    final year = _yearOf(m);
-    return year == null ? null : (year ~/ 10) * 10;
-  }
+  List<Movie> get _visibleItems => _genreFilter == null ? _items : _genreItems;
 
-  static int? _yearOf(Movie m) {
-    final match = RegExp(r'\d{4}').firstMatch(m.year ?? '');
-    return match == null ? null : int.parse(match.group(0)!);
-  }
-
-  List<Movie> _sorted(List<Movie> items) {
-    final sorted = List.of(items);
-    switch (_sort) {
-      case _CatalogSort.yearNewest:
-        sorted.sort((a, b) => (_yearOf(b) ?? -1).compareTo(_yearOf(a) ?? -1));
-      case _CatalogSort.yearOldest:
-        sorted.sort(
-          (a, b) => (_yearOf(a) ?? 99999).compareTo(_yearOf(b) ?? 99999),
-        );
-    }
-    return sorted;
-  }
-
-  List<Movie> get _visibleItems {
-    final base = _genreFilter == null ? _items : _genreItems;
-    final items = _decadeFilter == null
-        ? base
-        : base.where((m) => _decadeOf(m) == _decadeFilter).toList();
-    return _sorted(items);
-  }
-
-  /// A genre or decade choice cannot be answered by rows of curated catalogs,
-  /// so picking one switches the page to a single filtered grid.
-  bool get _isFiltered => _genreFilter != null || _decadeFilter != null;
+  /// A genre choice cannot be answered by rows of curated catalogs, so picking
+  /// one switches the page to a single filtered grid.
+  bool get _isFiltered => _genreFilter != null;
 
   /// The hero shows the head of the first catalog, which is the addon's own
   /// lead catalog -- "Popular", "Top", whatever it chose to put first.
@@ -350,7 +317,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
               BrowseRow<Movie>(
                 id: 'catalog:${section.title}',
                 title: section.title,
-                items: _sorted(section.movies),
+                items: section.movies,
               ),
           if (_documentaries.isNotEmpty)
             BrowseRow<Movie>(
@@ -386,19 +353,16 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     return _buildFilteredGrid(context);
   }
 
-  /// Search plus the genre/decade/sort filters, one row -- no separate title,
-  /// since the section pill/bottom-bar tab already says "Movies" or "Series".
-  /// Shared by both views so the controls do not move when switching between
-  /// rows and the grid.
+  /// The genre filter, one row -- no separate title, since the section
+  /// pill/bottom-bar tab already says "Movies" or "Series". Shared by both
+  /// views so the control does not move when switching between rows and the
+  /// grid. Decade, rating and the A-Z order live in search, not here.
   ///
-  /// The "All" reset options carry `''` (genres) and `-1` (decades) rather
-  /// than null: a tap on a null-valued popup item never reaches `onSelected`
-  /// -- the framework reads a null route result as a dismissal -- so "All
-  /// Genres" reset nothing until the sentinels gave it a value that arrives.
+  /// The "All" reset option carries `''` rather than null: a tap on a
+  /// null-valued popup item never reaches `onSelected` -- the framework reads
+  /// a null route result as a dismissal -- so "All Genres" reset nothing until
+  /// the sentinel gave it a value that arrives.
   Widget _buildHeader(BuildContext context) {
-    final decades = _items.map(_decadeOf).whereType<int>().toSet().toList()
-      ..sort((a, b) => b.compareTo(a));
-
     return PillFilterHeaderBar(
       transparent: true,
       pills: [
@@ -425,32 +389,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
               ),
             ),
         ],
-        if (decades.isNotEmpty)
-          FilterDropdown<int?>(
-            label: _decadeFilter == null ? context.l10n.catalogAllDecades : '${_decadeFilter}s',
-            icon: Icons.calendar_today_rounded,
-            selectedValue: _decadeFilter ?? -1,
-            items: [
-              PopupMenuItem(value: -1, child: Text(context.l10n.catalogAllDecades)),
-              for (final d in decades)
-                PopupMenuItem(value: d, child: Text('${d}s')),
-            ],
-            onSelected: (v) =>
-                setState(() => _decadeFilter = (v == null || v < 0) ? null : v),
-          ),
-        FilterDropdown<_CatalogSort>(
-          label: switch (_sort) {
-            _CatalogSort.yearNewest => context.l10n.catalogNewest,
-            _CatalogSort.yearOldest => context.l10n.catalogOldest,
-          },
-          icon: Icons.sort_rounded,
-          selectedValue: _sort,
-          items: [
-            PopupMenuItem(value: _CatalogSort.yearNewest, child: Text(context.l10n.catalogNewest)),
-            PopupMenuItem(value: _CatalogSort.yearOldest, child: Text(context.l10n.catalogOldest)),
-          ],
-          onSelected: (v) => setState(() => _sort = v!),
-        ),
       ],
     );
   }
@@ -675,9 +613,7 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
                     child: Text(
                       _items.isEmpty
                           ? context.l10n.catalogNoContent
-                          : _genreFilter != null
-                          ? context.l10n.catalogNoTitlesForGenre(_genreFilter!)
-                          : context.l10n.catalogNoTitlesInDecade(_decadeFilter ?? 0),
+                          : context.l10n.catalogNoTitlesForGenre(_genreFilter!),
                       style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
                     ),
                   ),
