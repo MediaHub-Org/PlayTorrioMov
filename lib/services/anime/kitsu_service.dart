@@ -122,6 +122,33 @@ class KitsuService {
     return found;
   }
 
+  /// The TV seasons a title is linked to as a sequel or a prequel. Movies, OVAs
+  /// and specials are linked the same way and are left out.
+  Future<List<AnimeMedia>> seasonNeighbors(int kitsuId) async {
+    final body = await _get(
+      '/anime/$kitsuId/media-relationships?include=destination&page[limit]=20',
+    );
+    final data = body?['data'];
+    final included = body?['included'];
+    if (data is! List || included is! List) return const [];
+    final byId = <String, Map<String, dynamic>>{
+      for (final item in included.whereType<Map<String, dynamic>>())
+        if (item['type'] == 'anime') item['id'].toString(): item,
+    };
+    final seasons = <AnimeMedia>[];
+    for (final rel in data.whereType<Map<String, dynamic>>()) {
+      final role = _map(rel['attributes'])['role'];
+      if (role != 'sequel' && role != 'prequel') continue;
+      final destination = _map(_map(rel['relationships'])['destination']);
+      final destId = _map(destination['data'])['id']?.toString();
+      final item = destId == null ? null : byId[destId];
+      if (item == null) continue;
+      final media = _toMedia(item, const {});
+      if (media.format == 'TV') seasons.add(media);
+    }
+    return seasons;
+  }
+
   Future<List<AnimeMedia>> _list(String path) async {
     final body = await _get(path);
     final data = body?['data'];

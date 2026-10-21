@@ -13,6 +13,8 @@ import '../../widgets/common/details_section_header.dart';
 import '../../models/anime/anime_media.dart';
 import '../../models/my_list/my_list_item.dart';
 import '../../services/anime/anilist_service.dart';
+import '../../services/anime/anime_seasons.dart';
+import '../../services/theme/app_colors.dart';
 import '../../services/anime/anime_library_service.dart';
 import '../../services/continue_watching/continue_watching_service.dart';
 import '../../services/anime/extractors/anidb_extractor.dart';
@@ -88,6 +90,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   int _selectedEpisodeBatch = 0; // 50 episodes per chunk
   int? _highlightedEpisode;
   List<AniDbEpisode>? _aniDbEpisodes;
+  List<AnimeMedia> _seasons = const [];
 
   static const int _chunkSize = 50;
 
@@ -168,6 +171,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
       setState(() {
         if (full != null) _anime = full;
       });
+      _loadSeasons();
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -178,6 +182,77 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
         }
       });
     }
+  }
+
+  /// Finds the show's seasons. The page opens on the latest one, so Play starts
+  /// its first episode; a show with a single season gets no selector.
+  Future<void> _loadSeasons() async {
+    final seasons = await AnimeSeasons.of(_anime);
+    if (!mounted || seasons.length < 2) return;
+    setState(() => _seasons = seasons);
+    if (seasons.last.id != _anime.id) await _selectSeason(seasons.last);
+  }
+
+  Future<void> _selectSeason(AnimeMedia season) async {
+    final full = await AnilistService.instance.fetchAnimeDetails(season.id);
+    if (!mounted) return;
+    setState(() {
+      _anime = full ?? season;
+      _selectedEpisodeBatch = 0;
+      _highlightedEpisode = null;
+      _aniDbEpisodes = null;
+    });
+    _resolveAniDbEpisodes();
+  }
+
+  /// One pill per season, styled as the Series season row.
+  Widget _buildSeasonPills() {
+    return Wrap(
+      spacing: context.rem(AppRem.sm),
+      runSpacing: context.rem(AppRem.sm),
+      children: [
+        for (var i = 0; i < _seasons.length; i++)
+          _seasonPill(
+            label: context.l10n.playerSeasonN(i + 1),
+            selected: _seasons[i].id == _anime.id,
+            onTap: () => _selectSeason(_seasons[i]),
+          ),
+      ],
+    );
+  }
+
+  Widget _seasonPill({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return HoverButton(
+      showFocusRing: true,
+      scaleAmount: 1.02,
+      onTap: selected ? () {} : onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: context.rem(AppRem.md),
+          vertical: context.rem(AppRem.xs),
+        ),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.ink : AppColors.ink.withValues(alpha: 0.07),
+          borderRadius: BorderRadius.circular(context.rem(AppRem.radiusPill)),
+          border: Border.all(
+            color: selected ? AppColors.ink : AppColors.ink.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.black : AppColors.ink,
+            fontSize: AppType.bodyMd,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 
   void _resolveAniDbEpisodes() async {
@@ -1091,6 +1166,10 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_seasons.length > 1) ...[
+          _buildSeasonPills(),
+          SizedBox(height: context.rem(AppRem.md)),
+        ],
         // Episodes Header & Controls
         Wrap(
           spacing: context.rem(AppRem.ms),

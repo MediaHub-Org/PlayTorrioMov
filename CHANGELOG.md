@@ -9,6 +9,9 @@ Stable release. Checked locally: analysis, the full test suite and a Windows bui
 
 ### Added
 
+- **Anime shows its seasons.** A show with several seasons gets a season row,
+  like Series. The page opens on the latest season, so Play starts its first
+  episode. Seasons are found through the show's sequel and prequel links.
 - **Backups are encrypted with a passphrase.** Set it in Backup settings before
   your first backup. Every backup -- local file, WebDAV or Dropbox -- is sealed
   with it, and none can be opened without it. Lose the passphrase and the

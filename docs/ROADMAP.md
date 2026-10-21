@@ -25,6 +25,10 @@ Last reconciled: **2026-10-22**, on `v1.9.10+58`, the stable release (main at `2
   through Kitsu's AniList mapping. Check it on a device. Kitsu's titles and
   genres differ from AniList's, and a show Kitsu does not map gets only its
   title-based sources.
+- **Anime seasons.** A show with several seasons shows a season row, opens on the
+  latest season, and Play starts that season's first episode. Check it on a
+  show with three or more seasons (Attack on Titan), and on a show whose seasons
+  Kitsu does not link.
 - **Anime episode names.** AniList gives a title per episode only for shows it
   links to a legal streaming service (commonly Crunchyroll), which is most of
   the catalog; the rest show "EP N". No key is involved. A show AniList does list
