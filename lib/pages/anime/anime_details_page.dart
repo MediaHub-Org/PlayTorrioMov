@@ -1355,14 +1355,18 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                 final epNum = startIndex + index + 1;
                 return SizedBox(
                   width: context.rem(_Dim.epCardWidth),
-                  child: _AnimeEpisodeCard(
-                    epNum: epNum,
-                    info: _anime.episodeInfo(epNum, seasonEpisodes: total),
-                    isWatched:
-                        lastWatchedEp != null && epNum <= lastWatchedEp,
-                    isCurrent: lastWatchedEp == epNum,
-                    isHighlighted: _highlightedEpisode == epNum,
-                    onTap: () => _playEpisode(epNum),
+                  // The rail is taller than a card, so each card is centered in it
+                  // rather than sitting on the top edge.
+                  child: Center(
+                    child: _AnimeEpisodeCard(
+                      epNum: epNum,
+                      info: _anime.episodeInfo(epNum, seasonEpisodes: total),
+                      isWatched:
+                          lastWatchedEp != null && epNum <= lastWatchedEp,
+                      isCurrent: lastWatchedEp == epNum,
+                      isHighlighted: _highlightedEpisode == epNum,
+                      onTap: () => _playEpisode(epNum),
+                    ),
                   ),
                 );
               },

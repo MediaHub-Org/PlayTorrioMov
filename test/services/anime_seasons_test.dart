@@ -76,7 +76,7 @@ void main() {
   });
 
   test('the chain is followed both ways and comes back oldest first', () async {
-    final first = AnimeMedia(id: -7002, format: 'TV', seasonYear: 2017);
+    const first = AnimeMedia(id: -7002, format: 'TV', seasonYear: 2017);
     final seasons = await http.runWithClient(
       () => AnimeSeasons.of(first),
       () => MockClient((req) async => relationsFor(req.url.path)),
@@ -86,7 +86,7 @@ void main() {
   });
 
   test('a show with no linked seasons is a season of one', () async {
-    final alone = AnimeMedia(id: -7100, format: 'TV', seasonYear: 2020);
+    const alone = AnimeMedia(id: -7100, format: 'TV', seasonYear: 2020);
     final seasons = await http.runWithClient(
       () => AnimeSeasons.of(alone),
       () => MockClient((_) async => json200({'data': [], 'included': []})),
@@ -95,7 +95,7 @@ void main() {
   });
 
   test('a loop of links stops instead of walking forever', () async {
-    final loop = AnimeMedia(id: -7200, format: 'TV', seasonYear: 2021);
+    const loop = AnimeMedia(id: -7200, format: 'TV', seasonYear: 2021);
     var requests = 0;
     final seasons = await http.runWithClient(
       () => AnimeSeasons.of(loop),
