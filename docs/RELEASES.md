@@ -186,6 +186,13 @@ The secret reaches the job through the environment rather than being spliced
 into the shell script, so a value containing `"`, `` ` `` or `$` survives
 intact instead of being interpreted by bash.
 
+**Keep this secret free of keys.** Everything in `DOTENV_CONTENTS` is compiled
+into every published binary, so a key in it reaches everyone who downloads a
+release, and rotating it means shipping a new one. Each person pastes their
+own key under Settings instead: TMDB, Simkl, Dropbox and Wyzie. The table
+above stays as the list of what the app reads, for a developer's own local
+build; the release secret should be empty of keys.
+
 All are optional: each feature no-ops when its key is missing. A TMDB key
 is free and takes a minute to get — register at
 [themoviedb.org](https://www.themoviedb.org/settings/api), no billing
