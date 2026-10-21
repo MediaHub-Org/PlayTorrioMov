@@ -838,6 +838,22 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
   int? get _lastWatchedEpisode =>
       ContinueWatchingService.lastWatchedEpisodeFor('anilist:${_anime.id}');
 
+  /// The label names the season when the show has several, as the Series
+  /// button does: "Play S6 E1", "Resume S6 E4".
+  String _playLabel(int? lastWatched, int resumeEp) {
+    final l10n = context.l10n;
+    final seasonNumber = _seasons.indexWhere((s) => s.id == _anime.id) + 1;
+    final named = _seasons.length > 1 && seasonNumber > 0;
+    if (lastWatched != null && lastWatched > 0) {
+      return named
+          ? l10n.detailsResumeSeasonEpisode(seasonNumber, resumeEp)
+          : l10n.detailsResumeEp(resumeEp);
+    }
+    return named
+        ? l10n.detailsPlaySeasonEpisode(seasonNumber, 1)
+        : l10n.detailsPlayEp(1);
+  }
+
   Widget _buildPlayButton({required bool fullWidth}) {
     final lastWatched = _lastWatchedEpisode;
     final resumeEp = lastWatched ?? 1;
@@ -874,9 +890,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
             // the line and paints past the button -- 174px at 3x.
             Flexible(
               child: Text(
-                lastWatched != null && lastWatched > 0
-                    ? context.l10n.detailsResumeEp(resumeEp)
-                    : context.l10n.detailsPlayEp(1),
+                _playLabel(lastWatched, resumeEp),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -1338,16 +1352,42 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
     if (count <= 0) return const SizedBox.shrink();
     final isDesktop = _isDesktop();
 
+    final fadeWidth = context.rem(isDesktop ? DetailsDim.fadeDesktop : DetailsDim.fadeMobile);
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHoveringEp = true),
       onExit: (_) => setState(() => _isHoveringEp = false),
       child: Stack(
-        clipBehavior: Clip.none,
+        clipBehavior: Clip.hardEdge,
         children: [
           SizedBox(
             height: context.rem(_Dim.epRailHeight),
-            child: ListView.separated(
-              clipBehavior: Clip.none,
+            child: ShaderMask(
+              shaderCallback: (Rect bounds) {
+                final leftFadeStop = bounds.width > 0
+                    ? (fadeWidth / bounds.width).clamp(0.01, 0.2)
+                    : 0.05;
+                final rightFadeStop = bounds.width > 0
+                    ? (1.0 - (fadeWidth / bounds.width)).clamp(0.8, 0.99)
+                    : 0.95;
+                return LinearGradient(
+                  begin: AlignmentDirectional.centerStart,
+                  end: AlignmentDirectional.centerEnd,
+                  colors: [
+                    _canScrollEpLeft ? Colors.transparent : Colors.black,
+                    Colors.black,
+                    Colors.black,
+                    _canScrollEpRight ? Colors.transparent : Colors.black,
+                  ],
+                  stops: [0.0, leftFadeStop, rightFadeStop, 1.0],
+                ).createShader(
+                  bounds,
+                  textDirection: Directionality.of(context),
+                );
+              },
+              blendMode: BlendMode.dstIn,
+              child: ListView.separated(
+              clipBehavior: Clip.hardEdge,
               controller: _epScrollController,
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -1373,6 +1413,7 @@ class _AnimeDetailsPageState extends State<AnimeDetailsPage>
                   ),
                 );
               },
+            ),
             ),
           ),
 

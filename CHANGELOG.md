@@ -31,6 +31,10 @@ Stable release. Checked locally: analysis, the full test suite and a Windows bui
 - **A similar title is no longer cut off when it grows under the pointer.** The
   rail had no room for the enlargement, so its top and bottom were clipped.
 - **Stream stats has space above "Copy diagnostics".**
+- **Anime episode row stays inside the page width**, with the same edge fade as
+  Series.
+- **Anime Play names the season** when a show has several, as Series does:
+  "Play S6 E1".
 - **Anime episode cards sit centred in their row.** They used to hug the top
   edge of the row, which is taller than a card.
 - **A movie's loading screen shows only the title's logo** (or its name) above
