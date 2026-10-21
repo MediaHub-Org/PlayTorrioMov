@@ -17,6 +17,25 @@ const List<int> kSearchDecades = [2020, 2010, 2000, 1990, 1980];
 /// The minimum ratings offered, on the 0-10 scale.
 const List<int> kSearchMinRatings = [6, 7, 8];
 
+/// The genres the search offers. Films and series carry Cinemeta's names and
+/// anime carries AniList's; these are the ones both sides use, so a name here
+/// finds a title on either.
+const List<String> kSearchGenres = [
+  'Action',
+  'Adventure',
+  'Comedy',
+  'Crime',
+  'Drama',
+  'Family',
+  'Fantasy',
+  'Horror',
+  'Music',
+  'Mystery',
+  'Romance',
+  'Sci-Fi',
+  'Thriller',
+];
+
 /// Icon for a content type, for when the row has no room for its name.
 IconData searchFilterIcon(SearchFilter filter) => switch (filter) {
   SearchFilter.all => Icons.apps_rounded,
@@ -26,9 +45,9 @@ IconData searchFilterIcon(SearchFilter filter) => switch (filter) {
 };
 
 /// The search page's filters: what to search (All, Films, Series, Anime), and
-/// three menus every one of those can answer -- a decade, a minimum rating and
-/// an alphabetical order. The same on every tab, so switching the type never
-/// changes what you can ask.
+/// four menus every one of those can answer -- a decade, a minimum rating, a
+/// genre and an alphabetical order. The same on every tab, so switching the
+/// type never changes what you can ask.
 ///
 /// The row keeps to one line. It measures the words first and takes the
 /// widest of three layouts that fits: everything in words; the type in words
@@ -43,6 +62,8 @@ class SearchFilterBar extends StatelessWidget {
   final ValueChanged<int?> onDecadeChanged;
   final int? minRating;
   final ValueChanged<int?> onMinRatingChanged;
+  final String? genre;
+  final ValueChanged<String?> onGenreChanged;
   final SearchSort sort;
   final ValueChanged<SearchSort> onSortChanged;
 
@@ -54,6 +75,8 @@ class SearchFilterBar extends StatelessWidget {
     required this.onDecadeChanged,
     required this.minRating,
     required this.onMinRatingChanged,
+    required this.genre,
+    required this.onGenreChanged,
     required this.sort,
     required this.onSortChanged,
   });
@@ -105,6 +128,7 @@ class SearchFilterBar extends StatelessWidget {
     final ratingLabel = minRating == null
         ? l10n.searchAnyRating
         : '★ $minRating+';
+    final genreLabel = genre ?? l10n.catalogAllGenres;
     // A–Z and Z–A are the same in every language, so they are not translated.
     final sortLabel = switch (sort) {
       SearchSort.relevance => l10n.searchSortDefault,
@@ -137,6 +161,10 @@ class SearchFilterBar extends StatelessWidget {
                 l10n.searchAnyRating,
                 for (final r in kSearchMinRatings) '\u2605 $r+',
               ]),
+            ) +
+            _menuWidth(
+              context,
+              _longest([l10n.catalogAllGenres, ...kSearchGenres]),
             ) +
             _menuWidth(
               context,
@@ -206,6 +234,25 @@ class SearchFilterBar extends StatelessWidget {
                     ],
                     onSelected: (v) =>
                         onMinRatingChanged(v == null || v <= 0 ? null : v),
+                  ),
+                  gap,
+                  FilterDropdown<String?>(
+                    label: genreLabel,
+                    icon: Icons.category_rounded,
+                    showLabel: showMenuLabels,
+                    selectedValue: genre ?? '',
+                    items: [
+                      PopupMenuItem(
+                        value: '',
+                        child: Text(l10n.catalogAllGenres),
+                      ),
+                      for (final g in kSearchGenres)
+                        PopupMenuItem(value: g, child: Text(g)),
+                    ],
+                    // Same sentinel as the decade and rating menus: a menu
+                    // tap never delivers null.
+                    onSelected: (v) =>
+                        onGenreChanged(v == null || v.isEmpty ? null : v),
                   ),
                   gap,
                   FilterDropdown<SearchSort>(

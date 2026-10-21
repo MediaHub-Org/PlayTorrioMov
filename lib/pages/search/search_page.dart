@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import '../../l10n/l10n.dart';
 
 import '../../services/app_spacing.dart';
+import '../../models/movie/movie.dart';
 import '../../models/movie/movie_section.dart';
 import '../../models/stream/stream_model.dart';
 import '../../models/anime/anime_media.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../services/anime/anilist_service.dart';
+import '../../services/metadata/metadata_service.dart';
 import '../../utils/fullscreen_navigator.dart';
 import '../../utils/search_scope.dart';
 import '../../widgets/common/first_focus_scope.dart';
@@ -60,6 +62,17 @@ class _SearchPageState extends State<SearchPage> {
   int? _decade;
   int? _minRating;
   SearchSort _sort = SearchSort.relevance;
+
+  /// The genre picked, if any. Anime results carry their genres; a film or
+  /// series result does not, so its genres are read from its metadata into
+  /// [_genres] once a genre is on, and kept for the rest of the session.
+  String? _genre;
+  final Map<String, List<String>> _genres = {};
+  bool _genresLoading = false;
+
+  /// Titles whose genres are read per batch, so the list fills in as they
+  /// arrive instead of waiting for the slowest one.
+  static const int _genreBatchSize = 8;
 
   bool _isMagnetMode = false;
   String _magnetQuery = '';
@@ -209,6 +222,59 @@ class _SearchPageState extends State<SearchPage> {
       _animeResults = animeResults;
       _isLoading = false;
     });
+    if (_genre != null) _loadGenres();
+  }
+
+  void _onGenreChanged(String? genre) {
+    setState(() => _genre = genre);
+    if (genre != null) _loadGenres();
+  }
+
+  static String _genreKey(Movie movie) =>
+      '${movie.addonBaseUrl}|${movie.type}|${movie.id}';
+
+  List<String>? _genresOf(Movie movie) => _genres[_genreKey(movie)];
+
+  /// Reads the genres of the titles not looked up yet, a batch at a time.
+  /// Stops when the genre is cleared, and leaves a title it could not read
+  /// unrecorded, so the next pick asks for it again.
+  Future<void> _loadGenres() async {
+    final pending = [
+      for (final section in _results)
+        for (final movie in section.movies)
+          if (!_genres.containsKey(_genreKey(movie))) movie,
+    ];
+    if (pending.isEmpty) return;
+    setState(() => _genresLoading = true);
+    try {
+      for (var i = 0; i < pending.length; i += _genreBatchSize) {
+        if (!mounted || _genre == null) return;
+        final batch = pending.skip(i).take(_genreBatchSize);
+        final found = await Future.wait(batch.map(_fetchGenres));
+        if (!mounted) return;
+        setState(() {
+          for (final entry in found.nonNulls) {
+            _genres[entry.key] = entry.value;
+          }
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _genresLoading = false);
+    }
+  }
+
+  Future<MapEntry<String, List<String>>?> _fetchGenres(Movie movie) async {
+    try {
+      final detail = await MetadataService.fetchMeta(
+        baseUrl: movie.addonBaseUrl,
+        type: movie.type,
+        imdbId: movie.id,
+      );
+      return MapEntry(_genreKey(movie), detail?.genres ?? const <String>[]);
+    } catch (e) {
+      debugPrint('[Search] genres for ${movie.name} not read: $e');
+      return null;
+    }
   }
 
   void _onTypeChanged(SearchFilter value) {
@@ -230,12 +296,15 @@ class _SearchPageState extends State<SearchPage> {
       _animeResults,
       decade: _decade,
       minRating: _minRating?.toDouble(),
+      genre: _genre,
       sort: _sort,
     );
     final sections = filterSections(
       _results,
       decade: _decade,
       minRating: _minRating?.toDouble(),
+      genre: _genre,
+      genreOf: _genresOf,
       sort: _sort,
     );
     final animeSection = anime.isEmpty
@@ -370,6 +439,8 @@ class _SearchPageState extends State<SearchPage> {
               onDecadeChanged: (v) => setState(() => _decade = v),
               minRating: _minRating,
               onMinRatingChanged: (v) => setState(() => _minRating = v),
+              genre: _genre,
+              onGenreChanged: _onGenreChanged,
               sort: _sort,
               onSortChanged: (v) => setState(() => _sort = v),
             ),
@@ -392,6 +463,13 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     final sections = _resultSections();
+    // A genre is being read: until a title's genres arrive it is not in the
+    // list, so "no results" would be a lie while the reads are in flight.
+    if (sections.isEmpty && _genresLoading) {
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.accent),
+      );
+    }
     if (sections.isNotEmpty) {
       return FirstFocusScope(
         ready: true,

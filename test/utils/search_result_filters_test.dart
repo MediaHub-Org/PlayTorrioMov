@@ -65,6 +65,25 @@ void main() {
       expect(filterSections(sections, decade: 1980), isEmpty);
     });
 
+    test('a genre keeps the titles whose genres include it, ignoring case', () {
+      final genres = {
+        'Old': ['Drama', 'Crime'],
+        'Mid': ['Comedy'],
+        'New': ['drama'],
+      };
+      final out = filterSections(
+        sections,
+        genre: 'Drama',
+        genreOf: (m) => genres[m.name],
+      );
+      expect(out.single.movies.map((m) => m.name), ['Old', 'New']);
+    });
+
+    test('a title whose genres are not known yet is left out while a genre is on', () {
+      final out = filterSections(sections, genre: 'Drama', genreOf: (_) => null);
+      expect(out, isEmpty);
+    });
+
     test('A-Z and Z-A order the titles within each section', () {
       final az = filterSections(sections, sort: SearchSort.az);
       expect(az.single.movies.map((m) => m.name), ['Mid', 'New', 'Old', 'Unknown']);
@@ -95,6 +114,14 @@ void main() {
     test('rating is the AniList score out of ten; unscored is left out', () {
       expect(filterAnime(anime, minRating: 8).map((a) => a.id), [1, 4]);
       expect(filterAnime(anime, minRating: 6).map((a) => a.id), [1, 2, 4]);
+    });
+
+    test('a genre keeps the shows AniList tagged with it', () {
+      const tagged = [
+        AnimeMedia(id: 1, titleRomaji: 'A', genres: ['Action', 'Drama']),
+        AnimeMedia(id: 2, titleRomaji: 'B', genres: ['Comedy']),
+      ];
+      expect(filterAnime(tagged, genre: 'drama').map((a) => a.id), [1]);
     });
 
     test('A-Z and Z-A order the shows by title', () {

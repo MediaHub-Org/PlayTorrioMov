@@ -33,6 +33,8 @@ Future<void> pumpBar(
             onDecadeChanged: (_) {},
             minRating: null,
             onMinRatingChanged: (_) {},
+            genre: null,
+            onGenreChanged: (_) {},
             sort: SearchSort.relevance,
             onSortChanged: (_) {},
           ),
@@ -63,6 +65,7 @@ void main() {
     expect(find.text('Series'), findsOneWidget);
     expect(find.text('All decades'), findsOneWidget);
     expect(find.text('Default'), findsOneWidget);
+    expect(find.text('All genres'), findsOneWidget);
     expect(find.byIcon(Icons.tv_rounded), findsNothing);
   });
 
@@ -92,6 +95,7 @@ void main() {
       expect(find.byIcon(Icons.calendar_today_rounded), findsOneWidget);
       expect(find.byIcon(Icons.star_rounded), findsOneWidget);
       expect(find.byIcon(Icons.sort_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.category_rounded), findsOneWidget);
     }
   });
 }

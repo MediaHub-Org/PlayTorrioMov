@@ -39,8 +39,8 @@ None of these can be settled from the code.
 - **TV focus audit.** With a remote: the Sources page (the four filter pills; OK
   opens each menu on the selected row; Back returns to the same pill; focus stays
   put when the add-on pill appears), the in-player Sources and Episodes panels,
-  the Cast sheet, Library and Collections, Live TV sources, the Discover and
-  Catalog sort pills, and the video settings cards. Every row shows a wash under
+  the Cast sheet, Library and Collections, Live TV sources, the Discover sort
+  pills, the search filter menus, and the video settings cards. Every row shows a wash under
   the remote; a mouse lights it lighter; after a mouse or remote-app touch, the
   focus cue stays.
 - **Debrid with a real account.** TorBox (or Premiumize, AllDebrid, Debrid-Link),

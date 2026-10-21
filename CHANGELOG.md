@@ -7,8 +7,8 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- **Movies and Series no longer have decade and year-sort menus above the
-  rows.** Decade, rating and the new A–Z and Z–A order are in search.
+- **Movies, Series and Anime no longer have filter menus above the rows.**
+  Search has them instead: genre, decade, rating, and an A–Z or Z–A order.
 
 ### Fixed
 

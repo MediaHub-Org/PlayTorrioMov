@@ -11,33 +11,13 @@ import '../../services/app_units.dart';
 import '../../services/browse/home_rows_settings.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/anime/anime_card.dart';
-import '../../widgets/movie/movie_card.dart' show posterGridDelegate;
 import '../../widgets/common/browse_scaffold.dart';
-import '../../widgets/common/filter_dropdown.dart';
-import '../../widgets/common/first_focus_scope.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/hero_action_button.dart';
-import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import 'anime_details_page.dart';
 import 'anime_stream_sheet.dart';
 import '../../services/theme/app_colors.dart';
-
-const _kAnimeGenres = [
-  'Action',
-  'Adventure',
-  'Comedy',
-  'Drama',
-  'Fantasy',
-  'Horror',
-  'Mystery',
-  'Romance',
-  'Sci-Fi',
-  'Slice of Life',
-  'Sports',
-  'Supernatural',
-  'Thriller',
-];
 
 // The hero title's sizes, which have no AppType step.
 const double _kHeroTitleCompact = 30;
@@ -66,71 +46,6 @@ class _AnimePageState extends State<AnimePage> {
   List<AnimeMedia> _romanceAnime = [];
   List<AnimeMedia> _fantasyAnime = [];
   List<AnimeMedia> _sciFiAnime = [];
-
-  String? _genreFilter;
-  List<AnimeMedia> _genreResults = [];
-  bool _genreLoading = false;
-  int? _decadeFilter;
-
-  /// Decades across every loaded section, newest first. AniList dates shows
-  /// with a season year; a 0 means the feed did not say, and those pool
-  /// under no decade rather than a wrong one.
-  List<int> get _decades {
-    final decades = <int>{};
-    for (final list in [
-      _trending,
-      _popularSeason,
-      _topRated,
-      _upcoming,
-      _actionAnime,
-      _romanceAnime,
-      _fantasyAnime,
-      _sciFiAnime,
-      _genreResults,
-    ]) {
-      for (final anime in list) {
-        if (anime.seasonYear > 0) {
-          decades.add(anime.seasonYear ~/ 10 * 10);
-        }
-      }
-    }
-    return decades.toList()..sort((a, b) => b.compareTo(a));
-  }
-
-  /// The pooled sections as one deduplicated list, for the decade filter.
-  /// A genre choice is answered server-side by AniList instead, so the pool
-  /// only feeds the decade view.
-  List<AnimeMedia> get _pooledSections {
-    final pool = <int, AnimeMedia>{};
-    for (final list in [
-      _trending,
-      _popularSeason,
-      _topRated,
-      _upcoming,
-      _actionAnime,
-      _romanceAnime,
-      _fantasyAnime,
-      _sciFiAnime,
-    ]) {
-      for (final anime in list) {
-        pool.putIfAbsent(anime.id, () => anime);
-      }
-    }
-    return pool.values.toList();
-  }
-
-  /// What the filtered grid shows: the genre answer narrowed by decade, or
-  /// the pooled sections narrowed by decade when no genre is chosen.
-  List<AnimeMedia> get _filteredItems {
-    final base = _genreFilter != null ? _genreResults : _pooledSections;
-    final decade = _decadeFilter;
-    if (decade == null) return base;
-    return base
-        .where((a) => a.seasonYear > 0 && a.seasonYear ~/ 10 * 10 == decade)
-        .toList();
-  }
-
-  bool get _isFiltered => _genreFilter != null || _decadeFilter != null;
 
   @override
   void initState() {
@@ -197,148 +112,12 @@ class _AnimePageState extends State<AnimePage> {
     });
   }
 
-  /// Selecting a genre swaps the curated rows for a single filtered grid
-  /// fetched from AniList; picking "All Genres" reverts to curated rows.
-  /// Purely additive over the homepage -- doesn't touch _trending/etc.
-  Future<void> _selectGenre(String? genre) async {
-    setState(() {
-      _genreFilter = genre;
-      _genreLoading = genre != null;
-    });
-    if (genre == null) return;
-    try {
-      final results = await _anilistService.fetchByGenre(genre, perPage: 30);
-      if (!mounted || _genreFilter != genre) return;
-      setState(() {
-        _genreResults = results;
-        _genreLoading = false;
-      });
-    } catch (e) {
-      debugPrint('Error loading Anime genre "$genre": $e');
-      if (!mounted || _genreFilter != genre) return;
-      setState(() {
-        _genreResults = [];
-        _genreLoading = false;
-      });
-    }
-  }
-
   void _playEpisode(AnimeMedia anime, int episodeNumber) {
     AnimeStreamSheet.show(
       context,
       anime: anime,
       episodeNumber: episodeNumber,
       autoPlay: false,
-    );
-  }
-
-  /// The genre/decade pill row. Built once per [build] and either
-  /// nested inside the hero carousel (see its call sites) or placed inline
-  /// above other content via [_withHeader] -- never a page-level floating
-  /// overlay, so it always scrolls away with whatever it sits above.
-  ///
-  /// The "All" reset options carry `''` (genres) and `-1` (decades) rather
-  /// than null: a tap on a null-valued popup item never reaches `onSelected`
-  /// -- the framework reads a null route result as a dismissal -- so "All
-  /// Genres" reset nothing until the sentinels gave it a value that arrives.
-  Widget _buildPillHeader() {
-    return PillFilterHeaderBar(
-      transparent: true,
-      pills: [
-        FilterDropdown<String?>(
-          label: _genreFilter ?? context.l10n.animeAllGenres,
-          icon: Icons.filter_list_rounded,
-          selectedValue: _genreFilter ?? '',
-          items: [
-            PopupMenuItem(value: '', child: Text(context.l10n.animeAllGenres)),
-            for (final g in _kAnimeGenres)
-              PopupMenuItem(value: g, child: Text(g)),
-          ],
-          onSelected: (v) =>
-              _selectGenre(v == null || v.isEmpty ? null : v),
-        ),
-        if (_decades.isNotEmpty)
-          FilterDropdown<int?>(
-            label: _decadeFilter == null
-                ? context.l10n.catalogAllDecades
-                : '${_decadeFilter}s',
-            icon: Icons.calendar_today_rounded,
-            selectedValue: _decadeFilter ?? -1,
-            items: [
-              PopupMenuItem(
-                value: -1,
-                child: Text(context.l10n.catalogAllDecades),
-              ),
-              for (final d in _decades)
-                PopupMenuItem(value: d, child: Text('${d}s')),
-            ],
-            onSelected: (v) => setState(
-              () => _decadeFilter = (v == null || v < 0) ? null : v,
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// Places [header] in a fixed band above [child], which is what makes it
-  /// stay put while the page scrolls: it is outside the scroll viewport
-  /// rather than pinned over it, so no content ever slides underneath it.
-  /// Used by every branch, hero or not, so the filters do not move as the
-  /// page switches between its loading, error, grid and hero states.
-  /// [PillFilterHeaderBar] applies its own safe-area inset.
-  Widget _withHeader(Widget header, Widget child) {
-    return Column(
-      children: [
-        header,
-        SizedBox(height: context.rem(AppRem.sm)),
-        Expanded(child: child),
-      ],
-    );
-  }
-
-  /// The filtered grid: the genre answer narrowed by decade, or the pooled
-  /// sections narrowed by decade when no genre is chosen. Same split
-  /// TypeCatalogPage uses between curated rows and one grid.
-  Widget _buildFilteredGrid() {
-    final items = _filteredItems;
-    if (items.isEmpty) {
-      return Center(
-        child: Text(
-          _genreFilter != null
-              ? context.l10n.animeNoGenreResults(_genreFilter ?? '')
-              : context.l10n.catalogNoTitlesInDecade(_decadeFilter ?? 0),
-          style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
-        ),
-      );
-    }
-    final width = MediaQuery.sizeOf(context).width;
-    final crossAxisCount = width < 600
-        ? 3
-        : width < 900
-        ? 4
-        : width < 1200
-        ? 5
-        : 6;
-    return FirstFocusScope(
-      // The items.isEmpty branch above already returned.
-      ready: true,
-      child: GridView.builder(
-      // No floating header to clear anymore -- _withHeader (see build())
-      // already reserves real space for the pill row above this grid.
-      padding: EdgeInsets.fromLTRB(context.rem(AppRem.lg), context.rem(AppRem.md), context.rem(AppRem.lg), context.rem(7.5)),
-      gridDelegate: posterGridDelegate(
-        contentWidth: width - context.rem(AppRem.lg) * 2,
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: context.rem(1.25),
-        crossAxisSpacing: context.rem(AppRem.md),
-        scale: AppUnits.scaleOf(context),
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) => AnimeCard(
-        anime: items[index],
-        onTap: () => _openDetails(items[index]),
-      ),
-      ),
     );
   }
 
@@ -434,59 +213,41 @@ class _AnimePageState extends State<AnimePage> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    // Built once and placed above the content by _withHeader in every
-    // branch -- the hero carousel used to swallow it into its own Stack,
-    // which put the filters in a different place, and scrolled them away,
-    // depending on whether the page happened to have a hero yet.
-    final pillHeader = _buildPillHeader();
-
-    // A genre or decade choice cannot be answered by rows of curated
-    // catalogs, so picking one switches the page to a single filtered grid
-    // -- same split TypeCatalogPage (Movies/Series) uses between
-    // BrowseScaffold and its own filtered grid.
-    final content = _isFiltered
-        ? _withHeader(
-            pillHeader,
-            _genreLoading
-                ? Center(
-                    child: CircularProgressIndicator(color: AppColors.accent),
-                  )
-                : _buildFilteredGrid(),
-          )
-        : ValueListenableBuilder<List<String>>(
-            valueListenable: HomeRowsSettings.visibleAnime,
-            builder: (context, visible, _) => BrowseScaffold<AnimeMedia>(
-            contentLabel: context.l10n.navAnime,
-            header: pillHeader,
-            belowHero: ContinueWatchingSlider(
-              typeFilter: 'general_anime',
-              title: context.l10n.animeContinueWatching,
-            ),
-            belowHeroExtent: ContinueWatchingSlider.bandHeight,
-            isLoading: _loading,
-            error: _error,
-            onRetry: _loadAnimeData,
-            heroItems: _heroItems,
-            rows: _rows
-                .where((row) => row.id == null || visible.contains(row.id))
-                .toList(),
-            heroBuilder: (context, anime) => _AnimeHeroSlide(
-              anime: anime,
-              screenWidth: MediaQuery.sizeOf(context).width,
-              onWatchNow: () => _playEpisode(anime, 1),
-              onDetailsTap: () => _openDetails(anime),
-            ),
-            itemBuilder: (context, anime) =>
-                AnimeCard(anime: anime, onTap: () => _openDetails(anime)),
-            onRefresh: _loadAnimeData,
-            emptyState: Center(
-              child: Text(
-                context.l10n.animeLoadFailed,
-                style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
-              ),
-            ),
+    // Rows and hero only: the page's filters are gone, and search owns
+    // the narrowing now.
+    final content = ValueListenableBuilder<List<String>>(
+      valueListenable: HomeRowsSettings.visibleAnime,
+      builder: (context, visible, _) => BrowseScaffold<AnimeMedia>(
+        contentLabel: context.l10n.navAnime,
+        belowHero: ContinueWatchingSlider(
+          typeFilter: 'general_anime',
+          title: context.l10n.animeContinueWatching,
+        ),
+        belowHeroExtent: ContinueWatchingSlider.bandHeight,
+        isLoading: _loading,
+        error: _error,
+        onRetry: _loadAnimeData,
+        heroItems: _heroItems,
+        rows: _rows
+            .where((row) => row.id == null || visible.contains(row.id))
+            .toList(),
+        heroBuilder: (context, anime) => _AnimeHeroSlide(
+          anime: anime,
+          screenWidth: MediaQuery.sizeOf(context).width,
+          onWatchNow: () => _playEpisode(anime, 1),
+          onDetailsTap: () => _openDetails(anime),
+        ),
+        itemBuilder: (context, anime) =>
+            AnimeCard(anime: anime, onTap: () => _openDetails(anime)),
+        onRefresh: _loadAnimeData,
+        emptyState: Center(
+          child: Text(
+            context.l10n.animeLoadFailed,
+            style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
           ),
-        );
+        ),
+      ),
+    );
 
     return Scaffold(
       backgroundColor: AppColors.canvas,

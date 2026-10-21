@@ -4,14 +4,12 @@ import '../models/movie/movie_section.dart';
 import '../models/movie/movie_year.dart';
 
 /// The narrowing filters the search page offers on every kind of result: a
-/// decade, a minimum rating, and an alphabetical order.
+/// decade, a minimum rating, a genre, and an alphabetical order.
 ///
-/// They are the ones every catalog can answer. Genre looked like the obvious
-/// third, but an addon's search results carry only a name, poster, year and
-/// rating -- no genres -- so a genre filter would work for anime and silently
-/// match nothing for films and series. A filter that exists on one tab and
-/// not the others is the inconsistency this replaces. The page applies them
-/// to what came back rather than re-querying, so changing one is instant.
+/// They apply to what came back rather than re-querying, so changing one is
+/// instant. An anime result carries its genres from AniList. A film or series
+/// result does not: the page reads its genres from its metadata, and only once
+/// a genre is picked, so a search with no genre picked costs no extra requests.
 ///
 /// A title that does not say its year (or its rating) is left out while that
 /// filter is on, not guessed at, the same rule the Anime page's decade filter
@@ -21,6 +19,14 @@ bool decadeMatches(int? year, int? decade) =>
 
 bool ratingMatches(double? rating, double? minRating) =>
     minRating == null || (rating != null && rating >= minRating);
+
+/// Whether a title's genres include [genre], ignoring case. A title whose genres
+/// are not known yet is left out while a genre is on, the same as one with no
+/// year under a decade.
+bool genreMatches(List<String>? genres, String? genre) =>
+    genre == null ||
+    (genres != null &&
+        genres.any((g) => g.toLowerCase() == genre.toLowerCase()));
 
 /// A film or series' rating on the 0-10 scale, or null when it has none.
 double? movieRatingOf(Movie movie) => double.tryParse(movie.imdbRating ?? '');
@@ -47,13 +53,20 @@ List<T> sortedByTitle<T>(
   return sort == SearchSort.za ? sorted.reversed.toList() : sorted;
 }
 
+/// [genreOf] reads a title's genres from wherever they are kept; a search
+/// answer does not carry them, so the page looks them up once a genre is on.
 List<MovieSection> filterSections(
   List<MovieSection> sections, {
   int? decade,
   double? minRating,
+  String? genre,
+  List<String>? Function(Movie movie)? genreOf,
   SearchSort sort = SearchSort.relevance,
 }) {
-  if (decade == null && minRating == null && sort == SearchSort.relevance) {
+  if (decade == null &&
+      minRating == null &&
+      genre == null &&
+      sort == SearchSort.relevance) {
     return sections;
   }
   final out = <MovieSection>[];
@@ -63,7 +76,8 @@ List<MovieSection> filterSections(
           .where(
             (m) =>
                 decadeMatches(startYearOf(m.year), decade) &&
-                ratingMatches(movieRatingOf(m), minRating),
+                ratingMatches(movieRatingOf(m), minRating) &&
+                genreMatches(genreOf?.call(m), genre),
           )
           .toList(),
       (m) => m.name,
@@ -89,16 +103,21 @@ List<AnimeMedia> filterAnime(
   List<AnimeMedia> anime, {
   int? decade,
   double? minRating,
+  String? genre,
   SearchSort sort = SearchSort.relevance,
 }) {
-  if (decade == null && minRating == null && sort == SearchSort.relevance) {
+  if (decade == null &&
+      minRating == null &&
+      genre == null &&
+      sort == SearchSort.relevance) {
     return anime;
   }
   final kept = anime
       .where(
         (a) =>
             decadeMatches(a.seasonYear > 0 ? a.seasonYear : null, decade) &&
-            ratingMatches(animeRatingOf(a), minRating),
+            ratingMatches(animeRatingOf(a), minRating) &&
+            genreMatches(a.genres, genre),
       )
       .toList();
   return sortedByTitle(kept, (a) => a.displayTitle, sort);

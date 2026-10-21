@@ -13,10 +13,8 @@ import '../../services/addon/addon_manager.dart';
 import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/common/browse_scaffold.dart';
 import '../../widgets/common/error_view.dart';
-import '../../widgets/common/filter_dropdown.dart';
 import '../../widgets/common/genre_tag_row.dart';
 import '../../widgets/common/hero_action_button.dart';
-import '../../widgets/common/pill_filter_header_bar.dart';
 import '../../widgets/home/continue_watching_slider.dart';
 import '../../widgets/movie/movie_card.dart';
 import '../../widgets/movie/upcoming_calendar_row.dart';
@@ -81,17 +79,12 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   bool _loading = true;
   String? _error;
 
-  List<String> _availableGenres = [];
-  String? _genreFilter;
-
   /// The Documentary genre, as its own row. Documentaries are films -- the
   /// addon catalogs carry them under the same type -- but a viewer looking
   /// for one is rarely browsing; they want the shelf. Sourced by genre
   /// rather than by a catalog of its own, so it works with whatever addons
   /// are installed and costs no new catalog.
   List<Movie> _documentaries = [];
-  List<Movie> _genreItems = [];
-  bool _loadingGenre = false;
 
   /// Per-hero-item enrichment (genre/synopsis) keyed by movie id — the
   /// catalog list itself only carries poster/background/year/imdbRating, not
@@ -99,12 +92,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
   /// knows which ~6 items it's showing. Missing/failed entries just mean
   /// that slide stays at today's minimal title+year overlay.
   Map<String, MovieDetail> _heroDetails = {};
-
-  List<Movie> get _visibleItems => _genreFilter == null ? _items : _genreItems;
-
-  /// A genre choice cannot be answered by rows of curated catalogs, so picking
-  /// one switches the page to a single filtered grid.
-  bool get _isFiltered => _genreFilter != null;
 
   /// The hero shows the head of the first catalog, which is the addon's own
   /// lead catalog -- "Popular", "Top", whatever it chose to put first.
@@ -180,25 +167,10 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
           if (seen.add(key)) items.add(typed);
         }
       }
-      final genres = <String>{};
-      for (final addon in _manager.activeAddons) {
-        for (final catalog in addon.manifest.catalogs) {
-          if (catalog.type != widget.type) continue;
-          genres.addAll(catalog.genres);
-        }
-      }
-      final filteredGenres = genres.where((g) {
-        final trimmed = g.trim();
-        if (trimmed.isEmpty) return false;
-        if (RegExp(r'^\d{4}$').hasMatch(trimmed)) return false;
-        return true;
-      }).toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-
       if (!mounted) return;
       setState(() {
         _sections = sections;
         _items = items;
-        _availableGenres = filteredGenres;
         _loading = false;
       });
       _fetchHeroDetails(_heroItems);
@@ -222,50 +194,6 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     }
   }
 
-  Future<void> _selectGenreFilter(String? genre) async {
-    if (genre == null) {
-      setState(() {
-        _genreFilter = null;
-        _genreItems = [];
-      });
-      return;
-    }
-    setState(() {
-      _genreFilter = genre;
-      _loadingGenre = true;
-    });
-    try {
-      final sections = await _manager.fetchByGenre(genre);
-      final seen = <String>{};
-      final items = <Movie>[];
-      for (final section in sections) {
-        if (section.contentType != widget.type) continue;
-        for (final movie in section.movies) {
-          final typed = Movie(
-            id: movie.id,
-            name: movie.name,
-            poster: movie.poster,
-            background: movie.background,
-            year: movie.year,
-            type: widget.type,
-            addonBaseUrl: movie.addonBaseUrl,
-            imdbRating: movie.imdbRating,
-          );
-          final key = '${typed.type}:${typed.id}';
-          if (seen.add(key)) items.add(typed);
-        }
-      }
-      if (!mounted || _genreFilter != genre) return;
-      setState(() {
-        _genreItems = items;
-        _loadingGenre = false;
-      });
-    } catch (e) {
-      if (!mounted || _genreFilter != genre) return;
-      setState(() => _loadingGenre = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
@@ -280,117 +208,69 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
       );
     }
 
-    // Browsing and filtering answer different questions. With no filter the
-    // page is the addon catalogs as rows; once a genre or decade is chosen
-    // those rows stop being the right shape and it becomes one grid.
-    if (!_isFiltered) {
-      final section =
-          widget.type == 'series' ? HomeSection.series : HomeSection.movies;
-      return ValueListenableBuilder<List<String>>(
-        valueListenable: HomeRowsSettings.visibleFor(section),
-        builder: (context, visible, _) => BrowseScaffold<Movie>(
-        contentLabel: label,
-        header: _buildHeader(context),
-        belowHero: ContinueWatchingSlider(typeFilter: widget.type),
-        // Sizes the hero to the rest of the viewport, so Continue Watching
-        // is the one row on screen with it rather than a strip under a
-        // hero that left room for the start of two more.
-        belowHeroExtent: ContinueWatchingSlider.bandHeight,
-        afterRows: widget.type == 'series' && visible.contains('upcomingCalendar')
-            ? const UpcomingCalendarRow()
-            : null,
-        isLoading: _loading,
-        heroItems: _heroItems,
-        rows: distinctBrowseRows([
-          // First: the catalog's most acclaimed titles, ranked by rating
-          // rather than by the page's year sort -- acclaim is the point,
-          // and re-sorting them by year would unrank them.
-          if (topRated(_items).isNotEmpty)
-            BrowseRow<Movie>(
-              id: 'topRated',
-              title: '⭐ ${context.l10n.catalogTopRated}',
-              subtitle: context.l10n.catalogTopRatedSub,
-              items: topRated(_items),
-            ),
-          for (final section in _sections)
-            if (section.movies.isNotEmpty)
-              BrowseRow<Movie>(
-                id: 'catalog:${section.title}',
-                title: section.title,
-                items: section.movies,
-              ),
-          if (_documentaries.isNotEmpty)
-            BrowseRow<Movie>(
-              id: 'documentaries',
-              title: context.l10n.catalogDocumentaries,
-              items: _documentaries,
-            ),
-          if (_items.isNotEmpty)
-            BrowseRow<Movie>(
-              id: 'latestReleases',
-              title: context.l10n.catalogLatestReleases,
-              items: latestReleases(_items),
-            ),
-          if (comingSoon(_items).isNotEmpty)
-            BrowseRow<Movie>(
-              id: 'comingSoon',
-              title: context.l10n.catalogComingSoon,
-              items: comingSoon(_items),
-            ),
-        ]).where((row) => row.id == null || visible.contains(row.id)).toList(),
-        heroBuilder: _buildHeroSlide,
-        itemBuilder: (context, movie) => MovieCard(movie: movie),
-        onRefresh: _load,
-        emptyState: Center(
-          child: Text(
-            context.l10n.catalogNoContent,
-            style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
+    final section =
+        widget.type == 'series' ? HomeSection.series : HomeSection.movies;
+    return ValueListenableBuilder<List<String>>(
+      valueListenable: HomeRowsSettings.visibleFor(section),
+      builder: (context, visible, _) => BrowseScaffold<Movie>(
+      contentLabel: label,
+      belowHero: ContinueWatchingSlider(typeFilter: widget.type),
+      // Sizes the hero to the rest of the viewport, so Continue Watching
+      // is the one row on screen with it rather than a strip under a
+      // hero that left room for the start of two more.
+      belowHeroExtent: ContinueWatchingSlider.bandHeight,
+      afterRows: widget.type == 'series' && visible.contains('upcomingCalendar')
+          ? const UpcomingCalendarRow()
+          : null,
+      isLoading: _loading,
+      heroItems: _heroItems,
+      rows: distinctBrowseRows([
+        // First: the catalog's most acclaimed titles, ranked by rating
+        // rather than by the page's year sort -- acclaim is the point,
+        // and re-sorting them by year would unrank them.
+        if (topRated(_items).isNotEmpty)
+          BrowseRow<Movie>(
+            id: 'topRated',
+            title: '⭐ ${context.l10n.catalogTopRated}',
+            subtitle: context.l10n.catalogTopRatedSub,
+            items: topRated(_items),
           ),
+        for (final section in _sections)
+          if (section.movies.isNotEmpty)
+            BrowseRow<Movie>(
+              id: 'catalog:${section.title}',
+              title: section.title,
+              items: section.movies,
+            ),
+        if (_documentaries.isNotEmpty)
+          BrowseRow<Movie>(
+            id: 'documentaries',
+            title: context.l10n.catalogDocumentaries,
+            items: _documentaries,
+          ),
+        if (_items.isNotEmpty)
+          BrowseRow<Movie>(
+            id: 'latestReleases',
+            title: context.l10n.catalogLatestReleases,
+            items: latestReleases(_items),
+          ),
+        if (comingSoon(_items).isNotEmpty)
+          BrowseRow<Movie>(
+            id: 'comingSoon',
+            title: context.l10n.catalogComingSoon,
+            items: comingSoon(_items),
+          ),
+      ]).where((row) => row.id == null || visible.contains(row.id)).toList(),
+      heroBuilder: _buildHeroSlide,
+      itemBuilder: (context, movie) => MovieCard(movie: movie),
+      onRefresh: _load,
+      emptyState: Center(
+        child: Text(
+          context.l10n.catalogNoContent,
+          style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
         ),
-      ));
-    }
-
-    return _buildFilteredGrid(context);
-  }
-
-  /// The genre filter, one row -- no separate title, since the section
-  /// pill/bottom-bar tab already says "Movies" or "Series". Shared by both
-  /// views so the control does not move when switching between rows and the
-  /// grid. Decade, rating and the A-Z order live in search, not here.
-  ///
-  /// The "All" reset option carries `''` rather than null: a tap on a
-  /// null-valued popup item never reaches `onSelected` -- the framework reads
-  /// a null route result as a dismissal -- so "All Genres" reset nothing until
-  /// the sentinel gave it a value that arrives.
-  Widget _buildHeader(BuildContext context) {
-    return PillFilterHeaderBar(
-      transparent: true,
-      pills: [
-        if (_availableGenres.isNotEmpty) ...[
-          FilterDropdown<String?>(
-            label: _genreFilter ?? context.l10n.catalogAllGenres,
-            icon: Icons.category_rounded,
-            selectedValue: _genreFilter ?? '',
-            items: [
-              PopupMenuItem(value: '', child: Text(context.l10n.catalogAllGenres)),
-              for (final g in _availableGenres)
-                PopupMenuItem(value: g, child: Text(g)),
-            ],
-            onSelected: (v) =>
-                _selectGenreFilter(v == null || v.isEmpty ? null : v),
-          ),
-          if (_loadingGenre)
-            SizedBox(
-              width: context.rem(AppRem.md),
-              height: context.rem(AppRem.md),
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.accent,
-              ),
-            ),
-        ],
-      ],
-    );
+      ),
+    ));
   }
 
   Future<void> _fetchHeroDetails(List<Movie> heroItems) async {
@@ -583,67 +463,4 @@ class _TypeCatalogPageState extends State<TypeCatalogPage> {
     );
   }
 
-  Widget _buildFilteredGrid(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final crossAxisCount = width < 600
-        ? 3
-        : width < 900
-        ? 4
-        : width < 1200
-        ? 5
-        : width < 1600
-        ? 6
-        : 7;
-    final visible = _visibleItems;
-
-    // Header above the viewport, not the first sliver in it, so it stays
-    // put here exactly as it does on the unfiltered rows view -- switching
-    // between the two must not make the controls move or scroll away.
-    return Column(
-      children: [
-        _buildHeader(context),
-        SizedBox(height: context.rem(AppRem.sm)),
-        Expanded(
-          child: CustomScrollView(
-            slivers: [
-              if (visible.isEmpty && !_loadingGenre)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Text(
-                      _items.isEmpty
-                          ? context.l10n.catalogNoContent
-                          : context.l10n.catalogNoTitlesForGenre(_genreFilter!),
-                      style: TextStyle(color: AppColors.inkSubtle, fontSize: AppType.bodyLg),
-                    ),
-                  ),
-                )
-              else
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.pageInset(context),
-                    0,
-                    AppSpacing.pageInset(context),
-                    context.rem(7.5),
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate: posterGridDelegate(
-                      contentWidth: MediaQuery.sizeOf(context).width - AppSpacing.pageInset(context) * 2,
-                      crossAxisCount: crossAxisCount,
-                      mainAxisSpacing: context.rem(1.25),
-                      crossAxisSpacing: context.rem(AppRem.md),
-                      scale: AppUnits.scaleOf(context),
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => MovieCard(movie: visible[index]),
-                      childCount: visible.length,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 }
