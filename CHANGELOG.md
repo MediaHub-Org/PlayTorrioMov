@@ -31,6 +31,8 @@ Stable release. Checked locally: analysis, the full test suite and a Windows bui
 - **A similar title is no longer cut off when it grows under the pointer.** The
   rail had no room for the enlargement, so its top and bottom were clipped.
 - **Stream stats has space above "Copy diagnostics".**
+- **Anime episode cards sit centred in their row.** They used to hug the top
+  edge of the row, which is taller than a card.
 - **A movie's loading screen shows only the title's logo** (or its name) above
   a spinner. The PlayTorrioMov logo that filled up while a movie loaded is gone;
   live TV keeps it.
