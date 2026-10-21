@@ -10,7 +10,7 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-21**, on `v1.9.10+58`, the stable release (main at `24b9a83`).
+Last reconciled: **2026-10-22**, on `v1.9.10+58`, the stable release (main at `2cf48b3`).
 
 ---
 
@@ -29,9 +29,6 @@ Last reconciled: **2026-10-21**, on `v1.9.10+58`, the stable release (main at `2
   links to a legal streaming service (commonly Crunchyroll), which is most of
   the catalog; the rest show "EP N". No key is involved. A show AniList does list
   with episode titles that shows "EP N" here is a bug: send the show and episode.
-- **Revoke the old Wyzie key.** The shared key the app used to ship stays in git
-  history, and anyone can read it there. Revoke it on Wyzie's dashboard if it
-  allows. The app no longer uses it, so revoking it does not break anything.
 
 ---
 

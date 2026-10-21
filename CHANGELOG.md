@@ -3,22 +3,6 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
-
-### Changed
-
-- **Dropbox backup takes your own app key.** Paste it in Backup settings, the
-  same way TMDB, Simkl and Wyzie keys work. Nothing is shared between installs.
-
-### Fixed
-
-- **The player's info popover follows the app's theme.** It used to keep the
-  player's fixed dark look whatever theme was chosen.
-- **Anime works while AniList is down.** AniList has its API switched off for
-  now, which left the anime tab empty. The catalog now falls back to Kitsu:
-  lists, search, details and episode titles, with streams found through the
-  AniList id Kitsu maps each show to.
-
 ## [1.9.10+58] - 2026-10-21
 
 Stable release. Checked locally: analysis, the full test suite and a Windows build.
@@ -35,6 +19,9 @@ Stable release. Checked locally: analysis, the full test suite and a Windows bui
 - **Movies, Series and Anime no longer have filter menus above the rows.**
   Search has them instead: genre, decade, rating, and an A–Z or Z–A order.
 
+- **Dropbox backup takes your own app key.** Paste it in Backup settings, the
+  same way TMDB, Simkl and Wyzie keys work. Nothing is shared between installs.
+
 ### Fixed
 
 - **A filter menu is as wide as the pill that opens it.**
@@ -44,6 +31,12 @@ Stable release. Checked locally: analysis, the full test suite and a Windows bui
 - **A movie's loading screen shows only the title's logo** (or its name) above
   a spinner. The PlayTorrioMov logo that filled up while a movie loaded is gone;
   live TV keeps it.
+- **The player's info popover follows the app's theme.** It used to keep the
+  player's fixed dark look whatever theme was chosen.
+- **Anime works while AniList is down.** AniList has its API switched off for
+  now, which left the anime tab empty. The catalog now falls back to Kitsu:
+  lists, search, details and episode titles, with streams found through the
+  AniList id Kitsu maps each show to.
 
 ## [1.9.9+57] - 2026-10-21
 
