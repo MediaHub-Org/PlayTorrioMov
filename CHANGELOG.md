@@ -3,6 +3,20 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+
+- **Dropbox backup takes your own app key.** Paste it in Backup settings, the
+  same way TMDB, Simkl and Wyzie keys work. Nothing is shared between installs.
+
+### Fixed
+
+- **The player's info popover follows the app's theme.** It used to keep the
+  player's fixed dark look whatever theme was chosen.
+- **The anime tab says when AniList is down.** It used to say the connection
+  had failed, which was not the cause.
+
 ## [1.9.10+58] - 2026-10-21
 
 Stable release. Checked locally: analysis, the full test suite and a Windows build.

@@ -16,10 +16,15 @@ Last reconciled: **2026-10-21**, on `v1.9.10+58`, the stable release (main at `2
 
 ## Waiting on you
 
-- **Dropbox and Simkl Connect.** Both credentials are in the published build
-  (v1.9.7's `data/app.so`). Simkl's device request returns a PIN for the app ID,
-  and Dropbox's authorize page loads for the app key. Each still needs one real
-  approval in the browser: Dropbox's pasted code, and Simkl's PIN.
+- **Dropbox and Simkl Connect.** Each person enters their own Dropbox app key and
+  Simkl client ID in Settings; nothing is shipped for everyone to share. Each
+  still needs one real approval in the browser: Dropbox's pasted code, and
+  Simkl's PIN.
+- **Anime catalog.** AniList has switched its API off for now: every request
+  answers 403, "temporarily disabled due to severe stability issues". Browse,
+  search, details and episode titles all come from AniList, so the anime tab is
+  empty until it returns; the page now says so. Kitsu answers and could serve as
+  a fallback. That would be a decision to take, not a fix.
 - **Anime episode names.** AniList gives a title per episode only for shows it
   links to a legal streaming service (commonly Crunchyroll), which is most of
   the catalog; the rest show "EP N". No key is involved. A show AniList does list

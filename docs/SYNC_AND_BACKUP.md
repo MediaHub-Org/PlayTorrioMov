@@ -143,8 +143,9 @@ does not need the Custom Lists API at all; that API is read-only beta
 - **Dropbox backup** (`dropbox_backup_service.dart`): PKCE OAuth against a
   "public client" app (App Key only, no secret), with the code Dropbox
   shows pasted back in -- the same shape as Trakt's device code. Uploads
-  and downloads the same envelope. `DROPBOX_APP_KEY` is configured (see
-  the App Console at dropbox.com/developers/apps).
+  and downloads the same envelope. Each person registers their own Dropbox app
+  (free, at dropbox.com/developers/apps) and pastes its app key in Backup
+  settings; no key is shipped for everyone to share.
 - **Auto-backup** (`auto_backup_service.dart`): on by default once a
   destination is connected, backing up at app open when a day/week/month
   (your choice) has passed since the last one. There is no background-task
@@ -181,7 +182,7 @@ its own cost:
 
 | Provider    | Auth                                                                                                                        | Real cost of adding it                                                                                                                                                                                             |
 |-------------|-----------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Dropbox** | OAuth2, PKCE — no client secret needed for an installed/public app                                                          | Built (`dropbox_backup_service.dart` + the Backup settings card): PKCE flow with the code pasted back in, plain REST upload/download. `DROPBOX_APP_KEY` is configured, at dropbox.com/developers/apps.             |
+| **Dropbox** | OAuth2, PKCE — no client secret needed for an installed/public app                                                          | Built (`dropbox_backup_service.dart` + the Backup settings card): PKCE flow with the code pasted back in, plain REST upload/download. Each person's own app key, pasted in Backup settings (dropbox.com/developers/apps).             |
 | **Mega**    | Proprietary — no REST/OAuth; email+password login, client-side key derivation (RSA/AES) done the way Mega's own SDK does it | No official Dart SDK; the community packages that exist are less mature than Dropbox's official one. The largest and least certain lift, and the one most likely to need rework if Mega changes anything server-side. |
 
 None of this is a reason not to do it — it's the reason to pick one rather
