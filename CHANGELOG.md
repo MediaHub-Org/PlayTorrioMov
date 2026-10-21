@@ -3,7 +3,9 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.9.10+58] - 2026-10-21
+
+Stable release. Checked locally: analysis, the full test suite and a Windows build.
 
 ### Added
 
