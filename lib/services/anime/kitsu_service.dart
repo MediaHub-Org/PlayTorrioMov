@@ -146,7 +146,9 @@ class KitsuService {
         debugPrint('Kitsu API error ${res.statusCode} for $path');
         return null;
       }
-      final decoded = jsonDecode(res.body);
+      // Kitsu sends UTF-8 without a charset, and `res.body` would read it as
+      // Latin-1, turning Japanese titles and punctuation into mojibake.
+      final decoded = jsonDecode(utf8.decode(res.bodyBytes));
       if (decoded is! Map<String, dynamic>) return null;
       _cache[url] = decoded;
       return decoded;

@@ -119,6 +119,31 @@ void main() {
     expect(id, 1735);
   });
 
+  test('Japanese titles and punctuation survive, even without a charset header', () async {
+    final body = {
+      'data': [
+        {
+          ...kitsuAnime(id: '1535'),
+          'attributes': {
+            ...(kitsuAnime(id: '1535')['attributes'] as Map<String, dynamic>),
+            'titles': {'ja_jp': 'デスノート', 'en': 'Death Note'},
+            'synopsis': 'Light’s notebook — “new god”',
+          },
+        },
+      ],
+      'included': _categories,
+    };
+    final results = await http.runWithClient(
+      () => KitsuService.instance.search('utf8 titles'),
+      () => MockClient((_) async => http.Response.bytes(
+            utf8.encode(jsonEncode(body)),
+            200,
+          )),
+    );
+    expect(results.single.titleNative, 'デスノート');
+    expect(results.single.description, 'Light’s notebook — “new god”');
+  });
+
   test('a failed mapping request is not remembered as "no AniList id"', () async {
     final first = await http.runWithClient(
       () => KitsuService.instance.anilistIdFor(7777),
