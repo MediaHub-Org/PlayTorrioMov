@@ -55,7 +55,7 @@ runs:
         else
           : > .env
           if [ "$WARN_WHEN_EMPTY" = "true" ]; then
-            echo "::warning title=Building without credentials::No DOTENV_CONTENTS secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build, and TMDB cast photos are off -- set TMDB_API_KEY in the secret, or each user adds their own under Settings. See docs/RELEASES.md for the keys .env is read for."
+            echo "::warning title=Building without credentials::No DOTENV_CONTENTS secret is set, so .env is empty. Trakt and Simkl sign-in and Discord Rich Presence are inert in this build, and TMDB cast photos are off -- each person adds their own keys under Settings; keys in the secret ship in every binary. See docs/RELEASES.md for the keys .env is read for."
           fi
         fi
 
