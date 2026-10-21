@@ -15,6 +15,9 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **A similar title is no longer cut off when it grows under the pointer.** The
   rail had no room for the enlargement, so its top and bottom were clipped.
 - **Stream stats has space above "Copy diagnostics".**
+- **A movie's loading screen shows only the title's logo** (or its name) above
+  a spinner. The PlayTorrioMov logo that filled up while a movie loaded is gone;
+  live TV keeps it.
 
 ## [1.9.9+57] - 2026-10-21
 

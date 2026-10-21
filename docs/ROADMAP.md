@@ -34,8 +34,8 @@ None of these can be settled from the code.
   for notification permission on launch.
 - **Similar Content** on a movie and a series (TMDB first, BestSimilar as the
   fallback).
-- **The loading logo** with a torrent, a debrid link and a plain URL, and it
-  clears on the first frame.
+- **The loading screen** with a torrent, a debrid link and a plain URL: the
+  title's logo (or name) and a spinner, and the screen clears on the first frame.
 - **TV focus audit.** With a remote: the Sources page (the four filter pills; OK
   opens each menu on the selected row; Back returns to the same pill; focus stays
   put when the add-on pill appears), the in-player Sources and Episodes panels,
@@ -62,8 +62,8 @@ None of these can be settled from the code.
   and a jump back comes out of the cache.
 - **TV: details, loading screen, speed menu.** Opening a title's details lands on
   Play, and Down/Right reach the library buttons and then the rails with no genre
-  tags between. The loading screen shows the title's logo (or name) above the
-  filling logo, and the episode under it. The speed menu stays open while
+  tags between. The loading screen shows the title's logo (or name) above a
+  spinner, and the episode under it. The speed menu stays open while
   Left/Right step the speed, closes on OK or Back, and has no frame around the
   slider.
 - **Subtitle panel on TV and phone.** Opening it puts the violet wash on "Turn

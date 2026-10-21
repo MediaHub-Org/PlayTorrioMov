@@ -35,8 +35,6 @@ import '../../widgets/player/player_top_bar.dart';
 import '../../widgets/player/back_press_decision.dart';
 import '../../widgets/player/remote_key_decision.dart';
 import '../../widgets/player/player_transport.dart';
-import '../../widgets/player/player_load_progress.dart';
-import '../../widgets/player/player_loading_logo.dart';
 import '../../widgets/player/player_center_controls.dart';
 import '../../widgets/player/player_seek_feedback.dart';
 import '../../widgets/player/sleep_timer_menu.dart';
@@ -133,15 +131,12 @@ class _PlayerScreenState extends State<PlayerScreen>
   Timer? _hideTimer;
   Timer? _progressSaveTimer;
   DateTime? _lastPointerTimerReset;
-  /// 0..1 for the loading logo; see [PlayerLoadProgress] for what moves it.
-  final PlayerLoadProgress _loadProgress = PlayerLoadProgress();
 
   /// True from the moment the player has been handed the stream until it has
   /// actually produced playback. `open()` returns as soon as mpv accepts the
   /// URL, long before a frame exists, so without this the loading screen
   /// vanished into a black video for however long the buffer took to fill.
   bool _awaitingFirstFrame = false;
-  StreamSubscription<TorrentStats>? _preloadSub;
   Timer? _firstFrameTimeout;
 
   /// Notices, once a second after the first frame, how the connection is
@@ -348,9 +343,6 @@ class _PlayerScreenState extends State<PlayerScreen>
         _buffered = buf;
         _bufferNotifier.value = buf;
       }),
-      _player.stream.bufferingPercentage.listen((percent) {
-        if (_awaitingFirstFrame) _loadProgress.reachBuffering(percent / 100);
-      }),
       _player.stream.buffering.listen((isBuffering) {
         if (_wasBuffering &&
             !isBuffering &&
@@ -491,30 +483,14 @@ class _PlayerScreenState extends State<PlayerScreen>
   /// Ends the wait. Does not call setState: callers are already in one, or
   /// are tearing down.
   void _endFirstFrameWait() {
-    if (_awaitingFirstFrame) _loadProgress.reach(1);
     _awaitingFirstFrame = false;
     _firstFrameTimeout?.cancel();
     _firstFrameTimeout = null;
-    _preloadSub?.cancel();
-    _preloadSub = null;
-  }
-
-  void _watchTorrentPreload(String magnet) {
-    _preloadSub?.cancel();
-    _preloadSub = TorrentStreamService().statsStream(magnet).listen(
-      (stats) => _loadProgress.reachBuffering(stats.preloadPercent / 100),
-      onError: (Object e) => debugPrint('[PlayerScreen] Preload stats failed: $e'),
-    );
   }
 
   Future<void> _initStream() async {
     String? streamUrl;
-    // Set only when TorrServer is serving, the one case with a preload to watch.
-    String? preloadMagnet;
     _endFirstFrameWait();
-    _loadProgress
-      ..reset()
-      ..reach(PlayerLoadProgress.started);
 
     // Ensure only one source plays app-wide: stop any other active source.
     final sourceId =
@@ -575,7 +551,6 @@ class _PlayerScreenState extends State<PlayerScreen>
         _statsDebridService = null;
         _statsKind = 'File';
         _statsIsLive = false;
-        _loadProgress.reach(PlayerLoadProgress.opened);
         await _player.open(Media(rawUrl), play: true);
         await PlayerSettings.applyPostOpenProperties(_player);
         _setSubtitleScale(_subtitleScale);
@@ -614,7 +589,6 @@ class _PlayerScreenState extends State<PlayerScreen>
           final activeService = await DebridService().getSelectedService();
           if (!mounted) return;
           setState(() => _status = (l10n) => l10n.playerStatusUsing(activeService));
-          _loadProgress.reach(PlayerLoadProgress.resolving);
 
           final seasonNum = _currentEpisode?.season;
           final episodeNum = _currentEpisode?.episode;
@@ -638,9 +612,7 @@ class _PlayerScreenState extends State<PlayerScreen>
         } else {
           if (!mounted) return;
           setState(() => _status = (l10n) => l10n.playerStatusGathering);
-          _loadProgress.reach(PlayerLoadProgress.resolving);
 
-          preloadMagnet = magnet;
           _statsMagnet = magnet;
           _statsDebridService = null;
           streamUrl = await TorrentStreamService().streamTorrent(
@@ -658,7 +630,6 @@ class _PlayerScreenState extends State<PlayerScreen>
 
       if (streamUrl == null) throw Exception('Stream URL is null');
 
-      _loadProgress.reach(PlayerLoadProgress.resolved);
       final sanitizedUrlStr = streamUrl.contains('::')
           ? streamUrl.replaceAll('::', '%3A%3A')
           : streamUrl;
@@ -760,7 +731,6 @@ class _PlayerScreenState extends State<PlayerScreen>
       // fetchable by a receiver.
       _isCastableSource = CastService.canCastUrl(_resolvedStreamUrl);
 
-      _loadProgress.reach(PlayerLoadProgress.opened);
       await _player.open(
         Media(
           cleanUri.toString(),
@@ -785,9 +755,6 @@ class _PlayerScreenState extends State<PlayerScreen>
         _isLoading = false;
         _beginFirstFrameWait();
       });
-      // Only the engine knows how full its preload is; debrid and plain
-      // HTTP streams are measured by the player's own buffering alone.
-      if (preloadMagnet != null) _watchTorrentPreload(preloadMagnet);
 
       // Resume from history if previously watched
       if (widget.detail != null) {
@@ -2576,7 +2543,6 @@ class _PlayerScreenState extends State<PlayerScreen>
     _bufferNotifier.dispose();
     _player.dispose();
     _endFirstFrameWait();
-    _loadProgress.dispose();
     TorrentStreamService().cleanup();
     if (!_wasFullscreenBeforeEntering && WindowService.instance.isFullscreen) {
       WindowService.instance.exitFullscreen();
@@ -2948,9 +2914,10 @@ class _PlayerScreenState extends State<PlayerScreen>
     );
   }
 
-  /// The logo filling with load progress, and what is being waited on.
+  /// What is being loaded and what is being waited on.
   ///
-  /// Under the title being loaded: its logo (or its name), then the episode.
+  /// The title being loaded, its logo (or its name), then the episode, then a
+  /// spinner and the status line.
   /// The detail's name rather than [PlayerScreen.title], which for a movie is
   /// the release's filename.
   Widget _buildLoadingContent() {
@@ -2976,10 +2943,9 @@ class _PlayerScreenState extends State<PlayerScreen>
                   ),
           ),
           SizedBox(height: context.rem(AppRem.lg)),
-          ValueListenableBuilder<double>(
-            valueListenable: _loadProgress,
-            builder: (context, progress, _) => PlayerLoadingLogo(progress: progress),
-          ),
+          // A generic spinner rather than the app's own logo: the title's logo
+          // is the only logo a movie's loading screen shows.
+          CircularProgressIndicator(color: AppColors.accent),
           SizedBox(height: context.rem(AppRem.lg)),
           Text(
             _status(context.l10n),
