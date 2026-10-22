@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../services/theme/app_colors.dart';
+import 'focus_cue.dart';
 import 'focus_ring.dart';
 import 'activate_keys.dart';
 
@@ -77,7 +78,7 @@ class HoverButton extends StatefulWidget {
   State<HoverButton> createState() => _HoverButtonState();
 }
 
-class _HoverButtonState extends State<HoverButton> {
+class _HoverButtonState extends State<HoverButton> with FocusCueState<HoverButton> {
   bool _isHovered = false;
   bool _isPressed = false;
   bool _isFocused = false;
@@ -112,12 +113,13 @@ class _HoverButtonState extends State<HoverButton> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
+    final focusCue = isFocusCueShown(_isFocused);
     return Focus(
       autofocus: widget.autofocus,
       onFocusChange: _onFocusChange,
       onKeyEvent: _handleKey,
       child: FocusRing(
-        visible: widget.showFocusRing && _isFocused,
+        visible: widget.showFocusRing && focusCue,
         borderRadius: widget.focusRingBorderRadius,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
@@ -134,7 +136,7 @@ class _HoverButtonState extends State<HoverButton> {
             child: AnimatedScale(
               scale: _isPressed
                   ? 0.96
-                  : (_isHovered || _isFocused ? widget.scaleAmount : 1.0),
+                  : (_isHovered || focusCue ? widget.scaleAmount : 1.0),
               duration: const Duration(milliseconds: 150),
               curve: Curves.easeOutCubic,
               child: widget.focusFillRadius == null
@@ -150,7 +152,7 @@ class _HoverButtonState extends State<HoverButton> {
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 140),
                               decoration: BoxDecoration(
-                                color: _isFocused
+                                color: focusCue
                                     ? AppColors.inkAlpha(0.20)
                                     : Colors.transparent,
                                 borderRadius: BorderRadius.circular(

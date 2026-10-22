@@ -4,6 +4,7 @@ import '../../l10n/l10n.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
 import 'activate_keys.dart';
+import 'focus_cue.dart';
 
 /// Red used for every "liked" state in the app.
 const Color kLikedColor = Color(0xFFE50914);
@@ -67,7 +68,7 @@ class LikeButton extends StatefulWidget {
   State<LikeButton> createState() => _LikeButtonState();
 }
 
-class _LikeButtonState extends State<LikeButton> {
+class _LikeButtonState extends State<LikeButton> with FocusCueState<LikeButton> {
   bool _hovered = false;
   bool _pressed = false;
   bool _focused = false;
@@ -86,7 +87,7 @@ class _LikeButtonState extends State<LikeButton> {
     final label = widget.isLiked ? l10n.commonLiked : l10n.commonLike;
     final semantics =
         widget.isLiked ? l10n.commonRemoveFromLiked : l10n.commonAddToLiked;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     final child = switch (widget.style) {
       LikeButtonStyle.pill => _buildPill(label),

@@ -23,10 +23,13 @@ abstract final class TvModeService {
   static final ValueNotifier<bool> isTv = ValueNotifier<bool>(false);
 
   static Future<void> initialize() async {
+    installFocusPolicy();
     if (kIsWeb || !Platform.isAndroid) return;
     try {
       isTv.value = await _channel.invokeMethod<bool>('isTv') ?? false;
-      applyFocusStrategy(isTv.value);
+      // A key may have arrived while the channel was still answering; then
+      // the answer applies now, not at the next key.
+      if (_keyboardSeen) applyFocusStrategy(isTv.value);
     } catch (e) {
       // Optional signal, not a startup requirement -- phases 2/3 read it to
       // decide whether to apply TV-specific treatment, and simply don't if
@@ -49,5 +52,40 @@ abstract final class TvModeService {
     FocusManager.instance.highlightStrategy = isTv
         ? FocusHighlightStrategy.alwaysTraditional
         : FocusHighlightStrategy.automatic;
+  }
+
+  /// Focus is drawn only once the viewer has pressed a key.
+  ///
+  /// Flutter starts a desktop in traditional mode, so the first card that
+  /// FirstFocusScope hands focus to zoomed on open, for a mouse viewer who
+  /// never touched a key. Starting in touch mode draws nothing until a key
+  /// arrives. The first key then sets the strategy the app would have had
+  /// anyway: pinned on a TV, Flutter's own choice everywhere else.
+  ///
+  /// The hook is a [HardwareKeyboard] handler, not a focus one: the hardware
+  /// handlers see a key before the focus system does, and they run even when
+  /// nothing holds focus yet, which a focus-side handler would skip.
+  static void installFocusPolicy() {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    HardwareKeyboard.instance.removeHandler(_onHardwareKey);
+    HardwareKeyboard.instance.addHandler(_onHardwareKey);
+  }
+
+  static bool _keyboardSeen = false;
+
+  static bool _onHardwareKey(KeyEvent event) {
+    if (_keyboardSeen || event is! KeyDownEvent) return false;
+    _keyboardSeen = true;
+    applyFocusStrategy(isTv.value);
+    // Not handled: the key still goes on to move focus.
+    return false;
+  }
+
+  /// Returns the focus policy to where a fresh launch starts. Tests only.
+  @visibleForTesting
+  static void resetFocusPolicy() {
+    HardwareKeyboard.instance.removeHandler(_onHardwareKey);
+    _keyboardSeen = false;
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
   }
 }

@@ -38,6 +38,7 @@ import '../../services/app_spacing.dart';
 import '../../services/app_units.dart';
 import '../../widgets/details/details_poster_fit.dart';
 import '../../widgets/common/activate_keys.dart';
+import '../../widgets/common/focus_cue.dart';
 
 // ---------------------------------------------------------------------------
 // Design tokens
@@ -160,7 +161,7 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, FocusCueState<DetailsPage> {
   MovieDetail? _detail;
   bool _isLoading = true;
 
@@ -1338,7 +1339,7 @@ class _DetailsPageState extends State<DetailsPage>
       autofocus: TvModeService.isTv.value,
       onTap: () => _handlePlayAction(_playTarget(resumeTarget)),
       child: Builder(builder: (context) {
-        final focused = Focus.of(context).hasFocus;
+        final focused = isFocusCueShown(Focus.of(context).hasFocus);
         return Container(
         width: fullWidth ? double.infinity : null,
         padding: EdgeInsets.symmetric(
@@ -2217,7 +2218,7 @@ class _EpisodeCard extends StatefulWidget {
   State<_EpisodeCard> createState() => _EpisodeCardState();
 }
 
-class _EpisodeCardState extends State<_EpisodeCard> {
+class _EpisodeCardState extends State<_EpisodeCard> with FocusCueState<_EpisodeCard> {
   bool _hovered = false;
   bool _focused = false;
 
@@ -2233,7 +2234,7 @@ class _EpisodeCardState extends State<_EpisodeCard> {
     AppColors.dependOn(context);
     final ep = widget.episode;
     final imgUrl = ep.thumbnail ?? widget.fallbackImageUrl;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     return Focus(
       onFocusChange: (focused) => setState(() => _focused = focused),

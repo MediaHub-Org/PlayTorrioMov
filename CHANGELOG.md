@@ -3,6 +3,14 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- **Focus no longer zooms the first card of a section on open.** A desktop or
+  phone viewer sees the focus cue only after pressing a key; hover and tap work
+  as before. On a TV the cue appears once the D-pad is used.
+
 ## [1.9.10+58] - 2026-10-22
 
 Stable release. Checked locally: analysis, the full test suite and a Windows build.

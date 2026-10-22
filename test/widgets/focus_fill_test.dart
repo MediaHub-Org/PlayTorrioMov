@@ -38,6 +38,14 @@ BoxDecoration cue(WidgetTester tester) => tester
     .decoration! as BoxDecoration;
 
 void main() {
+  // Focus is drawn only once a key has been pressed (see
+  // TvModeService.installFocusPolicy). The focus wash is a keyboard cue, so the
+  // checks start in keyboard mode, as they would after the first key.
+  setUp(() => FocusManager.instance.highlightStrategy =
+      FocusHighlightStrategy.alwaysTraditional);
+  tearDown(() => FocusManager.instance.highlightStrategy =
+      FocusHighlightStrategy.automatic);
+
   testWidgets('a settings row shows focus even over an opaque child', (
     tester,
   ) async {

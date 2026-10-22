@@ -20,6 +20,7 @@ import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
 import '../common/activate_keys.dart';
+import '../common/focus_cue.dart';
 
 class ContinueWatchingSlider extends StatefulWidget {
   final String?
@@ -372,7 +373,7 @@ class ContinueWatchingCard extends StatefulWidget {
   State<ContinueWatchingCard> createState() => ContinueWatchingCardState();
 }
 
-class ContinueWatchingCardState extends State<ContinueWatchingCard> {
+class ContinueWatchingCardState extends State<ContinueWatchingCard> with FocusCueState<ContinueWatchingCard> {
   bool _isHovered = false;
   bool _isFocused = false;
 
@@ -427,7 +428,7 @@ class ContinueWatchingCardState extends State<ContinueWatchingCard> {
     final imgHeight = widget.width * 0.58;
     final progress = item.progressPercent;
     final imageUrl = item.backdropUrl ?? item.posterUrl;
-    final hovered = _isHovered || _isFocused;
+    final hovered = _isHovered || isFocusCueShown(_isFocused);
 
     return Focus(
       onFocusChange: (focused) => setState(() => _isFocused = focused),

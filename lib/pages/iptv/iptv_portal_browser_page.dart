@@ -26,6 +26,7 @@ import '../../widgets/common/clamped_text_scale.dart';
 import '../../services/app_units.dart';
 import '../../widgets/common/focus_fill.dart';
 import '../../widgets/common/activate_keys.dart';
+import '../../widgets/common/focus_cue.dart';
 
 class IptvPortalBrowserPage extends StatefulWidget {
   final VerifiedPortal? portal;
@@ -1421,7 +1422,7 @@ class _CategoryListRow extends StatefulWidget {
   State<_CategoryListRow> createState() => _CategoryListRowState();
 }
 
-class _CategoryListRowState extends State<_CategoryListRow> {
+class _CategoryListRowState extends State<_CategoryListRow> with FocusCueState<_CategoryListRow> {
   bool _hovered = false;
   bool _focused = false;
 
@@ -1438,7 +1439,7 @@ class _CategoryListRowState extends State<_CategoryListRow> {
     final palette = AppThemeService.currentPalette.value;
     final isFavCategory = widget.category.id == _IptvPortalBrowserPageState.favoritesCategoryId;
     final showCount = IptvSettings.showCategoryCount.value;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     return RepaintBoundary(
       child: Focus(
@@ -1551,7 +1552,7 @@ class _LiveChannelListRow extends StatefulWidget {
   State<_LiveChannelListRow> createState() => _LiveChannelListRowState();
 }
 
-class _LiveChannelListRowState extends State<_LiveChannelListRow> {
+class _LiveChannelListRowState extends State<_LiveChannelListRow> with FocusCueState<_LiveChannelListRow> {
   bool _hovered = false;
   bool _focused = false;
   List<EpgEntry>? _cachedEpg;
@@ -1596,7 +1597,7 @@ class _LiveChannelListRowState extends State<_LiveChannelListRow> {
     final isVerySmall = screenW < 440;
     final showLogo = IptvSettings.showStreamLogos.value;
     final showEpg = IptvSettings.showEpgSnippet.value;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     return RepaintBoundary(
       child: Focus(
@@ -1829,7 +1830,7 @@ class _LiveChannelGridCard extends StatefulWidget {
   State<_LiveChannelGridCard> createState() => _LiveChannelGridCardState();
 }
 
-class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
+class _LiveChannelGridCardState extends State<_LiveChannelGridCard> with FocusCueState<_LiveChannelGridCard> {
   bool _hovered = false;
   bool _focused = false;
 
@@ -1846,7 +1847,7 @@ class _LiveChannelGridCardState extends State<_LiveChannelGridCard> {
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final showLogo = IptvSettings.showStreamLogos.value;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     return RepaintBoundary(
       child: Focus(
@@ -2036,7 +2037,7 @@ class _LiveChannelCompactListRow extends StatefulWidget {
   State<_LiveChannelCompactListRow> createState() => _LiveChannelCompactListRowState();
 }
 
-class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> {
+class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> with FocusCueState<_LiveChannelCompactListRow> {
   bool _hovered = false;
   bool _focused = false;
 
@@ -2053,7 +2054,7 @@ class _LiveChannelCompactListRowState extends State<_LiveChannelCompactListRow> 
     final palette = AppThemeService.currentPalette.value;
     final s = widget.stream;
     final showLogo = IptvSettings.showStreamLogos.value;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     return RepaintBoundary(
       child: Focus(

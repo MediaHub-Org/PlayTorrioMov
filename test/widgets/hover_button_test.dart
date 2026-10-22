@@ -10,6 +10,15 @@ Widget wrap(Widget child) => MaterialApp(
     );
 
 void main() {
+  // Focus is drawn only once a key has been pressed (see
+  // TvModeService.installFocusPolicy). These checks are about what a keyboard
+  // viewer sees, so they start in that state; focus_cue_test covers the
+  // untouched start.
+  setUp(() => FocusManager.instance.highlightStrategy =
+      FocusHighlightStrategy.alwaysTraditional);
+  tearDown(() => FocusManager.instance.highlightStrategy =
+      FocusHighlightStrategy.automatic);
+
   testWidgets('Enter activates onTap while the button holds focus',
       (tester) async {
     var tapped = 0;

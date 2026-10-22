@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../services/theme/app_colors.dart';
+import 'focus_cue.dart';
 
 /// Marks a row that holds focus with a soft wash drawn *over* it, in its own
 /// bounds. No border: on a settings page the fill alone reads clearly, and the
@@ -34,7 +35,7 @@ class FocusFill extends StatefulWidget {
   State<FocusFill> createState() => _FocusFillState();
 }
 
-class _FocusFillState extends State<FocusFill> {
+class _FocusFillState extends State<FocusFill> with FocusCueState<FocusFill> {
   bool _focused = false;
   bool _hovered = false;
   bool _pressed = false;
@@ -43,7 +44,7 @@ class _FocusFillState extends State<FocusFill> {
   /// focused row presses it, and the press must not read as the focus going
   /// away.
   Color _wash() {
-    if (_focused) return AppColors.accent.withValues(alpha: 0.22);
+    if (isFocusCueShown(_focused)) return AppColors.accent.withValues(alpha: 0.22);
     if (_pressed) return AppColors.accent.withValues(alpha: 0.18);
     if (_hovered) return AppColors.accent.withValues(alpha: 0.10);
     return Colors.transparent;

@@ -10,6 +10,7 @@ import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../../services/app_units.dart';
 import '../../widgets/common/activate_keys.dart';
+import '../../widgets/common/focus_cue.dart';
 
 class AddonsSettingsPage extends StatefulWidget {
   const AddonsSettingsPage({super.key});
@@ -612,7 +613,7 @@ class _FeatureToggleChip extends StatefulWidget {
   State<_FeatureToggleChip> createState() => _FeatureToggleChipState();
 }
 
-class _FeatureToggleChipState extends State<_FeatureToggleChip> {
+class _FeatureToggleChipState extends State<_FeatureToggleChip> with FocusCueState<_FeatureToggleChip> {
   bool _hovered = false;
   bool _focused = false;
 
@@ -628,7 +629,7 @@ class _FeatureToggleChipState extends State<_FeatureToggleChip> {
     AppColors.dependOn(context);
     final activeColor = AppColors.accent;
     final isEnabled = widget.isEnabled;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     return FocusFill(
       radius: context.rem(0.5625),

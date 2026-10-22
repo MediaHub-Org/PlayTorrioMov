@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'activate_keys.dart';
+import 'focus_cue.dart';
 
 /// The hover/press interaction physics shared by every poster-style card in
 /// the app (Movies, IPTV channels, ...): scale up + lift on hover, scale
@@ -104,9 +105,7 @@ class _InteractiveCardShellState extends State<InteractiveCardShell> {
     // hands it to the first card on open so a remote has somewhere to be,
     // and without this gate that looked like the first movie arriving
     // pre-selected and zoomed. Same gate the player menus use.
-    final focusShown = _focused &&
-        FocusManager.instance.highlightMode ==
-            FocusHighlightMode.traditional;
+    final focusShown = isFocusCueShown(_focused);
     final hovered = _hovered || focusShown;
     return Focus(
       autofocus: widget.autofocus,

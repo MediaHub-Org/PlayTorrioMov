@@ -11,6 +11,7 @@ import 'like_button.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/app_units.dart';
 import 'activate_keys.dart';
+import 'focus_cue.dart';
 
 /// The app's one set of library actions: **Watchlist**, **Watched**, **Like**.
 ///
@@ -182,7 +183,7 @@ class _StatusButton extends StatefulWidget {
   State<_StatusButton> createState() => _StatusButtonState();
 }
 
-class _StatusButtonState extends State<_StatusButton> {
+class _StatusButtonState extends State<_StatusButton> with FocusCueState<_StatusButton> {
   bool _hovering = false;
   bool _focused = false;
 
@@ -196,7 +197,7 @@ class _StatusButtonState extends State<_StatusButton> {
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    final highlighted = _hovering || _focused;
+    final highlighted = _hovering || isFocusCueShown(_focused);
     // The Tooltip is the pointer affordance; the Semantics is what a screen
     // reader reads, and it carries the toggle state as well as the label --
     // matching the LikeButton sitting beside it in this same row.

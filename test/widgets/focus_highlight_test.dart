@@ -5,6 +5,14 @@ import 'package:playtorriomov/widgets/common/focus_highlight.dart';
 import 'package:playtorriomov/widgets/common/focus_ring.dart';
 
 void main() {
+  // Focus is drawn only once a key has been pressed (see
+  // TvModeService.installFocusPolicy). These checks are about the keyboard
+  // cue, so they start in keyboard mode, as they would after the first key.
+  setUp(() => FocusManager.instance.highlightStrategy =
+      FocusHighlightStrategy.alwaysTraditional);
+  tearDown(() => FocusManager.instance.highlightStrategy =
+      FocusHighlightStrategy.automatic);
+
   testWidgets('a focused pill gets a soft backdrop and does not move its '
       'neighbors', (tester) async {
     final first = FocusNode(debugLabel: 'first');

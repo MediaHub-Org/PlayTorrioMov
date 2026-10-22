@@ -31,6 +31,7 @@ import '../../widgets/common/hover_button.dart';
 import '../../widgets/common/slider_arrow.dart';
 import 'anime_stream_sheet.dart';
 import '../../widgets/common/activate_keys.dart';
+import '../../widgets/common/focus_cue.dart';
 
 // This page's own sizes, in rem (the ones it shares with DetailsPage are in
 // details_metrics.dart), read through `context.rem(_Dim.x)`.
@@ -1697,7 +1698,7 @@ class _HoverScale extends StatefulWidget {
   State<_HoverScale> createState() => _HoverScaleState();
 }
 
-class _HoverScaleState extends State<_HoverScale> {
+class _HoverScaleState extends State<_HoverScale> with FocusCueState<_HoverScale> {
   bool _hover = false;
   bool _focused = false;
 
@@ -1712,7 +1713,7 @@ class _HoverScaleState extends State<_HoverScale> {
 
   @override
   Widget build(BuildContext context) {
-    final hover = _hover || _focused;
+    final hover = _hover || isFocusCueShown(_focused);
     return Focus(
       canRequestFocus: widget.onTap != null,
       onFocusChange: (focused) => setState(() => _focused = focused),
@@ -1771,7 +1772,7 @@ class _AnimeEpisodeCard extends StatefulWidget {
   State<_AnimeEpisodeCard> createState() => _AnimeEpisodeCardState();
 }
 
-class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
+class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> with FocusCueState<_AnimeEpisodeCard> {
   bool _hovered = false;
   bool _focused = false;
 
@@ -1784,7 +1785,7 @@ class _AnimeEpisodeCardState extends State<_AnimeEpisodeCard> {
 
   @override
   Widget build(BuildContext context) {
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
     final numberColor = widget.isHighlighted
         ? const Color(0xFFEF4444)
         : widget.isCurrent

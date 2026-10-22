@@ -5,6 +5,7 @@ import '../../services/theme/app_colors.dart';
 import 'arrow_affordance.dart';
 import '../../services/app_units.dart';
 import 'activate_keys.dart';
+import 'focus_cue.dart';
 
 class SliderArrow extends StatefulWidget {
   final IconData icon;
@@ -20,7 +21,8 @@ class SliderArrow extends StatefulWidget {
   State<SliderArrow> createState() => _SliderArrowState();
 }
 
-class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStateMixin {
+class _SliderArrowState extends State<SliderArrow>
+    with SingleTickerProviderStateMixin, FocusCueState<SliderArrow> {
   bool _isHovered = false;
   bool _isPressed = false;
   bool _isFocused = false;
@@ -35,7 +37,7 @@ class _SliderArrowState extends State<SliderArrow> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
-    final isHighlighted = _isHovered || _isFocused;
+    final isHighlighted = _isHovered || isFocusCueShown(_isFocused);
     // Dynamic scale based on interaction state
     final scale = _isPressed ? 0.90 : (isHighlighted ? 1.08 : 1.0);
 

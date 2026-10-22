@@ -12,6 +12,7 @@ import '../common/poster_skeleton.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
 import '../common/activate_keys.dart';
+import '../common/focus_cue.dart';
 
 // This card's own sizes, in rem (the shared poster ones are in AppRem).
 const double _kBadgePadX = 0.4375;
@@ -44,7 +45,7 @@ class AnimeCard extends StatefulWidget {
   State<AnimeCard> createState() => _AnimeCardState();
 }
 
-class _AnimeCardState extends State<AnimeCard> {
+class _AnimeCardState extends State<AnimeCard> with FocusCueState<AnimeCard> {
   bool _hovered = false;
   bool _pressed = false;
   bool _focused = false;
@@ -60,7 +61,7 @@ class _AnimeCardState extends State<AnimeCard> {
   Widget build(BuildContext context) {
     AppColors.dependOn(context);
     final anime = widget.anime;
-    final hovered = _hovered || _focused;
+    final hovered = _hovered || isFocusCueShown(_focused);
 
     // A grid cell is a fixed box; its text is not. Capped so a
     // large system scale cannot paint outside the cell.

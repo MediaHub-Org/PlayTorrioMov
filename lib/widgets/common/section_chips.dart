@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../services/app_breakpoints.dart';
 import '../../services/app_units.dart';
 import '../../utils/hub_controller.dart';
+import 'focus_cue.dart';
 import 'tv_focus_bridge.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/theme/app_theme_service.dart';
@@ -85,7 +86,7 @@ class _Chip extends StatefulWidget {
   State<_Chip> createState() => _ChipState();
 }
 
-class _ChipState extends State<_Chip> {
+class _ChipState extends State<_Chip> with FocusCueState<_Chip> {
   bool _focused = false;
 
   KeyEventResult _handleKey(FocusNode node, KeyEvent event) {
@@ -134,7 +135,7 @@ class _ChipState extends State<_Chip> {
             // plain overlay tint is a faint one. A ring in the ink color
             // shows on the selected chip's accent fill and on the bar alike.
             border: Border.all(
-              color: _focused ? AppColors.ink : Colors.transparent,
+              color: isFocusCueShown(_focused) ? AppColors.ink : Colors.transparent,
               width: 2, // px: a focus ring keeps its weight at any text size
             ),
             boxShadow: selected

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'focus_cue.dart';
 import 'focus_ring.dart';
 
 /// Marks focus on a control that owns its own focus node -- a
@@ -25,7 +26,7 @@ class FocusHighlight extends StatefulWidget {
   State<FocusHighlight> createState() => _FocusHighlightState();
 }
 
-class _FocusHighlightState extends State<FocusHighlight> {
+class _FocusHighlightState extends State<FocusHighlight> with FocusCueState<FocusHighlight> {
   bool _focused = false;
 
   @override
@@ -35,12 +36,12 @@ class _FocusHighlightState extends State<FocusHighlight> {
       skipTraversal: true,
       onFocusChange: (focused) => setState(() => _focused = focused),
       child: FocusRing(
-        visible: _focused,
+        visible: isFocusCueShown(_focused),
         borderRadius: widget.borderRadius,
         // A soft wash, not a ring: see [FocusRing.soft].
         soft: true,
         child: AnimatedScale(
-          scale: _focused ? 1.05 : 1.0,
+          scale: isFocusCueShown(_focused) ? 1.05 : 1.0,
           duration: const Duration(milliseconds: 140),
           curve: Curves.easeOutCubic,
           child: widget.child,
