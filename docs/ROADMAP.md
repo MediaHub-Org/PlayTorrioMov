@@ -10,7 +10,8 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-22**, on `v1.9.10+58`, the stable release (main at `c0e6f9e`).
+Last reconciled: **2026-10-22**, on `v1.9.10+58` (main at `2ae6854`), before the
+1.9.10 release. The latest published release is `v1.9.9`.
 
 ---
 
@@ -28,7 +29,12 @@ Last reconciled: **2026-10-22**, on `v1.9.10+58`, the stable release (main at `c
 - **Anime seasons.** A show with several seasons shows a season row, opens on the
   latest season, and Play starts that season's first episode. Check it on a
   show with three or more seasons (Attack on Titan), and on a show whose seasons
-  Kitsu does not link.
+  Kitsu does not link. On a cold start the page can show Season 1 for a few
+  seconds before it switches, while Kitsu answers the season walk.
+- **Anime episode arrows.** The previous and next arrows on the episode row were
+  reported as needing work. They reveal on hover, scroll 70% of the row, and hide
+  at either end, as the other rails do; no specific defect has been found yet.
+  Say what looked wrong.
 - **Anime episode names.** AniList gives a title per episode only for shows it
   links to a legal streaming service (commonly Crunchyroll), which is most of
   the catalog; the rest show "EP N". No key is involved. A show AniList does list
@@ -44,7 +50,7 @@ has to be measured first.
 | Plan | Status |
 |:-----|:-------|
 | [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md) | Step 1 is done, including the 37 deprecations and the ignore that hid them. Next is Step 2, one press/hover/focus primitive, which waits on the TV checks above; then the big pages, and the player last. |
-| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md) | Done: the stats-panel diagnosis with "Copy diagnostics", release ranking, a learned link ceiling, an offer to change source after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, burst seeks as one seek, and the debrid Cached badge with cached-first ranking (**not verified against a live account**). Open: Step 0.2, one TV session. Stream adaptation is HLS-only; a server of our own is not planned. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md) | Done: stats-panel diagnosis with "Copy diagnostics", release ranking, a learned link ceiling, a source offer after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, burst seeks as one seek, and the debrid Cached badge with cached-first ranking (**not verified against a live account**). Open: Step 0.2, one TV session. Stream adaptation is HLS-only; a server of our own is not planned. |
 
 ---
 
