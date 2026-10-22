@@ -4,7 +4,8 @@ description: >
   torrserver-MatriX.147 release, checks each against a pinned SHA-256, and
   points TORRSERVER_FLUTTER_LOCAL_BINARIES at them. The torrserver_flutter
   plugin then uses these instead of downloading from its own upstream repo,
-  which no longer exists.
+  which no longer exists. The download goes through `gh` with the workflow's
+  own token: the repo is private, so an anonymous curl gets a 404.
 
 inputs:
   platforms:
@@ -17,15 +18,25 @@ runs:
     - shell: bash
       env:
         PLATFORMS: ${{ inputs.platforms }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         set -euo pipefail
-        base="https://github.com/MediaHub-Org/PlayTorrioMov/releases/download/torrserver-MatriX.147"
         dest="${RUNNER_TEMP//\\//}/torrserver"
         mkdir -p "$dest"
 
         fetch() {
-          local name="$1" sum="$2"
-          curl -fsSL --retry 3 -o "$dest/$name" "$base/$name"
+          local name="$1" sum="$2" attempt
+          for attempt in 1 2 3; do
+            if gh release download torrserver-MatriX.147 --repo "$GITHUB_REPOSITORY" \
+                --pattern "$name" --dir "$dest" --clobber; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "::error::could not download $name from the torrserver-MatriX.147 release"
+              return 1
+            fi
+            sleep 5
+          done
           echo "$sum  $dest/$name" | sha256sum -c --quiet -
         }
 
