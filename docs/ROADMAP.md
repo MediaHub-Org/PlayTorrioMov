@@ -10,8 +10,9 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-22**, on `v1.9.10`, the stable release (tag at `3420197`).
-The release is the latest published one.
+Last reconciled: **2026-10-23**, on `v1.9.10` (tag at `3420197`). The repo is private
+now, so nothing is published publicly; builds are made locally, and CI builds stay
+private in GitHub.
 
 ---
 
@@ -71,6 +72,7 @@ has to be measured first.
 | Trakt sync (card in Settings → Sync) | Decided off, not deleted (`_traktSyncEnabled = false` in `sync_settings_page.dart`). Registering a *new* Trakt API app now needs paid VIP, which makes it impractical next to Simkl's free one. `TraktService`, `TraktSettings` and the pasted-credentials path stay in place. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md). |
 | Mega backup | **Decided against.** Mega has no official Dart SDK, so its login and client-side crypto would be a reimplementation, and it needs the user's Mega email and password stored in the app. Cloud backup already works without a password: Dropbox (OAuth, nothing stored) and WebDAV (the user's own server). Revisit if Mega ships an official Dart SDK, or if storing the password is accepted explicitly. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md). |
 | Remove the centered play/pause button | **Decided: keep it.** It is where a TV remote's first arrow lands when the controls reappear (#80), and the single tap and double tap are already taken (show controls; fullscreen and the ±10s zones). If the look is the complaint, a lighter visual version is the option, not removal. |
+| Public release and the in-app update check | **Paused, 2026-10-23.** The repo is private, so the release downloads, the update check (`releases/latest`) and the About link answer 404 to anyone outside the org. The app itself works; the updater finds no update and says nothing. Revisit if the repo goes public, or if the releases move to a public mirror. |
 | Simkl custom-list writes | **Blocked upstream.** Simkl's Custom Lists API is read-only beta (reads need AUTH V2 and PRO/VIP), and a POST returns 200 while changing nothing. Revisit when Simkl ships writes. The watchlist, history and ratings sync is unaffected. |
 
 ---
