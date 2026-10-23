@@ -8,15 +8,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - **The profile follows you across devices.** Likes, watchlist, history,
-  continue watching, collections and settings sync through Dropbox when the app
-  opens, every ten minutes while it is open, and when it goes to the background.
-  A key changed on both devices keeps the cloud's value, and the local profile
-  is saved to a snapshot before anything is overwritten. Needs a Dropbox link
-  and a backup passphrase on the device.
+  continue watching, collections and settings sync through one secret gist in
+  your own GitHub account, encrypted with your backup passphrase. It syncs when
+  the app opens, every ten minutes while it is open, and when it goes to the
+  background. A key changed on both devices keeps the cloud's value. The local
+  profile is saved to a snapshot before any sync or restore overwrites it. Needs
+  a GitHub token with the Gists permission on the device.
 - **Your own builds carry your keys.** `scripts\build_local.ps1` builds the
   Windows installer and two APKs (arm64 for phones, arm32 for TVs) with the keys
-  in `.env` compiled in. `scripts\link_simkl.ps1` and `scripts\link_dropbox.ps1`
-  link those accounts once.
+  in `.env` compiled in. `scripts\link_simkl.ps1` links the Simkl account once.
 
 ### Changed
 

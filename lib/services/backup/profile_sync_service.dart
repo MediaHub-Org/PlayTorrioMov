@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'auto_backup_service.dart';
@@ -31,7 +29,6 @@ enum ProfileSyncResult { notConnected, busy, failed, synced }
 abstract final class ProfileSyncService {
   static const _baseKey = 'profile_sync_base';
   static const _interval = Duration(minutes: 10);
-  static const _keepSnapshots = 5;
 
   static bool _running = false;
   static Timer? _timer;
@@ -92,7 +89,7 @@ abstract final class ProfileSyncService {
 
     final overwritten = _differing(local, merged);
     if (overwritten.any(local.containsKey)) {
-      await _snapshot(local);
+      await BackupService.writeSnapshot();
     }
     await _applyLocal(merged, local);
 
@@ -175,7 +172,7 @@ abstract final class ProfileSyncService {
     } else if (value is double) {
       await prefs.setDouble(key, value);
     } else if (value is List) {
-      await prefs.setStringList(key, value.cast<String>());
+      await prefs.setStringList(key, value.cast<String>().toList());
     }
   }
 
@@ -195,26 +192,4 @@ abstract final class ProfileSyncService {
 
   static bool _identical(Map<String, Object?> a, Map<String, Object?> b) =>
       ProfileMerge.encodeData(a) == ProfileMerge.encodeData(b);
-
-  /// Writes the local profile to a dated file before it is overwritten. Throws
-  /// if it cannot, so the sync stops before it changes anything.
-  static Future<void> _snapshot(Map<String, Object?> local) async {
-    final support = await getApplicationSupportDirectory();
-    final dir = Directory(
-      '${support.path}${Platform.pathSeparator}profile_snapshots',
-    );
-    await dir.create(recursive: true);
-    final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    await File(
-      '${dir.path}${Platform.pathSeparator}profile-$stamp.json',
-    ).writeAsString(ProfileMerge.encodeData(local));
-
-    final snapshots = (await dir.list().toList()).whereType<File>().toList()
-      ..sort((a, b) => a.path.compareTo(b.path));
-    if (snapshots.length > _keepSnapshots) {
-      for (final old in snapshots.take(snapshots.length - _keepSnapshots)) {
-        await old.delete();
-      }
-    }
-  }
 }

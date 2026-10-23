@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +7,11 @@ import 'package:playtorriomov/services/backup/backup_service.dart';
 import 'package:playtorriomov/services/backup/cloud_backup_settings.dart';
 
 void main() {
+  setUpAll(() {
+    final snapshots = Directory.systemTemp.createTempSync('playtorrio_snapshots_');
+    BackupService.snapshotDirectoryOverride = () async => snapshots;
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {

@@ -1,5 +1,6 @@
 // test/services/backup_encryption_test.dart
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playtorriomov/services/backup/backup_crypto.dart';
@@ -8,6 +9,11 @@ import 'package:playtorriomov/services/storage/secure_value_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUpAll(() {
+    final snapshots = Directory.systemTemp.createTempSync('playtorrio_snapshots_');
+    BackupService.snapshotDirectoryOverride = () async => snapshots;
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {

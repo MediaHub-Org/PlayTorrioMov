@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app_info.dart';
@@ -129,6 +130,43 @@ abstract final class BackupService {
   /// backup are left untouched.
   static Future<int> applyEnvelopeJson(String raw) => _applyEnvelopeJson(raw);
 
+  static const _keepSnapshots = 5;
+
+  /// Where snapshots are kept. Tests point it at a temp folder, since
+  /// path_provider has no platform behind it in a unit test.
+  @visibleForTesting
+  static Future<Directory> Function()? snapshotDirectoryOverride;
+
+  static Future<Directory> _snapshotDirectory() async {
+    final override = snapshotDirectoryOverride;
+    if (override != null) return override();
+    final support = await getApplicationSupportDirectory();
+    return Directory('${support.path}${Platform.pathSeparator}profile_snapshots');
+  }
+
+  /// Saves this device's profile, as a plain envelope, before anything
+  /// overwrites it. The last five are kept. Throws if it cannot be written, so
+  /// the overwrite that needed it does not happen.
+  static Future<File> writeSnapshot() async {
+    final dir = await _snapshotDirectory();
+    await dir.create(recursive: true);
+    final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
+    final file = File('${dir.path}${Platform.pathSeparator}profile-$stamp.json');
+    await file.writeAsString(await _buildEnvelopeJson());
+
+    final snapshots = (await dir.list().toList())
+        .whereType<File>()
+        .where((f) => f.uri.pathSegments.last.startsWith('profile-'))
+        .toList()
+      ..sort((a, b) => a.path.compareTo(b.path));
+    if (snapshots.length > _keepSnapshots) {
+      for (final old in snapshots.take(snapshots.length - _keepSnapshots)) {
+        await old.delete();
+      }
+    }
+    return file;
+  }
+
   static Future<int> _applyEnvelopeJson(String raw) async {
     final plain = await BackupCrypto.open(raw, await BackupPassphrase.read());
     final envelope = jsonDecode(plain);
@@ -136,6 +174,9 @@ abstract final class BackupService {
       throw const FormatException('Not a valid PlayTorrio backup file.');
     }
     final data = (envelope['data'] as Map).cast<String, dynamic>();
+    // The restore is about to overwrite the profile: keep what is there now,
+    // so a file restored by mistake can be undone by hand.
+    await writeSnapshot();
     final prefs = await SharedPreferences.getInstance();
 
     var restored = 0;

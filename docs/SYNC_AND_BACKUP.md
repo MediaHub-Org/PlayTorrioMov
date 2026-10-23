@@ -194,8 +194,9 @@ agreed on (the base), this device, and the cloud copy. A key that only one side
 changed takes that side's value. A key both sides changed to different values is
 a conflict: the cloud copy wins it. Before any local value is overwritten or
 removed, the local profile is saved to `profile_snapshots/` in the app's support
-folder (the last five are kept). If that snapshot cannot be written, the sync
-stops before changing anything.
+folder (the last five are kept). A restore from a file does the same before it
+writes anything. If a snapshot cannot be written, the sync or restore stops
+before changing anything.
 
 Safety: an empty local profile never replaces a cloud copy that has content, and
 a failed sync changes nothing in the cloud. While sync is active, the app-open
