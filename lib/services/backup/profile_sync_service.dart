@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'auto_backup_service.dart';
 import 'backup_crypto.dart';
 import 'backup_service.dart';
-import 'dropbox_backup_service.dart';
+import 'gist_sync.dart';
 import 'profile_merge.dart';
 
 /// How a sync ended. A sync never throws: a failed one is logged and reported
@@ -25,8 +25,9 @@ enum ProfileSyncResult { notConnected, busy, failed, synced }
 /// snapshot of the local profile is written under the app's support folder, so
 /// a bad merge can be read back by hand.
 ///
-/// Active only where there is a Dropbox link and a backup passphrase; without
-/// both, the app-open auto backup runs as it always did.
+/// The cloud copy is one secret gist in the person's own GitHub account (see
+/// [GistSync]). Active only where there is a token and a backup passphrase;
+/// without both, the app-open auto backup runs as it always did.
 abstract final class ProfileSyncService {
   static const _baseKey = 'profile_sync_base';
   static const _interval = Duration(minutes: 10);
@@ -36,10 +37,10 @@ abstract final class ProfileSyncService {
   static Timer? _timer;
   static AppLifecycleListener? _lifecycle;
 
-  /// Whether this device syncs its profile: it has a Dropbox link and a
-  /// passphrase to open the cloud copy with.
+  /// Whether this device syncs its profile: it carries a GitHub token and has a
+  /// passphrase to seal the cloud copy with.
   static Future<bool> isActive() async {
-    if (!await DropboxBackupService.isAuthenticated()) return false;
+    if (!GistSync.isConfigured) return false;
     return await BackupPassphrase.read() != null;
   }
 
@@ -74,7 +75,7 @@ abstract final class ProfileSyncService {
     final passphrase = (await BackupPassphrase.read())!;
     final local = await _localProfile();
     final base = await _readBase();
-    final sealed = await DropboxBackupService.downloadSealed();
+    final sealed = await GistSync.download();
     final remote = sealed == null
         ? <String, Object?>{}
         : _synced(await ProfileMerge.openRemote(sealed, passphrase));
@@ -96,7 +97,7 @@ abstract final class ProfileSyncService {
     await _applyLocal(merged, local);
 
     if (!_identical(merged, remote)) {
-      await DropboxBackupService.uploadSealed(
+      await GistSync.upload(
         await BackupService.sealProfile(merged),
       );
     }

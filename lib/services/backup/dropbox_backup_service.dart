@@ -29,9 +29,6 @@ abstract final class DropboxBackupService {
   static const _expiryKey = 'dropbox_token_expiry_ms';
   static const _accountNameKey = 'dropbox_account_name';
   static const _verifierKey = 'dropbox_pending_code_verifier';
-  // Device-local (secure store, not the synced profile): the person signed out
-  // of Dropbox here, so the build's bundled refresh token stays off.
-  static const _signedOutKey = 'dropbox_signed_out';
 
   static const _authorizeUrl = 'https://www.dropbox.com/oauth2/authorize';
   static const _tokenUrl = 'https://api.dropboxapi.com/oauth2/token';
@@ -147,7 +144,6 @@ abstract final class DropboxBackupService {
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
-    await SecureValueStore.delete(_signedOutKey);
     await _storeTokens(data);
     await _refreshAccountName();
   }
@@ -190,7 +186,7 @@ abstract final class DropboxBackupService {
       if (token != null && token.isNotEmpty) return token;
     }
 
-    final refreshToken = await _refreshTokenOrBundled();
+    final refreshToken = await SecureValueStore.read(_refreshTokenKey);
     if (refreshToken == null || refreshToken.isEmpty) return null;
 
     try {
@@ -219,19 +215,8 @@ abstract final class DropboxBackupService {
   }
 
   static Future<bool> isAuthenticated() async {
-    final token = await _refreshTokenOrBundled();
+    final token = await SecureValueStore.read(_refreshTokenKey);
     return token != null && token.isNotEmpty;
-  }
-
-  /// The refresh token this device uses: the one it connected with, or else
-  /// the build's own, unless the person signed out here. A sign-out is
-  /// remembered, so the bundled token does not bring the link back.
-  static Future<String?> _refreshTokenOrBundled() async {
-    final stored = await SecureValueStore.read(_refreshTokenKey);
-    if (stored != null && stored.isNotEmpty) return stored;
-    if (await SecureValueStore.read(_signedOutKey) == '1') return null;
-    final bundled = EnvService.dropboxRefreshToken;
-    return bundled.isEmpty ? null : bundled;
   }
 
   /// The connected account's display name, cached locally so the settings
@@ -267,7 +252,6 @@ abstract final class DropboxBackupService {
   static Future<void> logout() async {
     await SecureValueStore.delete(_accessTokenKey);
     await SecureValueStore.delete(_refreshTokenKey);
-    await SecureValueStore.write(_signedOutKey, '1');
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_expiryKey);
     await prefs.remove(_accountNameKey);

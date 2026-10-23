@@ -175,7 +175,7 @@ dependency to add." Plain HTTP PUT/GET with Basic Auth has no OAuth app to
 register, no API quota, no vendor SDK, and works with any WebDAV-speaking
 host the user already has.
 
-### Profile sync (Dropbox, three-way merge)
+### Profile sync (GitHub gist, three-way merge)
 
 `lib/services/backup/profile_sync_service.dart` and `profile_merge.dart`.
 
@@ -186,7 +186,7 @@ own state and the passphrase. The cloud copy is the same envelope a backup
 writes, sealed with the passphrase.
 
 When: at app open, every ten minutes while the app is open, and when it goes to
-the background. A device syncs only when it has a Dropbox link and a passphrase;
+the background. A device syncs only when it has a GitHub token and a passphrase;
 without both, the app-open auto backup runs as before.
 
 How it merges: each run compares three copies: the snapshot both sides last
@@ -210,7 +210,7 @@ the local one is in the snapshot.
 | Option | Covers | Steps per device | Verdict |
 |---|---|---|---|
 | Simkl (existing) | Watchlist, watched and ratings. Not likes, collections, settings or positions in a title. | One PIN sign-in, or the token from `scripts\link_simkl.ps1` | Kept. It is the only sync other apps see, so it stays alongside the profile sync. |
-| Dropbox (profile sync) | The whole profile | One link, or the token from `scripts\link_dropbox.ps1`, carried by the build | Chosen. The only option that covers everything without a step at each sync. |
+| GitHub gist (profile sync) | The whole profile, config included | One fine-grained token in `.env`, carried by the build | Chosen. One token, no app to register, no browser step. The gist's revisions keep earlier profiles. |
 | Local network with a QR code | Whatever is sent | A scan at every sync, with both devices on the same network | Not built. It asks for the step every time, where the cloud sync asks once per device. |
 ### Why Dropbox/Mega don't fit that model
 

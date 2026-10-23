@@ -15,18 +15,16 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 # Required: the build will not run without these.
-$required = 'TMDB_API_KEY', 'WYZIE_API_KEY', 'SIMKL_CLIENT_ID', 'DROPBOX_APP_KEY'
+$required = 'TMDB_API_KEY', 'WYZIE_API_KEY', 'SIMKL_CLIENT_ID', 'GITHUB_SYNC_TOKEN', 'BACKUP_PASSPHRASE'
 $missing = @($required | Where-Object { -not (Get-EnvValue $_) })
 if ($missing) {
     throw "Missing in .env: $($missing -join ', '). See .env.example."
 }
 
 # Optional links: without them the build still works, but the device needs one
-# sign-in for that service. Run scripts\link_simkl.ps1 / link_dropbox.ps1 once.
+# sign-in for Simkl. Run scripts\link_simkl.ps1 once.
 $links = @{
-    'SIMKL_ACCESS_TOKEN'    = 'Simkl is not linked: run scripts\link_simkl.ps1 once.'
-    'DROPBOX_REFRESH_TOKEN' = 'Dropbox is not linked: run scripts\link_dropbox.ps1 once.'
-    'BACKUP_PASSPHRASE'     = 'No backup passphrase: the profile sync will ask for one.'
+    'SIMKL_ACCESS_TOKEN' = 'Simkl is not linked: run scripts\link_simkl.ps1 once.'
 }
 foreach ($key in $links.Keys) {
     if (-not (Get-EnvValue $key)) { Write-Warning $links[$key] }
@@ -39,13 +37,18 @@ $tsSha = '92624fffc72c79d87041f6624850070e466972323ed28f14881a4c0a0c943ee6'
 $tsDir = Join-Path $env:TEMP 'torrserver-stage'
 $tsBin = Join-Path $tsDir 'torrserver-windows-amd64.exe'
 New-Item -ItemType Directory -Force -Path $tsDir | Out-Null
-if (-not (Test-Path -LiteralPath $tsBin)) {
+function Get-FileSha([string]$Path) {
+    if (-not (Test-Path -LiteralPath $Path)) { return '' }
+    (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLower()
+}
+# An older TorrServer may sit here from a previous build: replace it unless it
+# is the pinned file already.
+if ((Get-FileSha $tsBin) -ne $tsSha) {
     gh release download $tsTag -R MediaHub-Org/PlayTorrioMov -p 'torrserver-windows-amd64.exe' -D $tsDir --clobber
 }
-$got = (Get-FileHash -LiteralPath $tsBin -Algorithm SHA256).Hash.ToLower()
+$got = Get-FileSha $tsBin
 if ($got -ne $tsSha) {
-    Remove-Item -LiteralPath $tsBin -Force
-    throw "TorrServer checksum mismatch ($got). The file was removed; run the script again."
+    throw "TorrServer checksum mismatch ($got). Expected $tsSha from $tsTag."
 }
 $env:TORRSERVER_FLUTTER_LOCAL_BINARIES = $tsDir
 

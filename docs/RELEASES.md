@@ -108,12 +108,12 @@ builds on GitHub use the empty `DOTENV_CONTENTS` secret, so the keys stay out of
 them.
 
 1. Copy `.env.example` to `.env` and fill in `TMDB_API_KEY`, `WYZIE_API_KEY`,
-   `SIMKL_CLIENT_ID` and `DROPBOX_APP_KEY`.
-2. Link the accounts once, in your browser: `scripts\link_simkl.ps1` and
-   `scripts\link_dropbox.ps1`. They write `SIMKL_ACCESS_TOKEN` and
-   `DROPBOX_REFRESH_TOKEN` into `.env`, and no token is printed.
-3. Set `BACKUP_PASSPHRASE`, so the profile sync opens the cloud copy without
-   asking. Keep a copy of it: it cannot be recovered.
+   `SIMKL_CLIENT_ID` and `GITHUB_SYNC_TOKEN` (a fine-grained token whose only
+   permission is Gists).
+2. Link Simkl once, in your browser: `scripts\link_simkl.ps1`. It writes
+   `SIMKL_ACCESS_TOKEN` into `.env`, and no token is printed.
+3. Set `BACKUP_PASSPHRASE` to a long random text. The profile is sealed with it
+   before it leaves the device. Keep a copy of `.env`: it cannot be recovered.
 4. Run `scripts\build_local.ps1`. It builds the Windows installer and two APKs
    (arm64 for phones, arm32 for TVs) into a folder on the Desktop.
 
@@ -197,7 +197,7 @@ looks for:
 |:-----------------------------------------|:---------------------------------------------------------------------------|
 | `TRAKT_CLIENT_ID`, `TRAKT_CLIENT_SECRET` | Trakt sign-in                                                              |
 | `SIMKL_CLIENT_ID`                        | Simkl sign-in (the PIN flow needs no secret)                               |
-| `DROPBOX_APP_KEY`                        | Dropbox backup (PKCE public client: key only, no secret)                   |
+| `GITHUB_SYNC_TOKEN`                      | Profile sync: a fine-grained token with only the Gists permission          |
 | `TMDB_API_KEY`                           | Cast photos and character names, so a fresh install has them with no setup |
 | `WYZIE_API_KEY`                          | Optional build-wide Wyzie key. Users normally paste their own in Settings → Connect, which wins over this one. With neither, online subtitles are off |
 

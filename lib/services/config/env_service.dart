@@ -168,11 +168,13 @@ class EnvService {
     return get('SIMKL_ACCESS_TOKEN');
   }
 
-  // Dropbox refresh token: the account the profile sync reads and writes.
-  static String get dropboxRefreshToken {
-    const compileVal = String.fromEnvironment('DROPBOX_REFRESH_TOKEN');
+  // GitHub token for the profile sync: a fine-grained token whose only
+  // permission is Gists (read and write). It holds the encrypted profile in a
+  // secret gist of the owner's account and cannot touch any repository.
+  static String get githubSyncToken {
+    const compileVal = String.fromEnvironment('GITHUB_SYNC_TOKEN');
     if (compileVal.isNotEmpty) return compileVal;
-    return get('DROPBOX_REFRESH_TOKEN');
+    return get('GITHUB_SYNC_TOKEN');
   }
 
   // Passphrase that seals the cloud copy of the profile (AES-GCM). Anyone who
