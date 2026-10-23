@@ -29,6 +29,9 @@ abstract final class DropboxBackupService {
   static const _expiryKey = 'dropbox_token_expiry_ms';
   static const _accountNameKey = 'dropbox_account_name';
   static const _verifierKey = 'dropbox_pending_code_verifier';
+  // Device-local (secure store, not the synced profile): the person signed out
+  // of Dropbox here, so the build's bundled refresh token stays off.
+  static const _signedOutKey = 'dropbox_signed_out';
 
   static const _authorizeUrl = 'https://www.dropbox.com/oauth2/authorize';
   static const _tokenUrl = 'https://api.dropboxapi.com/oauth2/token';
@@ -144,6 +147,7 @@ abstract final class DropboxBackupService {
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
+    await SecureValueStore.delete(_signedOutKey);
     await _storeTokens(data);
     await _refreshAccountName();
   }
@@ -186,7 +190,7 @@ abstract final class DropboxBackupService {
       if (token != null && token.isNotEmpty) return token;
     }
 
-    final refreshToken = await SecureValueStore.read(_refreshTokenKey);
+    final refreshToken = await _refreshTokenOrBundled();
     if (refreshToken == null || refreshToken.isEmpty) return null;
 
     try {
@@ -215,8 +219,19 @@ abstract final class DropboxBackupService {
   }
 
   static Future<bool> isAuthenticated() async {
-    final token = await SecureValueStore.read(_refreshTokenKey);
+    final token = await _refreshTokenOrBundled();
     return token != null && token.isNotEmpty;
+  }
+
+  /// The refresh token this device uses: the one it connected with, or else
+  /// the build's own, unless the person signed out here. A sign-out is
+  /// remembered, so the bundled token does not bring the link back.
+  static Future<String?> _refreshTokenOrBundled() async {
+    final stored = await SecureValueStore.read(_refreshTokenKey);
+    if (stored != null && stored.isNotEmpty) return stored;
+    if (await SecureValueStore.read(_signedOutKey) == '1') return null;
+    final bundled = EnvService.dropboxRefreshToken;
+    return bundled.isEmpty ? null : bundled;
   }
 
   /// The connected account's display name, cached locally so the settings
@@ -252,6 +267,7 @@ abstract final class DropboxBackupService {
   static Future<void> logout() async {
     await SecureValueStore.delete(_accessTokenKey);
     await SecureValueStore.delete(_refreshTokenKey);
+    await SecureValueStore.write(_signedOutKey, '1');
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_expiryKey);
     await prefs.remove(_accountNameKey);
@@ -260,11 +276,16 @@ abstract final class DropboxBackupService {
   /// Uploads the same envelope the local export and WebDAV paths write, to
   /// the fixed path in this app's own Dropbox app folder.
   static Future<void> upload() async {
+    await uploadSealed(await BackupService.buildOutgoingEnvelope());
+  }
+
+  /// Replaces the cloud copy with [sealed], an envelope already sealed with the
+  /// backup passphrase. Sync uses this for the merged profile.
+  static Future<void> uploadSealed(String sealed) async {
     final token = await _validAccessToken();
     if (token == null) {
       throw Exception('Not connected to Dropbox.');
     }
-    final json = await BackupService.buildOutgoingEnvelope();
     final response = await http.post(
       Uri.parse(_uploadUrl),
       headers: {
@@ -276,7 +297,7 @@ abstract final class DropboxBackupService {
         }),
         'Content-Type': 'application/octet-stream',
       },
-      body: utf8.encode(json),
+      body: utf8.encode(sealed),
     ).timeout(const Duration(seconds: 30));
 
     if (response.statusCode != 200) {
@@ -288,6 +309,19 @@ abstract final class DropboxBackupService {
   /// Downloads and restores the envelope from Dropbox. Returns how many keys
   /// were restored.
   static Future<int> download() async {
+    final sealed = await downloadSealed();
+    if (sealed == null) {
+      throw Exception(
+        'No backup found in Dropbox yet -- back up from this app at least '
+        'once before restoring from it.',
+      );
+    }
+    return BackupService.applyEnvelopeJson(sealed);
+  }
+
+  /// The cloud copy as it is stored, still sealed, or null when there is none
+  /// yet. Sync reads it to merge; nothing is restored here.
+  static Future<String?> downloadSealed() async {
     final token = await _validAccessToken();
     if (token == null) {
       throw Exception('Not connected to Dropbox.');
@@ -300,16 +334,11 @@ abstract final class DropboxBackupService {
       },
     ).timeout(const Duration(seconds: 30));
 
-    if (response.statusCode == 409) {
-      throw Exception(
-        'No backup found in Dropbox yet -- back up from this app at least '
-        'once before restoring from it.',
-      );
-    }
+    if (response.statusCode == 409) return null;
     if (response.statusCode != 200) {
       debugPrint('[Dropbox] Download failed (${response.statusCode}): ${response.body}');
       throw Exception('Dropbox download failed (HTTP ${response.statusCode}).');
     }
-    return BackupService.applyEnvelopeJson(response.body);
+    return response.body;
   }
 }

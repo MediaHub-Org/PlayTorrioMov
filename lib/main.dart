@@ -21,6 +21,7 @@ import './services/theme/app_theme_service.dart';
 import './services/updater/app_updater_service.dart';
 import './services/backup/cloud_backup_settings.dart';
 import './services/backup/auto_backup_service.dart';
+import './services/backup/profile_sync_service.dart';
 import './services/download/download_service.dart';
 import './services/continue_watching/continue_watching_service.dart';
 import './services/iptv/custom_channels_service.dart';
@@ -138,10 +139,10 @@ void main() async {
     // controls, not startup.
     MediaSessionService.init(),
   ]);
-  // Fire-and-forget: a possible network upload has no business delaying the
-  // first frame, and `maybeRunAutoBackup` never throws out to here either
-  // way.
-  unawaited(AutoBackupService.maybeRunAutoBackup());
+  // Fire-and-forget: a possible network sync has no business delaying the
+  // first frame. With a Dropbox link it syncs the profile; without one it runs
+  // the app-open auto backup, and neither throws out to here.
+  unawaited(ProfileSyncService.start());
   runApp(const PlayTorrioApp());
 }
 

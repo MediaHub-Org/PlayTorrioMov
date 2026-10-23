@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/env_service.dart';
 import 'secure_value_store.dart';
 
 class StorageService {
@@ -10,6 +11,9 @@ class StorageService {
   static const _kTraktUsername = 'trakt_username';
 
   static const _kSimklAccessToken = 'simkl_access_token';
+  // Device-local (secure store, so it is not in the synced profile): the
+  // person signed out of Simkl here, so the build's bundled token stays off.
+  static const _kSimklSignedOut = 'simkl_signed_out';
   static const _kSimklUsername = 'simkl_username';
 
   static final ValueNotifier<int> movieFinishedRevision = ValueNotifier<int>(0);
@@ -63,12 +67,20 @@ class StorageService {
   }
 
   // ── Simkl ─────────────────────────────────────────────────────────────────
-  static Future<String?> getSimklAccessToken() {
-    return SecureValueStore.read(_kSimklAccessToken);
+  /// This device's Simkl token. A build that carries its owner's token links
+  /// Simkl on its own, unless the owner signed out on this device: the sign-out
+  /// is remembered, so the bundled token does not bring the link back.
+  static Future<String?> getSimklAccessToken() async {
+    final stored = await SecureValueStore.read(_kSimklAccessToken);
+    if (stored != null && stored.isNotEmpty) return stored;
+    if (await SecureValueStore.read(_kSimklSignedOut) == '1') return null;
+    final bundled = EnvService.simklAccessToken;
+    return bundled.isEmpty ? null : bundled;
   }
 
-  static Future<void> setSimklAccessToken(String token) {
-    return SecureValueStore.write(_kSimklAccessToken, token);
+  static Future<void> setSimklAccessToken(String token) async {
+    await SecureValueStore.delete(_kSimklSignedOut);
+    await SecureValueStore.write(_kSimklAccessToken, token);
   }
 
   static Future<String?> getSimklUsername() async {
@@ -83,6 +95,7 @@ class StorageService {
 
   static Future<void> clearSimklAuth() async {
     await SecureValueStore.delete(_kSimklAccessToken);
+    await SecureValueStore.write(_kSimklSignedOut, '1');
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kSimklUsername);
   }

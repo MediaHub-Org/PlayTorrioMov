@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:pointycastle/export.dart' as pc;
 
+import '../config/env_service.dart';
 import '../storage/secure_value_store.dart';
 
 /// Keeps the passphrase that seals backups. It lives in the secure store and
@@ -13,9 +14,14 @@ import '../storage/secure_value_store.dart';
 abstract final class BackupPassphrase {
   static const key = 'backup_passphrase';
 
+  /// The passphrase on this device: the one the person set, or else the build's
+  /// own (a private build carries it so a new install opens the cloud copy
+  /// without asking).
   static Future<String?> read() async {
     final value = await SecureValueStore.read(key);
-    return (value == null || value.isEmpty) ? null : value;
+    if (value != null && value.isNotEmpty) return value;
+    final bundled = EnvService.backupPassphrase;
+    return bundled.isEmpty ? null : bundled;
   }
 
   static Future<void> save(String passphrase) => SecureValueStore.write(key, passphrase);

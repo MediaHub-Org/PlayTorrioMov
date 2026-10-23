@@ -18,10 +18,15 @@ private in GitHub.
 
 ## Waiting on you
 
-- **Dropbox and Simkl Connect.** Each person enters their own Dropbox app key and
-  Simkl client ID in Settings; nothing is shipped for everyone to share. Each
-  still needs one real approval in the browser: Dropbox's pasted code, and
-  Simkl's PIN.
+- **Profile sync across devices.** Dropbox carries the whole profile, merged per
+  key with a snapshot before any overwrite (see SYNC_AND_BACKUP.md). Each device
+  needs its link: a build from `scripts\build_local.ps1` carries the one from
+  `.env`, and `scripts\link_dropbox.ps1` and `scripts\link_simkl.ps1` make it
+  once per account. Check it with two devices: change a list on one, sync, and
+  read it on the other.
+- **Simkl Connect on a store build.** A release build carries no Simkl or
+  Dropbox link, so each person approves it once in Settings (Simkl's PIN, and
+  Dropbox's pasted code).
 - **Anime while AniList is down.** AniList answers 403 for now, so the anime tab
   falls back to Kitsu: lists, search, details, episode titles, and stream sources
   through Kitsu's AniList mapping. Check it on a device. Kitsu's titles and
@@ -73,6 +78,7 @@ has to be measured first.
 | Mega backup | **Decided against.** Mega has no official Dart SDK, so its login and client-side crypto would be a reimplementation, and it needs the user's Mega email and password stored in the app. Cloud backup already works without a password: Dropbox (OAuth, nothing stored) and WebDAV (the user's own server). Revisit if Mega ships an official Dart SDK, or if storing the password is accepted explicitly. See [SYNC_AND_BACKUP.md](SYNC_AND_BACKUP.md). |
 | Remove the centered play/pause button | **Decided: keep it.** It is where a TV remote's first arrow lands when the controls reappear (#80), and the single tap and double tap are already taken (show controls; fullscreen and the ±10s zones). If the look is the complaint, a lighter visual version is the option, not removal. |
 | Public release and the in-app update check | **Paused, 2026-10-23.** The repo is private, so the release downloads, the update check (`releases/latest`) and the About link answer 404 to anyone outside the org. The app itself works; the updater finds no update and says nothing. Revisit if the repo goes public, or if the releases move to a public mirror. |
+| LAN sync with a QR code between devices | **Not built, 2026-10-23.** It needs a scan at every sync and both devices on the same network. The Dropbox profile sync covers the same data once per device. See SYNC_AND_BACKUP.md, "Choosing how to sync". |
 | Simkl custom-list writes | **Blocked upstream.** Simkl's Custom Lists API is read-only beta (reads need AUTH V2 and PRO/VIP), and a POST returns 200 while changing nothing. Revisit when Simkl ships writes. The watchlist, history and ratings sync is unaffected. |
 
 ---

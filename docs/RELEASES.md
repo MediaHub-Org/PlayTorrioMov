@@ -91,7 +91,7 @@ The build carries `--dart-define=APP_CHANNEL=dev`, the same marker a `dev_build`
 dispatch carries, so Settings → About says "Testing build" and a local build
 can never be mistaken for a release.
 
-The script also fetches the pinned TorrServer binary from the `torrserver-MatriX.147`
+The script also fetches the pinned TorrServer binary from the `torrserver-MatriX.148`
 release and checks its SHA-256, because the plugin's own download no longer exists.
 Without that a clean local build fails at install. Keys in `.env` are compiled in, as
 they are in CI, so sign-in flows can be tried locally. Delete the folder when done; nothing
@@ -100,6 +100,28 @@ depends on it.
 `build\releases\*.zip` is gone with the old script. To hand a Windows build to
 somebody, use a GitHub Actions artifact or a dispatch release, not a local zip.
 
+### Your own builds, with keys
+
+A build for your own devices carries your keys and links, compiled in from
+`.env` at the repository root. Those builds are never published: the release
+builds on GitHub use the empty `DOTENV_CONTENTS` secret, so the keys stay out of
+them.
+
+1. Copy `.env.example` to `.env` and fill in `TMDB_API_KEY`, `WYZIE_API_KEY`,
+   `SIMKL_CLIENT_ID` and `DROPBOX_APP_KEY`.
+2. Link the accounts once, in your browser: `scripts\link_simkl.ps1` and
+   `scripts\link_dropbox.ps1`. They write `SIMKL_ACCESS_TOKEN` and
+   `DROPBOX_REFRESH_TOKEN` into `.env`, and no token is printed.
+3. Set `BACKUP_PASSPHRASE`, so the profile sync opens the cloud copy without
+   asking. Keep a copy of it: it cannot be recovered.
+4. Run `scripts\build_local.ps1`. It builds the Windows installer and two APKs
+   (arm64 for phones, arm32 for TVs) into a folder on the Desktop.
+
+A local APK is signed with the debug key unless `android/key.properties` exists,
+so it cannot replace a release-signed copy on a phone: uninstall that first.
+
+Do not send these builds outside your own devices. Each one contains every key
+in `.env`.
 ### `pubspec.lock` churns on a local `pub get`
 
 **Do not commit `pubspec.lock` from a local build.** The SDK's own
@@ -128,16 +150,20 @@ are still floating; pin them the same way if either announces a migration.
 The torrserver_flutter plugin needs a TorrServer binary for the Linux, Windows,
 macOS and iOS builds. Its own download points at `ayman708-UX/torrserver_flutter`,
 which no longer exists, so those builds could not fetch it. CI now stages the
-binaries from the `torrserver-MatriX.147` release in this repo
+binaries from the `torrserver-MatriX.148` release in this repo
 (`.github/actions/torrserver-binaries`), checks each against a SHA-256 pinned in
 that action, and points `TORRSERVER_FLUTTER_LOCAL_BINARIES` at them. The files
-are the official YouROK/TorrServer assets, unchanged, renamed to the names the
-plugin looks for. Source for that tag: `MatriX.147` upstream, also forked at
-`MediaHub-Org/TorrServer`.
+are built from `MediaHub-Org/TorrServer` at the commit the tag names, with the
+release flags (`CGO_ENABLED=0`, `-tags=nosqlite`, `-trimpath`, `-s -w
+-checklinkname=0`), and renamed to the names the plugin looks for. The fork's
+own release workflow injects its TMDB key into the web UI, so the binaries are
+not built there: they are built locally without that key. The iOS framework
+is still the `MatriX.147` build, because rebuilding it needs macOS.
 
-To move to a newer TorrServer: take its release assets from YouROK, check their
-digests, publish them as a new `torrserver-<tag>` release here, then update the
-tag and digests in the action. Keep the plugin at 0.0.6 until it stops pointing
+To move to a newer TorrServer: sync `MediaHub-Org/TorrServer` master from
+YouROK/TorrServer, build the binaries with the flags above, check their digests,
+publish them as a new `torrserver-<tag>` release here, then update the tag and
+digests in the action. Keep the plugin at 0.0.6 until it stops pointing
 at the dead repo: 0.0.7 still does, and the Android step in the plugin's Gradle
 file would reach for it too after a version change.
 

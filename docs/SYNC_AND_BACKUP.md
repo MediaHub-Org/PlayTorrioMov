@@ -175,6 +175,43 @@ dependency to add." Plain HTTP PUT/GET with Basic Auth has no OAuth app to
 register, no API quota, no vendor SDK, and works with any WebDAV-speaking
 host the user already has.
 
+### Profile sync (Dropbox, three-way merge)
+
+`lib/services/backup/profile_sync_service.dart` and `profile_merge.dart`.
+
+What is synced: the profile keys of the app's preferences: library, likes,
+watchlist, watch history, continue watching, collections and settings. Not this
+device's own bookkeeping: the auto-backup timer, token expiry times, the sync's
+own state and the passphrase. The cloud copy is the same envelope a backup
+writes, sealed with the passphrase.
+
+When: at app open, every ten minutes while the app is open, and when it goes to
+the background. A device syncs only when it has a Dropbox link and a passphrase;
+without both, the app-open auto backup runs as before.
+
+How it merges: each run compares three copies: the snapshot both sides last
+agreed on (the base), this device, and the cloud copy. A key that only one side
+changed takes that side's value. A key both sides changed to different values is
+a conflict: the cloud copy wins it. Before any local value is overwritten or
+removed, the local profile is saved to `profile_snapshots/` in the app's support
+folder (the last five are kept). If that snapshot cannot be written, the sync
+stops before changing anything.
+
+Safety: an empty local profile never replaces a cloud copy that has content, and
+a failed sync changes nothing in the cloud. While sync is active, the app-open
+auto backup stops, since it would overwrite the cloud copy without merging.
+
+Limits: a merge works per key. A list such as the watchlist is one key, so two
+devices that change the same list between syncs keep the cloud's version, and
+the local one is in the snapshot.
+
+### Choosing how to sync
+
+| Option | Covers | Steps per device | Verdict |
+|---|---|---|---|
+| Simkl (existing) | Watchlist, watched and ratings. Not likes, collections, settings or positions in a title. | One PIN sign-in, or the token from `scripts\link_simkl.ps1` | Kept. It is the only sync other apps see, so it stays alongside the profile sync. |
+| Dropbox (profile sync) | The whole profile | One link, or the token from `scripts\link_dropbox.ps1`, carried by the build | Chosen. The only option that covers everything without a step at each sync. |
+| Local network with a QR code | Whatever is sent | A scan at every sync, with both devices on the same network | Not built. It asks for the step every time, where the cloud sync asks once per device. |
 ### Why Dropbox/Mega don't fit that model
 
 Neither requested provider speaks WebDAV for a consumer account, so this is
@@ -230,7 +267,7 @@ Dropbox's app key is safe because it is a PKCE public client with no secret.
 - `lib/pages/settings/sync_settings_page.dart` — both cards, the shared
   `_SyncCardChrome`, and the `unavailableNote` pattern for "built but needs a
   credential this build doesn't have."
-- `lib/services/backup/` — local export/import and WebDAV cloud backup.
+- `lib/services/backup/` — local export/import, WebDAV and Dropbox cloud backup, and the profile sync (`profile_sync_service.dart`, `profile_merge.dart`).
 - `lib/models/anime/anime_media.dart` — `AnimeStreamingEpisode`,
   `episodeInfo`, the offset/coverage logic that reconciles AniList's episode
   numbering with AniDB's.

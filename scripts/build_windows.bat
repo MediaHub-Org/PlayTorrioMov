@@ -31,8 +31,8 @@ REM build from our own release instead, the same way CI does, and point the plug
 REM at it. A checksum mismatch deletes the file and stops the build.
 set TS_DIR=%TEMP%\torrserver-stage
 set TS_BIN=%TS_DIR%\torrserver-windows-amd64.exe
-set TS_SHA=2a67f19266f111f00828857e7e37c233a509c0def4f6254fd564a1761f35b47d
-set TS_URL=https://github.com/MediaHub-Org/PlayTorrioMov/releases/download/torrserver-MatriX.147/torrserver-windows-amd64.exe
+set TS_SHA=92624fffc72c79d87041f6624850070e466972323ed28f14881a4c0a0c943ee6
+set TS_URL=https://github.com/MediaHub-Org/PlayTorrioMov/releases/download/torrserver-MatriX.148/torrserver-windows-amd64.exe
 if not exist "%TS_DIR%" mkdir "%TS_DIR%"
 if not exist "%TS_BIN%" (
   echo Fetching the pinned TorrServer binary ...

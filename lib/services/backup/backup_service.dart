@@ -58,14 +58,41 @@ abstract final class BackupService {
     return BackupCrypto.seal(await _buildEnvelopeJson(), passphrase);
   }
 
+  /// The cloud copy of the synced profile: [data] in the same envelope an
+  /// export writes, sealed the same way, so a manual restore reads it too.
+  /// Sync sends the merged profile here, which is not simply this device's
+  /// own keys.
+  static Future<String> sealProfile(Map<String, Object?> data) async {
+    final passphrase = await BackupPassphrase.read();
+    if (passphrase == null) {
+      throw const BackupCryptoException(
+        'Set a backup passphrase in Backup settings first.',
+      );
+    }
+    final envelope = {
+      'app': AppInfo.name,
+      'appVersion': await _appVersion(),
+      'version': 1,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'data': data,
+    };
+    return BackupCrypto.seal(
+      const JsonEncoder.withIndent('  ').convert(envelope),
+      passphrase,
+    );
+  }
+
   static Future<String> _buildEnvelopeJson() async {
     final prefs = await SharedPreferences.getInstance();
     // Sorted, so two exports diff cleanly instead of shuffling with the
     // store's own key order. The passphrase is left out: it seals this
-    // envelope, so it must never sit inside it.
+    // envelope, so it must never sit inside it. The profile sync's own
+    // bookkeeping is left out too, since it describes this device's last
+    // sync and would mislead the device that restores the file.
     final keys = prefs
         .getKeys()
         .where((key) => key != BackupPassphrase.key)
+        .where((key) => !key.startsWith('profile_sync_'))
         .toList()
       ..sort();
     final data = <String, dynamic>{

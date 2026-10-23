@@ -155,4 +155,32 @@ class EnvService {
     if (compileVal.isNotEmpty) return compileVal;
     return get('TMDB_API_KEY');
   }
+
+  // Credentials for a private build of one person's own devices. Each one
+  // stands in for a sign-in the app would otherwise ask for, so a fresh
+  // install of such a build needs no sign-in step. Never set these in the
+  // repository secret: they would ship in every published binary.
+  //
+  // Simkl access token: the account the build is linked to.
+  static String get simklAccessToken {
+    const compileVal = String.fromEnvironment('SIMKL_ACCESS_TOKEN');
+    if (compileVal.isNotEmpty) return compileVal;
+    return get('SIMKL_ACCESS_TOKEN');
+  }
+
+  // Dropbox refresh token: the account the profile sync reads and writes.
+  static String get dropboxRefreshToken {
+    const compileVal = String.fromEnvironment('DROPBOX_REFRESH_TOKEN');
+    if (compileVal.isNotEmpty) return compileVal;
+    return get('DROPBOX_REFRESH_TOKEN');
+  }
+
+  // Passphrase that seals the cloud copy of the profile (AES-GCM). Anyone who
+  // has a build carrying it can open that copy, so it is only for builds kept
+  // to one person's own devices.
+  static String get backupPassphrase {
+    const compileVal = String.fromEnvironment('BACKUP_PASSPHRASE');
+    if (compileVal.isNotEmpty) return compileVal;
+    return get('BACKUP_PASSPHRASE');
+  }
 }

@@ -1,7 +1,7 @@
 name: Stage TorrServer binaries
 description: >
   Fetches the TorrServer binaries a desktop or iOS build needs from this repo's
-  torrserver-MatriX.147 release, checks each against a pinned SHA-256, and
+  torrserver-MatriX.148 release, checks each against a pinned SHA-256, and
   points TORRSERVER_FLUTTER_LOCAL_BINARIES at them. The torrserver_flutter
   plugin then uses these instead of downloading from its own upstream repo,
   which no longer exists. The download goes through `gh` with the workflow's
@@ -27,12 +27,12 @@ runs:
         fetch() {
           local name="$1" sum="$2" attempt
           for attempt in 1 2 3; do
-            if gh release download torrserver-MatriX.147 --repo "$GITHUB_REPOSITORY" \
+            if gh release download torrserver-MatriX.148 --repo "$GITHUB_REPOSITORY" \
                 --pattern "$name" --dir "$dest" --clobber; then
               break
             fi
             if [ "$attempt" -eq 3 ]; then
-              echo "::error::could not download $name from the torrserver-MatriX.147 release"
+              echo "::error::could not download $name from the torrserver-MatriX.148 release"
               return 1
             fi
             sleep 5
@@ -43,12 +43,12 @@ runs:
         for platform in $PLATFORMS; do
           case "$platform" in
             linux)
-              fetch torrserver-linux-amd64 2f20fcb1fcacc9b61b7ca4bb6d5b7933547bd7f447b5cc77a84406faa9e6a4e8 ;;
+              fetch torrserver-linux-amd64 aae4100bf65acc78d4263582f5d9c71be19a7e6ad2f6319d44ab86f429cfeca8 ;;
             windows)
-              fetch torrserver-windows-amd64.exe 2a67f19266f111f00828857e7e37c233a509c0def4f6254fd564a1761f35b47d ;;
+              fetch torrserver-windows-amd64.exe 92624fffc72c79d87041f6624850070e466972323ed28f14881a4c0a0c943ee6 ;;
             darwin)
-              fetch torrserver-darwin-amd64 5cf02d76b6037a6a0f0cf8bafda0a9dbe34fb10149aed998f422cb26f7225608
-              fetch torrserver-darwin-arm64 3e13a04e5e9e9bee044b15829fa13769c7c385bc71e8227f010434e1038ef172 ;;
+              fetch torrserver-darwin-amd64 6c26d8d140929ef5215d47e4c9249b27b6fc2823de0e35d1a6feb5e5bbf528c6
+              fetch torrserver-darwin-arm64 d9ebd454d6c912d3bc2d7f77df8f5cd0d91b3817d78b64535b24cf94e75aae89 ;;
             ios)
               fetch TorrServerKit.xcframework.zip c3134357b17cfdced821cbbbeb1936da1b653d03ca5cf9a349e1adb146ceab9f
               unzip -q "$dest/TorrServerKit.xcframework.zip" -d "$dest"
