@@ -10,41 +10,32 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-23**, on `v1.9.10` (tag at `3420197`). The repo is private
-now, so nothing is published publicly; builds are made locally, and CI builds stay
-private in GitHub.
+Last reconciled: **2026-10-26**, on `v1.9.11` (dispatched as a full release, not a
+dev prerelease). The repo is private, so nothing is published publicly; builds are
+made locally, and CI builds stay private in GitHub.
 
 ---
 
 ## Waiting on you
 
-- **Profile sync across devices.** A secret gist in the owner's GitHub account
-  carries the whole profile, encrypted with the passphrase and merged per key with
-  a snapshot before any overwrite (see SYNC_AND_BACKUP.md). A build from
-  `scripts\build_local.ps1` carries the token from `.env`, so a new device needs
-  no sign-in. Check it with two devices: change a list on one, sync, and read it
-  on the other.
-- **Simkl Connect on a store build.** A release build carries no Simkl link, so
-  each person approves it once in Settings (Simkl's PIN), or runs
-  `scripts\link_simkl.ps1` for a local build.
-- **Anime while AniList is down.** AniList answers 403 for now, so the anime tab
-  falls back to Kitsu: lists, search, details, episode titles, and stream sources
-  through Kitsu's AniList mapping. Check it on a device. Kitsu's titles and
-  genres differ from AniList's, and a show Kitsu does not map gets only its
-  title-based sources.
-- **Anime seasons.** A show with several seasons shows a season row, opens on the
-  latest season, and Play starts that season's first episode. Check it on a
-  show with three or more seasons (Attack on Titan), and on a show whose seasons
-  Kitsu does not link. On a cold start the page can show Season 1 for a few
-  seconds before it switches, while Kitsu answers the season walk.
-- **Anime episode arrows.** The previous and next arrows on the episode row were
-  reported as needing work. They reveal on hover, scroll 70% of the row, and hide
-  at either end, as the other rails do; no specific defect has been found yet.
-  Say what looked wrong.
-- **Anime episode names.** AniList gives a title per episode only for shows it
-  links to a legal streaming service (commonly Crunchyroll), which is most of
-  the catalog; the rest show "EP N". No key is involved. A show AniList does list
-  with episode titles that shows "EP N" here is a bug: send the show and episode.
+All five device checks below were run on 2026-10-26 and came back clean --
+nothing needed fixing before cutting v1.9.11. Specific findings (exact shows
+checked, diagnostics output, etc.) weren't recorded here since they weren't
+reported; if anything surfaces after more use, reopen the relevant line.
+
+- ~~Profile sync across devices.~~ Verified with two devices.
+- ~~Simkl Connect on a store build.~~ Verified.
+- ~~Anime while AniList is down (Kitsu fallback).~~ Verified on a device.
+- ~~Anime seasons.~~ Verified on a device.
+- ~~Anime episode arrows.~~ Verified on a device, no defect found.
+- ~~Anime episode names.~~ Verified on a device, no defect found.
+
+One item stays open, not covered by the above:
+
+- **PLAYBACK_PLAN.md Step 0.2** (one TV session with the stats panel's "Copy
+  diagnostics" open) still needs that specific pasted output to measure the
+  hypotheses it gates -- a general "TV playback was clean" doesn't give the
+  numbers Step 0.2 is asking for. See that plan.
 
 ---
 
@@ -55,8 +46,8 @@ has to be measured first.
 
 | Plan | Status |
 |:-----|:-------|
-| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md) | Step 1 is done, including the 37 deprecations and the ignore that hid them. Next is Step 2, one press/hover/focus primitive, which waits on the TV checks above; then the big pages, and the player last. |
-| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md) | Done: stats-panel diagnosis with "Copy diagnostics", release ranking, a learned link ceiling, a source offer after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, burst seeks as one seek, and the debrid Cached badge with cached-first ranking (**not verified against a live account**). Open: Step 0.2, one TV session. Stream adaptation is HLS-only; a server of our own is not planned. |
+| [MAINTENANCE_PLAN.md](MAINTENANCE_PLAN.md) | Step 1 is done, including the 37 deprecations and the ignore that hid them. The device checks Step 2 was waiting on are now clean (see above), so it's unblocked -- not started yet. Then the big pages, and the player last. |
+| [PLAYBACK_PLAN.md](PLAYBACK_PLAN.md) | Done: stats-panel diagnosis with "Copy diagnostics", release ranking, a learned link ceiling, a source offer after repeated stalls, a rebuffer cushion, a bigger rewind cache, faster probing, burst seeks as one seek, and the debrid Cached badge with cached-first ranking (**not verified against a live account**). Open: Step 0.2 needs a session with diagnostics actually copied -- a clean TV session happened 2026-10-26 but without that paste. Stream adaptation is HLS-only; a server of our own is not planned. |
 
 ---
 
