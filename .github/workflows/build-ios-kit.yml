@@ -1,0 +1,72 @@
+# Builds TorrServerKit.xcframework for iOS from the TorrServer fork.
+#
+# The iOS build needs the framework staged from the torrserver-MatriX.148
+# release, and that framework can only be built on macOS with full Xcode.
+# This workflow exists so the asset can be rebuilt (or moved to a newer
+# TorrServer) without a Mac in hand; it is not part of a release run.
+#
+# Push to ci/ios-kit, or dispatch it once it is on the default branch.
+name: Build TorrServerKit iOS
+
+on:
+  push:
+    branches: ['ci/ios-kit']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kit:
+    name: TorrServerKit.xcframework
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout TorrServer
+        uses: actions/checkout@v5
+        with:
+          repository: MediaHub-Org/TorrServer
+          ref: 5e9ed1f2ab98f9d14a85d08aba00aa106d86fd1c
+          path: torrserver
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.27.x'
+          cache-dependency-path: torrserver/server/go.sum
+
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          go install golang.org/x/mobile/cmd/gobind@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Initialise gomobile
+        run: gomobile init
+
+      - name: Build the xcframework
+        working-directory: torrserver/server/mobile/torrserverkit
+        run: |
+          go mod tidy
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          gomobile bind \
+            -target=ios,iossimulator \
+            -iosversion=18.0 \
+            -tags=nosqlite \
+            -ldflags="-s -w -checklinkname=0" \
+            -trimpath \
+            -o "$GITHUB_WORKSPACE/dist/TorrServerKit.xcframework" \
+            .
+
+      - name: Package and checksum
+        run: |
+          cd "$GITHUB_WORKSPACE/dist"
+          zip -r -9 TorrServerKit.xcframework.zip TorrServerKit.xcframework
+          shasum -a 256 TorrServerKit.xcframework.zip | tee TorrServerKit.xcframework.zip.sha256
+
+      - name: Upload the framework
+        uses: actions/upload-artifact@v6
+        with:
+          name: TorrServerKit
+          path: dist/TorrServerKit.xcframework.zip
+          if-no-files-found: error
