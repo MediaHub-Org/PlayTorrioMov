@@ -3,7 +3,7 @@
 All notable changes to PlayTorrioMov are documented here. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.9.11+59] - 2026-10-23
+## [1.9.11+59] - 2026-10-27
 
 ### Added
 
