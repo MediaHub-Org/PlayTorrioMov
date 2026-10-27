@@ -5,7 +5,7 @@ description: >
   points TORRSERVER_FLUTTER_LOCAL_BINARIES at them. The torrserver_flutter
   plugin then uses these instead of downloading from its own upstream repo,
   which no longer exists. The download goes through `gh` with the workflow's
-  own token: the repo is private, so an anonymous curl gets a 404.
+  own token, so it works whether or not the release is public.
 
 inputs:
   platforms:
@@ -43,14 +43,14 @@ runs:
         for platform in $PLATFORMS; do
           case "$platform" in
             linux)
-              fetch torrserver-linux-amd64 aae4100bf65acc78d4263582f5d9c71be19a7e6ad2f6319d44ab86f429cfeca8 ;;
+              fetch torrserver-linux-amd64 1ae142a048d894b74f35e3b989ea83549f6e2da67484dbd715af9fd0dfe351fb ;;
             windows)
-              fetch torrserver-windows-amd64.exe 92624fffc72c79d87041f6624850070e466972323ed28f14881a4c0a0c943ee6 ;;
+              fetch torrserver-windows-amd64.exe 2173e118f551f7a0b192afa5bfcac00dba3c845d8edd1f590a5d1ea539773019 ;;
             darwin)
-              fetch torrserver-darwin-amd64 6c26d8d140929ef5215d47e4c9249b27b6fc2823de0e35d1a6feb5e5bbf528c6
-              fetch torrserver-darwin-arm64 d9ebd454d6c912d3bc2d7f77df8f5cd0d91b3817d78b64535b24cf94e75aae89 ;;
+              fetch torrserver-darwin-amd64 edfdc4c7f43f64040900efa383092f25bc023bcb16435361967c87a7a5e8f4af
+              fetch torrserver-darwin-arm64 e671318df28d6a0f7b5784e693c7e60170db74e47b8f626edebb4b6860cf4283 ;;
             ios)
-              fetch TorrServerKit.xcframework.zip c3134357b17cfdced821cbbbeb1936da1b653d03ca5cf9a349e1adb146ceab9f
+              fetch TorrServerKit.xcframework.zip 20a26c413d850952cec10b235d504496d333bfb1b6aa738aad0e522573d635b3
               unzip -q "$dest/TorrServerKit.xcframework.zip" -d "$dest"
               rm "$dest/TorrServerKit.xcframework.zip" ;;
             *)
