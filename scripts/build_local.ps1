@@ -33,7 +33,7 @@ foreach ($key in $links.Keys) {
 # TorrServer for the Windows build: the plugin's own download is gone, so the
 # pinned binary comes from our release. The checksum must match before use.
 $tsTag = 'torrserver-MatriX.148'
-$tsSha = '92624fffc72c79d87041f6624850070e466972323ed28f14881a4c0a0c943ee6'
+$tsSha = '2173e118f551f7a0b192afa5bfcac00dba3c845d8edd1f590a5d1ea539773019'
 $tsDir = Join-Path $env:TEMP 'torrserver-stage'
 $tsBin = Join-Path $tsDir 'torrserver-windows-amd64.exe'
 New-Item -ItemType Directory -Force -Path $tsDir | Out-Null
