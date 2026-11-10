@@ -30,6 +30,24 @@ import '../../services/app_units.dart';
 /// (VIP-registered, or one that predates the gate) and wants it back.
 const bool _traktSyncEnabled = false;
 
+/// How many of the cards on [SyncSettingsPage] are connected, for the badge
+/// on the Settings overview. The total is the number of cards actually
+/// shown, so it follows [_traktSyncEnabled] instead of a hardcoded "/2" that
+/// went stale when TMDB and Wyzie joined the page. TMDB and Wyzie count as
+/// connected on a build-shipped key too, matching what their cards say.
+Future<({int connected, int total})> loadConnectSummary() async {
+  final simkl = await SimklService.instance.isAuthenticated();
+  final trakt =
+      _traktSyncEnabled && await TraktService.instance.isAuthenticated();
+  final states = [
+    if (_traktSyncEnabled) trakt,
+    simkl,
+    TmdbSettings.isConfigured,
+    WyzieSettings.apiKey.value != null || EnvService.wyzieApiKey.isNotEmpty,
+  ];
+  return (connected: states.where((s) => s).length, total: states.length);
+}
+
 /// Every third-party account or key the app talks to, in one place: Trakt
 /// (disabled, see [_traktSyncEnabled]), Simkl and TMDB. Trakt/Simkl used to
 /// be the whole page (two nearly identical cards -- status,

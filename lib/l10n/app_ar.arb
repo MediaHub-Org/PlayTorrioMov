@@ -60,7 +60,7 @@
   "settingsBadgeDisabled": "معطّل",
   "settingsBadgeActive": "نشط",
   "settingsBadgeOffline": "غير متصل",
-  "settingsBadgeConnectedCount": "{count}/2 متصل",
+  "settingsBadgeConnectedCount": "{count}/{total} متصل",
 
   "appearanceTitle": "المظهر والواجهة",
   "appearanceSubtitle": "اضبط الأجواء المرئية ولوحات الألوان وتخطيطات الواجهة.",

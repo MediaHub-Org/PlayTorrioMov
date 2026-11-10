@@ -5,8 +5,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../services/addon/addon_manager.dart';
 import '../../services/theme/app_theme_service.dart';
 import '../../services/debrid/debrid_service.dart';
-import '../../services/trakt/trakt_service.dart';
-import '../../services/simkl/simkl_service.dart';
 
 import 'appearance_settings_page.dart';
 import 'debrid_settings_page.dart';
@@ -44,8 +42,8 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _useDebrid = false;
   String _debridProvider = 'None';
   String? _appVersion;
-  bool _traktConnected = false;
-  bool _simklConnected = false;
+  int _connectedCount = 0;
+  int _connectTotal = 0;
 
   @override
   void initState() {
@@ -56,8 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadOverviewState() async {
     final useDebrid = await _debrid.getUseDebridForStreams();
     final provider = await _debrid.getSelectedService();
-    final traktAuth = await TraktService.instance.isAuthenticated();
-    final simklAuth = await SimklService.instance.isAuthenticated();
+    final connect = await loadConnectSummary();
     final pkg = await PackageInfo.fromPlatform().catchError((_) => PackageInfo(
           appName: AppInfo.name,
           packageName: 'com.mediahub.playtorriomov',
@@ -70,8 +67,8 @@ class _SettingsPageState extends State<SettingsPage> {
         _useDebrid = useDebrid;
         _debridProvider = provider;
         _appVersion = AppInfo.versionLabel(pkg.version);
-        _traktConnected = traktAuth;
-        _simklConnected = simklAuth;
+        _connectedCount = connect.connected;
+        _connectTotal = connect.total;
       });
     }
   }
@@ -88,7 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final l10n = AppLocalizations.of(context);
     final addonCount = AddonManager.instance.addons.length;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final syncedCount = (_traktConnected ? 1 : 0) + (_simklConnected ? 1 : 0);
+    final syncedCount = _connectedCount;
 
     // Sorted A-Z by title, except About -- which stays last, the way a
     // settings screen's "about this app" entry conventionally does.
@@ -132,7 +129,7 @@ class _SettingsPageState extends State<SettingsPage> {
         title: l10n.settingsCategoryConnect,
         badgeText: syncedCount == 0
             ? l10n.settingsBadgeOffline
-            : l10n.settingsBadgeConnectedCount(syncedCount),
+            : l10n.settingsBadgeConnectedCount(syncedCount, _connectTotal),
         badgeColor:
             syncedCount == 0 ? AppColors.inkDisabled : const Color(0xFF10B981),
         onTap: () => _navigateTo(const SyncSettingsPage()),

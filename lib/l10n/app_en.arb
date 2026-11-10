@@ -68,9 +68,9 @@
   "settingsBadgeDisabled": "Disabled",
   "settingsBadgeActive": "Active",
   "settingsBadgeOffline": "Offline",
-  "settingsBadgeConnectedCount": "{count}/2 Connected",
+  "settingsBadgeConnectedCount": "{count}/{total} Connected",
   "@settingsBadgeConnectedCount": {
-    "placeholders": {"count": {"type": "int"}}
+    "placeholders": {"count": {"type": "int"}, "total": {"type": "int"}}
   },
 
   "appearanceTitle": "Appearance & Interface",

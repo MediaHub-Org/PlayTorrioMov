@@ -60,7 +60,7 @@
   "settingsBadgeDisabled": "Desactivado",
   "settingsBadgeActive": "Activo",
   "settingsBadgeOffline": "Sin conexión",
-  "settingsBadgeConnectedCount": "{count}/2 conectados",
+  "settingsBadgeConnectedCount": "{count}/{total} conectados",
 
   "appearanceTitle": "Apariencia e interfaz",
   "appearanceSubtitle": "Ajusta la atmósfera visual, las paletas de colores y los diseños de la interfaz.",
