@@ -10,12 +10,12 @@ probe, the RTL rules, the title-identity rule — is in
 Item numbers are never renumbered or reused, so `#43` means the same thing in
 a commit message, a pull request and here.
 
-Last reconciled: **2026-10-27**. The repository is public, so the public release
-and the in-app update check are unpaused. No GitHub release is live yet: the
-`v1.9.11` dispatch and the `v1.9.10` tag run on 2026-10-26 both failed at the
-artifact-upload step, so `releases/latest` still answers 404 and the updater
-stays silent. Cutting `v1.9.11` is the first public release -- see
-[RELEASES.md](RELEASES.md).
+Last reconciled: **2026-11-10**. The repository is public and `v1.9.11` is the
+live release (published 2026-10-27, after the 2026-10-26 runs that failed at
+the artifact-upload step), so the in-app update check has something to find.
+Main is ahead of it by the Settings Connect badge fix and the TV focus on
+Settings -- see the Unreleased section of [CHANGELOG.md](../CHANGELOG.md) and
+[RELEASES.md](RELEASES.md) for cutting the next one.
 
 ---
 
