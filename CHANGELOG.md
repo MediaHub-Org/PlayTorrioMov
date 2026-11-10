@@ -9,7 +9,6 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **Settings opens with a tile focused on a TV.** The remote had no starting
   point there. Phones and desktops are unchanged.
-
 - **Settings → Connect no longer shows "1/2 connected" when everything is on.**
   The badge counted only Trakt (switched off) and Simkl, out of a fixed 2. It
   now counts every card on the page (Simkl, TMDB, Wyzie) out of the number
