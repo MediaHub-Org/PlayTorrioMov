@@ -26,6 +26,8 @@ import '../../utils/navigation/route_transitions.dart';
 import '../../widgets/settings/settings_scroll_view.dart';
 import '../../services/theme/app_colors.dart';
 import '../../services/tv_type.dart';
+import '../../services/tv_mode_service.dart';
+import '../../widgets/common/first_focus_scope.dart';
 import '../../l10n/app_localizations.dart';
 import '../../l10n/l10n.dart';
 import '../../services/app_units.dart';
@@ -170,12 +172,21 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: AnimatedAmbientBackground(
-        child: SettingsScrollView.separated(
-          bottomPadding: 32 + bottomInset,
-          itemCount: tiles.length + 1,
-          separatorBuilder: (_, __) => SizedBox(height: context.rem(0.625)),
-          itemBuilder: (context, i) =>
-              i < tiles.length ? tiles[i] : _aboutTile(context),
+        // A TV remote needs a starting point or the first press just lands
+        // somewhere arbitrary; a phone or desktop does not, and the cue stays
+        // hidden there until a key is pressed (see FirstFocusScope). Listened
+        // to because the TV answer can arrive after the first frame.
+        child: ValueListenableBuilder<bool>(
+          valueListenable: TvModeService.isTv,
+          builder: (context, isTv, child) =>
+              FirstFocusScope(ready: isTv, child: child!),
+          child: SettingsScrollView.separated(
+            bottomPadding: 32 + bottomInset,
+            itemCount: tiles.length + 1,
+            separatorBuilder: (_, __) => SizedBox(height: context.rem(0.625)),
+            itemBuilder: (context, i) =>
+                i < tiles.length ? tiles[i] : _aboutTile(context),
+          ),
         ),
       ),
     );
